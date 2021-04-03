@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Global_Text_Switch"
+            style="@style/WidgetSetupGlobalSwitch"/>
+
+        <View style="@style/Divider"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Global_Text_Row" android:padding="5dp">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_all"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Global_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Global_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Global_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Global_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:id="@+id/Widget_Setup_Orbital_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_orbital"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Orbital_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Orbital_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Orbital_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Orbital_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Orbital_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Pass_Start_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                android:id="@+id/Widget_Setup_Pass_Start_Text"
+                style="@style/WidgetSetupText"
+                android:text="@string/title_pass_start"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Pass_Start_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Pass_Start_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Start_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Start_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Pass_Start_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Pass_End_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_pass_end"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Pass_End_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Pass_End_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_End_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_End_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Pass_End_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Pass_Elevation_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_pass_elevation"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Pass_Elevation_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Pass_Elevation_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Elevation_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Elevation_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Pass_Elevation_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_pass_az_start"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_pass_az_end"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Pass_Duration_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_pass_duration"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Pass_Duration_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Pass_Duration_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Duration_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Pass_Duration_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Pass_Duration_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Location_Text_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_location"/>
+
+            <LinearLayout
+                style="@style/WidgetSetupTextOptions">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Location_Text_Color_Button"
+                    style="@style/ColorButton"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Location_Text_Size_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="3dp"
+                    android:layout_marginStart="3dp"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Location_Text_Bold_CheckBox"
+                    style="@style/WidgetSetupBoldCheckBox"/>
+
+                <CheckBox
+                    android:id="@+id/Widget_Setup_Location_Text_Italic_CheckBox"
+                    style="@style/WidgetSetupItalicCheckBox"/>
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+</ScrollView>

@@ -1,0 +1,86 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:context=".MainLayoutActivity">
+    <item
+        android:id="@+id/menu_back"
+        android:title="@string/title_back"
+        android:icon="@drawable/ic_arrow_back_white"
+        android:orderInCategory="10"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_list"
+        android:title="@string/title_list_view"
+        android:icon="@drawable/ic_list_white"
+        android:orderInCategory="20"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_grid"
+        android:title="@string/title_grid_view"
+        android:icon="@drawable/ic_view_column_white"
+        android:orderInCategory="30"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_map"
+        android:title="@string/title_map_view"
+        android:icon="@drawable/ic_map_white"
+        android:orderInCategory="40"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_globe"
+        android:title="@string/title_globe_view"
+        android:icon="@drawable/ic_globe_white"
+        android:orderInCategory="50"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_lens"
+        android:title="@string/title_lens_view"
+        android:icon="@drawable/ic_photo_camera_white"
+        android:orderInCategory="60"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item android:id="@+id/menu_filter"
+        android:title="@string/title_visible"
+        android:icon="@drawable/ic_filter_white"
+        android:orderInCategory="70"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item android:id="@+id/menu_settings"
+        android:title="@string/title_settings"
+        android:icon="@drawable/ic_settings_white"
+        android:orderInCategory="80"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item android:id="@+id/menu_save"
+        android:title="@string/title_save"
+        android:icon="@drawable/ic_save_white"
+        android:orderInCategory="90"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item android:id="@+id/menu_update"
+        android:title="@string/title_update"
+        android:icon="@drawable/ic_sync_white"
+        android:orderInCategory="100"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item android:id="@+id/menu_edit"
+          android:title="@string/title_edit"
+          android:icon="@drawable/ic_mode_edit_white"
+          android:orderInCategory="110"
+          app:showAsAction="always"
+          android:visible="false"/>
+</menu>

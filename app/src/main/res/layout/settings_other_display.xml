@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/pageBackground">
+        <TextView
+            style="@style/TitleText"
+            android:text="@string/title_display"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            style="@style/SettingsSwitch"
+            android:id="@+id/Settings_Display_Dark_Theme_Switch"
+            android:text="@string/title_dark_theme"/>
+
+        <View style="@style/Divider"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/title_color_theme"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <com.nikolaiapps.orbtrack.IconSpinner
+                android:id="@+id/Settings_Display_Color_Theme_List"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"/>
+        </LinearLayout>
+
+        <View style="@style/Divider"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:text="@string/title_units"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <RadioGroup
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:orientation="horizontal">
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/Settings_Display_Metric_Radio"
+                    style="@style/RadioButton"
+                    android:text="@string/desc_metric"/>
+
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/Settings_Display_Imperial_Radio"
+                    style="@style/RadioButton"
+                    android:text="@string/desc_imperial"/>
+            </RadioGroup>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

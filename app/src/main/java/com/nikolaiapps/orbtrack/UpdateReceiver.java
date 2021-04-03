@@ -1,0 +1,200 @@
+package com.nikolaiapps.orbtrack;
+
+
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.res.Resources;
+import android.os.Build;
+import android.os.Bundle;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import android.text.Html;
+import android.text.Spanned;
+import android.view.View;
+import java.util.ArrayList;
+
+
+public abstract class UpdateReceiver extends BroadcastReceiver
+{
+    //Returns parent view
+    protected View getParentView()
+    {
+        //needs to be overridden
+        return(null);
+    }
+
+    //Returns database progress dialog
+    protected MultiProgressDialog getDatabaseProgressDialog()
+    {
+        //needs to be overridden
+        return(null);
+    }
+
+    //On pending satellites to load
+    protected void onLoadPending(ArrayList<Database.DatabaseSatellite> pendingLoadSatellites)
+    {
+        //needs to be overridden
+    }
+
+    //On database update
+    protected void onDatabaseUpdated()
+    {
+        //needs to be overridden
+    }
+
+    //On got information
+    protected void onGotInformation(Spanned infoText, int index)
+    {
+        //needs to be overridden
+    }
+
+    //On general update
+    protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
+    {
+        //needs to be overridden
+    }
+
+    //Register receiver
+    public void register(Context context)
+    {
+        LocalBroadcastManager.getInstance(context).registerReceiver(this, new IntentFilter(UpdateService.UPDATE_FILTER));
+    }
+
+    //Unregister receiver
+    public void unregister(Context context)
+    {
+        LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+    }
+
+    @Override
+    public void onReceive(Context context, Intent intent)
+    {
+        final byte updateType = intent.getByteExtra(UpdateService.ParamTypes.UpdateType, Byte.MAX_VALUE);
+        final byte messageType = intent.getByteExtra(NotifyService.ParamTypes.MessageType, Byte.MAX_VALUE);
+        final int progressType = intent.getIntExtra(NotifyService.ParamTypes.ProgressType, Byte.MAX_VALUE);
+        final int index = (int)intent.getLongExtra(NotifyService.ParamTypes.Index, 0);
+        final long count = intent.getLongExtra(NotifyService.ParamTypes.Count, 0);
+        long countValue;
+        final String section = intent.getStringExtra(NotifyService.ParamTypes.Section);
+        Bundle extraData = intent.getExtras();
+        boolean ended;
+        boolean isGeneral = (messageType == NotifyService.MessageTypes.General);
+        String infoString;
+        Spanned infoText;
+        Resources res = context.getResources();
+
+        //handle based on progress type
+        switch(progressType)
+        {
+            case Globals.ProgressType.Started:
+            case Globals.ProgressType.Finished:
+            case Globals.ProgressType.Cancelled:
+            case Globals.ProgressType.Denied:
+            case Globals.ProgressType.Failed:
+                //ending if not starting
+                ended = (progressType != Globals.ProgressType.Started);
+
+                //if extra data not set and might use
+                if(extraData == null && ended)
+                {
+                    //create empty
+                    extraData = new Bundle();
+                }
+
+                //if MessageType.General
+                if(isGeneral)
+                {
+                    //handle based on update type
+                    switch(updateType)
+                    {
+                        case UpdateService.UpdateType.LoadFile:
+                            //if ended
+                            if(ended)
+                            {
+                                //check for any pending satellites to load and if error
+                                ArrayList<Database.DatabaseSatellite> pendingLoadSatellites = extraData.getParcelableArrayList(UpdateService.ParamTypes.PendingSatellites);
+                                int pendingCount = (pendingLoadSatellites != null ? pendingLoadSatellites.size() : 0);
+                                boolean isError = ((progressType != Globals.ProgressType.Finished || count < 1) && (pendingCount < 1));
+
+                                //if there are pending satellites
+                                if(pendingCount > 0)
+                                {
+                                    //call on load pending
+                                    onLoadPending(pendingLoadSatellites);
+                                }
+
+                                //if error or done with some
+                                if(isError || count > 0)
+                                {
+                                    //show message
+                                    Globals.showSnackBar(getParentView(), (!isError ? (res.getString(R.string.text_reading_success) + " " + count + " " + res.getString(R.string.text_items_from_file)) : res.getString(R.string.text_file_error_using)), isError);
+                                }
+                            }
+                            //fall through
+
+                        case UpdateService.UpdateType.BuildDatabase:
+                            //if ended and really building database
+                            if(ended && updateType == UpdateService.UpdateType.BuildDatabase)
+                            {
+                                //call on database updated
+                                onDatabaseUpdated();
+                            }
+                            //fall through
+
+                        case UpdateService.UpdateType.UpdateSatellites:
+                        case UpdateService.UpdateType.GetMasterList:
+                            onGeneralUpdate(progressType, updateType, ended);
+                            break;
+                    }
+                }
+                else
+                {
+                    //handle based on update type
+                    switch(updateType)
+                    {
+                        case UpdateService.UpdateType.GetInformation:
+                            //if ended
+                            if(ended)
+                            {
+                                //get information
+                                infoString = (String)extraData.getSerializable(UpdateService.ParamTypes.Information);
+                                if(infoString != null)
+                                {
+                                    infoText = (Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT) : Html.fromHtml(infoString));
+                                }
+                                else
+                                {
+                                    infoText = null;
+                                }
+
+                                //call on got information
+                                onGotInformation(infoText, index);
+                            }
+                            break;
+                    }
+                }
+                break;
+
+            case Globals.ProgressType.Running:
+                //handle based on update type
+                switch(updateType)
+                {
+                    case UpdateService.UpdateType.BuildDatabase:
+                        //get dialog
+                        MultiProgressDialog databaseProgress = getDatabaseProgressDialog();
+
+                        //if progress display still exists and section is set
+                        if(databaseProgress != null && section != null)
+                        {
+                            //update display
+                            countValue = index + 1;
+                            databaseProgress.setMessage(section + " (" + (index + 1) + res.getString(R.string.text_space_of_space) + count + ")");
+                            databaseProgress.setProgress(countValue, count);
+                        }
+                        break;
+                }
+                break;
+        }
+    }
+}

@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Pass_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="?attr/itemSelect">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <LinearLayout
+            android:id="@+id/Pass_Name_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Pass_Name_Image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/Pass_Name_Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Pass_Data_Group_Titles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.1"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp">
+                <TextView
+                    android:id="@+id/Pass_Time_Start_Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:textColor="?attr/defaultTextColor"
+                    android:text="@string/empty"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/Pass_Time_End_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/empty"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/Pass_Time_Duration_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/empty"/>
+
+            <TextView
+                android:id="@+id/Pass_El_Max_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/empty"/>
+        </LinearLayout>
+
+        <ProgressBar
+            android:id="@+id/Pass_Current_Progress_Loading_Bar"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight="0.7"
+            android:visibility="gone"/>
+
+        <ProgressBar
+            android:id="@+id/Pass_Calculate_Progress_Bar"
+            style="@style/Base.Widget.AppCompat.ProgressBar"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            android:layout_weight="0.7"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Pass_Data_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <LinearLayout
+                android:id="@+id/Pass_Time_Start_Layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:layout_gravity="center_vertical"
+                android:padding="2dp"
+                android:orientation="vertical"
+                tools:ignore="NestedWeights">
+                <TextView
+                    android:id="@+id/Pass_Time_Start_Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <View
+                    android:id="@+id/Pass_Time_Start_Under"
+                    android:layout_width="74dp"
+                    android:layout_height="1dp"
+                    android:background="?attr/defaultTextColor"
+                    android:visibility="gone"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/Pass_Time_End_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:layout_gravity="center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/Pass_Time_Duration_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:layout_gravity="center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <LinearLayout
+                android:id="@+id/Pass_El_Max_Layout"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.2"
+                android:layout_gravity="center_vertical"
+                android:orientation="vertical"
+                android:gravity="end"
+                android:padding="2dp">
+                <TextView
+                    android:id="@+id/Pass_El_Max_Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <View
+                    android:id="@+id/Pass_El_Max_Under"
+                    android:layout_width="36dp"
+                    android:layout_height="1dp"
+                    android:background="@color/blue"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <ProgressBar
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+        android:id="@+id/Pass_Current_Progress_Bar"
+        android:layout_width="match_parent"
+        android:layout_height="3px"
+        android:padding="0dp"
+        android:visibility="gone"
+        tools:ignore="PxUsage"/>
+</LinearLayout>

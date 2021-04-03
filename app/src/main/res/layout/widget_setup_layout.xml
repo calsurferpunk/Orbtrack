@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Widget_Setup_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/viewPagerBackground">
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/Widget_Setup_Tab_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:tabTextColor="?attr/columnTitleTextColor"
+        app:tabTextAppearance="@style/TextAppearance.AppCompat.Small"
+        app:tabSelectedTextColor="?attr/columnTitleTextSelectColor"
+        app:tabBackground="?attr/columnBackground"
+        app:tabGravity="fill">
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/Widget_Setup_Source_Tab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_source"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/Widget_Setup_Images_Tab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_images"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/Widget_Setup_Background_Tab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_background"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/Widget_Setup_Text_Tab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/title_text"/>
+    </com.google.android.material.tabs.TabLayout>
+
+    <com.nikolaiapps.orbtrack.SwipeStateViewPager
+        android:id="@+id/Widget_Setup_Pager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"/>
+
+    <include layout="@layout/widget_pass_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="7dp"
+        android:layout_marginBottom="7dp"
+        android:layout_gravity="center"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal|bottom"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Widget_Setup_Cancel_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_cancel" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Widget_Setup_Ok_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_ok" />
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Setup_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/viewPagerBackground">
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <com.nikolaiapps.orbtrack.SwipeStateViewPager
+            android:id="@+id/Setup_Pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/Setup_Floating_Button"
+            style="@style/FloatingButton"
+            android:layout_margin="25dp"
+            android:layout_gravity="bottom|end"
+            app:elevation="2dp"
+            app:srcCompat="@drawable/ic_add_white"
+            android:visibility="gone"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <TextView
+        android:id="@+id/Setup_Info_Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+        android:textColor="?attr/defaultTextColor"
+        android:visibility="gone"/>
+
+    <ProgressBar
+        android:id="@+id/Setup_Loading_Bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="gone"/>
+
+    <CheckBox
+        android:id="@+id/Setup_Input_CheckBox"
+        style="@style/Base.TextAppearance.AppCompat.Medium"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="?attr/defaultTextColor"
+        android:visibility="gone"/>
+
+    <LinearLayout android:id="@+id/Setup_Progress_Layout" style="@style/ProgressBoxLayout">
+        <View style="@style/ProgressBox" android:tag="0"/>
+        <View style="@style/ProgressBox" android:tag="1"/>
+        <View style="@style/ProgressBox" android:tag="2"/>
+        <View style="@style/ProgressBox" android:tag="3"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1"
+        android:gravity="center_horizontal|bottom">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Setup_Back_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_back"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Setup_Next_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_next"/>
+    </LinearLayout>
+</LinearLayout>

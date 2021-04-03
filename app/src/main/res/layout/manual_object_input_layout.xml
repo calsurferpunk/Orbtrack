@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Manual_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/viewPagerBackground">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="?attr/pageBackground">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TableRow android:padding="5dp" android:weightSum="1">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textColor="?attr/defaultTextColor"
+                        android:text="@string/title_name"/>
+                    <com.nikolaiapps.orbtrack.EditTextSelect
+                        android:id="@+id/Manual_Object_Name"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="0.7"
+                        android:inputType="textNoSuggestions"
+                        android:maxLength="20"
+                        android:textColor="?attr/defaultTextColor"
+                        android:typeface="monospace"
+                        android:singleLine="true"/>
+                </TableRow>
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textColor="?attr/defaultTextColor"
+                        android:text="@string/title_line_1"/>
+                    <com.nikolaiapps.orbtrack.EditTextSelect
+                        android:id="@+id/Manual_Object_Line1_Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="textNoSuggestions"
+                        android:maxLength="69"
+                        android:textColor="?attr/defaultTextColor"
+                        android:typeface="monospace"
+                        android:singleLine="true"/>
+                </TableRow>
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:textColor="?attr/defaultTextColor"
+                        android:text="@string/title_line_2"/>
+                    <com.nikolaiapps.orbtrack.EditTextSelect
+                        android:id="@+id/Manual_Object_Line2_Text"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:inputType="textNoSuggestions"
+                        android:maxLength="69"
+                        android:textColor="?attr/defaultTextColor"
+                        android:typeface="monospace"
+                        android:singleLine="true"/>
+                </TableRow>
+            </TableLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp">
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textColor="?attr/defaultTextColor"
+                        android:text="@string/title_current_input_colon"/>
+                    <TextView
+                        android:id="@+id/Manual_Object_Current_Lbl"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/defaultTextColor"/>
+                </TableRow>
+
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:textColor="?attr/defaultTextColor"
+                        android:text="@string/title_character_colon"/>
+                    <LinearLayout
+                        android:orientation="horizontal"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+                        <TextView
+                            android:id="@+id/Manual_Object_Current_Char_Lbl"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="?attr/defaultTextColor"/>
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/text_space_of_space"
+                            android:textColor="?attr/defaultTextColor"/>
+                        <TextView
+                            android:id="@+id/Manual_Object_Current_Total_Lbl"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="?attr/defaultTextColor"/>
+                    </LinearLayout>
+                </TableRow>
+            </TableLayout>
+
+            <TableLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp">
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/defaultTextColor"
+                        android:layout_gravity="end|center_vertical"
+                        android:text="@string/title_owner"/>
+
+                    <com.nikolaiapps.orbtrack.IconSpinner
+                        android:id="@+id/Manual_Object_Owner_List"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </TableRow>
+
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/defaultTextColor"
+                        android:layout_gravity="end|center_vertical"
+                        android:text="@string/title_group"/>
+
+                    <com.nikolaiapps.orbtrack.IconSpinner
+                        android:id="@+id/Manual_Object_Group_List"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+                </TableRow>
+
+                <TableRow android:padding="5dp">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="?attr/defaultTextColor"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/title_launch_date"/>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1">
+                        <com.nikolaiapps.orbtrack.DateInputView
+                            android:id="@+id/Manual_Object_Launch_Date"
+                            android:layout_width="120dp"
+                            android:layout_height="wrap_content"
+                            android:gravity="center"
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                            android:textColor="?attr/defaultTextColor"/>
+                    </LinearLayout>
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:weightSum="1"
+        android:gravity="center_horizontal|bottom">
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Manual_Object_Cancel_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_cancel"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Manual_Object_Add_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_add"/>
+    </LinearLayout>
+</LinearLayout>

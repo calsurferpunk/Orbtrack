@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Global_Images_Switch"
+            style="@style/WidgetSetupGlobalSwitch"/>
+
+        <View android:id="@+id/Widget_Setup_Global_Images_Divider" style="@style/Divider"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Unused_Image_Row" android:padding="2dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_unused"/>
+        </TableRow>
+
+        <TableRow android:id="@+id/Widget_Setup_Global_Images_Row" android:padding="5dp">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_all"/>
+
+            <LinearLayout
+                android:layout_height="45dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:orientation="horizontal">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Global_Images_Color_Button"
+                    style="@style/ColorButton"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:id="@+id/Widget_Setup_Orbital_Image_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_orbital"/>
+
+            <LinearLayout
+                android:layout_height="45dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:orientation="horizontal">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Orbital_Image_Color_Button"
+                    style="@style/ColorButton"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Orbital_Image_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Settings_Image_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_settings"/>
+
+            <LinearLayout
+                android:layout_height="45dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:orientation="horizontal">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Settings_Image_Color_Button"
+                    style="@style/ColorButton"/>
+            </LinearLayout>
+        </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Settings_Image_Divider" style="@style/Divider" android:visibility="gone"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Location_Image_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_location"/>
+
+            <LinearLayout
+                android:layout_height="45dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"
+                android:orientation="horizontal">
+                <com.nikolaiapps.orbtrack.BorderButton
+                    android:id="@+id/Widget_Setup_Location_Image_Color_Button"
+                    style="@style/ColorButton"/>
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+</ScrollView>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/pageBackground">
+        <TableRow android:id="@+id/Edit_Value_Row" android:padding="5dp">
+            <TextView
+                android:id="@+id/Edit_Value_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/EditValueTitle"/>
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1">
+                <EditText
+                    android:id="@+id/Edit_Value_Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:inputType="textAutoComplete"
+                    android:maxLength="50"
+                    android:padding="10dp"
+                    android:singleLine="true"
+                    android:hint="@string/empty"
+                    android:textColor="?attr/defaultTextColor" />
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Edit_Value_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </TableRow>
+
+        <TableRow android:id="@+id/Edit_Value2_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                android:id="@+id/Edit_Value2_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/EditValueTitle"/>
+
+            <EditText
+                android:id="@+id/Edit_Value2_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="textPassword"
+                android:maxLength="50"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:hint="@string/empty"
+                android:textColor="?attr/defaultTextColor" />
+        </TableRow>
+
+        <TextView
+            android:id="@+id/Edit_Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:autoLink="web"
+            android:text="@string/spacetrack_create_link"
+            android:visibility="gone"
+            style="@style/EditValueTitle"/>
+
+        <TableRow android:id="@+id/Edit_Number_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                android:id="@+id/Edit_Number_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/EditValueTitle"/>
+
+            <EditText
+                android:id="@+id/Edit_Number_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:maxLength="20"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:hint="@string/empty"
+                android:textColor="?attr/defaultTextColor"/>
+        </TableRow>
+
+        <TableRow android:id="@+id/Edit_Number2_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                android:id="@+id/Edit_Number2_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/EditValueTitle"/>
+
+            <EditText
+                android:id="@+id/Edit_Number2_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:maxLength="20"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:hint="@string/empty"
+                android:textColor="?attr/defaultTextColor"/>
+        </TableRow>
+
+        <TableRow android:id="@+id/Edit_Number3_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                android:id="@+id/Edit_Number3_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/EditValueTitle"/>
+
+            <EditText
+                android:id="@+id/Edit_Number3_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:inputType="numberDecimal"
+                android:maxLength="20"
+                android:padding="10dp"
+                android:singleLine="true"
+                android:hint="@string/empty"
+                android:textColor="?attr/defaultTextColor"/>
+        </TableRow>
+
+        <TableRow android:id="@+id/Edit_List2_Row" android:padding="5dp">
+            <LinearLayout
+                android:id="@+id/Edit_List2_Layout"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="end|center_vertical"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/Edit_List2_Title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/EditValueTitle"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/Edit_List2_Title2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_margin="5dp"
+                    android:gravity="center"
+                    android:text="@string/text_to"
+                    android:textColor="?attr/defaultTextColor"/>
+            </LinearLayout>
+
+            <com.nikolaiapps.orbtrack.IconSpinner
+                android:id="@+id/Edit_Value_List2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"/>
+        </TableRow>
+
+        <TableRow android:id="@+id/Edit_Date_Row" android:padding="5dp" android:visibility="gone">
+            <TextView
+                android:id="@+id/Edit_Date_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/EditValueTitle"/>
+
+            <com.nikolaiapps.orbtrack.DateInputView
+                android:id="@+id/Edit_Date"
+                android:layout_width="120dp"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                android:textColor="?attr/defaultTextColor"/>
+        </TableRow>
+
+        <TextView
+            android:id="@+id/Edit_Text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="@string/empty"
+            android:visibility="gone"
+            style="@style/EditValueTitle"/>
+    </TableLayout>
+</ScrollView>

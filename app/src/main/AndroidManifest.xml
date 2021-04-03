@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" package="com.nikolaiapps.orbtrack">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" tools:node="replace"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" tools:node="replace"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+
+    <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
+    <uses-feature android:name="android.hardware.location" android:required="false" />
+    <uses-feature android:name="android.hardware.location.gps" android:required="false" />
+    <uses-feature android:name="andriod.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/LightCyan"
+        android:supportsRtl="false"
+        android:networkSecurityConfig="@xml/network_security_config"
+        tools:ignore="UnusedAttribute">
+
+        <uses-library android:name="org.apache.http.legacy"
+            android:required="false" />
+
+        <service
+            android:name=".CalculateService"
+            android:enabled="true"/>
+
+        <service
+            android:name=".UpdateService"
+            android:enabled="true"/>
+
+        <service
+            android:name=".LocationService"
+            android:foregroundServiceType="location"
+            android:enabled="true"/>
+
+        <service
+            android:name=".AddressUpdateService"
+            android:enabled="true"/>
+
+        <receiver
+            android:name=".CalculateService$NotifyReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".UpdateService$NotifyReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".LocationService$NotifyReceiver"
+            android:exported="false"/>
+
+        <receiver
+            android:name=".WidgetPassTinyProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_APPWIDGET_DELETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_SETTINGS_CLICK"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pass_tiny"/>
+        </receiver>
+
+        <receiver
+            android:name=".WidgetPassSmallProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_APPWIDGET_DELETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_SETTINGS_CLICK"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pass_small"/>
+        </receiver>
+
+        <receiver
+            android:name=".WidgetPassMediumProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_APPWIDGET_DELETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_SETTINGS_CLICK"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pass_medium"/>
+        </receiver>
+
+        <!--receiver
+            android:name=".WidgetPassCustomProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+                <action android:name="android.appwidget.action.APPWIDGET_APPWIDGET_DELETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_SETTINGS_CLICK"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/widget_pass_custom"/>
+        </receiver-->
+
+        <receiver
+            android:name=".WidgetPassTinyProvider$AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_PASS_ALARM"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_LOCATION_ALARM"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".WidgetPassSmallProvider$AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_PASS_ALARM"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_LOCATION_ALARM"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name=".WidgetPassMediumProvider$AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_PASS_ALARM"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_LOCATION_ALARM"/>
+            </intent-filter>
+        </receiver>
+
+        <!--receiver
+            android:name=".WidgetPassCustomProvider$AlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_PASS_ALARM"/>
+                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_LOCATION_ALARM"/>
+            </intent-filter>
+        </receiver-->
+
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:theme="@style/SplashScreen"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:configChanges="orientation|screenSize">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".SetupActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"/>
+
+        <activity android:name=".NotifySettingsActivity"/>
+
+        <activity android:name=".MasterAddListActivity"/>
+
+        <activity
+            android:name=".MapLocationInputActivity"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity android:name=".SDCardBrowserActivity"/>
+
+        <activity android:name=".ManualOrbitalInputActivity"/>
+
+        <activity
+            android:name="com.dropbox.core.android.AuthActivity"
+            android:configChanges="orientation|keyboard"
+            android:launchMode="singleTask">
+            <intent-filter>
+                <data android:scheme="db-oznnt8byoj4us2b" />
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".DropboxAccess"
+            android:theme="@style/DropboxSplashScreen"/>
+
+        <activity android:name=".DropboxAccess$BrowserActivity"/>
+
+        <activity
+            android:name=".GoogleDriveAccess"
+            android:theme="@style/GoogleDriveSplashScreen"/>
+
+        <activity android:name=".GoogleDriveAccess$BrowserActivity"/>
+
+        <activity
+            android:name=".WidgetPassTinyProvider$SetupActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".WidgetPassSmallProvider$SetupActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".WidgetPassMediumProvider$SetupActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="stateAlwaysHidden">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_geo_api_key"/>
+    </application>
+</manifest>

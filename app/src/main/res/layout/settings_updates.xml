@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent" android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:background="?attr/pageBackground">
+        <TextView
+            style="@style/TitleText"
+            android:text="@string/title_updates"/>
+
+        <TableLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_TLE_Auto_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_auto_update_tles"/>
+
+            <TableRow android:id="@+id/Settings_Updates_TLE_Auto_Row" android:padding="5dp" android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center"
+                    android:text="@string/title_every"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+                    <com.nikolaiapps.orbtrack.IconSpinner
+                        android:id="@+id/Settings_Updates_TLE_Auto_List"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:layout_gravity="center"
+                        android:text="@string/text_at"
+                        android:textColor="?attr/defaultTextColor"/>
+
+                    <com.nikolaiapps.orbtrack.TimeInputView
+                        android:id="@+id/Settings_Updates_TLE_Auto_Time_Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                        android:textColor="?attr/defaultTextColor"/>
+                </LinearLayout>
+            </TableRow>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_Catalog_Auto_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_auto_update_catalog"/>
+
+            <TableRow android:id="@+id/Settings_Updates_Catalog_Auto_Row" android:padding="5dp" android:visibility="gone">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center"
+                    android:text="@string/title_every"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_weight="1">
+                    <com.nikolaiapps.orbtrack.IconSpinner
+                        android:id="@+id/Settings_Updates_Catalog_Auto_List"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginLeft="5dp"
+                        android:layout_marginStart="5dp"/>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:layout_gravity="center"
+                        android:text="@string/text_at"
+                        android:textColor="?attr/defaultTextColor"/>
+
+                    <com.nikolaiapps.orbtrack.TimeInputView
+                        android:id="@+id/Settings_Updates_Catalog_Auto_Time_Text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                        android:textColor="?attr/defaultTextColor"/>
+                </LinearLayout>
+            </TableRow>
+
+            <View android:id="@+id/Settings_Updates_Satellites_Divider" style="@style/Divider"/>
+
+            <TableRow android:padding="5dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:text="@string/title_satellites"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Settings_Updates_Satellites_List"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"/>
+            </TableRow>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_Catalog_Rocket_Body_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_add_rocket_bodies"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_Catalog_Debris_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_add_debris"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_Use_Legacy_Data_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_use_legacy_tle_format"/>
+
+            <View android:id="@+id/Settings_Updates_Altitude_Divider" style="@style/Divider"/>
+
+            <TableRow android:id="@+id/Settings_Updates_Altitude_Row" android:padding="5dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:text="@string/title_altitude"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Settings_Updates_Altitude_List"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"/>
+            </TableRow>
+
+            <TextView
+                android:id="@+id/Settings_Updates_Altitude_Text"
+                style="@style/SettingsDescriptionText"
+                android:text="@string/desc_altitude_source"/>
+
+            <View android:id="@+id/Settings_Updates_Time_Zone_Divider" style="@style/Divider"/>
+
+            <TableRow android:id="@+id/Settings_Updates_Time_Zone_Row" android:padding="5dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:text="@string/title_time_zone"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Settings_Updates_Time_Zone_List"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"/>
+            </TableRow>
+
+            <TextView
+                android:id="@+id/Settings_Updates_Time_Zone_Text"
+                style="@style/SettingsDescriptionText"
+                android:text="@string/desc_time_zone_source"/>
+
+            <View android:id="@+id/Settings_Updates_Information_Divider" style="@style/Divider"/>
+
+            <TableRow android:id="@+id/Settings_Updates_Information_Row" android:padding="5dp">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|center_vertical"
+                    android:text="@string/title_information"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Settings_Updates_Information_List"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginStart="5dp"/>
+            </TableRow>
+
+            <TextView
+                android:id="@+id/Settings_Updates_Information_Text"
+                style="@style/SettingsDescriptionText"
+                android:text="@string/desc_information_source"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_Information_Translate_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_translate_information"/>
+
+            <androidx.appcompat.widget.SwitchCompat
+                android:id="@+id/Settings_Updates_Information_Translate_Share_Switch"
+                style="@style/SettingsSubSwitch"
+                android:text="@string/title_share_translations_online"/>
+        </TableLayout>
+    </LinearLayout>
+</ScrollView>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <attr name="defaultTextColor" format="reference"/>
+    <attr name="actionBarBackground" format="reference"/>
+    <attr name="pageTitleTextColor" format="reference"/>
+    <attr name="pageTitleBackground" format="reference"/>
+    <attr name="pageBackground" format="reference"/>
+    <attr name="pageHighlightBackground" format="reference"/>
+    <attr name="viewPagerBackground" format="reference"/>
+    <attr name="columnTitleTextColor" format="reference"/>
+    <attr name="columnTitleTextSelectColor" format="reference"/>
+    <attr name="columnBackground" format="reference"/>
+    <attr name="dividerColor" format="reference"/>
+    <attr name="dialogStyle" format="reference"/>
+    <attr name="itemSelect" format="reference"/>
+    <attr name="itemSelected" format="reference"/>
+    <attr name="normalTint" format="color"/>
+    <attr name="checkedTint" format="color"/>
+
+    <declare-styleable name="PlayBar">
+        <attr name="textColor" format="color"/>
+        <attr name="buttonColor" format="color"/>
+    </declare-styleable>
+
+    <declare-styleable name="Graph">
+        <attr name="dataTextSize" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="FloatingActionStateButton">
+        <attr name="normalTint"/>
+        <attr name="checkedTint"/>
+    </declare-styleable>
+
+    <declare-styleable name="FloatingActionStateButtonMenu">
+        <attr name="imageTint" format="color"/>
+        <attr name="backgroundTint" format="color"/>
+        <attr name="menuImageId" format="integer"/>
+        <attr name="normalTint"/>
+        <attr name="checkedTint"/>
+    </declare-styleable>
+</resources>

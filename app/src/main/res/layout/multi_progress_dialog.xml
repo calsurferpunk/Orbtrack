@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/Multi_Progress_Message_Text"
+        style="?attr/dialogStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <LinearLayout
+        android:id="@+id/Multi_Progress_Bar_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:orientation="horizontal"
+        android:visibility="invisible">
+        <ProgressBar
+            android:id="@+id/Multi_Progress_Bar"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="8dp"
+            android:paddingRight="8dp"/>
+
+        <TextView
+            android:id="@+id/Multi_Progress_Percent_Text"
+            style="?attr/dialogStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/Multi_Progress_Message_Text2"
+        style="?attr/dialogStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/Multi_Progress_Bar_Layout2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingTop="4dp"
+        android:orientation="horizontal"
+        android:visibility="gone">
+        <ProgressBar
+            android:id="@+id/Multi_Progress_Bar2"
+            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center_vertical"
+            android:paddingLeft="0dp"
+            android:paddingStart="0dp"
+            android:paddingEnd="8dp"
+            android:paddingRight="8dp"/>
+
+        <TextView
+            android:id="@+id/Multi_Progress_Percent_Text2"
+            style="?attr/dialogStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"/>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"  xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Coordinate_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="?attr/itemSelect">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <LinearLayout
+            android:id="@+id/Coordinate_Name_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.25"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Coordinate_Name_Image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/Coordinate_Name_Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/Coordinate_Time_Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:padding="2dp"
+            android:textColor="?attr/defaultTextColor"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Coordinate_Data_Group_Titles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/Coordinate_Latitude_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_latitude"/>
+
+            <TextView
+                android:id="@+id/Coordinate_Longitude_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_longitude"/>
+
+            <TextView
+                android:id="@+id/Coordinate_Altitude_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_altitude"/>
+
+            <TextView
+                android:id="@+id/Coordinate_Speed_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_altitude"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Coordinate_Progress_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:gravity="center">
+            <ProgressBar
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Coordinate_Data_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.55"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/Coordinate_Latitude_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:gravity="end|center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                tools:ignore="NestedWeights" />
+
+            <TextView
+                android:id="@+id/Coordinate_Longitude_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:gravity="end|center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <TextView
+                android:id="@+id/Coordinate_Altitude_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:gravity="end|center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <TextView
+                android:id="@+id/Coordinate_Speed_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:gravity="end|center_vertical"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

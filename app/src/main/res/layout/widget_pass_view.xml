@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Widget_View"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:padding="0dp"
+    android:orientation="vertical"
+    android:background="@color/transparent">
+    <ImageView
+        android:id="@+id/Widget_Border"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"/>
+
+    <LinearLayout
+        android:id="@+id/Widget_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:layout_margin="3dp"
+        android:orientation="vertical">
+        <LinearLayout
+            android:id="@+id/Widget_Top_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            tools:ignore="UseCompoundDrawables">
+            <TextView
+                android:id="@+id/Widget_Name_Text"
+                style="@style/WidgetBarText"/>
+
+            <ImageView
+                android:id="@+id/Widget_Settings_Button"
+                style="@style/WidgetImage"
+                android:layout_width="16dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical|end"
+                android:contentDescription="@string/title_settings"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Widget_Tiny_Middle_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            tools:ignore="NestedWeights">
+            <ImageView
+                android:id="@+id/Widget_Item_Tiny_Image"
+                style="@style/WidgetImage"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:contentDescription="@string/title_orbital"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Widget_Middle_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:orientation="vertical">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="0dp"
+                android:orientation="horizontal">
+                <ImageView
+                    android:id="@+id/Widget_Item_Image"
+                    style="@style/WidgetImage"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.2"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/title_orbital"/>
+
+                <LinearLayout
+                    android:id="@+id/Widget_Normal_Layout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.4"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/Widget_Start_Text"
+                        style="@style/WidgetDetailText"/>
+
+                    <TextView
+                        android:id="@+id/Widget_End_Text"
+                        style="@style/WidgetDetailText"/>
+
+                    <TextView
+                        android:id="@+id/Widget_El_Max_Text"
+                        style="@style/WidgetDetailText"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/Widget_Extended_Layout"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.4"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:orientation="vertical"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/Widget_Az_Start_Text"
+                        style="@style/WidgetDetailText"
+                        android:text="@string/title_loading_dots"
+                        tools:ignore="SmallSp" />
+
+                    <TextView
+                        android:id="@+id/Widget_Az_End_Text"
+                        style="@style/WidgetDetailText"/>
+
+                    <TextView
+                        android:id="@+id/Widget_Duration_Text"
+                        style="@style/WidgetDetailText"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Widget_Bottom_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            tools:ignore="UseCompoundDrawables">
+            <ImageView
+                android:id="@+id/Widget_Location_Image"
+                style="@style/WidgetImage"
+                android:layout_width="16dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start|center_vertical"
+                android:contentDescription="@string/title_location"/>
+
+            <TextView
+                android:id="@+id/Widget_Location_Text"
+                style="@style/WidgetBarText"/>
+
+            <LinearLayout
+                android:id="@+id/Widget_Tiny_Start_Layout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/Widget_Start_Direction_Text"
+                    style="@style/WidgetDetailText"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.2"
+                    android:gravity="center"/>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.8"
+                    android:layout_gravity="center"
+                    android:orientation="vertical">
+                    <TextView
+                        android:id="@+id/Widget_Start_Date_Text"
+                        style="@style/WidgetDetailText"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/Widget_Start_Time_Text"
+                        style="@style/WidgetDetailText"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

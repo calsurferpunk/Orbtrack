@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
+    <TableLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TableRow android:padding="5dp">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_orbital"/>
+
+            <com.nikolaiapps.orbtrack.IconSpinner
+                android:id="@+id/Widget_Setup_Orbital_List"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"/>
+        </TableRow>
+
+        <View style="@style/Divider"/>
+
+        <TableRow android:padding="5dp">
+            <TextView
+                style="@style/WidgetSetupText"
+                android:text="@string/title_location"/>
+
+            <com.nikolaiapps.orbtrack.IconSpinner
+                android:id="@+id/Widget_Setup_Location_Source_List"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_gravity="center_vertical"
+                android:layout_marginLeft="5dp"
+                android:layout_marginStart="5dp"/>
+        </TableRow>
+
+        <TableRow android:padding="5dp">
+            <View/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+                <AutoCompleteTextView
+                    android:id="@+id/Widget_Setup_Location_Search_Text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:selectAllOnFocus="true"
+                    android:hint="@string/empty"
+                    android:textColor="?attr/defaultTextColor"
+                    android:visibility="gone"/>
+
+                <RadioGroup
+                    android:id="@+id/Widget_Setup_Current_Location_Group"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Widget_Setup_Now_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_now"/>
+
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Widget_Setup_Follow_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_follow"/>
+
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Widget_Setup_Interval_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_interval"/>
+                </RadioGroup>
+
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Widget_Setup_Interval_List"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone"/>
+            </LinearLayout>
+        </TableRow>
+    </TableLayout>
+</ScrollView>

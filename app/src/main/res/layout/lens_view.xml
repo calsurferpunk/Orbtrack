@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:keepScreenOn="true">
+    <TextView
+        android:id="@+id/Lens_Header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <FrameLayout
+        android:id="@+id/Lens_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <com.nikolaiapps.orbtrack.FloatingActionStateButtonMenu
+            android:id="@+id/Lens_Settings_Menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:imageTint="?attr/defaultTextColor"
+            app:backgroundTint="?attr/pageBackground"
+            android:orientation="vertical"/>
+
+        <LinearLayout
+            android:id="@+id/Lens_Button_Layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="30dp"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/Lens_Select_Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_select"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/Lens_Reset_Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_reset"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/Lens_Cancel_Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/title_cancel"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <TextView
+        android:id="@+id/Lens_Help_Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="5dp"
+        android:gravity="center"
+        android:text="@string/title_select"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:textColor="?attr/columnTitleTextColor"
+        android:background="?attr/columnBackground"
+        android:visibility="gone"/>
+
+    <com.nikolaiapps.orbtrack.PlayBar
+        android:id="@+id/Lens_Play_Bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/pageTitleBackground"
+        android:visibility="gone"/>
+</LinearLayout>

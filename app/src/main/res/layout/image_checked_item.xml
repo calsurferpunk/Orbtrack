@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp"
+    android:background="?attr/pageBackground"
+    android:orientation="horizontal">
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/Item_Checked_Image1"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_gravity="center"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/Item_Checked_Image2"
+        android:layout_width="26dp"
+        android:layout_height="26dp"
+        android:layout_gravity="center"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/Item_Checked_Text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:layout_marginLeft="5dp"
+        android:layout_marginStart="5dp"
+        android:paddingLeft="2dp"
+        android:paddingRight="2dp"
+        android:textColor="?attr/defaultTextColor"
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+
+    <ProgressBar
+        android:id="@+id/Item_Checked_Progress"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
+    <CheckBox
+        android:id="@+id/Item_Checked_Check"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:checkMark="?android:attr/listChoiceIndicatorMultiple"/>
+</LinearLayout>

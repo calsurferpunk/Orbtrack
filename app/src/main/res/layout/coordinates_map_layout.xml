@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/viewPagerBackground">
+    <View
+        android:id="@+id/Coordinate_Header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/Map_Search_List_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/pageTitleBackground"
+        android:visibility="gone">
+        <com.nikolaiapps.orbtrack.IconSpinner
+            android:id="@+id/Map_Search_List"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/Map_Frame_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <FrameLayout
+            android:id="@+id/Map_View"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <ImageView
+            android:id="@+id/Map_Compass_Image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="top|right"
+            android:padding="5dp"
+            android:contentDescription="@string/empty"
+            app:srcCompat="@drawable/compass"
+            android:scaleType="centerInside"
+            tools:ignore="RtlHardcoded"
+            android:visibility="gone"/>
+
+        <com.nikolaiapps.orbtrack.FloatingActionStateButtonMenu
+            android:id="@+id/Map_Settings_Menu"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:imageTint="?attr/defaultTextColor"
+            app:backgroundTint="?attr/pageBackground"
+            android:orientation="vertical"/>
+
+        <LinearLayout
+            android:id="@+id/Map_Zoom_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingBottom="24dp"
+            android:orientation="vertical"
+            android:gravity="bottom|end"
+            android:visibility="gone">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/Map_Zoom_In_Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                app:useCompatPadding="true"
+                app:srcCompat="@drawable/ic_add_white"
+                app:fabSize="mini"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/Map_Zoom_Out_Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:alpha="0.7"
+                app:useCompatPadding="true"
+                app:srcCompat="@drawable/ic_remove_black"
+                android:tint="@color/white"
+                app:fabSize="mini"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/Coordinate_Info_Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:padding="5dp"
+            android:gravity="center"
+            android:text="@string/empty"
+            android:textSize="12sp"
+            android:textColor="?attr/columnTitleTextColor"
+            android:background="?attr/columnBackground"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <com.nikolaiapps.orbtrack.PlayBar
+        android:id="@+id/Coordinate_Play_Bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/pageTitleBackground"
+        android:visibility="gone"/>
+
+    <com.nikolaiapps.orbtrack.PlayBar
+        android:id="@+id/Coordinate_Scale_Bar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/pageTitleBackground"
+        android:visibility="gone"/>
+</LinearLayout>

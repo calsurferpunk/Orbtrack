@@ -1,0 +1,651 @@
+<resources>
+
+    <!-- Splash screens -->
+    <style name="SplashScreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen_app</item>
+    </style>
+    <style name="GoogleDriveSplashScreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen_google_drive</item>
+    </style>
+    <style name="DropboxSplashScreen" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_screen_dropbox</item>
+    </style>
+
+    <!-- Dialogs -->
+    <style name="LightDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColor">@color/black</item>
+        <item name="android:textColorPrimary">@color/black</item>
+        <item name="android:textColorSecondary">@color/gray</item>
+        <item name="android:windowBackground">@color/white</item>
+    </style>
+
+    <style name="DarkDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/gray</item>
+        <item name="android:windowBackground">@color/very_dark_gray</item>
+    </style>
+
+    <!-- Base themes -->
+    <style name="LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="defaultTextColor">@color/black</item>
+        <item name="pageTitleTextColor">@color/white</item>
+        <item name="pageBackground">@color/white</item>
+        <item name="pageHighlightBackground">@color/very_light_gray</item>
+        <item name="viewPagerBackground">@color/very_light_gray</item>
+        <item name="dividerColor">@color/light_gray</item>
+        <item name="dialogStyle">@style/LightDialog</item>
+    </style>
+
+    <style name="DarkBase" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="defaultTextColor">@color/white</item>
+        <item name="pageTitleTextColor">@color/white</item>
+        <item name="pageBackground">@color/very_dark_gray</item>
+        <item name="pageHighlightBackground">@color/very_very_dark_gray</item>
+        <item name="viewPagerBackground">@color/black</item>
+        <item name="dividerColor">@color/dark_gray</item>
+        <item name="dialogStyle">@style/DarkDialog</item>
+    </style>
+
+    <!-- Themes -->
+    <style name="LightBlue" parent="LightBase">
+        <item name="colorAccent">@color/blue</item>
+        <item name="colorControlNormal">@color/blue</item>
+        <item name="actionBarBackground">@color/blue_900</item>
+        <item name="pageTitleBackground">@color/blue_800</item>
+        <item name="columnTitleTextColor">@color/blue_50</item>
+        <item name="columnTitleTextSelectColor">@color/blue_300</item>
+        <item name="columnBackground">@color/blue_700</item>
+        <item name="itemSelect">@drawable/item_select_light_blue</item>
+        <item name="itemSelected">@drawable/item_selected_light_blue</item>
+    </style>
+
+    <style name="DarkBlue" parent="DarkBase">
+        <item name="colorAccent">@color/blue_700</item>
+        <item name="colorControlNormal">@color/blue_700</item>
+        <item name="actionBarBackground">@color/blue_900</item>
+        <item name="pageTitleBackground">@color/blue_800</item>
+        <item name="columnTitleTextColor">@color/blue_50</item>
+        <item name="columnTitleTextSelectColor">@color/blue_300</item>
+        <item name="columnBackground">@color/blue_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_blue</item>
+        <item name="itemSelected">@drawable/item_selected_dark_blue</item>
+    </style>
+
+    <style name="LightBrown" parent="LightBase">
+        <item name="colorAccent">@color/brown</item>
+        <item name="colorControlNormal">@color/brown</item>
+        <item name="actionBarBackground">@color/brown_900</item>
+        <item name="pageTitleBackground">@color/brown_800</item>
+        <item name="columnTitleTextColor">@color/brown_50</item>
+        <item name="columnTitleTextSelectColor">@color/brown_300</item>
+        <item name="columnBackground">@color/brown_700</item>
+        <item name="itemSelect">@drawable/item_select_light_brown</item>
+        <item name="itemSelected">@drawable/item_selected_light_brown</item>
+    </style>
+
+    <style name="DarkBrown" parent="DarkBase">
+        <item name="colorAccent">@color/brown_700</item>
+        <item name="colorControlNormal">@color/brown_700</item>
+        <item name="actionBarBackground">@color/brown_900</item>
+        <item name="pageTitleBackground">@color/brown_800</item>
+        <item name="columnTitleTextColor">@color/brown_50</item>
+        <item name="columnTitleTextSelectColor">@color/brown_300</item>
+        <item name="columnBackground">@color/brown_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_brown</item>
+        <item name="itemSelected">@drawable/item_selected_dark_brown</item>
+    </style>
+    
+    <style name="LightCyan" parent="LightBase">
+        <item name="colorAccent">@color/cyan</item>
+        <item name="colorControlNormal">@color/cyan</item>
+        <item name="actionBarBackground">@color/cyan_900</item>
+        <item name="pageTitleBackground">@color/cyan_800</item>
+        <item name="columnTitleTextColor">@color/cyan_50</item>
+        <item name="columnTitleTextSelectColor">@color/cyan_300</item>
+        <item name="columnBackground">@color/cyan_700</item>
+        <item name="itemSelect">@drawable/item_select_light_cyan</item>
+        <item name="itemSelected">@drawable/item_selected_light_cyan</item>
+    </style>
+
+    <style name="DarkCyan" parent="DarkBase">
+        <item name="colorAccent">@color/cyan_700</item>
+        <item name="colorControlNormal">@color/cyan_700</item>
+        <item name="actionBarBackground">@color/cyan_900</item>
+        <item name="pageTitleBackground">@color/cyan_800</item>
+        <item name="columnTitleTextColor">@color/cyan_50</item>
+        <item name="columnTitleTextSelectColor">@color/cyan_300</item>
+        <item name="columnBackground">@color/cyan_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_cyan</item>
+        <item name="itemSelected">@drawable/item_selected_dark_cyan</item>
+    </style>
+
+    <style name="LightGreen" parent="LightBase">
+        <item name="colorAccent">@color/green</item>
+        <item name="colorControlNormal">@color/green</item>
+        <item name="actionBarBackground">@color/green_900</item>
+        <item name="pageTitleBackground">@color/green_800</item>
+        <item name="columnTitleTextColor">@color/green_50</item>
+        <item name="columnTitleTextSelectColor">@color/green_300</item>
+        <item name="columnBackground">@color/green_700</item>
+        <item name="itemSelect">@drawable/item_select_light_green</item>
+        <item name="itemSelected">@drawable/item_selected_light_green</item>
+    </style>
+
+    <style name="DarkGreen" parent="DarkBase">
+        <item name="colorAccent">@color/green_700</item>
+        <item name="colorControlNormal">@color/green_700</item>
+        <item name="actionBarBackground">@color/green_900</item>
+        <item name="pageTitleBackground">@color/green_800</item>
+        <item name="columnTitleTextColor">@color/green_50</item>
+        <item name="columnTitleTextSelectColor">@color/green_300</item>
+        <item name="columnBackground">@color/green_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_green</item>
+        <item name="itemSelected">@drawable/item_selected_dark_green</item>
+    </style>
+
+    <style name="LightGrey" parent="LightBase">
+        <item name="colorAccent">@color/grey</item>
+        <item name="colorControlNormal">@color/grey</item>
+        <item name="actionBarBackground">@color/grey_900</item>
+        <item name="pageTitleBackground">@color/grey_800</item>
+        <item name="columnTitleTextColor">@color/grey_50</item>
+        <item name="columnTitleTextSelectColor">@color/grey_300</item>
+        <item name="columnBackground">@color/grey_700</item>
+        <item name="itemSelect">@drawable/item_select_light_grey</item>
+        <item name="itemSelected">@drawable/item_selected_light_grey</item>
+    </style>
+
+    <style name="DarkGrey" parent="DarkBase">
+        <item name="colorAccent">@color/grey_700</item>
+        <item name="colorControlNormal">@color/grey_700</item>
+        <item name="actionBarBackground">@color/grey_900</item>
+        <item name="pageTitleBackground">@color/grey_800</item>
+        <item name="columnTitleTextColor">@color/grey_50</item>
+        <item name="columnTitleTextSelectColor">@color/grey_300</item>
+        <item name="columnBackground">@color/grey_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_grey</item>
+        <item name="itemSelected">@drawable/item_selected_dark_grey</item>
+    </style>
+
+    <style name="LightOrange" parent="LightBase">
+        <item name="colorAccent">@color/orange</item>
+        <item name="colorControlNormal">@color/orange</item>
+        <item name="actionBarBackground">@color/orange_900</item>
+        <item name="pageTitleBackground">@color/orange_800</item>
+        <item name="columnTitleTextColor">@color/orange_50</item>
+        <item name="columnTitleTextSelectColor">@color/orange_300</item>
+        <item name="columnBackground">@color/orange_700</item>
+        <item name="itemSelect">@drawable/item_select_light_orange</item>
+        <item name="itemSelected">@drawable/item_selected_light_orange</item>
+    </style>
+
+    <style name="DarkOrange" parent="DarkBase">
+        <item name="colorAccent">@color/orange_700</item>
+        <item name="colorControlNormal">@color/orange_700</item>
+        <item name="actionBarBackground">@color/orange_900</item>
+        <item name="pageTitleBackground">@color/orange_800</item>
+        <item name="columnTitleTextColor">@color/orange_50</item>
+        <item name="columnTitleTextSelectColor">@color/orange_300</item>
+        <item name="columnBackground">@color/orange_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_orange</item>
+        <item name="itemSelected">@drawable/item_selected_dark_orange</item>
+    </style>
+
+    <style name="LightPink" parent="LightBase">
+        <item name="colorAccent">@color/pink</item>
+        <item name="colorControlNormal">@color/pink</item>
+        <item name="actionBarBackground">@color/pink_900</item>
+        <item name="pageTitleBackground">@color/pink_800</item>
+        <item name="columnTitleTextColor">@color/pink_50</item>
+        <item name="columnTitleTextSelectColor">@color/pink_300</item>
+        <item name="columnBackground">@color/pink_700</item>
+        <item name="itemSelect">@drawable/item_select_light_pink</item>
+        <item name="itemSelected">@drawable/item_selected_light_pink</item>
+    </style>
+
+    <style name="DarkPink" parent="DarkBase">
+        <item name="colorAccent">@color/pink_700</item>
+        <item name="colorControlNormal">@color/pink_700</item>
+        <item name="actionBarBackground">@color/pink_900</item>
+        <item name="pageTitleBackground">@color/pink_800</item>
+        <item name="columnTitleTextColor">@color/pink_50</item>
+        <item name="columnTitleTextSelectColor">@color/pink_300</item>
+        <item name="columnBackground">@color/pink_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_pink</item>
+        <item name="itemSelected">@drawable/item_selected_dark_pink</item>
+    </style>
+
+    <style name="LightRed" parent="LightBase">
+        <item name="colorAccent">@color/red</item>
+        <item name="colorControlNormal">@color/red</item>
+        <item name="actionBarBackground">@color/red_900</item>
+        <item name="pageTitleBackground">@color/red_800</item>
+        <item name="columnTitleTextColor">@color/red_50</item>
+        <item name="columnTitleTextSelectColor">@color/red_300</item>
+        <item name="columnBackground">@color/red_700</item>
+        <item name="itemSelect">@drawable/item_select_light_red</item>
+        <item name="itemSelected">@drawable/item_selected_light_red</item>
+    </style>
+
+    <style name="DarkRed" parent="DarkBase">
+        <item name="colorAccent">@color/red_700</item>
+        <item name="colorControlNormal">@color/red_700</item>
+        <item name="actionBarBackground">@color/red_900</item>
+        <item name="pageTitleBackground">@color/red_800</item>
+        <item name="columnTitleTextColor">@color/red_50</item>
+        <item name="columnTitleTextSelectColor">@color/red_300</item>
+        <item name="columnBackground">@color/red_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_red</item>
+        <item name="itemSelected">@drawable/item_selected_dark_red</item>
+    </style>
+
+    <style name="LightPurple" parent="LightBase">
+        <item name="colorAccent">@color/purple</item>
+        <item name="colorControlNormal">@color/purple</item>
+        <item name="actionBarBackground">@color/purple_900</item>
+        <item name="pageTitleBackground">@color/purple_800</item>
+        <item name="columnTitleTextColor">@color/purple_50</item>
+        <item name="columnTitleTextSelectColor">@color/purple_300</item>
+        <item name="columnBackground">@color/purple_700</item>
+        <item name="itemSelect">@drawable/item_select_light_purple</item>
+        <item name="itemSelected">@drawable/item_selected_light_purple</item>
+    </style>
+
+    <style name="DarkPurple" parent="DarkBase">
+        <item name="colorAccent">@color/purple_700</item>
+        <item name="colorControlNormal">@color/purple_700</item>
+        <item name="actionBarBackground">@color/purple_900</item>
+        <item name="pageTitleBackground">@color/purple_800</item>
+        <item name="columnTitleTextColor">@color/purple_50</item>
+        <item name="columnTitleTextSelectColor">@color/purple_300</item>
+        <item name="columnBackground">@color/purple_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_purple</item>
+        <item name="itemSelected">@drawable/item_selected_dark_purple</item>
+    </style>
+
+    <style name="LightYellow" parent="LightBase">
+        <item name="colorAccent">@color/yellow</item>
+        <item name="colorControlNormal">@color/yellow</item>
+        <item name="actionBarBackground">@color/yellow_900</item>
+        <item name="pageTitleBackground">@color/yellow_800</item>
+        <item name="columnTitleTextColor">@color/yellow_100</item>
+        <item name="columnTitleTextSelectColor">@color/yellow_300</item>
+        <item name="columnBackground">@color/yellow_700</item>
+        <item name="itemSelect">@drawable/item_select_light_yellow</item>
+        <item name="itemSelected">@drawable/item_selected_light_yellow</item>
+    </style>
+
+    <style name="DarkYellow" parent="DarkBase">
+        <item name="colorAccent">@color/yellow_700</item>
+        <item name="colorControlNormal">@color/yellow_700</item>
+        <item name="actionBarBackground">@color/yellow_900</item>
+        <item name="pageTitleBackground">@color/yellow_800</item>
+        <item name="columnTitleTextColor">@color/yellow_100</item>
+        <item name="columnTitleTextSelectColor">@color/yellow_300</item>
+        <item name="columnBackground">@color/yellow_700</item>
+        <item name="itemSelect">@drawable/item_select_dark_yellow</item>
+        <item name="itemSelected">@drawable/item_selected_dark_yellow</item>
+    </style>
+
+    <!--Divider-->
+    <style name="Divider">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">2dp</item>
+        <item name="android:background">?attr/dividerColor</item>
+    </style>
+
+    <!-- Detail Views -->
+    <style name="DetailTableRow">
+        <item name="android:padding">1dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:background">?attr/pageBackground</item>
+    </style>
+
+    <style name="DetailText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:padding">1dp</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="DetailTitle" parent="DetailText">
+        <item name="android:alpha">0.65</item>
+        <item name="android:layout_gravity">top</item>
+        <item name="android:gravity">right</item>
+    </style>
+
+    <style name="DetailButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
+    <style name="DetailVerticalDivider">
+        <item name="android:layout_width">2dp</item>
+        <item name="android:layout_marginLeft">1dp</item>
+        <item name="android:layout_marginRight">1dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:background">?attr/dividerColor</item>
+    </style>
+
+    <!--Edit Dialog -->
+    <style name="EditValueTitle">
+        <item name="android:layout_gravity">right|center_vertical</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <!--Combined Image-->
+    <style name="CombinedImage">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:layout_margin">1dp</item>
+        <item name="android:layout_gravity">center_vertical|end</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="tint">?attr/defaultTextColor</item>
+    </style>
+
+    <!--Calculate View-->
+    <style name="CalculateEditRow">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="CalculateEditLayout">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+    </style>
+
+    <style name="CalculateEditText">
+        <item name="android:layout_width">75dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:inputType">numberDecimal</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:maxLength">6</item>
+        <item name="android:hint">@string/empty</item>
+        <item name="android:selectAllOnFocus">true</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="CalculateEditUnitTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="CalculateEditValueTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <!--Combined Title Text-->
+    <style name="CombinedTitleText">
+        <item name="android:layout_width">20dp</item>
+        <item name="android:layout_height">20dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <!--Combined Text-->
+    <style name="CombinedText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">0.5</item>
+        <item name="android:padding">2dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <!--Title Text-->
+    <style name="TitleText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:background">?attr/columnBackground</item>
+        <item name="android:textColor">?attr/columnTitleTextColor</item>
+    </style>
+
+    <!--Progress Box-->
+    <style name="ProgressBox">
+        <item name="android:layout_width">15dp</item>
+        <item name="android:layout_height">15dp</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:background">@color/light_gray</item>
+    </style>
+
+    <style name="ProgressBoxLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <!--Floating button-->
+    <style name="FloatingButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:scaleType">fitXY</item>
+        <item name="useCompatPadding">true</item>
+        <item name="borderWidth">0dp</item>
+        <item name="fabSize">normal</item>
+    </style>
+
+    <!--Result button-->
+    <style name="ResultButton">
+        <item name="android:layout_width">130dp</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!--Color button-->
+    <style name="ColorButton">
+        <item name="android:layout_width">60dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:focusable">false</item>
+    </style>
+
+    <!--Visible button-->
+    <style name="VisibleButton">
+        <item name="android:layout_width">40dp</item>
+        <item name="android:layout_height">40dp</item>
+        <item name="android:focusable">false</item>
+    </style>
+
+    <!--Radio button-->
+    <style name="RadioButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">8dp</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <!--Settings-->
+    <style name="SettingsItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:background">?attr/itemSelect</item>
+        <item name="android:drawablePadding">5dp</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="SettingsSwitch">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="SettingsSubSwitch">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">36dp</item>
+        <item name="android:layout_marginRight">36dp</item>
+        <item name="android:gravity">start|center_vertical</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="SettingsDescriptionText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">36dp</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="SettingsDescriptionSwitch" parent="SettingsDescriptionText">
+        <item name="android:paddingRight">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+
+    <!--Notify settings-->
+    <style name="NotifySettingsLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">10dp</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="NotifySettingsText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="NotifySettingsSwitch">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+    </style>
+
+    <style name="NotifySettingsRadioGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">end</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:padding">5dp</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <!--Notify item-->
+    <style name="NotifyItemTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+        <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="NotifyItemText" parent="NotifyItemTitle">
+        <item name="android:paddingLeft">0dp</item>
+        <item name="android:paddingRight">0dp</item>
+    </style>
+
+    <!--Widgets-->
+    <style name="WidgetImage">
+        <item name="android:padding">2dp</item>
+        <item name="android:adjustViewBounds">true</item>
+        <item name="android:scaleType">fitCenter</item>
+        <item name="android:maxWidth">96dp</item>
+        <item name="android:maxHeight">96dp</item>
+    </style>
+
+    <style name="WidgetBarText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:gravity">center</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="WidgetDetailText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">0dp</item>
+        <item name="android:layout_weight">0.333</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">10sp</item>
+    </style>
+
+    <style name="WidgetSetupGlobalSwitch">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">16dp</item>
+        <item name="android:text">@string/title_shared</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+        <item name="android:checked">true</item>
+    </style>
+
+    <style name="WidgetSetupText">
+        <item name="android:minWidth">56sp</item>
+        <item name="android:maxWidth">76sp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+        <item name="android:gravity">center_vertical|end</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="WidgetSetupTextOptions">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">5dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="WidgetSetupCheckBox">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="WidgetSetupBoldCheckBox" parent="WidgetSetupCheckBox">
+        <item name="android:text">@string/title_bold</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+
+    <style name="WidgetSetupItalicCheckBox" parent="WidgetSetupCheckBox">
+        <item name="android:layout_marginLeft">3dp</item>
+        <item name="android:text">@string/title_italic</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+</resources>

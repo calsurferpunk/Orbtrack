@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="?attr/viewPagerBackground">
+    <LinearLayout
+        android:id="@+id/Setup_Text_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="?attr/pageBackground"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/Setup_Text_Title"
+            style="@style/TitleText"
+            android:paddingBottom="30dp"
+            android:text="@string/title_welcome"/>
+
+        <TextView
+            android:id="@+id/Setup_Text"
+            style="@style/Base.TextAppearance.AppCompat.Medium"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:drawableTop="@drawable/ic_launcher_clear"
+            android:drawablePadding="10dp"
+            android:text="@string/desc_quick_setup"
+            android:textColor="?attr/defaultTextColor"/>
+    </LinearLayout>
+
+    <View
+        android:id="@+id/Setup_Input_View"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"/>
+</LinearLayout>

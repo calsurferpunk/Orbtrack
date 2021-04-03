@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">tile.stamen.com</domain>
+        <domain includeSubdomains="true">nikolai-apps.000webhostapp.com</domain>
+    </domain-config>
+</network-security-config>

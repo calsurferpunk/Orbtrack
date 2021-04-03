@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/Angles_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="?attr/itemSelect">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <LinearLayout
+            android:id="@+id/Angles_Name_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.3"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Angles_Name_Image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center"/>
+
+            <TextView
+                android:id="@+id/Angles_Name_Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/Angles_Time_Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:padding="2dp"
+            android:textColor="?attr/defaultTextColor"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Angles_Data_Group_Titles"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.2"
+            android:gravity="end"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/Angles_Az_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_azimuth"/>
+
+            <TextView
+                android:id="@+id/Angles_El_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_elevation"/>
+
+            <TextView
+                android:id="@+id/Angles_Range_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_kilometers_lower"/>
+
+            <TextView
+                android:id="@+id/Angles_Phase_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_phase"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/Angles_Illumination_Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:text="@string/abbrev_illumination"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Angles_Progress_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:gravity="center">
+            <ProgressBar
+                style="?android:attr/progressBarStyle"
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Angles_Data_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/Angles_Az_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                tools:ignore="NestedWeights" />
+
+            <TextView
+                android:id="@+id/Angles_El_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <TextView
+                android:id="@+id/Angles_Range_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <TextView
+                android:id="@+id/Angles_Phase_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/Angles_Illumination_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

@@ -1,0 +1,11 @@
+https://romannurik.github.io/AndroidAssetStudio/icons-launcher.html
+
+use app icon w/ white background, 512x512
+foreground: image
+trim whitespace: trim
+padding: 10%
+color: transparent (default)
+background color: white (default?)
+scaling: center
+shape: circle
+effect: elevation

@@ -1,0 +1,7 @@
+app/debug
+app/release
+app/src/main/res/values/keys.xml
+
+.idea/
+.gradle/
+

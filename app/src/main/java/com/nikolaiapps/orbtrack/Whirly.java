@@ -24,6 +24,7 @@ import com.mousebird.maply.BaseController;
 import com.mousebird.maply.MaplyStarModel;
 import com.mousebird.maply.MaplyTexture;
 import com.mousebird.maply.QuadImageLoader;
+import com.mousebird.maply.RenderControllerInterface;
 import com.mousebird.maply.SamplingParams;
 import com.mousebird.maply.Shader;
 import com.mousebird.maply.MarkerInfo;
@@ -33,6 +34,8 @@ import com.mousebird.maply.RemoteTileInfoNew;
 import com.mousebird.maply.ScreenMarker;
 import com.mousebird.maply.ScreenObject;
 import com.mousebird.maply.SelectedObject;
+import com.mousebird.maply.ShapeInfo;
+import com.mousebird.maply.ShapeLinear;
 import com.mousebird.maply.SimpleTileFetcher;
 import com.mousebird.maply.SphericalMercatorCoordSystem;
 import com.mousebird.maply.Sticker;
@@ -44,6 +47,7 @@ import com.mousebird.maply.VectorObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 
 
@@ -266,7 +270,7 @@ class Whirly
             }
 
             zValue = z;
-            board.setCenter(new Point3d(Math.toRadians(longitude),Math.toRadians(latitude), zValue));
+            board.setCenter(new Point3d(Math.toRadians(longitude), Math.toRadians(latitude), zValue));
 
             add();
         }
@@ -414,20 +418,40 @@ class Whirly
     private static class Path
     {
         private boolean isVisible;
-        private VectorObject path;
-        private final VectorInfo pathInfo;
+        private final boolean useVectors;
+        private VectorObject flatPath;
+        private ShapeLinear elevatedPath;
+        private final VectorInfo flatPathInfo;
+        private final ShapeInfo elevatedPathInfo;
         private ComponentObject pathObject;
         private final BaseController controller;
 
-        Path(BaseController orbitalController, int color)
+        Path(BaseController orbitalController, boolean isFlat, int color)
         {
+            useVectors = isFlat;
             controller = orbitalController;
 
-            path = new VectorObject();
-            pathInfo = new VectorInfo();
-            pathInfo.setColor(color);
-            pathInfo.setLineWidth(4f);
-            pathInfo.setDrawPriority(5000);
+            if(useVectors)
+            {
+                flatPath = new VectorObject();
+                flatPathInfo = new VectorInfo();
+                flatPathInfo.setColor(color);
+                flatPathInfo.setLineWidth(4f);
+                flatPathInfo.setDrawPriority(5000);
+
+                elevatedPathInfo = null;
+            }
+            else
+            {
+                elevatedPath = new ShapeLinear();
+                elevatedPathInfo = new ShapeInfo();
+                elevatedPathInfo.setColor(color);
+                elevatedPathInfo.setLineWidth(4f);
+                elevatedPathInfo.setDrawPriority(5000);
+
+                flatPathInfo = null;
+            }
+
             pathObject = null;
 
             //set to opposite to allow change
@@ -444,84 +468,119 @@ class Whirly
             double nextLon;
             double currentLat;
             double currentLon;
+            double currentAltKm;
             double splitLat;
-            ArrayList<Point2d> setPoints = new ArrayList<>(0);
+            ArrayList<Point2d> setFlatPoints = new ArrayList<>(0);
+            ArrayList<Point3d> setElevatedPoints = new ArrayList<>(0);
 
             remove();
 
+            if(useVectors)
+            {
+                flatPath = new VectorObject();
+            }
+            else
+            {
+                elevatedPath = new ShapeLinear();
+            }
+
             //add linear path
-            path = new VectorObject();
             for(index = 0; index < pointsLength; index++)
             {
                 CoordinatesFragment.Coordinate currentPoint = points.get(index);
                 CoordinatesFragment.Coordinate nextPoint = (index + 1 < pointsLength ? points.get(index + 1) : null);
-                Point2d[] splitPoints = null;
+                Point2d[] flatSplitPoints = null;
 
+                //remember current location
                 currentLat = currentPoint.latitude;
                 currentLon = currentPoint.longitude;
+                currentAltKm = currentPoint.altitudeKm;
 
-                //if there is a next point
-                if(nextPoint != null)
+                //if using vectors
+                if(useVectors)
                 {
-                    //get next latitude, longitude, and slope
-                    nextLat = nextPoint.latitude;
-                    nextLon = nextPoint.longitude;
-                    slope = Globals.degreeDistance(currentLon, nextLon) / Globals.degreeDistance(currentLat, nextLat);
-
-                    //if going across 180 eastward
-                    if(currentLon >= 90 && currentLon <= 180 && nextLon >= -180 && nextLon <= -90)
+                    //if there is a next point
+                    if(nextPoint != null)
                     {
-                        //get latitude 180 point
-                        splitLat = (Globals.degreeDistance(currentLon, 180) / slope) + currentLat;
+                        //get next latitude, longitude, and slope
+                        nextLat = nextPoint.latitude;
+                        nextLon = nextPoint.longitude;
+                        slope = Globals.degreeDistance(currentLon, nextLon) / Globals.degreeDistance(currentLat, nextLat);
 
-                        //add points up to 180
-                        setPoints.add(Point2d.FromDegrees(currentLon, currentLat));
-                        setPoints.add(Point2d.FromDegrees(180, splitLat));
+                        //if going across 180 eastward
+                        if(currentLon >= 90 && currentLon <= 180 && nextLon >= -180 && nextLon <= -90)
+                        {
+                            //get latitude 180 point
+                            splitLat = (Globals.degreeDistance(currentLon, 180) / slope) + currentLat;
 
-                        //set points past 180
-                        splitPoints = new Point2d[]{Point2d.FromDegrees(-180, splitLat), Point2d.FromDegrees(nextLon, nextLat)};
+                            //add points up to 180
+                            setFlatPoints.add(Point2d.FromDegrees(currentLon, currentLat));
+                            setFlatPoints.add(Point2d.FromDegrees(180, splitLat));
+
+                            //set points past 180
+                            flatSplitPoints = new Point2d[]{Point2d.FromDegrees(-180, splitLat), Point2d.FromDegrees(nextLon, nextLat)};
+                        }
+                        //else if going across 180 westward
+                        else if(currentLon >= -180 && currentLon <= -90 && nextLon >= 90 && nextLon <= 180)
+                        {
+                            //get latitude -180 point
+                            splitLat = (Globals.degreeDistance(currentLon, -180) / slope) + currentLat;
+
+                            //add points up to -180
+                            setFlatPoints.add(Point2d.FromDegrees(currentLon, currentLat));
+                            setFlatPoints.add(Point2d.FromDegrees(-180, splitLat));
+
+                            //set points past -180
+                            flatSplitPoints = new Point2d[]{Point2d.FromDegrees(180, splitLat), Point2d.FromDegrees(nextLon, nextLat)};
+                        }
                     }
-                    //else if going across 180 westward
-                    else if(currentLon >= -180 && currentLon <= -90 && nextLon >= 90 && nextLon <= 180)
+
+                    //if there are split points
+                    if(flatSplitPoints != null)
                     {
-                        //get latitude -180 point
-                        splitLat = (Globals.degreeDistance(currentLon, -180) / slope) + currentLat;
+                        //add other points and reset
+                        flatPath.addLinear(setFlatPoints.toArray(new Point2d[0]));
+                        setFlatPoints.clear();
 
-                        //add points up to -180
-                        setPoints.add(Point2d.FromDegrees(currentLon, currentLat));
-                        setPoints.add(Point2d.FromDegrees(-180, splitLat));
+                        //add split points
+                        setFlatPoints.add(flatSplitPoints[0]);
+                        setFlatPoints.add(flatSplitPoints[1]);
 
-                        //set points past -180
-                        splitPoints = new Point2d[]{Point2d.FromDegrees(180, splitLat), Point2d.FromDegrees(nextLon, nextLat)};
+                        //skip next point
+                        index++;
                     }
-                }
-
-                //if there are split points
-                if(splitPoints != null)
-                {
-                    //add other points and reset
-                    path.addLinear(setPoints.toArray(new Point2d[0]));
-                    setPoints.clear();
-
-                    //add split points
-                    setPoints.add(splitPoints[0]);
-                    setPoints.add(splitPoints[1]);
-
-                    //skip next point
-                    index++;
+                    else
+                    {
+                        //add point
+                        setFlatPoints.add(Point2d.FromDegrees(currentLon, currentLat));
+                    }
                 }
                 else
                 {
+                    if(currentAltKm < CoordinatesFragment.MinDrawDistanceZ / 1000)
+                    {
+                        currentAltKm = CoordinatesFragment.MinDrawDistanceZ / 1000;
+                    }
+                    else if(currentAltKm > CoordinatesFragment.MaxDrawDistanceZ / 1000)
+                    {
+                        currentAltKm = CoordinatesFragment.MaxDrawDistanceZ / 1000;
+                    }
+
                     //add point
-                    setPoints.add(new Point2d(Math.toRadians(currentLon), Math.toRadians(currentLat)));
+                    setElevatedPoints.add(controller.displayPointFromGeo(new Point3d(Point2d.FromDegrees(currentLon, currentLat), currentAltKm)).multiplyBy((currentAltKm / Calculations.EarthRadiusKM) + 1.0));
                 }
             }
 
             //if there are points
-            if(setPoints.size() > 0)
+            if(useVectors && setFlatPoints.size() > 0)
             {
                 //add them
-                path.addLinear(setPoints.toArray(new Point2d[0]));
+                flatPath.addLinear(setFlatPoints.toArray(new Point2d[0]));
+            }
+            else if(!useVectors && setElevatedPoints.size() > 0)
+            {
+                //add them
+                elevatedPath.setCoords(setElevatedPoints.toArray(new Point3d[0]));
             }
 
             add();
@@ -535,7 +594,14 @@ class Whirly
                 isVisible = visible;
 
                 remove();
-                pathInfo.setEnable(visible);
+                if(useVectors)
+                {
+                    flatPathInfo.setEnable(visible);
+                }
+                else
+                {
+                    elevatedPathInfo.setEnable(visible);
+                }
                 add();
             }
         }
@@ -544,7 +610,7 @@ class Whirly
         {
             if(pathObject == null)
             {
-                pathObject = controller.addVector(path, pathInfo, BaseController.ThreadMode.ThreadAny);
+                pathObject = (useVectors ? controller.addVector(flatPath, flatPathInfo, BaseController.ThreadMode.ThreadAny) : controller.addShapes(Collections.singletonList(elevatedPath), elevatedPathInfo, RenderControllerInterface.ThreadMode.ThreadAny));
             }
         }
 
@@ -850,7 +916,7 @@ class Whirly
                 orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
             }
 
-            orbitalPath = new Path(controller, common.data.database.pathColor);
+            orbitalPath = new Path(controller, forMap, common.data.database.pathColor);
 
             if(forMap)
             {
@@ -863,8 +929,6 @@ class Whirly
                 orbitalBoard = new Board(controller);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
-                //orbitalShadow = new FlatObject(controller);
-                //orbitalShadow.setImage(Globals.getBitmap(currentContext, iconId, Color.argb(192, 0, 0, 0)));
                 setShowShadow(showShadow);
 
                 name = common.data.getName();
@@ -1385,7 +1449,8 @@ class Whirly
                 }
             }
 
-            //set speed scale
+            //set sensitivity and speed scale
+            setSensitivityScale(Settings.getMapSensitivityScale(activity, !forMap));
             setSpeedScale(Settings.getMapSpeedScale(activity, !forMap));
 
             //set if tilt allowed
@@ -1745,6 +1810,20 @@ class Whirly
                     stars.removeFromView();
                     stars = null;
                 }
+            }
+        }
+
+        @Override
+        public void setSensitivityScale(float sensitivityScaling)
+        {
+            //if for map
+            if(isMap())
+            {
+                mapControl.setScrollScale(sensitivityScaling);
+            }
+            else
+            {
+                globeControl.setScrollScale(sensitivityScaling);
             }
         }
 

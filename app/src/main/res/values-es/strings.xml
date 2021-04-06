@@ -316,7 +316,6 @@
     <string name="title_full_moon_end">Fin de Luna Llena</string>
     <string name="title_g">G</string>
     <string name="title_getting">Consiguiendo</string>
-    <string name="title_globe_speed">Velocidad de Globo</string>
     <string name="title_globe_type">Tipo de Globo</string>
     <string name="title_globe_view">Vista Globo</string>
     <string name="title_golden_hour">Hora Dorada</string>
@@ -374,7 +373,6 @@
     <string name="title_longitude">Longitud</string>
     <string name="title_longitude_west_east">Longitud (O+/E-)</string>
     <string name="title_manual">Manual</string>
-    <string name="title_map_speed">Velocidad de Mapa</string>
     <string name="title_map_type">Tipo de Mapa</string>
     <string name="title_map_view">Vista Mapa</string>
     <string name="title_mars">Marte</string>
@@ -471,6 +469,7 @@
     <string name="title_select_source">Seleccionar Fuente</string>
     <string name="title_selected_delete">Eliminar Seleccionado</string>
     <string name="title_semi_major_axis">Semieje Mayor</string>
+    <string name="title_sensitivity">Sensibilidad</string>
     <string name="title_set">Establecer</string>
     <string name="title_set_actual_position">Establecer Posición Actual</string>
     <string name="title_set_icon_scale">Establecer Escala Iconos</string>

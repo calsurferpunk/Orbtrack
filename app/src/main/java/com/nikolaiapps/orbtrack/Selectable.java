@@ -965,7 +965,7 @@ public abstract class Selectable
         }
         public ListBaseAdapter(View parentView)
         {
-            this(parentView.getContext());
+            this(parentView != null ? parentView.getContext() : null);
         }
 
         //Sets header view
@@ -1003,8 +1003,8 @@ public abstract class Selectable
         //Sets column titles
         protected void setColumnTitles(ViewGroup listColumns, int page)
         {
-            int[] colors = Globals.resolveAttributeIDs(currentContext, new int[]{R.attr.columnBackground, R.attr.columnTitleTextColor});
-            colors[1] = currentContext.getResources().getColor(colors[1]);
+            int[] colors = (currentContext != null ? Globals.resolveAttributeIDs(currentContext, new int[]{R.attr.columnBackground, R.attr.columnTitleTextColor}) : new int[]{Color.BLACK, Color.WHITE});
+            colors[1] = (currentContext != null ? currentContext.getResources().getColor(colors[1]) : colors[1]);
 
             if(showColumnTitles(page))
             {

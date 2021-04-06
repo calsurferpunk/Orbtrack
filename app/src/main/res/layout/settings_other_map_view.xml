@@ -42,31 +42,48 @@
             android:text="@string/title_show_clouds"
             android:visibility="gone"/>
 
-        <View style="@style/Divider"/>
-
-        <LinearLayout
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_globe_speed"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/defaultTextColor"/>
+            android:padding="10dp">
+            <TableRow android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_sensitivity"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
 
-            <com.nikolaiapps.orbtrack.PlayBar
-                android:id="@+id/Settings_Map_View_Globe_Speed_Scale_Bar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                app:textColor="?attr/defaultTextColor"
-                app:buttonColor="?attr/defaultTextColor"/>
-        </LinearLayout>
+                <com.nikolaiapps.orbtrack.PlayBar
+                    android:id="@+id/Settings_Map_View_Globe_Sensitivity_Scale_Bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    app:textColor="?attr/defaultTextColor"
+                    app:buttonColor="?attr/defaultTextColor"/>
+            </TableRow>
+
+            <TableRow android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_speed"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.PlayBar
+                    android:id="@+id/Settings_Map_View_Globe_Speed_Scale_Bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    app:textColor="?attr/defaultTextColor"
+                    app:buttonColor="?attr/defaultTextColor"/>
+            </TableRow>
+        </TableLayout>
 
         <View style="@style/Divider"/>
 
@@ -99,31 +116,48 @@
             android:text="@string/title_show_clouds"
             android:visibility="gone"/>
 
-        <View style="@style/Divider"/>
-
-        <LinearLayout
+        <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
-            android:padding="10dp"
-            android:orientation="horizontal">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/title_map_speed"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/defaultTextColor"/>
+            android:padding="10dp">
+            <TableRow android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_sensitivity"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
 
-            <com.nikolaiapps.orbtrack.PlayBar
-                android:id="@+id/Settings_Map_View_Map_Speed_Scale_Bar"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginLeft="5dp"
-                android:layout_marginRight="5dp"
-                app:textColor="?attr/defaultTextColor"
-                app:buttonColor="?attr/defaultTextColor"/>
-        </LinearLayout>
+                <com.nikolaiapps.orbtrack.PlayBar
+                    android:id="@+id/Settings_Map_View_Map_Sensitivity_Scale_Bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    app:textColor="?attr/defaultTextColor"
+                    app:buttonColor="?attr/defaultTextColor"/>
+            </TableRow>
+
+            <TableRow android:gravity="center_vertical">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/title_speed"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.PlayBar
+                    android:id="@+id/Settings_Map_View_Map_Speed_Scale_Bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginLeft="5dp"
+                    android:layout_marginRight="5dp"
+                    app:textColor="?attr/defaultTextColor"
+                    app:buttonColor="?attr/defaultTextColor"/>
+            </TableRow>
+        </TableLayout>
 
         <View style="@style/Divider"/>
 

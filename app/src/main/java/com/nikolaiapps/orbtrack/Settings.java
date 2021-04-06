@@ -46,6 +46,8 @@ public abstract class Settings
     public static final int IconScaleMax = 200;
     public static final int SpeedScaleMin = 0;
     public static final int SpeedScaleMax = 150;
+    public static final int SensitivityScaleMin = 10;
+    public static final int SensitivityScaleMax = 150;
 
     //Page types
     public static abstract class PageType
@@ -85,6 +87,7 @@ public abstract class Settings
         static final String MapShowLabelsAlways = "MapShowLabelsAlways";
         static final String MapShowStars = "MapShowStars";
         static final String MapSpeedScale = "MapSpeedScale";
+        static final String MapSensitivityScale = "MapSensitivityScale";
         static final String MapRotateAllowed = "MapRotateAllowed";
         static final String MapShowGrid = "MapShowGrid";
         static final String MapGridColor = "MapGridColor";
@@ -690,15 +693,25 @@ public abstract class Settings
         }
 
         //Creates an on play bar changed listener
-        private static PlayBar.OnPlayBarChangedListener createOnPlayBarChangedListener(final Context context, boolean forGlobe)
+        private static PlayBar.OnPlayBarChangedListener createOnPlayBarChangedListener(final Context context, boolean forGlobe, boolean forSensitivity)
         {
             return(new PlayBar.OnPlayBarChangedListener()
             {
                 @Override
                 public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
                 {
-                    //set speed
-                    Settings.setMapSpeedScale(context, progressValue / 100f, forGlobe);
+                    float scaleValue = progressValue / 100f;
+
+                    if(forSensitivity)
+                    {
+                        //set sensitivity
+                        Settings.setMapSensitivityScale(context, scaleValue, forGlobe);
+                    }
+                    else
+                    {
+                        //set speed
+                        Settings.setMapSpeedScale(context, scaleValue, forGlobe);
+                    }
 
                     //update text
                     seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));
@@ -1403,7 +1416,9 @@ public abstract class Settings
                                 final IconSpinner mapTypeList = rootView.findViewById(R.id.Settings_Map_View_Map_Type_List);
                                 final IconSpinner informationLocationList = rootView.findViewById(R.id.Settings_Map_View_Information_Location_List);
                                 final BorderButton gridColorButton = rootView.findViewById(R.id.Settings_Map_View_Grid_Color_Button);
+                                final PlayBar globeSensitivityScaleBar = rootView.findViewById(R.id.Settings_Map_View_Globe_Sensitivity_Scale_Bar);
                                 final PlayBar globeSpeedScaleBar = rootView.findViewById(R.id.Settings_Map_View_Globe_Speed_Scale_Bar);
+                                final PlayBar mapSensitivityScaleBar = rootView.findViewById(R.id.Settings_Map_View_Map_Sensitivity_Scale_Bar);
                                 final PlayBar mapSpeedScaleBar = rootView.findViewById(R.id.Settings_Map_View_Map_Speed_Scale_Bar);
                                 final PlayBar iconScaleBar = rootView.findViewById(R.id.Settings_Map_View_Icon_Scale_Bar);
                                 final SwitchCompat showGlobeCloudsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Globe_Clouds_Switch);
@@ -1438,17 +1453,29 @@ public abstract class Settings
                                 mapTypeList.setAdapter(new IconSpinner.CustomAdapter(context, MapView.mapTypeItems));
                                 informationLocationList.setAdapter(new IconSpinner.CustomAdapter(context, MapView.infoLocationItems));
 
+                                //setup sensitivities
+                                globeSensitivityScaleBar.setMin(Settings.SensitivityScaleMin);
+                                globeSensitivityScaleBar.setMax(Settings.SensitivityScaleMax);
+                                globeSensitivityScaleBar.setPlayIndexIncrementUnits(1);
+                                globeSensitivityScaleBar.setPlayActivity(null);
+                                globeSensitivityScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, true, true));
+                                mapSensitivityScaleBar.setMin(Settings.SensitivityScaleMin);
+                                mapSensitivityScaleBar.setMax(Settings.SensitivityScaleMax);
+                                mapSensitivityScaleBar.setPlayIndexIncrementUnits(1);
+                                mapSensitivityScaleBar.setPlayActivity(null);
+                                mapSensitivityScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, false, true));
+
                                 //setup speeds
                                 globeSpeedScaleBar.setMin(Settings.SpeedScaleMin);
                                 globeSpeedScaleBar.setMax(Settings.SpeedScaleMax);
                                 globeSpeedScaleBar.setPlayIndexIncrementUnits(1);
                                 globeSpeedScaleBar.setPlayActivity(null);
-                                globeSpeedScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, true));
+                                globeSpeedScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, true, false));
                                 mapSpeedScaleBar.setMin(Settings.SpeedScaleMin);
                                 mapSpeedScaleBar.setMax(Settings.SpeedScaleMax);
                                 mapSpeedScaleBar.setPlayIndexIncrementUnits(1);
                                 mapSpeedScaleBar.setPlayActivity(null);
-                                mapSpeedScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, false));
+                                mapSpeedScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, false, false));
 
                                 //setup scale
                                 iconScaleBar.setMin(Settings.IconScaleMin);
@@ -1473,7 +1500,9 @@ public abstract class Settings
                                 mapTypeList.setSelection(Arrays.asList(MapView.MapTypeValues).indexOf(getMapLayerType(context, false)));
                                 informationLocationList.setSelection(Arrays.asList(MapView.InfoLocationValues).indexOf(getMapMarkerInfoLocation(context)));
                                 gridColorButton.setBackgroundColor(Settings.getMapGridColor(context));
+                                globeSensitivityScaleBar.setValue((int)Math.floor(Settings.getMapSensitivityScale(context, true) * 100));
                                 globeSpeedScaleBar.setValue((int)Math.floor(Settings.getMapSpeedScale(context, true) * 100));
+                                mapSensitivityScaleBar.setValue((int)Math.floor(Settings.getMapSensitivityScale(context, false) * 100));
                                 mapSpeedScaleBar.setValue((int)Math.floor(Settings.getMapSpeedScale(context, false) * 100));
                                 iconScaleBar.setValue((int)Math.floor(Settings.getMapMarkerScale(context) * 100));
                                 showInformationBackgroundSwitch.setChecked(Settings.getMapMarkerShowBackground(context));
@@ -2641,6 +2670,23 @@ public abstract class Settings
         {
             //set scale
             getWriteSettings(context).putFloat(PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale).apply();
+        }
+    }
+
+    //Gets map sensitivity scale
+    public static float getMapSensitivityScale(Context context, boolean forGlobe)
+    {
+        return(getPreferences(context).getFloat(PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.8f));
+    }
+
+    //Sets map sensitivity scale
+    public static void setMapSensitivityScale(Context context, float scale, boolean forGlobe)
+    {
+        //if a valid scale
+        if(scale >= (SensitivityScaleMin / 100.0f) && scale <= (SensitivityScaleMax / 100.0f))
+        {
+            //set scale
+            getWriteSettings(context).putFloat(PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale).apply();
         }
     }
 

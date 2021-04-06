@@ -754,6 +754,7 @@ public interface CoordinatesFragment
     void setMarkerShowShadow(boolean show);
     void setShowTitlesAlways(boolean show);
     void setStarsEnabled(boolean enabled);
+    void setSensitivityScale(float sensitivityScaling);
     void setSpeedScale(float speedScaling);
     void setRotateAllowed(boolean enabled);
     void setLatitudeLongitudeGridEnabled(boolean enabled);

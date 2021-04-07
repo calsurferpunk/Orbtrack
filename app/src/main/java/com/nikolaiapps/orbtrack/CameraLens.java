@@ -15,6 +15,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
@@ -32,6 +34,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import java.util.ArrayList;
+import java.util.Comparator;
 
 
 public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, SensorUpdate.OnSensorChangedListener
@@ -94,6 +97,28 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //start running
                 start();
             }
+        }
+    }
+
+    //Icon image for ID
+    private static class IconImage
+    {
+        private static class Comparer implements Comparator<IconImage>
+        {
+            @Override
+            public int compare(IconImage value1, IconImage value2)
+            {
+                return(Globals.intCompare(value1.id, value2.id));
+            }
+        }
+
+        public int id;
+        Bitmap image;
+
+        public IconImage(int id, Bitmap image)
+        {
+            this.id = id;
+            this.image = image;
         }
     }
 
@@ -515,6 +540,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public PlayBar playBar;
     public FloatingActionStateButtonMenu settingsMenu;
 
+    private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
     private int orientation;
     private int azIndex;
     private int elIndex;
@@ -563,6 +589,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private SensorUpdate sensorUpdater;
     private UpdateThread updateThread;
     private OnStopCalibrationListener stopCalibrationListener;
+    private ArrayList<IconImage> orbitalIcons;
     private Rect[] currentOrbitalAreas;
     private Database.SatelliteData[] currentOrbitals;
     private Calculations.TopographicDataType[] currentLookAngles;
@@ -575,7 +602,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         SharedPreferences readSettings = Settings.getPreferences(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
-        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 32);
+        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 36);
 
         orientation = getCameraOrientation();
         horizonLineColor = Settings.getLensHorizonColor(context);
@@ -658,6 +685,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         calibrateOkayButton = null;
         helpText = null;
 
+        orbitalIcons = new ArrayList<>(0);
         currentOrbitals = new Database.SatelliteData[0];
         currentOrbitalAreas = new Rect[0];
         currentLookAngles = new Calculations.TopographicDataType[0];
@@ -676,7 +704,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //stop
             return;
         }
-
 
         //start camera
         startCamera(currentHolder);
@@ -1053,7 +1080,32 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             case Settings.Options.IndicatorType.Icon:
                 if(context != null)
                 {
-                    canvas.drawBitmap(Globals.getBitmap(context, Globals.getOrbitalIconID(noradId, currentType), iconLength, iconLength), centerX - (iconLength / 2f), centerY - iconLength, iconPaint);
+                    int iconId;
+                    IconImage indicatorIcon = new IconImage(noradId, null);
+                    int[] indexes = Globals.divideFind(indicatorIcon, orbitalIcons, iconImageComparer);
+
+                    //if already in the list
+                    if(indexes[0] >= 0)
+                    {
+                        //use image
+                        indicatorIcon.image = orbitalIcons.get(indexes[0]).image;
+                    }
+                    else
+                    {
+                        //create image and add to list
+                        iconId = Globals.getOrbitalIconID(noradId, currentType);
+                        indicatorIcon.image = Globals.getBitmap(context, iconId, (noradId > 0 ? R.color.white : 0), iconLength, iconLength);
+                        if(noradId > 0)
+                        {
+                            //add background highlight
+                            Drawable imageBg = Globals.getDrawable(context, iconId, indicatorIcon.image.getWidth(), indicatorIcon.image.getHeight(), R.color.black, false);
+                            indicatorIcon.image = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), indicatorIcon.image), imageBg));
+                        }
+                        orbitalIcons.add(indexes[1], indicatorIcon);
+                    }
+
+                    //draw image
+                    canvas.drawBitmap(indicatorIcon.image, centerX - (iconLength / 2f), centerY - iconLength, iconPaint);
                     break;
                 }
                 //else fall through

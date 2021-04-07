@@ -1078,6 +1078,13 @@ public class Database extends SQLiteOpenHelper
                     clearMasterSatelliteTable(context);
                 }
 
+                //if previous is before lens icon indicators
+                if(updateStatus.previousVersion < 30)
+                {
+                    //default to lens icon indicators
+                    Settings.setIndicator(context, Settings.Options.IndicatorType.Icon);
+                }
+
                 //show any notice
                 showNoticeDialog(context, updateStatus.previousVersion);
             }

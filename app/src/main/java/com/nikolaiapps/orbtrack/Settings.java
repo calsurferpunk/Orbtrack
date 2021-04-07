@@ -2437,6 +2437,12 @@ public abstract class Settings
         return(getPreferences(context).getInt(PreferenceName.LensIndicator, Options.IndicatorType.Icon));
     }
 
+    //Sets indicator type
+    public static void setIndicator(Context context, int indicatorType)
+    {
+        setPreferenceInt(context, PreferenceName.LensIndicator, indicatorType);
+    }
+
     //Gets dark theme value
     public static boolean getDarkTheme(Context context)
     {

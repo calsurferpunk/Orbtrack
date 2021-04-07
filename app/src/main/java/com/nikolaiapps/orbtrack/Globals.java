@@ -2664,6 +2664,10 @@ public abstract class Globals
     {
         return(getBitmap(getDrawable(context, resId, tintColor, false)));
     }
+    public static Bitmap getBitmap(Context context, int resId, int width, int height)
+    {
+        return(getBitmap(getDrawable(context, resId, width, height, 0, false)));
+    }
     public static Bitmap getBitmap(Context context, int resId, boolean useThemeTint)
     {
         return(getBitmap(getDrawable(context, resId, useThemeTint)));

@@ -520,6 +520,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int elIndex;
     private final int compassWidth;
     private final int indicator;
+    private final int iconLength;
     private final int compassHeight;
     private int compassBorderWidth;
     private final int horizonColor;
@@ -549,6 +550,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float indicatorPxRadius;
     private final double defaultPathJulianDelta;
     private Camera currentCamera;
+    private final Paint iconPaint;
     private final Paint currentPaint;
     private Rect selectedArea;
     private final Bitmap compassDirection;
@@ -573,7 +575,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         SharedPreferences readSettings = Settings.getPreferences(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
-        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16);
+        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 32);
 
         orientation = getCameraOrientation();
         horizonLineColor = Settings.getLensHorizonColor(context);
@@ -584,6 +586,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         textOffset = textSize / 1.5f;
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
+        iconLength = (int)dpPixels[4];
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
         indicator = Settings.getIndicator(context);
@@ -600,6 +603,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentPaint.setAntiAlias(true);
         currentPaint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         currentPaint.setTextSize(textSize);
+        iconPaint = new Paint();
+        if(indicator == Settings.Options.IndicatorType.Icon)
+        {
+            iconPaint.setAntiAlias(true);
+            iconPaint.setAlpha(80);
+        }
 
         currentHolder = this.getHolder();
         currentHolder.addCallback(this);
@@ -711,6 +720,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         int index;
         int index2;
+        int currentId;
         int travelLength;
         int selectedColor = Color.WHITE;
         int width = getWidth();
@@ -719,6 +729,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int height = getHeight();
         int heightHalf = height / 2;
         int heightDouble = height * 2;
+        int selectedId = Universe.IDs.Invalid;
+        byte currentType;
+        byte selectedType = Database.OrbitalType.Satellite;
         boolean outsideArea;
         float azCenterPx;
         float elCenterPx;
@@ -742,6 +755,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         double currentElPxDelta;
         String currentName;
         String selectedName = "";
+        Context context = getContext();
 
         //if camera area has been calculated
         if(useCameraDegWidth != Float.MAX_VALUE && useCameraDegHeight != Float.MAX_VALUE)
@@ -794,11 +808,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //if current look angle is set
                     if(currentLookAngle != null)
                     {
-                        //remember current name
+                        //remember current ID, type, and name
+                        currentId = currentOrbital.getSatelliteNum();
+                        currentType = currentOrbital.getOrbitalType();
                         currentName = currentOrbital.getName();
                         if(selectedOrbitalIndex == index)
                         {
-                            //update selected name and color
+                            //update selected ID, type, name, and color
+                            selectedId = currentId;
+                            selectedType = currentType;
                             selectedName = currentName;
                             selectedColor = currentOrbital.database.pathColor;
                         }
@@ -833,7 +851,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
 
                         //draw orbital
-                        drawOrbital(canvas, currentName, currentOrbitalAreas[index], azCenterPx, elCenterPx, indicatorPxRadius, width, height, outsideArea);
+                        drawOrbital(context, canvas, currentId, currentType, currentName, currentOrbitalAreas[index], azCenterPx, elCenterPx, indicatorPxRadius, width, height, outsideArea);
                     }
 
                     //if current travel is set, showing paths, and not calibrating
@@ -962,7 +980,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
                     //show offset orbital position
                     currentPaint.setColor(selectedColor);
-                    drawOrbital(canvas, selectedName, selectedArea, alignCenterX, alignCenterY, indicatorPxRadius, width, height, false);
+                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedArea, alignCenterX, alignCenterY, indicatorPxRadius, width, height, false);
                 }
                 else
                 {
@@ -1003,7 +1021,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     //Draws orbital at the given position
-    private void drawOrbital(Canvas canvas, String currentName, Rect currentArea, float centerX, float centerY, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
+    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, Rect currentArea, float centerX, float centerY, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
     {
         float drawPxRadius = indicatorPxRadius / (outsideArea ? 2 : 1);
 
@@ -1031,6 +1049,14 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 trianglePoints[11] = centerY + drawPxRadius;       //bottom left
                 canvas.drawLines(trianglePoints, currentPaint);
                 break;
+
+            case Settings.Options.IndicatorType.Icon:
+                if(context != null)
+                {
+                    canvas.drawBitmap(Globals.getBitmap(context, Globals.getOrbitalIconID(noradId, currentType), iconLength, iconLength), centerX - (iconLength / 2f), centerY - iconLength, iconPaint);
+                    break;
+                }
+                //else fall through
 
             default:
             case Settings.Options.IndicatorType.Circle:

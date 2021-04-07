@@ -183,6 +183,7 @@ public abstract class Settings
             static final int Circle = 0;
             static final int Square = 1;
             static final int Triangle = 2;
+            static final int Icon = 3;
         }
 
         //Display
@@ -1359,6 +1360,7 @@ public abstract class Settings
 
                                 IconSpinner.Item[] indicatorItems = new IconSpinner.Item[]
                                 {
+                                    new IconSpinner.Item(Globals.getDrawable(context, R.drawable.orbital_satellite, themeTint), res.getString(R.string.title_icon), IndicatorType.Icon),
                                     new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_circle_black, themeTint), res.getString(R.string.title_circle), IndicatorType.Circle),
                                     new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_square_black, themeTint), res.getString(R.string.title_square), IndicatorType.Square),
                                     new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_triangle_black, themeTint), res.getString(R.string.title_triangle), IndicatorType.Triangle)
@@ -1398,7 +1400,7 @@ public abstract class Settings
                                 lensUpdateRateList.setAdapter(rateListAdapter);
 
                                 //update displays
-                                lensOrbitalIconList.setSelectedValue(readSettings.getInt(PreferenceName.LensIndicator, IndicatorType.Circle));
+                                lensOrbitalIconList.setSelectedValue(readSettings.getInt(PreferenceName.LensIndicator, IndicatorType.Icon));
                                 lensUpdateRateList.setSelectedValue(readSettings.getInt(PreferenceName.LensUpdateDelay, 1000));                    //default to average
                                 horizonColorButton.setBackgroundColor(Settings.getLensHorizonColor(context));
                                 useHorizonSwitch.setChecked(readSettings.getBoolean(PreferenceName.LensUseHorizon, false));
@@ -2432,7 +2434,7 @@ public abstract class Settings
     //Gets indicator type
     public static int getIndicator(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.LensIndicator, Options.IndicatorType.Circle));
+        return(getPreferences(context).getInt(PreferenceName.LensIndicator, Options.IndicatorType.Icon));
     }
 
     //Gets dark theme value

@@ -328,6 +328,7 @@
     <string name="title_hour">Hour</string>
     <string name="title_hours">Hours</string>
     <string name="title_hybrid">Hybrid</string>
+    <string name="title_icon">Icon</string>
     <string name="title_icon_scale">Icon Scale</string>
     <string name="title_id">ID</string>
     <string name="title_illumination">Illumination</string>

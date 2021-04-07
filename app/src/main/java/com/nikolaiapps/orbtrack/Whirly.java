@@ -489,6 +489,7 @@ class Whirly
             {
                 CoordinatesFragment.Coordinate currentPoint = points.get(index);
                 CoordinatesFragment.Coordinate nextPoint = (index + 1 < pointsLength ? points.get(index + 1) : null);
+                Point3d elevatedPoint;
                 Point2d[] flatSplitPoints = null;
 
                 //remember current location
@@ -557,6 +558,7 @@ class Whirly
                 }
                 else
                 {
+                    //keep inside of bounds
                     if(currentAltKm < CoordinatesFragment.MinDrawDistanceZ / 1000)
                     {
                         currentAltKm = CoordinatesFragment.MinDrawDistanceZ / 1000;
@@ -566,8 +568,13 @@ class Whirly
                         currentAltKm = CoordinatesFragment.MaxDrawDistanceZ / 1000;
                     }
 
-                    //add point
-                    setElevatedPoints.add(controller.displayPointFromGeo(new Point3d(Point2d.FromDegrees(currentLon, currentLat), currentAltKm)).multiplyBy((currentAltKm / Calculations.EarthRadiusKM) + 1.0));
+                    //if able to get point
+                    elevatedPoint = controller.displayPointFromGeo(new Point3d(Point2d.FromDegrees(currentLon, currentLat), currentAltKm));
+                    if(elevatedPoint != null)
+                    {
+                        //add point
+                        setElevatedPoints.add(elevatedPoint.multiplyBy((currentAltKm / Calculations.EarthRadiusKM) + 1.0));
+                    }
                 }
             }
 
@@ -910,9 +917,9 @@ class Whirly
 
             iconId = Globals.getOrbitalIconID(noradId, common.data.getOrbitalType());
             orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(currentContext, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(currentContext, iconId, (noradId > 0 ? Color.WHITE : 0)));
-            orbitalBgImage = Globals.getDrawable(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
             if(noradId > 0)
             {
+                orbitalBgImage = Globals.getDrawable(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
                 orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
             }
 

@@ -14,6 +14,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -33,6 +34,8 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.solver.widgets.Rectangle;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -549,6 +552,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int iconLength;
     private final int compassHeight;
     private int compassBorderWidth;
+    private final int textColor;
+    private final int textBgColor;
     private final int horizonColor;
     private final int horizonLineColor;
     private int selectedOrbitalIndex;
@@ -556,6 +561,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private boolean compassHadBad;
     private final float textSize;
     private final float textOffset;
+    private final float textPadding;
     private float compassCenterX;
     private float compassCenterY;
     private final float indicatorThickness;
@@ -599,18 +605,22 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         super(context);
 
+        boolean darkTheme = Settings.getDarkTheme(context);
         SharedPreferences readSettings = Settings.getPreferences(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
         float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 36);
 
         orientation = getCameraOrientation();
+        textColor = (darkTheme ? Color.argb(160, 255, 255, 255) : Color.argb(160, 0, 0, 0));
+        textBgColor = (darkTheme ? Color.argb(50, 0, 0, 0) : Color.argb(50, 255, 255, 255));
         horizonLineColor = Settings.getLensHorizonColor(context);
         horizonColor = Globals.getColor(horizonLineColor, 70);
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = readSettings.getBoolean(Settings.PreferenceName.LensUseHorizon, false);
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 9, metrics);
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 8, metrics);
         textOffset = textSize / 1.5f;
+        textPadding = (textSize * 0.15f);
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
         iconLength = (int)dpPixels[4];
@@ -819,7 +829,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //if current orbital is set, look angle is set, and using orbital
                 if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelectedOrbital() || selectedOrbitalIndex == index))
                 {
-                    //remember current look and travel angles
+                    //remember current color, look, and travel angles
+                    int currentColor = currentOrbital.database.pathColor;
                     Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
                     CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
 
@@ -827,7 +838,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(currentLookAngle != null || currentTravel != null)
                     {
                         //setup paint
-                        currentPaint.setColor(Globals.getColor(currentOrbital.database.pathColor, (showCalibration && selectedOrbitalIndex == index ? 70 : 255)));
+                        currentPaint.setColor(Globals.getColor(currentColor, (showCalibration && selectedOrbitalIndex == index ? 70 : 255)));
                         currentPaint.setStyle(Paint.Style.STROKE);
                         currentPaint.setStrokeWidth(indicatorThickness);
                     }
@@ -948,12 +959,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                 if(index2 != 0 && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
                                 {
                                     //draw line between last and current view
+                                    currentPaint.setColor(currentColor);
                                     canvas.drawLine(azPx[0], elPx[0], azPx[1], elPx[1], currentPaint);
                                 }
 
                                 //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
                                 if(index2 == 0 || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
                                 {
+                                    RectF bgArea;
+
                                     //draw circle
                                     canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
 
@@ -964,7 +978,21 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     }
                                     currentView.timeArea.offsetTo((int) (azPx[1] - (currentView.timeArea.width() / 2f)), (int) (elPx[1] - textSize));
 
+                                    //get background area
+                                    bgArea = new RectF(currentView.timeArea.left - textPadding, currentView.timeArea.top - textOffset - textPadding, currentView.timeArea.right + textPadding, (currentView.timeArea.bottom - textOffset) + textPadding);
+
+                                    //draw text background
+                                    currentPaint.setColor(textBgColor);
+                                    canvas.drawRect(bgArea, currentPaint);
+
+                                    //draw text border
+                                    currentPaint.setColor(currentColor);
+                                    currentPaint.setStyle(Paint.Style.STROKE);
+                                    canvas.drawRect(bgArea, currentPaint);
+
                                     //draw text
+                                    currentPaint.setColor(textColor);
+                                    currentPaint.setStyle(Paint.Style.FILL);
                                     canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
 
                                     //update starting julian date

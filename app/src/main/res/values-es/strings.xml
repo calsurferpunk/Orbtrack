@@ -136,6 +136,7 @@
     <string name="desc_permission_write_external_storage_deny">Escribir en el almacenamiento externo denegado</string>
     <string name="desc_privacy_policy">Nunca se transmiten datos personales desde su dispositivo. La información como las contraseñas de las cuentas y los datos de ubicación nunca se almacenan en ningún otro lugar que no sea su dispositivo. Las contraseñas se cifran y almacenan localmente. Las ubicaciones se utilizan para recuperar información de altitud y zona horaria, que a su vez se utilizan en cálculos locales.\n\nEl uso de la cámara es solo para ver el entorno que te rodea. No se guardan ni transmiten imágenes.\n\nCompartir traducciones también es útil para acelerar la información para otros usuarios, pero puede desactivarse si desea optar por no participar. Esto también se hizo para ayudar a evitar quedarse sin las cuotas mensuales de caracteres de traducción dadas que están permitidas por las API de traducción de Microsoft utilizadas.\n\n<a href="https://nikolai-apps.000webhostapp.com/Privacy/">https://nikolai-apps.000webhostapp.com/Privacy/</a></string>
     <string name="desc_quick_setup">Esta configuración rápida le pedirá algunas preferencias para que Orbtrack funcione mejor para usted.</string>
+    <string name="desc_sensor_smoothing">Aumenta la estabilidad (más alta) o disminuye la demora (más baja).</string>
     <string name="desc_show_label_background">Mostrar fondos etiquetas o dejar en claro</string>
     <string name="desc_show_labels_always">Mostrar etiquetas incluso cuando no está seleccionado</string>
     <string name="desc_show_grid">Mostrar cuadrícula de latitud/longitud</string>
@@ -324,6 +325,7 @@
     <string name="title_grid_color">Color Cuadrícula</string>
     <string name="title_grid_view">Vista Cuadrícula</string>
     <string name="title_group">Grupo</string>
+    <string name="title_high">Alto</string>
     <string name="title_horizon_color">Color Horizonte</string>
     <string name="title_hour">Hora</string>
     <string name="title_hours">Horas</string>
@@ -373,6 +375,7 @@
     <string name="title_login">Iniciar Sesión</string>
     <string name="title_longitude">Longitud</string>
     <string name="title_longitude_west_east">Longitud (O+/E-)</string>
+    <string name="title_low">Bajo</string>
     <string name="title_manual">Manual</string>
     <string name="title_map_type">Tipo de Mapa</string>
     <string name="title_map_view">Vista Mapa</string>
@@ -380,6 +383,7 @@
     <string name="title_max">Max</string>
     <string name="title_mean_anomaly">Anomalía Media</string>
     <string name="title_mean_motion">Movimiento Medio (Revoluciones por Día)</string>
+    <string name="title_medium">Medio</string>
     <string name="title_mercury">Mercurio</string>
     <string name="title_middle">Medio</string>
     <string name="title_minutes">Minutos</string>
@@ -471,6 +475,7 @@
     <string name="title_selected_delete">Eliminar Seleccionado</string>
     <string name="title_semi_major_axis">Semieje Mayor</string>
     <string name="title_sensitivity">Sensibilidad</string>
+    <string name="title_sensor_smoothing">Suavizado del Sensor</string>
     <string name="title_set">Establecer</string>
     <string name="title_set_actual_position">Establecer Posición Actual</string>
     <string name="title_set_icon_scale">Establecer Escala Iconos</string>

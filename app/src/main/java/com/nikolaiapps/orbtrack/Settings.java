@@ -107,6 +107,7 @@ public abstract class Settings
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
         static final String LensUpdateDelay = "LensUpdateDelay";
+        static final String LensAverageCount = "LensAverageCount";
         static final String LensIndicator = "LensIndicator";
         static final String LensHorizonColor = "LensHorizonColor";
         static final String LensUseHorizon = "LensUseHorizon";
@@ -1093,6 +1094,7 @@ public abstract class Settings
             final SharedPreferences readSettings;
             final SharedPreferences.Editor writeSettings;
             final IconSpinner.CustomAdapter rateListAdapter;
+            final IconSpinner.CustomAdapter sensorSmoothingAdapter;
             final Activity context = page.getActivity();
             final ViewGroup rootView = (ViewGroup)inflater.inflate(pageNum == PageType.Updates     ? R.layout.settings_updates :
                                                                    subPage == SubPageType.Accounts ? R.layout.settings_other_accounts :
@@ -1118,6 +1120,12 @@ public abstract class Settings
                     new IconSpinner.Item(res.getString(R.string.title_fast), res.getString(R.string.title_500_ms), 500),
                     new IconSpinner.Item(res.getString(R.string.title_very_fast), res.getString(R.string.title_100_ms), 100),
                     new IconSpinner.Item(res.getString(R.string.title_immediate), res.getString(R.string.title_20_ms), 20)
+                };
+                IconSpinner.Item[] sensorSmoothingItems = new IconSpinner.Item[]
+                {
+                    new IconSpinner.Item(res.getString(R.string.title_high), 80),
+                    new IconSpinner.Item(res.getString(R.string.title_medium), 40),
+                    new IconSpinner.Item(res.getString(R.string.title_low), 10)
                 };
                 Updates.updateFrequencyItems = new String[]
                 {
@@ -1156,8 +1164,9 @@ public abstract class Settings
                     new IconSpinner.Item(context, R.color.grey, res.getString(R.string.title_grey), Display.ThemeIndex.Grey)
                 };
 
-                //create adapter
+                //create adapters
                 rateListAdapter = new IconSpinner.CustomAdapter(context, updateRateItems);
+                sensorSmoothingAdapter = new IconSpinner.CustomAdapter(context, sensorSmoothingItems);
 
                 switch(pageNum)
                 {
@@ -1345,6 +1354,7 @@ public abstract class Settings
                             case SubPageType.LensView:
                                 final IconSpinner lensOrbitalIconList = rootView.findViewById(R.id.Settings_Lens_View_Orbital_Icon_List);
                                 final IconSpinner lensUpdateRateList = rootView.findViewById(R.id.Settings_Lens_View_Update_Rate_List);
+                                final IconSpinner lensSensorSmoothingList = rootView.findViewById(R.id.Settings_Lens_View_Sensor_Smoothing_List);
                                 final BorderButton horizonColorButton = rootView.findViewById(R.id.Settings_Lens_View_Horizon_Color_Button);
                                 final SwitchCompat useHorizonSwitch = rootView.findViewById(R.id.Settings_Lens_View_Use_Horizon_Switch);
                                 final SwitchCompat useCameraSwitch = rootView.findViewById(R.id.Settings_Lens_View_Use_Camera_Switch);
@@ -1386,6 +1396,7 @@ public abstract class Settings
                                 //set events
                                 lensOrbitalIconList.setOnItemSelectedListener(createOnItemSelectedListener(indicatorListAdapter, PreferenceName.LensIndicator, writeSettings));
                                 lensUpdateRateList.setOnItemSelectedListener(createOnItemSelectedListener(rateListAdapter, PreferenceName.LensUpdateDelay, writeSettings));
+                                lensSensorSmoothingList.setOnItemSelectedListener(createOnItemSelectedListener(sensorSmoothingAdapter, PreferenceName.LensAverageCount, writeSettings));
                                 horizonColorButton.setOnClickListener(createColorButtonClickedListener(context, Settings.getLensHorizonColor(context), R.string.title_horizon_color, PreferenceName.LensHorizonColor, false, readSettings, writeSettings));
                                 useHorizonSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.LensUseHorizon, writeSettings));
                                 useCameraSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.LensUseCamera, writeSettings));
@@ -1399,10 +1410,12 @@ public abstract class Settings
                                 //set list items
                                 lensOrbitalIconList.setAdapter(indicatorListAdapter);
                                 lensUpdateRateList.setAdapter(rateListAdapter);
+                                lensSensorSmoothingList.setAdapter(sensorSmoothingAdapter);
 
                                 //update displays
                                 lensOrbitalIconList.setSelectedValue(readSettings.getInt(PreferenceName.LensIndicator, IndicatorType.Icon));
                                 lensUpdateRateList.setSelectedValue(readSettings.getInt(PreferenceName.LensUpdateDelay, 1000));                    //default to average
+                                lensSensorSmoothingList.setSelectedValue(readSettings.getInt(PreferenceName.LensAverageCount, 40));
                                 horizonColorButton.setBackgroundColor(Settings.getLensHorizonColor(context));
                                 useHorizonSwitch.setChecked(readSettings.getBoolean(PreferenceName.LensUseHorizon, false));
                                 useCameraSwitch.setChecked(readSettings.getBoolean(PreferenceName.LensUseCamera, true));
@@ -2445,6 +2458,12 @@ public abstract class Settings
     public static void setIndicator(Context context, int indicatorType)
     {
         setPreferenceInt(context, PreferenceName.LensIndicator, indicatorType);
+    }
+
+    //Gets lens average count
+    public static int getLensAverageCount(Context context)
+    {
+        return(getPreferences(context).getInt(PreferenceName.LensAverageCount, 40));
     }
 
     //Gets dark theme value

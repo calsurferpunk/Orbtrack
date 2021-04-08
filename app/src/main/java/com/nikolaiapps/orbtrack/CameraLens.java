@@ -34,8 +34,6 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.constraintlayout.solver.widgets.Rectangle;
-
 import java.util.ArrayList;
 import java.util.Comparator;
 
@@ -595,7 +593,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private SensorUpdate sensorUpdater;
     private UpdateThread updateThread;
     private OnStopCalibrationListener stopCalibrationListener;
-    private ArrayList<IconImage> orbitalIcons;
+    private final ArrayList<IconImage> orbitalIcons;
     private Rect[] currentOrbitalAreas;
     private Database.SatelliteData[] currentOrbitals;
     private Calculations.TopographicDataType[] currentLookAngles;
@@ -605,11 +603,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         super(context);
 
+        int index;
+        int averageCount = Settings.getLensAverageCount(context);
         boolean darkTheme = Settings.getDarkTheme(context);
         SharedPreferences readSettings = Settings.getPreferences(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
-        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 36);
+        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42);
 
         orientation = getCameraOrientation();
         textColor = (darkTheme ? Color.argb(160, 255, 255, 255) : Color.argb(160, 0, 0, 0));
@@ -633,8 +633,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         azUserOffset = Settings.getLensAzimuthUserOffset(context);
         azDeclination = 0;
         defaultPathJulianDelta = Globals.truncate(1.0 / 24, 8);      //1 hour interval      note: setting to 8 places prevents rounding errors for 1 hour intervals
-        azDegArray = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-        elDegArray = new float[]{0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+        azDegArray = new float[averageCount];
+        elDegArray = new float[averageCount];
+        for(index = 0; index < averageCount; index++)
+        {
+            azDegArray[index] = elDegArray[index] = 0;
+        }
 
         currentPaint = new Paint();
         currentPaint.setAntiAlias(true);
@@ -1135,7 +1139,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     }
 
                     //draw image
-                    canvas.drawBitmap(indicatorIcon.image, centerX - (iconLength / 2f), centerY - iconLength, iconPaint);
+                    canvas.drawBitmap(indicatorIcon.image, centerX - (iconLength / 2f), centerY - (iconLength / 2f), iconPaint);
                     break;
                 }
                 //else fall through

@@ -136,6 +136,7 @@
     <string name="desc_permission_write_external_storage_deny">Write to external storage denied</string>
     <string name="desc_privacy_policy">No personal data is ever transmitted from your device. Information such as account passwords and location data are never stored anywhere other than your device. Passwords are encrypted and stored locally. Locations are used to retrieve altitude and time zone information, which are in turn used in local calculations.\n\nCamera usage is only to view the environment around you. No images are saved or transmitted.\n\nSharing translations is also helpful in speeding up information for other users, but can be disabled if you wish to opt out. This was also done to help avoid running out of the given monthly translation character quotas that are allowed by the used microsoft translation APIs.\n\n<a href="https://nikolai-apps.000webhostapp.com/Privacy/">https://nikolai-apps.000webhostapp.com/Privacy/</a></string>
     <string name="desc_quick_setup">This quick setup will ask a few preferences in order to make Orbtrack work best for you.</string>
+    <string name="desc_sensor_smoothing">Increase stability (higher) or decrease delay (lower).</string>
     <string name="desc_show_label_background">Show label backgrounds or make clear</string>
     <string name="desc_show_labels_always">Show labels even when not selected</string>
     <string name="desc_show_grid">Show latitude/longitude grid</string>
@@ -324,6 +325,7 @@
     <string name="title_grid_color">Grid Color</string>
     <string name="title_grid_view">Grid View</string>
     <string name="title_group">Group</string>
+    <string name="title_high">High</string>
     <string name="title_horizon_color">Horizon Color</string>
     <string name="title_hour">Hour</string>
     <string name="title_hours">Hours</string>
@@ -373,6 +375,7 @@
     <string name="title_login">Login</string>
     <string name="title_longitude">Longitude</string>
     <string name="title_longitude_west_east">Longitude (W+/E-)</string>
+    <string name="title_low">Low</string>
     <string name="title_manual">Manual</string>
     <string name="title_map_type">Map Type</string>
     <string name="title_map_view">Map View</string>
@@ -380,6 +383,7 @@
     <string name="title_max">Max</string>
     <string name="title_mean_anomaly">Mean Anomaly</string>
     <string name="title_mean_motion">Mean Motion (Revolutions per Day)</string>
+    <string name="title_medium">Medium</string>
     <string name="title_mercury">Mercury</string>
     <string name="title_middle">Middle</string>
     <string name="title_minutes">Minutes</string>
@@ -471,6 +475,7 @@
     <string name="title_selected_delete">Delete Selected</string>
     <string name="title_semi_major_axis">Semi Major Axis</string>
     <string name="title_sensitivity">Sensitivity</string>
+    <string name="title_sensor_smoothing">Sensor Smoothing</string>
     <string name="title_set">Set</string>
     <string name="title_set_actual_position">Set Actual Position</string>
     <string name="title_set_icon_scale">Set Icon Scale</string>

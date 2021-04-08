@@ -478,6 +478,7 @@
     <string name="title_settings">Settings</string>
     <string name="title_shared">Shared</string>
     <string name="title_share_translations_online">Share Translations Online</string>
+    <string name="title_show_3d_paths">Show 3d Paths</string>
     <string name="title_show_clouds">Show Clouds</string>
     <string name="title_show_grid">Show Grid</string>
     <string name="title_show_horizon">Show Horizon</string>

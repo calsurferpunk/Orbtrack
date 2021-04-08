@@ -478,6 +478,7 @@
     <string name="title_settings">Configuraciones</string>
     <string name="title_shared">Compartido</string>
     <string name="title_share_translations_online">Compartir Traducciones en Línea</string>
+    <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
     <string name="title_show_clouds">Mostrar Nubes</string>
     <string name="title_show_grid">Mostrar Cuadrícula</string>
     <string name="title_show_horizon">Mostrar Horizonte</string>

@@ -81,6 +81,7 @@ public abstract class Settings
         static final String ColorTheme = "ColorTheme";
         static final String MetricUnits = "MetricUnits";
         static final String MapLayerType = "MapLayerType";
+        static final String MapShow3dPaths = "MapShow3dPaths";
         static final String ShowSatelliteClouds = "ShowSatelliteClouds";
         static final String MapDisplayType = "MapDisplayType";
         static final String MapShowZoom = "MapShowZoom";
@@ -1423,6 +1424,7 @@ public abstract class Settings
                                 final PlayBar mapSensitivityScaleBar = rootView.findViewById(R.id.Settings_Map_View_Map_Sensitivity_Scale_Bar);
                                 final PlayBar mapSpeedScaleBar = rootView.findViewById(R.id.Settings_Map_View_Map_Speed_Scale_Bar);
                                 final PlayBar iconScaleBar = rootView.findViewById(R.id.Settings_Map_View_Icon_Scale_Bar);
+                                final SwitchCompat show3dPathsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_3d_Paths_Switch);
                                 final SwitchCompat showGlobeCloudsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Globe_Clouds_Switch);
                                 final SwitchCompat showMapCloudsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Map_Clouds_Switch);
                                 final SwitchCompat showInformationBackgroundSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Information_Background_Switch);
@@ -1440,6 +1442,7 @@ public abstract class Settings
                                 informationLocationList.setOnItemSelectedListener(createOnItemSelectedListener(context, null, PreferenceName.MapMarkerInfoLocation, MapView.InfoLocationValues, writeSettings));
                                 showInformationBackgroundSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapMarkerShowBackground, writeSettings));
                                 gridColorButton.setOnClickListener(createColorButtonClickedListener(context, Settings.getMapGridColor(context), R.string.title_grid_color, PreferenceName.MapGridColor, true, readSettings, writeSettings));
+                                show3dPathsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShow3dPaths, writeSettings));
                                 showGlobeCloudsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe, writeSettings));
                                 showMapCloudsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map, writeSettings));
                                 useSearchSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShowSearchList, writeSettings));
@@ -1508,6 +1511,7 @@ public abstract class Settings
                                 mapSpeedScaleBar.setValue((int)Math.floor(Settings.getMapSpeedScale(context, false) * 100));
                                 iconScaleBar.setValue((int)Math.floor(Settings.getMapMarkerScale(context) * 100));
                                 showInformationBackgroundSwitch.setChecked(Settings.getMapMarkerShowBackground(context));
+                                show3dPathsSwitch.setChecked(Settings.getMapShow3dPaths(context));
                                 showGlobeCloudsSwitch.setChecked(Settings.getSatelliteClouds(context, false));
                                 showMapCloudsSwitch.setChecked(Settings.getSatelliteClouds(context, true));
                                 useSearchSwitch.setChecked(Settings.getMapShowSearchList(context));
@@ -2592,6 +2596,12 @@ public abstract class Settings
     public static int getMapLayerType(Context context, boolean forGlobe)
     {
         return(getPreferences(context).getInt(PreferenceName.MapLayerType + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), (forGlobe ? CoordinatesFragment.MapLayerType.Hybrid : CoordinatesFragment.MapLayerType.Normal)));
+    }
+
+    //Returns if using 3d path on globe
+    public static boolean getMapShow3dPaths(Context context)
+    {
+        return(getPreferences(context).getBoolean(PreferenceName.MapShow3dPaths, true));
     }
 
     //Returns if using clouds on satellite layer for map/globe

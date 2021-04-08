@@ -437,7 +437,7 @@ class Whirly
                 flatPathInfo = new VectorInfo();
                 flatPathInfo.setColor(color);
                 flatPathInfo.setLineWidth(4f);
-                flatPathInfo.setDrawPriority(5000);
+                flatPathInfo.setDrawPriority(200000);
 
                 elevatedPathInfo = null;
             }
@@ -447,7 +447,7 @@ class Whirly
                 elevatedPathInfo = new ShapeInfo();
                 elevatedPathInfo.setColor(color);
                 elevatedPathInfo.setLineWidth(4f);
-                elevatedPathInfo.setDrawPriority(5000);
+                elevatedPathInfo.setDrawPriority(200000);
 
                 flatPathInfo = null;
             }
@@ -923,7 +923,7 @@ class Whirly
                 orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
             }
 
-            orbitalPath = new Path(controller, forMap, common.data.database.pathColor);
+            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(currentContext), common.data.database.pathColor);
 
             if(forMap)
             {
@@ -1660,17 +1660,17 @@ class Whirly
                 switch(mapLayerType)
                 {
                     case MapLayerType.Hybrid:
-                        drawPriorities.add(1000);
+                        drawPriorities.add(100000);
                         cacheDirNames.add("hybridLabels");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-labels/{z}/{x}/{y}.png", 0, 18));
+                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-labels/{z}/{x}/{y}.png", 0, 17));
 
-                        drawPriorities.add(900);
+                        drawPriorities.add(90000);
                         cacheDirNames.add("hybridLines");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-lines/{z}/{x}/{y}.png", 0, 18));
+                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-lines/{z}/{x}/{y}.png", 0, 17));
                         //fall through
 
                     case MapLayerType.Satellite:
-                        drawPriorities.add(100);
+                        drawPriorities.add(10000);
                         if(Settings.getSatelliteClouds(activity, isMap()))
                         {
                             cacheDirNames.add("satellite");
@@ -1684,15 +1684,15 @@ class Whirly
                         break;
 
                     case MapLayerType.Moon:
-                        drawPriorities.add(100);
+                        drawPriorities.add(10000);
                         cacheDirNames.add("moon");
-                        layerSources.add(new RemoteTileInfoNew("https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd/1.0.0/default/default028mm/{z}/{y}/{x}.jpg", 0, 18));
+                        layerSources.add(new RemoteTileInfoNew("https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd/1.0.0/default/default028mm/{z}/{y}/{x}.jpg", 0, 7));
                         break;
 
                     case MapLayerType.Mars:
-                        drawPriorities.add(100);
+                        drawPriorities.add(10000);
                         cacheDirNames.add("mars");
-                        layerSources.add(new RemoteTileInfoNew("https://api.nasa.gov/mars-wmts/catalog/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg", 0, 18));
+                        layerSources.add(new RemoteTileInfoNew("https://api.nasa.gov/mars-wmts/catalog/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg", 0, 9));
                         break;
 
                     case MapLayerType.Venus:
@@ -1745,16 +1745,16 @@ class Whirly
                                 name = "venus";
                                 break;
                         }
-                        drawPriorities.add(100);
+                        drawPriorities.add(10000);
                         cacheDirNames.add(name);
                         layerSources.add(new RemoteTileInfoNew("http://nikolai-apps.000webhostapp.com/tiles/" + name + "/{z}/{x}/{y}.jpg", 0, maxZoom));
                         break;
 
                     default:
                     case MapLayerType.Normal:
-                        drawPriorities.add(100);
+                        drawPriorities.add(10000);
                         cacheDirNames.add("normal");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain/{z}/{x}/{y}.png", 0, 18));
+                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain/{z}/{x}/{y}.png", 0, 17));
                         break;
                 }
 

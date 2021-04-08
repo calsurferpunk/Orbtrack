@@ -42,6 +42,11 @@
             android:text="@string/title_show_clouds"
             android:visibility="gone"/>
 
+        <androidx.appcompat.widget.SwitchCompat
+            style="@style/SettingsDescriptionSwitch"
+            android:id="@+id/Settings_Map_View_Show_3d_Paths_Switch"
+            android:text="@string/title_show_3d_paths"/>
+
         <TableLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

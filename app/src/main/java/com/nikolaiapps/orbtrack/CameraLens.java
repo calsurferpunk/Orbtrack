@@ -839,57 +839,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     {
                         //setup paint
                         currentPaint.setColor(Globals.getColor(currentColor, (showCalibration && selectedOrbitalIndex == index ? 70 : 255)));
-                        currentPaint.setStyle(Paint.Style.STROKE);
                         currentPaint.setStrokeWidth(indicatorThickness);
-                    }
-
-                    //if current look angle is set
-                    if(currentLookAngle != null)
-                    {
-                        //remember current ID, type, and name
-                        currentId = currentOrbital.getSatelliteNum();
-                        currentType = currentOrbital.getOrbitalType();
-                        currentName = currentOrbital.getName();
-                        if(selectedOrbitalIndex == index)
-                        {
-                            //update selected ID, type, name, and color
-                            selectedId = currentId;
-                            selectedType = currentType;
-                            selectedName = currentName;
-                            selectedColor = currentOrbital.database.pathColor;
-                        }
-
-                        //determine relative location
-                        azDeltaDeg = (float)Globals.degreeDistance(currentAzDeg, currentLookAngle.azimuth);
-                        elDeltaDeg = (float)Globals.degreeDistance(currentElDeg, currentLookAngle.elevation);
-                        outsideArea = false;
-
-                        //get center
-                        azCenterPx = widthHalf + (azDeltaDeg * degToPxWidth);
-                        if(azCenterPx > width)
-                        {
-                            azCenterPx = width;
-                            outsideArea = true;
-                        }
-                        else if(azCenterPx < 0)
-                        {
-                            azCenterPx = 0;
-                            outsideArea = true;
-                        }
-                        elCenterPx = heightHalf - (elDeltaDeg * degToPxHeight);
-                        if(elCenterPx > height)
-                        {
-                            elCenterPx = height;
-                            outsideArea = true;
-                        }
-                        else if(elCenterPx < 0)
-                        {
-                            elCenterPx = 0;
-                            outsideArea = true;
-                        }
-
-                        //draw orbital
-                        drawOrbital(context, canvas, currentId, currentType, currentName, currentOrbitalAreas[index], azCenterPx, elCenterPx, indicatorPxRadius, width, height, outsideArea);
                     }
 
                     //if current travel is set, showing paths, and not calibrating
@@ -921,12 +871,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
                         pathJulianEndDelta = pathJulianDelta / 4;
 
-                        //set to fill
-                        currentPaint.setStyle(Paint.Style.FILL);
-
                         //if there are travel views
                         if(travelLength > 0)
                         {
+                            //setup paint
+                            currentPaint.setStyle(Paint.Style.FILL);
+
                             //set julian dates
                             julianDateStart = currentTravel[0].julianDate;
                             julianDateEnd = currentTravel[travelLength - 1].julianDate;
@@ -1001,6 +951,55 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             }
                         }
                     }
+
+                    //if current look angle is set
+                    if(currentLookAngle != null)
+                    {
+                        //remember current ID, type, and name
+                        currentId = currentOrbital.getSatelliteNum();
+                        currentType = currentOrbital.getOrbitalType();
+                        currentName = currentOrbital.getName();
+                        if(selectedOrbitalIndex == index)
+                        {
+                            //update selected ID, type, name, and color
+                            selectedId = currentId;
+                            selectedType = currentType;
+                            selectedName = currentName;
+                            selectedColor = currentOrbital.database.pathColor;
+                        }
+
+                        //determine relative location
+                        azDeltaDeg = (float)Globals.degreeDistance(currentAzDeg, currentLookAngle.azimuth);
+                        elDeltaDeg = (float)Globals.degreeDistance(currentElDeg, currentLookAngle.elevation);
+                        outsideArea = false;
+
+                        //get center
+                        azCenterPx = widthHalf + (azDeltaDeg * degToPxWidth);
+                        if(azCenterPx > width)
+                        {
+                            azCenterPx = width;
+                            outsideArea = true;
+                        }
+                        else if(azCenterPx < 0)
+                        {
+                            azCenterPx = 0;
+                            outsideArea = true;
+                        }
+                        elCenterPx = heightHalf - (elDeltaDeg * degToPxHeight);
+                        if(elCenterPx > height)
+                        {
+                            elCenterPx = height;
+                            outsideArea = true;
+                        }
+                        else if(elCenterPx < 0)
+                        {
+                            elCenterPx = 0;
+                            outsideArea = true;
+                        }
+
+                        //draw orbital
+                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], azCenterPx, elCenterPx, indicatorPxRadius, width, height, outsideArea);
+                    }
                 }
             }
 
@@ -1034,8 +1033,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     }
 
                     //show offset orbital position
-                    currentPaint.setColor(selectedColor);
-                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedArea, alignCenterX, alignCenterY, indicatorPxRadius, width, height, false);
+                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, indicatorPxRadius, width, height, false);
                 }
                 else
                 {
@@ -1076,9 +1074,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     //Draws orbital at the given position
-    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, Rect currentArea, float centerX, float centerY, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
+    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
     {
         float drawPxRadius = indicatorPxRadius / (outsideArea ? 2 : 1);
+
+        //setup paint
+        currentPaint.setColor(currentColor);
+        currentPaint.setStyle(Paint.Style.STROKE);
 
         //draw indicator
         switch(indicator)
@@ -1143,9 +1145,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 canvas.drawCircle(centerX, centerY, drawPxRadius, currentPaint);
                 break;
         }
-
-        //reset to stroke
-        currentPaint.setStyle(Paint.Style.STROKE);
 
         //get text area
         currentPaint.setStrokeWidth(2);

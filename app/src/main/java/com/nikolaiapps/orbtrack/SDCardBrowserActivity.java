@@ -26,7 +26,7 @@ public class SDCardBrowserActivity extends FileBrowserBaseActivity
         @Override
         public String getId()
         {
-            return(item.getName());
+            return(item.getPath());
         }
 
         @Override

@@ -1220,6 +1220,7 @@ public class CalculateService extends NotifyService
         double pathDayIncrement;
         double phase;
         long spanMs;
+        long firstTimeMs;
         String section;
         Calendar currentGMT = Globals.getGMTTime();
         Calendar currentEndGMT = Globals.getGMTTime();
@@ -1319,12 +1320,20 @@ public class CalculateService extends NotifyService
                                 service.sendLoadRunningMessage(calculateType, section, 50, listIndex, listCount);
                             }
 
-                            // try to go back up to 180 days in 1 or 15 second increments to find starting second
+                            // remember first time and try to go back up to 180 days in 1 or 15 second increments to find starting second
+                            firstTimeMs = currentGMT.getTimeInMillis();
                             currentItem.passStartFound = updateTimeInPath(calculateType, satellite1, satellite2, observer, intersection, (forIntersection ? 1 : 15), (long)(Calculations.SecondsPerDay * 180), currentGMT, false, applyRefraction);
 
                             //set pass start to now
                             pathStartGMT = Globals.getGMTTime();
                             pathStartGMT.setTimeInMillis((currentItem.passStartFound ? currentGMT : startGMT).getTimeInMillis());
+
+                            //if pass start was not found
+                            if(!currentItem.passStartFound)
+                            {
+                                //go back first known pass start time
+                                currentGMT.setTimeInMillis(firstTimeMs);
+                            }
 
                             //remember 1 hour after pass start time
                             pathHourAfterStartGMT.setTimeInMillis(pathStartGMT.getTimeInMillis());

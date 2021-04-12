@@ -2646,6 +2646,7 @@ public class UpdateService extends NotifyService
         int inputLength = inputString.length();
         boolean unknownSatellite = (satelliteNum < 0);
         boolean isGpData = inputString.contains(Calculations.GPParams.Name);
+        String currentNumString;
         Calendar defaultLaunchDate = Calendar.getInstance();
         ArrayList<Integer> satelliteNums = new ArrayList<>(0);
         ArrayList<String> satelliteNames = new ArrayList<>(0);
@@ -2748,41 +2749,53 @@ public class UpdateService extends NotifyService
                         line2Index = inputString.indexOf("2 ", line1Index + TLE_LINE_LENGTH);
                         if(line2Index > line1Index && line2Index + TLE_LINE_LENGTH <= inputLength)
                         {
-                            //if satellite number is valid and a match after both starting lines
-                            currentNum = Globals.tryParseInt(inputString.substring(line1Index + 2, line1Index + 7).trim());
-                            if(currentNum < Integer.MAX_VALUE && currentNum == Globals.tryParseInt(inputString.substring(line2Index + 2, line2Index + 7).trim()))
+                            //get current number string
+                            currentNumString = inputString.substring(line1Index + 2, line1Index + 7).trim();
+
+                            //if line 1 and 2 indexes are followed by the same number
+                            if(inputString.substring(line1Index + 2, line1Index + 2 + currentNumString.length()).equals(inputString.substring(line2Index + 2, line2Index + 2 + currentNumString.length())))
                             {
-                                //add satellite number to list
-                                satelliteNums.add(currentNum);
-
-                                //try to get name
-                                satelliteName = Globals.getUnknownString(this);
-                                nameEndIndex = line1Index - 2;
-                                if(nameEndIndex > 0)
+                                //if satellite number is valid
+                                currentNum = Globals.tryParseInt(currentNumString);
+                                if(currentNum < Integer.MAX_VALUE)
                                 {
-                                    //keep going back until previous is not a new line
-                                    nameStartIndex = nameEndIndex - 1;
-                                    while(nameStartIndex > 0 && inputString.charAt(nameStartIndex - 1) != '\r' && inputString.charAt(nameStartIndex - 1) != '\n')
-                                    {
-                                        nameStartIndex--;
-                                    }
+                                    //add satellite number to list
+                                    satelliteNums.add(currentNum);
 
-                                    //if room for name and it is less than TLE_LINE_LENGTH
-                                    if(nameStartIndex >= 0 && nameStartIndex < nameEndIndex && nameEndIndex - nameStartIndex < TLE_LINE_LENGTH)
+                                    //try to get name
+                                    satelliteName = Globals.getUnknownString(this);
+                                    nameEndIndex = line1Index - 2;
+                                    if(nameEndIndex > 0)
                                     {
-                                        //get name
-                                        satelliteName = inputString.substring(nameStartIndex, nameEndIndex).trim();
+                                        //keep going back until previous is not a new line
+                                        nameStartIndex = nameEndIndex - 1;
+                                        while(nameStartIndex > 0 && inputString.charAt(nameStartIndex - 1) != '\r' && inputString.charAt(nameStartIndex - 1) != '\n')
+                                        {
+                                            nameStartIndex--;
+                                        }
+
+                                        //if room for name and it is less than TLE_LINE_LENGTH
+                                        if(nameStartIndex >= 0 && nameStartIndex < nameEndIndex && nameEndIndex - nameStartIndex < TLE_LINE_LENGTH)
+                                        {
+                                            //get name
+                                            satelliteName = inputString.substring(nameStartIndex, nameEndIndex).trim();
+                                        }
                                     }
+                                    satelliteNames.add(satelliteName);
+
+                                    //continue
+                                    inputOffset = line2Index + TLE_LINE_LENGTH;
                                 }
-                                satelliteNames.add(satelliteName);
-
-                                //continue
-                                inputOffset = line2Index + TLE_LINE_LENGTH;
+                                else
+                                {
+                                    //done
+                                    inputOffset = inputString.length();
+                                }
                             }
                             else
                             {
-                                //done
-                                inputOffset = inputString.length();
+                                //line 1 index was not really line 1, so skip
+                                inputOffset = line1Index + 2;
                             }
                         }
                         else

@@ -3476,10 +3476,9 @@ public abstract class Current
 
             //setup lists and status
             final int mapViewNoradId = (savedInstanceState != null ? savedInstanceState.getInt(MainActivity.ParamTypes.CoordinateNoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE);
-            //final Current.Coordinates.Item[] savedItems = (savedInstanceState != null ? (Current.Coordinates.Item[])savedInstanceState.getParcelableArray(MainActivity.ParamTypes.CoordinateItems) : null);
             final Current.Coordinates.Item[] savedItems = (savedInstanceState != null ? (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
             final boolean allMapOrbitals = (mapViewNoradId == Integer.MAX_VALUE);
-            final boolean useSavedPath = (savedItems != null && savedItems.length > 0);
+            final boolean useSavedPath = (page instanceof Calculate.Page && savedItems != null && savedItems.length > 0);
             final boolean rotateAllowed = Settings.getMapRotateAllowed(context);
             final Database.SatelliteData currentSatellite = (useSavedPath ? new Database.SatelliteData(context, savedItems[0].id) : null);
 

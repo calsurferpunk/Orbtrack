@@ -29,11 +29,14 @@ import android.graphics.drawable.VectorDrawable;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.NonNull;
 import com.google.android.gms.security.ProviderInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
+
+import androidx.documentfile.provider.DocumentFile;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -65,10 +68,13 @@ import com.google.android.gms.common.api.Scope;
 import com.google.api.services.drive.DriveScopes;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PushbackInputStream;
 import java.math.BigDecimal;
 import java.net.CookieHandler;
 import java.net.CookieManager;
@@ -148,8 +154,9 @@ public abstract class Globals
     //Encoding
     public static abstract class Encoding
     {
-        static final String UTF8 =  "UTF-8";    //(Build.VERSION.SDK_INT >= 19 ? StandardCharsets.UTF_8.toString() : "UTF-8");
-        static final String UTF16 = "UTF-16";   //(Build.VERSION.SDK_INT >= 19 ? StandardCharsets.UTF_16.toString() : "UTF-16");
+        static final String UTF8 =  "UTF-8";    //note: can't use standard charset since not always available
+        static final String UTF16 = "UTF-16";   //" "
+        static final String UTF32 = "UTF-32";   //note: not guaranteed to exist for all platforms
     }
 
     //Account types
@@ -175,6 +182,7 @@ public abstract class Globals
         static final int SDCard = 0;
         static final int GoogleDrive = 1;
         static final int Dropbox = 2;
+        static final int Others = 3;
     }
 
     //File extension types
@@ -360,16 +368,16 @@ public abstract class Globals
         public int fileSourceType;
         public String name;
         public String extension;
-        public String separator;
+        public Uri outUri;
 
-        public PendingFile(int pg, String nm, String ext, int typ, int flSrcType, String spr)
+        public PendingFile(Uri out, String nm, String ext, int typ, int flSrcType)
         {
-            page = pg;
+            page = -1;
+            outUri = out;
             name = nm;
             extension = ext;
             type = typ;
             fileSourceType = flSrcType;
-            separator = spr;
 
             //if file does not end with extension
             if(extension != null && extension.length() > 0 && !name.endsWith(extension))
@@ -443,7 +451,7 @@ public abstract class Globals
                         new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
-                            public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
                             {
                                 int index;
 
@@ -466,7 +474,7 @@ public abstract class Globals
                         new EditValuesDialog.OnDismissListener()
                         {
                             @Override
-                            public void onDismiss(int saveCount)
+                            public void onDismiss(EditValuesDialog dialog, int saveCount)
                             {
                                 //if listener is set and not canceled
                                 if(loginListener != null && !canceled)
@@ -479,7 +487,7 @@ public abstract class Globals
                         new EditValuesDialog.OnCancelListener()
                         {
                             @Override
-                            public void onCancel()
+                            public void onCancel(EditValuesDialog dialog)
                             {
                                 //if listener is set
                                 if(loginListener != null)
@@ -702,8 +710,8 @@ public abstract class Globals
     private static final DateFormat mediumTimeFormatter = DateFormat.getTimeInstance(DateFormat.MEDIUM);
     private static final SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static ArrayList<TimeZone> timeZoneList = null;
-    private static final int[] fileSources = new int[]{FileSource.SDCard, FileSource.GoogleDrive, FileSource.Dropbox};
-    public static final int[] fileSourceImageIds = new int[]{R.drawable.ic_sd_card_black, R.drawable.org_gdrive, R.drawable.org_dbox};
+    private static final int[] fileSources = new int[]{FileSource.SDCard, FileSource.GoogleDrive, FileSource.Dropbox, FileSource.Others};
+    public static final int[] fileSourceImageIds = new int[]{(Build.VERSION.SDK_INT >= 29 ? -1 : R.drawable.ic_sd_card_black), R.drawable.org_gdrive, R.drawable.org_dbox, (Build.VERSION.SDK_INT >= 21 ? R.drawable.ic_folder_open_black : -1)};
 
     //Variables
     public static boolean askLocationPermission = true;
@@ -720,7 +728,18 @@ public abstract class Globals
     //Gets file locations
     public static String[] getFileLocations(Context context)
     {
-        return(new String[]{context.getResources().getString(R.string.title_downloads), FileLocationType.GoogleDrive, FileLocationType.Dropbox});
+        Resources res = context.getResources();
+        return(new String[]{(Build.VERSION.SDK_INT >= 29 ? null : res.getString(R.string.title_downloads)), FileLocationType.GoogleDrive, FileLocationType.Dropbox, (Build.VERSION.SDK_INT >= 21 ? res.getString(R.string.title_other) : null)});
+    }
+
+    //Show others folder browser
+    public static void showOthersFolderSelect(Activity activity)
+    {
+        if(Build.VERSION.SDK_INT >= 21)
+        {
+            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+            activity.startActivityForResult(intent, BaseInputActivity.RequestCode.OthersSave);
+        }
     }
 
     //Shows a confirm dialog
@@ -833,6 +852,13 @@ public abstract class Globals
                 //else if not for settings
                 else if(selectType != AddSelectListAdapter.SelectType.Settings)
                 {
+                    //if for file source
+                    if(selectType == AddSelectListAdapter.SelectType.FileSource && Build.VERSION.SDK_INT >= 29)
+                    {
+                        //skip SD card
+                        which++;
+                    }
+
                     //handle based on account type
                     switch(extra)
                     {
@@ -3786,6 +3812,123 @@ public abstract class Globals
         BigDecimal roundValue = new BigDecimal(value);
         roundValue = roundValue.setScale(decimalCount, BigDecimal.ROUND_FLOOR);
         return(roundValue.doubleValue());
+    }
+
+    //Normalizes ASCII file data
+    public static String normalizeAsciiFileData(String value)
+    {
+        int index = 0;
+        int length;
+
+        //if no value
+        if(value == null)
+        {
+            //return null
+            return(null);
+        }
+
+        //remove nulls
+        value = value.replace("\0", "");
+
+        //find first valid ASCII char
+        length = value.length();
+        while(index < length && value.charAt(index) > 127)
+        {
+            //go to next
+            index++;
+        }
+
+        //return characters at start of valid
+        return(index < length ? value.substring(index) : "");
+    }
+
+    //Creates a file and returns URI if successful
+    public static Uri createFileUri(Context context, Uri pathUri, String fileName, String extension) throws UnsupportedOperationException
+    {
+        DocumentFile file;
+        DocumentFile filePath;
+
+        //if file name does not end with extension
+        if(!fileName.toLowerCase().endsWith(extension.toLowerCase()))
+        {
+            //add extension
+            fileName += extension;
+        }
+
+        //try to get file path
+        filePath = DocumentFile.fromTreeUri(context, pathUri);
+        if(filePath != null)
+        {
+            //try to create file
+            file = filePath.createFile("application/" + extension, fileName);
+            if(file != null)
+            {
+                //return URI
+                return(file.getUri());
+            }
+        }
+
+        //error creating file
+        throw(new UnsupportedOperationException(context.getString(R.string.text_file_error_saving)));
+    }
+
+    //Reads a text file into a string
+    public static String readTextFile(Context context, InputStream fileStream) throws IOException
+    {
+        int readCount;
+        int unReadCount = 1;
+        int headerCount = 0;
+        BufferedInputStream fileReader;
+        PushbackInputStream headerStream = new PushbackInputStream(fileStream, 4);
+        String encoding = Encoding.UTF8;
+        StringBuilder fileData = new StringBuilder();
+        byte[] header = new byte[4];
+        byte[] buffer = new byte[WEB_READ_SIZE];
+
+        //if not enough bytes for header
+        if(headerStream.read(header) != 4)
+        {
+            //throw length error error
+            throw(new IOException(context.getString(R.string.title_length)));
+        }
+        else
+        {
+            //if UTF-32
+            if((header[0] == (byte)0x00 && header[1] == (byte)0x00 && header[2] == (byte)0xFE && header[3] == (byte)0xFF) || (header[0] == (byte)0xFF && header[1] == (byte)0xFE && header[2] == (byte)0x00 && header[3] == (byte)0x00))
+            {
+                encoding = Encoding.UTF32;
+                unReadCount = 0;
+                headerCount = 4;
+            }
+            //else UTF-16
+            else if((header[0] == (byte)0xFE && header[1] == (byte)0xFF) || (header[0] == (byte)0xFF && header[1] == (byte)0xFE))
+            {
+                encoding = Encoding.UTF16;
+                unReadCount = headerCount = 2;
+            }
+
+            //put bytes back in stream
+            headerStream.unread(header, 4 - unReadCount, unReadCount);
+        }
+
+        //copy header to buffer
+        for(readCount = 0; readCount < headerCount; readCount++)
+        {
+            buffer[readCount] = header[readCount];
+        }
+
+        //read file while more data
+        fileReader = new BufferedInputStream(headerStream);
+        while((readCount = fileReader.read(buffer, headerCount, buffer.length - headerCount)) > 0)
+        {
+            //add data
+            fileData.append(new String(buffer, 0, readCount + headerCount, encoding));
+        }
+        fileReader.close();
+        headerStream.close();
+
+        //return normalized ASCII file data
+        return(normalizeAsciiFileData(fileData.toString()));
     }
 
     //Gets the given number of stars

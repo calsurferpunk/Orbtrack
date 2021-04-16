@@ -361,7 +361,6 @@ public class GoogleDriveAccess extends AppCompatActivity
         {
             int fileIndex;
             int taskResult;
-            boolean removeInvalid = true;
             String fileData;
             String message = null;
             ArrayList<String> filesData = new ArrayList<>(0);
@@ -385,21 +384,9 @@ public class GoogleDriveAccess extends AppCompatActivity
                     }
                     download.executeMediaAndDownloadTo(fileOutput);
 
-                    //read file data
-                    fileData = fileOutput.toString().replace("\0", "");
+                    //read and normalize file data
+                    fileData = Globals.normalizeAsciiFileData(fileOutput.toString());
                     fileOutput.close();
-
-                    //remove any starting invalid chars while there are chars left
-                    while(removeInvalid && fileData.length() > 1)
-                    {
-                        //if start char is invalid
-                        removeInvalid = (fileData.charAt(0) > 127);
-                        if(removeInvalid)
-                        {
-                            //remove it
-                            fileData = fileData.substring(1);
-                        }
-                    }
 
                     //add file
                     filesData.add(fileData);

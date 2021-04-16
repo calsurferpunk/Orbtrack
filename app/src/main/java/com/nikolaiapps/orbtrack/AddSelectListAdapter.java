@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.content.Context;
 import android.content.res.Resources;
 import androidx.appcompat.widget.AppCompatImageView;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +38,7 @@ public class AddSelectListAdapter extends BaseAdapter
         static final int SDCard = 0;
         static final int GoogleDrive = 1;
         static final int Dropbox = 2;
+        static final int Others = 3;
     }
 
     static abstract class LocationSourceType
@@ -97,7 +99,14 @@ public class AddSelectListAdapter extends BaseAdapter
                 break;
 
             case SelectType.FileSource:
-                selections = new String[]{res.getString(R.string.title_sd_card), Globals.FileLocationType.GoogleDrive, Globals.FileLocationType.Dropbox};
+                if(Build.VERSION.SDK_INT >= 29)
+                {
+                    selections = new String[]{Globals.FileLocationType.GoogleDrive, Globals.FileLocationType.Dropbox, res.getString(R.string.title_other)};
+                }
+                else
+                {
+                    selections = new String[]{res.getString(R.string.title_sd_card), Globals.FileLocationType.GoogleDrive, Globals.FileLocationType.Dropbox, res.getString(R.string.title_other)};
+                }
                 break;
 
             case SelectType.EditAccount:
@@ -211,7 +220,7 @@ public class AddSelectListAdapter extends BaseAdapter
         switch(selectType)
         {
             case SelectType.FileSource:
-                switch(position)
+                switch(position + (Build.VERSION.SDK_INT >= 29 ? 1 : 0))
                 {
                     case FileSourceType.GoogleDrive:
                         imageId = R.drawable.org_gdrive;
@@ -221,6 +230,10 @@ public class AddSelectListAdapter extends BaseAdapter
                     case FileSourceType.Dropbox:
                         imageId = R.drawable.org_dbox;
                         useTheme = false;
+                        break;
+
+                    case FileSourceType.Others:
+                        imageId = R.drawable.ic_folder_open_black;
                         break;
 
                     default:

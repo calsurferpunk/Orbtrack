@@ -8,10 +8,13 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
+import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
@@ -39,6 +42,7 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -191,7 +195,7 @@ public class MainActivity extends AppCompatActivity
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
         Settings.setUsingCurrentGridLayout(this, Settings.getCurrentGridLayout(this));
-        pendingSaveFile = new Globals.PendingFile(-1, "", "", -1, -1, "");
+        setSaveFileData(null, "", "", -1, -1);
         backPressTime = Globals.getGMTTime();
         backPressTime.set(Calendar.YEAR, 0);
 
@@ -638,6 +642,48 @@ public class MainActivity extends AppCompatActivity
                         //get item count and show success
                         count = data.getIntExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, 0);
                         Globals.showSnackBar(mainDrawerLayout, res.getQuantityString(R.plurals.title_satellites_saved, (int)count, (int)count), (count < 1));
+                    }
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.OthersOpenItem:
+                //if selected item
+                if(isOkay)
+                {
+                    try
+                    {
+                        //read file data
+                        InputStream fileStream = this.getContentResolver().openInputStream(data.getData());
+                        String fileData = Globals.readTextFile(this, fileStream);
+                        fileStream.close();
+
+                        //load file data
+                        fileNames = new ArrayList<>(0);
+                        fileNames.add(fileData);
+                        UpdateService.loadFileData(this, fileNames);
+                    }
+                    catch(Exception ex)
+                    {
+                        //show error
+                        Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_file_error_using), ex.getMessage(), true, true);
+                    }
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.OthersSave:
+                //if selected folder
+                if(isOkay)
+                {
+                    try
+                    {
+                        //update pending file and save it
+                        pendingSaveFile.outUri = data.getData();
+                        savePendingFile();
+                    }
+                    catch(Exception ex)
+                    {
+                        //show error
+                        Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_file_error_saving), ex.getMessage(), true, true);
                     }
                 }
                 break;
@@ -1745,6 +1791,12 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    //Sets save file data
+    public void setSaveFileData(Uri outUri, String fileName, String fileExtension, int fileType, int fileSourceType)
+    {
+        pendingSaveFile = new Globals.PendingFile(outUri, fileName, fileExtension, fileType, fileSourceType);
+    }
+
     //Saves a calculated angles file
     private void saveCalculateAnglesFile(OutputStream outStream, String separator) throws Exception
     {
@@ -1977,13 +2029,15 @@ public class MainActivity extends AppCompatActivity
             Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_file_saved));
         }
     }
-    private void saveCalculateFile(final int page, final String fileName, final String extension, final int fileSourceType, boolean confirmInternet)
+    private void saveCalculateFile(final int page, Uri outUri, final String fileName, final String extension, final int fileSourceType, boolean confirmInternet)
     {
         String separator = (extension.equals(Globals.FileExtensionType.TXT) ? "\t" : ",");
+        OutputStream outStream;
         Resources res = this.getResources();
 
         //remember pending save file
-        pendingSaveFile = new Globals.PendingFile(page, fileName, extension, -1, fileSourceType, separator);
+        setSaveFileData(outUri, fileName, extension, -1, fileSourceType);
+        pendingSaveFile.page = page;
 
         //handle based on file source
         switch(fileSourceType)
@@ -1996,7 +2050,7 @@ public class MainActivity extends AppCompatActivity
                     {
                         //try to create file and output stream
                         File saveFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), pendingSaveFile.name);
-                        OutputStream outStream = new FileOutputStream(saveFile);
+                        outStream = new FileOutputStream(saveFile);
 
                         //save file
                         saveCalculateFile(page, outStream, separator, Globals.FileSource.SDCard);
@@ -2033,7 +2087,7 @@ public class MainActivity extends AppCompatActivity
                         public void onClick(DialogInterface dialog, int which)
                         {
                             //don't ask this time
-                            saveCalculateFile(page, fileName, extension, fileSourceType, false);
+                            saveCalculateFile(page, null, fileName, extension, fileSourceType, false);
                         }
                     });
                 }
@@ -2043,18 +2097,20 @@ public class MainActivity extends AppCompatActivity
                     {
                         //try to create file and output stream
                         File saveFile = new File(this.getCacheDir() + "/" + pendingSaveFile.name);
-                        OutputStream outStream = new FileOutputStream(saveFile);
+                        outStream = new FileOutputStream(saveFile);
 
                         //save file
-                        saveCalculateFile(page, outStream, separator, Globals.FileSource.GoogleDrive);
+                        saveCalculateFile(page, outStream, separator, fileSourceType);
                         outStream.close();
-                        if(fileSourceType == Globals.FileSource.GoogleDrive)
+                        switch(fileSourceType)
                         {
-                            GoogleDriveAccess.start(this, saveFile, 1, true);
-                        }
-                        else
-                        {
-                            DropboxAccess.start(this, saveFile, 1, true);
+                            case Globals.FileSource.GoogleDrive:
+                                GoogleDriveAccess.start(this, saveFile, 1, true);
+                                break;
+
+                            case Globals.FileSource.Dropbox:
+                                DropboxAccess.start(this, saveFile, 1, true);
+                                break;
                         }
                     }
                     catch(Exception ex)
@@ -2064,11 +2120,26 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
                 break;
+
+            case Globals.FileSource.Others:
+                try
+                {
+                    //save file
+                    outStream = this.getContentResolver().openOutputStream(Globals.createFileUri(this, outUri, fileName, extension));
+                    saveCalculateFile(page, outStream, separator, Globals.FileSource.Others);
+                    outStream.close();
+                }
+                catch(Exception ex)
+                {
+                    //show error
+                    Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_file_error_saving), ex.getMessage(), true, true);
+                }
+                break;
         }
     }
     private void saveCalculateFile(int page, String fileName, String extension, int fileSourceType)
     {
-        saveCalculateFile(page, fileName, extension, fileSourceType, true);
+        saveCalculateFile(page, null, fileName, extension, fileSourceType, true);
     }
 
     //Saves pending file
@@ -2079,15 +2150,17 @@ public class MainActivity extends AppCompatActivity
         switch(mainGroup)
         {
             case Groups.Calculate:
+                //if on list
                 if(calculateSubPage[page] == Calculate.SubPageType.List)
                 {
-                    //try to save file
-                    saveCalculateFile(page, pendingSaveFile.name, pendingSaveFile.extension, pendingSaveFile.fileSourceType, confirmInternet);
+                    //save file
+                    saveCalculateFile(page, pendingSaveFile.outUri, pendingSaveFile.name, pendingSaveFile.extension, pendingSaveFile.fileSourceType, confirmInternet);
                 }
                 break;
 
             case Groups.Orbitals:
-                orbitalPageAdapter.saveFileSelectedItems(mainPager, page);
+                //save file
+                orbitalPageAdapter.saveFileSelectedItems(mainPager, page, pendingSaveFile.outUri, pendingSaveFile.name, pendingSaveFile.extension, pendingSaveFile.type, pendingSaveFile.fileSourceType);
                 break;
         }
     }
@@ -2633,7 +2706,7 @@ public class MainActivity extends AppCompatActivity
                     Orbitals.showLoadDialog(MainActivity.this, mainPager, orbitalPageAdapter, pendingLoadSatellites, new EditValuesDialog.OnDismissListener()
                     {
                         @Override
-                        public void onDismiss(int saveCount)
+                        public void onDismiss(EditValuesDialog dialog, int saveCount)
                         {
                             //if some were saved
                             if(saveCount > 0)
@@ -2776,7 +2849,7 @@ public class MainActivity extends AppCompatActivity
                         new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
-                            public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
                             {
                                 //update current sort by for page
                                 Settings.setCurrentSortBy(MainActivity.this, page, list2Value);
@@ -2879,7 +2952,7 @@ public class MainActivity extends AppCompatActivity
         new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
         {
             @Override
-            public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
             {
                 String zoneId = zones.get(Arrays.asList(zoneNames).indexOf(list2Value)).getID();
                 double altitudeM = (Settings.getUsingMetric() ? number3 : (number3 / Globals.FEET_PER_METER));
@@ -2897,7 +2970,7 @@ public class MainActivity extends AppCompatActivity
         }, new EditValuesDialog.OnDismissListener()
         {
             @Override
-            public void onDismiss(int saveCount)
+            public void onDismiss(EditValuesDialog dialog, int saveCount)
             {
                 //if any were saved
                 if(saveCount > 0)
@@ -3079,23 +3152,38 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onItemClick(final int which)
             {
-                boolean isBackup = which == Globals.FileType.Backup;
+                final boolean isBackup = which == Globals.FileType.Backup;
                 final int page = Orbitals.PageType.Satellites;
-                String fileType = (isBackup ? Globals.FileExtensionType.JSON : Globals.FileExtensionType.TLE);
-                Resources res = MainActivity.this.getResources();
+                final String fileType = (isBackup ? Globals.FileExtensionType.JSON : Globals.FileExtensionType.TLE);
+                final Resources res = MainActivity.this.getResources();
 
                 new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
                 {
                     @Override
-                    public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                    public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
                     {
-                        //save all satellites
-                        orbitalPageAdapter.saveFileSelectedItems(mainPager, page, textValue, listValue, which, Globals.getFileSource(MainActivity.this, list2Value));
+                        //remember file source
+                        int fileSourceType = Globals.getFileSource(MainActivity.this, list2Value);
+
+                        //if for others
+                        if(fileSourceType == AddSelectListAdapter.FileSourceType.Others)
+                        {
+                            //remember pending save file
+                            setSaveFileData(null, textValue, listValue, which, fileSourceType);
+
+                            //get folder
+                            Globals.showOthersFolderSelect(MainActivity.this);
+                        }
+                        else
+                        {
+                            //save all satellites or prepare for later
+                            orbitalPageAdapter.saveFileSelectedItems(mainPager, page, null, textValue, listValue, which, fileSourceType);
+                        }
                     }
                 }, new EditValuesDialog.OnDismissListener()
                 {
                     @Override
-                    public void onDismiss(int saveCount)
+                    public void onDismiss(EditValuesDialog dialog, int saveCount)
                     {
                         //make sure no items are selected
                         orbitalPageAdapter.selectItems(mainPager, page, false);
@@ -3147,9 +3235,24 @@ public class MainActivity extends AppCompatActivity
                 new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
                 {
                     @Override
-                    public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                    public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
                     {
-                        saveCalculateFile(calculatePageType, textValue, listValue, Globals.getFileSource(MainActivity.this, list2Value));
+                        //remember file source
+                        int fileSourceType = Globals.getFileSource(MainActivity.this, list2Value);
+
+                        //if for others
+                        if(fileSourceType == AddSelectListAdapter.FileSourceType.Others)
+                        {
+                            //remember pending save file
+                            setSaveFileData(null, textValue, listValue, -1, fileSourceType);
+
+                            //get folder
+                            Globals.showOthersFolderSelect(MainActivity.this);
+                        }
+                        else
+                        {
+                            saveCalculateFile(calculatePageType, textValue, listValue, fileSourceType);
+                        }
                     }
                 }).getFileLocation(res.getString(R.string.title_save_file), new int[]{0}, new String[]{fileName}, new String[]{Globals.FileExtensionType.TXT, Globals.FileExtensionType.CSV}, new String[]{Globals.FileExtensionType.TXT}, new String[]{res.getString(R.string.title_downloads)});
             }

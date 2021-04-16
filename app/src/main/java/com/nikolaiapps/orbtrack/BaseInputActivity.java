@@ -32,6 +32,8 @@ public abstract class BaseInputActivity extends AppCompatActivity
         static final byte DropboxSave = 15;
         static final byte DropboxOpenFile = 16;
         static final byte DropboxOpenFolder = 17;
+        static final byte OthersOpenItem = 18;
+        static final byte OthersSave = 19;
     }
 
     @Override

@@ -931,7 +931,7 @@ public class SetupActivity extends BaseInputActivity
                 Orbitals.showLoadDialog(SetupActivity.this, setupPager, (Selectable.ListFragmentAdapter) setupPager.getAdapter(), pendingLoadSatellites, new EditValuesDialog.OnDismissListener()
                 {
                     @Override
-                    public void onDismiss(int saveCount)
+                    public void onDismiss(EditValuesDialog dialog, int saveCount)
                     {
                         //if some were saved
                         if(saveCount > 0)

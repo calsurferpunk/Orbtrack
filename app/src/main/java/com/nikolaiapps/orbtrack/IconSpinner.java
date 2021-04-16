@@ -106,7 +106,17 @@ public class IconSpinner extends AppCompatSpinner
 
         public CustomAdapter(Context context, Item[] itms)
         {
-            items = itms;
+            ArrayList<Item> usedItems = new ArrayList<>(0);
+
+            for(Item currentItem : itms)
+            {
+                if(currentItem != null)
+                {
+                    usedItems.add(currentItem);
+                }
+            }
+            items = usedItems.toArray(new Item[0]);
+
             BaseConstructor(context);
         }
         public CustomAdapter(Context context, Object[] itms)

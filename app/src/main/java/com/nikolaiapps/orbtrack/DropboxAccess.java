@@ -288,7 +288,6 @@ public class DropboxAccess extends AppCompatActivity
         protected Void doInBackground(Object... objects)
         {
             int fileIndex;
-            int startIndex;
             int taskResult;
             String fileData;
             String message = null;
@@ -321,14 +320,12 @@ public class DropboxAccess extends AppCompatActivity
                         }
                     }));
 
-                    //read file data
-                    fileData = fileOutput.toString().replace("\0", "");
+                    //read and normalize file data
+                    fileData = Globals.normalizeAsciiFileData(fileOutput.toString());
                     fileOutput.close();
 
-                    //get file data
-                    startIndex = fileData.indexOf("{");
-                    startIndex = Math.max(0, startIndex);
-                    filesData.add(fileData.substring(startIndex));
+                    //add file
+                    filesData.add(fileData);
                 }
 
                 //success

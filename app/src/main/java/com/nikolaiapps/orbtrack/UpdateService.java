@@ -9,14 +9,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.documentfile.provider.DocumentFile;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -47,6 +48,7 @@ public class UpdateService extends NotifyService
         static final String FileType = "fileType";
         static final String FileExt = "fileExt";
         static final String FileSourceType = "fileSourceType";
+        static final String FileUri = "fileUri";
         static final String TLEData = "tleData";
         static final String UsedFile = "usedFile";
         static final String Information = "information";
@@ -801,6 +803,7 @@ public class UpdateService extends NotifyService
         int updateSource = intent.getIntExtra(ParamTypes.UpdateSource, Database.UpdateSource.SpaceTrack);
         int fileType = intent.getIntExtra(ParamTypes.FileType, Integer.MAX_VALUE);
         int fileSourceType = intent.getIntExtra(ParamTypes.FileSourceType, Integer.MAX_VALUE);
+        Uri fileUri = intent.getParcelableExtra(ParamTypes.FileUri);
         String user = intent.getStringExtra(ParamTypes.User);
         String pwd = intent.getStringExtra(ParamTypes.Password);
         String fileName = intent.getStringExtra(ParamTypes.FileName);
@@ -858,7 +861,7 @@ public class UpdateService extends NotifyService
 
             case UpdateType.SaveFile:
                 //save file
-                saveSatellitesFile(satelliteList.toArray(new Database.DatabaseSatellite[0]), fileName, fileExt, fileType, fileSourceType);
+                saveSatellitesFile(satelliteList.toArray(new Database.DatabaseSatellite[0]), fileUri, fileName, fileExt, fileType, fileSourceType);
                 break;
 
             case UpdateType.BuildDatabase:
@@ -2540,7 +2543,7 @@ public class UpdateService extends NotifyService
                                     for(index = 0; index < ownerItems.length && !cancelIntent[updateType]; index++)
                                     {
                                         //add empty list
-                                        satCatItems.add(new ArrayList<Integer>(0));
+                                        satCatItems.add(new ArrayList<>(0));
                                     }
                                     for(index = 0; index < masterList.satelliteCategories.size() && !cancelIntent[updateType]; index++)
                                     {
@@ -3199,16 +3202,12 @@ public class UpdateService extends NotifyService
         boolean error = false;
         boolean useFileData = (filesData != null);
         int index;
-        int bytesRead;
         int fileCount = (useFileData ? filesData.size() : (fileNames != null ? fileNames.size() : 0));
         int updatedSatellites = 0;
         FileInputStream fileStream;
-        BufferedInputStream inputStream;
         Resources res = this.getResources();
         String readString;
         String section = res.getString(R.string.title_file);
-        StringBuilder readStringBuilder;
-        byte[] readBuffer = new byte[512];
         ArrayList<Database.DatabaseSatellite> pendingSaveSatellites = new ArrayList<>(0);
 
         //go through each file
@@ -3216,9 +3215,6 @@ public class UpdateService extends NotifyService
         {
             //update status
             sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Started);
-
-            //reset
-            readStringBuilder = new StringBuilder();
 
             try
             {
@@ -3230,21 +3226,10 @@ public class UpdateService extends NotifyService
                 }
                 else
                 {
-                    //get streams
+                    //read file data
                     fileStream = new FileInputStream(new File(fileNames.get(index)));
-                    inputStream = new BufferedInputStream(fileStream);
-
-                    //while there is data to read
-                    while((bytesRead = inputStream.read(readBuffer)) != -1)
-                    {
-                        //add data
-                        readStringBuilder.append(new String(readBuffer, 0, bytesRead, Globals.Encoding.UTF16));
-                    }
-                    readString = readStringBuilder.toString();
-
-                    //close streams
+                    readString = Globals.readTextFile(this, fileStream);
                     fileStream.close();
-                    inputStream.close();
                 }
 
                 //try to save all satellites
@@ -3629,16 +3614,18 @@ public class UpdateService extends NotifyService
         //return saved satellite count
         return(savedSatellites);
     }
-    private void saveSatellitesFile(Database.DatabaseSatellite[] satellites, String fileName, String fileExtension, int fileType, int fileSourceType)
+    private void saveSatellitesFile(Database.DatabaseSatellite[] satellites, Uri fileUri, String fileName, String fileExtension, int fileType, int fileSourceType)
     {
         int count = satellites.length;
         int savedSatellites = 0;
         boolean error = false;
+        boolean isOthersSource = (fileSourceType == Globals.FileSource.Others);
         boolean isDropboxSource = (fileSourceType == Globals.FileSource.Dropbox);
         boolean isGoogleDriveSource = (fileSourceType == Globals.FileSource.GoogleDrive);
         String source = "";
         File saveFile = null;
         OutputStream outStream;
+        Resources res = this.getResources();
 
         //if file does not end with extension
         if(!fileName.endsWith(fileExtension))
@@ -3653,25 +3640,36 @@ public class UpdateService extends NotifyService
             case Globals.FileSource.SDCard:
             case Globals.FileSource.GoogleDrive:
             case Globals.FileSource.Dropbox:
+            case Globals.FileSource.Others:
                 //try to create file
                 try
                 {
-                    //if for Dropbox or GoogleDrive
-                    if(isDropboxSource || isGoogleDriveSource)
+                    //if for others
+                    if(isOthersSource)
                     {
-                        //set save file and source
-                        saveFile = new File(this.getCacheDir() + "/" + fileName);
-                        source = (isDropboxSource ? Globals.FileLocationType.Dropbox : Globals.FileLocationType.GoogleDrive);
+                        //set source and create output stream
+                        source = res.getString(R.string.title_other);
+                        outStream = this.getContentResolver().openOutputStream(Globals.createFileUri(this, fileUri, fileName, fileExtension));
                     }
                     else
                     {
-                        //set save file and source
-                        saveFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
-                        source = this.getResources().getString(R.string.title_downloads);
-                    }
+                        //if for Dropbox or GoogleDrive
+                        if(isDropboxSource || isGoogleDriveSource)
+                        {
+                            //set save file and source
+                            saveFile = new File(this.getCacheDir() + "/" + fileName);
+                            source = (isDropboxSource ? Globals.FileLocationType.Dropbox : Globals.FileLocationType.GoogleDrive);
+                        }
+                        else
+                        {
+                            //set save file and source
+                            saveFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), fileName);
+                            source = res.getString(R.string.title_downloads);
+                        }
 
-                    //create output stream
-                    outStream = new FileOutputStream(saveFile);
+                        //create output stream
+                        outStream = new FileOutputStream(saveFile);
+                    }
 
                     //save satellites
                     savedSatellites = saveSatellitesFile(this, this, satellites, fileType, outStream);
@@ -3799,16 +3797,17 @@ public class UpdateService extends NotifyService
     }
 
     //Saves satellites to a file
-    public static void saveFile(Activity activity, ArrayList<Database.DatabaseSatellite> satellites, String fileName, String fileExtension, int fileType, int fileSourceType)
+    public static void saveFile(Activity activity, ArrayList<Database.DatabaseSatellite> satellites, Globals.PendingFile pendingFile)
     {
         Resources res = activity.getResources();
         Intent saveIntent = createIntent(activity, UpdateType.SaveFile, res.getString(R.string.title_saving));
 
         saveIntent.putParcelableArrayListExtra(ParamTypes.Satellites, satellites);
-        saveIntent.putExtra(ParamTypes.FileName, fileName);
-        saveIntent.putExtra(ParamTypes.FileExt, fileExtension);
-        saveIntent.putExtra(ParamTypes.FileType, fileType);
-        saveIntent.putExtra(ParamTypes.FileSourceType, fileSourceType);
+        saveIntent.putExtra(ParamTypes.FileName, pendingFile.name);
+        saveIntent.putExtra(ParamTypes.FileExt, pendingFile.extension);
+        saveIntent.putExtra(ParamTypes.FileType, pendingFile.type);
+        saveIntent.putExtra(ParamTypes.FileSourceType, pendingFile.fileSourceType);
+        saveIntent.putExtra(ParamTypes.FileUri, pendingFile.outUri);
 
         Globals.startService(activity, saveIntent, false);
     }

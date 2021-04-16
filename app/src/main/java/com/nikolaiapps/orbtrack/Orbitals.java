@@ -11,6 +11,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -608,16 +609,40 @@ public abstract class Orbitals
                         new EditValuesDialog(activity, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
-                            public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
                             {
-                                //save satellites
-                                setSaveFileData(textValue, listValue, which, Globals.getFileSource(activity, list2Value));
-                                runTaskSelectedItems(UpdateService.UpdateType.SaveFile);
+                                //remember file source
+                                int fileSourceType = Globals.getFileSource(activity, list2Value);
+
+                                //set pending file
+                                setSaveFileData(null, textValue, listValue, which, fileSourceType);
+
+                                //if for others
+                                if(fileSourceType == AddSelectListAdapter.FileSourceType.Others)
+                                {
+                                    //if the main activity
+                                    if(activity instanceof MainActivity)
+                                    {
+                                        //set pending file in activity
+                                        ((MainActivity)activity).setSaveFileData(null, textValue, listValue, which, fileSourceType);
+                                    }
+
+                                    //get folder
+                                    Globals.showOthersFolderSelect(activity);
+
+                                    //don't call on dismiss listener (prevent deselecting items too soon)
+                                    dialog.setOnDismissListener(null);
+                                }
+                                else
+                                {
+                                    //save satellites
+                                    runTaskSelectedItems(UpdateService.UpdateType.SaveFile);
+                                }
                             }
                         }, new EditValuesDialog.OnDismissListener()
                         {
                             @Override
-                            public void onDismiss(int saveCount)
+                            public void onDismiss(EditValuesDialog dialog, int saveCount)
                             {
                                 //make sure no items are selected
                                 setItemsSelected(false);
@@ -687,13 +712,13 @@ public abstract class Orbitals
                     long updateValue;
                     String section = intent.getStringExtra(UpdateService.ParamTypes.Section);
                     Bundle extraData = intent.getExtras();
+                    Resources res = context.getResources();
                     boolean useBroadcast = false;
                     boolean savingFile = (updateType == UpdateService.UpdateType.SaveFile);
                     boolean forDropbox = (section != null && section.equals(Globals.FileLocationType.Dropbox));
                     boolean forGoogleDrive = (section != null && section.equals(Globals.FileLocationType.GoogleDrive));
                     String errorMessage;
                     File usedFile;
-                    Resources res = context.getResources();
 
                     //if extra data not set
                     if(extraData == null)
@@ -833,13 +858,13 @@ public abstract class Orbitals
                                                 if(currentActivity != null)
                                                 {
                                                     //save file
-                                                    if(forDropbox)
+                                                    if(forGoogleDrive)
                                                     {
-                                                        DropboxAccess.start(currentActivity, usedFile, index, true);
+                                                        GoogleDriveAccess.start(currentActivity, usedFile, index, true);
                                                     }
                                                     else
                                                     {
-                                                        GoogleDriveAccess.start(currentActivity, usedFile, index, true);
+                                                        DropboxAccess.start(currentActivity, usedFile, index, true);
                                                     }
                                                 }
                                             }
@@ -880,9 +905,9 @@ public abstract class Orbitals
         }
 
         //Sets save file data
-        public void setSaveFileData(String fileName, String fileExtension, int fileType, int fileSourceType)
+        public void setSaveFileData(Uri outUri, String fileName, String fileExtension, int fileType, int fileSourceType)
         {
-            pendingSaveFile = new Globals.PendingFile(-1, fileName, fileExtension, fileType, fileSourceType, "");
+            pendingSaveFile = new Globals.PendingFile(outUri, fileName, fileExtension, fileType, fileSourceType);
         }
 
         //Run task on selected items
@@ -950,7 +975,7 @@ public abstract class Orbitals
                 {
                     case UpdateService.UpdateType.SaveFile:
                         //show progress if -have permission for file SDCard- or -not asking about internet for Dropbox or GoogleDrive-
-                        showProgress = (fileSourceType == Globals.FileSource.SDCard && Globals.haveWritePermission(activity)) || (!askInternet && (fileSourceType == Globals.FileSource.Dropbox || fileSourceType == Globals.FileSource.GoogleDrive));
+                        showProgress = (fileSourceType == Globals.FileSource.SDCard && Globals.haveWritePermission(activity)) || (!askInternet && (fileSourceType == Globals.FileSource.Dropbox || fileSourceType == Globals.FileSource.GoogleDrive)) || (fileSourceType == AddSelectListAdapter.FileSourceType.Others);
                         break;
 
                     case UpdateService.UpdateType.UpdateSatellites:
@@ -984,7 +1009,7 @@ public abstract class Orbitals
                                     if(!UpdateService.savingFile() && activity != null)
                                     {
                                        //save satellites
-                                       UpdateService.saveFile(activity, satellites, pendingSaveFile.name, pendingSaveFile.extension, pendingSaveFile.type, pendingSaveFile.fileSourceType);
+                                       UpdateService.saveFile(activity, satellites, pendingSaveFile);
                                     }
                                 }
                                 //else if don't have permission but can ask
@@ -1007,6 +1032,7 @@ public abstract class Orbitals
 
                             case Globals.FileSource.GoogleDrive:
                             case Globals.FileSource.Dropbox:
+                            case Globals.FileSource.Others:
                                 //if asking about internet
                                 if(askInternet)
                                 {
@@ -1028,7 +1054,7 @@ public abstract class Orbitals
                                     if(!UpdateService.savingFile() && activity != null)
                                     {
                                         //save satellites
-                                        UpdateService.saveFile(activity, satellites, pendingSaveFile.name, pendingSaveFile.extension, pendingSaveFile.type, pendingSaveFile.fileSourceType);
+                                        UpdateService.saveFile(activity, satellites, pendingSaveFile);
                                     }
                                 }
                                 break;
@@ -1126,7 +1152,7 @@ public abstract class Orbitals
         }
 
         //Saves file for selected items
-        public void saveFileSelectedItems(ViewGroup container, int pageNum, String fileName, String fileExtension, int fileType, int fileSourceType)
+        public void saveFileSelectedItems(ViewGroup container, int pageNum, Uri outUri, String fileName, String fileExtension, int fileType, int fileSourceType)
         {
             Page page = (Page)getPage(container, pageNum);
             if(page != null)
@@ -1135,17 +1161,12 @@ public abstract class Orbitals
                 if(fileName != null)
                 {
                     //save values
-                    page.setSaveFileData(fileName, fileExtension, fileType, fileSourceType);
+                    page.setSaveFileData(outUri, fileName, fileExtension, fileType, fileSourceType);
                 }
 
                 //save file
                 page.runTaskSelectedItems(UpdateService.UpdateType.SaveFile);
             }
-        }
-        public void saveFileSelectedItems(ViewGroup container, int pageNum)
-        {
-            //use saved values
-            saveFileSelectedItems(container, pageNum, null, null, -1, -1);
         }
 
         //Updates selected items
@@ -1265,6 +1286,15 @@ public abstract class Orbitals
         }
     }
 
+    //Shows other file browsers
+    public static void showOthersFileBrowser(Activity context)
+    {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("*/*");
+        intent = Intent.createChooser(intent, context.getString(R.string.title_select_file_or_files));
+        context.startActivityForResult(intent, BaseInputActivity.RequestCode.OthersOpenItem);
+    }
+
     //Shows an add dialog
     public static void showAddDialog(final Activity context, final View parentView, final boolean askForce)
     {
@@ -1295,12 +1325,16 @@ public abstract class Orbitals
                                         showSDCardFileBrowser(context, parentView);
                                         break;
 
+                                    case AddSelectListAdapter.FileSourceType.Dropbox:
+                                        showDropboxBrowser(context, true);
+                                        break;
+
                                     case AddSelectListAdapter.FileSourceType.GoogleDrive:
                                         showGoogleDriveFileBrowser(context, true);
                                         break;
 
-                                    case AddSelectListAdapter.FileSourceType.Dropbox:
-                                        showDropboxBrowser(context, true);
+                                    case AddSelectListAdapter.FileSourceType.Others:
+                                        showOthersFileBrowser(context);
                                         break;
                                 }
                             }
@@ -1319,6 +1353,7 @@ public abstract class Orbitals
     private static void showEditDialog(final Activity context, final ViewGroup container, final Selectable.ListFragmentAdapter adapter, ArrayList<Orbitals.PageListItem> selectedItems, final ArrayList<Database.DatabaseSatellite> orbitals, final EditValuesDialog.OnDismissListener dismissListener)
     {
         int index;
+        String unknownOwnerName = null;
         final Resources res = context.getResources();
         final List<String> ownerValuesList;
         ArrayList<UpdateService.MasterOwner> owners = Database.getOwners(context);
@@ -1345,6 +1380,13 @@ public abstract class Orbitals
             //set owner ID and name
             ownerCodes[index] = currentOwner.code;
             ownerValues[index] = currentOwner.name;
+
+            //if unknown owner
+            if(currentOwner.code.equals("TBD"))
+            {
+                //remember unknown owner name
+                unknownOwnerName = currentOwner.name;
+            }
         }
         ownerValuesList = Arrays.asList(ownerValues);
 
@@ -1357,7 +1399,7 @@ public abstract class Orbitals
             //get current ID and values
             ids[index] = (orbitals != null ? index : currentItem.id);
             nameValues[index] = currentItem.text;
-            defaultOwnerValues[index] = currentItem.owner;
+            defaultOwnerValues[index] = (currentItem.owner == null || currentItem.owner.equals("") ? unknownOwnerName : currentItem.owner);
             dateValues[index] = currentItem.launchDateMs;
         }
 
@@ -1365,7 +1407,7 @@ public abstract class Orbitals
         new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
         {
             @Override
-            public void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
             {
                 String ownerCode = ownerCodes[ownerValuesList.indexOf(list2Value)];
 
@@ -1387,7 +1429,7 @@ public abstract class Orbitals
         }, new EditValuesDialog.OnDismissListener()
         {
             @Override
-            public void onDismiss(int saveCount)
+            public void onDismiss(EditValuesDialog dialog, int saveCount)
             {
                 //if adapter exists
                 if(adapter != null)
@@ -1407,7 +1449,7 @@ public abstract class Orbitals
                 if(dismissListener != null)
                 {
                     //call it
-                    dismissListener.onDismiss(saveCount);
+                    dismissListener.onDismiss(dialog, saveCount);
                 }
             }
         }).getOrbital(res.getString(R.string.title_edit), ids, res.getString(R.string.title_name), nameValues, res.getString(R.string.title_owner), ownerValues, ownerCodes, defaultOwnerValues, res.getString(R.string.title_launch_date), dateValues);

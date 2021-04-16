@@ -29,24 +29,24 @@ public class EditValuesDialog
     {
         static final byte Orbital = 0;
         static final byte Location = 1;
-        static final byte File = 2;
+        static final byte Folder = 2;
         static final byte Login = 3;
         static final byte SortBy = 4;
     }
 
     public interface OnSaveListener
     {
-        void onSave(int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue);
+        void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue);
     }
 
     public interface OnDismissListener
     {
-        void onDismiss(int saveCount);
+        void onDismiss(EditValuesDialog dialog, int saveCount);
     }
 
     public interface OnCancelListener
     {
-        void onCancel();
+        void onCancel(EditValuesDialog dialog);
     }
 
     private int itemCount;
@@ -80,7 +80,7 @@ public class EditValuesDialog
     private Button positiveButton;
     private AlertDialog editDialog;
     private final OnSaveListener saveListener;
-    private final OnDismissListener dismissListener;
+    private OnDismissListener dismissListener;
     private final OnCancelListener cancelListener;
     private int[] itemIDs;
     private double[] itemNumberValues;
@@ -118,6 +118,11 @@ public class EditValuesDialog
         this(context, sListener, null, null);
     }
 
+    public void setOnDismissListener(OnDismissListener listener)
+    {
+        dismissListener = listener;
+    }
+
     //Creates an on click listener
     private View.OnClickListener createOnClickListener(final int which)
     {
@@ -151,7 +156,7 @@ public class EditValuesDialog
                             savedCount++;
                             if(saveListener != null)
                             {
-                                saveListener.onSave(currentIndex, (itemIDs != null ? itemIDs[currentIndex] : -1), textValue, text2Value, number, number2, number3, (itemListValues != null ? editValueList.getSelectedValue("").toString() : null), (itemList2Values != null ? editValueList2.getSelectedValue("").toString() : null), (itemDateValues != null ? editDate.getDate().getTimeInMillis() : -1));
+                                saveListener.onSave(EditValuesDialog.this, currentIndex, (itemIDs != null ? itemIDs[currentIndex] : -1), textValue, text2Value, number, number2, number3, (itemListValues != null ? editValueList.getSelectedValue("").toString() : null), (itemList2Values != null ? editValueList2.getSelectedValue("").toString() : null), (itemDateValues != null ? editDate.getDate().getTimeInMillis() : -1));
                             }
                         }
                         else
@@ -299,7 +304,7 @@ public class EditValuesDialog
     //Show the dialog
     private void show(byte editType, String titleText, int[] ids, @Nullable String textValueTitle, String[] textValues, @Nullable String textValue2Title, @Nullable String[] text2Values, @Nullable String[] textRowValues, @Nullable String[] textRow2Values, @Nullable String[] numberTitles, @Nullable double[] numberValues, @Nullable double[] number2Values, @Nullable double[] number3Values, String[] listValues, String[] defaultListValue, String list2Title, int[] list2IconIds, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues)
     {
-        boolean isEditFile = (editType == EditType.File);
+        boolean isEditFolder = (editType == EditType.Folder);
         boolean usingText = (textValues != null);
         boolean usingText2 = (text2Values != null);
         boolean usingList = (listValues != null && defaultListValue != null);
@@ -397,9 +402,9 @@ public class EditValuesDialog
 
             //get list 2
             editValueList2Title = editDialogView.findViewById(R.id.Edit_List2_Title);
-            editValueList2Title.setVisibility(!isEditFile && usingList2 ? View.VISIBLE : View.GONE);
+            editValueList2Title.setVisibility(!isEditFolder && usingList2 ? View.VISIBLE : View.GONE);
             editValueList2Title2 = editDialogView.findViewById(R.id.Edit_List2_Title2);
-            editValueList2Title2.setVisibility(isEditFile && usingList2 ? View.VISIBLE : View.GONE);
+            editValueList2Title2.setVisibility(isEditFolder && usingList2 ? View.VISIBLE : View.GONE);
             editValueList2 = editDialogView.findViewById(R.id.Edit_Value_List2);
             editDialogView.findViewById(R.id.Edit_List2_Row).setVisibility((isLogin && usingList2) || !usingText2 ? View.VISIBLE : View.GONE);
             editDialogView.findViewById(R.id.Edit_List2_Layout).setVisibility(usingList2 ? View.VISIBLE : View.GONE);
@@ -461,7 +466,7 @@ public class EditValuesDialog
                             currentIcon = Globals.getDrawable(currentContext, currentId, (!isLogin && currentId != R.drawable.org_gdrive && currentId != R.drawable.org_dbox));
                         }
 
-                        items[index] = new IconSpinner.Item(currentIcon, currentValue, currentValue, rotate);
+                        items[index] = (currentId != -1 ? new IconSpinner.Item(currentIcon, currentValue, currentValue, rotate) : null);
                     }
                     editValueList2.setAdapter(new IconSpinner.CustomAdapter(currentContext, items));
                     if(isLogin)
@@ -534,7 +539,7 @@ public class EditValuesDialog
                 if(dismissListener != null)
                 {
                     //send event
-                    dismissListener.onDismiss(savedCount);
+                    dismissListener.onDismiss(EditValuesDialog.this, savedCount);
                 }
 
                 //allow rotation
@@ -550,7 +555,7 @@ public class EditValuesDialog
                 if(cancelListener != null)
                 {
                     //send event
-                    cancelListener.onCancel();
+                    cancelListener.onCancel(EditValuesDialog.this);
                 }
             }
         });
@@ -581,7 +586,7 @@ public class EditValuesDialog
     }
     public void getFileLocation(String titleText, int[] ids, @NonNull String[] textValues, String[] listValues, String[] defaultListValue, String[] defaultList2Value)
     {
-        show(EditType.File, titleText, ids, null, textValues, null, null, null, null, null, null, null, null, listValues, defaultListValue, null, Globals.fileSourceImageIds, Globals.getFileLocations(currentContext), null, defaultList2Value, null, null);
+        show(EditType.Folder, titleText, ids, null, textValues, null, null, null, null, null, null, null, null, listValues, defaultListValue, null, Globals.fileSourceImageIds, Globals.getFileLocations(currentContext), null, defaultList2Value, null, null);
     }
     public void getOrbital(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String list2Title, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues)
     {

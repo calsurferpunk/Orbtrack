@@ -725,6 +725,7 @@ public interface CoordinatesFragment
     }
 
     double WhirlyEarthRadiusKm = 6371.0;
+    double WhirlyZScale = 0.1;
     double DefaultNearZoom = 1.25;
     double DefaultFarZoom = 4.25;
     double MaxDrawDistanceKm = (WhirlyEarthRadiusKm * 16);

@@ -250,7 +250,7 @@ class Whirly
 
         void moveLocation(double latitude, double longitude, double altitudeKm, boolean limitAltitude)
         {
-            double z = altitudeKm * 100;
+            double z = (altitudeKm * 1000 * CoordinatesFragment.WhirlyZScale);
 
             remove();
 
@@ -463,6 +463,7 @@ class Whirly
         {
             int index;
             int pointsLength = points.size();
+            double z;
             double slope;
             double nextLat;
             double nextLon;
@@ -558,22 +559,25 @@ class Whirly
                 }
                 else
                 {
+                    //get initial z value
+                    z = currentAltKm * CoordinatesFragment.WhirlyZScale;
+
                     //keep inside of bounds
-                    if(currentAltKm < CoordinatesFragment.MinDrawDistanceZ / 1000)
+                    if(z < CoordinatesFragment.MinDrawDistanceZ / 1000)
                     {
-                        currentAltKm = CoordinatesFragment.MinDrawDistanceZ / 1000;
+                        z = CoordinatesFragment.MinDrawDistanceZ / 1000;
                     }
-                    else if(currentAltKm > CoordinatesFragment.MaxDrawDistanceZ / 1000)
+                    else if(z > CoordinatesFragment.MaxDrawDistanceZ / 1000)
                     {
-                        currentAltKm = CoordinatesFragment.MaxDrawDistanceZ / 1000;
+                        z = CoordinatesFragment.MaxDrawDistanceZ / 1000;
                     }
 
                     //if able to get point
-                    elevatedPoint = controller.displayPointFromGeo(new Point3d(Point2d.FromDegrees(currentLon, currentLat), currentAltKm));
+                    elevatedPoint = controller.displayPointFromGeo(new Point3d(Point2d.FromDegrees(currentLon, currentLat), z));
                     if(elevatedPoint != null)
                     {
                         //add point
-                        setElevatedPoints.add(elevatedPoint.multiplyBy((currentAltKm / CoordinatesFragment.WhirlyEarthRadiusKm) + 1.0));
+                        setElevatedPoints.add(elevatedPoint.multiplyBy((z / CoordinatesFragment.WhirlyEarthRadiusKm) + 1.0));
                     }
                 }
             }

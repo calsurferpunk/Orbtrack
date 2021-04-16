@@ -724,9 +724,10 @@ public interface CoordinatesFragment
         }
     }
 
+    double WhirlyEarthRadiusKm = 6371.0;
     double DefaultNearZoom = 1.25;
     double DefaultFarZoom = 4.25;
-    double MaxDrawDistanceKm = (Calculations.EarthRadiusKM * 16);
+    double MaxDrawDistanceKm = (WhirlyEarthRadiusKm * 16);
     double MinDrawDistanceZ = 500000;
     double MaxDrawDistanceZ = (MaxDrawDistanceKm * 200.0);
 

@@ -573,7 +573,7 @@ class Whirly
                     if(elevatedPoint != null)
                     {
                         //add point
-                        setElevatedPoints.add(elevatedPoint.multiplyBy((currentAltKm / Calculations.EarthRadiusKM) + 1.0));
+                        setElevatedPoints.add(elevatedPoint.multiplyBy((currentAltKm / CoordinatesFragment.WhirlyEarthRadiusKm) + 1.0));
                     }
                 }
             }

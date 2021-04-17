@@ -1290,6 +1290,7 @@ public abstract class Orbitals
     public static void showOthersFileBrowser(Activity context)
     {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setType("*/*");
         intent = Intent.createChooser(intent, context.getString(R.string.title_select_file_or_files));
         context.startActivityForResult(intent, BaseInputActivity.RequestCode.OthersOpenItem);

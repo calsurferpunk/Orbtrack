@@ -3,6 +3,8 @@ package com.nikolaiapps.orbtrack;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
+import android.content.ClipData;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -13,8 +15,6 @@ import android.os.Environment;
 import android.os.SystemClock;
 import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-
-import androidx.documentfile.provider.DocumentFile;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
@@ -652,14 +652,45 @@ public class MainActivity extends AppCompatActivity
                 {
                     try
                     {
-                        //read file data
-                        InputStream fileStream = this.getContentResolver().openInputStream(data.getData());
-                        String fileData = Globals.readTextFile(this, fileStream);
-                        fileStream.close();
+                        int index;
+                        String fileData;
+                        InputStream fileStream;
+                        ClipData multiData = data.getClipData();
+                        ContentResolver resolver = this.getContentResolver();
+                        ArrayList<Uri> fileList = new ArrayList<>(0);
 
-                        //load file data
+                        //initialize file names
                         fileNames = new ArrayList<>(0);
-                        fileNames.add(fileData);
+
+                        //if there are multiple files
+                        if(multiData != null)
+                        {
+                            //go through each file
+                            for(index = 0; index < multiData.getItemCount(); index++)
+                            {
+                                //add current file to list
+                                fileList.add(multiData.getItemAt(index).getUri());
+                            }
+                        }
+                        else
+                        {
+                            //add file to list
+                            fileList.add(data.getData());
+                        }
+
+                        //go through each file
+                        for(index = 0; index < fileList.size(); index++)
+                        {
+                            //read file data
+                            fileStream = resolver.openInputStream(fileList.get(index));
+                            fileData = Globals.readTextFile(this, fileStream);
+                            fileStream.close();
+
+                            //add file data
+                            fileNames.add(fileData);
+                        }
+
+                        //load all files
                         UpdateService.loadFileData(this, fileNames);
                     }
                     catch(Exception ex)

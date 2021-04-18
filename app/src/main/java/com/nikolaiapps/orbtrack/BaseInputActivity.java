@@ -7,8 +7,10 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -172,6 +174,36 @@ public abstract class BaseInputActivity extends AppCompatActivity
                         Uri currentFile = fileList.get(index);
                         String currentPath = currentFile.getPath();
                         String currentExtension = Globals.getFileExtension(currentPath);
+
+                        //if current scheme has content
+                        if(currentFile.getScheme().equals("content"))
+                        {
+                            //if able to get cursor
+                            Cursor currentCursor = resolver.query(currentFile, null, null, null, null);
+                            if(currentCursor != null)
+                            {
+                                try
+                                {
+                                    //if able to get first row
+                                    if(currentCursor.moveToFirst())
+                                    {
+                                        //if able to get display name
+                                        String cursorResult = currentCursor.getString(currentCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                                        if(cursorResult != null)
+                                        {
+                                            //update path and extension
+                                            currentPath = cursorResult;
+                                            currentExtension = Globals.getFileExtension(currentPath);
+                                        }
+                                    }
+                                    currentCursor.close();
+                                }
+                                catch(Exception ex)
+                                {
+                                    //do nothing
+                                }
+                            }
+                        }
 
                         //read file data
                         fileStream = resolver.openInputStream(fileList.get(index));

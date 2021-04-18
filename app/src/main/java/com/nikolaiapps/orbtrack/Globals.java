@@ -35,7 +35,6 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.security.ProviderInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
-
 import androidx.documentfile.provider.DocumentFile;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import androidx.core.app.ActivityCompat;
@@ -70,6 +69,9 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -95,6 +97,8 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
@@ -696,6 +700,7 @@ public abstract class Globals
     }
 
     //Constants
+    private static final int ZIP_FILE_MAX_DEPTH = 4;
     public static final int WEB_READ_SIZE = 1024;
     public static final long UNKNOWN_DATE_MS = 0;
     public static final long INVALID_DATE_MS = -1;
@@ -712,6 +717,7 @@ public abstract class Globals
     private static ArrayList<TimeZone> timeZoneList = null;
     private static final int[] fileSources = new int[]{FileSource.SDCard, FileSource.GoogleDrive, FileSource.Dropbox, FileSource.Others};
     public static final int[] fileSourceImageIds = new int[]{(Build.VERSION.SDK_INT >= 29 ? -1 : R.drawable.ic_sd_card_black), R.drawable.org_gdrive, R.drawable.org_dbox, (Build.VERSION.SDK_INT >= 21 ? R.drawable.ic_folder_open_black : -1)};
+    public static final String[] fileDataExtensions = new String[]{".tle", ".json", ".txt"};
 
     //Variables
     public static boolean askLocationPermission = true;
@@ -3876,7 +3882,7 @@ public abstract class Globals
     public static String readTextFile(Context context, InputStream fileStream) throws IOException
     {
         int readCount;
-        int unReadCount = 1;
+        int unReadCount = 4;
         int headerCount = 0;
         BufferedInputStream fileReader;
         PushbackInputStream headerStream = new PushbackInputStream(fileStream, 4);
@@ -3929,6 +3935,104 @@ public abstract class Globals
 
         //return normalized ASCII file data
         return(normalizeAsciiFileData(fileData.toString()));
+    }
+
+    //Gets file extension
+    public static String getFileExtension(String fileName)
+    {
+        int index = (fileName != null ? fileName.toLowerCase().indexOf(".") : -1);
+        return(index >= 0 ? fileName.substring(index) : "");
+    }
+
+    //Gets InputStreams from files within a zip file that match any extensions
+    private static InputStream[] readZipFile(Context context, String filePath, InputStream fileStream, String[] extensionFilter, int depth)
+    {
+        int count;
+        boolean haveFilter = (extensionFilter != null && extensionFilter.length > 0);
+        File cacheDir = new File(context.getCacheDir(), filePath);
+        ZipEntry currentEntry;
+        ZipInputStream zipStream = new ZipInputStream(fileStream);
+        ArrayList<String> filterList = new ArrayList<>(0);
+        ArrayList<InputStream> inputList = new ArrayList<>(0);
+        byte[] fileBuffer = new byte[1024];
+
+        //make sure cache exists
+        cacheDir.mkdir();
+
+        //if there is a filter
+        if(haveFilter)
+        {
+            //create filter list
+            for(String currentExtenstion : extensionFilter)
+            {
+                //add lower case extension
+                filterList.add(currentExtenstion.toLowerCase());
+            }
+        }
+
+        try
+        {
+            //go through files
+            while((currentEntry = zipStream.getNextEntry()) != null)
+            {
+                //remember current file, dir, name, and extension
+                String currentName = currentEntry.getName();
+                String currentExtension = getFileExtension(currentName).toLowerCase();
+                File currentFile = new File(cacheDir, currentName);
+                File currentDir = (currentEntry.isDirectory() ? currentFile : currentFile.getParentFile());
+                boolean isZip = currentExtension.equals(".zip");
+
+                //if -directory exists or able to make- and -a file-
+                if((currentDir.isDirectory() || currentDir.mkdirs()) && !currentEntry.isDirectory())
+                {
+                    //use if no filter or extension is in list
+                    boolean useExtension = (!haveFilter || filterList.contains(currentExtension));
+
+                    //if a .zip file or using extension
+                    if(isZip || useExtension)
+                    {
+                        //create file
+                        FileOutputStream outStream = new FileOutputStream(currentFile);
+                        while((count = zipStream.read(fileBuffer)) > 0)
+                        {
+                            //write bytes to file
+                            outStream.write(fileBuffer, 0, count);
+                        }
+                        outStream.flush();
+                        outStream.close();
+
+                        //if an embedded .zip file
+                        if(isZip)
+                        {
+                            //if not too deep
+                            if(depth <= ZIP_FILE_MAX_DEPTH)
+                            {
+                                //add all filtered files inside
+                                inputList.addAll(Arrays.asList(readZipFile(context, filePath + "/" + currentFile.getName() + depth, new FileInputStream(currentFile), extensionFilter, depth++)));
+                            }
+                        }
+
+                        //if using extension
+                        if(useExtension)
+                        {
+                            //add input stream to list
+                            inputList.add(new FileInputStream(currentFile));
+                        }
+                    }
+                }
+            }
+            zipStream.close();
+        }
+        catch(Exception ex)
+        {
+            //do nothing
+        }
+
+        return(inputList.toArray(new InputStream[0]));
+    }
+    public static InputStream[] readZipFile(Context context, String filePath, InputStream fileStream, String[] extensionFilter)
+    {
+        return(readZipFile(context, filePath, fileStream, extensionFilter, 1));
     }
 
     //Gets the given number of stars

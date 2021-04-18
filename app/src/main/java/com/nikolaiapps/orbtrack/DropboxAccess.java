@@ -263,7 +263,7 @@ public class DropboxAccess extends AppCompatActivity
             if(resultListener != null)
             {
                 //send event
-                resultListener.onResult(taskResult, null, message);
+                resultListener.onResult(taskResult, null, null, message);
             }
 
             //end task
@@ -289,9 +289,9 @@ public class DropboxAccess extends AppCompatActivity
         {
             int fileIndex;
             int taskResult;
-            String fileData;
             String message = null;
-            ArrayList<String> filesData = new ArrayList<>(0);
+            ArrayList<String> filesDataNames = new ArrayList<>(0);
+            ArrayList<byte[]> filesData = new ArrayList<>(0);
             String[] fileNames = (String[])objects[0];
 
             try
@@ -304,7 +304,8 @@ public class DropboxAccess extends AppCompatActivity
                 {
                     //download file
                     final int index = fileIndex;
-                    final DbxDownloader<FileMetadata> download = dbClient.files().download(fileNames[fileIndex].toLowerCase());
+                    final String currentFileName = fileNames[fileIndex];
+                    final DbxDownloader<FileMetadata> download = dbClient.files().download(currentFileName.toLowerCase());
                     ByteArrayOutputStream fileOutput = new ByteArrayOutputStream();
                     download.download(new ProgressOutputStream(fileOutput, new IOUtil.ProgressListener()
                     {
@@ -320,12 +321,10 @@ public class DropboxAccess extends AppCompatActivity
                         }
                     }));
 
-                    //read and normalize file data
-                    fileData = Globals.normalizeAsciiFileData(fileOutput.toString());
+                    //read file, add name, then close
+                    filesData.add(fileOutput.toByteArray());
+                    filesDataNames.add(currentFileName);
                     fileOutput.close();
-
-                    //add file
-                    filesData.add(fileData);
                 }
 
                 //success
@@ -348,7 +347,7 @@ public class DropboxAccess extends AppCompatActivity
             if(resultListener != null)
             {
                 //send event
-                resultListener.onResult(taskResult, filesData, message);
+                resultListener.onResult(taskResult, filesDataNames, filesData, message);
             }
 
             //end task
@@ -569,7 +568,7 @@ public class DropboxAccess extends AppCompatActivity
     {
         boolean isOkay = (resultCode == RESULT_OK);
         String folderName;
-        ArrayList<String> fileNames;
+        ArrayList<String> fileIds;
         final Intent resultData = new Intent();
 
         switch(requestCode)
@@ -603,7 +602,7 @@ public class DropboxAccess extends AppCompatActivity
                         , new FileBrowserBaseActivity.OnResultListener()
                         {
                             @Override
-                            public void onResult(int resultCode, ArrayList<String> filesData, String message)
+                            public void onResult(int resultCode, ArrayList<String> fileNames, ArrayList<byte[]> filesData, String message)
                             {
                                 //pass information back to caller
                                 int passedResultCode = (resultCode == FileBrowserBaseActivity.ResultCode.Success ? RESULT_OK : RESULT_CANCELED);
@@ -616,8 +615,8 @@ public class DropboxAccess extends AppCompatActivity
                     else
                     {
                         //get files
-                        fileNames = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileNames);
-                        getFiles(fileNames, new FileBrowserBaseActivity.OnProgressListener()
+                        fileIds = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileIds);
+                        getFiles(fileIds, new FileBrowserBaseActivity.OnProgressListener()
                         {
                             @Override
                             public void onProgressChanged(int index, int length, long bytes, long totalBytes, double progress)
@@ -627,11 +626,19 @@ public class DropboxAccess extends AppCompatActivity
                         }, new FileBrowserBaseActivity.OnResultListener()
                         {
                             @Override
-                            public void onResult(int resultCode, ArrayList<String> filesData, String message)
+                            public void onResult(int resultCode, ArrayList<String> fileNames, ArrayList<byte[]> filesData, String message)
                             {
+                                int index;
+                                int count = filesData.size();
+
                                 //pass information back to caller
                                 int passedResultCode = (resultCode == FileBrowserBaseActivity.ResultCode.Success ? RESULT_OK : RESULT_CANCELED);
-                                resultData.putStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FilesData, filesData);
+                                resultData.putStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileNames, fileNames);
+                                resultData.putExtra(FileBrowserBaseActivity.ParamTypes.FilesDataCount, count);
+                                for(index = 0; index < count; index++)
+                                {
+                                    resultData.putExtra(FileBrowserBaseActivity.ParamTypes.FilesData + index, filesData.get(index));
+                                }
                                 setResult(passedResultCode, resultData);
                                 DropboxAccess.this.finish();
                             }

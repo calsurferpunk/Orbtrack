@@ -3,8 +3,6 @@ package com.nikolaiapps.orbtrack;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
-import android.content.ClipData;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -42,7 +40,6 @@ import android.widget.ExpandableListView;
 import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -431,7 +428,6 @@ public class MainActivity extends AppCompatActivity
         String message;
         Resources res = this.getResources();
         ArrayList<String> fileNames;
-        ArrayList<String> filesData;
 
         //if not handling
         if(!handle)
@@ -614,15 +610,12 @@ public class MainActivity extends AppCompatActivity
 
             case BaseInputActivity.RequestCode.GoogleDriveOpenFile:
             case BaseInputActivity.RequestCode.DropboxOpenFile:
+            case BaseInputActivity.RequestCode.OthersOpenItem:
                 //if selected item
                 if(isOkay)
                 {
-                    //load from file if not already
-                    filesData = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FilesData);
-                    if(!UpdateService.isRunning(UpdateService.UpdateType.LoadFile))
-                    {
-                        UpdateService.loadFileData(this, filesData);
-                    }
+                    //handle open file request
+                    BaseInputActivity.handleActivityOpenFileRequest(this, mainDrawerLayout, data, requestCode);
                 }
                 break;
 
@@ -642,61 +635,6 @@ public class MainActivity extends AppCompatActivity
                         //get item count and show success
                         count = data.getIntExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, 0);
                         Globals.showSnackBar(mainDrawerLayout, res.getQuantityString(R.plurals.title_satellites_saved, (int)count, (int)count), (count < 1));
-                    }
-                }
-                break;
-
-            case BaseInputActivity.RequestCode.OthersOpenItem:
-                //if selected item
-                if(isOkay)
-                {
-                    try
-                    {
-                        int index;
-                        String fileData;
-                        InputStream fileStream;
-                        ClipData multiData = data.getClipData();
-                        ContentResolver resolver = this.getContentResolver();
-                        ArrayList<Uri> fileList = new ArrayList<>(0);
-
-                        //initialize file names
-                        fileNames = new ArrayList<>(0);
-
-                        //if there are multiple files
-                        if(multiData != null)
-                        {
-                            //go through each file
-                            for(index = 0; index < multiData.getItemCount(); index++)
-                            {
-                                //add current file to list
-                                fileList.add(multiData.getItemAt(index).getUri());
-                            }
-                        }
-                        else
-                        {
-                            //add file to list
-                            fileList.add(data.getData());
-                        }
-
-                        //go through each file
-                        for(index = 0; index < fileList.size(); index++)
-                        {
-                            //read file data
-                            fileStream = resolver.openInputStream(fileList.get(index));
-                            fileData = Globals.readTextFile(this, fileStream);
-                            fileStream.close();
-
-                            //add file data
-                            fileNames.add(fileData);
-                        }
-
-                        //load all files
-                        UpdateService.loadFileData(this, fileNames);
-                    }
-                    catch(Exception ex)
-                    {
-                        //show error
-                        Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_file_error_using), ex.getMessage(), true, true);
                     }
                 }
                 break;

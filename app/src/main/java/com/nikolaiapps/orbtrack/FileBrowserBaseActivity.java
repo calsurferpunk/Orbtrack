@@ -48,7 +48,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
 
     public interface OnResultListener
     {
-        void onResult(int resultCode, ArrayList<String> filesData, String message);
+        void onResult(int resultCode, ArrayList<String> fileNames, ArrayList<byte[]> filesData, String message);
     }
 
     public static abstract class ResultCode
@@ -61,9 +61,11 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
     public static abstract class ParamTypes
     {
         static final String SelectFolder = "selectFolder";
+        static final String FileIds = "fileIds";
         static final String FileName = "fileName";
         static final String FileNames = "fileNames";
         static final String FilesData = "filesData";
+        static final String FilesDataCount = "filesDataCount";
         static final String FolderName = "folderName";
         static final String ItemCount = "itemCount";
         static final String LoginOnly = "loginOnly";
@@ -158,6 +160,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         private final Drawable folderDrawable;
         private final Drawable backupFileDrawable;
         private final Drawable tleFileDrawable;
+        private final Drawable zipFileDrawable;
         private final OnPathChangedListener pathChangedListener;
         private final OnSelectedFilesChangedListener selectedFilesChangedListener;
         private final OnItemClickListener itemClickedListener;
@@ -182,6 +185,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             folderDrawable = Globals.getDrawable(currentContext, R.drawable.ic_folder_open_black, themeTint);
             backupFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_storage_black, themeTint);
             tleFileDrawable = Globals.getDrawable(currentContext, R.drawable.orbital_satellite, themeTint);
+            zipFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_briefcase_black, themeTint);
 
             itemClickedListener = new OnItemClickListener()
             {
@@ -261,7 +265,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             final ItemHolder itemHolder = (ItemHolder)holder;
 
             //update displays
-            itemHolder.fileImage.setBackgroundDrawable(isDir ? folderDrawable : lowerFileName.endsWith(".tle") ? tleFileDrawable : lowerFileName.endsWith(".json") ? backupFileDrawable : fileDrawable);
+            itemHolder.fileImage.setBackgroundDrawable(isDir ? folderDrawable : lowerFileName.endsWith(".tle") ? tleFileDrawable : lowerFileName.endsWith(".json") ? backupFileDrawable : lowerFileName.endsWith(".zip") ? zipFileDrawable : fileDrawable);
             itemHolder.fileText.setText(currentFileName);
             itemHolder.fileCheck.setOnCheckedChangeListener(null);
             itemHolder.fileCheck.setChecked(selectedFiles.contains(currentFile));
@@ -302,6 +306,19 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             for(ItemBase currentFile : selectedFiles)
             {
                 idList.add(currentFile.getId());
+            }
+
+            return(idList);
+        }
+
+        //Gets selected file names
+        private ArrayList<String> getSelectedFileNames()
+        {
+            ArrayList<String> idList = new ArrayList<>(selectedFiles.size());
+
+            for(ItemBase currentFile : selectedFiles)
+            {
+                idList.add(currentFile.getName());
             }
 
             return(idList);
@@ -364,8 +381,8 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                             //remember lowercase name
                             String currentLowerName = currentFile.getName().toLowerCase();
 
-                            //if a directory, backup, or TLE
-                            if(currentFile.isDirectory() || (!selectFolder && (currentLowerName.endsWith(".json") || currentLowerName.endsWith(".tle"))))
+                            //if a directory, backup, TLE, or zip
+                            if(currentFile.isDirectory() || (!selectFolder && (currentLowerName.endsWith(".json") || currentLowerName.endsWith(".tle") || currentLowerName.endsWith(".zip"))))
                             {
                                 //add to list
                                 fileList.add(currentFile);
@@ -493,7 +510,8 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                 else
                 {
                     //add files
-                    data.putStringArrayListExtra(ParamTypes.FileNames, filesAdapter.getSelectedFileIds());
+                    data.putStringArrayListExtra(ParamTypes.FileIds, filesAdapter.getSelectedFileIds());
+                    data.putStringArrayListExtra(ParamTypes.FileNames, filesAdapter.getSelectedFileNames());
                 }
 
                 //set result

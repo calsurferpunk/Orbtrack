@@ -430,7 +430,6 @@ public class SetupActivity extends BaseInputActivity
         String message;
         Resources res = this.getResources();
         ArrayList<String> fileNames;
-        ArrayList<String> filesData;
 
         //if no data
         if(data == null)
@@ -544,15 +543,12 @@ public class SetupActivity extends BaseInputActivity
 
             case BaseInputActivity.RequestCode.GoogleDriveOpenFile:
             case BaseInputActivity.RequestCode.DropboxOpenFile:
+            case BaseInputActivity.RequestCode.OthersOpenItem:
                 //if selected item
                 if(isOkay)
                 {
-                    //load from file if not already
-                    filesData = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FilesData);
-                    if(!UpdateService.isRunning(UpdateService.UpdateType.LoadFile))
-                    {
-                        UpdateService.loadFileData(this, filesData);
-                    }
+                    //handle open file request
+                    handleActivityOpenFileRequest(this, setupLayout, data, requestCode);
                 }
                 break;
         }

@@ -335,7 +335,7 @@ public class GoogleDriveAccess extends AppCompatActivity
             if(resultListener != null)
             {
                 //send event
-                resultListener.onResult(taskResult, null, message);
+                resultListener.onResult(taskResult, null, null, message);
             }
 
             //end task
@@ -361,35 +361,36 @@ public class GoogleDriveAccess extends AppCompatActivity
         {
             int fileIndex;
             int taskResult;
-            String fileData;
             String message = null;
-            ArrayList<String> filesData = new ArrayList<>(0);
-            String[] fileNames = (String[])objects[0];
+            ArrayList<String> filesDataNames = new ArrayList<>(0);
+            ArrayList<byte[]> filesData = new ArrayList<>(0);
+            String[] fileIds = (String[])objects[0];
+            String[] fileNames = (String[])objects[1];
 
             try
             {
                 //get total files
-                final int totalFiles = fileNames.length;
+                final int totalFiles = fileIds.length;
 
                 //go through each file name
                 for(fileIndex = 0; fileIndex < totalFiles; fileIndex++)
                 {
                     //download file
-                    File currentFileSize = driveClient.files().get(fileNames[fileIndex]).setFields("size").execute();
+                    String currentFileId = fileIds[fileIndex];
+                    String currentFileName = fileNames[fileIndex];
+                    File currentFileSize = driveClient.files().get(currentFileId).setFields("size").execute();
                     ByteArrayOutputStream fileOutput = new ByteArrayOutputStream();
-                    Drive.Files.Get download = driveClient.files().get(fileNames[fileIndex]);
+                    Drive.Files.Get download = driveClient.files().get(currentFileId);
                     if(downloadListener != null)
                     {
                         download.getMediaHttpDownloader().setProgressListener(new DownloadListenerClass(fileIndex, totalFiles, currentFileSize.getSize(), downloadListener)).setChunkSize(4096);
                     }
                     download.executeMediaAndDownloadTo(fileOutput);
 
-                    //read and normalize file data
-                    fileData = Globals.normalizeAsciiFileData(fileOutput.toString());
+                    //read file, add name, then close
+                    filesData.add(fileOutput.toByteArray());
+                    filesDataNames.add(currentFileName);
                     fileOutput.close();
-
-                    //add file
-                    filesData.add(fileData);
                 }
 
                 //success
@@ -406,7 +407,7 @@ public class GoogleDriveAccess extends AppCompatActivity
             if(resultListener != null)
             {
                 //send event
-                resultListener.onResult(taskResult, filesData, message);
+                resultListener.onResult(taskResult, filesDataNames, filesData, message);
             }
 
             //end task
@@ -548,6 +549,7 @@ public class GoogleDriveAccess extends AppCompatActivity
         boolean isOkay = (resultCode == RESULT_OK);
         boolean finished = false;
         String folderName;
+        ArrayList<String> fileIds;
         ArrayList<String> fileNames;
         final Intent resultData = new Intent();
 
@@ -597,7 +599,7 @@ public class GoogleDriveAccess extends AppCompatActivity
                         , new FileBrowserBaseActivity.OnResultListener()
                         {
                             @Override
-                            public void onResult(int resultCode, ArrayList<String> filesData, String message)
+                            public void onResult(int resultCode, ArrayList<String> fileNames, ArrayList<byte[]> filesData, String message)
                             {
                                 //pass information back to caller
                                 int passedResultCode = (resultCode == FileBrowserBaseActivity.ResultCode.Success ? RESULT_OK : RESULT_CANCELED);
@@ -610,8 +612,9 @@ public class GoogleDriveAccess extends AppCompatActivity
                     else
                     {
                         //get files
+                        fileIds = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileIds);
                         fileNames = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileNames);
-                        getFiles(fileNames, new FileBrowserBaseActivity.OnProgressListener()
+                        getFiles(fileIds, fileNames, new FileBrowserBaseActivity.OnProgressListener()
                         {
                             @Override
                             public void onProgressChanged(int index, int length, long bytes, long totalBytes, double progress)
@@ -621,11 +624,19 @@ public class GoogleDriveAccess extends AppCompatActivity
                         }, new FileBrowserBaseActivity.OnResultListener()
                         {
                             @Override
-                            public void onResult(int resultCode, ArrayList<String> filesData, String message)
+                            public void onResult(int resultCode, ArrayList<String> fileNames, ArrayList<byte[]> filesData, String message)
                             {
+                                int index;
+                                int count = filesData.size();
+
                                 //pass information back to caller
                                 int passedResultCode = (resultCode == FileBrowserBaseActivity.ResultCode.Success ? RESULT_OK : RESULT_CANCELED);
-                                resultData.putStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FilesData, filesData);
+                                resultData.putStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileNames, fileNames);
+                                resultData.putExtra(FileBrowserBaseActivity.ParamTypes.FilesDataCount, count);
+                                for(index = 0; index < count; index++)
+                                {
+                                    resultData.putExtra(FileBrowserBaseActivity.ParamTypes.FilesData + index, filesData.get(index));
+                                }
                                 setResult(passedResultCode, resultData);
                                 GoogleDriveAccess.this.finish();
                             }
@@ -682,15 +693,19 @@ public class GoogleDriveAccess extends AppCompatActivity
     }
 
     //Gets the given files
-    private void getFiles(ArrayList<String> fileNames, FileBrowserBaseActivity.OnProgressListener dlListener, FileBrowserBaseActivity.OnResultListener resListener)
+    private void getFiles(ArrayList<String> fileIds, ArrayList<String> fileNames, FileBrowserBaseActivity.OnProgressListener dlListener, FileBrowserBaseActivity.OnResultListener resListener)
     {
         DownloadFilesTask task = new DownloadFilesTask(client, dlListener, resListener);
 
+        if(fileIds == null)
+        {
+            fileIds = new ArrayList<>(0);
+        }
         if(fileNames == null)
         {
             fileNames = new ArrayList<>(0);
         }
-        task.execute((Object)fileNames.toArray(new String[0]));
+        task.execute((Object)fileIds.toArray(new String[0]), (Object)fileNames.toArray(new String[0]));
     }
 
     //Save the given file

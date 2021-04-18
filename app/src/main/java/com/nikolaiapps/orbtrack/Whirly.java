@@ -62,6 +62,17 @@ class Whirly
         static final String MapLayerType = "mapLayerType";
     }
 
+    private static abstract class DrawPriority
+    {
+        private static final int BoardEye           = 50000000;
+        private static final int BoardFlat          = 25000000;
+        private static final int Path               = 200000;
+        private static final int Layer              = 10000;
+        private static final int LayerLatLon        = 12500;
+        private static final int LayerHybridLines   = 15000;
+        private static final int LayerHybridLabels  = 20000;
+    }
+
     private static class InfoImageCreator
     {
         private boolean useText;
@@ -179,7 +190,7 @@ class Whirly
             boardTextureColor = new float[]{1.0f, 1.0f, 1.0f, 1.0f};
             billboardList = new ArrayList<>(0);
 
-            boardInfo.setDrawPriority(1000000);
+            boardInfo.setDrawPriority(DrawPriority.BoardEye);
             boardInfo.setZBufferWrite(true);
             boardInfo.setZBufferRead(true);
             boardInfo.setShader(controller.getShader(Shader.BillboardEyeShader));
@@ -323,7 +334,7 @@ class Whirly
             flatSticker.setLowerLeft(new Point2d(0, 0));
             flatSticker.setUpperRight(new Point2d(0, 0));
             flatInfo = new StickerInfo();
-            flatInfo.setDrawPriority(1000000);
+            flatInfo.setDrawPriority(DrawPriority.BoardFlat);
             flatList.add(flatSticker);
             flatScale = zoomScale = 1;
             flatRotationRads = 0;
@@ -437,7 +448,7 @@ class Whirly
                 flatPathInfo = new VectorInfo();
                 flatPathInfo.setColor(color);
                 flatPathInfo.setLineWidth(4f);
-                flatPathInfo.setDrawPriority(200000);
+                flatPathInfo.setDrawPriority(DrawPriority.Path);
 
                 elevatedPathInfo = null;
             }
@@ -447,7 +458,7 @@ class Whirly
                 elevatedPathInfo = new ShapeInfo();
                 elevatedPathInfo.setColor(color);
                 elevatedPathInfo.setLineWidth(4f);
-                elevatedPathInfo.setDrawPriority(200000);
+                elevatedPathInfo.setDrawPriority(DrawPriority.Path);
 
                 flatPathInfo = null;
             }
@@ -1664,17 +1675,17 @@ class Whirly
                 switch(mapLayerType)
                 {
                     case MapLayerType.Hybrid:
-                        drawPriorities.add(100000);
+                        drawPriorities.add(DrawPriority.LayerHybridLabels);
                         cacheDirNames.add("hybridLabels");
                         layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-labels/{z}/{x}/{y}.png", 0, 17));
 
-                        drawPriorities.add(90000);
+                        drawPriorities.add(DrawPriority.LayerHybridLines);
                         cacheDirNames.add("hybridLines");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-lines/{z}/{x}/{y}.png", 0, 17));
+                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-lines/{z}/{x}/{y}.png", 0, 12));
                         //fall through
 
                     case MapLayerType.Satellite:
-                        drawPriorities.add(10000);
+                        drawPriorities.add(DrawPriority.Layer);
                         if(Settings.getSatelliteClouds(activity, isMap()))
                         {
                             cacheDirNames.add("satellite");
@@ -1688,13 +1699,13 @@ class Whirly
                         break;
 
                     case MapLayerType.Moon:
-                        drawPriorities.add(10000);
+                        drawPriorities.add(DrawPriority.Layer);
                         cacheDirNames.add("moon");
                         layerSources.add(new RemoteTileInfoNew("https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd/1.0.0/default/default028mm/{z}/{y}/{x}.jpg", 0, 7));
                         break;
 
                     case MapLayerType.Mars:
-                        drawPriorities.add(10000);
+                        drawPriorities.add(DrawPriority.Layer);
                         cacheDirNames.add("mars");
                         layerSources.add(new RemoteTileInfoNew("https://api.nasa.gov/mars-wmts/catalog/Mars_Viking_MDIM21_ClrMosaic_global_232m/1.0.0/default/default028mm/{z}/{y}/{x}.jpg", 0, 9));
                         break;
@@ -1749,14 +1760,14 @@ class Whirly
                                 name = "venus";
                                 break;
                         }
-                        drawPriorities.add(10000);
+                        drawPriorities.add(DrawPriority.Layer);
                         cacheDirNames.add(name);
                         layerSources.add(new RemoteTileInfoNew("http://nikolai-apps.000webhostapp.com/tiles/" + name + "/{z}/{x}/{y}.jpg", 0, maxZoom));
                         break;
 
                     default:
                     case MapLayerType.Normal:
-                        drawPriorities.add(10000);
+                        drawPriorities.add(DrawPriority.Layer);
                         cacheDirNames.add("normal");
                         layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain/{z}/{x}/{y}.png", 0, 17));
                         break;
@@ -1880,7 +1891,7 @@ class Whirly
             if(latLonLoader == null)
             {
                 latLonLoader = new QuadImageLoader(createTileParams(sourceInfo, false), sourceInfo, controller);
-                latLonLoader.setBaseDrawPriority(5000);
+                latLonLoader.setBaseDrawPriority(DrawPriority.LayerLatLon);
             }
             latLonLoader.setTileFetcher(latLonSource);
             latLonLoader.changeTileInfo(sourceInfo);

@@ -1691,16 +1691,17 @@ public abstract class Settings
                 int offset = 0;
                 String text;
                 final Item currentItem = (Item)item;
+                final boolean haveContext = (currentContext != null);
                 final boolean isCurrent = (currentItem.locationType == Database.LocationType.Current);
                 final double latitude = currentItem.latitude;
                 final double longitude = currentItem.longitude;
                 final double altitudeM = currentItem.altitudeM;
-                final Resources res = currentContext.getResources();
+                final Resources res = (currentContext != null ? currentContext.getResources() : null);
                 final TextView[] titles;
                 final TextView[] texts;
 
-                //if a valid latitude, longitude, or altitude
-                if((latitude != 0 && latitude >= -90 && latitude <= 90) || (longitude != 0 && longitude >= -180 && longitude <= 180) || (altitudeM != 0 && altitudeM != Double.MAX_VALUE))
+                //if have context and -a valid latitude, longitude, or altitude-
+                if(haveContext && ((latitude != 0 && latitude >= -90 && latitude <= 90) || (longitude != 0 && longitude >= -180 && longitude <= 180) || (altitudeM != 0 && altitudeM != Double.MAX_VALUE)))
                 {
                     //create dialog
                     final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, Universe.IDs.None, currentItem.name, Globals.getDrawable(currentContext, Globals.getLocationIcon(currentItem.locationType), true), itemDetailButtonClickListener);

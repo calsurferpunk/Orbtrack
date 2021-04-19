@@ -1003,12 +1003,20 @@ public abstract class Selectable
         //Sets column titles
         protected void setColumnTitles(ViewGroup listColumns, int page)
         {
-            int[] colors = (currentContext != null ? Globals.resolveAttributeIDs(currentContext, new int[]{R.attr.columnBackground, R.attr.columnTitleTextColor}) : new int[]{Color.BLACK, Color.WHITE});
-            colors[1] = (currentContext != null ? currentContext.getResources().getColor(colors[1]) : colors[1]);
+            boolean haveContext = (currentContext != null);
+            int[] colors = (haveContext ? Globals.resolveAttributeIDs(currentContext, new int[]{R.attr.columnBackground, R.attr.columnTitleTextColor}) : new int[]{Color.BLACK, Color.WHITE});
+            colors[1] = (haveContext ? currentContext.getResources().getColor(colors[1]) : colors[1]);
 
             if(showColumnTitles(page))
             {
-                listColumns.setBackgroundResource(colors[0]);
+                if(haveContext)
+                {
+                    listColumns.setBackgroundResource(colors[0]);
+                }
+                else
+                {
+                    listColumns.setBackgroundColor(colors[0]);
+                }
                 Globals.setTextColor(listColumns, colors[1]);
             }
             else
@@ -1038,8 +1046,11 @@ public abstract class Selectable
             if(itemView != null)
             {
                 //get around compiler bug by storing result in array
-                ids = new int[]{isSelected ? Globals.resolveAttributeID(currentContext, R.attr.itemSelected) : Globals.resolveAttributeID(currentContext, R.attr.itemSelect)};
-                itemView.setBackgroundResource(ids[0]);
+                if(currentContext != null)
+                {
+                    ids = new int[]{Globals.resolveAttributeID(currentContext, (isSelected ? R.attr.itemSelected : R.attr.itemSelect))};
+                    itemView.setBackgroundResource(ids[0]);
+                }
             }
         }
 

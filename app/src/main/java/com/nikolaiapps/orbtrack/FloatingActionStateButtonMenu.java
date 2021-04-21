@@ -112,8 +112,8 @@ public class FloatingActionStateButtonMenu extends LinearLayout
         menuButton.setCustomSize((int)Globals.dpToPixels(context, SmallDp));
         menuButton.setStateColors(backgroundTintColor, checkedTintColor);
         menuButton.setShowChecked(showChecked);
-        menuButton.setBackgroundTintList(ColorStateList.valueOf(backgroundTintColor));
-        menuButton.setImageDrawable(Globals.getDrawable(getContext(), imageId, imageTintColor, false));
+        menuButton.setImageDrawable(Globals.getDrawable(context, imageId, imageTintColor, false));
+        menuButton.setSupportImageTintList(ColorStateList.valueOf(imageTintColor));
         menuButton.setUseCompatPadding(true);
         menuButton.setClickable(true);
 

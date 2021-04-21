@@ -176,6 +176,8 @@ class Whirly
 
         Board(BaseController boardController)
         {
+            Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
+
             zValue = 0;
             controller = boardController;
 
@@ -193,7 +195,10 @@ class Whirly
             boardInfo.setDrawPriority(DrawPriority.BoardEye);
             boardInfo.setZBufferWrite(true);
             boardInfo.setZBufferRead(true);
-            boardInfo.setShader(controller.getShader(Shader.BillboardEyeShader));
+            if(eyeShader != null)
+            {
+                boardInfo.setShader(eyeShader);
+            }
             board.setScreenObject(boardScreen);
             board.setSelectable(false);
             billboardList.add(board);

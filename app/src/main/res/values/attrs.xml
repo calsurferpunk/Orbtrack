@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="defaultTextColor" format="reference"/>
+    <attr name="defaultTextShadowColor" format="reference"/>
     <attr name="actionBarBackground" format="reference"/>
     <attr name="pageTitleTextColor" format="reference"/>
     <attr name="pageTitleBackground" format="reference"/>
@@ -11,6 +12,7 @@
     <attr name="columnTitleTextSelectColor" format="reference"/>
     <attr name="columnBackground" format="reference"/>
     <attr name="dividerColor" format="reference"/>
+    <attr name="dividerTextBackground" format="color"/>
     <attr name="dialogStyle" format="reference"/>
     <attr name="itemSelect" format="reference"/>
     <attr name="itemSelected" format="reference"/>

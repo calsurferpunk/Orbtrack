@@ -1,17 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:ignore="ContentDescription"
     android:id="@+id/Location_Layout"
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="?attr/viewPagerBackground">
-    <!--fragment
-        android:id="@+id/Location_Map"
-        class="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"/-->
     <FrameLayout
         android:id="@+id/Location_Map_Frame_Layout"
         android:layout_width="match_parent"
@@ -30,19 +23,15 @@
             android:gravity="bottom|end">
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/Location_Zoom_In_Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/FloatingButton"
                 android:alpha="0.7"
-                app:useCompatPadding="true"
                 app:srcCompat="@drawable/ic_add_white"
                 app:fabSize="mini"/>
 
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/Location_Zoom_Out_Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/FloatingButton"
                 android:alpha="0.7"
-                app:useCompatPadding="true"
                 app:srcCompat="@drawable/ic_remove_black"
                 android:tint="@color/white"
                 app:fabSize="mini"/>
@@ -101,7 +90,8 @@
                 android:layout_weight="1"
                 android:inputType="numberDecimal|numberSigned"
                 android:singleLine="true"
-                android:hint="@string/empty"
+                android:autofillHints="@string/text_90_plus_minus"
+                android:hint="@string/text_90_plus_minus"
                 android:textColor="?attr/defaultTextColor"/>
         </TableRow>
 
@@ -120,7 +110,8 @@
                 android:layout_weight="1"
                 android:inputType="numberDecimal|numberSigned"
                 android:singleLine="true"
-                android:hint="@string/empty"
+                android:autofillHints="@string/text_180_plus_minus"
+                android:hint="@string/text_180_plus_minus"
                 android:textColor="?attr/defaultTextColor"/>
         </TableRow>
 
@@ -144,6 +135,7 @@
                     android:layout_weight="1"
                     android:inputType="numberDecimal|numberSigned"
                     android:singleLine="true"
+                    android:autofillHints="@string/empty"
                     android:hint="@string/empty"
                     android:textColor="?attr/defaultTextColor"/>
 

@@ -25,7 +25,6 @@
 
             <LinearLayout
                 android:layout_height="45dp"
-                android:layout_marginLeft="5dp"
                 android:layout_marginStart="5dp"
                 android:orientation="horizontal">
                 <com.nikolaiapps.orbtrack.BorderButton

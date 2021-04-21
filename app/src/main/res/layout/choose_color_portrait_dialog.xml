@@ -147,6 +147,7 @@
                 android:layout_height="wrap_content"
                 android:maxLength="3"
                 android:inputType="number"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"
                 android:text="@string/text_0"/>
@@ -177,6 +178,7 @@
                 android:layout_height="wrap_content"
                 android:maxLength="3"
                 android:inputType="number"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"
                 android:text="@string/text_0"/>
@@ -207,6 +209,7 @@
                 android:layout_height="wrap_content"
                 android:maxLength="3"
                 android:inputType="number"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"
                 android:text="@string/text_0"/>
@@ -237,6 +240,7 @@
                 android:layout_height="wrap_content"
                 android:maxLength="3"
                 android:inputType="number"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"
                 android:text="@string/text_0"/>

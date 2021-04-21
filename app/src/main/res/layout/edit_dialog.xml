@@ -27,6 +27,7 @@
                     android:maxLength="50"
                     android:padding="10dp"
                     android:singleLine="true"
+                    android:autofillHints="@string/empty"
                     android:hint="@string/empty"
                     android:textColor="?attr/defaultTextColor" />
 
@@ -53,6 +54,7 @@
                 android:maxLength="50"
                 android:padding="10dp"
                 android:singleLine="true"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor" />
         </TableRow>
@@ -83,6 +85,7 @@
                 android:maxLength="20"
                 android:padding="10dp"
                 android:singleLine="true"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"/>
         </TableRow>
@@ -103,6 +106,7 @@
                 android:maxLength="20"
                 android:padding="10dp"
                 android:singleLine="true"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"/>
         </TableRow>
@@ -123,6 +127,7 @@
                 android:maxLength="20"
                 android:padding="10dp"
                 android:singleLine="true"
+                android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:textColor="?attr/defaultTextColor"/>
         </TableRow>

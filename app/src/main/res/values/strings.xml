@@ -164,6 +164,8 @@
     <string name="text_12">12</string>
     <string name="text_14">14</string>
     <string name="text_30">30</string>
+    <string name="text_90_plus_minus">+/-90</string>
+    <string name="text_180_plus_minus">+/-180</string>
     <string name="text_at">at</string>
     <string name="text_camera_error">Error using camera</string>
     <string name="text_download_failed">Download failed</string>
@@ -261,6 +263,7 @@
     <string name="title_circle">Circle</string>
     <string name="title_civil_twilight">Civil Twilight</string>
     <string name="title_classification">Classification</string>
+    <string name="title_close">Close</string>
     <string name="title_closest_intersection_delta">Closest Intersection Delta</string>
     <string name="title_code">Code</string>
     <string name="title_color">Color</string>

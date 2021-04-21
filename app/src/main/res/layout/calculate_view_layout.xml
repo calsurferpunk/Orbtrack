@@ -146,7 +146,9 @@
                     android:id="@+id/Calculate_View_Unit_Text"
                     style="@style/CalculateEditText"
                     android:inputType="number"
-                    android:maxLength="3"/>
+                    android:maxLength="3"
+                    android:autofillHints="@string/empty"
+                    android:hint="@string/empty"/>
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Calculate_View_Unit_List"
                     android:layout_width="wrap_content"
@@ -165,7 +167,9 @@
                 style="@style/CalculateEditLayout">
                 <EditText
                     android:id="@+id/Calculate_Intersection_Unit_Text"
-                    style="@style/CalculateEditText"/>
+                    style="@style/CalculateEditText"
+                    android:autofillHints="@string/empty"
+                    android:hint="@string/empty"/>
                 <TextView
                     android:id="@+id/Calculate_Intersection_Unit_Title"
                     style="@style/CalculateEditUnitTitle"
@@ -184,7 +188,9 @@
                 style="@style/CalculateEditLayout">
                 <EditText
                     android:id="@+id/Calculate_Elevation_Min_Unit_Text"
-                    style="@style/CalculateEditText"/>
+                    style="@style/CalculateEditText"
+                    android:autofillHints="@string/empty"
+                    android:hint="@string/empty"/>
                 <TextView
                     android:id="@+id/Calculate_Elevation_Min_Unit_Title"
                     style="@style/CalculateEditUnitTitle"

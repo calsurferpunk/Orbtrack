@@ -84,6 +84,7 @@
                 android:layout_weight="1"
                 android:singleLine="true"
                 android:inputType="textNoSuggestions"
+                android:autofillHints="@string/title_name_or_id"
                 android:hint="@string/title_name_or_id"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:textColor="?attr/defaultTextColor"

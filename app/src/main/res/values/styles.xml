@@ -12,39 +12,70 @@
     </style>
 
     <!-- Dialogs -->
-    <style name="LightDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="LightDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorPrimary">@color/black</item>
         <item name="android:textColorSecondary">@color/gray</item>
         <item name="android:windowBackground">@color/white</item>
     </style>
 
-    <style name="DarkDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+    <style name="DarkDialog" parent="ThemeOverlay.AppCompat.Dialog.Alert">
         <item name="android:textColor">@color/white</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/gray</item>
         <item name="android:windowBackground">@color/very_dark_gray</item>
     </style>
 
+    <!-- Preferences -->
+    <style name="LightPreferenceOverlay" parent="PreferenceThemeOverlay">
+        <!--item name="android:background">@color/white</item-->
+        <item name="android:textColor">@color/black</item>
+        <item name="android:tint">@color/black</item>
+    </style>
+
+    <style name="DarkPreferenceOverlay" parent="PreferenceThemeOverlay">
+        <item name="android:background">@color/very_dark_gray</item>
+        <item name="android:textColor">@color/white</item>
+        <item name="android:tint">@color/white</item>
+    </style>
+
     <!-- Base themes -->
-    <style name="LightBase" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="LightBase" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="defaultTextColor">@color/black</item>
+        <item name="defaultTextShadowColor">@color/white</item>
         <item name="pageTitleTextColor">@color/white</item>
         <item name="pageBackground">@color/white</item>
         <item name="pageHighlightBackground">@color/very_light_gray</item>
         <item name="viewPagerBackground">@color/very_light_gray</item>
         <item name="dividerColor">@color/light_gray</item>
+        <item name="dividerTextBackground">#F9F9F9</item>
         <item name="dialogStyle">@style/LightDialog</item>
+        <item name="colorPrimary">@color/very_dark_gray</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="textColorAlertDialogListItem">@color/black</item>
+        <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
+        <item name="preferenceCategoryStyle">@style/DividerCategory</item>
+        <item name="android:textColorHint">@color/grey_400</item>
+        <item name="android:textColorSecondary">@color/gray</item>
     </style>
 
-    <style name="DarkBase" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="DarkBase" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="defaultTextColor">@color/white</item>
+        <item name="defaultTextShadowColor">@color/black</item>
         <item name="pageTitleTextColor">@color/white</item>
         <item name="pageBackground">@color/very_dark_gray</item>
         <item name="pageHighlightBackground">@color/very_very_dark_gray</item>
         <item name="viewPagerBackground">@color/black</item>
         <item name="dividerColor">@color/dark_gray</item>
+        <item name="dividerTextBackground">#2A2A2A</item>
         <item name="dialogStyle">@style/DarkDialog</item>
+        <item name="colorPrimary">@color/very_light_gray</item>
+        <item name="colorPrimaryDark">@color/black</item>
+        <item name="textColorAlertDialogListItem">@color/white</item>
+        <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
+        <item name="preferenceCategoryStyle">@style/DividerCategory</item>
+        <item name="android:textColorHint">@color/grey_600</item>
+        <item name="android:textColorSecondary">@color/gray</item>
     </style>
 
     <!-- Themes -->
@@ -295,6 +326,29 @@
         <item name="android:background">?attr/dividerColor</item>
     </style>
 
+    <style name="DividerText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?attr/dividerTextBackground</item>
+        <item name="android:paddingTop">2dp</item>
+        <item name="android:paddingBottom">2dp</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="DividerCategory" parent="Preference.Category">
+        <item name="layout">@layout/divider_view</item>
+    </style>
+
+    <!-- Bottom button -->
+    <style name="BottomButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">4dp</item>
+        <item name="android:layout_gravity">bottom|center</item>
+        <item name="backgroundTint">?attr/defaultTextShadowColor</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
     <!-- Detail Views -->
     <style name="DetailTableRow">
         <item name="android:padding">1dp</item>
@@ -437,7 +491,7 @@
     </style>
 
     <!--Floating button-->
-    <style name="FloatingButton">
+    <style name="FloatingButton" parent="Widget.Design.FloatingActionButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">5dp</item>
@@ -445,6 +499,8 @@
         <item name="useCompatPadding">true</item>
         <item name="borderWidth">0dp</item>
         <item name="fabSize">normal</item>
+        <item name="tint">?attr/pageTitleTextColor</item>
+        <item name="android:contentDescription">@string/title_unknown</item>
     </style>
 
     <!--Result button-->

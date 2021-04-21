@@ -1,4 +1,4 @@
-<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity"
+<androidx.drawerlayout.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:context=".MainActivity" tools:ignore="ContentDescription"
     android:id="@+id/Main_Drawer_Layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"

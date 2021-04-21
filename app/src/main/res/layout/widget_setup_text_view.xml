@@ -27,7 +27,6 @@
                     android:id="@+id/Widget_Setup_Global_Text_Size_List"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginLeft="3dp"
                     android:layout_marginStart="3dp"/>
 
                 <CheckBox

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:ignore="ContentDescription"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
@@ -178,7 +178,7 @@
                 android:id="@+id/Item_Detail_3d_Frame"
                 android:layout_width="match_parent"
                 android:layout_height="260dp">
-                <fragment
+                <androidx.fragment.app.FragmentContainerView
                     android:id="@+id/Item_Detail_3d_View"
                     android:name="com.nikolaiapps.orbtrack.Whirly$PreviewFragment"
                     android:layout_width="match_parent"
@@ -192,23 +192,19 @@
                     android:layout_gravity="end|top">
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
                         android:id="@+id/Item_Detail_3d_Close_Button"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
+                        style="@style/FloatingButton"
                         android:alpha="0.5"
                         app:backgroundTint="@color/transparent"
-                        app:useCompatPadding="true"
                         app:srcCompat="@drawable/ic_close_white"
                         app:fabSize="mini"/>
                 </FrameLayout>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton
                     android:id="@+id/Item_Detail_3d_Fullscreen_Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    style="@style/FloatingButton"
                     android:layout_gravity="end|bottom"
                     android:alpha="0.5"
                     app:backgroundTint="@color/transparent"
-                    app:useCompatPadding="true"
                     app:srcCompat="@drawable/ic_fullscreen_white"
                     app:fabSize="mini"/>
             </FrameLayout>

@@ -40,4 +40,11 @@
         <attr name="normalTint"/>
         <attr name="checkedTint"/>
     </declare-styleable>
+
+    <declare-styleable name="TimeIntervalPreference">
+        <attr name="hourKey" format="string"/>
+        <attr name="minuteKey" format="string"/>
+        <attr name="intervalKey" format="string"/>
+        <attr name="sharedName" format="string"/>
+    </declare-styleable>
 </resources>

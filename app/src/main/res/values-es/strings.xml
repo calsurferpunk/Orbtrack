@@ -5,10 +5,6 @@
 
 
 
-    <plurals name="text_accounts">
-        <item quantity="one">Cuenta</item>
-        <item quantity="other">Cuentas</item>
-    </plurals>
     <plurals name="text_days">
         <item quantity="one">%d día</item>
         <item quantity="other">%d días</item>
@@ -25,6 +21,10 @@
         <item quantity="one">%d semana</item>
         <item quantity="other">%d semanas</item>
     </plurals>
+    <plurals name="title_accounts">
+        <item quantity="one">Cuenta</item>
+        <item quantity="other">Cuentas</item>
+    </plurals>
     <plurals name="title_days_ago">
         <item quantity="one">Ayer</item>
         <item quantity="other">Hace %d Días</item>
@@ -36,6 +36,10 @@
     <plurals name="title_locations">
         <item quantity="one">Ubicación</item>
         <item quantity="other">Ubicaciones</item>
+    </plurals>
+    <plurals name="title_notifications">
+        <item quantity="one">Notificación</item>
+        <item quantity="other">Notificaciones</item>
     </plurals>
     <plurals name="title_satellites">
         <item quantity="one">Satélite</item>

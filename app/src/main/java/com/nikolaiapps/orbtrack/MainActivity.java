@@ -656,6 +656,14 @@ public class MainActivity extends AppCompatActivity
                     }
                 }
                 break;
+
+            case BaseInputActivity.RequestCode.Settings:
+                //if changed settings and need to recreate
+                if(isOkay && data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false))
+                {
+                    //
+                }
+                break;
         }
 
         super.onActivityResult(requestCode, resultCode, data);
@@ -897,12 +905,15 @@ public class MainActivity extends AppCompatActivity
                 switch(page)
                 {
                     case Settings.PageType.Locations:
-                    case Settings.PageType.Notifications:
                         show = true;
                         if(inEditMode)
                         {
                             imageID = R.drawable.ic_mode_edit_white;
                         }
+                        break;
+
+                    case Settings.PageType.Notifications:
+                        show = !inEditMode;
                         break;
 
                     case Settings.PageType.Other:
@@ -2558,7 +2569,7 @@ public class MainActivity extends AppCompatActivity
             protected void onGotLocation(Context context, ObserverType updatedObserver)
             {
                 boolean updated = (updatedObserver != null && (observer == null || observer.notEqual(updatedObserver)));
-                boolean showStatus = (needSaveCurrentLocation || pendingLocationUpdate) && updated;
+                boolean showStatus = (pendingLocationUpdate && updated);
                 boolean usingCurrent = (locationSource == Database.LocationType.Current);
 
                 //if need to save current location

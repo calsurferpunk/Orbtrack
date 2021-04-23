@@ -447,7 +447,7 @@ public abstract class Settings
                 }
 
                 @Override
-                protected void setColumnTitles(ViewGroup listColumns, int page)
+                protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
                 {
                     AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Accounts_Item_Image);
 
@@ -455,7 +455,7 @@ public abstract class Settings
                     imageColumn.setImageResource(R.drawable.org_gdrive);
                     ((TextView)listColumns.findViewById(R.id.Settings_Accounts_Item_Name_Text)).setText(R.string.title_account);
 
-                    super.setColumnTitles(listColumns, page);
+                    super.setColumnTitles(listColumns, categoryText, page);
                 }
 
                 @Override
@@ -523,11 +523,11 @@ public abstract class Settings
                     itemHolder.nameText.setText(currentItem.loginName);
                     if(imageId != -1)
                     {
-                        itemHolder.accountImage.setBackgroundResource(imageId);
+                        itemHolder.accountImage.setImageResource(imageId);
                     }
                     else
                     {
-                        itemHolder.accountImage.setBackgroundDrawable(null);
+                        itemHolder.accountImage.setImageDrawable(null);
                     }
 
                     //set background
@@ -1627,9 +1627,9 @@ public abstract class Settings
             private final int columnTitleStringId;
             private final Item[] locations;
 
-            public ItemListAdapter(View parentView, int titleStringId)
+            public ItemListAdapter(View parentView, int titleStringId, String categoryTitle)
             {
-                super(parentView);
+                super(parentView, categoryTitle);
 
                 int index;
                 Database.DatabaseLocation[] dbLocations = Database.getLocations(currentContext);
@@ -1649,9 +1649,9 @@ public abstract class Settings
                 }
                 this.itemsRefID = R.layout.settings_locations_item;
             }
-            public ItemListAdapter(View parentView)
+            public ItemListAdapter(View parentView, String title)
             {
-                this(parentView, -1);
+                this(parentView, -1, title);
             }
 
             @Override
@@ -1673,16 +1673,31 @@ public abstract class Settings
             }
 
             @Override
-            protected void setColumnTitles(ViewGroup listColumns, int page)
+            protected boolean showColumnTitles(int page)
             {
-                AppCompatImageView imageColumn = listColumns.findViewById(R.id.Location_Item_Image);
+                return(categoryTitle == null);
+            }
 
-                imageColumn.setVisibility(View.INVISIBLE);
-                imageColumn.setImageResource(R.drawable.ic_my_location_black);
-                ((TextView)listColumns.findViewById(R.id.Location_Item_Text)).setText(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name);
-                listColumns.findViewById(R.id.Location_Item_CheckBox).setVisibility(View.INVISIBLE);
+            @Override
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
+            {
+                //if have category
+                if(categoryText != null && categoryTitle != null)
+                {
+                    categoryText.setText(categoryTitle);
+                    ((View)categoryText.getParent()).setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Location_Item_Image);
 
-                super.setColumnTitles(listColumns, page);
+                    imageColumn.setVisibility(View.INVISIBLE);
+                    imageColumn.setImageResource(R.drawable.ic_my_location_black);
+                    ((TextView)listColumns.findViewById(R.id.Location_Item_Text)).setText(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name);
+                    listColumns.findViewById(R.id.Location_Item_CheckBox).setVisibility(View.INVISIBLE);
+                }
+
+                super.setColumnTitles(listColumns, categoryText, page);
             }
 
             @Override
@@ -1696,7 +1711,7 @@ public abstract class Settings
                 final double latitude = currentItem.latitude;
                 final double longitude = currentItem.longitude;
                 final double altitudeM = currentItem.altitudeM;
-                final Resources res = (currentContext != null ? currentContext.getResources() : null);
+                final Resources res = (haveContext ? currentContext.getResources() : null);
                 final TextView[] titles;
                 final TextView[] texts;
 
@@ -1839,7 +1854,7 @@ public abstract class Settings
 
             public Item(int id, String nm, CalculateService.AlarmNotifySettings pssStrtSttngs, CalculateService.AlarmNotifySettings pssEndSttngs, CalculateService.AlarmNotifySettings fllStrtSttngs, CalculateService.AlarmNotifySettings fllEndSttngs)
             {
-                super(id, -1, false, false, false, false);
+                super(id, -1, true, false, true, false);
                 name = nm;
                 passStartSettings = pssStrtSttngs;
                 passEndSettings = pssEndSttngs;
@@ -1879,9 +1894,9 @@ public abstract class Settings
         {
             private final Item[] notifications;
 
-            public ItemListAdapter(View parentView)
+            public ItemListAdapter(View parentView, String title)
             {
-                super(parentView);
+                super(parentView, title);
 
                 Resources res = currentContext.getResources();
                 Database.DatabaseSatellite[] orbitals = Database.getOrbitals(currentContext);
@@ -1931,14 +1946,29 @@ public abstract class Settings
             }
 
             @Override
-            protected void setColumnTitles(ViewGroup listColumns, int page)
+            protected boolean showColumnTitles(int page)
             {
-                AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Notify_Item_Image);
+                return(categoryTitle == null);
+            }
 
-                imageColumn.setVisibility(View.INVISIBLE);
-                ((TextView)listColumns.findViewById(R.id.Settings_Notify_Item_Name_Text)).setText(R.string.title_name);
+            @Override
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
+            {
+                //if have category
+                if(categoryText != null && categoryTitle != null)
+                {
+                    categoryText.setText(categoryTitle);
+                    ((View)categoryText.getParent()).setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Notify_Item_Image);
 
-                super.setColumnTitles(listColumns, page);
+                    imageColumn.setVisibility(View.INVISIBLE);
+                    ((TextView)listColumns.findViewById(R.id.Settings_Notify_Item_Name_Text)).setText(R.string.title_name);
+                }
+
+                super.setColumnTitles(listColumns, categoryText, page);
             }
 
             @Override
@@ -1980,7 +2010,7 @@ public abstract class Settings
                 //set displays
                 if(currentOrbital != null)
                 {
-                    itemHolder.notifyImage.setBackgroundDrawable(noradId != Integer.MIN_VALUE ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, currentOrbital.orbitalType) : Globals.getDrawable(currentContext, R.drawable.ic_notifications_white, true));
+                    itemHolder.notifyImage.setImageDrawable(noradId != Integer.MIN_VALUE ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, currentOrbital.orbitalType) : Globals.getDrawable(currentContext, R.drawable.ic_notifications_white, true));
                 }
                 itemHolder.nameText.setText(currentItem.name);
                 if(usePassStart || usePassEnd)
@@ -2066,7 +2096,7 @@ public abstract class Settings
 
             public ItemListAdapter(View parentView)
             {
-                super(parentView);
+                super(parentView, null);
 
                 this.itemsRefID = R.layout.settings_widgets_item;
             }
@@ -2090,7 +2120,7 @@ public abstract class Settings
             }
 
             @Override
-            protected void setColumnTitles(ViewGroup listColumns, int page)
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Widget_Item_Image);
 
@@ -2098,7 +2128,7 @@ public abstract class Settings
                 ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Name_Text)).setText(R.string.title_name);
                 ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Location_Text)).setText(R.string.title_location);
 
-                super.setColumnTitles(listColumns, page);
+                super.setColumnTitles(listColumns, categoryText, page);
             }
 
             @Override
@@ -2137,9 +2167,10 @@ public abstract class Settings
                 Item currentItem = widgets[position];
                 ItemHolder itemHolder = (ItemHolder)holder;
                 int widgetId = currentItem.id;
+                int noradId = WidgetBaseSetupActivity.getNoradID(currentContext, currentItem.id);
 
                 //set displays
-                itemHolder.widgetImage.setBackgroundDrawable(widgetId != 0 ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), WidgetBaseSetupActivity.getNoradID(currentContext, currentItem.id), WidgetBaseSetupActivity.getOrbitalType(currentContext, currentItem.id)) : Globals.getDrawable(currentContext, R.drawable.ic_widgets_black, true));
+                itemHolder.widgetImage.setImageDrawable(widgetId != 0 ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, WidgetBaseSetupActivity.getOrbitalType(currentContext, currentItem.id)) : Globals.getDrawable(currentContext, R.drawable.ic_widgets_black, (noradId > 0)));
                 itemHolder.nameText.setText(currentItem.name);
                 itemHolder.locationText.setText(currentItem.location);
 
@@ -2197,6 +2228,14 @@ public abstract class Settings
     //Page view
     public static class Page extends Selectable.ListFragment
     {
+        private final String categoryTitle;
+
+        public Page(String title)
+        {
+            super();
+            categoryTitle = title;
+        }
+
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
@@ -2209,11 +2248,11 @@ public abstract class Settings
             switch(page)
             {
                 case PageType.Locations:
-                    listAdapter = new Locations.ItemListAdapter(Page.this.listParentView);
+                    listAdapter = new Locations.ItemListAdapter(Page.this.listParentView, categoryTitle);
                     break;
 
                 case PageType.Notifications:
-                    listAdapter = new Notifications.ItemListAdapter(this.listParentView);
+                    listAdapter = new Notifications.ItemListAdapter(this.listParentView, categoryTitle);
                     break;
 
                 case PageType.Updates:
@@ -2246,11 +2285,12 @@ public abstract class Settings
         protected boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
         {
             boolean onLocations = (pageNum == PageType.Locations);
+            boolean onNotifications = (pageNum == PageType.Notifications);
             boolean onAccounts = isOnAccounts();
 
             //set visibility
             edit.setVisible(false);
-            delete.setVisible(inEditMode && (onLocations || onAccounts));
+            delete.setVisible(inEditMode && (onLocations || onNotifications || onAccounts));
             save.setVisible(false);
             sync.setVisible(false);
 
@@ -2265,7 +2305,7 @@ public abstract class Settings
         protected void onActionModeDelete()
         {
             //show deletion dialog
-            showConfirmDeleteDialog(isOnAccounts() ? R.plurals.text_accounts : R.plurals.title_locations);
+            showConfirmDeleteDialog(pageNum == PageType.Notifications ? R.plurals.title_notifications : isOnAccounts() ? R.plurals.title_accounts : R.plurals.title_locations);
         }
 
         @Override
@@ -2298,6 +2338,44 @@ public abstract class Settings
 
                             //update count
                             deleteCount++;
+                        }
+                        break;
+
+                    case PageType.Notifications:
+                        //get current notification item
+                        Notifications.Item currentNotification = (Notifications.Item)currentItem;
+
+                        //remove notification for each used type
+                        if(currentNotification.passStartSettings.timeMs != 0)
+                        {
+                            //remove type and update count
+                            Settings.setNotifyPassNext(context, currentNotification.id, null, false, 0, Globals.NotifyType.PassStart);
+                            deleteCount++;
+                        }
+                        if(currentNotification.passEndSettings.timeMs != 0)
+                        {
+                            //remove type and update count
+                            Settings.setNotifyPassNext(context, currentNotification.id, null, false, 0, Globals.NotifyType.PassEnd);
+                            deleteCount++;
+                        }
+                        if(currentNotification.fullStartSettings.timeMs != 0)
+                        {
+                            //remove type and update count
+                            Settings.setNotifyPassNext(context, currentNotification.id, null, false, 0, Globals.NotifyType.FullMoonStart);
+                            deleteCount++;
+                        }
+                        if(currentNotification.fullEndSettings.timeMs != 0)
+                        {
+                            //remove type and update count
+                            Settings.setNotifyPassNext(context, currentNotification.id, null, false, 0, Globals.NotifyType.FullMoonEnd);
+                            deleteCount++;
+                        }
+
+                        //normalize count
+                        if(deleteCount > 0)
+                        {
+                            //only show 1 to user
+                            deleteCount = 1;
                         }
                         break;
 
@@ -2350,7 +2428,7 @@ public abstract class Settings
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, subPage[position], new Page()));
+            return(this.getItem(group, position, subPage[position], new Page(null)));
         }
 
         @Override
@@ -2396,7 +2474,7 @@ public abstract class Settings
     }
 
     //Gets write settings
-    private static SharedPreferences.Editor getWriteSettings(Context context)
+    public static SharedPreferences.Editor getWriteSettings(Context context)
     {
         return(getPreferences(context).edit());
     }
@@ -3401,7 +3479,7 @@ public abstract class Settings
     }
 
     //Gets auto update alarm settings
-    private static UpdateService.AlarmUpdateSettings getAutoUpdateSettings(Context context, byte updateType)
+    public static UpdateService.AlarmUpdateSettings getAutoUpdateSettings(Context context, byte updateType)
     {
         UpdateService.AlarmUpdateSettings settings = new UpdateService.AlarmUpdateSettings();
         SharedPreferences readSettings = getPreferences(context);
@@ -3425,7 +3503,7 @@ public abstract class Settings
 
         return(settings);
     }
-    private static UpdateService.AlarmUpdateSettings getAutoUpdateSettings(Context context, String preferenceKey)
+    public static UpdateService.AlarmUpdateSettings getAutoUpdateSettings(Context context, String preferenceKey)
     {
         return(getAutoUpdateSettings(context, getUpdateType(preferenceKey)));
     }
@@ -3454,7 +3532,7 @@ public abstract class Settings
     }
 
     //Sets auto update
-    private static void setAutoUpdate(Context context, String preferenceKey)
+    public static void setAutoUpdate(Context context, String preferenceKey)
     {
         byte updateType = getUpdateType(preferenceKey);
         UpdateService.AlarmUpdateSettings settings = getAutoUpdateSettings(context, updateType);

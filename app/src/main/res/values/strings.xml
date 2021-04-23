@@ -5,10 +5,6 @@
     <string name="title_norad" translatable="false">NORAD</string>
     <string name="title_placeholder" translatable="false">-</string>
 
-    <plurals name="text_accounts">
-        <item quantity="one">account</item>
-        <item quantity="other">accounts</item>
-    </plurals>
     <plurals name="text_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>
@@ -25,6 +21,10 @@
         <item quantity="one">%d week</item>
         <item quantity="other">%d weeks</item>
     </plurals>
+    <plurals name="title_accounts">
+        <item quantity="one">Account</item>
+        <item quantity="other">Accounts</item>
+    </plurals>
     <plurals name="title_days_ago">
         <item quantity="one">Yesterday</item>
         <item quantity="other">%d Days Ago</item>
@@ -36,6 +36,10 @@
     <plurals name="title_locations">
         <item quantity="one">Location</item>
         <item quantity="other">Locations</item>
+    </plurals>
+    <plurals name="title_notifications">
+        <item quantity="one">Notification</item>
+        <item quantity="other">Notifications</item>
     </plurals>
     <plurals name="title_satellites">
         <item quantity="one">Satellite</item>

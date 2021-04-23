@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:ignore="ContentDescription"
+    android:id="@+id/Settings_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/dividerTextBackground">
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/Settings_Layout_Fragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="32dp"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/Settings_Layout_Floating_Button"
+        style="@style/FloatingButton"
+        android:layout_margin="25dp"
+        android:layout_gravity="bottom|end"
+        app:elevation="2dp"
+        android:visibility="gone"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/Settings_Layout_Back_Button"
+        style="@style/BottomButton"
+        android:text="@string/title_back"/>
+</FrameLayout>

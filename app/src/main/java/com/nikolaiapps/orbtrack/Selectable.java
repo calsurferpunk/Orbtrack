@@ -947,6 +947,7 @@ public abstract class Selectable
         protected int itemsRefID = -1;
         protected int itemsRootViewID = -1;
         protected int widthDp = Globals.getDeviceDp(null, true);
+        protected String categoryTitle;
         protected Context currentContext;
         protected LayoutInflater listInflater;
         private OnItemClickListener itemClickedListener;
@@ -959,13 +960,15 @@ public abstract class Selectable
 
         public ListBaseAdapter(Context context)
         {
+            categoryTitle = null;
             currentContext = context;
             listInflater = (currentContext != null ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
             enableItemClicks = true;
         }
-        public ListBaseAdapter(View parentView)
+        public ListBaseAdapter(View parentView, String categoryTitle)
         {
             this(parentView != null ? parentView.getContext() : null);
+            this.categoryTitle = categoryTitle;
         }
 
         //Sets header view
@@ -1001,7 +1004,7 @@ public abstract class Selectable
         }
 
         //Sets column titles
-        protected void setColumnTitles(ViewGroup listColumns, int page)
+        protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
         {
             boolean haveContext = (currentContext != null);
             int[] colors = (haveContext ? Globals.resolveAttributeIDs(currentContext, new int[]{R.attr.columnBackground, R.attr.columnTitleTextColor}) : new int[]{Color.BLACK, Color.WHITE});
@@ -1038,19 +1041,36 @@ public abstract class Selectable
         }
 
         //Sets item background
+        private void setItemBackground(View itemView, int bgId)
+        {
+            int index;
+
+            //set view background
+            itemView.setBackgroundResource(bgId);
+
+            //if a view group
+            if(itemView instanceof ViewGroup)
+            {
+                //go through each child
+                ViewGroup itemGroup = (ViewGroup)itemView;
+                for(index = 0; index < itemGroup.getChildCount(); index++)
+                {
+                    //set child background
+                    setItemBackground(itemGroup.getChildAt(index), bgId);
+                }
+            }
+        }
         public void setItemBackground(View itemView, boolean isSelected)
         {
+            int index;
             int[] ids;
 
-            //if view exists
-            if(itemView != null)
+            //if view and context exist
+            if(itemView != null && currentContext != null)
             {
                 //get around compiler bug by storing result in array
-                if(currentContext != null)
-                {
-                    ids = new int[]{Globals.resolveAttributeID(currentContext, (isSelected ? R.attr.itemSelected : R.attr.itemSelect))};
-                    itemView.setBackgroundResource(ids[0]);
-                }
+                ids = new int[]{Globals.resolveAttributeID(currentContext, (isSelected ? R.attr.itemSelected : R.attr.itemSelect))};
+                setItemBackground(itemView, ids[0]);
             }
         }
 
@@ -1304,6 +1324,7 @@ public abstract class Selectable
         private Menu actionMenu;
         private ActionMode actionModeMenu;
         private ListBaseAdapter selectListAdapter;
+        protected TextView categoryText;
         protected RecyclerView selectList;
         protected int group;
         protected int pageNum;
@@ -1318,6 +1339,7 @@ public abstract class Selectable
             super();
             group = pageNum = -1;
             inEditMode = false;
+            categoryText = null;
             selectList = null;
             selectListAdapter = null;
             selectedItems = new ArrayList<>(0);
@@ -1446,7 +1468,7 @@ public abstract class Selectable
                 if(listColumns != null)
                 {
                     //update column titles
-                    selectListAdapter.setColumnTitles((ViewGroup)listColumns, pageNum);
+                    selectListAdapter.setColumnTitles((ViewGroup)listColumns, categoryText, pageNum);
                 }
             }
         }
@@ -1480,6 +1502,10 @@ public abstract class Selectable
             {
                 listColumns = null;
             }
+
+            //setup category
+            categoryText = rootView.findViewById(android.R.id.title);
+            ((View)categoryText.getParent()).setVisibility(View.GONE);
 
             //setup list
             selectList = rootView.findViewById(R.id.List_View_List);

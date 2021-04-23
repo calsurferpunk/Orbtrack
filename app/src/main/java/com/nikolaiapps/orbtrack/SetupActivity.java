@@ -82,7 +82,7 @@ public class SetupActivity extends BaseInputActivity
                     break;
 
                 case SetupPage.Location:
-                    listAdapter = new Settings.Locations.ItemListAdapter(rootView, R.string.title_location);
+                    listAdapter = new Settings.Locations.ItemListAdapter(rootView, R.string.title_location, null);
                     break;
 
                 case SetupPage.Updates:

@@ -12,12 +12,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.view.View;
-
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -47,6 +45,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
         static final byte DropboxOpenFolder = 17;
         static final byte OthersOpenItem = 18;
         static final byte OthersSave = 19;
+        static final byte Settings = 20;
     }
 
     @Override

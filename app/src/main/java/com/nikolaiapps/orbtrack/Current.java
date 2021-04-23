@@ -1576,7 +1576,7 @@ public abstract class Current
             }
 
             @Override
-            protected void setColumnTitles(ViewGroup listColumns, int page)
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
                 TextView nameText;
@@ -1614,7 +1614,7 @@ public abstract class Current
                 text = res.getString(R.string.title_range) + " (" + Globals.getKmLabel(res) + ")";
                 ((TextView)listColumns.findViewById(R.id.Angles_Range_Text)).setText(text);
 
-                super.setColumnTitles(listColumns, page);
+                super.setColumnTitles(listColumns, categoryText, page);
             }
 
             @Override
@@ -2178,7 +2178,7 @@ public abstract class Current
             }
 
             @Override
-            protected void setColumnTitles(ViewGroup listColumns, int page)
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
                 boolean showEnd = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
@@ -2203,7 +2203,7 @@ public abstract class Current
                 ((TextView)listColumns.findViewById(R.id.Pass_El_Max_Text)).setText(text);
                 listColumns.findViewById(R.id.Pass_El_Max_Under).setVisibility(View.GONE);
 
-                super.setColumnTitles(listColumns, page);
+                super.setColumnTitles(listColumns, categoryText, page);
             }
 
             @Override
@@ -2782,7 +2782,7 @@ public abstract class Current
             }
 
             @Override
-            protected void setColumnTitles(ViewGroup listColumns, int page)
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
                 boolean showSpeed = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
@@ -2817,7 +2817,7 @@ public abstract class Current
                 text = res.getString(R.string.abbrev_altitude) + " (" + Globals.getKmLabel(res) + ")";
                 ((TextView)listColumns.findViewById(R.id.Coordinate_Altitude_Text)).setText(text);
 
-                super.setColumnTitles(listColumns, page);
+                super.setColumnTitles(listColumns, categoryText, page);
             }
 
             @Override

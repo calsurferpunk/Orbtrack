@@ -177,6 +177,11 @@
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"/>
 
+        <activity
+            android:name=".SettingsActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"/>
+
         <activity android:name=".NotifySettingsActivity"/>
 
         <activity android:name=".MasterAddListActivity"/>

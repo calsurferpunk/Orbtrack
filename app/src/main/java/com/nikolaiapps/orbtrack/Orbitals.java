@@ -119,7 +119,7 @@ public abstract class Orbitals
 
         public PageListAdapter(View parentView, int page, int titleStringId, boolean simple)
         {
-            super(parentView);
+            super(parentView, null);
 
             int index;
             String sqlConditions = null;
@@ -194,7 +194,7 @@ public abstract class Orbitals
         }
 
         @Override
-        protected void setColumnTitles(ViewGroup listColumns, int page)
+        protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
         {
             int nonNameVisibility = (currentPage == PageType.Satellites && !forSetup ? View.VISIBLE : View.GONE);
             TextView tleDateText = listColumns.findViewById(R.id.Object_TLE_Age_Text);
@@ -209,7 +209,7 @@ public abstract class Orbitals
             colorButton.setVisibility(View.GONE);
             listColumns.findViewById(R.id.Object_Color_Button_Replace).setVisibility(View.VISIBLE);
 
-            super.setColumnTitles(listColumns, page);
+            super.setColumnTitles(listColumns, categoryText, page);
         }
 
         @Override

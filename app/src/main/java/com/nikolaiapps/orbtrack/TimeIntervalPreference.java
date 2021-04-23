@@ -16,6 +16,11 @@ import java.util.Calendar;
 
 public class TimeIntervalPreference extends Preference
 {
+    public interface OnPreferenceChangedListener
+    {
+        void onPreferenceChanged(TimeIntervalPreference preference, Object newValue);
+    }
+
     //Class to report combined interval values
     public static class IntervalValues
     {
@@ -44,6 +49,7 @@ public class TimeIntervalPreference extends Preference
     private String sharedName;
     private IconSpinner frequencyList;
     private TimeInputView timeView;
+    private OnPreferenceChangedListener changedListener;
 
     public TimeIntervalPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
@@ -59,6 +65,7 @@ public class TimeIntervalPreference extends Preference
         hourKey = null;
         minuteKey = null;
         intervalKey = null;
+        changedListener = null;
 
         //if frequency items not set yet
         if(frequencyItems == null)
@@ -158,8 +165,10 @@ public class TimeIntervalPreference extends Preference
             @Override
             public void onTimeSet(TimeInputView timeView, int hour, int minute)
             {
+                IntervalValues newValue = new IntervalValues(hour, minute, getIntervalMs());
+
                 //if change saving allowed
-                if(callChangeListener(new IntervalValues(hour, minute, getIntervalMs())))
+                if(callChangeListener(newValue))
                 {
                     SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
@@ -175,9 +184,22 @@ public class TimeIntervalPreference extends Preference
                         writeSettings.putInt(minuteKey, minute);
                     }
                     writeSettings.apply();
+
+                    //if changed listener is set
+                    if(changedListener != null)
+                    {
+                        //call it
+                        changedListener.onPreferenceChanged(TimeIntervalPreference.this, newValue);
+                    }
                 }
             }
         });
+    }
+
+    //Sets on changed listener
+    public void setOnPreferenceChangedListener(OnPreferenceChangedListener listener)
+    {
+        changedListener = listener;
     }
 
     //Gets shared preferences

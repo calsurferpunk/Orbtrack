@@ -23,7 +23,7 @@
                     android:persistent="false"/>
 
                 <com.nikolaiapps.orbtrack.TimeIntervalPreference
-                    android:key="TLEAutoUpdateTime"
+                    android:key="TLEAutoUpdateRate"
                     app:hourKey="TLEAutoUpdateHour"
                     app:minuteKey="TLEAutoUpdateMinute"
                     app:intervalKey="TLEAutoUpdateInterval"
@@ -35,11 +35,67 @@
                     android:persistent="false"/>
 
                 <com.nikolaiapps.orbtrack.TimeIntervalPreference
-                    android:key="CatalogAutoUpdateTime"
+                    android:key="CatalogAutoUpdateRate"
                     app:hourKey="CatalogAutoUpdateHour"
                     app:minuteKey="CatalogAutoUpdateMinute"
                     app:intervalKey="CatalogAutoUpdateRate"
                     app:isPreferenceVisible="false"/>
+
+                <PreferenceCategory android:title="@string/title_satellites">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_source"
+                        android:key="SatelliteSource"
+                        android:persistent="false"/>
+
+                    <SwitchPreference
+                        app:title="@string/title_add_rocket_bodies"
+                        android:key="CatalogRocketBodies"
+                        android:persistent="false"/>
+
+                    <SwitchPreference
+                        app:title="@string/title_add_debris"
+                        android:key="CatalogDebris"
+                        android:persistent="false"/>
+
+                    <SwitchPreference
+                        app:title="@string/title_use_legacy_tle_format"
+                        android:key="SatelliteSourceUseGP"
+                        android:persistent="false"/>
+                </PreferenceCategory>
+
+                <PreferenceCategory android:title="@string/title_altitude">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_source"
+                        android:key="AltitudeSource"
+                        android:persistent="false"
+                        android:summary="@string/desc_altitude_source"/>
+                </PreferenceCategory>
+
+                <PreferenceCategory android:title="@string/title_time_zone">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_source"
+                        android:key="TimeZoneSource"
+                        android:persistent="false"
+                        android:summary="@string/desc_time_zone_source"/>
+                </PreferenceCategory>
+
+                <PreferenceCategory android:title="@string/title_information">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_information"
+                        android:key="InformationSource"
+                        android:persistent="false"
+                        android:summary="@string/desc_information_source"/>
+
+                    <SwitchPreference
+                        app:title="@string/title_translate_information"
+                        android:key="TranslateInformation"
+                        android:persistent="false"/>
+
+                    <SwitchPreference
+                        app:title="@string/title_share_translations_online"
+                        android:key="ShareTranslations"
+                        android:persistent="false"/>
+                </PreferenceCategory>
             </PreferenceCategory>
         </PreferenceScreen>
 

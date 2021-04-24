@@ -58,31 +58,41 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             if(context != null && screenKey != null)
             {
-                SharedPreferences readSettings = Settings.getPreferences(context);
-                SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
-
                 switch(screenKey)
                 {
                     case "updates":
+                        //get displays
                         SwitchPreference tleAutoSwitch = this.findPreference(Settings.PreferenceName.TLEAutoUpdate);
                         SwitchPreference catalogAutoSwitch = this.findPreference(Settings.PreferenceName.CatalogAutoUpdate);
-                        TimeIntervalPreference tleAutoTime = this.findPreference("TLEAutoUpdateTime");
-                        TimeIntervalPreference catalogAutoTime = this.findPreference("CatalogAutoUpdateTime");
+                        SwitchPreference rocketBodySwitch = this.findPreference(Settings.PreferenceName.CatalogRocketBodies);
+                        SwitchPreference debrisSwitch = this.findPreference(Settings.PreferenceName.CatalogDebris);
+                        SwitchPreference legacyDataSwitch = this.findPreference(Settings.PreferenceName.SatelliteSourceUseGP);
+                        SwitchPreference translateInformationSwitch = this.findPreference(Settings.PreferenceName.TranslateInformation);
+                        SwitchPreference shareTranslateSwitch = this.findPreference(Settings.PreferenceName.ShareTranslations);
+                        IconListPreference satellitesList = this.findPreference(Settings.PreferenceName.SatelliteSource);
+                        IconListPreference altitudeList = this.findPreference(Settings.PreferenceName.AltitudeSource);
+                        IconListPreference timeZoneList = this.findPreference(Settings.PreferenceName.TimeZoneSource);
+                        IconListPreference informationList = this.findPreference(Settings.PreferenceName.InformationSource);
+                        TimeIntervalPreference tleAutoTime = this.findPreference(Settings.PreferenceName.TLEAutoUpdateRate);
+                        TimeIntervalPreference catalogAutoTime = this.findPreference(Settings.PreferenceName.CatalogAutoUpdateRate);
 
-                        if(tleAutoSwitch != null)
-                        {
-                            tleAutoSwitch.setOnPreferenceChangeListener(createOnSwitchChangeListener(Settings.PreferenceName.TLEAutoUpdate, writeSettings, tleAutoTime));
-                            tleAutoSwitch.setChecked(readSettings.getBoolean(Settings.PreferenceName.TLEAutoUpdate, false));
-                        }
-                        if(catalogAutoSwitch != null)
-                        {
-                            catalogAutoSwitch.setOnPreferenceChangeListener(createOnSwitchChangeListener(Settings.PreferenceName.CatalogAutoUpdate, writeSettings, catalogAutoTime));
-                            tleAutoSwitch.setChecked(readSettings.getBoolean(Settings.PreferenceName.CatalogAutoUpdate, false));
-                        }
-                        if(tleAutoTime != null)
-                        {
-                            tleAutoTime.setOnPreferenceChangedListener(createOnTimeIntervalChangeListener(Settings.PreferenceName.TLEAutoUpdateRate));
-                        }
+                        //init values
+                        Settings.Options.Updates.initValues(context);
+
+                        //setup displays
+                        setupSwitch(tleAutoSwitch, tleAutoTime);
+                        setupSwitch(catalogAutoSwitch, catalogAutoTime);
+                        setupSwitch(rocketBodySwitch, null);
+                        setupSwitch(debrisSwitch, null);
+                        setupSwitch(legacyDataSwitch, null);
+                        setupSwitch(translateInformationSwitch, null);
+                        setupSwitch(shareTranslateSwitch, null);
+                        setupList(satellitesList, Settings.Options.Updates.SatelliteSourceItems, Settings.Options.Updates.SatelliteSourceValues, Settings.Options.Updates.SatelliteSourceImageIds, Settings.Options.Updates.SatelliteSourceSubTexts, legacyDataSwitch);
+                        setupList(altitudeList, Settings.Options.Updates.AltitudeSourceItems, Settings.Options.Updates.AltitudeSourceValues, Settings.Options.Updates.AltitudeSourceImageIds, null, null);
+                        setupList(timeZoneList, Settings.Options.Updates.TimeZoneSourceItems, Settings.Options.Updates.TimeZoneSourceValues, Settings.Options.Updates.TimeZoneSourceImageIds, null, null);
+                        setupList(informationList, Settings.Options.Updates.InformationSourceItems, Settings.Options.Updates.InformationSourceValues, Settings.Options.Updates.InformationSourceImageIds, null, null);
+                        setupTimeInterval(tleAutoTime);
+                        setupTimeInterval(catalogAutoTime);
                         break;
                 }
             }
@@ -606,70 +616,169 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         });
     }
 
-    //Creates an on preference change listener for a switch
-    private static Preference.OnPreferenceChangeListener createOnSwitchChangeListener(String preferenceKey, SharedPreferences.Editor writeSettings, TimeIntervalPreference timePreference)
+    //Sets up a list
+    private static void setupList(IconListPreference preference, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts, Preference childPreference)
     {
-        return(new Preference.OnPreferenceChangeListener()
+        //if preference exists
+        if(preference != null)
         {
-            @Override
-            public boolean onPreferenceChange(Preference preference, Object newValue)
+            final Context context = preference.getContext();
+            final String preferenceKey = preference.getKey();
+            int valueIndex = -1;
+            Object currentValue = null;
+
+            //get current value based on key
+            switch(preferenceKey)
             {
-                Context context = preference.getContext();
-                boolean checked = (Boolean)newValue;
-                boolean isAutoUpdate = (timePreference != null);
-                UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
+                case Settings.PreferenceName.SatelliteSource:
+                    valueIndex = Settings.getSatelliteSource(context);
 
-                //if -not for auto update- or -settings are changing-
-                if(!isAutoUpdate || settings.enabled != checked)
+                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                    {
+                        @Override
+                        public boolean onPreferenceChange(Preference preference, Object newValue)
+                        {
+                            byte source = (byte)newValue;
+                            SwitchPreference childSwitch = (SwitchPreference)childPreference;
+                            boolean sourceUseGP = !Settings.getSatelliteSourceUseGP(context, source);
+
+                            //update child switch
+                            childSwitch.setChecked(sourceUseGP);
+                            childSwitch.setEnabled(source != Database.UpdateSource.N2YO);
+
+                            //if changing source
+                            if(source != Settings.getSatelliteSource(context))
+                            {
+                                //clear master satellites
+                                Database.clearMasterSatelliteTable(context);
+                            }
+
+                            //allow change
+                            return(true);
+                        }
+                    });
+                    break;
+
+                case Settings.PreferenceName.AltitudeSource:
+                    valueIndex = (Settings.getAltitudeSource(context) == LocationService.OnlineSource.MapQuest ? 0 : 1);
+                    break;
+
+                case Settings.PreferenceName.TimeZoneSource:
+                    valueIndex = (Settings.getTimeZoneSource(context) == LocationService.OnlineSource.GeoNames ? 0 : 1);
+                    break;
+
+                case Settings.PreferenceName.InformationSource:
+                    valueIndex = Settings.getInformationSource(context);
+                    valueIndex = (valueIndex == Database.UpdateSource.NASA ? 0 : valueIndex == Database.UpdateSource.Celestrak ? 1 : 2);
+                    break;
+            }
+            if(valueIndex >= 0 && valueIndex < values.length)
+            {
+                currentValue = values[valueIndex];
+            }
+
+            //set adapter, state, and listener
+            preference.setAdapter(context, items, values, itemImageIds, subTexts);
+            preference.setSelectedValue(currentValue);
+        }
+    }
+
+    //Sets up up a preference switch
+    private static void setupSwitch(SwitchPreference preference, TimeIntervalPreference timePreference)
+    {
+        //if preference exists
+        if(preference != null)
+        {
+            final Context context = preference.getContext();
+            final SharedPreferences readSettings = Settings.getPreferences(context);
+            final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
+            final String preferenceKey = preference.getKey();
+            final boolean checked = readSettings.getBoolean(preferenceKey, false);
+
+            //set state and listener
+            preference.setChecked(checked);
+            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+            {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue)
                 {
-                    //save preference
-                    writeSettings.putBoolean(preferenceKey, checked).apply();
+                    boolean checked = (Boolean)newValue;
+                    boolean isAutoUpdate = (timePreference != null);
+                    String subKey = "";
+                    UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
 
-                    //if auto update
-                    if(isAutoUpdate)
+                    //if -not for auto update- or -settings are changing-
+                    if(!isAutoUpdate || settings.enabled != checked)
+                    {
+                        //if for GP data usage
+                        if(preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP))
+                        {
+                            //get sub key
+                            subKey = String.valueOf(Settings.getSatelliteSource(context));
+
+                            //invert value
+                            checked = !checked;
+                        }
+
+                        //save preference
+                        writeSettings.putBoolean(preferenceKey + subKey, checked).apply();
+
+                        //if auto update
+                        if(isAutoUpdate)
+                        {
+                            //apply changes
+                            Settings.setAutoUpdate(context, preferenceKey);
+                        }
+                    }
+
+                    //if time preference is set
+                    if(timePreference != null)
+                    {
+                        //update visibility
+                        timePreference.setVisible(checked);
+                    }
+
+                    //allow change
+                    return(true);
+                }
+            });
+
+            //if might need changes
+            if(timePreference != null)
+            {
+                //call once to update changes
+                preference.getOnPreferenceChangeListener().onPreferenceChange(preference, checked);
+            }
+        }
+    }
+
+    //Sets up a time interval
+    private static void setupTimeInterval(TimeIntervalPreference preference)
+    {
+        //if preference exists
+        if(preference != null)
+        {
+            final Context context = preference.getContext();
+            final String preferenceKey = preference.getKey();
+
+            //set listener
+            preference.setOnPreferenceChangedListener(new TimeIntervalPreference.OnPreferenceChangedListener()
+            {
+                @Override
+                public void onPreferenceChanged(TimeIntervalPreference preference, Object newValue)
+                {
+                    TimeIntervalPreference.IntervalValues values = (TimeIntervalPreference.IntervalValues)newValue;
+                    UpdateService.AlarmUpdateSettings settings = Settings.getAutoUpdateSettings(context, preferenceKey);
+
+                    //if settings changed
+                    if(values.hour != settings.hour || values.minute != settings.minute || values.intervalMs != settings.rate)
                     {
                         //apply changes
                         Settings.setAutoUpdate(context, preferenceKey);
                     }
                 }
-
-                //if time preference is set
-                if(timePreference != null)
-                {
-                    //update visibility
-                    timePreference.setVisible(checked);
-                }
-
-                //allow change
-                return(true);
-            }
-        });
-    }
-    private static Preference.OnPreferenceChangeListener createOnSwitchChangeListener(String preferenceKey, SharedPreferences.Editor writeSettings)
-    {
-        return(createOnSwitchChangeListener(preferenceKey, writeSettings, null));
-    }
-
-    //Creates an on preference change listener for a timer interval
-    private static TimeIntervalPreference.OnPreferenceChangedListener createOnTimeIntervalChangeListener(String preferenceKey)
-    {
-        return(new TimeIntervalPreference.OnPreferenceChangedListener()
-        {
-            @Override
-            public void onPreferenceChanged(TimeIntervalPreference preference, Object newValue)
-            {
-                Context context = preference.getContext();
-                TimeIntervalPreference.IntervalValues values = (TimeIntervalPreference.IntervalValues)newValue;
-                UpdateService.AlarmUpdateSettings settings = Settings.getAutoUpdateSettings(context, preferenceKey);
-
-                //if settings changed
-                if(values.hour != settings.hour || values.minute != settings.minute || values.intervalMs != settings.rate)
-                {
-                    //apply changes
-                    Settings.setAutoUpdate(context, preferenceKey);
-                }
-            }
-        });
+            });
+        }
     }
 
     //Gets the desired settings page

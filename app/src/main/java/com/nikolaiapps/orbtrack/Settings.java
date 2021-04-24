@@ -667,25 +667,25 @@ public abstract class Settings
         public static abstract class Updates
         {
             //Altitude sources
-            private static final String[] AltitudeSourceItems = new String[]{Sources.MapQuest, Sources.Google};
-            private static final Byte[] AltitudeSourceValues = new Byte[]{LocationService.OnlineSource.MapQuest, LocationService.OnlineSource.Google};
-            private static final int[] AltitudeSourceImageIds = new int[]{R.drawable.org_mapquest, R.drawable.org_google};
+            public static final String[] AltitudeSourceItems = new String[]{Sources.MapQuest, Sources.Google};
+            public static final Byte[] AltitudeSourceValues = new Byte[]{LocationService.OnlineSource.MapQuest, LocationService.OnlineSource.Google};
+            public static final int[] AltitudeSourceImageIds = new int[]{R.drawable.org_mapquest, R.drawable.org_google};
 
             //Time zone sources
-            private static final String[] TimeZoneSourceItems = new String[]{Sources.GeoNames, Sources.Google};
-            private static final Byte[] TimeZoneSourceValues = new Byte[]{LocationService.OnlineSource.GeoNames, LocationService.OnlineSource.Google};
-            private static final int[] TimeZoneSourceImageIds = new int[]{R.drawable.org_geonames, R.drawable.org_google};
+            public static final String[] TimeZoneSourceItems = new String[]{Sources.GeoNames, Sources.Google};
+            public static final Byte[] TimeZoneSourceValues = new Byte[]{LocationService.OnlineSource.GeoNames, LocationService.OnlineSource.Google};
+            public static final int[] TimeZoneSourceImageIds = new int[]{R.drawable.org_geonames, R.drawable.org_google};
 
             //Satellite sources
             public static final String[] SatelliteSourceItems = new String[]{Sources.Celestrak, Sources.N2YO, Sources.SpaceTrack};
             public static final Byte[] SatelliteSourceValues = new Byte[]{Database.UpdateSource.Celestrak, Database.UpdateSource.N2YO, Database.UpdateSource.SpaceTrack};
             public static final int[] SatelliteSourceImageIds = new int[]{R.drawable.org_celestrak, R.drawable.org_n2yo, R.drawable.org_space_track};
-            private static String[] SatelliteSourceSubTexts;
+            public static String[] SatelliteSourceSubTexts;
 
             //Information sources
-            private static final String[] InformationSourceItems = new String[]{Sources.NASA, Sources.Celestrak, Sources.N2YO};
-            private static final Byte[] InformationSourceValues = new Byte[]{Database.UpdateSource.NASA, Database.UpdateSource.Celestrak, Database.UpdateSource.N2YO};
-            private static final int[] InformationSourceImageIds = new int[]{R.drawable.org_nasa, R.drawable.org_celestrak, R.drawable.org_n2yo};
+            public static final String[] InformationSourceItems = new String[]{Sources.NASA, Sources.Celestrak, Sources.N2YO};
+            public static final Byte[] InformationSourceValues = new Byte[]{Database.UpdateSource.NASA, Database.UpdateSource.Celestrak, Database.UpdateSource.N2YO};
+            public static final int[] InformationSourceImageIds = new int[]{R.drawable.org_nasa, R.drawable.org_celestrak, R.drawable.org_n2yo};
 
             //Update frequencies
             private static final long MsPerDay = (long)Calculations.MsPerDay;
@@ -693,6 +693,26 @@ public abstract class Settings
             private static final long MsPer4Weeks = MsPerDay * 28;
             private static String[] updateFrequencyItems;
             private static final Long[] UpdateFrequencyValues = new Long[]{MsPerDay, MsPerDay * 2, MsPer3Days, MsPerDay * 5, MsPerDay * 7, MsPerDay * 14, MsPer4Weeks};
+
+            //Initializes values
+            public static void initValues(Context context)
+            {
+                Resources res = context.getResources();
+                String qualityString = res.getString(R.string.title_quality) + ":";
+                String speedString = "  " + res.getString(R.string.title_speed) + ":";
+
+                //if values are not set
+                if(SatelliteSourceSubTexts == null || SatelliteSourceSubTexts.length == 0)
+                {
+                    //init satellite source sub texts
+                    SatelliteSourceSubTexts = new String[]
+                    {
+                        qualityString + Globals.getStars(2) + speedString + Globals.getStars(2),
+                        qualityString + Globals.getStars(1) + speedString + Globals.getStars(2),
+                        qualityString + Globals.getStars(3) + speedString + Globals.getStars(3) + " " + Globals.Symbols.Lock
+                    };
+                }
+            }
         }
 
         //Creates an on play bar changed listener
@@ -1190,19 +1210,13 @@ public abstract class Settings
                         final View tleAutoRow = rootView.findViewById(R.id.Settings_Updates_TLE_Auto_Row);
                         final UpdateService.AlarmUpdateSettings catalogAutoSettings = getAutoUpdateSettings(context, UpdateService.UpdateType.GetMasterList);
                         final UpdateService.AlarmUpdateSettings tleAutoSettings = getAutoUpdateSettings(context, UpdateService.UpdateType.UpdateSatellites);
-                        final String qualityString = res.getString(R.string.title_quality) + ":";
-                        final String speedString = "  " + res.getString(R.string.title_speed) + ":";
                         int altitudeSource = getAltitudeSource(context);
                         int timeZoneSource = getTimeZoneSource(context);
                         int informationSource = getInformationSource(context);
                         int satelliteSource = getSatelliteSource(context);
 
-                        Updates.SatelliteSourceSubTexts = new String[]
-                        {
-                            qualityString + Globals.getStars(2) + speedString + Globals.getStars(2),
-                            qualityString + Globals.getStars(1) + speedString + Globals.getStars(2),
-                            qualityString + Globals.getStars(3) + speedString + Globals.getStars(3) + " " + Globals.Symbols.Lock
-                        };
+                        //initialize values
+                        Updates.initValues(context);
 
                         //set events
                         satellitesList.setOnItemSelectedListener(createOnItemSelectedListener((simple ? null : context), (simple ? null : legacyDataSwitch), PreferenceName.SatelliteSource, Updates.SatelliteSourceValues, writeSettings));

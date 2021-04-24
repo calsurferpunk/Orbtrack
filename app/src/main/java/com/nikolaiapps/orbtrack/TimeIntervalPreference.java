@@ -56,7 +56,7 @@ public class TimeIntervalPreference extends Preference
         super(context, attrs, defStyleAttr, defStyleRes);
 
         this.setPersistent(false);
-        this.setWidgetLayoutResource(R.layout.time_interval_preference_layout);
+        this.setLayoutResource(R.layout.time_interval_preference_layout);
 
         TypedArray valueArray;
         Resources res = context.getResources();

@@ -18,6 +18,7 @@
     <attr name="itemSelected" format="reference"/>
     <attr name="normalTint" format="color"/>
     <attr name="checkedTint" format="color"/>
+    <attr name="sharedName" format="string"/>
 
     <declare-styleable name="PlayBar">
         <attr name="textColor" format="color"/>
@@ -42,9 +43,14 @@
     </declare-styleable>
 
     <declare-styleable name="TimeIntervalPreference">
+        <attr name="sharedName"/>
         <attr name="hourKey" format="string"/>
         <attr name="minuteKey" format="string"/>
         <attr name="intervalKey" format="string"/>
-        <attr name="sharedName" format="string"/>
+    </declare-styleable>
+
+    <declare-styleable name="IconListPreference">
+        <attr name="sharedName"/>
+        <attr name="titleText" format="string"/>
     </declare-styleable>
 </resources>

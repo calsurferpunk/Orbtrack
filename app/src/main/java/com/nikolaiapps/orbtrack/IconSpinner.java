@@ -144,17 +144,21 @@ public class IconSpinner extends AppCompatSpinner
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Object[] itms, int[] itmImgIds, String[] sbTxts)
+        public CustomAdapter(Context context, Object[] itms, Object[] vals, int[] itmImgIds, String[] sbTxts)
         {
             int index;
 
             items = new Item[itms.length];
             for(index = 0; index < items.length; index++)
             {
-                items[index] = new Item(Globals.getDrawable(context, itmImgIds[index], false), itms[index].toString(), itms[index], sbTxts[index]);
+                items[index] = new Item(Globals.getDrawable(context, itmImgIds[index], false), itms[index].toString(), vals[index], (sbTxts != null ? sbTxts[index] : null));
             }
 
             BaseConstructor(context);
+        }
+        public CustomAdapter(Context context, Object[] itms, int[] itmImgIds, String[] sbTxts)
+        {
+            this(context, itms, itms, itmImgIds, sbTxts);
         }
         public CustomAdapter(Context context, ArrayList<TimeZone> zones)
         {
@@ -238,6 +242,22 @@ public class IconSpinner extends AppCompatSpinner
         public Item[] getItems()
         {
             return(items);
+        }
+
+        public Object[] getItemValues()
+        {
+            int position;
+            Object[] values = new Object[items.length];
+
+            //go through each time
+            for(position = 0; position < values.length; position++)
+            {
+                //copy value
+                values[position] = items[position].value;
+            }
+
+            //return values
+            return(values);
         }
 
         public Object getItemValue(int position)

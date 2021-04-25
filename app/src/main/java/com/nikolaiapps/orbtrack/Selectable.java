@@ -965,10 +965,14 @@ public abstract class Selectable
             listInflater = (currentContext != null ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
             enableItemClicks = true;
         }
+        public ListBaseAdapter(Context context, String categoryTitle)
+        {
+            this(context);
+            this.categoryTitle = categoryTitle;
+        }
         public ListBaseAdapter(View parentView, String categoryTitle)
         {
-            this(parentView != null ? parentView.getContext() : null);
-            this.categoryTitle = categoryTitle;
+            this((parentView != null ? parentView.getContext() : null), categoryTitle);
         }
 
         //Sets header view

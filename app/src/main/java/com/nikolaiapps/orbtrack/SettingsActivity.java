@@ -28,6 +28,9 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.ArrayList;
@@ -117,6 +120,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private LocationReceiver locationReceiver;
     private Settings.PageAdapter settingsPageAdapter;
     private Settings.Locations.ItemListAdapter settingsLocationsListAdapter;
+    private Settings.Options.Accounts.ItemListAdapter accountsListAdapter;
 
     public static class SettingsMainFragment extends PreferenceFragmentCompat
     {
@@ -182,6 +186,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         locationSource = Database.LocationType.Current;
         settingsPageAdapter = null;
         settingsLocationsListAdapter = null;
+        accountsListAdapter = null;
 
         //setup fragment manager
         manager = this.getSupportFragmentManager();
@@ -298,7 +303,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
+        boolean isError = true;
         boolean isOkay = (resultCode == RESULT_OK);
+        Resources res = this.getResources();
 
         //handle response
         switch(requestCode)
@@ -310,6 +317,44 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     //update list later
                     pendingUpdate = true;
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.GoogleDriveAddAccount:
+            case BaseInputActivity.RequestCode.DropboxAddAccount:
+                //if adapter is set
+                if(accountsListAdapter != null)
+                {
+                    //reload items
+                    accountsListAdapter.reloadItems();
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.GoogleDriveSignIn:
+                //if signed in
+                if(isOkay)
+                {
+                    //try to get account
+                    Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
+
+                    //if got account
+                    if(getAccountTask.isSuccessful())
+                    {
+                        //note: don't confirm internet since would have done already to get past sign in
+
+                        //show google drive file browser
+                        Orbitals.showGoogleDriveFileBrowser(this, false);
+
+                        //no error
+                        isError = false;
+                    }
+                }
+
+                //if there was an error
+                if(isError)
+                {
+                    //show error message
+                    Globals.showSnackBar(settingsLayout, res.getString(R.string.text_login_failed), true);
                 }
                 break;
         }
@@ -368,6 +413,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             //update current page
             switch(currentPageKey)
             {
+                case "accounts":
+                    currentPage = Settings.PageType.Accounts;
+                    break;
+
                 case "locations":
                     currentPage = Settings.PageType.Locations;
                     break;
@@ -412,6 +461,26 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         switch(currentPage)
         {
+            case Settings.PageType.Accounts:
+                if(inEditMode)
+                {
+                    //get selected items
+                    ArrayList<Selectable.ListItem> selectedItems = getSettingsPage(currentPageKey).getSelectedItems();
+
+                    //go through selected items
+                    for(Selectable.ListItem currentItem : selectedItems)
+                    {
+                        //edit account
+                        accountsListAdapter.editAccount(currentItem.id);
+                    }
+                }
+                else
+                {
+                    //show add account dialog
+                    showAddAccountDialog(accountsListAdapter.getUsedAccounts());
+                }
+                break;
+
             case Settings.PageType.Locations:
                 if(inEditMode)
                 {
@@ -426,9 +495,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case Settings.PageType.Notifications:
                 Database.DatabaseLocation currentLocation = Database.getSelectedLocation(this);
                 NotifySettingsActivity.show(this, new Calculations.ObserverType(currentLocation.zoneId, new Calculations.GeodeticDataType(currentLocation.latitude, currentLocation.longitude, currentLocation.altitudeKM, 0, 0)));
-                break;
-
-            case Settings.PageType.Other:
                 break;
         }
     }
@@ -555,6 +621,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 switch(position)
                 {
+                    case Settings.PageType.Accounts:
+                        //set adapter
+                        accountsListAdapter = (Settings.Options.Accounts.ItemListAdapter)adapter;
+                        break;
+
                     case Settings.PageType.Locations:
                         //set adapter
                         settingsLocationsListAdapter = (Settings.Locations.ItemListAdapter)adapter;
@@ -822,6 +893,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         switch(currentPage)
         {
+            case Settings.PageType.Accounts:
+                if(inEditMode)
+                {
+                    show = (accountsListAdapter != null && !accountsListAdapter.haveNonEditItemsSelected());
+                    imageID = R.drawable.ic_mode_edit_white;
+                }
+                else
+                {
+                    show = (accountsListAdapter != null && accountsListAdapter.getUsedAccounts().size() < Globals.AccountType.Count);
+                }
+                break;
+
             case Settings.PageType.Locations:
                 show = true;
                 if(inEditMode)
@@ -862,6 +945,81 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private void lockScreenOrientation(boolean lock)
     {
         Globals.lockScreenOrientation(this, lock);
+    }
+
+    //Shows an add account dialog
+    private void showAddAccountDialog(ArrayList<Integer> usedAccounts)
+    {
+        Resources res = this.getResources();
+        ArrayList<Integer> unused = new ArrayList<>(0);
+        int[] all = new int[]{Globals.AccountType.GoogleDrive, Globals.AccountType.Dropbox, Globals.AccountType.SpaceTrack};
+
+        //get all unused
+        for(int currentAccount : all)
+        {
+            //if not used
+            if(!usedAccounts.contains(currentAccount))
+            {
+                //add to unused
+                unused.add(currentAccount);
+            }
+        }
+
+        //if there are unused
+        if(unused.size() > 0)
+        {
+            //show dialog
+            Globals.showSelectDialog(this, res.getString(R.string.title_account_add), AddSelectListAdapter.SelectType.AddAccount, unused.toArray(new Integer[0]), new AddSelectListAdapter.OnItemClickListener()
+            {
+                @Override
+                public void onItemClick(final int which)
+                {
+                    //handle based on account type
+                    switch(which)
+                    {
+                        case Globals.AccountType.GoogleDrive:
+                            Globals.askGoogleDriveAccount(SettingsActivity.this, BaseInputActivity.RequestCode.GoogleDriveAddAccount);
+                            break;
+
+                        case Globals.AccountType.Dropbox:
+                            DropboxAccess.start(SettingsActivity.this);
+                            break;
+
+                        case Globals.AccountType.SpaceTrack:
+                            Globals.showAccountLogin(SettingsActivity.this, which, new Globals.WebPageListener()
+                            {
+                                @Override
+                                public void onResult(Globals.WebPageData pageData, boolean success)
+                                {
+                                    //if success
+                                    if(success)
+                                    {
+                                        //if adapter is set
+                                        if(accountsListAdapter != null)
+                                        {
+                                            SettingsActivity.this.runOnUiThread(new Runnable()
+                                            {
+                                                @Override
+                                                public void run()
+                                                {
+                                                    //reload items
+                                                    accountsListAdapter.reloadItems();
+                                                }
+                                            });
+                                        }
+                                    }
+                                    else
+                                    {
+                                        //remove account attempt
+                                        Settings.removeLogin(SettingsActivity.this, which);
+                                    }
+                                }
+                            }, true);
+                            break;
+                    }
+                }
+            });
+        }
     }
 
     //Shows an edit location dialog

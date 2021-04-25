@@ -52,11 +52,12 @@ public abstract class Settings
     //Page types
     public static abstract class PageType
     {
-        static final int Locations = 0;
-        static final int Notifications = 1;
-        static final int Updates = 2;
-        static final int Other = 3;
-        static final int PageCount = 4;
+        static final int Accounts = 0;
+        static final int Locations = 1;
+        static final int Notifications = 2;
+        static final int Updates = 3;
+        static final int Other = 4;
+        static final int PageCount = 5;
     }
 
     //Sub page types
@@ -326,7 +327,7 @@ public abstract class Settings
 
                 public Item(int accType, String name)
                 {
-                    super(accType, -1, true, false, false, false);
+                    super(accType, -1, (accType != Globals.AccountType.None), false, false, false);
 
                     loginName = name;
                 }
@@ -374,9 +375,9 @@ public abstract class Settings
                 private Activity activity;
                 private Selectable.ListFragment currentPage;
 
-                public ItemListAdapter(Selectable.ListFragment page)
+                public ItemListAdapter(Selectable.ListFragment page, String title)
                 {
-                    super(page.getActivity());
+                    super(page.getContext(), title);
 
                     //if activity exists
                     if(currentContext instanceof Activity)
@@ -447,13 +448,28 @@ public abstract class Settings
                 }
 
                 @Override
+                protected boolean showColumnTitles(int page)
+                {
+                    return(categoryTitle == null);
+                }
+
+                @Override
                 protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
                 {
-                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Accounts_Item_Image);
+                    //if have category
+                    if(categoryText != null && categoryTitle != null)
+                    {
+                        categoryText.setText(categoryTitle);
+                        ((View)categoryText.getParent()).setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Accounts_Item_Image);
 
-                    imageColumn.setVisibility(View.INVISIBLE);
-                    imageColumn.setImageResource(R.drawable.org_gdrive);
-                    ((TextView)listColumns.findViewById(R.id.Settings_Accounts_Item_Name_Text)).setText(R.string.title_account);
+                        imageColumn.setVisibility(View.INVISIBLE);
+                        imageColumn.setImageResource(R.drawable.org_gdrive);
+                        ((TextView)listColumns.findViewById(R.id.Settings_Accounts_Item_Name_Text)).setText(R.string.title_account);
+                    }
 
                     super.setColumnTitles(listColumns, categoryText, page);
                 }
@@ -2261,6 +2277,10 @@ public abstract class Settings
             //set list adapter based on page
             switch(page)
             {
+                case PageType.Accounts:
+                    listAdapter = new Options.Accounts.ItemListAdapter(this, categoryTitle);
+                    break;
+
                 case PageType.Locations:
                     listAdapter = new Locations.ItemListAdapter(Page.this.listParentView, categoryTitle);
                     break;
@@ -2274,7 +2294,7 @@ public abstract class Settings
                     switch(subPage)
                     {
                         case SubPageType.Accounts:
-                            listAdapter = new Options.Accounts.ItemListAdapter(this);
+                            listAdapter = new Options.Accounts.ItemListAdapter(this, null);
                             break;
 
                         case SubPageType.Widgets:
@@ -2427,7 +2447,7 @@ public abstract class Settings
         //Returns if on accounts page
         private boolean isOnAccounts()
         {
-            return(pageNum == PageType.Other && this.getSubPageParam() == SubPageType.Accounts);
+            return(pageNum == PageType.Accounts || (pageNum == PageType.Other && this.getSubPageParam() == SubPageType.Accounts));
         }
     }
 
@@ -2458,6 +2478,9 @@ public abstract class Settings
 
             switch(position)
             {
+                case PageType.Accounts:
+                    return(res.getString(R.string.title_accounts));
+
                 case PageType.Locations:
                     return(res.getString(R.string.title_locations));
 

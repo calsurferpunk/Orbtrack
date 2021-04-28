@@ -7,7 +7,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,6 +18,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -446,8 +446,8 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
     private View listLayout;
     private View listLoadingView;
     private TextView browseTitleText;
-    private AppCompatButton cancelButton;
-    private AppCompatButton selectButton;
+    private MaterialButton cancelButton;
+    private MaterialButton selectButton;
     private FileListAdapterBase filesAdapter;
 
     @Override

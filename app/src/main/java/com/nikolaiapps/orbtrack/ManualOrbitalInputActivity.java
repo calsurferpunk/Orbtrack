@@ -3,12 +3,12 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.res.Resources;
 import android.os.Bundle;
-import androidx.appcompat.widget.AppCompatButton;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -47,8 +47,8 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         launchDate = this.findViewById(R.id.Manual_Object_Launch_Date);
         final IconSpinner ownerList = this.findViewById(R.id.Manual_Object_Owner_List);
         final IconSpinner groupList = this.findViewById(R.id.Manual_Object_Group_List);
-        AppCompatButton cancelButton = this.findViewById(R.id.Manual_Object_Cancel_Button);
-        AppCompatButton addButton = this.findViewById(R.id.Manual_Object_Add_Button);
+        MaterialButton cancelButton = this.findViewById(R.id.Manual_Object_Cancel_Button);
+        MaterialButton addButton = this.findViewById(R.id.Manual_Object_Add_Button);
 
         //set owners list
         for(index = 0; index < owners.size(); index++)

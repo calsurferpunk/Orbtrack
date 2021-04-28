@@ -358,12 +358,13 @@
         <item name="layout">@layout/divider_view</item>
     </style>
 
-    <!-- Bottom button -->
-    <style name="BottomButton">
+    <!-- Material button -->
+    <style name="MaterialButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">bottom|center</item>
-        <item name="backgroundTint">?attr/defaultTextShadowColor</item>
+        <item name="android:layout_margin">6dp</item>
+        <item name="backgroundTint">?attr/pageHighlightBackground</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
@@ -523,7 +524,7 @@
     </style>
 
     <!--Result button-->
-    <style name="ResultButton">
+    <style name="ResultButton" parent="MaterialButton">
         <item name="android:layout_width">130dp</item>
         <item name="android:layout_height">wrap_content</item>
     </style>

@@ -32,22 +32,19 @@
             android:layout_marginBottom="30dp"
             android:orientation="horizontal"
             android:visibility="gone">
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/Lens_Select_Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/MaterialButton"
                 android:text="@string/title_select"/>
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/Lens_Reset_Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/MaterialButton"
                 android:text="@string/title_reset"/>
 
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/Lens_Cancel_Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                style="@style/MaterialButton"
                 android:text="@string/title_cancel"/>
         </LinearLayout>
     </FrameLayout>

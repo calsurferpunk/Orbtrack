@@ -5,7 +5,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
@@ -14,6 +13,7 @@ import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 
 
 public class NotifySettingsActivity extends BaseInputActivity
@@ -50,8 +50,8 @@ public class NotifySettingsActivity extends BaseInputActivity
         final View divider = this.findViewById(R.id.Notify_Settings_Divider);
         final View orbitalGroup = this.findViewById(R.id.Notify_Settings_Orbital_Group);
         final TextView notificationsTitle = this.findViewById(R.id.Notify_Settings_Notifications_Title);
-        final AppCompatButton cancelButton = this.findViewById(R.id.Notify_Settings_Cancel_Button);
-        final AppCompatButton okayButton = this.findViewById(R.id.Notify_Settings_Ok_Button);
+        final MaterialButton cancelButton = this.findViewById(R.id.Notify_Settings_Cancel_Button);
+        final MaterialButton okayButton = this.findViewById(R.id.Notify_Settings_Ok_Button);
 
         //get displays
         fullMoonStartDivider = this.findViewById(R.id.Notify_Settings_Full_Moon_Start_Divider);

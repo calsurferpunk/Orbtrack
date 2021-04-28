@@ -46,13 +46,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal|bottom"
+        android:padding="6dp"
         android:weightSum="1">
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/List_Cancel_Button"
             style="@style/ResultButton"
             android:text="@string/title_cancel"/>
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/List_Select_Button"
             style="@style/ResultButton"
             android:text="@string/title_select"

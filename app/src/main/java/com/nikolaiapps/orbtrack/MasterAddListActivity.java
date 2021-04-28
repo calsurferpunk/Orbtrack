@@ -12,7 +12,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -31,6 +30,7 @@ import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -515,7 +515,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private IconSpinner ageList;
     private EditText searchText;
     private TableRow ageRow;
-    private AppCompatButton addButton;
+    private MaterialButton addButton;
     private MultiProgressDialog downloadProgress;
     private MultiProgressDialog addProgress;
 
@@ -964,7 +964,7 @@ public class MasterAddListActivity extends BaseInputActivity
         final int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
         final TableLayout searchGroup = this.findViewById(R.id.Master_Search_Table);
         final AppCompatImageButton showButton = this.findViewById(R.id.Master_Show_Button);
-        final AppCompatButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
+        final MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
         ownerList = this.findViewById(R.id.Master_Owner_List);
         groupList = this.findViewById(R.id.Master_Group_List);
         ageList = this.findViewById(R.id.Master_Age_List);

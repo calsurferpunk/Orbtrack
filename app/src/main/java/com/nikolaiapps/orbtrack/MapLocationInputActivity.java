@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
@@ -22,6 +21,7 @@ import android.widget.Toast;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import java.util.TimeZone;
 
@@ -104,8 +104,8 @@ public class MapLocationInputActivity extends BaseInputActivity
         final IconSpinner timeZoneList = this.findViewById(R.id.Location_Time_Zone_List);
         final AppCompatImageButton altitudeButton = this.findViewById(R.id.Location_Altitude_Button);
         final AppCompatImageButton timeZoneButton = this.findViewById(R.id.Location_Time_Zone_Button);
-        final AppCompatButton cancelButton = this.findViewById(R.id.Location_Cancel_Button);
-        final AppCompatButton addButton = this.findViewById(R.id.Location_Add_Button);
+        final MaterialButton cancelButton = this.findViewById(R.id.Location_Cancel_Button);
+        final MaterialButton addButton = this.findViewById(R.id.Location_Add_Button);
 
         //replace view
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(this, false));

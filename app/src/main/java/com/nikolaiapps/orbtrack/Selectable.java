@@ -16,6 +16,7 @@ import android.os.Parcelable;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -1049,8 +1050,12 @@ public abstract class Selectable
         {
             int index;
 
-            //set view background
-            itemView.setBackgroundResource(bgId);
+            //if not an AppCompatButton
+            if(!(itemView instanceof AppCompatButton))
+            {
+                //set view background
+                itemView.setBackgroundResource(bgId);
+            }
 
             //if a view group
             if(itemView instanceof ViewGroup)
@@ -1066,7 +1071,6 @@ public abstract class Selectable
         }
         public void setItemBackground(View itemView, boolean isSelected)
         {
-            int index;
             int[] ids;
 
             //if view and context exist

@@ -14,7 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spanned;
@@ -29,6 +28,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.nikolaiapps.orbtrack.Calculations.*;
 import java.util.ArrayList;
@@ -4485,9 +4485,9 @@ public abstract class Current
         final FloatingActionStateButton showHorizonButton;
         final FloatingActionStateButton showPathButton;
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
-        final AppCompatButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
-        final AppCompatButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
-        final AppCompatButton cancelButton = rootView.findViewById(R.id.Lens_Cancel_Button);
+        final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
+        final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
+        final MaterialButton cancelButton = rootView.findViewById(R.id.Lens_Cancel_Button);
 
         //if camera is already set
         if(cameraView != null)

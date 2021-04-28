@@ -20,6 +20,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/Settings_Layout_Back_Button"
-        style="@style/BottomButton"
+        style="@style/MaterialButton"
+        android:layout_gravity="bottom|center"
         android:text="@string/title_back"/>
 </FrameLayout>

@@ -164,15 +164,16 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal|bottom"
+        android:weightSum="1"
         android:orientation="horizontal"
-        android:weightSum="1">
-        <androidx.appcompat.widget.AppCompatButton
+        android:gravity="center_horizontal|bottom"
+        android:padding="6dp">
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/Notify_Settings_Cancel_Button"
             style="@style/ResultButton"
             android:text="@string/title_cancel"/>
 
-        <androidx.appcompat.widget.AppCompatButton
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/Notify_Settings_Ok_Button"
             style="@style/ResultButton"
             android:text="@string/title_ok" />

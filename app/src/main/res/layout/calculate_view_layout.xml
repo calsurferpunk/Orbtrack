@@ -209,7 +209,7 @@
             android:layout_weight="1"
             android:weightSum="1"
             android:gravity="center_horizontal|bottom">
-            <androidx.appcompat.widget.AppCompatButton
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/Calculate_Start_Button"
                 style="@style/ResultButton"
                 android:text="@string/title_start"/>

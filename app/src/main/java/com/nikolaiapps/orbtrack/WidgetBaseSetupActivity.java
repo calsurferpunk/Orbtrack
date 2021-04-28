@@ -16,11 +16,11 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.AppCompatDelegate;
-import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.SwitchCompat;
 import android.text.Editable;
@@ -39,7 +39,6 @@ import android.widget.TextView;
 import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Set;
 
 
 public abstract class WidgetBaseSetupActivity extends BaseInputActivity
@@ -1330,7 +1329,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
     //variables
     private View parentView;
     private View widgetPreview;
-    private AppCompatButton okButton;
+    private MaterialButton okButton;
     private static int dpWidth;
     private static WidgetSettings widgetSettings;
 
@@ -1348,7 +1347,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         final SwipeStateViewPager setupPager = this.findViewById(R.id.Widget_Setup_Pager);
         int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
         Bundle extras = this.getIntent().getExtras();
-        AppCompatButton cancelButton;
+        MaterialButton cancelButton;
         ViewGroup.LayoutParams previewParams;
         float[] dps;
 

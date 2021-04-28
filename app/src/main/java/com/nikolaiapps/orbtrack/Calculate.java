@@ -7,7 +7,6 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.widget.AppCompatButton;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -15,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+import com.google.android.material.button.MaterialButton;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -1211,7 +1211,7 @@ public abstract class Calculate
         View intersectionRow = rootView.findViewById(R.id.Calculate_Intersection_Row);
         View elevationMinRow = rootView.findViewById(R.id.Calculate_Elevation_Min_Row);
         TextView orbital2ListTitle = rootView.findViewById(R.id.Calculate_Orbital2_List_Title);
-        AppCompatButton startButton = rootView.findViewById(R.id.Calculate_Start_Button);
+        MaterialButton startButton = rootView.findViewById(R.id.Calculate_Start_Button);
         IconSpinner.CustomAdapter incrementAdapter;
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
 

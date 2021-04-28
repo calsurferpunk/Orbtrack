@@ -56,6 +56,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -834,9 +835,12 @@ public abstract class Globals
     //Shows a select dialog
     private static void showSelectDialog(Context context, int titleIconId, String title, final byte selectType, final int extra, int extra2, final Integer[] itemIds, final AddSelectListAdapter.OnItemClickListener listener)
     {
+        boolean usingIcon = (titleIconId >= 0);
         AddSelectListAdapter listAdapter = (itemIds != null ? new AddSelectListAdapter(context, selectType, itemIds) : new AddSelectListAdapter(context, selectType, extra, extra2));
+        AlertDialog dialog;
         AlertDialog.Builder selectDialog = new AlertDialog.Builder(context, getDialogThemeID(context));
-        if(titleIconId >= 0)
+
+        if(usingIcon)
         {
             selectDialog.setIcon(titleIconId);
         }
@@ -884,7 +888,16 @@ public abstract class Globals
                 }
             }
         });
-        selectDialog.show();
+        dialog = selectDialog.show();
+
+        if(usingIcon)
+        {
+            ImageView iconView = dialog.findViewById(android.R.id.icon);
+            if(iconView != null)
+            {
+                iconView.setColorFilter(Color.TRANSPARENT);
+            }
+        }
     }
     public static void showSelectDialog(Context context, String title, byte selectType, Integer[] itemIds, AddSelectListAdapter.OnItemClickListener listener)
     {

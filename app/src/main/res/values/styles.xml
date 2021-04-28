@@ -1,13 +1,16 @@
 <resources>
 
     <!-- Splash screens -->
-    <style name="SplashScreen" parent="Theme.AppCompat.NoActionBar">
+    <style name="SplashScreen" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimaryDark">@color/transparent</item>
         <item name="android:windowBackground">@drawable/splash_screen_app</item>
     </style>
-    <style name="GoogleDriveSplashScreen" parent="Theme.AppCompat.NoActionBar">
+    <style name="GoogleDriveSplashScreen" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimaryDark">@color/transparent</item>
         <item name="android:windowBackground">@drawable/splash_screen_google_drive</item>
     </style>
-    <style name="DropboxSplashScreen" parent="Theme.AppCompat.NoActionBar">
+    <style name="DropboxSplashScreen" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <item name="colorPrimaryDark">@color/transparent</item>
         <item name="android:windowBackground">@drawable/splash_screen_dropbox</item>
     </style>
 
@@ -15,25 +18,31 @@
     <style name="DialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
+
+    <style name="DialogBase" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:background">@color/transparent</item>
+        <item name="android:selectableItemBackground">?attr/colorAccent</item>
+        <item name="buttonBarPositiveButtonStyle">@style/DialogButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/DialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/DialogButton</item>
+        <item name="colorControlActivated">?attr/colorAccent</item>
+        <item name="materialButtonStyle">@style/DialogButton</item>
+    </style>
     
-    <style name="LightDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+    <style name="LightDialog" parent="DialogBase">
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorPrimary">@color/black</item>
-        <item name="android:textColorSecondary">@color/gray</item>
+        <item name="android:textColorSecondary">@color/dark_gray</item>
         <item name="android:windowBackground">@color/white</item>
-        <item name="buttonBarPositiveButtonStyle">@style/DialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/DialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/DialogButton</item>
+        <item name="colorControlNormal">@color/black</item>
     </style>
 
-    <style name="DarkDialog" parent="Theme.MaterialComponents.Dialog.Alert">
+    <style name="DarkDialog" parent="DialogBase">
         <item name="android:textColor">@color/white</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/gray</item>
+        <item name="android:textColorPrimary">@color/grey</item>
+        <item name="android:textColorSecondary">@color/very_light_gray</item>
         <item name="android:windowBackground">@color/very_dark_gray</item>
-        <item name="buttonBarPositiveButtonStyle">@style/DialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/DialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/DialogButton</item>
+        <item name="colorControlNormal">@color/white</item>
     </style>
 
     <!-- Preferences -->
@@ -353,7 +362,6 @@
     <style name="BottomButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_margin">4dp</item>
         <item name="android:layout_gravity">bottom|center</item>
         <item name="backgroundTint">?attr/defaultTextShadowColor</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
@@ -501,7 +509,7 @@
     </style>
 
     <!--Floating button-->
-    <style name="FloatingButton" parent="Widget.Design.FloatingActionButton">
+    <style name="FloatingButton" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_margin">5dp</item>
@@ -510,6 +518,7 @@
         <item name="borderWidth">0dp</item>
         <item name="fabSize">normal</item>
         <item name="tint">?attr/pageTitleTextColor</item>
+        <item name="backgroundTint">?attr/colorAccent</item>
         <item name="android:contentDescription">@string/title_unknown</item>
     </style>
 

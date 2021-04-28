@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -40,6 +41,11 @@ import java.util.TimeZone;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback
 {
+    static
+    {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
+
     public static class SettingsSubFragment extends PreferenceFragmentCompat
     {
         @Override

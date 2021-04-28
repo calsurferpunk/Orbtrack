@@ -4,7 +4,6 @@ package com.nikolaiapps.orbtrack;
 import android.content.Context;
 import android.content.res.Resources;
 import androidx.appcompat.widget.AppCompatImageView;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -209,7 +208,6 @@ public class AddSelectListAdapter extends BaseAdapter
         int imageId = -1;
         boolean useTheme = true;
         TextView addSourceItemText;
-        Drawable image;
         AppCompatImageView addSourceItemImage;
 
         if(convertView == null)
@@ -366,15 +364,7 @@ public class AddSelectListAdapter extends BaseAdapter
         }
         if(imageId != -1)
         {
-            image = Globals.getDrawable(parent.getContext(), imageId, useTheme);
-            if(!useTheme)
-            {
-                addSourceItemImage.setBackgroundDrawable(image);
-            }
-            else
-            {
-                addSourceItemImage.setImageDrawable(image);
-            }
+            addSourceItemImage.setBackgroundDrawable(Globals.getDrawable(parent.getContext(), imageId, useTheme));
         }
         addSourceItemText.setText(selections[position]);
 

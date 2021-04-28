@@ -347,7 +347,7 @@ public abstract class Orbitals
             String dayText = Globals.getNumberString(ageDays, 1) + " " + res.getString(R.string.title_days);
 
             //set displays
-            itemHolder.itemImage.setBackgroundDrawable(item.icon);
+            itemHolder.itemImage.setImageDrawable(item.icon);
             itemHolder.itemText.setText(item.text);
             if(onSatellites)
             {

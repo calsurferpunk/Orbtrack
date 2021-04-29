@@ -661,7 +661,8 @@ public class MainActivity extends AppCompatActivity
                 //if changed settings and need to recreate
                 if(isOkay && data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false))
                 {
-                    //
+                    //update theme
+                    updateTheme();
                 }
                 break;
         }

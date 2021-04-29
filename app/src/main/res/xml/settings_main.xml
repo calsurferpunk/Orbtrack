@@ -7,6 +7,24 @@
             app:title="@string/title_accounts"
             android:fragment="com.nikolaiapps.orbtrack.Settings$Page"/>
 
+        <PreferenceScreen android:title="@string/title_display"
+            android:key="display"
+            android:icon="@drawable/ic_tablet_white"
+            app:title="@string/title_display"
+            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+            <PreferenceCategory app:title="@string/title_display">
+                <SwitchPreference
+                    app:title="@string/title_dark_theme"
+                    android:key="DarkTheme"
+                    android:persistent="false"/>
+
+                <com.nikolaiapps.orbtrack.IconListPreference
+                    app:titleText="@string/title_color_theme"
+                    android:key="ColorTheme"
+                    android:persistent="false"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
         <PreferenceScreen android:title="@string/title_locations"
             android:key="locations"
             android:icon="@drawable/ic_my_location_black"

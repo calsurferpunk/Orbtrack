@@ -206,7 +206,32 @@ public abstract class Settings
                 static final int Red = 8;
                 static final int Yellow = 9;
             }
-            private static IconSpinner.Item[] colorAdvancedItems;
+            public static IconSpinner.Item[] colorAdvancedItems;
+
+            //Initializes values
+            public static void initValues(Context context)
+            {
+                Resources res = context.getResources();
+
+                //if values are not set
+                if(colorAdvancedItems == null || colorAdvancedItems.length == 0)
+                {
+                    //init color advanced items
+                    colorAdvancedItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(context, R.color.pink, res.getString(R.string.title_pink), Display.ThemeIndex.Pink),
+                        new IconSpinner.Item(context, R.color.red, res.getString(R.string.title_red), Display.ThemeIndex.Red),
+                        new IconSpinner.Item(context, R.color.orange, res.getString(R.string.title_orange), Display.ThemeIndex.Orange),
+                        new IconSpinner.Item(context, R.color.yellow, res.getString(R.string.title_yellow), Display.ThemeIndex.Yellow),
+                        new IconSpinner.Item(context, R.color.green, res.getString(R.string.title_green), Display.ThemeIndex.Green),
+                        new IconSpinner.Item(context, R.color.cyan, res.getString(R.string.title_cyan), Display.ThemeIndex.Cyan),
+                        new IconSpinner.Item(context, R.color.blue, res.getString(R.string.title_blue), Display.ThemeIndex.Blue),
+                        new IconSpinner.Item(context, R.color.purple, res.getString(R.string.title_purple), Display.ThemeIndex.Purple),
+                        new IconSpinner.Item(context, R.color.brown, res.getString(R.string.title_brown), Display.ThemeIndex.Brown),
+                        new IconSpinner.Item(context, R.color.grey, res.getString(R.string.title_grey), Display.ThemeIndex.Grey)
+                    };
+                }
+            }
 
             //Creates an on dark theme check changed listener
             private static CompoundButton.OnCheckedChangeListener createOnDarkThemeCheckedChangedListener(final Selectable.ListFragment page, final Activity context, final SharedPreferences.Editor writeSettings)
@@ -1147,7 +1172,7 @@ public abstract class Settings
                 readSettings = getPreferences(context);
                 writeSettings = readSettings.edit();
 
-                //set constant items
+                //initialize values
                 IconSpinner.Item[] updateRateItems = new IconSpinner.Item[]
                 {
                     new IconSpinner.Item(res.getString(R.string.title_very_slow), res.getString(R.string.title_5_seconds), 5000),
@@ -1186,19 +1211,7 @@ public abstract class Settings
                     res.getString(R.string.title_under_name),
                     res.getString(R.string.title_screen_bottom)
                 };
-                Display.colorAdvancedItems = new IconSpinner.Item[]
-                {
-                    new IconSpinner.Item(context, R.color.pink, res.getString(R.string.title_pink), Display.ThemeIndex.Pink),
-                    new IconSpinner.Item(context, R.color.red, res.getString(R.string.title_red), Display.ThemeIndex.Red),
-                    new IconSpinner.Item(context, R.color.orange, res.getString(R.string.title_orange), Display.ThemeIndex.Orange),
-                    new IconSpinner.Item(context, R.color.yellow, res.getString(R.string.title_yellow), Display.ThemeIndex.Yellow),
-                    new IconSpinner.Item(context, R.color.green, res.getString(R.string.title_green), Display.ThemeIndex.Green),
-                    new IconSpinner.Item(context, R.color.cyan, res.getString(R.string.title_cyan), Display.ThemeIndex.Cyan),
-                    new IconSpinner.Item(context, R.color.blue, res.getString(R.string.title_blue), Display.ThemeIndex.Blue),
-                    new IconSpinner.Item(context, R.color.purple, res.getString(R.string.title_purple), Display.ThemeIndex.Purple),
-                    new IconSpinner.Item(context, R.color.brown, res.getString(R.string.title_brown), Display.ThemeIndex.Brown),
-                    new IconSpinner.Item(context, R.color.grey, res.getString(R.string.title_grey), Display.ThemeIndex.Grey)
-                };
+                Settings.Options.Display.initValues(context);
 
                 //create adapters
                 rateListAdapter = new IconSpinner.CustomAdapter(context, updateRateItems);

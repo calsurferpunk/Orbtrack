@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -69,6 +68,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 switch(screenKey)
                 {
+                    case "display":
+                        SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
+                        IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
+
+                        //initialize values
+                        Settings.Options.Display.initValues(context);
+
+                        //setup displays
+                        setupSwitch(darkThemeSwitch, null);
+                        setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
+                        break;
+
                     case "updates":
                         //get displays
                         SwitchPreference tleAutoSwitch = this.findPreference(Settings.PreferenceName.TLEAutoUpdate);
@@ -85,7 +96,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         TimeIntervalPreference tleAutoTime = this.findPreference(Settings.PreferenceName.TLEAutoUpdateRate);
                         TimeIntervalPreference catalogAutoTime = this.findPreference(Settings.PreferenceName.CatalogAutoUpdateRate);
 
-                        //init values
+                        //initialize values
                         Settings.Options.Updates.initValues(context);
 
                         //setup displays
@@ -127,6 +138,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private Settings.PageAdapter settingsPageAdapter;
     private Settings.Locations.ItemListAdapter settingsLocationsListAdapter;
     private Settings.Options.Accounts.ItemListAdapter accountsListAdapter;
+    private SharedPreferences preferences;
+    private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
 
     public static class SettingsMainFragment extends PreferenceFragmentCompat
     {
@@ -171,11 +184,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
+        Settings.Options.Display.setTheme(this);
         super.onCreate(savedInstanceState);
 
         ActionBar mainActionBar;
 
-        Settings.Options.Display.setTheme(this);
         setContentView(R.layout.settings_layout);
 
         //if result intent does not exist yet
@@ -269,16 +282,34 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         });
 
-        //set receiver
+        //set receivers/listeners
         locationReceiver = createLocationReceiver();
         locationReceiver.register(this);
+        preferences = Settings.getPreferences(this);
+        preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener()
+        {
+            @Override
+            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
+            {
+                switch(key)
+                {
+                    case Settings.PreferenceName.ColorTheme:
+                    case Settings.PreferenceName.DarkTheme:
+                        //recreate activity
+                        setRecreateNeeded();
+                        SettingsActivity.this.recreate();
+                        break;
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
         //if able to get action bar
         mainActionBar = getSupportActionBar();
         if(mainActionBar != null)
         {
-            //set background
-            mainActionBar.setBackgroundDrawable(new ColorDrawable(Globals.resolveColorID(this, R.attr.pageTitleBackground)));
+            //hide it
+            mainActionBar.hide();
         }
 
         //update display
@@ -298,12 +329,28 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     @Override
+    public void finish()
+    {
+        //set result and reset
+        setResult(RESULT_OK, resultIntent);
+        resultIntent = null;
+
+        super.finish();
+    }
+
+    @Override
     protected void onDestroy()
     {
         super.onDestroy();
 
         //remove receiver
         locationReceiver.unregister(this);
+
+        //stop listener
+        if(preferences != null && preferenceChangeListener != null)
+        {
+            preferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
+        }
     }
 
     @Override
@@ -707,6 +754,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             //get current value based on key
             switch(preferenceKey)
             {
+                case Settings.PreferenceName.ColorTheme:
+                    currentValue = Settings.getColorTheme(context);
+
+                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                    {
+                        @Override
+                        public boolean onPreferenceChange(Preference preference, Object newValue)
+                        {
+                            //allow if changing
+                            return((int)newValue != Settings.getColorTheme(context));
+                        }
+                    });
+                    break;
+
                 case Settings.PreferenceName.SatelliteSource:
                     valueIndex = Settings.getSatelliteSource(context);
 
@@ -754,8 +815,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 currentValue = values[valueIndex];
             }
 
-            //set adapter, state, and listener
-            preference.setAdapter(context, items, values, itemImageIds, subTexts);
+            //set adapter and state
+            if(items instanceof IconSpinner.Item[])
+            {
+                preference.setAdapter(context, (IconSpinner.Item[])items);
+            }
+            else
+            {
+                preference.setAdapter(context, items, values, itemImageIds, subTexts);
+            }
             preference.setSelectedValue(currentValue);
         }
     }
@@ -938,7 +1006,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     //Update back button
     private void updateBackButton()
     {
-        backButton.setText(currentPage == -1 ? R.string.title_close : R.string.title_back);
+        //backButton.setText(currentPage == -1 ? R.string.title_close : R.string.title_back);
+        backButton.setText(manager.getBackStackEntryCount() > 0 ? R.string.title_back : R.string.title_close);
     }
 
     //Sets recreate needed

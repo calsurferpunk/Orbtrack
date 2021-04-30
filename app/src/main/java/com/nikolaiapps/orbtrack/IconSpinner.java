@@ -6,6 +6,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSpinner;
@@ -13,6 +14,7 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -24,6 +26,8 @@ public class IconSpinner extends AppCompatSpinner
 {
     public static class Item
     {
+        boolean icon1UseTextColor;
+        boolean icon3UseTextColor;
         float rotate;
         Drawable icon1;
         Drawable icon2;
@@ -43,6 +47,7 @@ public class IconSpinner extends AppCompatSpinner
 
         public Item(String txt, Object val)
         {
+            icon1UseTextColor = icon3UseTextColor = false;
             rotate = 0;
             icon1 = null;
             icon2 = null;
@@ -71,9 +76,11 @@ public class IconSpinner extends AppCompatSpinner
             this(icn3, txt, val);
             subText = sbTxt;
         }
-        public Item(Drawable icn1, Drawable icn2, Drawable icn3, String txt, Object val)
+        public Item(Drawable icn1, boolean ic1UseTxtClr, Drawable icn2, Drawable icn3, boolean ic3UseTxtClr, String txt, Object val)
         {
             this(icn3, txt, val);
+            icon1UseTextColor = ic1UseTxtClr;
+            icon3UseTextColor = ic3UseTxtClr;
             icon1 = icn1;
             icon2 = icn2;
         }
@@ -191,8 +198,8 @@ public class IconSpinner extends AppCompatSpinner
                 Database.DatabaseSatellite currentSat = satellites[index];
                 isLocation = (currentSat.norad == Universe.IDs.CurrentLocation);
                 useIcons = (currentSat.norad != Integer.MAX_VALUE && !isLocation);
-                Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.norad, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), R.color.white)});
-                items[index] = new Item(ownerIcons[0], (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceColorId) : null), currentSat.getName(), currentSat.norad);
+                Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.norad, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
+                items[index] = new Item(ownerIcons[0], !useIcons, (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceColorId) : null), (useIcons && currentSat.norad > 0), currentSat.getName(), currentSat.norad);
             }
 
             BaseConstructor(context);
@@ -315,7 +322,14 @@ public class IconSpinner extends AppCompatSpinner
             itemSubText = convertView.findViewById(R.id.Spinner_Item_Sub_Text);
 
             //update displays
-            itemImage1.setBackgroundDrawable(currentItem.icon1);
+            if(currentItem.icon1UseTextColor)
+            {
+                itemImage1.setBackgroundDrawable(Globals.getDrawable(currentItem.icon1, (isSelected ? textSelectedColor : textColor)));
+            }
+            else
+            {
+                itemImage1.setBackgroundDrawable(currentItem.icon1);
+            }
             if(!usingIcon1)
             {
                 itemImage1.setVisibility(View.GONE);
@@ -326,7 +340,14 @@ public class IconSpinner extends AppCompatSpinner
                 itemImage2.setVisibility(View.VISIBLE);
                 Globals.setLayoutWidth(itemImage1, itemImage2.getLayoutParams().width);
             }
-            itemImage3.setBackgroundDrawable(currentItem.icon3);
+            if(currentItem.icon3UseTextColor)
+            {
+                itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? textSelectedColor : textColor)));
+            }
+            else
+            {
+                itemImage3.setBackgroundDrawable(currentItem.icon3);
+            }
             if(currentItem.rotate != 0)
             {
                 itemImage3.setRotation(currentItem.rotate);
@@ -388,30 +409,75 @@ public class IconSpinner extends AppCompatSpinner
     }
 
     private CustomAdapter currentAdapter;
+    private OnItemSelectedListener itemSelectedListener;
+
+    public void BaseConstructor()
+    {
+        super.setOnItemSelectedListener(new OnItemSelectedListener()
+        {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+            {
+                //update selected item and view
+                currentAdapter.setSelectedIndex(position);
+                view = currentAdapter.getView(position, view, parent);
+
+                //if listener is set
+                if(itemSelectedListener != null)
+                {
+                    //call it
+                    itemSelectedListener.onItemSelected(parent, view, position, id);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent)
+            {
+                //if listener is set
+                if(itemSelectedListener != null)
+                {
+                    //call it
+                    itemSelectedListener.onNothingSelected(parent);
+                }
+            }
+        });
+    }
 
     public IconSpinner(Context context)
     {
         super(context);
+        BaseConstructor();
     }
     public IconSpinner(Context context, int mode)
     {
         super(context, mode);
+        BaseConstructor();
     }
     public IconSpinner(Context context, AttributeSet attrs)
     {
         super(context, attrs);
+        BaseConstructor();
     }
     public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
+        BaseConstructor();
     }
     public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode)
     {
         super(context, attrs, defStyleAttr, mode);
+        BaseConstructor();
     }
     public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode, Resources.Theme popupTheme)
     {
         super(context, attrs, defStyleAttr, mode, popupTheme);
+        BaseConstructor();
+    }
+
+    @Override
+    public void setOnItemSelectedListener(@Nullable OnItemSelectedListener listener)
+    {
+        itemSelectedListener = listener;
     }
 
     public void setAdapter(CustomAdapter adapter)

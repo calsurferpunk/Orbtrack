@@ -3150,12 +3150,10 @@ public abstract class Current
                 //setup search list
                 searchList.setAdapter(new IconSpinner.CustomAdapter(context, Database.getSelectedOrbitals(context,  true, true), (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
-                searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.columnBackground));
-                //searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
-                //searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
-                searchList.setTextColor(Globals.resolveColorID(context, R.attr.columnTitleTextColor));
-                //searchList.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));
-                //searchList.setTextSelectedColor((Globals.resolveColorID(context, R.attr.columnTitleTextColor)));
+                searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
+                searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
+                searchList.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));
+                searchList.setTextSelectedColor((Globals.resolveColorID(context, R.attr.columnTitleTextColor)));
                 searchList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                 {
                     @Override

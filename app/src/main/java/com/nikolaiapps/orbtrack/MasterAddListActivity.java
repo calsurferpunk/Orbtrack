@@ -874,7 +874,7 @@ public class MasterAddListActivity extends BaseInputActivity
         {
             UpdateService.MasterOwner currentItem = usedOwners.get(index);
             Drawable[] ownerIcons = Settings.getOwnerIcons(this, (currentItem.code == null ? Integer.MIN_VALUE : Integer.MAX_VALUE), currentItem.code);
-            owners[index + 1] = new IconSpinner.Item(Globals.getDrawable(this, ownerIcons), null, null, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
+            owners[index + 1] = new IconSpinner.Item(Globals.getDrawable(this, ownerIcons), false, null, null, false, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
         }
         ownerList.setAdapter(new IconSpinner.CustomAdapter(this, owners));
         ownerList.setBackgroundColor(listBgColor);

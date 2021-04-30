@@ -2692,6 +2692,19 @@ public abstract class Globals
 
         return(new BitmapDrawable(context.getResources(), textImage));
     }
+    public static Drawable getDrawable(Drawable image, int tintColor)
+    {
+        Drawable tintedImage;
+
+        if(image == null)
+        {
+            return(null);
+        }
+
+        tintedImage = image.mutate();
+        DrawableCompat.setTint(tintedImage, tintColor);
+        return(tintedImage);
+    }
 
     //Gets a bitmap
     public static Bitmap getBitmap(Drawable image)

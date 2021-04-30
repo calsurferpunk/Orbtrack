@@ -172,20 +172,17 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
 
         protected FileListAdapterBase(FileBrowserBaseActivity activity, ItemBase root, ItemBase startDir, boolean showRootItem, boolean gettingFolder)
         {
-            boolean darkTheme = Settings.getDarkTheme(activity);
-            int themeTint = (darkTheme ? R.color.white : R.color.black);
-
             rootDir = root;
             allowRootItem = showRootItem;
             selectFolder = gettingFolder;
             currentContext = activity;
             pathChangedListener = currentContext.createOnPathChangedListener();
             selectedFilesChangedListener = currentContext.createOnSelectedFilesChangedListener();
-            fileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_insert_drive_file_black, themeTint);
-            folderDrawable = Globals.getDrawable(currentContext, R.drawable.ic_folder_open_black, themeTint);
-            backupFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_storage_black, themeTint);
-            tleFileDrawable = Globals.getDrawable(currentContext, R.drawable.orbital_satellite, themeTint);
-            zipFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_briefcase_black, themeTint);
+            fileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_insert_drive_file_black, true);
+            folderDrawable = Globals.getDrawable(currentContext, R.drawable.ic_folder_open_black, true);
+            backupFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_storage_black, true);
+            tleFileDrawable = Globals.getDrawable(currentContext, R.drawable.orbital_satellite, true);
+            zipFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_briefcase_black, true);
 
             itemClickedListener = new OnItemClickListener()
             {

@@ -2288,8 +2288,8 @@ public abstract class Current
                     final String localString = res.getString(R.string.title_local);
                     final String azTravelString = azAbbrevString + " " + res.getString(R.string.title_travel);
                     final String elMaxString = res.getString(R.string.abbrev_elevation) + " " + res.getString(R.string.title_max);
-                    final Drawable orbital1Icon = Globals.getOrbitalIcon(currentContext, location, currentItem.id, currentItem.orbitalType, midPassTimeMs, false);
-                    final Drawable orbital2Icon = (haveSatellite2 ? Globals.getOrbitalIcon(currentContext, location, currentItem.satellite2.getSatelliteNum(), currentItem.orbital2Type, false) : null);
+                    final Drawable orbital1Icon = Globals.getOrbitalIcon(currentContext, location, currentItem.id, currentItem.orbitalType, midPassTimeMs, 0);
+                    final Drawable orbital2Icon = (haveSatellite2 ? Globals.getOrbitalIcon(currentContext, location, currentItem.satellite2.getSatelliteNum(), currentItem.orbital2Type, 0) : null);
                     final TextView[] detailTexts;
                     final TextView[] detailTitles;
 
@@ -3148,10 +3148,14 @@ public abstract class Current
             if(showSearchButton != null)
             {
                 //setup search list
-                searchList.setAdapter(new IconSpinner.CustomAdapter(context, Database.getSelectedOrbitals(context,  true, true), true));
+                searchList.setAdapter(new IconSpinner.CustomAdapter(context, Database.getSelectedOrbitals(context,  true, true), (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
                 searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.columnBackground));
+                //searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
+                //searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
                 searchList.setTextColor(Globals.resolveColorID(context, R.attr.columnTitleTextColor));
+                //searchList.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));
+                //searchList.setTextSelectedColor((Globals.resolveColorID(context, R.attr.columnTitleTextColor)));
                 searchList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                 {
                     @Override

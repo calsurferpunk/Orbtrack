@@ -86,9 +86,12 @@ public class IconSpinner extends AppCompatSpinner
 
     public static class CustomAdapter extends BaseAdapter
     {
+        private int selectedIndex;
         private int backgroundColor;
         private int backgroundItemColor;
+        private int backgroundItemSelectedColor;
         private int textColor;
+        private int textSelectedColor;
         private boolean usingIcon1;
         private boolean usingIcon3;
         private LayoutInflater listInflater;
@@ -96,10 +99,11 @@ public class IconSpinner extends AppCompatSpinner
 
         private void BaseConstructor(Context context)
         {
+            selectedIndex = -1;
             listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
-            backgroundItemColor = Globals.resolveColorID(context, R.attr.pageBackground);
-            textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
+            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
+            textColor = textSelectedColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
 
             updateUsingIcons();
         }
@@ -173,7 +177,7 @@ public class IconSpinner extends AppCompatSpinner
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean forceWhiteIcons)
+        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, int forceColorId)
         {
             int index;
             boolean useIcons;
@@ -188,14 +192,14 @@ public class IconSpinner extends AppCompatSpinner
                 isLocation = (currentSat.norad == Universe.IDs.CurrentLocation);
                 useIcons = (currentSat.norad != Integer.MAX_VALUE && !isLocation);
                 Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.norad, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), R.color.white)});
-                items[index] = new Item(ownerIcons[0], (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceWhiteIcons) : null), currentSat.getName(), currentSat.norad);
+                items[index] = new Item(ownerIcons[0], (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceColorId) : null), currentSat.getName(), currentSat.norad);
             }
 
             BaseConstructor(context);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
-            this(context, satellites, false);
+            this(context, satellites, 0);
         }
 
         private void updateUsingIcons()
@@ -287,6 +291,7 @@ public class IconSpinner extends AppCompatSpinner
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
+            boolean isSelected = (position == selectedIndex);
             AppCompatImageView itemImage1;
             AppCompatImageView itemImage2;
             AppCompatImageView itemImage3;
@@ -300,7 +305,7 @@ public class IconSpinner extends AppCompatSpinner
                 convertView = listInflater.inflate(R.layout.icon_spinner_item, parent, false);
             }
             convertView.setBackgroundColor(backgroundColor);
-            convertView.findViewById(R.id.Spinner_Item_Background).setBackgroundColor(backgroundItemColor);
+            convertView.findViewById(R.id.Spinner_Item_Background).setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
 
             //get views
             itemImage1 = convertView.findViewById(R.id.Spinner_Item_Image1);
@@ -331,11 +336,11 @@ public class IconSpinner extends AppCompatSpinner
                 itemImage3.setVisibility(View.GONE);
             }
             itemText.setText(currentItem.text);
-            itemText.setTextColor(textColor);
+            itemText.setTextColor(isSelected ? textSelectedColor : textColor);
             if(currentItem.subText != null)
             {
                 itemSubText.setText(currentItem.subText);
-                itemSubText.setTextColor(textColor);
+                itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
             }
             else
             {
@@ -361,9 +366,24 @@ public class IconSpinner extends AppCompatSpinner
             backgroundItemColor = color;
         }
 
+        public void setBackgroundItemSelectedColor(int color)
+        {
+            backgroundItemSelectedColor = color;
+        }
+
         public void setTextColor(int color)
         {
             textColor = color;
+        }
+
+        public void setTextSelectedColor(int color)
+        {
+            textSelectedColor = color;
+        }
+
+        public void setSelectedIndex(int index)
+        {
+            selectedIndex = index;
         }
     }
 
@@ -419,6 +439,15 @@ public class IconSpinner extends AppCompatSpinner
         {
             currentAdapter.setBackgroundItemColor(color);
         }
+        setBackgroundItemSelectedColor(color);
+    }
+
+    public void setBackgroundItemSelectedColor(int color)
+    {
+        if(currentAdapter != null)
+        {
+            currentAdapter.setBackgroundItemSelectedColor(color);
+        }
     }
 
     public void setTextColor(int color)
@@ -426,6 +455,15 @@ public class IconSpinner extends AppCompatSpinner
         if(currentAdapter != null)
         {
             currentAdapter.setTextColor(color);
+        }
+        setTextSelectedColor(color);
+    }
+
+    public void setTextSelectedColor(int color)
+    {
+        if(currentAdapter != null)
+        {
+            currentAdapter.setTextSelectedColor(color);
         }
     }
 
@@ -441,6 +479,7 @@ public class IconSpinner extends AppCompatSpinner
             {
                 if(items[index].text.equals(value))
                 {
+                    currentAdapter.setSelectedIndex(index);
                     super.setSelection(index);
                     return;
                 }
@@ -464,6 +503,7 @@ public class IconSpinner extends AppCompatSpinner
             index = currentAdapter.getItemIndex(value);
             if(index >= 0)
             {
+                currentAdapter.setSelectedIndex(index);
                 super.setSelection(index);
                 return(true);
             }

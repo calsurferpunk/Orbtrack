@@ -2795,7 +2795,7 @@ public abstract class Globals
     }
 
     //Gets an orbital icon
-    public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType, long timeMs, boolean forceWhiteIcons)
+    public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType, long timeMs, int forceColorId)
     {
         int iconID = getOrbitalIconID(satelliteNum, orbitalType);
         boolean allowIconColor = (iconID == R.drawable.orbital_satellite || iconID == R.drawable.orbital_rocket || iconID == R.drawable.orbital_debris);
@@ -2804,22 +2804,22 @@ public abstract class Globals
         {
             return(new BitmapDrawable(context.getResources(), Universe.Moon.getPhaseImage(context, location, timeMs)));
         }
-        else if(forceWhiteIcons && allowIconColor)
+        else if(forceColorId != 0 && allowIconColor)
         {
-            return(getDrawable(context, iconID, R.color.white));
+            return(getDrawable(context, iconID, forceColorId));
         }
         else
         {
             return(getDrawable(context, iconID, allowIconColor));
         }
     }
-    public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType, boolean forceWhiteIcons)
+    public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType, int forceColorId)
     {
-        return(getOrbitalIcon(context, location, satelliteNum, orbitalType, System.currentTimeMillis(), forceWhiteIcons));
+        return(getOrbitalIcon(context, location, satelliteNum, orbitalType, System.currentTimeMillis(), forceColorId));
     }
     public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType)
     {
-        return(getOrbitalIcon(context, location, satelliteNum, orbitalType, false));
+        return(getOrbitalIcon(context, location, satelliteNum, orbitalType, 0));
     }
 
     //Gets owner icon IDs

@@ -507,6 +507,8 @@ public class MasterAddListActivity extends BaseInputActivity
     private int listBgColor;
     private int listBgItemColor;
     private int listTextColor;
+    private int listBgSelectedColor;
+    private int listTextSelectedColor;
     private LinearLayout masterLayout;
     private RecyclerView addList;
     private MasterListAdapter addAdapter;
@@ -860,7 +862,7 @@ public class MasterAddListActivity extends BaseInputActivity
     }
 
     //Sets up owner list
-    private void setupOwnerList(IconSpinner ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, int listBgColor, int listBgItemColor, int listTextColor, AdapterView.OnItemSelectedListener itemSelectedListener)
+    private void setupOwnerList(IconSpinner ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, AdapterView.OnItemSelectedListener itemSelectedListener)
     {
         int index;
         Resources res = this.getResources();
@@ -879,13 +881,15 @@ public class MasterAddListActivity extends BaseInputActivity
         ownerList.setAdapter(new IconSpinner.CustomAdapter(this, owners));
         ownerList.setBackgroundColor(listBgColor);
         ownerList.setBackgroundItemColor(listBgItemColor);
+        ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
         ownerList.setTextColor(listTextColor);
+        ownerList.setTextSelectedColor(listTextSelectedColor);
         ownerList.setOnItemSelectedListener(itemSelectedListener);
         ownerList.setEnabled(true);
     }
 
     //Sets up group list
-    private void setupGroupList(IconSpinner groupList, ArrayList<String> usedCategories, int listBgColor, int listBgItemColor, int listTextColor, AdapterView.OnItemSelectedListener itemSelectedListener)
+    private void setupGroupList(IconSpinner groupList, ArrayList<String> usedCategories, AdapterView.OnItemSelectedListener itemSelectedListener)
     {
         Resources res = this.getResources();
         ArrayList<String> groups;
@@ -895,13 +899,15 @@ public class MasterAddListActivity extends BaseInputActivity
         groupList.setAdapter(new IconSpinner.CustomAdapter(this, groups.toArray(new String[0])));
         groupList.setBackgroundColor(listBgColor);
         groupList.setBackgroundItemColor(listBgItemColor);
+        groupList.setBackgroundItemSelectedColor(listBgSelectedColor);
         groupList.setTextColor(listTextColor);
+        groupList.setTextSelectedColor(listTextSelectedColor);
         groupList.setOnItemSelectedListener(itemSelectedListener);
         groupList.setEnabled(true);
     }
 
     //Sets up age list
-    private void setupAgeList(IconSpinner ageList, int listBgColor, int listBgItemColor, int listTextColor, AdapterView.OnItemSelectedListener itemSelectedListener)
+    private void setupAgeList(IconSpinner ageList, AdapterView.OnItemSelectedListener itemSelectedListener)
     {
         Resources res = this.getResources();
         String lastString = res.getString(R.string.title_last_plural);
@@ -922,7 +928,9 @@ public class MasterAddListActivity extends BaseInputActivity
         }));
         ageList.setBackgroundColor(listBgColor);
         ageList.setBackgroundItemColor(listBgItemColor);
+        ageList.setBackgroundItemSelectedColor(listBgSelectedColor);
         ageList.setTextColor(listTextColor);
+        ageList.setTextSelectedColor(listTextSelectedColor);
         ageList.setOnItemSelectedListener(itemSelectedListener);
         ageList.setEnabled(true);
     }
@@ -934,9 +942,9 @@ public class MasterAddListActivity extends BaseInputActivity
         AdapterView.OnItemSelectedListener itemSelectedListener = createOnItemSelectedListener(addAdapter, ownerList, groupList, ageList, searchText);
 
         //get owners, groups, and ages
-        setupOwnerList(ownerList, usedOwners, listBgColor, listBgItemColor, listTextColor, itemSelectedListener);
-        setupGroupList(groupList, usedCategories, listBgColor, listBgItemColor, listTextColor, itemSelectedListener);
-        setupAgeList(ageList, listBgColor, listBgItemColor, listTextColor, itemSelectedListener);
+        setupOwnerList(ownerList, usedOwners, itemSelectedListener);
+        setupGroupList(groupList, usedCategories, itemSelectedListener);
+        setupAgeList(ageList, itemSelectedListener);
 
         //update age row visibility
         ageRow.setVisibility(addAdapter.hasLaunchDates() ? View.VISIBLE : View.GONE);
@@ -972,9 +980,12 @@ public class MasterAddListActivity extends BaseInputActivity
         searchText = this.findViewById(R.id.Master_Search_Text);
         ageRow = this.findViewById(R.id.Master_Age_Row);
         addButton = this.findViewById(R.id.Master_Add_Button);
-        listBgColor = Globals.resolveColorID(MasterAddListActivity.this, R.attr.columnBackground);
-        listBgItemColor = Globals.resolveColorID(MasterAddListActivity.this, R.attr.pageTitleBackground);
-        listTextColor = Globals.resolveColorID(MasterAddListActivity.this, R.attr.columnTitleTextColor);
+
+        listBgColor = Globals.resolveColorID(this, R.attr.pageTitleBackground);
+        listBgItemColor = Globals.resolveColorID(this, R.attr.pageBackground);
+        listTextColor = Globals.resolveColorID(this, R.attr.defaultTextColor);
+        listBgSelectedColor = Globals.resolveColorID(this, R.attr.columnBackground);
+        listTextSelectedColor = Globals.resolveColorID(this, R.attr.columnTitleTextColor);
         downloadProgress = Globals.createProgressDialog(this);
         addProgress = Globals.createProgressDialog(this);
 

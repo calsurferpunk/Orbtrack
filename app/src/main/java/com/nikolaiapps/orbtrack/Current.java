@@ -3147,13 +3147,16 @@ public abstract class Current
             //if show search button exists
             if(showSearchButton != null)
             {
+                int textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
+                int textSelectedColor = Globals.resolveColorID(context, R.attr.columnTitleTextColor);
+
                 //setup search list
-                searchList.setAdapter(new IconSpinner.CustomAdapter(context, Database.getSelectedOrbitals(context,  true, true), (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+                searchList.setAdapter(new IconSpinner.CustomAdapter(context, Database.getSelectedOrbitals(context,  true, true), textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
                 searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
                 searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
-                searchList.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));
-                searchList.setTextSelectedColor((Globals.resolveColorID(context, R.attr.columnTitleTextColor)));
+                searchList.setTextColor(textColor);
+                searchList.setTextSelectedColor(textSelectedColor);
                 searchList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                 {
                     @Override

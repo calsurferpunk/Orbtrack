@@ -26,15 +26,17 @@ public class IconSpinner extends AppCompatSpinner
 {
     public static class Item
     {
-        boolean icon1UseTextColor;
-        boolean icon3UseTextColor;
         float rotate;
-        Drawable icon1;
-        Drawable icon2;
-        Drawable icon3;
         String text;
         String subText;
         Object value;
+        Drawable icon1;
+        Drawable icon2;
+        Drawable icon3;
+        int icon1Color;
+        int icon1SelectedColor;
+        int icon3Color;
+        int icon3SelectedColor;
 
         public static class Comparer implements Comparator<Item>
         {
@@ -47,7 +49,6 @@ public class IconSpinner extends AppCompatSpinner
 
         public Item(String txt, Object val)
         {
-            icon1UseTextColor = icon3UseTextColor = false;
             rotate = 0;
             icon1 = null;
             icon2 = null;
@@ -55,6 +56,7 @@ public class IconSpinner extends AppCompatSpinner
             text = txt;
             subText = null;
             value = val;
+            icon1Color = icon1SelectedColor = icon3Color = icon3SelectedColor = Color.TRANSPARENT;
         }
         public Item(String txt, String sbTxt, Object val)
         {
@@ -76,29 +78,50 @@ public class IconSpinner extends AppCompatSpinner
             this(icn3, txt, val);
             subText = sbTxt;
         }
-        public Item(Drawable icn1, boolean ic1UseTxtClr, Drawable icn2, Drawable icn3, boolean ic3UseTxtClr, String txt, Object val)
+        public Item(Drawable icn1, int icn1Clr, int icn1SlctdClr, Drawable icn2, Drawable icn3, int icn3Clr, int icn3SlctClr, String txt, Object val)
         {
             this(icn3, txt, val);
-            icon1UseTextColor = ic1UseTxtClr;
-            icon3UseTextColor = ic3UseTxtClr;
             icon1 = icn1;
             icon2 = icn2;
+            icon1Color = icn1Clr;
+            icon1SelectedColor = icn1SlctdClr;
+            icon3Color = icn3Clr;
+            icon3SelectedColor = icn3SlctClr;
+        }
+        public Item(Drawable icn1, Drawable icn2, Drawable icn3, String txt, Object val)
+        {
+            this(icn1, Color.TRANSPARENT, Color.TRANSPARENT, icn2, icn3, Color.TRANSPARENT, Color.TRANSPARENT, txt, val);
         }
         public Item(Context context, int colorID, String txt, Object val)
         {
             this(txt, val);
             icon3 = new ColorDrawable(ContextCompat.getColor(context, colorID));
         }
+
+        private boolean usingIconColors(int color, int selectedColor)
+        {
+            return(color != Color.TRANSPARENT && selectedColor != Color.TRANSPARENT);
+        }
+
+        public boolean usingIcon1Colors()
+        {
+            return(usingIconColors(icon1Color, icon1SelectedColor));
+        }
+
+        public boolean usingIcon3Colors()
+        {
+            return(usingIconColors(icon3Color, icon3SelectedColor));
+        }
     }
 
     public static class CustomAdapter extends BaseAdapter
     {
         private int selectedIndex;
+        private int textColor;
+        private int textSelectedColor;
         private int backgroundColor;
         private int backgroundItemColor;
         private int backgroundItemSelectedColor;
-        private int textColor;
-        private int textSelectedColor;
         private boolean usingIcon1;
         private boolean usingIcon3;
         private LayoutInflater listInflater;
@@ -108,9 +131,9 @@ public class IconSpinner extends AppCompatSpinner
         {
             selectedIndex = -1;
             listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            textColor = textSelectedColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
             backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
-            textColor = textSelectedColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
 
             updateUsingIcons();
         }
@@ -184,11 +207,13 @@ public class IconSpinner extends AppCompatSpinner
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, int forceColorId)
+        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
         {
             int index;
             boolean useIcons;
             boolean isLocation;
+            boolean useIcon1Color;
+            boolean useIcon3Color;
 
             //go through each satellite
             items = new Item[satellites.length];
@@ -198,15 +223,17 @@ public class IconSpinner extends AppCompatSpinner
                 Database.DatabaseSatellite currentSat = satellites[index];
                 isLocation = (currentSat.norad == Universe.IDs.CurrentLocation);
                 useIcons = (currentSat.norad != Integer.MAX_VALUE && !isLocation);
+                useIcon1Color = !useIcons;
+                useIcon3Color = (useIcons && currentSat.norad > 0);
                 Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.norad, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
-                items[index] = new Item(ownerIcons[0], !useIcons, (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceColorId) : null), (useIcons && currentSat.norad > 0), currentSat.getName(), currentSat.norad);
+                items[index] = new Item(ownerIcons[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), currentSat.getName(), currentSat.norad);
             }
 
             BaseConstructor(context);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
-            this(context, satellites, 0);
+            this(context, satellites, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0);
         }
 
         private void updateUsingIcons()
@@ -322,9 +349,9 @@ public class IconSpinner extends AppCompatSpinner
             itemSubText = convertView.findViewById(R.id.Spinner_Item_Sub_Text);
 
             //update displays
-            if(currentItem.icon1UseTextColor)
+            if(currentItem.usingIcon1Colors())
             {
-                itemImage1.setBackgroundDrawable(Globals.getDrawable(currentItem.icon1, (isSelected ? textSelectedColor : textColor)));
+                itemImage1.setBackgroundDrawable(Globals.getDrawable(currentItem.icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
             }
             else
             {
@@ -340,9 +367,9 @@ public class IconSpinner extends AppCompatSpinner
                 itemImage2.setVisibility(View.VISIBLE);
                 Globals.setLayoutWidth(itemImage1, itemImage2.getLayoutParams().width);
             }
-            if(currentItem.icon3UseTextColor)
+            if(currentItem.usingIcon3Colors())
             {
-                itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? textSelectedColor : textColor)));
+                itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
             }
             else
             {

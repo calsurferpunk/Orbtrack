@@ -41,13 +41,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/pageBackground"/>
 
-    <LinearLayout
-        android:orientation="horizontal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_horizontal|bottom"
-        android:padding="6dp"
-        android:weightSum="1">
+    <LinearLayout style="@style/ResultButtonLayout">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/List_Cancel_Button"
             style="@style/ResultButton"

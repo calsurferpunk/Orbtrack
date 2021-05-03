@@ -529,6 +529,15 @@
         <item name="android:layout_height">wrap_content</item>
     </style>
 
+    <style name="ResultButtonLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">-26dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_horizontal|bottom</item>
+        <item name="android:padding">6dp</item>
+    </style>
+
     <!--Color button-->
     <style name="ColorButton">
         <item name="android:layout_width">60dp</item>

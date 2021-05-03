@@ -53,14 +53,7 @@
         android:layout_marginBottom="7dp"
         android:layout_gravity="center"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:weightSum="1"
-        android:orientation="horizontal"
-        android:gravity="center_horizontal|bottom"
-        android:padding="6dp">
-
+    <LinearLayout style="@style/ResultButtonLayout">
         <com.google.android.material.button.MaterialButton
             android:id="@+id/Widget_Setup_Cancel_Button"
             style="@style/ResultButton"

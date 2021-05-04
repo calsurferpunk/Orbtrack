@@ -139,6 +139,11 @@ public class ThreadTask<Params, Progress, Result>
         execute((Params[])null);
     }
 
+    public void setRepeatMs(long ms)
+    {
+        runRepeatMs = ms;
+    }
+
     public void cancel(boolean allow)
     {
         cancelled = true;

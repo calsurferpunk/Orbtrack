@@ -237,6 +237,10 @@ public class MainActivity extends AppCompatActivity
                         break;
 
                     case Settings.PreferenceName.UseCombinedCurrentLayout:
+                        if(mainGroup == Groups.Current)
+                        {
+                            updateMainPagerAdapter(true, false);
+                        }
                         updateSideMenu();
                         break;
                 }
@@ -1600,13 +1604,13 @@ public class MainActivity extends AppCompatActivity
         String intersectionString = res.getString(R.string.title_intersection);
         ArrayList<SideMenuListAdapter.Group> groups = new ArrayList<>(0);
 
-        groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, Settings.getCombinedCurrentLayout(this) ? (new Item[]{new Item(statusString, viewDrawable)}) : (new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable)})));
-        groups.add(new Group(this, res.getString(R.string.title_calculate), R.drawable.ic_calculator_black, new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable), new Item(intersectionString, intersectionDrawable)}));
-        groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
-        groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_other), otherDrawable)}));
-
         if(sideMenu != null)
         {
+            groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, Settings.getCombinedCurrentLayout(this) ? (new Item[]{new Item(statusString, viewDrawable)}) : (new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable)})));
+            groups.add(new Group(this, res.getString(R.string.title_calculate), R.drawable.ic_calculator_black, new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable), new Item(intersectionString, intersectionDrawable)}));
+            groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
+            groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_other), otherDrawable)}));
+
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
             sideMenu.setOnChildClickListener(createOnSideMenuChildClickListener());
             sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener(sideMenu));
@@ -4897,6 +4901,9 @@ public class MainActivity extends AppCompatActivity
                                 runTask.run();
                             }
                         }
+
+                        //update delay
+                        timerTask.setRepeatMs(timerDelay);
                     }
                 }
             };

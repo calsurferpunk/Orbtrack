@@ -19,6 +19,7 @@
     <attr name="normalTint" format="color"/>
     <attr name="checkedTint" format="color"/>
     <attr name="sharedName" format="string"/>
+    <attr name="titleText" format="string"/>
 
     <declare-styleable name="PlayBar">
         <attr name="textColor" format="color"/>
@@ -51,6 +52,20 @@
 
     <declare-styleable name="IconListPreference">
         <attr name="sharedName"/>
-        <attr name="titleText" format="string"/>
+        <attr name="titleText"/>
+    </declare-styleable>
+
+    <declare-styleable name="RadioGroupPreference">
+        <attr name="sharedName"/>
+        <attr name="titleText"/>
+        <attr name="itemTexts" format="reference"/>
+        <attr name="itemValues" format="reference"/>
+        <attr name="valueType" format="enum">
+            <enum name="String" value="0"/>
+            <enum name="Boolean" value="1"/>
+            <enum name="Byte" value="2"/>
+            <enum name="Integer" value="3"/>
+            <enum name="Long" value="4"/>
+        </attr>
     </declare-styleable>
 </resources>

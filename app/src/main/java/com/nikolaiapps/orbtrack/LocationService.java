@@ -860,19 +860,28 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     //Sends a need enable broadcast
     private void sendNeedEnable()
     {
-        localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedEnable));
+        if(localBroadcast != null)
+        {
+            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedEnable));
+        }
     }
 
     //Sends a need permission broadcast
     private void sendNeedPermission()
     {
-        localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedPermission));
+        if(localBroadcast != null)
+        {
+            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedPermission));
+        }
     }
 
     //Sends a denied broadcast
     private void sendDenied()
     {
-        localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.Denied));
+        if(localBroadcast != null)
+        {
+            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.Denied));
+        }
     }
 
     //Sends a need restart
@@ -881,7 +890,11 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         Intent restartIntent = getBroadcastIntent(MessageTypes.NeedRestart);
         restartIntent.putExtra(ParamTypes.ForceClose, forceClose);
         restartIntent.putExtra(ParamTypes.CheckClose, checkClose);
-        localBroadcast.sendBroadcast(restartIntent);
+
+        if(localBroadcast != null)
+        {
+            localBroadcast.sendBroadcast(restartIntent);
+        }
     }
 
     //Sends a location broadcast
@@ -937,7 +950,10 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     //Sends on connected broadcast
     private void sendConnected()
     {
-        localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.Connected));
+        if(localBroadcast != null)
+        {
+            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.Connected));
+        }
     }
 
     //Stop any running timeout timer

@@ -178,7 +178,7 @@ public class RadioGroupPreference extends Preference
                             {
                                 writeSettings.putString(preferenceName, currentValue);
                             }
-                            writeSettings.commit();
+                            writeSettings.apply();
                         }
                     }
                 });

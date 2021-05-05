@@ -68,4 +68,9 @@
             <enum name="Long" value="4"/>
         </attr>
     </declare-styleable>
+
+    <declare-styleable name="SwitchButtonPreference">
+        <attr name="sharedName"/>
+        <attr name="titleText"/>
+    </declare-styleable>
 </resources>

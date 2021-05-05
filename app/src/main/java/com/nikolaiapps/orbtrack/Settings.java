@@ -756,6 +756,34 @@ public abstract class Settings
             }
         }
 
+        //Rates
+        public static abstract class Rates
+        {
+            //Update rates
+            public static IconSpinner.Item[] updateRateItems;
+
+            //Initializes values
+            public static void initValues(Context context)
+            {
+                Resources res = context.getResources();
+
+                //if values are not set
+                if(updateRateItems == null || updateRateItems.length == 0)
+                {
+                    //init rate items
+                    updateRateItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_very_slow), res.getString(R.string.title_5_seconds), 5000),
+                        new IconSpinner.Item(res.getString(R.string.title_slow), res.getString(R.string.title_2_seconds), 2000),
+                        new IconSpinner.Item(res.getString(R.string.title_average), res.getString(R.string.title_1_second), 1000),
+                        new IconSpinner.Item(res.getString(R.string.title_fast), res.getString(R.string.title_500_ms), 500),
+                        new IconSpinner.Item(res.getString(R.string.title_very_fast), res.getString(R.string.title_100_ms), 100),
+                        new IconSpinner.Item(res.getString(R.string.title_immediate), res.getString(R.string.title_20_ms), 20)
+                    };
+                }
+            }
+        }
+
         //Creates an on play bar changed listener
         private static PlayBar.OnPlayBarChangedListener createOnPlayBarChangedListener(final Context context, boolean forGlobe, boolean forSensitivity)
         {
@@ -1173,15 +1201,7 @@ public abstract class Settings
                 writeSettings = readSettings.edit();
 
                 //initialize values
-                IconSpinner.Item[] updateRateItems = new IconSpinner.Item[]
-                {
-                    new IconSpinner.Item(res.getString(R.string.title_very_slow), res.getString(R.string.title_5_seconds), 5000),
-                    new IconSpinner.Item(res.getString(R.string.title_slow), res.getString(R.string.title_2_seconds), 2000),
-                    new IconSpinner.Item(res.getString(R.string.title_average), res.getString(R.string.title_1_second), 1000),
-                    new IconSpinner.Item(res.getString(R.string.title_fast), res.getString(R.string.title_500_ms), 500),
-                    new IconSpinner.Item(res.getString(R.string.title_very_fast), res.getString(R.string.title_100_ms), 100),
-                    new IconSpinner.Item(res.getString(R.string.title_immediate), res.getString(R.string.title_20_ms), 20)
-                };
+                Rates.initValues(context);
                 IconSpinner.Item[] sensorSmoothingItems = new IconSpinner.Item[]
                 {
                     new IconSpinner.Item(res.getString(R.string.title_high), 80),
@@ -1214,7 +1234,7 @@ public abstract class Settings
                 Settings.Options.Display.initValues(context);
 
                 //create adapters
-                rateListAdapter = new IconSpinner.CustomAdapter(context, updateRateItems);
+                rateListAdapter = new IconSpinner.CustomAdapter(context, Rates.updateRateItems);
                 sensorSmoothingAdapter = new IconSpinner.CustomAdapter(context, sensorSmoothingItems);
 
                 switch(pageNum)
@@ -2737,6 +2757,12 @@ public abstract class Settings
     public static boolean getListPathProgress(Context context)
     {
         return(getPreferences(context).getBoolean(PreferenceName.ListShowPassProgress, true));
+    }
+
+    //Gets list update delay
+    public static int getListUpdateDelay(Context context)
+    {
+        return(getPreferences(context).getInt(PreferenceName.ListUpdateDelay, 1000));
     }
 
     //Returns map layer type

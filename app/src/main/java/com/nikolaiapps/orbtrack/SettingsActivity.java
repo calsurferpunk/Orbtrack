@@ -11,6 +11,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
@@ -78,6 +79,26 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(darkThemeSwitch, null);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
+                        break;
+
+                    case "listView":
+                        SwitchPreference combinedSwitch = this.findPreference(Settings.PreferenceName.UseCombinedCurrentLayout);
+                        SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
+                        IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
+
+                        //initialize values
+                        Settings.Options.Rates.initValues(context);
+
+                        //setup displays
+                        setupSwitch(combinedSwitch, null);
+                        setupSwitch(pathProgressSwitch, null);
+                        setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
+                        break;
+
+                    case "lensView":
+                        SwitchButtonPreference useHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
+
+                        setupSwitchButton(useHorizonSwitch);
                         break;
 
                     case "updates":
@@ -291,13 +312,24 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             @Override
             public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
             {
+                boolean recreateThis = false;
+
                 switch(key)
                 {
                     case Settings.PreferenceName.ColorTheme:
                     case Settings.PreferenceName.DarkTheme:
+                        recreateThis = true;
+                        //fall through
+
+                    case Settings.PreferenceName.MetricUnits:
                         //recreate activity
                         setRecreateNeeded();
-                        SettingsActivity.this.recreate();
+
+                        //if need to recreate this activity
+                        if(recreateThis)
+                        {
+                            SettingsActivity.this.recreate();
+                        }
                         break;
                 }
             }
@@ -740,6 +772,32 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         });
     }
 
+    //Creates an on color button click listener
+    private static View.OnClickListener createOnColorButtonClickListener(final Context context, final String preferenceKey, final int titleId, final int startColor, boolean allowOpacity, SharedPreferences readSettings, SharedPreferences.Editor writeSettings)
+    {
+        return(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View v)
+            {
+                ChooseColorDialog colorDialog = new ChooseColorDialog(context, readSettings.getInt(preferenceKey, startColor));
+                colorDialog.setAllowOpacity(allowOpacity);
+                colorDialog.setAllowTransparent(allowOpacity);
+                colorDialog.setTitle(context.getResources().getString(titleId));
+                colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
+                {
+                    @Override
+                    public void onColorSelected(int color)
+                    {
+                        writeSettings.putInt(preferenceKey, color).apply();
+                        v.setBackgroundColor(color);
+                    }
+                });
+                colorDialog.show(context);
+            }
+        });
+    }
+
     //Sets up a list
     private static void setupList(IconListPreference preference, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts, Preference childPreference)
     {
@@ -766,6 +824,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             return((int)newValue != Settings.getColorTheme(context));
                         }
                     });
+                    break;
+
+                case Settings.PreferenceName.ListUpdateDelay:
+                    currentValue = Settings.getListUpdateDelay(context);
                     break;
 
                 case Settings.PreferenceName.SatelliteSource:
@@ -893,6 +955,28 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 //call once to update changes
                 preference.getOnPreferenceChangeListener().onPreferenceChange(preference, checked);
+            }
+        }
+    }
+
+    //Sets up a switch button preference
+    private static void setupSwitchButton(SwitchButtonPreference preference)
+    {
+        //if preference exists
+        if(preference != null)
+        {
+            final Context context = preference.getContext();
+            final SharedPreferences readSettings = Settings.getPreferences(context);
+            final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
+            final String preferenceKey = preference.getKey();
+
+            //if lens horizon toggle
+            if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
+            {
+                BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
+                switchButton.setBackgroundColor(Settings.getLensHorizonColor(context));
+                preference.setButton(switchButton);
+                preference.setButtonOnClickListener(createOnColorButtonClickListener(context, Settings.PreferenceName.LensHorizonColor, R.string.title_horizon_color, Settings.getLensHorizonColor(context), false, readSettings, writeSettings));
             }
         }
     }

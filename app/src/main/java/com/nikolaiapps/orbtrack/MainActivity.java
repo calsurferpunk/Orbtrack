@@ -177,7 +177,7 @@ public class MainActivity extends AppCompatActivity
 
         //look for web protocol updates
         Globals.updateWebProtocols(this);
-
+        
         //set defaults
         if(savedInstanceState == null)
         {
@@ -1680,10 +1680,8 @@ public class MainActivity extends AppCompatActivity
     //Updates current timer delays
     private void updateTimerDelays()
     {
-        SharedPreferences readSettings = Settings.getPreferences(this);
-
-        listTimerDelay = readSettings.getInt(Settings.PreferenceName.ListUpdateDelay, 1000);
-        lensTimerDelay = readSettings.getInt(Settings.PreferenceName.LensUpdateDelay, 1000);
+        listTimerDelay = Settings.getListUpdateDelay(this);
+        lensTimerDelay = Settings.getLensUpdateDelay(this);
     }
 
     //Updates current calculations

@@ -224,7 +224,7 @@ public abstract class Selectable
                 canShow = true;
                 currentContext = context;
                 noradId = id;
-                timerDelay = Settings.getPreferences(currentContext).getInt(Settings.PreferenceName.ListUpdateDelay, 1000);
+                timerDelay = Settings.getListUpdateDelay(currentContext);
 
                 try
                 {

@@ -77,6 +77,18 @@
                     app:titleText="@string/title_show_horizon"
                     android:key="LensUseHorizon"
                     android:summary="@string/desc_show_horizon"/>
+
+                <SwitchPreference
+                    android:title="@string/title_use_camera"
+                    android:key="LensUseCamera"
+                    android:summary="@string/desc_use_camera"
+                    android:persistent="false"/>
+
+                <SwitchPreference
+                    android:title="@string/title_force_rotate"
+                    android:key="LensRotate"
+                    android:summary="@string/desc_force_rotate"
+                    android:persistent="false"/>
             </PreferenceCategory>
         </PreferenceScreen>
 

@@ -180,13 +180,52 @@ public abstract class Settings
     //Options
     public static abstract class Options
     {
-        //Indicator types
-        public static abstract class IndicatorType
+        //Lens view
+        public static abstract class LensView
         {
-            static final int Circle = 0;
-            static final int Square = 1;
-            static final int Triangle = 2;
-            static final int Icon = 3;
+            //Indicator types
+            public static abstract class IndicatorType
+            {
+                static final int Circle = 0;
+                static final int Square = 1;
+                static final int Triangle = 2;
+                static final int Icon = 3;
+            }
+
+            //Indicator items
+            public static IconSpinner.Item[] indicatorItems;
+
+            //Sensor smoothing items
+            public static IconSpinner.Item[] sensorSmoothingItems;
+
+            //Initializes values
+            public static void initValues(Context context)
+            {
+                Resources res = context.getResources();
+
+                //if values are not set
+                if(indicatorItems == null || indicatorItems.length == 0)
+                {
+                    //init indicator items
+                    indicatorItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.orbital_satellite, true), res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
+                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_circle_black, true), res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
+                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_square_black, true), res.getString(R.string.title_square), LensView.IndicatorType.Square),
+                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_triangle_black, true), res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
+                    };
+                }
+                if(sensorSmoothingItems == null || sensorSmoothingItems.length == 0)
+                {
+                    //init sensor smoothing items
+                    sensorSmoothingItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_high), 80),
+                        new IconSpinner.Item(res.getString(R.string.title_medium), 40),
+                        new IconSpinner.Item(res.getString(R.string.title_low), 10)
+                    };
+                }
+            }
         }
 
         //Display
@@ -1202,12 +1241,7 @@ public abstract class Settings
 
                 //initialize values
                 Rates.initValues(context);
-                IconSpinner.Item[] sensorSmoothingItems = new IconSpinner.Item[]
-                {
-                    new IconSpinner.Item(res.getString(R.string.title_high), 80),
-                    new IconSpinner.Item(res.getString(R.string.title_medium), 40),
-                    new IconSpinner.Item(res.getString(R.string.title_low), 10)
-                };
+                LensView.initValues(context);
                 Updates.updateFrequencyItems = new String[]
                 {
                     res.getQuantityString(R.plurals.text_days, 1, 1),
@@ -1231,11 +1265,11 @@ public abstract class Settings
                     res.getString(R.string.title_under_name),
                     res.getString(R.string.title_screen_bottom)
                 };
-                Settings.Options.Display.initValues(context);
+                Display.initValues(context);
 
                 //create adapters
                 rateListAdapter = new IconSpinner.CustomAdapter(context, Rates.updateRateItems);
-                sensorSmoothingAdapter = new IconSpinner.CustomAdapter(context, sensorSmoothingItems);
+                sensorSmoothingAdapter = new IconSpinner.CustomAdapter(context, LensView.sensorSmoothingItems);
 
                 switch(pageNum)
                 {
@@ -1411,7 +1445,7 @@ public abstract class Settings
                                 //update displays
                                 combinedSwitch.setChecked(Settings.getCombinedCurrentLayout(context));
                                 pathProgressSwitch.setChecked(Settings.getListPathProgress(context));
-                                listUpdateRateList.setSelectedValue(readSettings.getInt(PreferenceName.ListUpdateDelay, 1000));                      //default to average
+                                listUpdateRateList.setSelectedValue(getListUpdateDelay(context));
                                 break;
 
                             case SubPageType.LensView:
@@ -1431,14 +1465,7 @@ public abstract class Settings
                                 final boolean useAutoWidth = Settings.getLensAutoWidth(context);
                                 final boolean useAutoHeight = Settings.getLensAutoHeight(context);
 
-                                IconSpinner.Item[] indicatorItems = new IconSpinner.Item[]
-                                {
-                                    new IconSpinner.Item(Globals.getDrawable(context, R.drawable.orbital_satellite, true), res.getString(R.string.title_icon), IndicatorType.Icon),
-                                    new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_circle_black, true), res.getString(R.string.title_circle), IndicatorType.Circle),
-                                    new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_square_black, true), res.getString(R.string.title_square), IndicatorType.Square),
-                                    new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_triangle_black, true), res.getString(R.string.title_triangle), IndicatorType.Triangle)
-                                };
-                                IconSpinner.CustomAdapter indicatorListAdapter = new IconSpinner.CustomAdapter(context, indicatorItems);
+                                IconSpinner.CustomAdapter indicatorListAdapter = new IconSpinner.CustomAdapter(context, LensView.indicatorItems);
 
                                 //get lens width and height
                                 try
@@ -1475,8 +1502,8 @@ public abstract class Settings
                                 lensSensorSmoothingList.setAdapter(sensorSmoothingAdapter);
 
                                 //update displays
-                                lensOrbitalIconList.setSelectedValue(readSettings.getInt(PreferenceName.LensIndicator, IndicatorType.Icon));
-                                lensUpdateRateList.setSelectedValue(readSettings.getInt(PreferenceName.LensUpdateDelay, 1000));                    //default to average
+                                lensOrbitalIconList.setSelectedValue(getIndicator(context));
+                                lensUpdateRateList.setSelectedValue(getLensUpdateDelay(context));
                                 lensSensorSmoothingList.setSelectedValue(readSettings.getInt(PreferenceName.LensAverageCount, 40));
                                 horizonColorButton.setBackgroundColor(Settings.getLensHorizonColor(context));
                                 useHorizonSwitch.setChecked(readSettings.getBoolean(PreferenceName.LensUseHorizon, false));
@@ -2599,7 +2626,7 @@ public abstract class Settings
     //Gets indicator type
     public static int getIndicator(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.LensIndicator, Options.IndicatorType.Icon));
+        return(getPreferences(context).getInt(PreferenceName.LensIndicator, Options.LensView.IndicatorType.Icon));
     }
 
     //Sets indicator type
@@ -2763,6 +2790,12 @@ public abstract class Settings
     public static int getListUpdateDelay(Context context)
     {
         return(getPreferences(context).getInt(PreferenceName.ListUpdateDelay, 1000));
+    }
+
+    //Gets lens update delay
+    public static int getLensUpdateDelay(Context context)
+    {
+        return(getPreferences(context).getInt(PreferenceName.LensUpdateDelay, 1000));
     }
 
     //Returns map layer type

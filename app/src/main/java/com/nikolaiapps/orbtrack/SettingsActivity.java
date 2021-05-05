@@ -13,6 +13,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
@@ -96,9 +97,24 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
 
                     case "lensView":
+                        SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
+                        SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
                         SwitchButtonPreference useHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
+                        IconListPreference lensOrbitalIconList = this.findPreference(Settings.PreferenceName.LensIndicator);
+                        IconListPreference lensUpdateRateList = this.findPreference(Settings.PreferenceName.LensUpdateDelay);
+                        IconListPreference lensSensorSmoothingList = this.findPreference(Settings.PreferenceName.LensAverageCount);
 
+                        //initialize values
+                        Settings.Options.LensView.initValues(context);
+                        Settings.Options.Rates.initValues(context);
+
+                        //setup displays
+                        setupSwitch(useCameraSwitch, null);
+                        setupSwitch(rotateSwitch, null);
                         setupSwitchButton(useHorizonSwitch);
+                        setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, null);
+                        setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
+                        setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
                         break;
 
                     case "updates":
@@ -830,6 +846,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     currentValue = Settings.getListUpdateDelay(context);
                     break;
 
+                case Settings.PreferenceName.LensIndicator:
+                    currentValue = Settings.getIndicator(context);
+                    break;
+
+                case Settings.PreferenceName.LensUpdateDelay:
+                    currentValue = Settings.getLensUpdateDelay(context);
+                    break;
+
                 case Settings.PreferenceName.SatelliteSource:
                     valueIndex = Settings.getSatelliteSource(context);
 
@@ -974,7 +998,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
             {
                 BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
+                float[] size = Globals.dpsToPixels(context, 60, 40);
+                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
+
                 switchButton.setBackgroundColor(Settings.getLensHorizonColor(context));
+                switchButton.setLayoutParams(params);
                 preference.setButton(switchButton);
                 preference.setButtonOnClickListener(createOnColorButtonClickListener(context, Settings.PreferenceName.LensHorizonColor, R.string.title_horizon_color, Settings.getLensHorizonColor(context), false, readSettings, writeSettings));
             }

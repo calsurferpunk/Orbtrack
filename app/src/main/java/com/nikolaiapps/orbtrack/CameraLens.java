@@ -645,7 +645,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentPaint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         currentPaint.setTextSize(textSize);
         iconPaint = new Paint();
-        if(indicator == Settings.Options.IndicatorType.Icon)
+        if(indicator == Settings.Options.LensView.IndicatorType.Icon)
         {
             iconPaint.setAntiAlias(true);
             iconPaint.setAlpha(80);
@@ -1089,11 +1089,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //draw indicator
         switch(indicator)
         {
-            case Settings.Options.IndicatorType.Square:
+            case Settings.Options.LensView.IndicatorType.Square:
                 canvas.drawRect(centerX - drawPxRadius, centerY - drawPxRadius, centerX + drawPxRadius, centerY + drawPxRadius, currentPaint);
                 break;
 
-            case Settings.Options.IndicatorType.Triangle:
+            case Settings.Options.LensView.IndicatorType.Triangle:
                 trianglePoints[0] = centerX - drawPxRadius;        //bottom left
                 trianglePoints[1] = centerY + drawPxRadius;        //bottom left
                 trianglePoints[2] = centerX + drawPxRadius;        //bottom right
@@ -1111,7 +1111,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 canvas.drawLines(trianglePoints, currentPaint);
                 break;
 
-            case Settings.Options.IndicatorType.Icon:
+            case Settings.Options.LensView.IndicatorType.Icon:
                 if(context != null)
                 {
                     int iconId;
@@ -1145,7 +1145,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //else fall through
 
             default:
-            case Settings.Options.IndicatorType.Circle:
+            case Settings.Options.LensView.IndicatorType.Circle:
                 canvas.drawCircle(centerX, centerY, drawPxRadius, currentPaint);
                 break;
         }

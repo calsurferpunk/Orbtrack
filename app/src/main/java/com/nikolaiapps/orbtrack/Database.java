@@ -1082,7 +1082,7 @@ public class Database extends SQLiteOpenHelper
                 if(updateStatus.previousVersion < 30)
                 {
                     //default to lens icon indicators
-                    Settings.setIndicator(context, Settings.Options.IndicatorType.Icon);
+                    Settings.setIndicator(context, Settings.Options.LensView.IndicatorType.Icon);
                 }
 
                 //show any notice

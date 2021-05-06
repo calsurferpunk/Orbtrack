@@ -361,6 +361,7 @@
     <string name="title_launch_number">Lanzamiento Número</string>
     <string name="title_launch_number_of_year">Lanzamiento Número de Año</string>
     <string name="title_length">Longitud</string>
+    <string name="title_lens">Lente</string>
     <string name="title_lens_view">Vista Lente</string>
     <string name="title_line_1">Línea 1</string>
     <string name="title_line_2">Línea 2</string>
@@ -444,6 +445,7 @@
     <string name="title_quality">Calidad</string>
     <string name="title_r">R</string>
     <string name="title_range">Distancia</string>
+    <string name="title_rates">Frecuencia</string>
     <string name="title_read_external_storage">Leer Almacenamiento Externo</string>
     <string name="title_rectangle">Rectángulo</string>
     <string name="title_red">Rojo</string>

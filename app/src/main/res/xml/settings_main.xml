@@ -29,30 +29,6 @@
             </PreferenceCategory>
         </PreferenceScreen>
 
-        <PreferenceScreen android:title="@string/title_list_view"
-            android:key="listView"
-            android:icon="@drawable/ic_list_white"
-            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-            <PreferenceCategory android:title="@string/title_list_view">
-                <SwitchPreference
-                    android:title="@string/title_combine_lists"
-                    android:key="UseCombinedCurrentLayout"
-                    android:summary="@string/desc_combine_lists"
-                    android:persistent="false"/>
-
-                <SwitchPreference
-                    android:title="@string/title_pass_progress"
-                    android:key="ListShowPassProgress"
-                    android:summary="@string/desc_show_path_progress"
-                    android:persistent="false"/>
-
-                <com.nikolaiapps.orbtrack.IconListPreference
-                    app:titleText="@string/title_update_rate"
-                    android:key="ListUpdateDelay"
-                    android:summary="@string/desc_update_rate_list"/>
-            </PreferenceCategory>
-        </PreferenceScreen>
-
         <PreferenceScreen android:title="@string/title_lens_view"
             android:key="lensView"
             android:icon="@drawable/ic_photo_camera_white"
@@ -62,16 +38,6 @@
                     app:titleText="@string/title_orbital_icon"
                     android:key="LensIndicator"
                     android:summary="@string/desc_orbital_icon"/>
-
-                <com.nikolaiapps.orbtrack.IconListPreference
-                    app:titleText="@string/title_update_rate"
-                    android:key="LensUpdateDelay"
-                    android:summary="@string/desc_update_rate_lens"/>
-
-                <com.nikolaiapps.orbtrack.IconListPreference
-                    app:titleText="@string/title_sensor_smoothing"
-                    android:key="LensAverageCount"
-                    android:summary="@string/desc_sensor_smoothing"/>
 
                 <com.nikolaiapps.orbtrack.SwitchButtonPreference
                     app:titleText="@string/title_show_horizon"
@@ -90,32 +56,72 @@
                     android:summary="@string/desc_force_rotate"
                     android:persistent="false"/>
 
-                <com.nikolaiapps.orbtrack.SwitchTextPreference
-                    app:titleText="@string/title_auto_width"
-                    app:suffixText="@string/title_degs"
-                    android:key="LensWidth"
-                    app:switchKey="LensUseAutoWidth"
-                    app:minValue="0"
-                    app:maxValue="360"
-                    android:summary="@string/desc_auto_width"/>
+                <PreferenceCategory android:title="@string/title_rates">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_update_rate"
+                        android:key="LensUpdateDelay"
+                        android:summary="@string/desc_update_rate_lens"/>
 
-                <com.nikolaiapps.orbtrack.SwitchTextPreference
-                    app:titleText="@string/title_auto_height"
-                    app:suffixText="@string/title_degs"
-                    android:key="LensHeight"
-                    app:switchKey="LensUseAutoHeight"
-                    app:minValue="0"
-                    app:maxValue="360"
-                    android:summary="@string/desc_auto_height"/>
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_sensor_smoothing"
+                        android:key="LensAverageCount"
+                        android:summary="@string/desc_sensor_smoothing"/>
+                </PreferenceCategory>
 
-                <com.nikolaiapps.orbtrack.SwitchTextPreference
-                    app:titleText="@string/title_azimuth_offset"
-                    app:suffixText="@string/title_degs"
-                    android:key="LensAzimuthUserOffset"
-                    app:showSwitch="false"
-                    app:minValue="-180"
-                    app:maxValue="360"
-                    android:summary="@string/desc_azimuth_offset"/>
+                <PreferenceCategory android:title="@string/title_lens">
+                    <com.nikolaiapps.orbtrack.SwitchTextPreference
+                        app:titleText="@string/title_auto_width"
+                        app:suffixText="@string/title_degs"
+                        android:key="LensWidth"
+                        app:switchKey="LensUseAutoWidth"
+                        app:minValue="0"
+                        app:maxValue="360"
+                        android:summary="@string/desc_auto_width"/>
+
+                    <com.nikolaiapps.orbtrack.SwitchTextPreference
+                        app:titleText="@string/title_auto_height"
+                        app:suffixText="@string/title_degs"
+                        android:key="LensHeight"
+                        app:switchKey="LensUseAutoHeight"
+                        app:minValue="0"
+                        app:maxValue="360"
+                        android:summary="@string/desc_auto_height"/>
+
+                    <com.nikolaiapps.orbtrack.SwitchTextPreference
+                        app:titleText="@string/title_azimuth_offset"
+                        app:suffixText="@string/title_degs"
+                        android:key="LensAzimuthUserOffset"
+                        app:showSwitch="false"
+                        app:minValue="-180"
+                        app:maxValue="360"
+                        android:summary="@string/desc_azimuth_offset"/>
+                </PreferenceCategory>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
+        <PreferenceScreen android:title="@string/title_list_view"
+            android:key="listView"
+            android:icon="@drawable/ic_list_white"
+            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+            <PreferenceCategory android:title="@string/title_list_view">
+                <SwitchPreference
+                    android:title="@string/title_combine_lists"
+                    android:key="UseCombinedCurrentLayout"
+                    android:summary="@string/desc_combine_lists"
+                    android:persistent="false"/>
+
+                <SwitchPreference
+                    android:title="@string/title_pass_progress"
+                    android:key="ListShowPassProgress"
+                    android:summary="@string/desc_show_path_progress"
+                    android:persistent="false"/>
+
+                <PreferenceCategory android:title="@string/title_rates">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_update_rate"
+                        android:key="ListUpdateDelay"
+                        android:summary="@string/desc_update_rate_list"/>
+                </PreferenceCategory>
             </PreferenceCategory>
         </PreferenceScreen>
 
@@ -123,6 +129,41 @@
             android:key="locations"
             android:icon="@drawable/ic_my_location_black"
             android:fragment="com.nikolaiapps.orbtrack.Settings$Page"/>
+
+        <PreferenceScreen android:title="@string/title_map_view"
+            android:key="mapView"
+            android:icon="@drawable/ic_map_white"
+            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+            <PreferenceCategory android:title="@string/title_map_view">
+                <com.nikolaiapps.orbtrack.IconListPreference
+                    app:titleText="@string/title_globe_type"
+                    android:key="MapLayerTypeGlobe"/>
+
+                <SwitchPreference
+                    android:title="@string/title_show_clouds"
+                    android:key="ShowSatelliteCloudsGlobe"
+                    android:persistent="false"/>
+
+                <SwitchPreference
+                    android:title="@string/title_show_3d_paths"
+                    android:key="MapShow3dPaths"
+                    android:persistent="false"/>
+
+                <com.nikolaiapps.orbtrack.SliderPreference
+                    app:titleText="@string/title_sensitivity"
+                    android:key="MapSensitivityScaleGlobe"
+                    app:minValue="10"
+                    app:maxValue="150"
+                    app:scaleType="Percent"/>
+
+                <com.nikolaiapps.orbtrack.SliderPreference
+                    app:titleText="@string/title_speed"
+                    android:key="MapSpeedScaleGlobe"
+                    app:minValue="0"
+                    app:maxValue="150"
+                    app:scaleType="Percent"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
 
         <PreferenceScreen android:title="@string/title_notifications"
             android:key="notifications"
@@ -209,15 +250,6 @@
                         android:key="ShareTranslations"
                         android:persistent="false"/>
                 </PreferenceCategory>
-            </PreferenceCategory>
-        </PreferenceScreen>
-
-        <PreferenceScreen android:title="@string/title_other"
-            android:key="other"
-            android:icon="@drawable/ic_settings_black"
-            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-            <PreferenceCategory android:title="@string/title_other">
-
             </PreferenceCategory>
         </PreferenceScreen>
     </PreferenceCategory>

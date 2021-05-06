@@ -185,7 +185,7 @@ public class IconSpinner extends AppCompatSpinner
             items = new Item[itms.length];
             for(index = 0; index < items.length; index++)
             {
-                items[index] = new Item(Globals.getDrawable(context, itmImgIds[index], false), itms[index].toString(), vals[index], (sbTxts != null ? sbTxts[index] : null));
+                items[index] = new Item((itmImgIds != null ? Globals.getDrawable(context, itmImgIds[index], false) : null), itms[index].toString(), vals[index], (sbTxts != null ? sbTxts[index] : null));
             }
 
             BaseConstructor(context);

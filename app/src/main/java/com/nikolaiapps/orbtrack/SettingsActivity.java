@@ -83,20 +83,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
                         break;
 
-                    case "listView":
-                        SwitchPreference combinedSwitch = this.findPreference(Settings.PreferenceName.UseCombinedCurrentLayout);
-                        SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
-                        IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
-
-                        //initialize values
-                        Settings.Options.Rates.initValues(context);
-
-                        //setup displays
-                        setupSwitch(combinedSwitch, null);
-                        setupSwitch(pathProgressSwitch, null);
-                        setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
-                        break;
-
                     case "lensView":
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
@@ -122,6 +108,34 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, null);
                         setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
+                        break;
+
+                    case "listView":
+                        SwitchPreference combinedSwitch = this.findPreference(Settings.PreferenceName.UseCombinedCurrentLayout);
+                        SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
+                        IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
+
+                        //initialize values
+                        Settings.Options.Rates.initValues(context);
+
+                        //setup displays
+                        setupSwitch(combinedSwitch, null);
+                        setupSwitch(pathProgressSwitch, null);
+                        setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
+                        break;
+
+                    case "mapView":
+                        SwitchPreference showCloudsGlobeSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Globe);
+                        SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
+                        IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showCloudsGlobeSwitch, null);
+                        setupSlider(globeSensitivitySlider);
+                        setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
                         break;
 
                     case "updates":
@@ -849,16 +863,35 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     });
                     break;
 
-                case Settings.PreferenceName.ListUpdateDelay:
-                    currentValue = Settings.getListUpdateDelay(context);
-                    break;
-
                 case Settings.PreferenceName.LensIndicator:
                     currentValue = Settings.getIndicator(context);
                     break;
 
                 case Settings.PreferenceName.LensUpdateDelay:
                     currentValue = Settings.getLensUpdateDelay(context);
+                    break;
+
+                case Settings.PreferenceName.ListUpdateDelay:
+                    currentValue = Settings.getListUpdateDelay(context);
+                    break;
+
+                case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe:
+                    currentValue = Settings.getMapLayerType(context, true);
+
+                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                    {
+                        @Override
+                        public boolean onPreferenceChange(Preference preference, Object newValue)
+                        {
+                            int layerType = (int)newValue;
+
+                            //update child visibility
+                            childPreference.setVisible(layerType == CoordinatesFragment.MapLayerType.Satellite || layerType == CoordinatesFragment.MapLayerType.Hybrid);
+
+                            //allow change
+                            return(true);
+                        }
+                    });
                     break;
 
                 case Settings.PreferenceName.SatelliteSource:
@@ -986,6 +1019,41 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 //call once to update changes
                 preference.getOnPreferenceChangeListener().onPreferenceChange(preference, checked);
+            }
+        }
+    }
+
+    //Sets up a slider preference
+    private static void setupSlider(SliderPreference preference)
+    {
+        //if preference exists
+        if(preference != null)
+        {
+            final Context context = preference.getContext();
+            final String preferenceKey = preference.getKey();
+            int min = -1;
+            int max = -1;
+
+            switch(preferenceKey)
+            {
+                case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe:
+                case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map:
+                    min = Settings.SensitivityScaleMin;
+                    max = Settings.SensitivityScaleMax;
+                    break;
+
+                case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe:
+                case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map:
+                    min = Settings.SpeedScaleMin;
+                    max = Settings.SpeedScaleMax;
+                    break;
+            }
+
+            //if range is valid
+            if(min >= 0)
+            {
+                //set range
+                preference.setRange(min, max);
             }
         }
     }

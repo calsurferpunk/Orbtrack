@@ -361,6 +361,7 @@
     <string name="title_launch_number">Launch Number</string>
     <string name="title_launch_number_of_year">Launch Number of Year</string>
     <string name="title_length">Length</string>
+    <string name="title_lens">Lens</string>
     <string name="title_lens_view">Lens View</string>
     <string name="title_line_1">Line 1</string>
     <string name="title_line_2">Line 2</string>
@@ -444,6 +445,7 @@
     <string name="title_quality">Quality</string>
     <string name="title_r">R</string>
     <string name="title_range">Range</string>
+    <string name="title_rates">Rates</string>
     <string name="title_read_external_storage">Read External Storage</string>
     <string name="title_rectangle">Rectangle</string>
     <string name="title_red">Red</string>

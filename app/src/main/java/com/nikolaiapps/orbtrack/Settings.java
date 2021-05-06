@@ -720,15 +720,44 @@ public abstract class Settings
         }
 
         //Map view
-        private static abstract class MapView
+        public static abstract class MapView
         {
             //Map types
-            private static String[] mapTypeItems;
-            private static final Integer[] MapTypeValues = new Integer[]{CoordinatesFragment.MapLayerType.Normal, CoordinatesFragment.MapLayerType.Satellite, /*CoordinatesFragment.MapLayerType.Terrain,*/ CoordinatesFragment.MapLayerType.Hybrid};
+            public static String[] mapTypeItems;
+            public static final Integer[] MapTypeValues = new Integer[]{CoordinatesFragment.MapLayerType.Normal, CoordinatesFragment.MapLayerType.Satellite, /*CoordinatesFragment.MapLayerType.Terrain,*/ CoordinatesFragment.MapLayerType.Hybrid};
 
             //Information location types
-            private static String[] infoLocationItems;
-            private static final Integer[] InfoLocationValues = new Integer[]{CoordinatesFragment.MapMarkerInfoLocation.None, CoordinatesFragment.MapMarkerInfoLocation.UnderTitle, CoordinatesFragment.MapMarkerInfoLocation.ScreenBottom};
+            public static String[] infoLocationItems;
+            public static final Integer[] InfoLocationValues = new Integer[]{CoordinatesFragment.MapMarkerInfoLocation.None, CoordinatesFragment.MapMarkerInfoLocation.UnderTitle, CoordinatesFragment.MapMarkerInfoLocation.ScreenBottom};
+
+            //Initializes values
+            public static void initValues(Context context)
+            {
+                Resources res = context.getResources();
+
+                //if values are not set
+                if(mapTypeItems == null || mapTypeItems.length == 0)
+                {
+                    //init map type items
+                    mapTypeItems = new String[]
+                    {
+                        res.getString(R.string.title_normal),
+                        res.getQuantityString(R.plurals.title_satellites, 1),
+                        /*res.getString(R.string.title_terrain),*/
+                        res.getString(R.string.title_hybrid)
+                    };
+                }
+                if(infoLocationItems == null || infoLocationItems.length == 0)
+                {
+                    //init info location items
+                    infoLocationItems = new String[]
+                    {
+                        res.getString(R.string.title_none),
+                        res.getString(R.string.title_under_name),
+                        res.getString(R.string.title_screen_bottom)
+                    };
+                }
+            }
         }
 
         //Sources
@@ -1252,19 +1281,7 @@ public abstract class Settings
                     res.getQuantityString(R.plurals.text_weeks, 2, 2),
                     res.getQuantityString(R.plurals.text_weeks, 4, 4)
                 };
-                MapView.mapTypeItems = new String[]
-                {
-                    res.getString(R.string.title_normal),
-                    res.getQuantityString(R.plurals.title_satellites, 1),
-                    /*res.getString(R.string.title_terrain),*/
-                    res.getString(R.string.title_hybrid)
-                };
-                MapView.infoLocationItems = new String[]
-                {
-                    res.getString(R.string.title_none),
-                    res.getString(R.string.title_under_name),
-                    res.getString(R.string.title_screen_bottom)
-                };
+                MapView.initValues(context);
                 Display.initValues(context);
 
                 //create adapters

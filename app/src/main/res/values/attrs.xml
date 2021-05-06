@@ -73,4 +73,14 @@
         <attr name="sharedName"/>
         <attr name="titleText"/>
     </declare-styleable>
+
+    <declare-styleable name="SwitchTextPreference">
+        <attr name="sharedName"/>
+        <attr name="switchKey" format="string"/>
+        <attr name="titleText"/>
+        <attr name="suffixText" format="string"/>
+        <attr name="showSwitch" format="boolean"/>
+        <attr name="minValue" format="float"/>
+        <attr name="maxValue" format="float"/>
+    </declare-styleable>
 </resources>

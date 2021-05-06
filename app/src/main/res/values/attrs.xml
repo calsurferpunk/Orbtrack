@@ -20,6 +20,8 @@
     <attr name="checkedTint" format="color"/>
     <attr name="sharedName" format="string"/>
     <attr name="titleText" format="string"/>
+    <attr name="minValue" format="float"/>
+    <attr name="maxValue" format="float"/>
 
     <declare-styleable name="PlayBar">
         <attr name="textColor" format="color"/>
@@ -80,7 +82,18 @@
         <attr name="titleText"/>
         <attr name="suffixText" format="string"/>
         <attr name="showSwitch" format="boolean"/>
-        <attr name="minValue" format="float"/>
-        <attr name="maxValue" format="float"/>
+        <attr name="minValue"/>
+        <attr name="maxValue"/>
+    </declare-styleable>
+
+    <declare-styleable name="SliderPreference">
+        <attr name="sharedName"/>
+        <attr name="titleText"/>
+        <attr name="minValue"/>
+        <attr name="maxValue"/>
+        <attr name="scaleType" format="enum">
+            <enum name="Integer" value="0"/>
+            <enum name="Percent" value="1"/>
+        </attr>
     </declare-styleable>
 </resources>

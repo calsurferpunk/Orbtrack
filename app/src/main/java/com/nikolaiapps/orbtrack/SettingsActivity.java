@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
@@ -99,7 +100,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "lensView":
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
-                        SwitchButtonPreference useHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
+                        SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
+                        SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
+                        SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
+                        SwitchButtonPreference lensUseHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
                         IconListPreference lensOrbitalIconList = this.findPreference(Settings.PreferenceName.LensIndicator);
                         IconListPreference lensUpdateRateList = this.findPreference(Settings.PreferenceName.LensUpdateDelay);
                         IconListPreference lensSensorSmoothingList = this.findPreference(Settings.PreferenceName.LensAverageCount);
@@ -111,7 +115,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(useCameraSwitch, null);
                         setupSwitch(rotateSwitch, null);
-                        setupSwitchButton(useHorizonSwitch);
+                        setupSwitchButton(lensUseHorizonSwitch);
+                        setupSwitchText(lensWidthSwitch);
+                        setupSwitchText(lensHeightSwitch);
+                        setupSwitchText(lensAzimuthOffsetSwitch);
                         setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, null);
                         setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
@@ -1005,6 +1012,48 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 switchButton.setLayoutParams(params);
                 preference.setButton(switchButton);
                 preference.setButtonOnClickListener(createOnColorButtonClickListener(context, Settings.PreferenceName.LensHorizonColor, R.string.title_horizon_color, Settings.getLensHorizonColor(context), false, readSettings, writeSettings));
+            }
+        }
+    }
+
+    //Sets up a switch text preference
+    private static void setupSwitchText(SwitchTextPreference preference)
+    {
+        //if preference exists
+        if(preference != null)
+        {
+            final Context context = preference.getContext();
+            final String preferenceKey = preference.getKey();
+            float enabledValue;
+            float disabledValue;
+
+            switch(preferenceKey)
+            {
+                case Settings.PreferenceName.LensWidth:
+                case Settings.PreferenceName.LensHeight:
+                    boolean isWidth = preferenceKey.equals(Settings.PreferenceName.LensWidth);
+
+                    //get lens width and height
+                    try
+                    {
+                        Camera.Parameters cameraParams;
+                        cameraParams = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK).getParameters();
+                        enabledValue = (isWidth ? cameraParams.getHorizontalViewAngle() : cameraParams.getVerticalViewAngle());
+                    }
+                    catch(Exception ex)
+                    {
+                        enabledValue = 45;
+                    }
+                    disabledValue = (isWidth ? Settings.getLensWidth(context) : Settings.getLensHeight(context));
+
+                    //set values
+                    preference.setValueText(String.valueOf(enabledValue), String.valueOf(disabledValue));
+                    break;
+
+                case Settings.PreferenceName.LensAzimuthUserOffset:
+                    //set value
+                    preference.setValueText(String.valueOf(Settings.getLensAzimuthUserOffset(context)));
+                    break;
             }
         }
     }

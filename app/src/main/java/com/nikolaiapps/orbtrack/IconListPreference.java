@@ -91,6 +91,10 @@ public class IconListPreference extends Preference
             summaryView.setText(summary);
             summaryView.setVisibility(View.VISIBLE);
         }
+        if(iconList.getAdapter() != null && pendingSetValue == null)
+        {
+            pendingSetValue = iconList.getSelectedValue(null);
+        }
         iconList.setAdapter(adapter);
         if(pendingSetValue != null)
         {

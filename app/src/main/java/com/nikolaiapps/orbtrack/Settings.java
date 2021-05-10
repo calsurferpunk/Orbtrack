@@ -387,7 +387,7 @@ public abstract class Settings
             //Item
             public static class Item extends Selectable.ListItem
             {
-                String loginName;
+                final String loginName;
 
                 public Item(int accType, String name)
                 {
@@ -419,8 +419,8 @@ public abstract class Settings
             //Item holder
             public static class ItemHolder extends Selectable.ListItemHolder
             {
-                AppCompatImageView accountImage;
-                TextView nameText;
+                final AppCompatImageView accountImage;
+                final TextView nameText;
 
                 public ItemHolder(View itemView)
                 {
@@ -1691,12 +1691,12 @@ public abstract class Settings
         //Item
         public static class Item extends Selectable.ListItem
         {
-            public String name;
+            public final String name;
             public double latitude;
             public double longitude;
             public double altitudeM;
-            public byte locationType;
-            public TimeZone zone;
+            public final byte locationType;
+            public final TimeZone zone;
 
             public Item(int id, int index, String nm, double lat, double lon, double altM, String znId, byte lType, boolean canEdit, boolean selected, boolean checked)
             {
@@ -1713,8 +1713,8 @@ public abstract class Settings
         //Item holder
         public static class ItemHolder extends Selectable.ListItemHolder
         {
-            AppCompatImageView locationImage;
-            TextView locationText;
+            final AppCompatImageView locationImage;
+            final TextView locationText;
 
             public ItemHolder(View itemView, int checkBoxID, int locationImageID, int locationTextID)
             {
@@ -1952,11 +1952,11 @@ public abstract class Settings
         //Item
         public static class Item extends Selectable.ListItem
         {
-            public String name;
-            public CalculateService.AlarmNotifySettings passStartSettings;
-            public CalculateService.AlarmNotifySettings passEndSettings;
-            public CalculateService.AlarmNotifySettings fullStartSettings;
-            public CalculateService.AlarmNotifySettings fullEndSettings;
+            public final String name;
+            public final CalculateService.AlarmNotifySettings passStartSettings;
+            public final CalculateService.AlarmNotifySettings passEndSettings;
+            public final CalculateService.AlarmNotifySettings fullStartSettings;
+            public final CalculateService.AlarmNotifySettings fullEndSettings;
 
             public Item(int id, String nm, CalculateService.AlarmNotifySettings pssStrtSttngs, CalculateService.AlarmNotifySettings pssEndSttngs, CalculateService.AlarmNotifySettings fllStrtSttngs, CalculateService.AlarmNotifySettings fllEndSttngs)
             {
@@ -1972,14 +1972,14 @@ public abstract class Settings
         //Item holder
         public static class ItemHolder extends Selectable.ListItemHolder
         {
-            AppCompatImageView notifyImage;
-            TextView nameText;
-            TextView passText;
-            TextView passStartText;
-            TextView passEndText;
-            TextView fullText;
-            TextView fullStartText;
-            TextView fullEndText;
+            final AppCompatImageView notifyImage;
+            final TextView nameText;
+            final TextView passText;
+            final TextView passStartText;
+            final TextView passEndText;
+            final TextView fullText;
+            final TextView fullStartText;
+            final TextView fullEndText;
 
             public ItemHolder(View itemView, int notifyImageId, int notifyTextId, int passTextId, int passStartTextId, int passEndTextId, int fullTextId, int fullStartTextId, int fullEndTextId)
             {
@@ -2166,9 +2166,9 @@ public abstract class Settings
         //Item
         public static class Item extends Selectable.ListItem
         {
-            public String name;
-            public String location;
-            public Class<?> widgetClass;
+            public final String name;
+            public final String location;
+            public final Class<?> widgetClass;
 
             public Item(int id, int index, String nm, String loc, Class<?> wClass)
             {
@@ -2182,9 +2182,9 @@ public abstract class Settings
         //Item holder
         public static class ItemHolder extends Selectable.ListItemHolder
         {
-            AppCompatImageView widgetImage;
-            TextView nameText;
-            TextView locationText;
+            final AppCompatImageView widgetImage;
+            final TextView nameText;
+            final TextView locationText;
 
             public ItemHolder(View itemView, int widgetImageId, int widgetTextId, int widgetLocationTextId)
             {

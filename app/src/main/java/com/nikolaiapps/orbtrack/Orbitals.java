@@ -49,17 +49,16 @@ public abstract class Orbitals
     //Page list item
     public static class PageListItem extends Selectable.ListItem
     {
-        public Drawable icon;
-        public Drawable titleIcon;
+        public final Drawable icon;
+        public final Drawable titleIcon;
         public int color;
         public boolean isVisible;
-        public String text;
-        public String owner;
-        public String ownerCode;
-        public long launchDateMs;
-        public long tleDateMs;
-        public byte orbitalType;
-        public Calculations.SatelliteObjectType satellite;
+        public final String text;
+        public final String owner;
+        public final String ownerCode;
+        public final long launchDateMs;
+        public final long tleDateMs;
+        public final Calculations.SatelliteObjectType satellite;
 
         public PageListItem(Context context, int index, Database.DatabaseSatellite currentSat, boolean canEd, boolean isSel)
         {
@@ -79,7 +78,6 @@ public abstract class Orbitals
             color = currentSat.pathColor;
             isVisible = currentSat.isSelected;
             tleDateMs = currentSat.tleDateMs;
-            orbitalType = currentSat.orbitalType;
             satellite = Calculations.loadSatellite(currentSat);
         }
     }
@@ -87,13 +85,13 @@ public abstract class Orbitals
     //Page list item holder
     public static class PageListItemHolder extends Selectable.ListItemHolder
     {
-        AppCompatImageView itemImage;
-        TextView itemText;
-        LinearLayout tleAgeLayout;
-        TextView tleAgeText;
-        View tleUnder;
-        BorderButton colorButton;
-        AppCompatButton visibleButton;
+        final AppCompatImageView itemImage;
+        final TextView itemText;
+        final LinearLayout tleAgeLayout;
+        final TextView tleAgeText;
+        final View tleUnder;
+        final BorderButton colorButton;
+        final AppCompatButton visibleButton;
 
         public PageListItemHolder(View viewItem, int itemImageID, int itemTextID, int tleAgeLayoutID, int tleAgeTextID, int tleAgeUnderID, int colorButtonID, int visibleButtonID)
         {

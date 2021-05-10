@@ -15,7 +15,6 @@ import android.os.Environment;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.documentfile.provider.DocumentFile;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
@@ -87,14 +86,14 @@ public class UpdateService extends NotifyService
     //Master satellite
     public static class MasterSatellite
     {
-        int noradId;
+        final int noradId;
         long launchDateMs;
-        public String name;
+        public final String name;
         String ownerCode;
         String ownerName;
         byte orbitalType;
         ArrayList<Integer> categoryIndexes;
-        ArrayList<String> categories;
+        final ArrayList<String> categories;
 
         public MasterSatellite(int nID, String nm, String ownrCd, String ownrNm, long launchMs)
         {
@@ -147,8 +146,8 @@ public class UpdateService extends NotifyService
     //Master link
     public static class MasterLink
     {
-        public String group;
-        public String link;
+        public final String group;
+        public final String link;
 
         public MasterLink(String gp, String lnk)
         {
@@ -160,8 +159,8 @@ public class UpdateService extends NotifyService
     //Master owner
     public static class MasterOwner implements Comparable<MasterOwner>
     {
-        public String code;
-        public String name;
+        public final String code;
+        public final String name;
 
         public static class Comparer implements Comparator<MasterOwner>
         {
@@ -225,7 +224,7 @@ public class UpdateService extends NotifyService
     //Master category
     public static class MasterCategory implements Comparable<MasterCategory>
     {
-        public String name;
+        public final String name;
         public int index;
 
         public static class Comparer implements Comparator<MasterCategory>
@@ -269,8 +268,8 @@ public class UpdateService extends NotifyService
     //Master satellite category
     public static class MasterSatelliteCategory
     {
-        public int noradId;
-        public int categoryIndex;
+        public final int noradId;
+        public final int categoryIndex;
 
         public static class Comparer implements Comparator<MasterSatelliteCategory>
         {
@@ -304,10 +303,10 @@ public class UpdateService extends NotifyService
         private final ArrayList<MasterCategory> newCategories;
         private ArrayList<MasterOwner> owners;
         private final ArrayList<MasterOwner> newOwners;
-        public ArrayList<MasterOwner> usedOwners;
+        public final ArrayList<MasterOwner> usedOwners;
         private ArrayList<MasterSatelliteCategory> satelliteCategories;
         private final ArrayList<MasterSatelliteCategory> newSatelliteCategories;
-        public ArrayList<String> usedCategories;
+        public final ArrayList<String> usedCategories;
 
         public MasterListType()
         {
@@ -465,7 +464,7 @@ public class UpdateService extends NotifyService
         public String ownerCode;
         public byte orbitalType;
         public Calendar launchDate;
-        public ArrayList<String> categories;
+        public final ArrayList<String> categories;
 
         public SpaceTrackSatellite()
         {
@@ -537,9 +536,9 @@ public class UpdateService extends NotifyService
     //Space track list
     private static class SpaceTrackList
     {
-        public boolean loginFailed;
-        public SpaceTrackSatellite[] satellites;
-        public MasterOwner[] owners;
+        public final boolean loginFailed;
+        public final SpaceTrackSatellite[] satellites;
+        public final MasterOwner[] owners;
 
         public SpaceTrackList(SpaceTrackSatellite[] sats, MasterOwner[] owrs, boolean loggedIn)
         {
@@ -552,9 +551,9 @@ public class UpdateService extends NotifyService
     //Owner item
     public static class OwnerItem
     {
-        public int noradId;
-        public String ownerCode;
-        public Calendar launchDate;
+        public final int noradId;
+        public final String ownerCode;
+        public final Calendar launchDate;
 
         public OwnerItem(int nrID, String ownrCd, Calendar lnchDt)
         {

@@ -76,7 +76,7 @@ public class CalculateService extends NotifyService
         boolean nextOnly;
         public int noradId;
         public long timeMs;
-        public Calculations.ObserverType location;
+        public final Calculations.ObserverType location;
 
         public AlarmNotifySettings()
         {
@@ -99,9 +99,8 @@ public class CalculateService extends NotifyService
         public Calculations.SatelliteObjectType satellite2;
         public boolean passStartFound;
         public boolean passCalculated;
-        public boolean passCalculating;
         public boolean passCalculateFinished;
-        public boolean showPathProgress;
+        public final boolean showPathProgress;
         public double passAzStart;
         public double passAzEnd;
         public double passAzTravel;
@@ -154,7 +153,6 @@ public class CalculateService extends NotifyService
             passCalculated = foundPass;
             passCalculateFinished = finishedCalculating;
             showPathProgress = usePathProgress;
-            passCalculating = false;
             passTimeStart = startTime;
             passTimeEnd = endTime;
             passDuration = duration;
@@ -1282,7 +1280,6 @@ public class CalculateService extends NotifyService
 
             //update status
             currentItem.passCalculated = currentItem.passCalculateFinished = currentItem.passStartFound = false;
-            currentItem.passCalculating = true;
             currentItem.passTimeStart = null;
             currentItem.passTimeEnd = null;
             currentItem.passDuration = "";
@@ -1483,9 +1480,6 @@ public class CalculateService extends NotifyService
                 //go forward up to 15 minutes/seconds to find ending second
                 updateTimeInPath(calculateType, satellite1, satellite2, observer, intersection, 1, (extendedSearch ? (15 * 60) : 15), pathEndGMT, true, applyRefraction);
             }
-
-            //update status
-            currentItem.passCalculating = false;
 
             //if done with pass or cancelled
             if(doneWithPath || (usingTask ? task.isCancelled() : cancelIntent[calculateType]))

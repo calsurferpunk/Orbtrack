@@ -113,7 +113,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
         }
 
-        public int id;
+        public final int id;
         Bitmap image;
 
         public IconImage(int id, Bitmap image)

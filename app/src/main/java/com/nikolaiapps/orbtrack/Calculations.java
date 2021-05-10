@@ -541,10 +541,10 @@ public abstract class Calculations
     //Planet data type
     public static class PlanetDataType
     {
-        double hourAngleRad;
-        double declinationRad;
-        double rightAscDeg;
-        double distanceKm;
+        final double hourAngleRad;
+        final double declinationRad;
+        final double rightAscDeg;
+        final double distanceKm;
 
         PlanetDataType(int planetNumber, double julianCenturies, double obliquity, double localSiderealTime, double latitude)
         {
@@ -619,7 +619,7 @@ public abstract class Calculations
                     bundle = new Bundle();
                 }
 
-                return(new SatelliteObjectType((EciDataType)bundle.getParcelable(ParamTypes.ECI), (GeodeticDataType)bundle.getParcelable(ParamTypes.Geo), (TLEDataType)bundle.getParcelable(ParamTypes.TLE), (OrbitDataType)bundle.getParcelable(ParamTypes.Orbit)));
+                return(new SatelliteObjectType(bundle.getParcelable(ParamTypes.ECI), bundle.getParcelable(ParamTypes.Geo), bundle.getParcelable(ParamTypes.TLE), bundle.getParcelable(ParamTypes.Orbit)));
             }
 
             @Override
@@ -699,7 +699,7 @@ public abstract class Calculations
     public static class ObserverType implements Parcelable
     {
         public TimeZone timeZone;
-        public GeodeticDataType geo;				//geodetic position
+        public final GeodeticDataType geo;				//geodetic position
 
         public static final Creator<ObserverType> CREATOR = new Parcelable.Creator<ObserverType>()
         {
@@ -712,7 +712,7 @@ public abstract class Calculations
                     bundle = new Bundle();
                 }
 
-                return(new ObserverType(bundle.getString(ParamTypes.TimeZoneId), (GeodeticDataType)bundle.getParcelable(ParamTypes.Geo)));
+                return(new ObserverType(bundle.getString(ParamTypes.TimeZoneId), bundle.getParcelable(ParamTypes.Geo)));
             }
 
             @Override

@@ -226,9 +226,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         int topBackgroundColor;
         int middleBackgroundColor;
         int bottomBackgroundColor;
-        TextSettings[] text;
-        String[][] textSettingsNames;
-        LocationSettings location;
+        final TextSettings[] text;
+        final String[][] textSettingsNames;
+        final LocationSettings location;
 
         public WidgetSettings(Context context, Class<?> widgetClass, int widgetId)
         {
@@ -467,7 +467,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     nowRadio = rootView.findViewById(R.id.Widget_Setup_Now_Radio);
 
                     intervalList = rootView.findViewById(R.id.Widget_Setup_Interval_List);
-                    intervalList.setAdapter(new IconSpinner.CustomAdapter(context, intervalItems));
+                    if(intervalItems != null)
+                    {
+                        intervalList.setAdapter(new IconSpinner.CustomAdapter(context, intervalItems));
+                    }
                     intervalList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                     {
                         @Override
@@ -619,7 +622,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     globalBackgroundColorButton = rootView.findViewById(R.id.Widget_Setup_Global_Background_Color_Button);
                     globalBackgroundColorButton.setOnClickListener(createOnColorButtonClickListener(globalBackgroundRow, true));
                     globalBorderStyleList = rootView.findViewById(R.id.Widget_Setup_Global_Border_Style_List);
-                    globalBorderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
+                    if(borderStyles != null)
+                    {
+                        globalBorderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
+                    }
                     globalBorderStyleList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                     {
                         @Override
@@ -640,7 +646,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     borderColorButton = rootView.findViewById(R.id.Widget_Setup_Border_Color_Button);
                     borderColorButton.setOnClickListener(createOnColorButtonClickListener(borderRow, true));
                     borderStyleList = rootView.findViewById(R.id.Widget_Setup_Border_Style_List);
-                    borderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
+                    if(borderStyles != null)
+                    {
+                        borderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
+                    }
                     borderStyleList.setOnItemSelectedListener(globalBorderStyleList.getOnItemSelectedListener());
                     borderDivider = rootView.findViewById(R.id.Widget_Setup_Border_Background_Divider);
 

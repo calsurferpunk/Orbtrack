@@ -114,8 +114,8 @@ public abstract class Current
                 }
             }
 
-            public int noradId;
-            public int displayIndex;
+            public final int noradId;
+            public final int displayIndex;
 
             public NoradIndex(int noradId, int displayIndex)
             {
@@ -408,22 +408,22 @@ public abstract class Current
     private static class ItemHolderBase extends RecyclerView.ViewHolder
     {
         public boolean movedName;
-        public ViewGroup rootView;
-        public TextView nameText;
-        public TextView dataGroup1Text;
-        public TextView dataGroup2Text;
-        public TextView dataGroup3Text;
-        public TextView dataGroup4Text;
-        public TextView dataGroup5Text;
-        public TextView dataGroupTitle1Text;
-        public TextView dataGroupTitle2Text;
-        public TextView dataGroupTitle3Text;
-        public TextView dataGroupTitle4Text;
-        public TextView dataGroupTitle5Text;
-        public LinearLayout dataGroupTitles;
-        public LinearLayout dataGroup;
-        public LinearLayout nameGroup;
-        public AppCompatImageView nameImage;
+        public final ViewGroup rootView;
+        public final TextView nameText;
+        public final TextView dataGroup1Text;
+        public final TextView dataGroup2Text;
+        public final TextView dataGroup3Text;
+        public final TextView dataGroup4Text;
+        public final TextView dataGroup5Text;
+        public final TextView dataGroupTitle1Text;
+        public final TextView dataGroupTitle2Text;
+        public final TextView dataGroupTitle3Text;
+        public final TextView dataGroupTitle4Text;
+        public final TextView dataGroupTitle5Text;
+        public final LinearLayout dataGroupTitles;
+        public final LinearLayout dataGroup;
+        public final LinearLayout nameGroup;
+        public final AppCompatImageView nameImage;
 
         public ItemHolderBase(View itemView, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroup1TextID, int dataGroupTitle2ID, int dataGroup2TextID, int dataGroupTitle3ID, int dataGroup3TextID, int dataGroupTitle4ID, int dataGroup4TextID, int dataGroupTitle5ID, int dataGroup5TextID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID)
         {
@@ -456,12 +456,12 @@ public abstract class Current
         private final int columnBackgroundColorId;
         protected boolean hasItems;
         protected boolean forCalculation;
-        protected boolean usingGrid;
+        protected final boolean usingGrid;
         protected String dataGroupTitle1String;
         protected String dataGroupTitle2String;
         protected String dataGroupTitle3String;
         protected String dataGroupTitle4String;
-        protected String dataGroupTitle5String;
+        protected final String dataGroupTitle5String;
 
         public abstract void onBindViewHolder(@NonNull ItemHolderBase holder, int position);
 
@@ -567,7 +567,7 @@ public abstract class Current
 
             public static class Comparer implements Comparator<Item>
             {
-                int sort;
+                final int sort;
 
                 public Comparer(int sortBy)
                 {
@@ -1369,7 +1369,7 @@ public abstract class Current
 
             public static class Comparer implements Comparator<Item>
             {
-                int sort;
+                final int sort;
 
                 public Comparer(int sortBy)
                 {
@@ -1461,8 +1461,8 @@ public abstract class Current
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public TextView timeText;
-            public LinearLayout progressGroup;
+            public final TextView timeText;
+            public final LinearLayout progressGroup;
 
             private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int timeTextID)
             {
@@ -1819,7 +1819,7 @@ public abstract class Current
 
             public static class Comparer implements Comparator<Item>
             {
-                int sort;
+                final int sort;
 
                 public Comparer(int sortBy)
                 {
@@ -2065,13 +2065,13 @@ public abstract class Current
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public ProgressBar currentProgressBar;
-            public ProgressBar currentProgressLoadingBar;
-            public ProgressBar calculateProgressBar;
-            public LinearLayout timeStartLayout;
-            public LinearLayout elMaxLayout;
-            public View timeStartUnder;
-            public View elMaxUnder;
+            public final ProgressBar currentProgressBar;
+            public final ProgressBar currentProgressLoadingBar;
+            public final ProgressBar calculateProgressBar;
+            public final LinearLayout timeStartLayout;
+            public final LinearLayout elMaxLayout;
+            public final View timeStartUnder;
+            public final View elMaxUnder;
 
             public ItemHolder(View itemView, int nameImageID, int nameTextID, int timeStartLayoutID, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxLayoutID, int elMaxTextID, int elMaxUnderID, int nameGroupID, int currentProgressBarID, int currentProgressLoadingBarID, int calculateProgressBarID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID)
             {
@@ -2556,7 +2556,7 @@ public abstract class Current
 
             public static class Comparer implements Comparator<Item>
             {
-                int sort;
+                final int sort;
 
                 public Comparer(int sortBy)
                 {
@@ -2665,8 +2665,8 @@ public abstract class Current
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public TextView timeText;
-            public LinearLayout progressGroup;
+            public final TextView timeText;
+            public final LinearLayout progressGroup;
 
             private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int speedTextID, int timeTextID)
             {

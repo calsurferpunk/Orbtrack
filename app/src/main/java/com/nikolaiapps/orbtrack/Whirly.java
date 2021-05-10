@@ -172,7 +172,7 @@ class Whirly
         private final BaseController.TextureSettings boardTextureSettings;
         private ComponentObject boardObject;
         private final float[] boardTextureColor;
-        ArrayList<Billboard> billboardList;
+        final ArrayList<Billboard> billboardList;
 
         Board(BaseController boardController)
         {
@@ -321,8 +321,8 @@ class Whirly
         private final BaseController.TextureSettings flatTextureSettings;
         private ComponentObject flatObject;
         private final BaseController controller;
-        ArrayList<Sticker> flatList;
-        ArrayList<MaplyTexture> flatTextureList;
+        final ArrayList<Sticker> flatList;
+        final ArrayList<MaplyTexture> flatTextureList;
 
         FlatObject(BaseController boardController)
         {
@@ -1315,7 +1315,7 @@ class Whirly
     private static class LatLonTileSource extends SimpleTileFetcher
     {
         private final int thickness;
-        CoordinatesFragment.TileShared common;
+        final CoordinatesFragment.TileShared common;
 
         LatLonTileSource(Context context, BaseController controller, int borderThickness)
         {
@@ -1360,7 +1360,7 @@ class Whirly
     {
         protected boolean allowRotate;
         protected double lastRotationRads;
-        protected CoordinatesFragment.Shared common;
+        protected final CoordinatesFragment.Shared common;
         protected MaplyStarModel stars;
         QuadImageLoader latLonLoader;
 
@@ -1373,13 +1373,6 @@ class Whirly
             common = new Shared();
             stars = null;
             latLonLoader = null;
-        }
-
-        @Override
-        public void onDestroy()
-        {
-            super.onDestroy();
-            //common.destroyed();
         }
 
         @Override

@@ -32,7 +32,7 @@ public class AutoPlacesAdapter extends ArrayAdapter<AutoPlacesAdapter.Item> impl
     public static class Item
     {
         private final CharSequence description;
-        public CharSequence ID;
+        public final CharSequence ID;
 
         public Item(CharSequence placeID, CharSequence placeDesc)
         {

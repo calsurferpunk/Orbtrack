@@ -27,9 +27,9 @@ public class IconSpinner extends AppCompatSpinner
     public static class Item
     {
         float rotate;
-        String text;
+        final String text;
         String subText;
-        Object value;
+        final Object value;
         Drawable icon1;
         Drawable icon2;
         Drawable icon3;

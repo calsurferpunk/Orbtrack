@@ -52,9 +52,9 @@ public interface CoordinatesFragment
 
     class Coordinate
     {
-        double latitude;
-        double longitude;
-        double altitudeKm;
+        final double latitude;
+        final double longitude;
+        final double altitudeKm;
 
         public Coordinate(double lat, double lon, double altKm)
         {
@@ -98,7 +98,7 @@ public interface CoordinatesFragment
         {
             Database.SatelliteData data;
             Calculations.GeodeticDataType geo;
-            ArrayList<Coordinate> points;
+            final ArrayList<Coordinate> points;
 
             Shared()
             {
@@ -170,8 +170,8 @@ public interface CoordinatesFragment
         int selectedOrbitalIndex;
         int selectedNoradId;
 
-        ArrayList<MarkerBase> markerObjects;
-        ArrayList<OrbitalBase> orbitalObjects;
+        final ArrayList<MarkerBase> markerObjects;
+        final ArrayList<OrbitalBase> orbitalObjects;
 
         Shared()
         {
@@ -588,9 +588,9 @@ public interface CoordinatesFragment
 
     class TileShared
     {
-        float textSpScale;
-        Resources res;
-        Context currentContext;
+        final float textSpScale;
+        final Resources res;
+        final Context currentContext;
 
         TileShared(Context context)
         {

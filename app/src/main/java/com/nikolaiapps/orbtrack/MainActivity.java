@@ -3488,7 +3488,7 @@ public class MainActivity extends AppCompatActivity
         return(new Selectable.ListFragment.OnAdapterSetListener()
         {
             @Override
-            public void setAdapter(final int group, final int position, RecyclerView.Adapter adapter)
+            public void setAdapter(final int group, final int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter)
             {
                 int orbitalId;
                 Bundle params;
@@ -5190,7 +5190,7 @@ public class MainActivity extends AppCompatActivity
     {
         Bundle params;
         Database.SatelliteData listSatellite;
-        Current.ViewAngles.Item[] savedViewItems = null;
+        Current.ViewAngles.Item[] savedViewItems;
 
         //if task was running
         if(calculateViewAnglesTask != null)
@@ -5459,7 +5459,7 @@ public class MainActivity extends AppCompatActivity
     {
         Bundle params;
         Database.SatelliteData listSatellite;
-        Current.Coordinates.Item[] savedCoordinateItems = null;
+        Current.Coordinates.Item[] savedCoordinateItems;
 
         //if task was running
         if(calculateCoordinatesTask != null)

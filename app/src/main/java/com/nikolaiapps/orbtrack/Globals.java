@@ -369,10 +369,10 @@ public abstract class Globals
     public static class PendingFile
     {
         public int page;
-        public int type;
-        public int fileSourceType;
+        public final int type;
+        public final int fileSourceType;
         public String name;
-        public String extension;
+        public final String extension;
         public Uri outUri;
 
         public PendingFile(Uri out, String nm, String ext, int typ, int flSrcType)

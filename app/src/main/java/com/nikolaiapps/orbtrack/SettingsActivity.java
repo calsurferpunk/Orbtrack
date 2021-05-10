@@ -739,7 +739,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         return(new Selectable.ListFragment.OnAdapterSetListener()
         {
             @Override
-            public void setAdapter(final int group, final int position, RecyclerView.Adapter adapter)
+            public void setAdapter(final int group, final int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter)
             {
                 switch(position)
                 {

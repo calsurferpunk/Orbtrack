@@ -14,7 +14,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.os.Build;
 import androidx.appcompat.app.AppCompatDelegate;
 import android.text.Html;
 import android.view.View;
@@ -419,14 +418,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
             //set border color and opacity
             views.setInt(viewId, "setColorFilter", color);
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN)
-            {
-                views.setInt(viewId, "setImageAlpha", alpha);
-            }
-            else
-            {
-                views.setInt(viewId, "setAlpha", alpha);
-            }
+            views.setInt(viewId, "setImageAlpha", alpha);
         }
     }
 

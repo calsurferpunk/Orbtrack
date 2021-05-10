@@ -29,7 +29,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
 
     public static class CoordinateBase
     {
-        public Calculations.SatelliteObjectType satellite;
+        public final Calculations.SatelliteObjectType satellite;
         public double pathJulianDateStart;
         public double pathJulianDateEnd;
 
@@ -173,10 +173,10 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
     //Coordinate information at time
     public static class OrbitalCoordinate extends Calculations.GeodeticDataType
     {
-        public double julianDate;
-        public double illumination;
-        public Calendar time;
-        public String phaseName;
+        public final double julianDate;
+        public final double illumination;
+        public final Calendar time;
+        public final String phaseName;
 
         public OrbitalCoordinate(Calculations.GeodeticDataType geoData, double jd, double illum, String pn)
         {

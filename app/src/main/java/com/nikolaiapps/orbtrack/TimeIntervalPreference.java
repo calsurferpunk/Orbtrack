@@ -24,9 +24,9 @@ public class TimeIntervalPreference extends Preference
     //Class to report combined interval values
     public static class IntervalValues
     {
-        int hour;
-        int minute;
-        long intervalMs;
+        final int hour;
+        final int minute;
+        final long intervalMs;
 
         public IntervalValues(int hour, int minute, long intervalMs)
         {

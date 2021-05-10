@@ -153,7 +153,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         }
 
         private static ItemBase rootDir;
-        protected FileBrowserBaseActivity currentContext;
+        protected final FileBrowserBaseActivity currentContext;
         private final boolean allowRootItem;
         private final boolean selectFolder;
         private final Drawable fileDrawable;

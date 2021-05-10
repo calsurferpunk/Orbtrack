@@ -72,9 +72,9 @@ public abstract class Selectable
     {
         public int id;
         public int listIndex;
-        public boolean canEdit;
+        public final boolean canEdit;
         public boolean isSelected;
-        public boolean canCheck;
+        public final boolean canCheck;
         public boolean isChecked;
         public CheckBox checkBoxView;
         public static final Creator<ListItem> CREATOR =  new Parcelable.Creator<ListItem>()
@@ -949,8 +949,8 @@ public abstract class Selectable
         protected int itemsRootViewID = -1;
         protected int widthDp = Globals.getDeviceDp(null, true);
         protected String categoryTitle;
-        protected Context currentContext;
-        protected LayoutInflater listInflater;
+        protected final Context currentContext;
+        protected final LayoutInflater listInflater;
         private OnItemClickListener itemClickedListener;
         private OnItemLongClickListener itemLongClickedListener;
         protected OnItemDetailButtonClickListener itemDetailButtonClickListener;
@@ -1277,7 +1277,7 @@ public abstract class Selectable
         //On adapter set listener
         public interface OnAdapterSetListener
         {
-            void setAdapter(int group, int position, RecyclerView.Adapter adapter);
+            void setAdapter(int group, int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter);
         }
 
         //On item selected listener
@@ -1340,7 +1340,7 @@ public abstract class Selectable
         protected View listParentView;
         protected PlayBar playBar;
         protected PlayBar scaleBar;
-        protected ArrayList<ListItem> selectedItems;
+        protected final ArrayList<ListItem> selectedItems;
 
         public ListFragment()
         {
@@ -2216,9 +2216,9 @@ public abstract class Selectable
     //Page adapter
     public static class ListFragmentAdapter extends FragmentStatePagerAdapter
     {
-        protected int group;
-        protected Context currentContext;
-        protected int[] subPage;
+        protected final int group;
+        protected final Context currentContext;
+        protected final int[] subPage;
         private final View currentParentVIew;
         private final ListFragment.OnUpdateNeededListener updateNeededListener;
         private final ListFragment.OnItemSelectedListener itemSelectedListener;
@@ -2308,7 +2308,7 @@ public abstract class Selectable
         public ArrayList<ListItem> getSelectedItems(ViewGroup container, int pageNum)
         {
             ListFragment page = getPage(container, pageNum);
-            return(page != null ? page.getSelectedItems() : new ArrayList<ListItem>(0));
+            return(page != null ? page.getSelectedItems() : new ArrayList<>(0));
         }
 
         //Selects all items

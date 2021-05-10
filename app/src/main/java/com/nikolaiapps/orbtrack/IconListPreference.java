@@ -207,19 +207,18 @@ public class IconListPreference extends Preference
             pendingDefaultValue = defaultValue;
         }
     }
-    public boolean setSelectedValue(Object value)
+    public void setSelectedValue(Object value)
     {
         pendingDefaultValue = null;
 
         if(iconList != null)
         {
             pendingSetValue = null;
-            return(iconList.setSelectedValue(value));
+            iconList.setSelectedValue(value);
         }
         else
         {
             pendingSetValue = value;
-            return(false);
         }
     }
 }

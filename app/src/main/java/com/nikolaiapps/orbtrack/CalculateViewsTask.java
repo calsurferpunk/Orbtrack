@@ -2,7 +2,6 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.content.Context;
-import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -32,13 +31,11 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
 
     public static class OrbitalPathBase
     {
-        public Calculations.SatelliteObjectType satellite;
-        protected int mapPathColor;
+        public final Calculations.SatelliteObjectType satellite;
 
         public OrbitalPathBase(Database.SatelliteData newSat)
         {
             satellite = newSat.satellite;
-            mapPathColor = (newSat.database != null ? newSat.database.pathColor : Color.DKGRAY);
         }
     }
 
@@ -185,12 +182,12 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
     {
         private final String timeZoneId;
 
-        public double julianDate;
-        public double illumination;
-        public Calendar gmtTime;
-        public String phaseName;
-        public String timeString;
-        public Rect timeArea;
+        public final double julianDate;
+        public final double illumination;
+        public final Calendar gmtTime;
+        public final String phaseName;
+        public final String timeString;
+        public final Rect timeArea;
 
         public static final Creator<OrbitalView> CREATOR =  new Parcelable.Creator<OrbitalView>()
         {

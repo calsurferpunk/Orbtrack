@@ -747,7 +747,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             if(legacyProvider == null)
             {
                 //get all available providers
-                legacyProviders = (legacyClient != null ? legacyClient.getAllProviders() : new ArrayList<String>(0));
+                legacyProviders = (legacyClient != null ? legacyClient.getAllProviders() : new ArrayList<>(0));
 
                 //try to get lowest battery usage provider that will return now
                 if(legacyProviders.contains(LocationManager.NETWORK_PROVIDER))

@@ -148,8 +148,8 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
 
         public static class ItemHolder extends RecyclerView.ViewHolder
         {
-            AppCompatImageView itemImage;
-            TextView itemTextLbl;
+            final AppCompatImageView itemImage;
+            final TextView itemTextLbl;
 
             public ItemHolder(View itemView, int itemImageId, int itemTextLblId)
             {
@@ -184,12 +184,6 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
             //set displays
             itemHolder.itemImage.setBackgroundDrawable(currentItem.icon);
             itemHolder.itemTextLbl.setText(currentItem.text);
-        }
-
-        @Override
-        protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
-        {
-            //final Item currentItem = (Item)item;
         }
 
         @Override

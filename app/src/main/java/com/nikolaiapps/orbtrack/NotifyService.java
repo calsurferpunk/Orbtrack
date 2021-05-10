@@ -148,7 +148,7 @@ public abstract class NotifyService extends IntentService
     }
 
     private final String wakeTag;
-    protected String notifyChannelId;
+    protected final String notifyChannelId;
     protected NotifySettings currentNotify;
     private NotifySettings lastNotify;
     private NotificationManagerCompat notifyManger;

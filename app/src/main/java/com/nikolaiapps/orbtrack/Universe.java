@@ -18,7 +18,10 @@ public abstract class Universe
 {
     public static class LatLonRadData
     {
-        public int d, m, mp, f;
+        public final int d;
+        public final int m;
+        public final int mp;
+        public final int f;
         public long sl, sr;         //longitude/radius
         public long sb;             //latitude
 
@@ -46,9 +49,9 @@ public abstract class Universe
 
     public static class VSOPData
     {
-        double a;
-        double b;
-        double c;
+        final double a;
+        final double b;
+        final double c;
 
         public VSOPData(double a_val, double b_val, double c_val)
         {

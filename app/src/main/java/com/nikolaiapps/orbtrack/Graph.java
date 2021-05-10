@@ -58,17 +58,17 @@ public class Graph extends View
     private static class Item
     {
         private int color;
-        boolean useArc;
+        final boolean useArc;
         boolean updated;
-        double xMin;
-        double xMax;
+        final double xMin;
+        final double xMax;
         double yMin;
         double yMax;
-        String name;
-        String bssid;
-        Paint fillPaint;
-        Paint borderPaint;
-        Paint textPaint;
+        final String name;
+        final String bssid;
+        final Paint fillPaint;
+        final Paint borderPaint;
+        final Paint textPaint;
 
         Item(String name, String bssid, double xMin, double xMax, double yMin, double yMax, float textSize, boolean useArc)
         {
@@ -128,11 +128,11 @@ public class Graph extends View
 
     private static class Divisor
     {
-        double value;
-        String text;
-        Bitmap image;
-        Bitmap subImage1;
-        Bitmap subImage2;
+        final double value;
+        final String text;
+        final Bitmap image;
+        final Bitmap subImage1;
+        final Bitmap subImage2;
 
         Divisor(String text, double value, Bitmap image, Bitmap subImage1, Bitmap subImage2)
         {
@@ -303,7 +303,7 @@ public class Graph extends View
         setColors(Color.BLACK, Color.GRAY);
         setUnitTypes(UnitType.Number, UnitType.Number);
         setTitles("X Title", "Y Title");
-        setData(new ArrayList<Double>(0), new ArrayList<Double>(0), TimeZone.getDefault());
+        setData(new ArrayList<>(0), new ArrayList<>(0), TimeZone.getDefault());
 
         selectType = SelectType.Circle;
         allowScroll = isPreview = showDataTitles = allowParentTouch = false;

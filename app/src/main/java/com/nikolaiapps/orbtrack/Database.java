@@ -567,21 +567,21 @@ public class Database extends SQLiteOpenHelper
 
     public static class DatabaseSatellite implements Parcelable
     {
-        public String name;
+        public final String name;
         private final String userName;
-        public int norad;
+        public final int norad;
         public String ownerCode;
-        public String ownerName;
-        public String tleLine1;
-        public String tleLine2;
-        public String gp;
+        public final String ownerName;
+        public final String tleLine1;
+        public final String tleLine2;
+        public final String gp;
         public Calculations.TLEDataType tle;
         public long tleDateMs;
-        public long updateDateMs;
-        public long launchDateMs;
+        public final long updateDateMs;
+        public final long launchDateMs;
         public int pathColor;
-        public byte orbitalType;
-        public boolean isSelected;
+        public final byte orbitalType;
+        public final boolean isSelected;
         public static final Creator<DatabaseSatellite> CREATOR =  new Parcelable.Creator<DatabaseSatellite>()
         {
             @Override
@@ -708,8 +708,8 @@ public class Database extends SQLiteOpenHelper
 
     public static class SatelliteData
     {
-        Calculations.SatelliteObjectType satellite;
-        DatabaseSatellite database;
+        final Calculations.SatelliteObjectType satellite;
+        final DatabaseSatellite database;
 
         public SatelliteData(DatabaseSatellite db)
         {
@@ -759,14 +759,14 @@ public class Database extends SQLiteOpenHelper
 
     public static class DatabaseLocation
     {
-        public int id;
-        public String name;
+        public final int id;
+        public final String name;
         public String zoneId;
         public double latitude;
         public double longitude;
         public double altitudeKM;
-        public byte locationType;
-        public boolean isChecked;
+        public final byte locationType;
+        public final boolean isChecked;
 
         public DatabaseLocation(int locID, String nm, double lat, double lon, double altKm, String znId, byte ltype, boolean checked)
         {

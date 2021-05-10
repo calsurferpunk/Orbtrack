@@ -206,13 +206,13 @@ public class MasterAddListActivity extends BaseInputActivity
         //List item
         public static class ListItem extends Selectable.ListItem
         {
-            public boolean startChecked;
-            public long launchDateMs;
+            public final boolean startChecked;
+            public final long launchDateMs;
             private final Drawable orbitalIcon;
             private final Drawable ownerIcon;
-            public UpdateService.MasterSatellite satellite;
-            public ArrayList<String> ownerCodes;
-            public ArrayList<String> categories;
+            public final UpdateService.MasterSatellite satellite;
+            public final ArrayList<String> ownerCodes;
+            public final ArrayList<String> categories;
 
             public static class Comparer implements Comparator<ListItem>
             {
@@ -294,10 +294,10 @@ public class MasterAddListActivity extends BaseInputActivity
         //List item holder
         public static class ListItemHolder extends Selectable.ListItemHolder
         {
-            AppCompatImageView orbitalImage;
-            AppCompatImageView ownerImage;
-            TextView itemText;
-            ProgressBar itemProgress;
+            final AppCompatImageView orbitalImage;
+            final AppCompatImageView ownerImage;
+            final TextView itemText;
+            final ProgressBar itemProgress;
 
             public ListItemHolder(View viewItem, int orbitalImageID, int itemImageID, int itemTextID, int itemProgressID)
             {

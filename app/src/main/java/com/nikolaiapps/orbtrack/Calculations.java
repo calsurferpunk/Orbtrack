@@ -2099,28 +2099,24 @@ public abstract class Calculations
 
         //initialize lunar solar terms
         day = tle_data.epochJulian - JanFirst1900JD;
-
-        if(day != norad_data.dpi_day)
-        {
-            norad_data.dpi_day = day;
-            norad_data.dpi_xnodce = 4.5236020 - 9.2422029E-4 * day;
-            norad_data.dpi_stem = Math.sin(norad_data.dpi_xnodce);
-            norad_data.dpi_ctem = Math.cos(norad_data.dpi_xnodce);
-            norad_data.dpi_zcosil = 0.91375164 - 0.03568096 * norad_data.dpi_ctem;
-            norad_data.dpi_zsinil = Math.sqrt(1.0 - norad_data.dpi_zcosil * norad_data.dpi_zcosil);
-            norad_data.dpi_zsinhl = 0.089683511 * norad_data.dpi_stem / norad_data.dpi_zsinil;
-            norad_data.dpi_zcoshl = Math.sqrt(1.0 - norad_data.dpi_zsinhl * norad_data.dpi_zsinhl);
-            norad_data.dpi_c = 4.7199672 + 0.22997150 * day;
-            norad_data.dpi_gam = 5.8351514 + 0.0019443680 * day;
-            norad_data.dp_zmol = fmod2P(norad_data.dpi_c - norad_data.dpi_gam);
-            norad_data.dpi_zx = 0.39785416 * norad_data.dpi_stem / norad_data.dpi_zsinil;
-            norad_data.dpi_zy = norad_data.dpi_zcoshl * norad_data.dpi_ctem + 0.91744867 * norad_data.dpi_zsinhl * norad_data.dpi_stem;
-            norad_data.dpi_zx = arctan(norad_data.dpi_zx, norad_data.dpi_zy) + norad_data.dpi_gam - norad_data.dpi_xnodce;
-            norad_data.dpi_zcosgl = Math.cos(norad_data.dpi_zx);
-            norad_data.dpi_zsingl = Math.sin(norad_data.dpi_zx);
-            norad_data.dp_zmos = 6.2565837 + 0.017201977 * day;
-            norad_data.dp_zmos = fmod2P(norad_data.dp_zmos);
-        }
+        norad_data.dpi_day = day;
+        norad_data.dpi_xnodce = 4.5236020 - 9.2422029E-4 * day;
+        norad_data.dpi_stem = Math.sin(norad_data.dpi_xnodce);
+        norad_data.dpi_ctem = Math.cos(norad_data.dpi_xnodce);
+        norad_data.dpi_zcosil = 0.91375164 - 0.03568096 * norad_data.dpi_ctem;
+        norad_data.dpi_zsinil = Math.sqrt(1.0 - norad_data.dpi_zcosil * norad_data.dpi_zcosil);
+        norad_data.dpi_zsinhl = 0.089683511 * norad_data.dpi_stem / norad_data.dpi_zsinil;
+        norad_data.dpi_zcoshl = Math.sqrt(1.0 - norad_data.dpi_zsinhl * norad_data.dpi_zsinhl);
+        norad_data.dpi_c = 4.7199672 + 0.22997150 * day;
+        norad_data.dpi_gam = 5.8351514 + 0.0019443680 * day;
+        norad_data.dp_zmol = fmod2P(norad_data.dpi_c - norad_data.dpi_gam);
+        norad_data.dpi_zx = 0.39785416 * norad_data.dpi_stem / norad_data.dpi_zsinil;
+        norad_data.dpi_zy = norad_data.dpi_zcoshl * norad_data.dpi_ctem + 0.91744867 * norad_data.dpi_zsinhl * norad_data.dpi_stem;
+        norad_data.dpi_zx = arctan(norad_data.dpi_zx, norad_data.dpi_zy) + norad_data.dpi_gam - norad_data.dpi_xnodce;
+        norad_data.dpi_zcosgl = Math.cos(norad_data.dpi_zx);
+        norad_data.dpi_zsingl = Math.sin(norad_data.dpi_zx);
+        norad_data.dp_zmos = 6.2565837 + 0.017201977 * day;
+        norad_data.dp_zmos = fmod2P(norad_data.dp_zmos);
 
         zcosg = ZCosGS;
         zsing = ZSinGS;

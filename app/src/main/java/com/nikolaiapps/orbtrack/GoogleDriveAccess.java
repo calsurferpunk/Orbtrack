@@ -705,7 +705,7 @@ public class GoogleDriveAccess extends AppCompatActivity
         {
             fileNames = new ArrayList<>(0);
         }
-        task.execute((Object)fileIds.toArray(new String[0]), (Object)fileNames.toArray(new String[0]));
+        task.execute(fileIds.toArray(new String[0]), fileNames.toArray(new String[0]));
     }
 
     //Save the given file

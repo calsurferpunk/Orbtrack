@@ -325,7 +325,7 @@ public class EditValuesDialog
         final TextView editValueList2Title2;
         AlertDialog.Builder editDialogBuilder = new AlertDialog.Builder(currentContext, Globals.getDialogThemeID(currentContext));
         LayoutInflater viewInflater = (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View editDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.edit_dialog, (ViewGroup)currentContext.findViewById(android.R.id.content), false) : null);
+        final View editDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.edit_dialog, currentContext.findViewById(android.R.id.content), false) : null);
 
         //remember if a specific edit type
         isLogin = (editType == EditType.Login);

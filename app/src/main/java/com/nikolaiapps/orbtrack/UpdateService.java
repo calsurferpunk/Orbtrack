@@ -948,7 +948,7 @@ public class UpdateService extends NotifyService
             else if(data instanceof ArrayList)
             {
                 //remember list
-                ArrayList list = (ArrayList)data;
+                ArrayList<?> list = (ArrayList<?>)data;
 
                 //if items in list
                 if(!list.isEmpty())

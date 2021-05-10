@@ -511,7 +511,7 @@ public abstract class Calculate
                             if(rootView != null)
                             {
                                 listAdapter.dataID = id;
-                                listAdapter.setColumnTitles((ViewGroup)rootView.findViewById(listAdapter.itemsRootViewID), null, page);
+                                listAdapter.setColumnTitles(rootView.findViewById(listAdapter.itemsRootViewID), null, page);
                             }
                             break;
                     }

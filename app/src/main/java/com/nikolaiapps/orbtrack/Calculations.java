@@ -464,7 +464,7 @@ public abstract class Calculations
     {
         //All prediction vars
         double m_satInc;	double m_satEcc;	double m_cosio;		double m_theta2; 	double m_x3thm1;
-        double m_eosq;		double m_betao2;	double m_betao;		double m_aodp;		double m_xnodp;
+        double m_eosq;		double m_betao2;	double m_betao;		double m_aodp;		double mean_motion;
         double m_s4;		double m_qoms24;	double m_tsi;		double m_eta;
         double m_etasq;		double m_eeta;		double m_coef;		double m_coef1;		double m_c1;
         double m_c3;		double m_c4;		double m_sinio;
@@ -479,7 +479,7 @@ public abstract class Calculations
         double rteqsq;		double ao;			double cosq2;		double sinomo;		double cosomo;
         double bsq;			double xlldot;		double omgdt;		double xnodot;		double xll;
         double omgasm;		double xnodes;		double _em;			double xinc;		double xn;
-        double t;			double dp_e3;		double dp_ee2;		double dp_savtsn;	double dp_se2;
+        double t;			double dp_e3;		double dp_ee2;		double dp_se2;
         double dp_se3;		double dp_sgh2;		double dp_sgh3;		double dp_sgh4;		double dp_sghs;
         double dp_sh2;		double dp_sh3;		double dp_si2;		double dp_si3;		double dp_sl2;
         double dp_sl3;		double dp_sl4;		double dp_xgh2;		double dp_xgh3;		double dp_xgh4;
@@ -491,7 +491,7 @@ public abstract class Calculations
         double dp_fasx4;	double dp_fasx6;	double dp_omegaq;	double dp_sse;		double dp_ssg;
         double dp_ssh;		double dp_ssi;		double dp_ssl;		double dp_step2;	double dp_stepn;
         double dp_stepp;	double dp_thgr;		double dp_xfact;	double dp_xlamo;	double dp_xli;
-        double dp_xni;		boolean dp_iresfl;	boolean dp_isynfl;	double dpi_c;		double dpi_ctem;
+        double dp_xni;		boolean gp_reso;	boolean gp_sync;	double dpi_c;		double dpi_ctem;
         double dpi_day;		double dpi_gam;		double dpi_stem;	double dpi_xnodce;	double dpi_zcosgl;
         double dpi_zcoshl;	double dpi_zcosil;	double dpi_zsingl;	double dpi_zsinhl;	double dpi_zsinil;
         double dpi_zx;		double dpi_zy;
@@ -503,7 +503,7 @@ public abstract class Calculations
             if(copyFrom != null)
             {
                 this.m_satInc = copyFrom.m_satInc;	    this.m_satEcc = copyFrom.m_satEcc;	    this.m_cosio = copyFrom.m_cosio;		this.m_theta2 = copyFrom.m_theta2; 	    this.m_x3thm1 = copyFrom.m_x3thm1;
-                this.m_eosq = copyFrom.m_eosq;		    this.m_betao2 = copyFrom.m_betao2;	    this.m_betao = copyFrom.m_betao;		this.m_aodp = copyFrom.m_aodp;		    this.m_xnodp = copyFrom.m_xnodp;
+                this.m_eosq = copyFrom.m_eosq;		    this.m_betao2 = copyFrom.m_betao2;	    this.m_betao = copyFrom.m_betao;		this.m_aodp = copyFrom.m_aodp;		    this.mean_motion = copyFrom.mean_motion;
                 this.m_s4 = copyFrom.m_s4;		        this.m_qoms24 = copyFrom.m_qoms24;	    this.m_tsi = copyFrom.m_tsi;		    this.m_eta = copyFrom.m_eta;
                 this.m_etasq = copyFrom.m_etasq;	    this.m_eeta = copyFrom.m_eeta;		    this.m_coef = copyFrom.m_coef;		    this.m_coef1 = copyFrom.m_coef1;		this.m_c1 = copyFrom.m_c1;
                 this.m_c3 = copyFrom.m_c3;		        this.m_c4 = copyFrom.m_c4;		        this.m_sinio = copyFrom.m_sinio;
@@ -518,7 +518,7 @@ public abstract class Calculations
                 this.rteqsq = copyFrom.rteqsq;		    this.ao = copyFrom.ao;			        this.cosq2 = copyFrom.cosq2;		    this.sinomo = copyFrom.sinomo;		    this.cosomo = copyFrom.cosomo;
                 this.bsq = copyFrom.bsq;			    this.xlldot = copyFrom.xlldot;		    this.omgdt = copyFrom.omgdt;		    this.xnodot = copyFrom.xnodot;		    this.xll = copyFrom.xll;
                 this.omgasm = copyFrom.omgasm;		    this.xnodes = copyFrom.xnodes;		    this._em = copyFrom._em;			    this.xinc = copyFrom.xinc;		        this.xn = copyFrom.xn;
-                this.t = copyFrom.t;			        this.dp_e3 = copyFrom.dp_e3;		    this.dp_ee2 = copyFrom.dp_ee2;		    this.dp_savtsn = copyFrom.dp_savtsn;	this.dp_se2 = copyFrom.dp_se2;
+                this.t = copyFrom.t;			        this.dp_e3 = copyFrom.dp_e3;		    this.dp_ee2 = copyFrom.dp_ee2;		    this.dp_se2 = copyFrom.dp_se2;
                 this.dp_se3 = copyFrom.dp_se3;		    this.dp_sgh2 = copyFrom.dp_sgh2;		this.dp_sgh3 = copyFrom.dp_sgh3;		this.dp_sgh4 = copyFrom.dp_sgh4;		this.dp_sghs = copyFrom.dp_sghs;
                 this.dp_sh2 = copyFrom.dp_sh2;		    this.dp_sh3 = copyFrom.dp_sh3;		    this.dp_si2 = copyFrom.dp_si2;		    this.dp_si3 = copyFrom.dp_si3;		    this.dp_sl2 = copyFrom.dp_sl2;
                 this.dp_sl3 = copyFrom.dp_sl3;		    this.dp_sl4 = copyFrom.dp_sl4;		    this.dp_xgh2 = copyFrom.dp_xgh2;		this.dp_xgh3 = copyFrom.dp_xgh3;		this.dp_xgh4 = copyFrom.dp_xgh4;
@@ -530,7 +530,7 @@ public abstract class Calculations
                 this.dp_fasx4 = copyFrom.dp_fasx4;	    this.dp_fasx6 = copyFrom.dp_fasx6;	    this.dp_omegaq = copyFrom.dp_omegaq;	this.dp_sse = copyFrom.dp_sse;		    this.dp_ssg = copyFrom.dp_ssg;
                 this.dp_ssh = copyFrom.dp_ssh;		    this.dp_ssi = copyFrom.dp_ssi;		    this.dp_ssl = copyFrom.dp_ssl;		    this.dp_step2 = copyFrom.dp_step2;	    this.dp_stepn = copyFrom.dp_stepn;
                 this.dp_stepp = copyFrom.dp_stepp;	    this.dp_thgr = copyFrom.dp_thgr;		this.dp_xfact = copyFrom.dp_xfact;	    this.dp_xlamo = copyFrom.dp_xlamo;	    this.dp_xli = copyFrom.dp_xli;
-                this.dp_xni = copyFrom.dp_xni;		    this.dp_iresfl = copyFrom.dp_iresfl;	this.dp_isynfl = copyFrom.dp_isynfl;	this.dpi_c = copyFrom.dpi_c;		    this.dpi_ctem = copyFrom.dpi_ctem;
+                this.dp_xni = copyFrom.dp_xni;		    this.gp_reso = copyFrom.gp_reso;	this.gp_sync = copyFrom.gp_sync;	this.dpi_c = copyFrom.dpi_c;		    this.dpi_ctem = copyFrom.dpi_ctem;
                 this.dpi_day = copyFrom.dpi_day;		this.dpi_gam = copyFrom.dpi_gam;		this.dpi_stem = copyFrom.dpi_stem;	    this.dpi_xnodce = copyFrom.dpi_xnodce;	this.dpi_zcosgl = copyFrom.dpi_zcosgl;
                 this.dpi_zcoshl = copyFrom.dpi_zcoshl;	this.dpi_zcosil = copyFrom.dpi_zcosil;	this.dpi_zsingl = copyFrom.dpi_zsingl;	this.dpi_zsinhl = copyFrom.dpi_zsinhl;	this.dpi_zsinil = copyFrom.dpi_zsinil;
                 this.dpi_zx = copyFrom.dpi_zx;		    this.dpi_zy = copyFrom.dpi_zy;
@@ -1558,7 +1558,7 @@ public abstract class Calculations
 
         //the "recovered" semi-minor axis and mean motion.
         noradData.m_aodp = orbitData.semiMinorAxis;
-        noradData.m_xnodp = orbitData.meanMotion;
+        noradData.mean_motion = orbitData.meanMotion;
 
         noradData.m_s4 = S;
         noradData.m_qoms24 = QOMS2T;
@@ -1589,23 +1589,23 @@ public abstract class Calculations
         noradData.m_coef = noradData.m_qoms24 * Math.pow(noradData.m_tsi,4.0);
         noradData.m_coef1 = noradData.m_coef / Math.pow(psisq,3.5);
 
-        c2 = noradData.m_coef1 * noradData.m_xnodp * (noradData.m_aodp * (1.0 + 1.5 * noradData.m_etasq + noradData.m_eeta * (4.0 + noradData.m_etasq)) + 0.75 * CK2 * noradData.m_tsi / psisq * noradData.m_x3thm1 * (8.0 + 3.0 * noradData.m_etasq * (8.0 + noradData.m_etasq)));
+        c2 = noradData.m_coef1 * noradData.mean_motion * (noradData.m_aodp * (1.0 + 1.5 * noradData.m_etasq + noradData.m_eeta * (4.0 + noradData.m_etasq)) + 0.75 * CK2 * noradData.m_tsi / psisq * noradData.m_x3thm1 * (8.0 + 3.0 * noradData.m_etasq * (8.0 + noradData.m_etasq)));
 
         noradData.m_c1 = (tleData.drag / AE) * c2;
         noradData.m_sinio = Math.sin(noradData.m_satInc);
 
         a3ovk2 = -XJ3 / CK2 * Math.pow(AE,3.0);
 
-        noradData.m_c3 = noradData.m_coef * noradData.m_tsi * a3ovk2 * noradData.m_xnodp * AE * noradData.m_sinio / noradData.m_satEcc;
+        noradData.m_c3 = noradData.m_coef * noradData.m_tsi * a3ovk2 * noradData.mean_motion * AE * noradData.m_sinio / noradData.m_satEcc;
         noradData.m_x1mth2 = 1.0 - noradData.m_theta2;
-        noradData.m_c4 = 2.0 * noradData.m_xnodp * noradData.m_coef1 * noradData.m_aodp * noradData.m_betao2 * (noradData.m_eta * (2.0 + 0.5 * noradData.m_etasq) + noradData.m_satEcc * (0.5 + 2.0 * noradData.m_etasq) - 2.0 * CK2 * noradData.m_tsi / (noradData.m_aodp * psisq) * (-3.0 * noradData.m_x3thm1 * (1.0 - 2.0 * noradData.m_eeta + noradData.m_etasq * (1.5 - 0.5 * noradData.m_eeta)) + 0.75 * noradData.m_x1mth2 * (2.0 * noradData.m_etasq - noradData.m_eeta * (1.0 + noradData.m_etasq)) * Math.cos(2.0 * Math.toRadians(tleData.argPerigreeDeg))));
+        noradData.m_c4 = 2.0 * noradData.mean_motion * noradData.m_coef1 * noradData.m_aodp * noradData.m_betao2 * (noradData.m_eta * (2.0 + 0.5 * noradData.m_etasq) + noradData.m_satEcc * (0.5 + 2.0 * noradData.m_etasq) - 2.0 * CK2 * noradData.m_tsi / (noradData.m_aodp * psisq) * (-3.0 * noradData.m_x3thm1 * (1.0 - 2.0 * noradData.m_eeta + noradData.m_etasq * (1.5 - 0.5 * noradData.m_eeta)) + 0.75 * noradData.m_x1mth2 * (2.0 * noradData.m_etasq - noradData.m_eeta * (1.0 + noradData.m_etasq)) * Math.cos(2.0 * Math.toRadians(tleData.argPerigreeDeg))));
 
         theta4 = noradData.m_theta2 * noradData.m_theta2;
-        temp1 = 3.0 * CK2 * pinvsq * noradData.m_xnodp;
+        temp1 = 3.0 * CK2 * pinvsq * noradData.mean_motion;
         temp2 = temp1 * CK2 * pinvsq;
-        temp3 = 1.25 * CK4 * pinvsq * pinvsq * noradData.m_xnodp;
+        temp3 = 1.25 * CK4 * pinvsq * pinvsq * noradData.mean_motion;
 
-        noradData.m_xmdot = noradData.m_xnodp + 0.5 * temp1 * noradData.m_betao * noradData.m_x3thm1 + 0.0625 * temp2 * noradData.m_betao * (13.0 - 78.0 * noradData.m_theta2 + 137.0 * theta4);
+        noradData.m_xmdot = noradData.mean_motion + 0.5 * temp1 * noradData.m_betao * noradData.m_x3thm1 + 0.0625 * temp2 * noradData.m_betao * (13.0 - 78.0 * noradData.m_theta2 + 137.0 * theta4);
 
         x1m5th = 1.0 - 5.0 * noradData.m_theta2;
 
@@ -1634,7 +1634,7 @@ public abstract class Calculations
                 noradData.m_sing = Math.sin(Math.toRadians(tleData.argPerigreeDeg));
                 noradData.m_cosg = Math.cos(Math.toRadians(tleData.argPerigreeDeg));
 
-                noradData.dp_savtsn = noradData.dp_zmos = noradData.dp_se2 = noradData.dp_se3 = noradData.dp_si2 = noradData.dp_si3 = noradData.dp_sl2 = noradData.dp_sl3 = noradData.dp_sl4 =
+                noradData.dp_zmos = noradData.dp_se2 = noradData.dp_se3 = noradData.dp_si2 = noradData.dp_si3 = noradData.dp_sl2 = noradData.dp_sl3 = noradData.dp_sl4 =
                 noradData.dp_sghs = noradData.dp_sgh2 = noradData.dp_sgh3 = noradData.dp_sgh4 = noradData.dp_sh2 = noradData.dp_sh3 = noradData.dp_zmol = noradData.dp_ee2 =
                 noradData.dp_e3 = noradData.dp_xi2 = noradData.dp_xi3 = noradData.dp_xl2 = noradData.dp_xl3 = noradData.dp_xl4 = noradData.dp_xgh2 = noradData.dp_xgh3 = noradData.dp_xgh4 =
                 noradData.dp_xh2 = noradData.dp_xh3 = noradData.dp_xqncl = noradData.dp_thgr = noradData.dp_omegaq = noradData.dp_sse = noradData.dp_ssi = noradData.dp_ssl = noradData.dp_ssh =
@@ -1644,7 +1644,7 @@ public abstract class Calculations
                 noradData.dp_step2 = 0.0;
                 noradData.dp_stepp = 720.0;
 
-                noradData.dp_iresfl = noradData.dp_isynfl = false;
+                noradData.gp_reso = noradData.gp_sync = false;
                 break;
         }
 
@@ -1877,37 +1877,32 @@ public abstract class Calculations
         sinis = Math.sin(noradData.xinc);
         cosis = Math.cos(noradData.xinc);
 
-        if(Math.abs(noradData.dp_savtsn - noradData.t) >= 30.0)
-        {
-            noradData.dp_savtsn = noradData.t;
+        zm = noradData.dp_zmos + ZNS * noradData.t;
+        zf = zm + 2.0 * ZES * Math.sin(zm);
+        sinzf = Math.sin(zf);
+        f2 = 0.5 * sinzf * sinzf - 0.25;
+        f3 = -0.5 * sinzf * Math.cos(zf);
+        ses = noradData.dp_se2 * f2 + noradData.dp_se3 * f3;
+        sis = noradData.dp_si2 * f2 + noradData.dp_si3 * f3;
+        sls = noradData.dp_sl2 * f2 + noradData.dp_sl3 * f3 + noradData.dp_sl4 * sinzf;
 
-            zm = noradData.dp_zmos + ZNS * noradData.t;
-            zf = zm + 2.0 * ZES * Math.sin(zm);
-            sinzf = Math.sin(zf);
-            f2 = 0.5 * sinzf * sinzf - 0.25;
-            f3 = -0.5 * sinzf * Math.cos(zf);
-            ses = noradData.dp_se2 * f2 + noradData.dp_se3 * f3;
-            sis = noradData.dp_si2 * f2 + noradData.dp_si3 * f3;
-            sls = noradData.dp_sl2 * f2 + noradData.dp_sl3 * f3 + noradData.dp_sl4 * sinzf;
+        sghs = noradData.dp_sgh2 * f2 + noradData.dp_sgh3 * f3 + noradData.dp_sgh4 * sinzf;
+        shs = noradData.dp_sh2 * f2 + noradData.dp_sh3 * f3;
+        zm = noradData.dp_zmol + ZNL * noradData.t;
+        zf = zm + 2.0 * ZEL * Math.sin(zm);
+        sinzf = Math.sin(zf);
+        f2 = 0.5 * sinzf * sinzf - 0.25;
+        f3 = -0.5 * sinzf * Math.cos(zf);
 
-            sghs = noradData.dp_sgh2 * f2 + noradData.dp_sgh3 * f3 + noradData.dp_sgh4 * sinzf;
-            shs = noradData.dp_sh2 * f2 + noradData.dp_sh3 * f3;
-            zm = noradData.dp_zmol + ZNL * noradData.t;
-            zf = zm + 2.0 * ZEL * Math.sin(zm);
-            sinzf = Math.sin(zf);
-            f2 = 0.5 * sinzf * sinzf - 0.25;
-            f3 = -0.5 * sinzf * Math.cos(zf);
+        sel = noradData.dp_ee2 * f2 + noradData.dp_e3 * f3;
+        sil = noradData.dp_xi2 * f2 + noradData.dp_xi3 * f3;
+        sll = noradData.dp_xl2 * f2 + noradData.dp_xl3 * f3 + noradData.dp_xl4 * sinzf;
 
-            sel = noradData.dp_ee2 * f2 + noradData.dp_e3 * f3;
-            sil = noradData.dp_xi2 * f2 + noradData.dp_xi3 * f3;
-            sll = noradData.dp_xl2 * f2 + noradData.dp_xl3 * f3 + noradData.dp_xl4 * sinzf;
-
-            sghl = noradData.dp_xgh2 * f2 + noradData.dp_xgh3 * f3 + noradData.dp_xgh4 * sinzf;
-            sh1 = noradData.dp_xh2 * f2 + noradData.dp_xh3 * f3;
-            pe = ses + sel;
-            pinc = sis + sil;
-            pl = sls + sll;
-        }
+        sghl = noradData.dp_xgh2 * f2 + noradData.dp_xgh3 * f3 + noradData.dp_xgh4 * sinzf;
+        sh1 = noradData.dp_xh2 * f2 + noradData.dp_xh3 * f3;
+        pe = ses + sel;
+        pinc = sis + sil;
+        pl = sls + sll;
 
         pgh = sghs + sghl;
         ph = shs + sh1;
@@ -1972,7 +1967,7 @@ public abstract class Calculations
         Sdp4CalcdottermsDataType sdp4_calcdotterms_data = new Sdp4CalcdottermsDataType();
 
         //dot terms calculated
-        if(norad_data.dp_isynfl)
+        if(norad_data.gp_sync)
         {
             pxndot = norad_data.dp_del1 * Math.sin(norad_data.dp_xli -
             norad_data.dp_fasx2) + norad_data.dp_del2 * Math.sin(2.0 *
@@ -2054,7 +2049,6 @@ public abstract class Calculations
     private static NoradDataType sdp4Init(NoradDataType norad_data, TLEDataType tle_data)
     {
         int pass;
-        boolean b_init_on_exit;
         double day;
         double eoc;
         double sini2;
@@ -2128,8 +2122,6 @@ public abstract class Calculations
             norad_data.dp_zmos = fmod2P(norad_data.dp_zmos);
         }
 
-        norad_data.dp_savtsn = 1.0e20;
-
         zcosg = ZCosGS;
         zsing = ZSinGS;
         zcosi = ZCosIS;
@@ -2139,7 +2131,7 @@ public abstract class Calculations
         cc  = C1SS;
         zn  = ZNS;
         ze  = ZES;
-        xnoi = 1.0 / norad_data.m_xnodp;
+        xnoi = 1.0 / norad_data.mean_motion;
 
         //apply the solar and lunar terms on the first pass, then re-apply the solar terms again on the second pass
         for(pass = 1; pass <= 2; pass++)
@@ -2245,104 +2237,19 @@ public abstract class Calculations
         norad_data.dp_ssg = norad_data.dp_ssg + sgh - norad_data.cosiq / norad_data.siniq * sh;
         norad_data.dp_ssh = norad_data.dp_ssh + sh / norad_data.siniq;
 
-        //geopotential resonance initialization for 12 hour orbits
-        norad_data.dp_iresfl = false;
-        norad_data.dp_isynfl = false;
+        // Geopotential resonance initialization
+        norad_data.gp_reso = false;
+        norad_data.gp_sync = false;
 
-        b_init_on_exit = true;
-
-        if((norad_data.m_xnodp >= 0.0052359877) || (norad_data.m_xnodp <= 0.0034906585))
+        // Determine if orbit is 24- or 12-hour resonant.
+        // Mean motion is given in radians per minute.
+        if(norad_data.mean_motion > 0.0034906585 && norad_data.mean_motion < 0.0052359877)
         {
-            if((norad_data.m_xnodp < 8.26E-3) || (norad_data.m_xnodp > 9.24E-3) || (eq < 0.5))
-            {
-                b_init_on_exit = false;
-            }
-            else
-            {
-                norad_data.dp_iresfl = true;
+            // Orbit is within the Clarke Belt (period is 24-hour resonant).
+            // Synchronous resonance terms initialization
+            norad_data.gp_reso = true;
+            norad_data.gp_sync = true;
 
-                eoc  = eq * norad_data.eqsq;
-                g201 = -0.306 - (eq - 0.64) * 0.440;
-
-                if(eq <= 0.65)
-                {
-                    g211 = 3.616 - 13.247 * eq + 16.290 * norad_data.eqsq;
-                    g310 = -19.302 + 117.390 * eq - 228.419 * norad_data.eqsq + 156.591 * eoc;
-                    g322 = -18.9068 + 109.7927 * eq - 214.6334 * norad_data.eqsq + 146.5816 * eoc;
-                    g410 = -41.122 + 242.694 * eq - 471.094 * norad_data.eqsq + 313.953 * eoc;
-                    g422 = -146.407 + 841.880 * eq - 1629.014 * norad_data.eqsq + 1083.435 * eoc;
-                    g520 = -532.114 + 3017.977 * eq - 5740.0 * norad_data.eqsq + 3708.276 * eoc;
-                }
-                else
-                {
-                    g211 = -72.099 + 331.819 * eq - 508.738 * norad_data.eqsq + 266.724 * eoc;
-                    g310 = -346.844 + 1582.851 * eq - 2415.925 * norad_data.eqsq + 1246.113 * eoc;
-                    g322 = -342.585 + 1554.908 * eq - 2366.899 * norad_data.eqsq + 1215.972 * eoc;
-                    g410 = -1052.797 + 4758.686 * eq - 7193.992 * norad_data.eqsq + 3651.957 * eoc;
-                    g422 = -3581.69 + 16178.11 * eq - 24462.77 * norad_data.eqsq + 12422.52 * eoc;
-
-                    if (eq <= 0.715)
-                        g520 = 1464.74 - 4664.75 * eq + 3763.64 * norad_data.eqsq;
-                    else
-                        g520 = -5149.66 + 29936.92 * eq - 54087.36 * norad_data.eqsq + 31324.56 * eoc;
-                }
-
-                if (eq < 0.7)
-                {
-                    g533 = -919.2277 + 4988.61 * eq - 9064.77 * norad_data.eqsq + 5542.21 * eoc;
-                    g521 = -822.71072 + 4568.6173 * eq - 8491.4146 * norad_data.eqsq + 5337.524 * eoc;
-                    g532 = -853.666 + 4690.25 * eq - 8624.77 * norad_data.eqsq + 5341.4 * eoc;
-                }
-                else
-                {
-                    g533 = -37995.78 + 161616.52 * eq - 229838.2 * norad_data.eqsq + 109377.94 * eoc;
-                    g521 = -51752.104 + 218913.95 * eq - 309468.16 * norad_data.eqsq + 146349.42 * eoc;
-                    g532 = -40023.88 + 170470.89 * eq - 242699.48 * norad_data.eqsq + 115605.82 * eoc;
-                }
-
-                sini2 = norad_data.siniq * norad_data.siniq;
-                f220 = 0.75*(1.0 + 2.0 * norad_data.cosiq + norad_data.cosq2);
-                f221 = 1.5 * sini2;
-                f321 = 1.875 * norad_data.siniq * (1.0 - 2.0 * norad_data.cosiq - 3.0 * norad_data.cosq2);
-                f322 = -1.875 * norad_data.siniq * (1.0 + 2.0 * norad_data.cosiq - 3.0 * norad_data.cosq2);
-                f441 = 35.0 * sini2 * f220;
-                f442 = 39.3750 * sini2 * sini2;
-                f522 = 9.84375 * norad_data.siniq * (sini2 * (1.0 - 2.0 * norad_data.cosiq - 5.0 * norad_data.cosq2) + 0.33333333 * (-2.0 + 4.0 * norad_data.cosiq + 6.0 * norad_data.cosq2));
-                f523 = norad_data.siniq * (4.92187512 * sini2 * (-2.0 - 4.0 * norad_data.cosiq + 10.0 * norad_data.cosq2) + 6.56250012 * (1.0 + 2.0 * norad_data.cosiq - 3.0 * norad_data.cosq2));
-                f542 = 29.53125 * norad_data.siniq * (2.0 - 8.0 * norad_data.cosiq + norad_data.cosq2 * (-12.0 + 8.0 * norad_data.cosiq + 10.0 * norad_data.cosq2));
-                f543 = 29.53125 * norad_data.siniq * (-2.0 - 8.0 * norad_data.cosiq + norad_data.cosq2 * (12.0 + 8.0 * norad_data.cosiq - 10.0 * norad_data.cosq2));
-                xno2 = norad_data.m_xnodp * norad_data.m_xnodp;
-                ainv2 = aqnv * aqnv;
-                temp1 = 3.0 * xno2 * ainv2;
-                temp = temp1 * Root22;
-
-                norad_data.dp_d2201 = temp * f220 * g201;
-                norad_data.dp_d2211 = temp * f221 * g211;
-                temp1 = temp1 * aqnv;
-                temp = temp1 * Root32;
-                norad_data.dp_d3210 = temp * f321 * g310;
-                norad_data.dp_d3222 = temp * f322 * g322;
-                temp1 = temp1 * aqnv;
-                temp = 2.0 * temp1 * Root44;
-                norad_data.dp_d4410 = temp * f441 * g410;
-                norad_data.dp_d4422 = temp * f442 * g422;
-                temp1 = temp1 * aqnv;
-                temp  = temp1 * Root52;
-                norad_data.dp_d5220 = temp * f522 * g520;
-                norad_data.dp_d5232 = temp * f523 * g532;
-                temp = 2.0 * temp1 * Root54;
-                norad_data.dp_d5421 = temp * f542 * g521;
-                norad_data.dp_d5433 = temp * f543 * g533;
-                norad_data.dp_xlamo = xmao + Math.toRadians(tle_data.rightAscnAscNodeDeg) + Math.toRadians(tle_data.rightAscnAscNodeDeg) - norad_data.dp_thgr - norad_data.dp_thgr;
-                bfact = norad_data.xlldot + norad_data.xnodot + norad_data.xnodot - THDT - THDT;
-                bfact = bfact + norad_data.dp_ssl + norad_data.dp_ssh + norad_data.dp_ssh;
-            }
-        }
-        else
-        {
-            //synchronous resonance terms initialization
-            norad_data.dp_iresfl = true;
-            norad_data.dp_isynfl = true;
             g200 = 1.0 + norad_data.eqsq * (-2.5 + 0.8125 * norad_data.eqsq);
             g310 = 1.0 + 2.0 * norad_data.eqsq;
             g300 = 1.0 + norad_data.eqsq * (-6.0 + 6.60937 * norad_data.eqsq);
@@ -2350,7 +2257,7 @@ public abstract class Calculations
             f311 = 0.9375 * norad_data.siniq * norad_data.siniq * (1.0 + 3 * norad_data.cosiq) - 0.75 * (1.0 + norad_data.cosiq);
             f330 = 1.0 + norad_data.cosiq;
             f330 = 1.875 * f330 * f330 * f330;
-            norad_data.dp_del1 = 3.0 * norad_data.m_xnodp * norad_data.m_xnodp * aqnv * aqnv;
+            norad_data.dp_del1 = 3.0 * norad_data.mean_motion * norad_data.mean_motion * aqnv * aqnv;
             norad_data.dp_del2 = 2.0 * norad_data.dp_del1 * f220 * g200 * Q22;
             norad_data.dp_del3 = 3.0 * norad_data.dp_del1 * f330 * g300 * Q33 * aqnv;
             norad_data.dp_del1 = norad_data.dp_del1 * f311 * g310 * Q31 * aqnv;
@@ -2361,14 +2268,95 @@ public abstract class Calculations
             bfact = norad_data.xlldot + xpidot - THDT;
             bfact = bfact + norad_data.dp_ssl + norad_data.dp_ssg + norad_data.dp_ssh;
         }
-
-        if(b_init_on_exit)
+        else if(norad_data.mean_motion >= 8.26E-3 && norad_data.mean_motion <= 9.24E-3 && eq >= 0.5)
         {
-            norad_data.dp_xfact = bfact - norad_data.m_xnodp;
+            // Period is 12-hour resonant
+            norad_data.gp_reso = true;
+
+            eoc  = eq * norad_data.eqsq;
+            g201 = -0.306 - (eq - 0.64) * 0.440;
+
+            if(eq <= 0.65)
+            {
+                g211 = 3.616 - 13.247 * eq + 16.290 * norad_data.eqsq;
+                g310 = -19.302 + 117.390 * eq - 228.419 * norad_data.eqsq + 156.591 * eoc;
+                g322 = -18.9068 + 109.7927 * eq - 214.6334 * norad_data.eqsq + 146.5816 * eoc;
+                g410 = -41.122 + 242.694 * eq - 471.094 * norad_data.eqsq + 313.953 * eoc;
+                g422 = -146.407 + 841.880 * eq - 1629.014 * norad_data.eqsq + 1083.435 * eoc;
+                g520 = -532.114 + 3017.977 * eq - 5740.0 * norad_data.eqsq + 3708.276 * eoc;
+            }
+            else
+            {
+                g211 = -72.099 + 331.819 * eq - 508.738 * norad_data.eqsq + 266.724 * eoc;
+                g310 = -346.844 + 1582.851 * eq - 2415.925 * norad_data.eqsq + 1246.113 * eoc;
+                g322 = -342.585 + 1554.908 * eq - 2366.899 * norad_data.eqsq + 1215.972 * eoc;
+                g410 = -1052.797 + 4758.686 * eq - 7193.992 * norad_data.eqsq + 3651.957 * eoc;
+                g422 = -3581.69 + 16178.11 * eq - 24462.77 * norad_data.eqsq + 12422.52 * eoc;
+
+                if (eq <= 0.715)
+                    g520 = 1464.74 - 4664.75 * eq + 3763.64 * norad_data.eqsq;
+                else
+                    g520 = -5149.66 + 29936.92 * eq - 54087.36 * norad_data.eqsq + 31324.56 * eoc;
+            }
+
+            if (eq < 0.7)
+            {
+                g533 = -919.2277 + 4988.61 * eq - 9064.77 * norad_data.eqsq + 5542.21 * eoc;
+                g521 = -822.71072 + 4568.6173 * eq - 8491.4146 * norad_data.eqsq + 5337.524 * eoc;
+                g532 = -853.666 + 4690.25 * eq - 8624.77 * norad_data.eqsq + 5341.4 * eoc;
+            }
+            else
+            {
+                g533 = -37995.78 + 161616.52 * eq - 229838.2 * norad_data.eqsq + 109377.94 * eoc;
+                g521 = -51752.104 + 218913.95 * eq - 309468.16 * norad_data.eqsq + 146349.42 * eoc;
+                g532 = -40023.88 + 170470.89 * eq - 242699.48 * norad_data.eqsq + 115605.82 * eoc;
+            }
+
+            sini2 = norad_data.siniq * norad_data.siniq;
+            f220 = 0.75*(1.0 + 2.0 * norad_data.cosiq + norad_data.cosq2);
+            f221 = 1.5 * sini2;
+            f321 = 1.875 * norad_data.siniq * (1.0 - 2.0 * norad_data.cosiq - 3.0 * norad_data.cosq2);
+            f322 = -1.875 * norad_data.siniq * (1.0 + 2.0 * norad_data.cosiq - 3.0 * norad_data.cosq2);
+            f441 = 35.0 * sini2 * f220;
+            f442 = 39.3750 * sini2 * sini2;
+            f522 = 9.84375 * norad_data.siniq * (sini2 * (1.0 - 2.0 * norad_data.cosiq - 5.0 * norad_data.cosq2) + 0.33333333 * (-2.0 + 4.0 * norad_data.cosiq + 6.0 * norad_data.cosq2));
+            f523 = norad_data.siniq * (4.92187512 * sini2 * (-2.0 - 4.0 * norad_data.cosiq + 10.0 * norad_data.cosq2) + 6.56250012 * (1.0 + 2.0 * norad_data.cosiq - 3.0 * norad_data.cosq2));
+            f542 = 29.53125 * norad_data.siniq * (2.0 - 8.0 * norad_data.cosiq + norad_data.cosq2 * (-12.0 + 8.0 * norad_data.cosiq + 10.0 * norad_data.cosq2));
+            f543 = 29.53125 * norad_data.siniq * (-2.0 - 8.0 * norad_data.cosiq + norad_data.cosq2 * (12.0 + 8.0 * norad_data.cosiq - 10.0 * norad_data.cosq2));
+            xno2 = norad_data.mean_motion * norad_data.mean_motion;
+            ainv2 = aqnv * aqnv;
+            temp1 = 3.0 * xno2 * ainv2;
+            temp = temp1 * Root22;
+
+            norad_data.dp_d2201 = temp * f220 * g201;
+            norad_data.dp_d2211 = temp * f221 * g211;
+            temp1 = temp1 * aqnv;
+            temp = temp1 * Root32;
+            norad_data.dp_d3210 = temp * f321 * g310;
+            norad_data.dp_d3222 = temp * f322 * g322;
+            temp1 = temp1 * aqnv;
+            temp = 2.0 * temp1 * Root44;
+            norad_data.dp_d4410 = temp * f441 * g410;
+            norad_data.dp_d4422 = temp * f442 * g422;
+            temp1 = temp1 * aqnv;
+            temp  = temp1 * Root52;
+            norad_data.dp_d5220 = temp * f522 * g520;
+            norad_data.dp_d5232 = temp * f523 * g532;
+            temp = 2.0 * temp1 * Root54;
+            norad_data.dp_d5421 = temp * f542 * g521;
+            norad_data.dp_d5433 = temp * f543 * g533;
+            norad_data.dp_xlamo = xmao + Math.toRadians(tle_data.rightAscnAscNodeDeg) + Math.toRadians(tle_data.rightAscnAscNodeDeg) - norad_data.dp_thgr - norad_data.dp_thgr;
+            bfact = norad_data.xlldot + norad_data.xnodot + norad_data.xnodot - THDT - THDT;
+            bfact = bfact + norad_data.dp_ssl + norad_data.dp_ssh + norad_data.dp_ssh;
+        }
+
+        if(norad_data.gp_reso || norad_data.gp_sync)
+        {
+            norad_data.dp_xfact = bfact - norad_data.mean_motion;
 
             //initialize integrator
             norad_data.dp_xli = norad_data.dp_xlamo;
-            norad_data.dp_xni = norad_data.m_xnodp;
+            norad_data.dp_xni = norad_data.mean_motion;
             norad_data.dp_atime = 0.0;
             norad_data.dp_stepp = 720.0;
             norad_data.dp_stepn = -720.0;
@@ -2432,7 +2420,7 @@ public abstract class Calculations
             noradData.omgasm = noradData.omgasm - Math.PI;
         }
 
-        if(noradData.dp_iresfl)
+        if(noradData.gp_reso)
         {
             while(!f_done)
             {
@@ -2445,7 +2433,7 @@ public abstract class Calculations
 
                     //epoch restart
                     noradData.dp_atime = 0.0;
-                    noradData.dp_xni = noradData.m_xnodp;
+                    noradData.dp_xni = noradData.mean_motion;
                     noradData.dp_xli = noradData.dp_xlamo;
 
                     f_done = true;
@@ -2494,7 +2482,7 @@ public abstract class Calculations
 
             noradData.xll = xl - noradData.omgasm + temp;
 
-            if(!noradData.dp_isynfl)
+            if(!noradData.gp_sync)
                 noradData.xll = xl + temp + temp;
         }
 
@@ -2596,7 +2584,7 @@ public abstract class Calculations
         a  = norad_data.m_aodp * Square(tempa);
         e  = norad_data.m_satEcc - tempe;
 
-        xl = xmp + omega + xnode + norad_data.m_xnodp * templ;
+        xl = xmp + omega + xnode + norad_data.mean_motion * templ;
 
         //set the ECI data
         eci_data = finalPosition(eci_data, norad_data, norad_data.m_satInc, omgadf, e, a, xl, xnode, tle_data.epochJulian, days_after_epoch);
@@ -2631,7 +2619,7 @@ public abstract class Calculations
         tempa = 1.0 - noradData.m_c1 * daysAfterEpoch;
         tempe = (tleData.drag / AE) * noradData.m_c4 * daysAfterEpoch;
         templ = noradData.m_t2cof * tsq;
-        xn = noradData.m_xnodp;
+        xn = noradData.mean_motion;
 
         sdp4_secular_data = sdp4Secular(noradData, tleData, xmdf, omgadf, xnode, xn, daysAfterEpoch);
         noradData = sdp4_secular_data.norad_data;
@@ -2645,7 +2633,7 @@ public abstract class Calculations
 
         a = Math.pow(XKE / xn, TwoThirds) * Square(tempa);
         e = em - tempe;
-        xmam = xmdf + noradData.m_xnodp * templ;
+        xmam = xmdf + noradData.mean_motion * templ;
 
         sdp4_periodics_data = sdp4Periodics(noradData, e, xinc, omgadf, xnode, xmam);
         noradData = sdp4_periodics_data.norad_data;

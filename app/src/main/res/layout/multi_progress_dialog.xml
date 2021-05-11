@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:padding="8dp"
     android:orientation="vertical">
     <TextView
@@ -17,9 +18,8 @@
         android:paddingTop="4dp"
         android:orientation="horizontal"
         android:visibility="invisible">
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Multi_Progress_Bar"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -27,7 +27,8 @@
             android:paddingLeft="0dp"
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
-            android:paddingRight="8dp"/>
+            android:paddingRight="8dp"
+            app:indicatorColor="?attr/colorAccent"/>
 
         <TextView
             android:id="@+id/Multi_Progress_Percent_Text"
@@ -51,9 +52,8 @@
         android:paddingTop="4dp"
         android:orientation="horizontal"
         android:visibility="gone">
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Multi_Progress_Bar2"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -61,7 +61,8 @@
             android:paddingLeft="0dp"
             android:paddingStart="0dp"
             android:paddingEnd="8dp"
-            android:paddingRight="8dp"/>
+            android:paddingRight="8dp"
+            app:indicatorColor="?attr/colorAccent"/>
 
         <TextView
             android:id="@+id/Multi_Progress_Percent_Text2"

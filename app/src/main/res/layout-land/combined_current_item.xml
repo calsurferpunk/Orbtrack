@@ -206,21 +206,15 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <ProgressBar
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/Combined_Item_Pass_Loading_Progress"
-                style="@style/Base.Widget.AppCompat.ProgressBar"
-                android:layout_width="match_parent"
-                android:layout_height="20dp"
+                style="@style/ProgressCircleSmall"
                 android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>
 
-    <ProgressBar
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/Combined_Item_Pass_Progress"
-        android:layout_width="match_parent"
-        android:layout_height="3px"
-        android:padding="0dp"
-        android:visibility="gone"
-        tools:ignore="PxUsage"/>
+        style="@style/ProgressLineSmall"
+        android:visibility="gone"/>
 </LinearLayout>

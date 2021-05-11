@@ -82,19 +82,17 @@
                 android:text="@string/empty"/>
         </LinearLayout>
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Pass_Current_Progress_Loading_Bar"
-            style="@style/Base.Widget.AppCompat.ProgressBar.Horizontal"
             android:layout_width="0dp"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_weight="0.7"
             android:visibility="gone"/>
 
-        <ProgressBar
+        <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Pass_Calculate_Progress_Bar"
-            style="@style/Base.Widget.AppCompat.ProgressBar"
             android:layout_width="0dp"
-            android:layout_height="20dp"
+            android:layout_height="wrap_content"
             android:layout_weight="0.7"
             android:visibility="gone"/>
 
@@ -172,12 +170,8 @@
         </LinearLayout>
     </LinearLayout>
 
-    <ProgressBar
-        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+    <com.google.android.material.progressindicator.LinearProgressIndicator
         android:id="@+id/Pass_Current_Progress_Bar"
-        android:layout_width="match_parent"
-        android:layout_height="3px"
-        android:padding="0dp"
-        android:visibility="gone"
-        tools:ignore="PxUsage"/>
+        style="@style/ProgressLineSmall"
+        android:visibility="gone"/>
 </LinearLayout>

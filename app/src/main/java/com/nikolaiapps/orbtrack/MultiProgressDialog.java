@@ -6,12 +6,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import java.util.Locale;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 
 public class MultiProgressDialog extends AlertDialog
@@ -20,8 +20,8 @@ public class MultiProgressDialog extends AlertDialog
     private TextView messageText2;
     private TextView percentText;
     private TextView percentText2;
-    private ProgressBar bar;
-    private ProgressBar bar2;
+    private LinearProgressIndicator bar;
+    private LinearProgressIndicator bar2;
     private LinearLayout barLayout;
     private LinearLayout barLayout2;
 
@@ -59,7 +59,7 @@ public class MultiProgressDialog extends AlertDialog
         super.onCreate(savedInstanceState);
     }
 
-    private void setProgressDisplays(LinearLayout lyt, ProgressBar br, TextView txt, int percent)
+    private void setProgressDisplays(LinearLayout lyt, LinearProgressIndicator br, TextView txt, int percent)
     {
         if(percent > 100)
         {

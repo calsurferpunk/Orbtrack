@@ -26,10 +26,11 @@ import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.nikolaiapps.orbtrack.Calculations.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -557,8 +558,8 @@ public abstract class Current
             private TextView durationText;
             private TextView latitudeText;
             private TextView longitudeText;
-            private ProgressBar passProgress;
-            private ProgressBar passLoadingProgress;
+            private LinearProgressIndicator passProgress;
+            private CircularProgressIndicator passLoadingProgress;
             private LinearLayout passLayout;
             private AppCompatImageView azImage;
             private AppCompatImageView elImage;
@@ -869,7 +870,7 @@ public abstract class Current
                 //create dialog
                 final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.icon, itemDetailButtonClickListener);
                 final View passProgressLayout = detailDialog.findViewById(R.id.Item_Detail_Progress_Layout);
-                final ProgressBar passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
+                final LinearProgressIndicator passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
                 final TextView passProgressText = detailDialog.findViewById(R.id.Item_Detail_Progress_Text);
                 final Graph elevationGraph = detailDialog.findViewById(R.id.Item_Detail_Graph);
                 detailDialog.addGroup(R.string.title_location, R.string.title_azimuth, R.string.title_elevation, R.string.title_range);
@@ -1793,8 +1794,8 @@ public abstract class Current
             public TextView timeEndText;
             public TextView timeDurationText;
             public TextView elMaxText;
-            public ProgressBar progressBar;
-            public ProgressBar progressStatusBar;
+            public LinearProgressIndicator progressBar;
+            public LinearProgressIndicator progressStatusBar;
             public LinearLayout dataGroup;
             public static final Creator<Item> CREATOR = new Parcelable.Creator<Item>()
             {
@@ -2065,9 +2066,9 @@ public abstract class Current
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public final ProgressBar currentProgressBar;
-            public final ProgressBar currentProgressLoadingBar;
-            public final ProgressBar calculateProgressBar;
+            public final LinearProgressIndicator currentProgressBar;
+            public final LinearProgressIndicator currentProgressLoadingBar;
+            public final LinearProgressIndicator calculateProgressBar;
             public final LinearLayout timeStartLayout;
             public final LinearLayout elMaxLayout;
             public final View timeStartUnder;
@@ -2296,7 +2297,7 @@ public abstract class Current
                     //create dialog
                     final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, Globals.getDrawable(currentContext, orbital1Icon, orbital2Icon), itemDetailButtonClickListener);
                     final View passProgressLayout = detailDialog.findViewById(R.id.Item_Detail_Progress_Layout);
-                    final ProgressBar passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
+                    final LinearProgressIndicator passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
                     final TextView passProgressText = detailDialog.findViewById(R.id.Item_Detail_Progress_Text);
                     final Graph elevationGraph = detailDialog.findViewById(R.id.Item_Detail_Graph);
                     detailDialog.addGroup(R.string.title_pass, R.string.title_time_until, R.string.title_duration, R.string.title_placeholder, R.string.title_placeholder, (useLocalZone ? R.string.title_placeholder : R.string.empty), (useLocalZone ? R.string.title_placeholder : R.string.empty), R.string.title_placeholder, R.string.title_placeholder, R.string.title_placeholder, R.string.title_placeholder);

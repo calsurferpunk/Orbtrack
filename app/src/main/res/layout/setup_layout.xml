@@ -33,12 +33,9 @@
         android:textColor="?attr/defaultTextColor"
         android:visibility="gone"/>
 
-    <ProgressBar
+    <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/Setup_Loading_Bar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:indeterminate="true"
+        style="@style/ProgressCircle"
         android:visibility="gone"/>
 
     <CheckBox

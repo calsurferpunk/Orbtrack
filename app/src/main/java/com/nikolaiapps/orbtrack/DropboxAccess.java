@@ -8,7 +8,6 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,6 +22,7 @@ import com.dropbox.core.v2.files.FileMetadata;
 import com.dropbox.core.v2.files.FolderMetadata;
 import com.dropbox.core.v2.files.Metadata;
 import com.dropbox.core.v2.files.WriteMode;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -579,7 +579,7 @@ public class DropboxAccess extends AppCompatActivity
                 if(isOkay)
                 {
                     //add progress bar
-                    final ProgressBar progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+                    final LinearProgressIndicator progressBar = new LinearProgressIndicator(this);
                     final TextView progressText = Globals.showSnackBarProgress(this.findViewById(android.R.id.content), progressBar);
                     final Resources res = this.getResources();
 

@@ -27,11 +27,11 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 
 
 public class ChooseColorDialog
@@ -148,7 +148,7 @@ public class ChooseColorDialog
         ViewGroup.LayoutParams brightBarParams;
         View colorDialogView = (viewInflater != null ? viewInflater.inflate(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270 ? R.layout.choose_color_landscape_dialog : R.layout.choose_color_portrait_dialog, null, false) : null);
         final Resources res = context.getResources();
-        final ProgressBar colorProgress = (colorDialogView != null ? (ProgressBar)colorDialogView.findViewById(R.id.Color_Progress) : null);
+        final CircularProgressIndicator colorProgress = (colorDialogView != null ? colorDialogView.findViewById(R.id.Color_Progress) : null);
         float[] buttonSize = Globals.dpsToPixels(context, 45, 35);
 
         //if view is set

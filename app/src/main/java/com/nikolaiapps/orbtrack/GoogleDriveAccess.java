@@ -8,13 +8,13 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.media.MediaHttpDownloader;
 import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
@@ -579,7 +579,7 @@ public class GoogleDriveAccess extends AppCompatActivity
                 if(isOkay)
                 {
                     //add progress bar
-                    final ProgressBar progressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
+                    final LinearProgressIndicator progressBar = new LinearProgressIndicator(this);
                     final TextView progressText = Globals.showSnackBarProgress(this.findViewById(android.R.id.content), progressBar);
                     final Resources res = this.getResources();
 

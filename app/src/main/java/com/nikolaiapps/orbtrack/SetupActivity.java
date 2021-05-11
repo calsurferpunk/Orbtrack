@@ -24,11 +24,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 
 
@@ -207,7 +207,7 @@ public class SetupActivity extends BaseInputActivity
     private MaterialButton nextButton;
     private FloatingActionButton floatingButton;
     private TextView infoText;
-    private ProgressBar loadingBar;
+    private CircularProgressIndicator loadingBar;
     private CheckBox inputCheckBox;
     private AlertDialog addCurrentLocationDialog;
     private LocationReceiver locationReceiver;

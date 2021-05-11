@@ -147,11 +147,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:visibility="gone">
-            <ProgressBar
-                style="?android:attr/progressBarStyle"
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/Item_Detail_Graph_Progress"
-                android:layout_width="32dp"
-                android:layout_height="32dp"/>
+                style="@style/ProgressCircle"/>
 
             <com.nikolaiapps.orbtrack.Graph
                 android:id="@+id/Item_Detail_Graph"
@@ -168,11 +166,9 @@
             android:orientation="vertical"
             android:gravity="center"
             android:visibility="gone">
-            <ProgressBar
-                style="?android:attr/progressBarStyle"
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/Item_Detail_3d_Progress"
-                android:layout_width="32dp"
-                android:layout_height="32dp"/>
+                style="@style/ProgressCircle"/>
 
             <FrameLayout
                 android:id="@+id/Item_Detail_3d_Frame"
@@ -216,11 +212,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:visibility="gone">
-            <ProgressBar
-                style="?android:attr/progressBarStyle"
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/Item_Detail_Info_Progress"
-                android:layout_width="32dp"
-                android:layout_height="32dp"/>
+                style="@style/ProgressCircle"/>
 
             <com.nikolaiapps.orbtrack.ScrollTextView
                 style="@style/DetailText"
@@ -242,11 +236,11 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:visibility="gone">
-            <ProgressBar
-                style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+            <com.google.android.material.progressindicator.LinearProgressIndicator
                 android:id="@+id/Item_Detail_Progress"
                 android:layout_width="180dp"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content"
+                app:indicatorColor="?attr/colorAccent"/>
             <TextView
                 style="@style/DetailText"
                 android:id="@+id/Item_Detail_Progress_Text"

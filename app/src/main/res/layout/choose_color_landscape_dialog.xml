@@ -68,16 +68,9 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center">
-                <ProgressBar
+                <com.google.android.material.progressindicator.CircularProgressIndicator
                     android:id="@+id/Color_Progress"
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
-                    android:layout_marginTop="79dp"
-                    android:layout_marginBottom="79dp"
-                    android:layout_marginLeft="69dp"
-                    android:layout_marginRight="64dp"
-                    android:layout_marginStart="69dp"
-                    android:layout_marginEnd="64dp"
+                    style="@style/ProgressCircle"
                     android:visibility="gone"/>
 
                 <com.nikolaiapps.orbtrack.CursorImageView

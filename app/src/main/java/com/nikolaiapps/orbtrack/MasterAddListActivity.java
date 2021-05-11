@@ -26,11 +26,11 @@ import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -297,7 +297,7 @@ public class MasterAddListActivity extends BaseInputActivity
             final AppCompatImageView orbitalImage;
             final AppCompatImageView ownerImage;
             final TextView itemText;
-            final ProgressBar itemProgress;
+            final CircularProgressIndicator itemProgress;
 
             public ListItemHolder(View viewItem, int orbitalImageID, int itemImageID, int itemTextID, int itemProgressID)
             {

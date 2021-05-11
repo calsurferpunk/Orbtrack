@@ -101,6 +101,7 @@ public abstract class Orbitals
             tleAgeLayout = viewItem.findViewById(tleAgeLayoutID);
             tleAgeText = viewItem.findViewById(tleAgeTextID);
             tleUnder = viewItem.findViewById(tleAgeUnderID);
+            tleUnder.setTag("keepBg");
             colorButton = viewItem.findViewById(colorButtonID);
             visibleButton = viewItem.findViewById(visibleButtonID);
         }

@@ -16,9 +16,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -552,7 +552,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         }
     }
 
-    public static void updateProgress(Activity activity, final Resources res, final ProgressBar barView, final TextView textView, final int index, final int length, final long bytes, final long totalBytes, final double progress)
+    public static void updateProgress(Activity activity, final Resources res, final LinearProgressIndicator barView, final TextView textView, final int index, final int length, final long bytes, final long totalBytes, final double progress)
     {
         activity.runOnUiThread(new Runnable()
         {

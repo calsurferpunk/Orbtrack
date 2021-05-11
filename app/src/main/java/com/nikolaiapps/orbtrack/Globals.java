@@ -34,6 +34,8 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import com.google.android.gms.security.ProviderInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
@@ -50,6 +52,7 @@ import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.DisplayMetrics;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
@@ -58,7 +61,6 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -917,17 +919,22 @@ public abstract class Globals
     }
 
     //Shows a snack bar progress and returns text
-    public static TextView showSnackBarProgress(View parentView, ProgressBar progressBar)
+    public static TextView showSnackBarProgress(View parentView, LinearProgressIndicator progressBar)
     {
+        Context context = parentView.getContext();
         Snackbar snackView = Snackbar.make(parentView, "", Snackbar.LENGTH_INDEFINITE);
         View snackParentView = snackView.getView();
         TextView snackText = snackParentView.findViewById(com.google.android.material.R.id.snackbar_text);
         ViewGroup snackGroup = (ViewGroup)snackText.getParent();
-        float[] sizes = Globals.dpsToPixels(parentView.getContext(), 200, 48);
+        float[] sizes = Globals.dpsToPixels(context, 200, 48);
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams((int)sizes[0], (int)sizes[1]);
 
         snackText.setTextColor(Color.DKGRAY);
-        snackParentView.setBackgroundColor(ContextCompat.getColor(parentView.getContext(), R.color.very_light_gray));
-        progressBar.setLayoutParams(new ViewGroup.LayoutParams((int)sizes[0], (int)sizes[1]));
+        snackParentView.setBackgroundColor(ContextCompat.getColor(context, R.color.very_light_gray));
+        params.gravity = Gravity.CENTER;
+        progressBar.setLayoutParams(params);
+        progressBar.setTrackColor(ContextCompat.getColor(context, R.color.light_gray));
+        progressBar.setIndicatorColor(resolveColorID(context, R.attr.colorAccent));
         snackGroup.addView(progressBar, 0);
         snackView.show();
 
@@ -2337,9 +2344,16 @@ public abstract class Globals
     //Creates an add current location dialog
     public static AlertDialog createAddCurrentLocationDialog(Context context, DialogInterface.OnClickListener negativeListener, DialogInterface.OnCancelListener cancelListener)
     {
+        LinearLayout progressLayout = new LinearLayout(context);
+        CircularProgressIndicator progressView = new CircularProgressIndicator(context);
         AlertDialog.Builder addCurrentLocationDialogBuilder = new AlertDialog.Builder(context, Globals.getDialogThemeID(context));
+
+        progressView.setIndeterminate(true);
+        progressLayout.setGravity(Gravity.CENTER);
+        progressLayout.addView(progressView);
+
         addCurrentLocationDialogBuilder.setTitle(R.string.title_location_getting);
-        addCurrentLocationDialogBuilder.setView(new ProgressBar(context));
+        addCurrentLocationDialogBuilder.setView(progressLayout);
         addCurrentLocationDialogBuilder.setCancelable(true);
         addCurrentLocationDialogBuilder.setNegativeButton(R.string.title_cancel, negativeListener);
         addCurrentLocationDialogBuilder.setOnCancelListener(cancelListener);

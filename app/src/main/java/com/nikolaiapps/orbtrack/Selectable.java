@@ -42,11 +42,11 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -1049,9 +1049,12 @@ public abstract class Selectable
         private void setItemBackground(View itemView, int bgId)
         {
             int index;
+            boolean haveItem = (itemView != null);
+            Object tag = (haveItem ? itemView.getTag() : null);
+            boolean setBackground = (haveItem && (tag == null || !tag.equals("keepBg")) && !(itemView instanceof AppCompatButton));
 
-            //if not an AppCompatButton
-            if(!(itemView instanceof AppCompatButton))
+            //if setting background
+            if(setBackground)
             {
                 //set view background
                 itemView.setBackgroundResource(bgId);
@@ -1950,7 +1953,7 @@ public abstract class Selectable
                     if(listAdapter.graphGroup != null && activity != null)
                     {
                         //get displays
-                        final ProgressBar graphProgress = listAdapter.graphGroup.findViewById(R.id.Item_Detail_Graph_Progress);
+                        final CircularProgressIndicator graphProgress = listAdapter.graphGroup.findViewById(R.id.Item_Detail_Graph_Progress);
                         final Graph elevationGraph = listAdapter.graphGroup.findViewById(R.id.Item_Detail_Graph);
 
                         //setup graph
@@ -2022,7 +2025,7 @@ public abstract class Selectable
                     if(listAdapter.preview3dGroup != null && activity != null)
                     {
                         //get displays
-                        final ProgressBar preview3dProgress = listAdapter.preview3dGroup.findViewById(R.id.Item_Detail_3d_Progress);
+                        final CircularProgressIndicator preview3dProgress = listAdapter.preview3dGroup.findViewById(R.id.Item_Detail_3d_Progress);
                         final Whirly.GlobeFragment mapView = new Whirly.GlobeFragment();
 
                         //setup preview
@@ -2058,7 +2061,7 @@ public abstract class Selectable
                     if(listAdapter.informationGroup != null && activity != null)
                     {
                         //get displays
-                        final ProgressBar infoProgress = listAdapter.informationGroup.findViewById(R.id.Item_Detail_Info_Progress);
+                        final CircularProgressIndicator infoProgress = listAdapter.informationGroup.findViewById(R.id.Item_Detail_Info_Progress);
                         final ScrollTextView infoText = listAdapter.informationGroup.findViewById(R.id.Item_Detail_Info_Text);
 
                         //update displays

@@ -126,16 +126,46 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     case "mapView":
                         SwitchPreference showCloudsGlobeSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Globe);
+                        SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
+                        SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
+                        SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
+                        SwitchPreference showSearchSwitch = this.findPreference(Settings.PreferenceName.MapShowSearchList);
+                        SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
+                        SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
+                        SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
+                        SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
+                        SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
                         SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
+                        SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
+                        SliderPreference mapSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map);
+                        SliderPreference mapSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map);
+                        SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
                         IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
+                        IconListPreference mapTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map);
+                        IconListPreference informationLocationList = this.findPreference(Settings.PreferenceName.MapMarkerInfoLocation);
 
                         //initialize values
                         Settings.Options.MapView.initValues(context);
 
                         //setup displays
                         setupSwitch(showCloudsGlobeSwitch, null);
+                        setupSwitch(show3dPathsSwitch, null);
+                        setupSwitch(allowRotationSwitch, null);
+                        setupSwitch(showInformationBackgroundSwitch, null);
+                        setupSwitch(showSearchSwitch, null);
+                        setupSwitch(showZoomSwitch, null);
+                        setupSwitch(showLabelsAlwaysSwitch, null);
+                        setupSwitch(showShadowsSwitch, null);
+                        setupSwitch(showStarsSwitch, null);
+                        setupSwitchButton(showGridSwitch);
                         setupSlider(globeSensitivitySlider);
+                        setupSlider(globeSpeedScaleSlider);
+                        setupSlider(mapSensitivitySlider);
+                        setupSlider(mapSpeedScaleSlider);
+                        setupSlider(iconScaleSlider);
                         setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
+                        setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, null);
+                        setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
                         break;
 
                     case "updates":
@@ -843,6 +873,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         {
             final Context context = preference.getContext();
             final String preferenceKey = preference.getKey();
+            boolean forGlobe = false;
             int valueIndex = -1;
             Object currentValue = null;
 
@@ -876,7 +907,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     break;
 
                 case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe:
-                    currentValue = Settings.getMapLayerType(context, true);
+                    forGlobe = true;
+                    //fall through
+
+                case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map:
+                    currentValue = Settings.getMapLayerType(context, forGlobe);
 
                     preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                     {
@@ -885,13 +920,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         {
                             int layerType = (int)newValue;
 
-                            //update child visibility
-                            childPreference.setVisible(layerType == CoordinatesFragment.MapLayerType.Satellite || layerType == CoordinatesFragment.MapLayerType.Hybrid);
+                            //if child preference exists
+                            if(childPreference != null)
+                            {
+                                //update child visibility
+                                childPreference.setVisible(layerType == CoordinatesFragment.MapLayerType.Satellite || layerType == CoordinatesFragment.MapLayerType.Hybrid);
+                            }
 
                             //allow change
                             return(true);
                         }
                     });
+                    break;
+
+                case Settings.PreferenceName.MapMarkerInfoLocation:
+                    currentValue = Settings.getMapMarkerInfoLocation(context);
                     break;
 
                 case Settings.PreferenceName.SatelliteSource:
@@ -1029,7 +1072,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //if preference exists
         if(preference != null)
         {
-            final Context context = preference.getContext();
             final String preferenceKey = preference.getKey();
             int min = -1;
             int max = -1;
@@ -1046,6 +1088,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map:
                     min = Settings.SpeedScaleMin;
                     max = Settings.SpeedScaleMax;
+                    break;
+
+                case Settings.PreferenceName.MapMarkerScale:
+                    min = Settings.IconScaleMin;
+                    max = Settings.IconScaleMax;
                     break;
             }
 
@@ -1065,21 +1112,45 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(preference != null)
         {
             final Context context = preference.getContext();
+            final int titleId;
+            final int startColor;
+            final boolean allowOpacity;
             final SharedPreferences readSettings = Settings.getPreferences(context);
             final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
             final String preferenceKey = preference.getKey();
+            final String buttonPreferenceKey;
 
-            //if lens horizon toggle
-            if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
+            //if lens horizon or show grid toggle
+            switch(preferenceKey)
             {
-                BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
-                float[] size = Globals.dpsToPixels(context, 60, 40);
-                ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
+                case Settings.PreferenceName.LensUseHorizon:
+                case Settings.PreferenceName.MapShowGrid:
+                    BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
+                    float[] size = Globals.dpsToPixels(context, 60, 40);
+                    ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
 
-                switchButton.setBackgroundColor(Settings.getLensHorizonColor(context));
-                switchButton.setLayoutParams(params);
-                preference.setButton(switchButton);
-                preference.setButtonOnClickListener(createOnColorButtonClickListener(context, Settings.PreferenceName.LensHorizonColor, R.string.title_horizon_color, Settings.getLensHorizonColor(context), false, readSettings, writeSettings));
+                    //get specific settings
+                    if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
+                    {
+                        titleId = R.string.title_horizon_color;
+                        startColor = Settings.getLensHorizonColor(context);
+                        buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
+                        allowOpacity = false;
+                    }
+                    else
+                    {
+                        titleId = R.string.title_grid_color;
+                        startColor = Settings.getMapGridColor(context);
+                        buttonPreferenceKey = Settings.PreferenceName.MapGridColor;
+                        allowOpacity = true;
+                    }
+
+                    //setup button
+                    switchButton.setBackgroundColor(startColor);
+                    switchButton.setLayoutParams(params);
+                    preference.setButton(switchButton);
+                    preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, startColor, allowOpacity, readSettings, writeSettings));
+                    break;
             }
         }
     }

@@ -276,6 +276,7 @@
     <string name="title_compass_align">Compass Align</string>
     <string name="title_compass_calibrate">Calibrate Compass</string>
     <string name="title_compass_inaccurate_fix">Compass Inaccurate [Fix]</string>
+    <string name="title_control">Control</string>
     <string name="title_coordinates">Coordinates</string>
     <string name="title_current">Current</string>
     <string name="title_current_input_colon">"Current Input: "</string>
@@ -324,6 +325,7 @@
     <string name="title_full_moon_end">Full Moon End</string>
     <string name="title_g">G</string>
     <string name="title_getting">Getting</string>
+    <string name="title_globe">Globe</string>
     <string name="title_globe_type">Globe Type</string>
     <string name="title_globe_view">Globe View</string>
     <string name="title_golden_hour">Golden Hour</string>
@@ -385,6 +387,7 @@
     <string name="title_longitude_west_east">Longitude (W+/E-)</string>
     <string name="title_low">Low</string>
     <string name="title_manual">Manual</string>
+    <string name="title_map">Map</string>
     <string name="title_map_type">Map Type</string>
     <string name="title_map_view">Map View</string>
     <string name="title_mars">Mars</string>
@@ -493,6 +496,7 @@
     <string name="title_shared">Shared</string>
     <string name="title_share_translations_online">Share Translations Online</string>
     <string name="title_show_3d_paths">Show 3d Paths</string>
+    <string name="title_show_background">Show Background</string>
     <string name="title_show_clouds">Show Clouds</string>
     <string name="title_show_grid">Show Grid</string>
     <string name="title_show_horizon">Show Horizon</string>
@@ -537,6 +541,7 @@
     <string name="title_transparent">Transparent</string>
     <string name="title_travel">Travel</string>
     <string name="title_triangle">Triangle</string>
+    <string name="title_type">Type</string>
     <string name="title_under_name">Under Name</string>
     <string name="title_units">Units</string>
     <string name="title_unknown">Unknown</string>

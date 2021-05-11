@@ -276,6 +276,7 @@
     <string name="title_compass_align">Alinear Brújula</string>
     <string name="title_compass_calibrate">Calibrar Brújula</string>
     <string name="title_compass_inaccurate_fix">Brújula Inexacta [Reparar]</string>
+    <string name="title_control">Control</string>
     <string name="title_coordinates">Coordenadas</string>
     <string name="title_current">Corriente</string>
     <string name="title_current_input_colon">"Entrada Actual: "</string>
@@ -324,6 +325,7 @@
     <string name="title_full_moon_end">Fin de Luna Llena</string>
     <string name="title_g">G</string>
     <string name="title_getting">Consiguiendo</string>
+    <string name="title_globe">Globo</string>
     <string name="title_globe_type">Tipo de Globo</string>
     <string name="title_globe_view">Vista Globo</string>
     <string name="title_golden_hour">Hora Dorada</string>
@@ -385,6 +387,7 @@
     <string name="title_longitude_west_east">Longitud (O+/E-)</string>
     <string name="title_low">Bajo</string>
     <string name="title_manual">Manual</string>
+    <string name="title_map">Mapa</string>
     <string name="title_map_type">Tipo de Mapa</string>
     <string name="title_map_view">Vista Mapa</string>
     <string name="title_mars">Marte</string>
@@ -493,6 +496,7 @@
     <string name="title_shared">Compartido</string>
     <string name="title_share_translations_online">Compartir Traducciones en Línea</string>
     <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
+    <string name="title_show_background">Mostrar Fondo</string>
     <string name="title_show_clouds">Mostrar Nubes</string>
     <string name="title_show_grid">Mostrar Cuadrícula</string>
     <string name="title_show_horizon">Mostrar Horizonte</string>
@@ -537,6 +541,7 @@
     <string name="title_transparent">Transparente</string>
     <string name="title_travel">Viajar</string>
     <string name="title_triangle">Triángulo</string>
+    <string name="title_type">Tipo</string>
     <string name="title_under_name">Bajo Nombre</string>
     <string name="title_units">Unidades</string>
     <string name="title_unknown">Desconocido</string>

@@ -576,6 +576,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "notifications":
                     currentPage = Settings.PageType.Notifications;
                     break;
+
+                case "widgets":
+                    currentPage = Settings.PageType.Widgets;
+                    break;
             }
 
             //if adapter not set yet
@@ -781,9 +785,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case Settings.PageType.Locations:
                         //set adapter
                         settingsLocationsListAdapter = (Settings.Locations.ItemListAdapter)adapter;
-                        break;
-
-                    case Settings.PageType.Other:
                         break;
                 }
             }
@@ -1010,6 +1011,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             final boolean checked = readSettings.getBoolean(preferenceKey, false);
 
             //set state and listener
+            preference.setIconSpaceReserved(false);
             preference.setChecked(checked);
             preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
             {
@@ -1289,9 +1291,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             case Settings.PageType.Notifications:
                 show = !inEditMode;
-                break;
-
-            case Settings.PageType.Other:
                 break;
         }
 

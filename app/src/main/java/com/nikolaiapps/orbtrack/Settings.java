@@ -57,7 +57,8 @@ public abstract class Settings
         static final int Notifications = 2;
         static final int Updates = 3;
         static final int Other = 4;
-        static final int PageCount = 5;
+        static final int Widgets = 5;
+        static final int PageCount = 6;
     }
 
     //Sub page types
@@ -2030,7 +2031,7 @@ public abstract class Settings
                     notifyList.add(new Item(Integer.MIN_VALUE, res.getString(R.string.title_none), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
                 }
                 notifications = notifyList.toArray(new Item[0]);
-                this.itemsRefID = R.layout.settings_notify_layout;
+                this.itemsRefID = R.layout.settings_notify_item;
             }
 
             @Override
@@ -2117,6 +2118,10 @@ public abstract class Settings
                 if(currentOrbital != null)
                 {
                     itemHolder.notifyImage.setImageDrawable(noradId != Integer.MIN_VALUE ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, currentOrbital.orbitalType) : Globals.getDrawable(currentContext, R.drawable.ic_notifications_white, true));
+                    if(noradId < 0)
+                    {
+                        itemHolder.notifyImage.setColorFilter(Color.TRANSPARENT);
+                    }
                 }
                 itemHolder.nameText.setText(currentItem.name);
                 if(usePassStart || usePassEnd)
@@ -2200,9 +2205,9 @@ public abstract class Settings
         {
             private Item[] widgets;
 
-            public ItemListAdapter(View parentView)
+            public ItemListAdapter(View parentView, String title)
             {
-                super(parentView, null);
+                super(parentView, title);
 
                 this.itemsRefID = R.layout.settings_widgets_item;
             }
@@ -2226,13 +2231,28 @@ public abstract class Settings
             }
 
             @Override
+            protected boolean showColumnTitles(int page)
+            {
+                return(categoryTitle == null);
+            }
+
+            @Override
             protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
-                AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Widget_Item_Image);
+                //if have category
+                if(categoryText != null && categoryTitle != null)
+                {
+                    categoryText.setText(categoryTitle);
+                    ((View)categoryText.getParent()).setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Widget_Item_Image);
 
-                imageColumn.setVisibility(View.INVISIBLE);
-                ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Name_Text)).setText(R.string.title_name);
-                ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Location_Text)).setText(R.string.title_location);
+                    imageColumn.setVisibility(View.INVISIBLE);
+                    ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Name_Text)).setText(R.string.title_name);
+                    ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Location_Text)).setText(R.string.title_location);
+                }
 
                 super.setColumnTitles(listColumns, categoryText, page);
             }
@@ -2277,6 +2297,10 @@ public abstract class Settings
 
                 //set displays
                 itemHolder.widgetImage.setImageDrawable(widgetId != 0 ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, WidgetBaseSetupActivity.getOrbitalType(currentContext, currentItem.id)) : Globals.getDrawable(currentContext, R.drawable.ic_widgets_black, (noradId > 0)));
+                if(noradId < 0)
+                {
+                    itemHolder.widgetImage.setColorFilter(Color.TRANSPARENT);
+                }
                 itemHolder.nameText.setText(currentItem.name);
                 itemHolder.locationText.setText(currentItem.location);
 
@@ -2374,12 +2398,16 @@ public abstract class Settings
                             break;
 
                         case SubPageType.Widgets:
-                            listAdapter = new Widgets.ItemListAdapter(this.listParentView);
+                            listAdapter = new Widgets.ItemListAdapter(this.listParentView, null);
                             break;
 
                         default:
                             return(Options.onCreateView(this, page, subPage, inflater, container, false));
                     }
+                    break;
+
+                case PageType.Widgets:
+                    listAdapter = new Widgets.ItemListAdapter(this.listParentView, categoryTitle);
                     break;
 
                 default:
@@ -2568,6 +2596,9 @@ public abstract class Settings
 
                 case PageType.Other:
                     return(res.getString(R.string.title_other));
+
+                case PageType.Widgets:
+                    return(res.getString(R.string.title_widgets));
 
                 default:
                     return(res.getString(R.string.title_invalid));

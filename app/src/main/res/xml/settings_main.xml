@@ -336,5 +336,10 @@
                 </PreferenceCategory>
             </PreferenceCategory>
         </PreferenceScreen>
+
+        <PreferenceScreen android:title="@string/title_widgets"
+            android:key="widgets"
+            android:icon="@drawable/ic_widgets_black"
+            android:fragment="com.nikolaiapps.orbtrack.Settings$Page"/>
     </PreferenceCategory>
 </PreferenceScreen>

@@ -2005,31 +2005,36 @@ public abstract class Settings
             {
                 super(parentView, title);
 
-                Resources res = currentContext.getResources();
+                Resources res = (currentContext != null ? currentContext.getResources() : null);
                 Database.DatabaseSatellite[] orbitals = Database.getOrbitals(currentContext);
                 ArrayList<Item> notifyList = new ArrayList<>(0);
 
-                //go through each orbital
-                for(Database.DatabaseSatellite currentOrbital : orbitals)
+                //if context is set
+                if(currentContext != null)
                 {
-                    CalculateService.AlarmNotifySettings passStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassStart);
-                    CalculateService.AlarmNotifySettings passEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassEnd);
-                    CalculateService.AlarmNotifySettings fullStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonStart);
-                    CalculateService.AlarmNotifySettings fullEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonEnd);
-
-                    //if using start or ending notification for any
-                    if(passStartSettings.isEnabled() || passEndSettings.isEnabled() || fullStartSettings.isEnabled() || fullEndSettings.isEnabled())
+                    //go through each orbital
+                    for(Database.DatabaseSatellite currentOrbital : orbitals)
                     {
-                        //add orbital
-                        notifyList.add(new Item(currentOrbital.norad, currentOrbital.getName(), passStartSettings, passEndSettings, fullStartSettings, fullEndSettings));
+                        CalculateService.AlarmNotifySettings passStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassStart);
+                        CalculateService.AlarmNotifySettings passEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassEnd);
+                        CalculateService.AlarmNotifySettings fullStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonStart);
+                        CalculateService.AlarmNotifySettings fullEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonEnd);
+
+                        //if using start or ending notification for any
+                        if(passStartSettings.isEnabled() || passEndSettings.isEnabled() || fullStartSettings.isEnabled() || fullEndSettings.isEnabled())
+                        {
+                            //add orbital
+                            notifyList.add(new Item(currentOrbital.norad, currentOrbital.getName(), passStartSettings, passEndSettings, fullStartSettings, fullEndSettings));
+                        }
+                    }
+
+                    //set items and layout ID
+                    if(notifyList.size() == 0)
+                    {
+                        notifyList.add(new Item(Integer.MIN_VALUE, res.getString(R.string.title_none), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
                     }
                 }
 
-                //set items and layout ID
-                if(notifyList.size() == 0)
-                {
-                    notifyList.add(new Item(Integer.MIN_VALUE, res.getString(R.string.title_none), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
-                }
                 notifications = notifyList.toArray(new Item[0]);
                 this.itemsRefID = R.layout.settings_notify_item;
             }
@@ -2382,7 +2387,7 @@ public abstract class Settings
                     break;
 
                 case PageType.Locations:
-                    listAdapter = new Locations.ItemListAdapter(Page.this.listParentView, categoryTitle);
+                    listAdapter = new Locations.ItemListAdapter(this.listParentView, categoryTitle);
                     break;
 
                 case PageType.Notifications:

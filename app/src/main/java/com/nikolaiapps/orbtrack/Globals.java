@@ -1954,10 +1954,17 @@ public abstract class Globals
     //Gets the language from the given context
     public static String getLanguage(Context context)
     {
-        //get language
-        Configuration config = context.getResources().getConfiguration();
-        Locale currentLocale = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? config.getLocales().get(0) : config.locale);
-        return(currentLocale.getLanguage());
+        if(context != null)
+        {
+            //get language
+            Configuration config = context.getResources().getConfiguration();
+            Locale currentLocale = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? config.getLocales().get(0) : config.locale);
+            return(currentLocale.getLanguage());
+        }
+        else
+        {
+            return(Locale.getDefault().getLanguage());
+        }
     }
 
     //Gets a number as a string

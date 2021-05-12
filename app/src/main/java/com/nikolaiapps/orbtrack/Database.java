@@ -1165,10 +1165,11 @@ public class Database extends SQLiteOpenHelper
         int column_count;
         Cursor queryResult;
         String[][] queryResults = new String[0][0];
-        SQLiteDatabase db = DatabaseManager.get(context, false);
 
         try
         {
+            SQLiteDatabase db = DatabaseManager.get(context, false);
+
             //run query
             queryResult = db.rawQuery(sql, replacements);
             if(queryResult != null)

@@ -88,6 +88,7 @@ public class MainActivity extends AppCompatActivity
     //Status
     private static boolean inEditMode;
     private static boolean wasPaused = false;
+    private static boolean wasRecreated = false;
     private static boolean runningUserSetup = false;
     private boolean savedState;
     private boolean finishedSetup;
@@ -98,6 +99,7 @@ public class MainActivity extends AppCompatActivity
     private Menu optionsMenu;
     private View sideActionDivider;
     private RecyclerView sideActionMenu;
+    private ExpandableListView sideMenu;
     private SwipeStateViewPager mainPager;
     private PagerTitleStrip mainPagerTitles;
     private DrawerLayout mainDrawerLayout;
@@ -177,7 +179,7 @@ public class MainActivity extends AppCompatActivity
 
         //look for web protocol updates
         Globals.updateWebProtocols(this);
-        
+
         //set defaults
         if(savedInstanceState == null)
         {
@@ -314,15 +316,15 @@ public class MainActivity extends AppCompatActivity
     {
         super.onResume();
 
-        //if were paused
-        if(wasPaused)
+        //if were paused and not recreating
+        if(wasPaused && !wasRecreated)
         {
             //restore tasks
             updateRunningTasks(true);
         }
 
         //reset
-        wasPaused = false;
+        wasPaused = wasRecreated = false;
     }
 
     @Override
@@ -951,6 +953,7 @@ public class MainActivity extends AppCompatActivity
 
     private void updateTheme()
     {
+        wasRecreated = true;
         Settings.Options.Display.setTheme(this);
         this.recreate();
     }
@@ -1488,6 +1491,7 @@ public class MainActivity extends AppCompatActivity
         optionsMenu = null;
         sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
         sideActionMenu = this.findViewById(R.id.Side_Action_Menu);
+        sideMenu = this.findViewById(R.id.Side_Menu);
         mainFloatingButton = this.findViewById(R.id.Main_Floating_Button);
         mainFloatingButton.setOnClickListener(new View.OnClickListener()
         {
@@ -1556,6 +1560,9 @@ public class MainActivity extends AppCompatActivity
         timerDelay = listTimerDelay;
         calculateCoordinatesTask = null;
 
+        //reset
+        wasRecreated = false;
+
         //setup pager
         mainPager.addOnPageChangeListener(createOnPageChangedListener());
 
@@ -1585,7 +1592,6 @@ public class MainActivity extends AppCompatActivity
     private void updateSideMenu()
     {
         Resources res = this.getResources();
-        ExpandableListView sideMenu = this.findViewById(R.id.Side_Menu);
         Drawable satelliteDrawable = Globals.getDrawable(this, R.drawable.orbital_satellite, true);
         Drawable viewDrawable = Globals.getDrawable(this, R.drawable.ic_remove_red_eye_white, true);
         Drawable passDrawable = Globals.getDrawable(this, R.drawable.orbit, true);
@@ -1593,10 +1599,11 @@ public class MainActivity extends AppCompatActivity
         Drawable intersectionDrawable = Globals.getDrawable(this, R.drawable.ic_intersect, true);
         Drawable starDrawable = Globals.getDrawable(this, R.drawable.orbital_sun);
         Drawable planetDrawable = Globals.getDrawable(this, R.drawable.orbital_moon);
+        Drawable displayDrawable = Globals.getDrawable(this, R.drawable.ic_tablet_white, true);
         Drawable locationDrawable = Globals.getDrawable(this, R.drawable.ic_my_location_black, true);
         Drawable notificationsDrawable = Globals.getDrawable(this, R.drawable.ic_notifications_white, true);
         Drawable updatesDrawable = Globals.getDrawable(this, R.drawable.ic_sync_white, true);
-        Drawable otherDrawable = Globals.getDrawable(this, R.drawable.ic_settings_black, true);
+        Drawable allDrawable = Globals.getDrawable(this, R.drawable.ic_settings_black, true);
         String statusString = res.getString(R.string.title_status);
         String viewString = res.getString(R.string.title_view);
         String passesString = res.getString(R.string.title_passes);
@@ -1609,11 +1616,11 @@ public class MainActivity extends AppCompatActivity
             groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, Settings.getCombinedCurrentLayout(this) ? (new Item[]{new Item(statusString, viewDrawable)}) : (new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable)})));
             groups.add(new Group(this, res.getString(R.string.title_calculate), R.drawable.ic_calculator_black, new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable), new Item(intersectionString, intersectionDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
-            groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_other), otherDrawable)}));
+            groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_display), displayDrawable), new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_all), allDrawable)}));
 
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
             sideMenu.setOnChildClickListener(createOnSideMenuChildClickListener());
-            sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener(sideMenu));
+            sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener());
         }
     }
 
@@ -2472,6 +2479,7 @@ public class MainActivity extends AppCompatActivity
                 //stop any running timer
                 calculatePageAdapter.stopPlayTimer(mainPager, Calculate.PageType.Coordinates);
             }
+            ThreadTask.purgeAll();
         }
     }
 
@@ -4070,10 +4078,57 @@ public class MainActivity extends AppCompatActivity
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id)
             {
-                //update display, page selection, and close menu
-                setMainGroup(groupPosition, false);
-                setMainPage(childPosition);
+                boolean forSettings = (groupPosition == Groups.Settings);
+
+                //if for settings
+                if(forSettings)
+                {
+                    Intent startIntent = new Intent(MainActivity.this, SettingsActivity.class);
+                    String startScreenValue;
+
+                    //get arguments for position
+                    switch(childPosition)
+                    {
+                        case 0:
+                            startScreenValue = SettingsActivity.ScreenKey.Display;
+                            break;
+
+                        case 1:
+                            startScreenValue = SettingsActivity.ScreenKey.Locations;
+                            break;
+
+                        case 2:
+                            startScreenValue = SettingsActivity.ScreenKey.Notifications;
+                            break;
+
+                        case 3:
+                            startScreenValue = SettingsActivity.ScreenKey.Updates;
+                            break;
+
+                        default:
+                        case 4:
+                            startScreenValue = "";
+                            break;
+                    }
+
+                    //start settings activity
+                    startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
+                    MainActivity.this.startActivityForResult(startIntent, BaseInputActivity.RequestCode.Settings);
+                }
+                else
+                {
+                    //update display and page selection
+                    setMainGroup(groupPosition, false);
+                    setMainPage(childPosition);
+                }
+
+                //close menu
                 mainDrawerLayout.closeDrawers();
+                if(forSettings && sideMenu != null)
+                {
+                    sideMenu.collapseGroup(groupPosition);
+                    lastSideMenuPosition = groupPosition;
+                }
 
                 //click handled
                 return(true);
@@ -4082,7 +4137,7 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Creates an on group expand listener
-    private ExpandableListView.OnGroupExpandListener createOnSideMenuGroupExpandListener(final ExpandableListView sideMenu)
+    private ExpandableListView.OnGroupExpandListener createOnSideMenuGroupExpandListener()
     {
         return(new ExpandableListView.OnGroupExpandListener()
         {

@@ -48,6 +48,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
+    public static abstract class ScreenKey
+    {
+        public static final String Accounts = "accounts";
+        public static final String Display = "display";
+        public static final String LensView = "lensView";
+        public static final String ListView = "listView";
+        public static final String Locations = "locations";
+        public static final String MapView = "mapView";
+        public static final String Notifications = "notifications";
+        public static final String Updates = "updates";
+        public static final String Widgets = "widgets";
+    }
+
     public static class SettingsSubFragment extends PreferenceFragmentCompat
     {
         @Override
@@ -64,14 +77,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 args = new Bundle();
             }
 
+            //get screen key and set display
             screenKey = args.getString("rootKey");
             setPreferencesFromResource(R.xml.settings_main, screenKey);
 
+            //if context and screen key exist
             if(context != null && screenKey != null)
             {
                 switch(screenKey)
                 {
-                    case "display":
+                    case ScreenKey.Display:
                         SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
 
@@ -83,7 +98,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
                         break;
 
-                    case "lensView":
+                    case ScreenKey.LensView:
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
@@ -110,7 +125,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
                         break;
 
-                    case "listView":
+                    case ScreenKey.ListView:
                         SwitchPreference combinedSwitch = this.findPreference(Settings.PreferenceName.UseCombinedCurrentLayout);
                         SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
                         IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
@@ -124,7 +139,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
-                    case "mapView":
+                    case ScreenKey.MapView:
                         SwitchPreference showCloudsGlobeSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Globe);
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
                         SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
@@ -168,7 +183,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
                         break;
 
-                    case "updates":
+                    case ScreenKey.Updates:
                         //get displays
                         SwitchPreference tleAutoSwitch = this.findPreference(Settings.PreferenceName.TLEAutoUpdate);
                         SwitchPreference catalogAutoSwitch = this.findPreference(Settings.PreferenceName.CatalogAutoUpdate);
@@ -208,6 +223,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     public static final String EXTRA_RECREATE = "recreate";
+    public static final String EXTRA_START_SCREEN = "startScreen";
+    private static final String RootKey = "rootKey";
 
     private static boolean inEditMode = false;
     private static Intent resultIntent = null;
@@ -275,9 +292,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         Settings.Options.Display.setTheme(this);
         super.onCreate(savedInstanceState);
 
+        int titleId;
+        String startScreenKey;
+        Bundle args = new Bundle();
+        Intent startIntent = this.getIntent();
         ActionBar mainActionBar;
+        Fragment startFragment;
 
-        setContentView(R.layout.settings_layout);
+        //get start intent and values
+        if(startIntent == null)
+        {
+            startIntent = new Intent();
+        }
+        startScreenKey = startIntent.getStringExtra(EXTRA_START_SCREEN);
 
         //if result intent does not exist yet
         if(resultIntent == null)
@@ -288,50 +315,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         //set defaults
         currentPage = -1;
-        currentPageKey = null;
+        currentPageKey = startScreenKey;
         pendingUpdate = false;
         locationSource = Database.LocationType.Current;
         settingsPageAdapter = null;
         settingsLocationsListAdapter = null;
         accountsListAdapter = null;
 
-        //setup fragment manager
-        manager = this.getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, new SettingsMainFragment()).commit();
-        manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
-        {
-            @Override
-            public void onBackStackChanged()
-            {
-                if(manager.getBackStackEntryCount() == 0)
-                {
-                    currentPage = -1;
-                }
-                updateFloatingButton();
-                updateBackButton();
-            }
-        });
-
-        //setup dialog
-        addCurrentLocationDialog = Globals.createAddCurrentLocationDialog(this, new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
-            {
-                //cancel
-                needSaveCurrentLocation = false;
-                lockScreenOrientation(false);
-            }
-        }, new DialogInterface.OnCancelListener()
-        {
-            @Override
-            public void onCancel(DialogInterface dialog)
-            {
-                //cancel
-                needSaveCurrentLocation = false;
-                lockScreenOrientation(false);
-            }
-        });
+        //set view
+        this.setContentView(R.layout.settings_layout);
 
         //setup displays
         settingsLayout = this.findViewById(R.id.Settings_Layout);
@@ -367,6 +359,91 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     SettingsActivity.this.finish();
                 }
+            }
+        });
+
+        //setup starting fragment
+        switch(startScreenKey)
+        {
+            case ScreenKey.Accounts:
+            case ScreenKey.Locations:
+            case ScreenKey.Notifications:
+            case ScreenKey.Widgets:
+                switch(startScreenKey)
+                {
+                    case ScreenKey.Accounts:
+                        titleId = R.string.title_accounts;
+                        break;
+
+                    case ScreenKey.Locations:
+                        titleId = R.string.title_locations;
+                        break;
+
+                    case ScreenKey.Notifications:
+                        titleId = R.string.title_notifications;
+                        break;
+
+                    default:
+                    case ScreenKey.Widgets:
+                        titleId = R.string.title_widgets;
+                        break;
+                }
+
+                startFragment = getSettingsFragment(startScreenKey, this.getString(titleId));
+                break;
+
+            case ScreenKey.Display:
+            case ScreenKey.LensView:
+            case ScreenKey.ListView:
+            case ScreenKey.MapView:
+            case ScreenKey.Updates:
+                startFragment = new SettingsSubFragment();
+
+                args.putString(RootKey, startScreenKey);
+                startFragment.setArguments(args);
+                break;
+
+            default:
+                startFragment = new SettingsMainFragment();
+                currentPageKey = null;
+                break;
+        }
+
+        //setup fragment manager
+        manager = this.getSupportFragmentManager();
+        manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, startFragment).commit();
+        manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
+        {
+            @Override
+            public void onBackStackChanged()
+            {
+                if(manager.getBackStackEntryCount() == 0)
+                {
+                    currentPage = -1;
+                }
+                updateFloatingButton();
+                updateBackButton();
+            }
+        });
+
+        //setup dialog
+        addCurrentLocationDialog = Globals.createAddCurrentLocationDialog(this, new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                //cancel
+                needSaveCurrentLocation = false;
+                lockScreenOrientation(false);
+            }
+        }, new DialogInterface.OnCancelListener()
+        {
+            @Override
+            public void onCancel(DialogInterface dialog)
+            {
+                //cancel
+                needSaveCurrentLocation = false;
+                lockScreenOrientation(false);
             }
         });
 
@@ -413,6 +490,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         //update display
         updateBackButton();
+        updateFloatingButton();
     }
 
     @Override
@@ -562,35 +640,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //if a page
         if(isPage)
         {
-            //update current page
-            switch(currentPageKey)
-            {
-                case "accounts":
-                    currentPage = Settings.PageType.Accounts;
-                    break;
-
-                case "locations":
-                    currentPage = Settings.PageType.Locations;
-                    break;
-
-                case "notifications":
-                    currentPage = Settings.PageType.Notifications;
-                    break;
-
-                case "widgets":
-                    currentPage = Settings.PageType.Widgets;
-                    break;
-            }
-
-            //if adapter not set yet
-            if(settingsPageAdapter == null)
-            {
-                //create adapter
-                settingsPageAdapter = new Settings.PageAdapter(manager, settingsLayout, null, createOnItemCheckChangedListener(), createOnSetAdapterListener(), createOnUpdateNeededListener(), null, createOnPageResumeListener(), new int[Settings.PageType.PageCount]);
-            }
-
-            //create page fragment
-            fragment = settingsPageAdapter.getItem(MainActivity.Groups.Settings, currentPage, 0, new Settings.Page(pref.getTitle().toString()));
+            //create settings fragment
+            fragment = getSettingsFragment(currentPageKey, pref.getTitle().toString());
         }
         else
         {
@@ -610,6 +661,40 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, fragment, (isPage ? currentPageKey : null)).addToBackStack(null).commit();
 
         return(true);
+    }
+
+    //Gets fragment for settings page with given screen key and title
+    private Fragment getSettingsFragment(String screenKey, String title)
+    {
+        //update current page
+        switch(screenKey)
+        {
+            case ScreenKey.Accounts:
+                currentPage = Settings.PageType.Accounts;
+                break;
+
+            case ScreenKey.Locations:
+                currentPage = Settings.PageType.Locations;
+                break;
+
+            case ScreenKey.Notifications:
+                currentPage = Settings.PageType.Notifications;
+                break;
+
+            case ScreenKey.Widgets:
+                currentPage = Settings.PageType.Widgets;
+                break;
+        }
+
+        //if adapter not set yet
+        if(settingsPageAdapter == null)
+        {
+            //create adapter
+            settingsPageAdapter = new Settings.PageAdapter(manager, settingsLayout, null, createOnItemCheckChangedListener(), createOnSetAdapterListener(), createOnUpdateNeededListener(), null, createOnPageResumeListener(), new int[Settings.PageType.PageCount]);
+        }
+
+        //return page fragment
+        return(settingsPageAdapter.getItem(MainActivity.Groups.Settings, currentPage, 0, new Settings.Page(title)));
     }
 
     //Handles main floating button click
@@ -1305,7 +1390,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     //Update back button
     private void updateBackButton()
     {
-        //backButton.setText(currentPage == -1 ? R.string.title_close : R.string.title_back);
         backButton.setText(manager.getBackStackEntryCount() > 0 ? R.string.title_back : R.string.title_close);
     }
 

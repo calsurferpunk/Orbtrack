@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.ThreadPoolExecutor;
 
 
 //Thread task
@@ -56,6 +57,14 @@ public class ThreadTask<Params, Progress, Result>
     protected void onCancelled(Result result)
     {
         //needs to be overridden
+    }
+
+    public static void purgeAll()
+    {
+        if(taskExecutor instanceof ThreadPoolExecutor)
+        {
+            ((ThreadPoolExecutor)taskExecutor).purge();
+        }
     }
 
     private void setFinished(Result result)
@@ -126,6 +135,10 @@ public class ThreadTask<Params, Progress, Result>
                         sleep(runRepeatMs);
                     }
 
+                    //update if done/canceled
+                    done = done || (taskThread != null && taskThread.isDone());
+                    cancelled = cancelled || (taskThread != null && taskThread.isCancelled());
+
                 } while(!done && !cancelled);
 
                 //finish
@@ -150,6 +163,10 @@ public class ThreadTask<Params, Progress, Result>
         if(taskThread != null)
         {
             taskThread.cancel(allow);
+            if(taskExecutor instanceof ThreadPoolExecutor)
+            {
+                ((ThreadPoolExecutor)taskExecutor).remove(taskThread);
+            }
         }
     }
 

@@ -479,7 +479,7 @@ public abstract class Calculations
         double rteqsq;		double ao;			double cosq2;		double sinomo;		double cosomo;
         double bsq;			double xlldot;		double omgdt;		double xnodot;		double xll;
         double omgasm;		double xnodes;		double _em;			double xinc;		double xn;
-        double t;			double dp_e3;		double dp_ee2;		double dp_se2;
+        double timeSince;			double dp_e3;		double dp_ee2;		double dp_se2;
         double dp_se3;		double dp_sgh2;		double dp_sgh3;		double dp_sgh4;		double dp_sghs;
         double dp_sh2;		double dp_sh3;		double dp_si2;		double dp_si3;		double dp_sl2;
         double dp_sl3;		double dp_sl4;		double dp_xgh2;		double dp_xgh3;		double dp_xgh4;
@@ -518,7 +518,7 @@ public abstract class Calculations
                 this.rteqsq = copyFrom.rteqsq;		    this.ao = copyFrom.ao;			        this.cosq2 = copyFrom.cosq2;		    this.sinomo = copyFrom.sinomo;		    this.cosomo = copyFrom.cosomo;
                 this.bsq = copyFrom.bsq;			    this.xlldot = copyFrom.xlldot;		    this.omgdt = copyFrom.omgdt;		    this.xnodot = copyFrom.xnodot;		    this.xll = copyFrom.xll;
                 this.omgasm = copyFrom.omgasm;		    this.xnodes = copyFrom.xnodes;		    this._em = copyFrom._em;			    this.xinc = copyFrom.xinc;		        this.xn = copyFrom.xn;
-                this.t = copyFrom.t;			        this.dp_e3 = copyFrom.dp_e3;		    this.dp_ee2 = copyFrom.dp_ee2;		    this.dp_se2 = copyFrom.dp_se2;
+                this.timeSince = copyFrom.timeSince;			        this.dp_e3 = copyFrom.dp_e3;		    this.dp_ee2 = copyFrom.dp_ee2;		    this.dp_se2 = copyFrom.dp_se2;
                 this.dp_se3 = copyFrom.dp_se3;		    this.dp_sgh2 = copyFrom.dp_sgh2;		this.dp_sgh3 = copyFrom.dp_sgh3;		this.dp_sgh4 = copyFrom.dp_sgh4;		this.dp_sghs = copyFrom.dp_sghs;
                 this.dp_sh2 = copyFrom.dp_sh2;		    this.dp_sh3 = copyFrom.dp_sh3;		    this.dp_si2 = copyFrom.dp_si2;		    this.dp_si3 = copyFrom.dp_si3;		    this.dp_sl2 = copyFrom.dp_sl2;
                 this.dp_sl3 = copyFrom.dp_sl3;		    this.dp_sl4 = copyFrom.dp_sl4;		    this.dp_xgh2 = copyFrom.dp_xgh2;		this.dp_xgh3 = copyFrom.dp_xgh3;		this.dp_xgh4 = copyFrom.dp_xgh4;
@@ -1877,7 +1877,7 @@ public abstract class Calculations
         sinis = Math.sin(noradData.xinc);
         cosis = Math.cos(noradData.xinc);
 
-        zm = noradData.dp_zmos + ZNS * noradData.t;
+        zm = noradData.dp_zmos + ZNS * noradData.timeSince;
         zf = zm + 2.0 * ZES * Math.sin(zm);
         sinzf = Math.sin(zf);
         f2 = 0.5 * sinzf * sinzf - 0.25;
@@ -1888,7 +1888,7 @@ public abstract class Calculations
 
         sghs = noradData.dp_sgh2 * f2 + noradData.dp_sgh3 * f3 + noradData.dp_sgh4 * sinzf;
         shs = noradData.dp_sh2 * f2 + noradData.dp_sh3 * f3;
-        zm = noradData.dp_zmol + ZNL * noradData.t;
+        zm = noradData.dp_zmol + ZNL * noradData.timeSince;
         zf = zm + 2.0 * ZEL * Math.sin(zm);
         sinzf = Math.sin(zf);
         f2 = 0.5 * sinzf * sinzf - 0.25;
@@ -2400,14 +2400,14 @@ public abstract class Calculations
         noradData.omgasm = omgadf;
         noradData.xnodes = xnode;
         noradData.xn = xnn;
-        noradData.t = daysAfterEpoch;
+        noradData.timeSince = daysAfterEpoch;
 
         //deep space secular effects
-        noradData.xll = noradData.xll + noradData.dp_ssl * noradData.t;
-        noradData.omgasm = noradData.omgasm + noradData.dp_ssg * noradData.t;
-        noradData.xnodes = noradData.xnodes + noradData.dp_ssh * noradData.t;
-        noradData._em = tleData.eccentricity + noradData.dp_sse * noradData.t;
-        noradData.xinc = Math.toRadians(tleData.inclinationDeg) + noradData.dp_ssi * noradData.t;
+        noradData.xll = noradData.xll + noradData.dp_ssl * noradData.timeSince;
+        noradData.omgasm = noradData.omgasm + noradData.dp_ssg * noradData.timeSince;
+        noradData.xnodes = noradData.xnodes + noradData.dp_ssh * noradData.timeSince;
+        noradData._em = tleData.eccentricity + noradData.dp_sse * noradData.timeSince;
+        noradData.xinc = Math.toRadians(tleData.inclinationDeg) + noradData.dp_ssi * noradData.timeSince;
 
         if(noradData.xinc < 0.0)
         {
@@ -2420,9 +2420,9 @@ public abstract class Calculations
         {
             while(!f_done)
             {
-                if((noradData.dp_atime == 0.0) || ((noradData.t >= 0.0) && (noradData.dp_atime <  0.0)) || ((noradData.t <  0.0) && (noradData.dp_atime >= 0.0)))
+                if((noradData.dp_atime == 0.0) || ((noradData.timeSince >= 0.0) && (noradData.dp_atime <  0.0)) || ((noradData.timeSince <  0.0) && (noradData.dp_atime >= 0.0)))
                 {
-                    if(noradData.t < 0)
+                    if(noradData.timeSince < 0)
                         delt = noradData.dp_stepn;
                     else
                         delt = noradData.dp_stepp;
@@ -2436,11 +2436,11 @@ public abstract class Calculations
                 }
                 else
                 {
-                    if(Math.abs(noradData.t) < Math.abs(noradData.dp_atime))
+                    if(Math.abs(noradData.timeSince) < Math.abs(noradData.dp_atime))
                     {
                         delt = noradData.dp_stepp;
 
-                        if(noradData.t >= 0.0)
+                        if(noradData.timeSince >= 0.0)
                             delt = noradData.dp_stepn;
 
                         sdp4_calcintegrator_data = sdp4CalcIntegrator(noradData, delt);
@@ -2450,7 +2450,7 @@ public abstract class Calculations
                     {
                         delt = noradData.dp_stepn;
 
-                        if(noradData.t > 0.0)
+                        if(noradData.timeSince > 0.0)
                             delt = noradData.dp_stepp;
 
                         f_done = true;
@@ -2458,13 +2458,14 @@ public abstract class Calculations
                 }
             }
 
-            while(Math.abs(noradData.t - noradData.dp_atime) >= noradData.dp_stepp)
+            //todo: improve time for very long timeSince
+            while(Math.abs(noradData.timeSince - noradData.dp_atime) >= noradData.dp_stepp)
             {
                 sdp4_calcintegrator_data = sdp4CalcIntegrator(noradData, delt);
                 noradData = sdp4_calcintegrator_data.norad_data;
             }
 
-            ft = noradData.t - noradData.dp_atime;
+            ft = noradData.timeSince - noradData.dp_atime;
 
             sdp4_calcdotterms_data = sdp4CalcDotTerms(noradData);
             xndot = sdp4_calcdotterms_data.pxndot;
@@ -2474,7 +2475,7 @@ public abstract class Calculations
             noradData.xn = noradData.dp_xni + xndot * ft + xnddt * ft * ft * 0.5;
 
             xl = noradData.dp_xli + xldot * ft + xndot * ft * ft * 0.5;
-            temp = -noradData.xnodes + noradData.dp_thgr + noradData.t * THDT;
+            temp = -noradData.xnodes + noradData.dp_thgr + noradData.timeSince * THDT;
 
             noradData.xll = xl - noradData.omgasm + temp;
 
@@ -2488,7 +2489,7 @@ public abstract class Calculations
         emm = noradData._em;
         xincc = noradData.xinc;
         xnn = noradData.xn;
-        daysAfterEpoch = noradData.t;
+        daysAfterEpoch = noradData.timeSince;
 
         sdp4_secular_data.norad_data = noradData;
         sdp4_secular_data.xmdf = xmdf;

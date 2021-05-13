@@ -159,13 +159,18 @@ public class ThreadTask<Params, Progress, Result>
 
     public void cancel(boolean allow)
     {
-        cancelled = true;
-        if(taskThread != null)
+        //if not already cancelled
+        if(!cancelled)
         {
-            taskThread.cancel(allow);
-            if(taskExecutor instanceof ThreadPoolExecutor)
+            //cancel and remove
+            cancelled = true;
+            if(taskThread != null)
             {
-                ((ThreadPoolExecutor)taskExecutor).remove(taskThread);
+                taskThread.cancel(allow);
+                if(taskExecutor instanceof ThreadPoolExecutor)
+                {
+                    ((ThreadPoolExecutor)taskExecutor).remove(taskThread);
+                }
             }
         }
     }

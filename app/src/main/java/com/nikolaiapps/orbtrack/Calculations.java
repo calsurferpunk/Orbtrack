@@ -479,7 +479,7 @@ public abstract class Calculations
         double rteqsq;		double ao;			double cosq2;		double sinomo;		double cosomo;
         double bsq;			double xlldot;		double omgdt;		double xnodot;		double xll;
         double omgasm;		double xnodes;		double _em;			double xinc;		double xn;
-        double timeSince;			double dp_e3;		double dp_ee2;		double dp_se2;
+        double timeSince;	double dp_e3;		double dp_ee2;		double dp_se2;
         double dp_se3;		double dp_sgh2;		double dp_sgh3;		double dp_sgh4;		double dp_sghs;
         double dp_sh2;		double dp_sh3;		double dp_si2;		double dp_si3;		double dp_sl2;
         double dp_sl3;		double dp_sl4;		double dp_xgh2;		double dp_xgh3;		double dp_xgh4;
@@ -2458,7 +2458,6 @@ public abstract class Calculations
                 }
             }
 
-            //todo: improve time for very long timeSince
             while(Math.abs(noradData.timeSince - noradData.dp_atime) >= noradData.dp_stepp)
             {
                 sdp4_calcintegrator_data = sdp4CalcIntegrator(noradData, delt);

@@ -233,11 +233,6 @@ public class MainActivity extends AppCompatActivity
             {
                 switch(key)
                 {
-                    case Settings.PreferenceName.DarkTheme:
-                    case Settings.PreferenceName.ColorTheme:
-                        updateTheme();
-                        break;
-
                     case Settings.PreferenceName.UseCombinedCurrentLayout:
                         if(mainGroup == Groups.Current)
                         {
@@ -1560,9 +1555,6 @@ public class MainActivity extends AppCompatActivity
         timerDelay = listTimerDelay;
         calculateCoordinatesTask = null;
 
-        //reset
-        wasRecreated = false;
-
         //setup pager
         mainPager.addOnPageChangeListener(createOnPageChangedListener());
 
@@ -2375,8 +2367,12 @@ public class MainActivity extends AppCompatActivity
             //update pager adapter
             updateMainPagerAdapter(groupChanging, true);
 
-            //update running tasks
-            updateRunningTasks(true);
+            //if not paused and not recreated
+            if(!wasPaused && !wasRecreated)
+            {
+                //update running tasks
+                updateRunningTasks(true);
+            }
 
             //update display
             updateOptionsMenu();
@@ -4897,9 +4893,8 @@ public class MainActivity extends AppCompatActivity
         //if timer was running
         if(timerTask != null)
         {
-            //cancel and clear it
+            //cancel it
             timerTask.cancel(true);
-            timerTask = null;
 
             //reset delay
             timerDelay = listTimerDelay;
@@ -4992,9 +4987,8 @@ public class MainActivity extends AppCompatActivity
         //if task was running
         if(currentViewAnglesTask != null)
         {
-            //cancel and clear it
+            //cancel it
             currentViewAnglesTask.cancel(true);
-            currentViewAnglesTask = null;
         }
 
         //get action button
@@ -5075,15 +5069,14 @@ public class MainActivity extends AppCompatActivity
         //if task was running
         if(currentPassesTask != null)
         {
-            //cancel and clear it
+            //cancel it
             currentPassesTask.cancel(true);
-            currentPassesTask = null;
         }
 
         ///if want to run, not waiting for location update, and have items
         havePasses = (onCurrent && !usingCombined && Current.PageAdapter.hasItems(Current.PageType.Passes));
         haveCombined = (onCurrent && usingCombined && Current.PageAdapter.hasItems(Current.PageType.Combined));
-        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && (havePasses || haveCombined))
+        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && (observer.geo.latitude != 0 || observer.geo.longitude != 0 || observer.geo.altitudeKm != 0) && (havePasses || haveCombined))
         {
             //get items
             passItems = (havePasses ? Current.PageAdapter.getPassItems() : Current.PageAdapter.getCombinedItems());
@@ -5172,9 +5165,8 @@ public class MainActivity extends AppCompatActivity
         //if task was running
         if(currentCoordinatesTask != null)
         {
-            //cancel and clear it
+            //cancel it
             currentCoordinatesTask.cancel(true);
-            currentCoordinatesTask = null;
         }
 
         //get action button
@@ -5250,9 +5242,8 @@ public class MainActivity extends AppCompatActivity
         //if task was running
         if(calculateViewAnglesTask != null)
         {
-            //cancel and clear it
+            //cancel it
             calculateViewAnglesTask.cancel(true);
-            calculateViewAnglesTask = null;
         }
 
         //if want to run and have an item
@@ -5359,9 +5350,8 @@ public class MainActivity extends AppCompatActivity
         //if task was running
         if(task != null)
         {
-            //cancel and clear it
+            //cancel it
             task.cancel(true);
-            task = null;
         }
 
         ///if want to run and have item
@@ -5519,9 +5509,8 @@ public class MainActivity extends AppCompatActivity
         //if task was running
         if(calculateCoordinatesTask != null)
         {
-            //cancel and clear it
+            //cancel it
             calculateCoordinatesTask.cancel(true);
-            calculateCoordinatesTask = null;
         }
 
         //if want to run and have an item

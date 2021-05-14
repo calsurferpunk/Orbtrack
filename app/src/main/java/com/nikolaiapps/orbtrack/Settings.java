@@ -2522,6 +2522,7 @@ public abstract class Settings
                         }
                         break;
 
+                    case PageType.Accounts:
                     case PageType.Other:
                         //remove account
                         ((Options.Accounts.ItemListAdapter)getAdapter()).removeAccount(currentItem.id);

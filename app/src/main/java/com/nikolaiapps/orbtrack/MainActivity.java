@@ -659,11 +659,20 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case BaseInputActivity.RequestCode.Settings:
-                //if changed settings and need to recreate
-                if(isOkay && data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false))
+                //if changed settings
+                if(isOkay)
                 {
-                    //update theme
-                    updateTheme();
+                    //if need to recreate everything
+                    if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false))
+                    {
+                        //update theme
+                        updateTheme();
+                    }
+                    //else if need to recreate map and on a map view
+                    else if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false))
+                    {
+
+                    }
                 }
                 break;
         }
@@ -2860,11 +2869,12 @@ public class MainActivity extends AppCompatActivity
     //Shows a settings dialog
     public void showSettingsDialog()
     {
+        final Activity activity = this;
         final int page = getMainPage();
         final int subPage = getSubPage();
         Resources res = this.getResources();
 
-        Globals.showSelectDialog(this, res.getString(R.string.title_settings), AddSelectListAdapter.SelectType.Settings, page, subPage, new AddSelectListAdapter.OnItemClickListener()
+        Globals.showSelectDialog(activity, res.getString(R.string.title_settings), AddSelectListAdapter.SelectType.Settings, page, subPage, new AddSelectListAdapter.OnItemClickListener()
         {
             @Override
             public void onItemClick(int which)
@@ -2873,20 +2883,23 @@ public class MainActivity extends AppCompatActivity
                 switch(which)
                 {
                     case AddSelectListAdapter.SettingsType.Settings:
-                        //update display and page selection
-                        setMainGroup(Groups.Settings, false);
-                        setMainPage(Settings.PageType.Other);
+                        Intent startIntent = new Intent(activity, SettingsActivity.class);
+                        String startScreenValue = "";
 
-                        //set sub page
+                        //get start screen value
                         switch(page)
                         {
                             case Current.PageType.View:
                             case Current.PageType.Passes:
                             case Current.PageType.Coordinates:
                             case Current.PageType.Combined:
-                                setSubPage(Groups.Settings, Settings.PageType.Other, (subPage == Current.SubPageType.Lens ? Settings.SubPageType.LensView : Settings.SubPageType.MapView));
+                                startScreenValue = (subPage == Current.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.MapView);
                                 break;
                         }
+
+                        //start settings activity
+                        startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
+                        activity.startActivityForResult(startIntent, BaseInputActivity.RequestCode.Settings);
                         break;
 
                     case AddSelectListAdapter.SettingsType.Visibility:

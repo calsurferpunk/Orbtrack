@@ -223,6 +223,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     public static final String EXTRA_RECREATE = "recreate";
+    public static final String EXTRA_RECREATE_MAP = "recreateMap";
     public static final String EXTRA_START_SCREEN = "startScreen";
     private static final String RootKey = "rootKey";
 
@@ -411,7 +412,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         //setup fragment manager
         manager = this.getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, startFragment).commit();
+        manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, startFragment, startScreenKey).commit();
         manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
         {
             @Override
@@ -1397,6 +1398,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private void setRecreateNeeded()
     {
         resultIntent.putExtra(EXTRA_RECREATE, true);
+    }
+
+    //Sets map recreate needed
+    private void setMapRecreateNeeded()
+    {
+        resultIntent.putExtra(EXTRA_RECREATE_MAP, true);
     }
 
     //Locks screen orientation

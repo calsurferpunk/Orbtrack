@@ -421,6 +421,7 @@ public class MainActivity extends AppCompatActivity
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         int id;
+        int subPage;
         int progressType = Globals.ProgressType.Finished;
         long count;
         boolean isError = true;
@@ -662,6 +663,9 @@ public class MainActivity extends AppCompatActivity
                 //if changed settings
                 if(isOkay)
                 {
+                    //get sub page
+                    subPage = getSubPage();
+
                     //if need to recreate everything
                     if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false))
                     {
@@ -669,9 +673,11 @@ public class MainActivity extends AppCompatActivity
                         updateTheme();
                     }
                     //else if need to recreate map and on a map view
-                    else if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false))
+                    else if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map))
                     {
-
+                        //recreate
+                        wasRecreated = true;
+                        this.recreate();
                     }
                 }
                 break;

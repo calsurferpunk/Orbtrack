@@ -459,23 +459,48 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 boolean recreateThis = false;
 
-                switch(key)
+                //if key ends with sub preference Globe or Map
+                if(key.endsWith(Settings.SubPreferenceName.Globe) || key.endsWith(Settings.SubPreferenceName.Map))
                 {
-                    case Settings.PreferenceName.ColorTheme:
-                    case Settings.PreferenceName.DarkTheme:
-                        recreateThis = true;
-                        //fall through
+                    //map needs recreate
+                    setMapRecreateNeeded();
+                }
+                else
+                {
+                    switch(key)
+                    {
+                        case Settings.PreferenceName.ColorTheme:
+                        case Settings.PreferenceName.DarkTheme:
+                            recreateThis = true;
+                            //fall through
 
-                    case Settings.PreferenceName.MetricUnits:
-                        //recreate activity
-                        setRecreateNeeded();
+                        case Settings.PreferenceName.MetricUnits:
+                            //recreate activity
+                            setRecreateNeeded();
 
-                        //if need to recreate this activity
-                        if(recreateThis)
-                        {
-                            SettingsActivity.this.recreate();
-                        }
-                        break;
+                            //if need to recreate this activity
+                            if(recreateThis)
+                            {
+                                SettingsActivity.this.recreate();
+                            }
+                            break;
+
+                        case Settings.PreferenceName.MapShow3dPaths:
+                        case Settings.PreferenceName.MapRotateAllowed:
+                        case Settings.PreferenceName.MapMarkerShowBackground:
+                        case Settings.PreferenceName.MapShowSearchList:
+                        case Settings.PreferenceName.MapShowZoom:
+                        case Settings.PreferenceName.MapShowLabelsAlways:
+                        case Settings.PreferenceName.MapMarkerShowShadow:
+                        case Settings.PreferenceName.MapShowStars:
+                        case Settings.PreferenceName.MapShowGrid:
+                        case Settings.PreferenceName.MapGridColor:
+                        case Settings.PreferenceName.MapMarkerScale:
+                        case Settings.PreferenceName.MapMarkerInfoLocation:
+                            //map needs recreate
+                            setMapRecreateNeeded();
+                            break;
+                    }
                 }
             }
         };

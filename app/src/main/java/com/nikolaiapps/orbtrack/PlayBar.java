@@ -121,7 +121,7 @@ public class PlayBar extends LinearLayout
         return(seekBar != null ? (seekBar.getProgress() + minValue) : minValue);
     }
 
-    public void setValue(int value)
+    public void setValue(int value, boolean forceChange)
     {
         int actualValue;
 
@@ -131,8 +131,8 @@ public class PlayBar extends LinearLayout
             //get progress value used
             actualValue = value - minValue;
 
-            //if value is not changing and listener is set
-            if(actualValue == seekBar.getProgress() && progressChangedListener != null)
+            //if value --is not changing- or -forced-- and listener is set
+            if((actualValue == seekBar.getProgress() || forceChange) && progressChangedListener != null)
             {
                 //still send event
                 progressChangedListener.onProgressChanged(this, value, 0, false);
@@ -142,6 +142,10 @@ public class PlayBar extends LinearLayout
             seekBar.setProgress(actualValue);
             playDelayUnits = 0;
         }
+    }
+    public void setValue(int value)
+    {
+        setValue(value, false);
     }
 
     public double getSubProgressPercent()

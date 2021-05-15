@@ -24,6 +24,7 @@ public class SliderPreference extends Preference
     private int scaleType;
     private int minValue;
     private int maxValue;
+    private float defaultValue;
     private String sharedName;
     private String titleText;
     private PlayBar sliderView;
@@ -128,11 +129,11 @@ public class SliderPreference extends Preference
         switch(scaleType)
         {
             case ScaleType.Integer:
-                sliderView.setValue(readSettings.getInt(preferenceName, 0));
+                sliderView.setValue(readSettings.getInt(preferenceName, (int)defaultValue), true);
                 break;
 
             case ScaleType.Percent:
-                sliderView.setValue((int)(readSettings.getFloat(preferenceName, 0) * 100));
+                sliderView.setValue((int)(readSettings.getFloat(preferenceName, defaultValue) * 100), true);
                 break;
         }
     }
@@ -160,5 +161,14 @@ public class SliderPreference extends Preference
             sliderView.setMin(minValue);
             sliderView.setMax(maxValue);
         }
+    }
+
+    public void setDefault(int value)
+    {
+        defaultValue = (float)value;
+    }
+    public void setDefault(float value)
+    {
+        defaultValue = value;
     }
 }

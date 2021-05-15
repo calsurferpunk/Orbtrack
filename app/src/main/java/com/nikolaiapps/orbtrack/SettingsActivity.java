@@ -1185,9 +1185,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //if preference exists
         if(preference != null)
         {
+            final Context context = preference.getContext();
             final String preferenceKey = preference.getKey();
+            boolean forGlobe = preferenceKey.endsWith(Settings.SubPreferenceName.Globe);
             int min = -1;
             int max = -1;
+            float defaultValue = 0;
 
             switch(preferenceKey)
             {
@@ -1195,17 +1198,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map:
                     min = Settings.SensitivityScaleMin;
                     max = Settings.SensitivityScaleMax;
+                    defaultValue = Settings.getMapSensitivityScale(context, forGlobe);
                     break;
 
                 case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe:
                 case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map:
                     min = Settings.SpeedScaleMin;
                     max = Settings.SpeedScaleMax;
+                    defaultValue = Settings.getMapSpeedScale(context, forGlobe);
                     break;
 
                 case Settings.PreferenceName.MapMarkerScale:
                     min = Settings.IconScaleMin;
                     max = Settings.IconScaleMax;
+                    defaultValue = Settings.getMapMarkerScale(context);
                     break;
             }
 
@@ -1215,6 +1221,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 //set range
                 preference.setRange(min, max);
             }
+
+            //set default value
+            preference.setDefault(defaultValue);
         }
     }
 

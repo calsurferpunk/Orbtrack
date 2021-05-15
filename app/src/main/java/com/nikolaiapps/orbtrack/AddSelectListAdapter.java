@@ -125,7 +125,7 @@ public class AddSelectListAdapter extends BaseAdapter
                     case Current.PageType.Passes:
                     case Current.PageType.Coordinates:
                     case Current.PageType.Combined:
-                        selections[0] = res.getString(extra2 == Current.SubPageType.Lens ? R.string.title_lens_view : R.string.title_map_view);
+                        selections[0] = res.getString(extra2 == Globals.SubPageType.Lens ? R.string.title_lens_view : R.string.title_map_view);
                         break;
 
                     default:

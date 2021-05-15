@@ -55,7 +55,7 @@ public class SetupActivity extends BaseInputActivity
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            int subPage = Settings.SubPageType.None;
+            int subPage = Globals.SubPageType.None;
             int page = this.getPageParam();
             int settingsPage = Settings.PageType.Other;
             boolean onWelcome = (page == SetupPage.Welcome);
@@ -78,7 +78,7 @@ public class SetupActivity extends BaseInputActivity
                     break;
 
                 case SetupPage.Display:
-                    subPage = Settings.SubPageType.Display;
+                    subPage = Globals.SubPageType.Display;
                     break;
 
                 case SetupPage.Location:
@@ -96,7 +96,7 @@ public class SetupActivity extends BaseInputActivity
             }
 
             //if Settings.PageType.Updates or using sub page
-            if(settingsPage == Settings.PageType.Updates || subPage != Settings.SubPageType.None)
+            if(settingsPage == Settings.PageType.Updates || subPage != Globals.SubPageType.None)
             {
                 //get input group
                 inputGroup = Settings.Options.onCreateView(Page.this, settingsPage, subPage, inflater, container, true);

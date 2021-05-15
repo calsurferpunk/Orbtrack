@@ -202,15 +202,15 @@ public class MainActivity extends AppCompatActivity
         currentSubPage = new int[Current.PageType.PageCount];
         for(index = 0; index < currentSubPage.length; index++)
         {
-            currentSubPage[index] = savedInstanceState.getInt(ParamTypes.CurrentSubPage + index, Current.SubPageType.List);
+            currentSubPage[index] = savedInstanceState.getInt(ParamTypes.CurrentSubPage + index, Globals.SubPageType.List);
         }
         calculateSubPage = new int[Calculate.PageType.PageCount];
         for(index = 0; index < calculateSubPage.length; index++)
         {
-            calculateSubPage[index] = savedInstanceState.getInt(ParamTypes.CalculateSubPage + index, Calculate.SubPageType.Input);
+            calculateSubPage[index] = savedInstanceState.getInt(ParamTypes.CalculateSubPage + index, Globals.SubPageType.Input);
         }
         settingsSubPage = new int[Settings.PageType.PageCount];
-        settingsSubPage[Settings.PageType.Other] = savedInstanceState.getInt(ParamTypes.SettingsSubPage + Settings.PageType.Other, Settings.SubPageType.None);
+        settingsSubPage[Settings.PageType.Other] = savedInstanceState.getInt(ParamTypes.SettingsSubPage + Settings.PageType.Other, Globals.SubPageType.None);
 
         //setup bundles
         calculateBundle = new Bundle();
@@ -379,7 +379,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     case Current.PageType.View:
                     case Current.PageType.Passes:
-                        restartCamera = (currentSubPage[page] == Current.SubPageType.Lens);
+                        restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
                         break;
                 }
 
@@ -396,7 +396,7 @@ public class MainActivity extends AppCompatActivity
                     case Calculate.PageType.View:
                     case Calculate.PageType.Passes:
                     case Calculate.PageType.Intersection:
-                        restartCamera = (calculateSubPage[page] == Calculate.SubPageType.Lens);
+                        restartCamera = (calculateSubPage[page] == Globals.SubPageType.Lens);
                         break;
                 }
 
@@ -807,10 +807,10 @@ public class MainActivity extends AppCompatActivity
         boolean usingCurrentCoordinatesGrid = Settings.getUsingCurrentGridLayout(Current.PageType.Coordinates);
         boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
         boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
-        boolean onCurrentList = (subPage == Current.SubPageType.List);
-        boolean onCurrentLens = (subPage == Current.SubPageType.Lens);
-        boolean onCurrentMap = (subPage == Current.SubPageType.Map);
-        boolean onCurrentGlobe = (subPage == Current.SubPageType.Globe);
+        boolean onCurrentList = (subPage == Globals.SubPageType.List);
+        boolean onCurrentLens = (subPage == Globals.SubPageType.Lens);
+        boolean onCurrentMap = (subPage == Globals.SubPageType.Map);
+        boolean onCurrentGlobe = (subPage == Globals.SubPageType.Globe);
         boolean onCurrentView = (onCurrent && page == Current.PageType.View);
         boolean onCurrentViewList = (onCurrentView && onCurrentList);
         boolean onCurrentPasses = (onCurrent && page == Current.PageType.Passes);
@@ -823,8 +823,8 @@ public class MainActivity extends AppCompatActivity
         boolean onCurrentCombinedList = (onCurrentCombined && onCurrentList);
         boolean onCurrentCombinedMap = (onCurrentCombined && onCurrentMap);
         boolean onCurrentCombinedGlobe = (onCurrentCombined && onCurrentGlobe);
-        boolean onCalculateList = (subPage == Calculate.SubPageType.List);
-        boolean onCalculateLens = (subPage == Calculate.SubPageType.Lens);
+        boolean onCalculateList = (subPage == Globals.SubPageType.List);
+        boolean onCalculateLens = (subPage == Globals.SubPageType.Lens);
         boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
         boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
         boolean onCalculateCoordinates = (onCalculate && page == Calculate.PageType.Coordinates);
@@ -834,12 +834,12 @@ public class MainActivity extends AppCompatActivity
         boolean onCalculatePassesList = (onCalculatePasses && onCalculateList);
         boolean onCalculatePassesLens = (onCalculatePasses && onCalculateLens);
         boolean onCalculateCoordinatesList = (onCalculateCoordinates && onCalculateList);
-        boolean onCalculateCoordinatesMap = (onCalculateCoordinates && subPage == Calculate.SubPageType.Map);
-        boolean onCalculateCoordinatesGlobe = (onCalculateCoordinates && subPage == Calculate.SubPageType.Globe);
+        boolean onCalculateCoordinatesMap = (onCalculateCoordinates && subPage == Globals.SubPageType.Map);
+        boolean onCalculateCoordinatesGlobe = (onCalculateCoordinates && subPage == Globals.SubPageType.Globe);
         boolean onCalculateIntersectionList = (onCalculateIntersection && onCalculateList);
         boolean onCalculateIntersectionLens = (onCalculateIntersection && onCalculateLens);
         boolean onOrbitalSatellites = (onOrbitals && page == Orbitals.PageType.Satellites);
-        boolean onSettingsOtherSub = (onSettings && page == Settings.PageType.Other && settingsSubPage[Settings.PageType.Other] != Settings.SubPageType.None);
+        boolean onSettingsOtherSub = (onSettings && page == Settings.PageType.Other && settingsSubPage[Settings.PageType.Other] != Globals.SubPageType.None);
         boolean haveSatellites = (onOrbitalSatellites && orbitalPageAdapter != null && orbitalPageAdapter.getPageItemCount(mainPager, Orbitals.PageType.Satellites) > 0);
         boolean onOrbitalSatellitesExistNoModify = (onOrbitalSatellites && haveSatellites && !UpdateService.modifyingSatellites());
         boolean calculatingViews = (calculateViewAnglesTask != null && calculateViewAnglesTask.isRunning());
@@ -930,7 +930,7 @@ public class MainActivity extends AppCompatActivity
                     case Settings.PageType.Other:
                         switch(settingsSubPage[page])
                         {
-                            case Settings.SubPageType.Accounts:
+                            case Globals.SubPageType.Accounts:
                                 if(inEditMode)
                                 {
                                     show = (accountsListAdapter != null && !accountsListAdapter.haveNonEditItemsSelected());
@@ -1006,7 +1006,7 @@ public class MainActivity extends AppCompatActivity
                             return(true);
                         }
 
-                        setSubPage(Groups.Settings, page, Settings.SubPageType.None);
+                        setSubPage(Groups.Settings, page, Globals.SubPageType.None);
                         setDisplayGroup = true;
                         break;
                 }
@@ -1024,7 +1024,7 @@ public class MainActivity extends AppCompatActivity
                             case Current.PageType.Coordinates:
                             case Current.PageType.Combined:
                                 //if --using grid and list menu or- -not using grid and grid menu-- and on list
-                                if(((usingGrid && id == R.id.menu_list) || (!usingGrid && id == R.id.menu_grid)) && currentSubPage[page] == Current.SubPageType.List)
+                                if(((usingGrid && id == R.id.menu_list) || (!usingGrid && id == R.id.menu_grid)) && currentSubPage[page] == Globals.SubPageType.List)
                                 {
                                     //stop using grid
                                     Settings.setUsingCurrentGridLayout(this, (id == R.id.menu_grid));
@@ -1032,7 +1032,7 @@ public class MainActivity extends AppCompatActivity
                                 else
                                 {
                                     //set sub page
-                                    setSubPage(Groups.Current, page, Current.SubPageType.List);
+                                    setSubPage(Groups.Current, page, Globals.SubPageType.List);
                                 }
 
                                 //update display
@@ -1048,7 +1048,7 @@ public class MainActivity extends AppCompatActivity
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Coordinates:
                             case Calculate.PageType.Intersection:
-                                setSubPage(Groups.Calculate, page, Calculate.SubPageType.List);
+                                setSubPage(Groups.Calculate, page, Globals.SubPageType.List);
                                 setDisplayGroup = true;
                                 break;
                         }
@@ -1075,11 +1075,11 @@ public class MainActivity extends AppCompatActivity
                                     previousSubPage = currentSubPage[page];
 
                                     //update sub page
-                                    setSubPage(mainGroup, page, (usingGlobe ? Current.SubPageType.Globe : Current.SubPageType.Map));
+                                    setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
                                     selectedSubPage = currentSubPage[page];
 
                                     //if switching between globe/map
-                                    if((previousSubPage == Current.SubPageType.Map && selectedSubPage == Current.SubPageType.Globe) || (previousSubPage == Current.SubPageType.Globe && selectedSubPage == Current.SubPageType.Map))
+                                    if((previousSubPage == Globals.SubPageType.Map && selectedSubPage == Globals.SubPageType.Globe) || (previousSubPage == Globals.SubPageType.Globe && selectedSubPage == Globals.SubPageType.Map))
                                     {
                                         //restore ID
                                         mapViewNoradID = previousId;
@@ -1099,7 +1099,7 @@ public class MainActivity extends AppCompatActivity
                             {
                                 case Current.PageType.Coordinates:
                                     //update sub page
-                                    setSubPage(mainGroup, page, (usingGlobe ? Calculate.SubPageType.Globe : Calculate.SubPageType.Map));
+                                    setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
 
                                     //update default display
                                     Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
@@ -1130,7 +1130,7 @@ public class MainActivity extends AppCompatActivity
                                 case Current.PageType.View:
                                 case Current.PageType.Passes:
                                 case Current.PageType.Combined:
-                                    setSubPage(mainGroup, page, Current.SubPageType.Lens);
+                                    setSubPage(mainGroup, page, Globals.SubPageType.Lens);
                                     setDisplayGroup = true;
                                     break;
                             }
@@ -1142,7 +1142,7 @@ public class MainActivity extends AppCompatActivity
                                 case Calculate.PageType.View:
                                 case Calculate.PageType.Passes:
                                 case Calculate.PageType.Intersection:
-                                    setSubPage(mainGroup, page, Calculate.SubPageType.Lens);
+                                    setSubPage(mainGroup, page, Globals.SubPageType.Lens);
                                     setDisplayGroup = true;
                                     break;
                             }
@@ -1201,7 +1201,7 @@ public class MainActivity extends AppCompatActivity
                                 stopPageTask();
 
                                 //update sub page
-                                setSubPage(Groups.Calculate, page, Calculate.SubPageType.Input);
+                                setSubPage(Groups.Calculate, page, Globals.SubPageType.Input);
 
                                 //update display
                                 updateMainPager(false);
@@ -1274,7 +1274,7 @@ public class MainActivity extends AppCompatActivity
             case Groups.Current:
                 switch(currentSubPage[page])
                 {
-                    case Current.SubPageType.Lens:
+                    case Globals.SubPageType.Lens:
                         //if camera view exists
                         if(Current.cameraView != null)
                         {
@@ -1294,16 +1294,16 @@ public class MainActivity extends AppCompatActivity
                         //else fall through
 
                     //go back to list
-                    case Current.SubPageType.Map:
-                    case Current.SubPageType.Globe:
+                    case Globals.SubPageType.Map:
+                    case Globals.SubPageType.Globe:
                         //if not on lens and able to close settings menu
-                        if(currentSubPage[page] != Current.SubPageType.Lens && Current.Coordinates.closeSettingsMenu())
+                        if(currentSubPage[page] != Globals.SubPageType.Lens && Current.Coordinates.closeSettingsMenu())
                         {
                             closedSettings = true;
                         }
                         else
                         {
-                            setSubPage(Groups.Current, page, Current.SubPageType.List);
+                            setSubPage(Groups.Current, page, Globals.SubPageType.List);
                             updateDisplay = true;
                         }
                         break;
@@ -1311,7 +1311,7 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case Groups.Calculate:
-                desiredSubPage = Calculate.SubPageType.Input;
+                desiredSubPage = Globals.SubPageType.Input;
                 switch(page)
                 {
                     case Calculate.PageType.View:
@@ -1322,10 +1322,10 @@ public class MainActivity extends AppCompatActivity
                         switch(calculateSubPage[page])
                         {
                             //go back to list
-                            case Calculate.SubPageType.Lens:
-                            case Calculate.SubPageType.Map:
-                            case Calculate.SubPageType.Globe:
-                                desiredSubPage = Calculate.SubPageType.List;
+                            case Globals.SubPageType.Lens:
+                            case Globals.SubPageType.Map:
+                            case Globals.SubPageType.Globe:
+                                desiredSubPage = Globals.SubPageType.List;
                                 break;
                         }
                         //fall through
@@ -1350,7 +1350,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     case Settings.PageType.Other:
                         //if not on the main display page
-                        if(settingsSubPage[page] != Settings.SubPageType.None)
+                        if(settingsSubPage[page] != Globals.SubPageType.None)
                         {
                             //if went back to previous page
                             if(showPreviousPage())
@@ -1360,7 +1360,7 @@ public class MainActivity extends AppCompatActivity
                             }
 
                             //go back to main display page
-                            setSubPage(Groups.Settings, page, Settings.SubPageType.None);
+                            setSubPage(Groups.Settings, page, Globals.SubPageType.None);
                             updateDisplay = true;
                         }
                         break;
@@ -1407,8 +1407,8 @@ public class MainActivity extends AppCompatActivity
         switch(previousGroup)
         {
             case Groups.Current:
-                previousLens = (previousSubPage == Current.SubPageType.Lens);
-                previousMap = (previousSubPage == Current.SubPageType.Map || previousSubPage == Current.SubPageType.Globe);
+                previousLens = (previousSubPage == Globals.SubPageType.Lens);
+                previousMap = (previousSubPage == Globals.SubPageType.Map || previousSubPage == Globals.SubPageType.Globe);
 
                 switch(previousPage)
                 {
@@ -1701,7 +1701,7 @@ public class MainActivity extends AppCompatActivity
         {
             case Current.PageType.View:
             case Current.PageType.Combined:
-                if(currentViewAnglesTask != null && currentSubPage[page] == Current.SubPageType.Lens)
+                if(currentViewAnglesTask != null && currentSubPage[page] == Globals.SubPageType.Lens)
                 {
                     currentViewAnglesTask.needViews = true;
                 }
@@ -2142,7 +2142,7 @@ public class MainActivity extends AppCompatActivity
         {
             case Groups.Calculate:
                 //if on list
-                if(calculateSubPage[page] == Calculate.SubPageType.List)
+                if(calculateSubPage[page] == Globals.SubPageType.List)
                 {
                     //save file
                     saveCalculateFile(page, pendingSaveFile.outUri, pendingSaveFile.name, pendingSaveFile.extension, pendingSaveFile.fileSourceType, confirmInternet);
@@ -2179,8 +2179,8 @@ public class MainActivity extends AppCompatActivity
             if(currentPageAdapter != null)
             {
                 //save items if not viewing list
-                currentPageAdapter.setSavedItems(Current.PageType.Passes, (saveItems && currentSubPage[Current.PageType.Passes] != Current.SubPageType.List ? Current.PageAdapter.getPassItems() : null));
-                currentPageAdapter.setSavedItems(Current.PageType.Combined, (saveItems && currentSubPage[Current.PageType.Combined] != Current.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
+                currentPageAdapter.setSavedItems(Current.PageType.Passes, (saveItems && currentSubPage[Current.PageType.Passes] != Globals.SubPageType.List ? Current.PageAdapter.getPassItems() : null));
+                currentPageAdapter.setSavedItems(Current.PageType.Combined, (saveItems && currentSubPage[Current.PageType.Combined] != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
             }
         }
         //else if showing calculate
@@ -2190,8 +2190,8 @@ public class MainActivity extends AppCompatActivity
             if(calculatePageAdapter != null)
             {
                 //save items if viewing input
-                Calculate.PageAdapter.setSavedItems(Calculate.PageType.View, (calculateSubPage[Calculate.PageType.View] == Calculate.SubPageType.Input ? null : Calculate.PageAdapter.getViewAngleItems()));
-                if(calculateSubPage[Calculate.PageType.View] == Calculate.SubPageType.Input)
+                Calculate.PageAdapter.setSavedItems(Calculate.PageType.View, (calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Input ? null : Calculate.PageAdapter.getViewAngleItems()));
+                if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Input)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setViewItems(new Current.ViewAngles.Item[0]);
@@ -2199,7 +2199,7 @@ public class MainActivity extends AppCompatActivity
 
                 //save inputs
                 calculatePageAdapter.setSavedSubInput(Calculate.PageType.Passes, ParamTypes.PassIndex, passesPassIndex);
-                if(calculateSubPage[Calculate.PageType.Passes] == Calculate.SubPageType.Input)
+                if(calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Input)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setSavedItems(Calculate.PageType.Passes, null);
@@ -2207,8 +2207,8 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 //save items if viewing input
-                Calculate.PageAdapter.setSavedItems(Calculate.PageType.Coordinates, (calculateSubPage[Calculate.PageType.Coordinates] == Calculate.SubPageType.Input ? null : Calculate.PageAdapter.getCoordinatesItems()));
-                if(calculateSubPage[Calculate.PageType.Coordinates] == Calculate.SubPageType.Input)
+                Calculate.PageAdapter.setSavedItems(Calculate.PageType.Coordinates, (calculateSubPage[Calculate.PageType.Coordinates] == Globals.SubPageType.Input ? null : Calculate.PageAdapter.getCoordinatesItems()));
+                if(calculateSubPage[Calculate.PageType.Coordinates] == Globals.SubPageType.Input)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setCoordinateItems(new Current.Coordinates.Item[0]);
@@ -2216,7 +2216,7 @@ public class MainActivity extends AppCompatActivity
 
                 //save inputs
                 calculatePageAdapter.setSavedSubInput(Calculate.PageType.Intersection, ParamTypes.PassIndex, intersectionPassIndex);
-                if(calculateSubPage[Calculate.PageType.Intersection] == Calculate.SubPageType.Input)
+                if(calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Input)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setSavedItems(Calculate.PageType.Intersection, null);
@@ -2257,7 +2257,7 @@ public class MainActivity extends AppCompatActivity
                     for(index = 0; index < Calculate.PageType.PageCount; index++)
                     {
                         //reset each sub page to input
-                        setSubPage(Groups.Calculate, index, Calculate.SubPageType.Input, false);
+                        setSubPage(Groups.Calculate, index, Globals.SubPageType.Input, false);
                     }
                 }
 
@@ -2268,7 +2268,7 @@ public class MainActivity extends AppCompatActivity
                     for(index = 0; index < Settings.PageType.PageCount; index++)
                     {
                         //reset each sub page to main page
-                        setSubPage(Groups.Settings, index, Settings.SubPageType.None, false);
+                        setSubPage(Groups.Settings, index, Globals.SubPageType.None, false);
                     }
                 }
             }
@@ -2350,7 +2350,7 @@ public class MainActivity extends AppCompatActivity
         }
 
         //update titles and swiping status to allow if not on current/calculate with map/globe
-        mainPager.setSwipeEnabled(!((showCurrent && (page == Current.PageType.Coordinates || page == Current.PageType.Combined) && (currentSubPage[page] == Current.SubPageType.Map || currentSubPage[page] == Current.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Calculate.SubPageType.Map || calculateSubPage[page] == Calculate.SubPageType.Globe))));
+        mainPager.setSwipeEnabled(!((showCurrent && (page == Current.PageType.Coordinates || page == Current.PageType.Combined) && (currentSubPage[page] == Globals.SubPageType.Map || currentSubPage[page] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe))));
         mainPagerTitles.setVisibility(showCurrent && Settings.getCombinedCurrentLayout(this.getBaseContext()) ? View.GONE : View.VISIBLE);
     }
 
@@ -2418,14 +2418,14 @@ public class MainActivity extends AppCompatActivity
         boolean onCurrent = (mainGroup == Groups.Current);
         boolean onCalculate = (mainGroup == Groups.Calculate);
         boolean onCurrentCombined = (onCurrent && getMainPage() == Current.PageType.Combined);
-        boolean onCurrentList = ((!onCurrentCombined && currentSubPage[Current.PageType.Passes] == Current.SubPageType.List) || (onCurrentCombined && currentSubPage[Current.PageType.Combined] == Current.SubPageType.List));
-        boolean onCalculateViewNonInput = (onCalculate && calculateSubPage[Calculate.PageType.View] != Calculate.SubPageType.Input);
-        boolean onCalculateViewLens = (onCalculate && calculateSubPage[Calculate.PageType.View] == Calculate.SubPageType.Lens);
-        boolean onCalculatePassesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Passes] != Calculate.SubPageType.Input);
-        boolean onCalculatePassesLens = (onCalculate && calculateSubPage[Calculate.PageType.Passes] == Calculate.SubPageType.Lens);
-        boolean onCalculateCoordinatesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Coordinates] != Calculate.SubPageType.Input);
-        boolean onCalculateIntersectionNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] != Calculate.SubPageType.Input);
-        boolean onCalculateIntersectionLens = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] == Calculate.SubPageType.Lens);
+        boolean onCurrentList = ((!onCurrentCombined && currentSubPage[Current.PageType.Passes] == Globals.SubPageType.List) || (onCurrentCombined && currentSubPage[Current.PageType.Combined] == Globals.SubPageType.List));
+        boolean onCalculateViewNonInput = (onCalculate && calculateSubPage[Calculate.PageType.View] != Globals.SubPageType.Input);
+        boolean onCalculateViewLens = (onCalculate && calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens);
+        boolean onCalculatePassesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Passes] != Globals.SubPageType.Input);
+        boolean onCalculatePassesLens = (onCalculate && calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Lens);
+        boolean onCalculateCoordinatesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Coordinates] != Globals.SubPageType.Input);
+        boolean onCalculateIntersectionNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] != Globals.SubPageType.Input);
+        boolean onCalculateIntersectionLens = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens);
         Bundle params;
 
         //update running tasks
@@ -2893,7 +2893,7 @@ public class MainActivity extends AppCompatActivity
                             case Current.PageType.Passes:
                             case Current.PageType.Coordinates:
                             case Current.PageType.Combined:
-                                startScreenValue = (subPage == Current.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.MapView);
+                                startScreenValue = (subPage == Globals.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.MapView);
                                 break;
                         }
 
@@ -3299,7 +3299,7 @@ public class MainActivity extends AppCompatActivity
                     case Settings.PageType.Other:
                         switch(settingsSubPage[page])
                         {
-                            case Settings.SubPageType.Accounts:
+                            case Globals.SubPageType.Accounts:
                                 //if adapter exists
                                 if(accountsListAdapter != null)
                                 {
@@ -3351,14 +3351,14 @@ public class MainActivity extends AppCompatActivity
                                     case Current.PageType.View:
                                     case Current.PageType.Combined:
                                         //update sub page and norad ID
-                                        setSubPage(group, pageType, Current.SubPageType.Lens);
+                                        setSubPage(group, pageType, Globals.SubPageType.Lens);
                                         viewLensNoradID = itemID;
                                         setMainGroup(mainGroup, true);
                                         break;
 
                                     case Current.PageType.Passes:
                                         //update sub page and norad ID
-                                        setSubPage(group, pageType, Current.SubPageType.Lens);
+                                        setSubPage(group, pageType, Globals.SubPageType.Lens);
                                         passesLensNoradID = itemID;
                                         setMainGroup(mainGroup, true);
                                         break;
@@ -3371,7 +3371,7 @@ public class MainActivity extends AppCompatActivity
                                     case Calculate.PageType.Passes:
                                     case Calculate.PageType.Intersection:
                                         //update sub page and norad ID
-                                        setSubPage(group, pageType, Calculate.SubPageType.Lens);
+                                        setSubPage(group, pageType, Globals.SubPageType.Lens);
                                         if(pageType == Calculate.PageType.Intersection)
                                         {
                                             intersectionPassIndex = item.listIndex;
@@ -3397,7 +3397,7 @@ public class MainActivity extends AppCompatActivity
                                     case Current.PageType.Coordinates:
                                     case Current.PageType.Combined:
                                         //update sub page and norad ID
-                                        setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Current.SubPageType.Globe : Current.SubPageType.Map));
+                                        setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
                                         mapViewNoradID = itemID;
                                         setMainGroup(mainGroup, true);
                                         break;
@@ -3639,7 +3639,7 @@ public class MainActivity extends AppCompatActivity
                             case Settings.PageType.Other:
                                 switch(settingsSubPage[Settings.PageType.Other])
                                 {
-                                    case Settings.SubPageType.Accounts:
+                                    case Globals.SubPageType.Accounts:
                                         //set adapter
                                         accountsListAdapter = (Settings.Options.Accounts.ItemListAdapter)adapter;
                                         break;
@@ -3701,7 +3701,7 @@ public class MainActivity extends AppCompatActivity
                         case Calculate.PageType.View:
                             switch(subPage)
                             {
-                                case Calculate.SubPageType.List:
+                                case Globals.SubPageType.List:
                                     //start calculating
                                     setCalculateViewCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
                                     break;
@@ -3711,7 +3711,7 @@ public class MainActivity extends AppCompatActivity
                         case Calculate.PageType.Passes:
                             switch(subPage)
                             {
-                                case Calculate.SubPageType.List:
+                                case Globals.SubPageType.List:
                                     //reset last inputs and start calculating
                                     setCalculatePassCalculations(true, satellite, julianDateStart, julianDateEnd, elevationMin);
                                     break;
@@ -3721,7 +3721,7 @@ public class MainActivity extends AppCompatActivity
                         case Calculate.PageType.Coordinates:
                             switch(subPage)
                             {
-                                case Calculate.SubPageType.List:
+                                case Globals.SubPageType.List:
                                     //start calculating
                                     setCalculateCoordinateCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
                                     break;
@@ -3731,7 +3731,7 @@ public class MainActivity extends AppCompatActivity
                         case Calculate.PageType.Intersection:
                             switch(subPage)
                             {
-                                case Calculate.SubPageType.List:
+                                case Globals.SubPageType.List:
                                     //reset last inputs and start calculating
                                     setCalculateIntersectionCalculations(true, satellite, satellite2, julianDateStart, julianDateEnd, intersection, elevationMin);
                                     break;
@@ -3763,7 +3763,7 @@ public class MainActivity extends AppCompatActivity
                     case Calculate.PageType.Coordinates:
                     case Calculate.PageType.Intersection:
                         //if getting input
-                        if(subPageNum == Calculate.SubPageType.Input)
+                        if(subPageNum == Globals.SubPageType.Input)
                         {
                             page.setOnStartCalculationListener(startCalculationListener);
                         }
@@ -3800,7 +3800,7 @@ public class MainActivity extends AppCompatActivity
                             case Current.PageType.View:
                             case Current.PageType.Passes:
                                 //if were using camera
-                                if(currentSubPage[lastPosition] == Current.SubPageType.Lens)
+                                if(currentSubPage[lastPosition] == Globals.SubPageType.Lens)
                                 {
                                     //make sure camera stops
                                     stopCamera = true;
@@ -3814,7 +3814,7 @@ public class MainActivity extends AppCompatActivity
                             case Current.PageType.Passes:
                             case Current.PageType.Combined:
                                 //if now using camera
-                                if(currentSubPage[position] == Current.SubPageType.Lens)
+                                if(currentSubPage[position] == Globals.SubPageType.Lens)
                                 {
                                     //start camera
                                     startCamera = true;
@@ -3830,7 +3830,7 @@ public class MainActivity extends AppCompatActivity
 
                             case Current.PageType.Coordinates:
                                 //don't allow swiping if on map/globe
-                                allowSwipe = (currentSubPage[position] != Current.SubPageType.Map && currentSubPage[position] != Current.SubPageType.Globe);
+                                allowSwipe = (currentSubPage[position] != Globals.SubPageType.Map && currentSubPage[position] != Globals.SubPageType.Globe);
                                 break;
                         }
 
@@ -3845,7 +3845,7 @@ public class MainActivity extends AppCompatActivity
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
                                 //if were using camera
-                                if(calculateSubPage[lastPosition] == Calculate.SubPageType.Lens)
+                                if(calculateSubPage[lastPosition] == Globals.SubPageType.Lens)
                                 {
                                     //make sure camera stops
                                     stopCamera = true;
@@ -3861,7 +3861,7 @@ public class MainActivity extends AppCompatActivity
                                 }
 
                                 //don't allow swiping if on map/globe
-                                allowSwipe = (calculateSubPage[position] != Calculate.SubPageType.Map && calculateSubPage[position] != Calculate.SubPageType.Globe);
+                                allowSwipe = (calculateSubPage[position] != Globals.SubPageType.Map && calculateSubPage[position] != Globals.SubPageType.Globe);
                                 break;
                         }
 
@@ -3871,7 +3871,7 @@ public class MainActivity extends AppCompatActivity
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
                                 //if now using camera
-                                if(calculateSubPage[position] == Calculate.SubPageType.Lens)
+                                if(calculateSubPage[position] == Globals.SubPageType.Lens)
                                 {
                                     //start camera
                                     startCamera = true;
@@ -4024,7 +4024,7 @@ public class MainActivity extends AppCompatActivity
                             case Settings.PageType.Other:
                                 switch(subPage)
                                 {
-                                    case Settings.SubPageType.Accounts:
+                                    case Globals.SubPageType.Accounts:
                                         //update floating button
                                         updateMainFloatingButton();
                                         break;
@@ -4206,9 +4206,9 @@ public class MainActivity extends AppCompatActivity
                 boolean allViewOrbitals = (viewLensNoradID == Integer.MAX_VALUE);
                 boolean allPassesOrbitals = (passesLensNoradID == Integer.MAX_VALUE);
                 boolean allMapOrbitals = (mapViewNoradID == Integer.MAX_VALUE);
-                boolean onMap = (subPage == Current.SubPageType.Map || subPage == Current.SubPageType.Globe);
-                boolean onList = (subPage == Current.SubPageType.List);
-                boolean onLens = (subPage == Current.SubPageType.Lens);
+                boolean onMap = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
+                boolean onList = (subPage == Globals.SubPageType.List);
+                boolean onLens = (subPage == Globals.SubPageType.Lens);
                 boolean[] updateList = new boolean[Current.PageType.PageCount];
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 long travelSeconds = (currentSystemElapsedSeconds - lastSystemElapsedSeconds.value);
@@ -4575,7 +4575,7 @@ public class MainActivity extends AppCompatActivity
                 if(Current.cameraView != null)
                 {
                     //if using lens and angles list exists
-                    if(calculateSubPage[Calculate.PageType.View] == Calculate.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
+                    if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
                     {
                         //get items
                         angleItems = Calculate.PageAdapter.getViewAngleItems();
@@ -4600,7 +4600,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     //if using lens and passes list exists
-                    if(calculateSubPage[Calculate.PageType.Passes] == Calculate.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Passes))
+                    if(calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Passes))
                     {
                         //get items
                         passesItems = Calculate.PageAdapter.getPassItems();
@@ -4621,7 +4621,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     //if passes list exists
-                    if(calculateSubPage[Calculate.PageType.Intersection] == Calculate.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Intersection))
+                    if(calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Intersection))
                     {
                         //get items
                         passesItems = Calculate.PageAdapter.getIntersectionItems();
@@ -4794,7 +4794,7 @@ public class MainActivity extends AppCompatActivity
                         case Current.PageType.Passes:
                         case Current.PageType.Combined:
                             //if changing to lens view
-                            if(subPage == Current.SubPageType.Lens)
+                            if(subPage == Globals.SubPageType.Lens)
                             {
                                 //go through each sub page
                                 for(index = 0; index < Current.PageType.PageCount; index++)
@@ -4803,7 +4803,7 @@ public class MainActivity extends AppCompatActivity
                                     if(index != page)
                                     {
                                         //make sure other page is not using lens view
-                                        currentSubPage[index] = Current.SubPageType.List;
+                                        currentSubPage[index] = Globals.SubPageType.List;
                                     }
                                 }
                             }
@@ -4821,7 +4821,7 @@ public class MainActivity extends AppCompatActivity
                             mapViewNoradID = Integer.MAX_VALUE;
 
                             //if changing to map/globe view
-                            if(subPage == Current.SubPageType.Map || subPage == Current.SubPageType.Globe)
+                            if(subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe)
                             {
                                 //go through each sub page
                                 for(index = 0; index < Current.PageType.PageCount; index++)
@@ -4830,7 +4830,7 @@ public class MainActivity extends AppCompatActivity
                                     if(index != page)
                                     {
                                         //make sure other page is not using map/globe view
-                                        currentSubPage[index] = Current.SubPageType.List;
+                                        currentSubPage[index] = Globals.SubPageType.List;
                                     }
                                 }
                             }
@@ -4863,16 +4863,16 @@ public class MainActivity extends AppCompatActivity
                             }
 
                             //if changing to lens view
-                            if(subPage == Calculate.SubPageType.Lens)
+                            if(subPage == Globals.SubPageType.Lens)
                             {
                                 //go through other pages that use lens
                                 for(int currentOtherPage : new int[]{Calculate.PageType.View, Calculate.PageType.Passes, Calculate.PageType.Intersection})
                                 {
                                     //if not the current page and page is using lens
-                                    if(currentOtherPage != page && calculateSubPage[currentOtherPage] == Calculate.SubPageType.Lens)
+                                    if(currentOtherPage != page && calculateSubPage[currentOtherPage] == Globals.SubPageType.Lens)
                                     {
                                         //set to input
-                                        calculateSubPage[currentOtherPage] = Calculate.SubPageType.Input;
+                                        calculateSubPage[currentOtherPage] = Globals.SubPageType.Input;
                                     }
                                 }
                             }
@@ -4930,7 +4930,7 @@ public class MainActivity extends AppCompatActivity
                     boolean pendingSort = false;
                     boolean onCurrent = (mainGroup == Groups.Current);
                     boolean onCalculate = (mainGroup == Groups.Calculate);
-                    boolean onCalculateLens = (onCalculate && page < Calculate.PageType.PageCount && calculateSubPage[page] == Calculate.SubPageType.Lens);
+                    boolean onCalculateLens = (onCalculate && page < Calculate.PageType.PageCount && calculateSubPage[page] == Globals.SubPageType.Lens);
 
                     //if task still exists
                     if(timerTask != null)

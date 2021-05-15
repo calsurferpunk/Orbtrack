@@ -53,14 +53,6 @@ public abstract class Current
         static final int PageCount = 4;
     }
 
-    public static abstract class SubPageType
-    {
-        static final int List = 0;
-        static final int Lens = 1;
-        static final int Map = 2;
-        static final int Globe = 3;
-    }
-
     public static abstract class ParamTypes
     {
         static final String ID = "id";
@@ -3837,7 +3829,7 @@ public abstract class Current
                             Passes.Item[] savedItems = (Passes.Item[])Current.PageAdapter.getSavedItems(page);
                             listAdapter = new Passes.ItemListAdapter(context, page, savedItems, MainActivity.getSatellites(), MainActivity.getTimeZone(), false);
 
-                            if(subPage == SubPageType.Lens)
+                            if(subPage == Globals.SubPageType.Lens)
                             {
                                 savedInstanceState.putInt(MainActivity.ParamTypes.PathDivisions, 8);
                                 savedInstanceState.putBoolean(MainActivity.ParamTypes.ForceShowPaths, true);
@@ -3851,14 +3843,14 @@ public abstract class Current
                     }
 
                     //set if need to create lens
-                    createLens = (subPage == SubPageType.Lens);
+                    createLens = (subPage == Globals.SubPageType.Lens);
                     break;
 
                 case PageType.Coordinates:
                     listAdapter = new Coordinates.ItemListAdapter(context, MainActivity.getSatellites(), MainActivity.getObserver());
 
                     //set if need to create map view
-                    createMapView = (subPage == SubPageType.Map || subPage == SubPageType.Globe);
+                    createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
                     break;
 
                 case PageType.Combined:
@@ -3866,8 +3858,8 @@ public abstract class Current
                     listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites(), MainActivity.getTimeZone());
 
                     //set if need to create lens/map view
-                    createLens = (subPage == SubPageType.Lens);
-                    createMapView = (subPage == SubPageType.Map || subPage == SubPageType.Globe);
+                    createLens = (subPage == Globals.SubPageType.Lens);
+                    createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
                     break;
 
                 default:
@@ -3889,7 +3881,7 @@ public abstract class Current
             {
                 //create view
                 savedInstanceState.putInt(MainActivity.ParamTypes.CoordinateNoradId, MainActivity.mapViewNoradID);
-                newView = Coordinates.onCreateMapView(this, inflater, container, (subPage == SubPageType.Globe), savedInstanceState);
+                newView = Coordinates.onCreateMapView(this, inflater, container, (subPage == Globals.SubPageType.Globe), savedInstanceState);
             }
 
             //if view is not set yet

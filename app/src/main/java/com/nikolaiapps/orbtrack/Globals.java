@@ -235,6 +235,23 @@ public abstract class Globals
         static final byte NotifyCount = 4;
     }
 
+    //Sub page type
+    public static abstract class SubPageType
+    {
+        static final int None = 0;
+        static final int Input = 0;
+        static final int List = 1;
+        static final int Lens = 2;
+        static final int Map = 3;
+        static final int Globe = 4;
+        static final int Accounts = 5;
+        static final int Display = 6;
+        static final int ListView = 7;
+        static final int LensView = 8;
+        static final int MapView = 9;
+        static final int Widgets = 10;
+    }
+
     //Bool object
     public static class BoolObject
     {

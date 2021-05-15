@@ -31,15 +31,6 @@ public abstract class Calculate
         static final int PageCount = 4;
     }
 
-    public static abstract class SubPageType
-    {
-        static final int Input = 0;
-        static final int List = 1;
-        static final int Lens = 2;
-        static final int Map = 3;
-        static final int Globe = 4;
-    }
-
     public static abstract class ParamTypes
     {
         static final String NoradId = "id";
@@ -164,24 +155,24 @@ public abstract class Calculate
                 case PageType.View:
                     switch(subPage)
                     {
-                        case SubPageType.Input:
+                        case Globals.SubPageType.Input:
                             savedInstanceState.putInt(ParamTypes.IncrementUnit, params.getInt(ParamTypes.IncrementUnit));
                             savedInstanceState.putInt(ParamTypes.IncrementType, params.getInt(ParamTypes.IncrementType));
                             break;
 
-                        case SubPageType.List:
-                        case SubPageType.Lens:
+                        case Globals.SubPageType.List:
+                        case Globals.SubPageType.Lens:
                             Current.ViewAngles.Item[] savedItems = (Current.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(page);
 
                             switch(subPage)
                             {
-                                case SubPageType.List:
+                                case Globals.SubPageType.List:
                                     listAdapter = new Current.ViewAngles.ItemListAdapter(context, savedItems);
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
 
-                                case SubPageType.Lens:
+                                case Globals.SubPageType.Lens:
                                     newView = Current.onCreateLensView(this, inflater, container, savedInstanceState);
                                     break;
                             }
@@ -196,19 +187,19 @@ public abstract class Calculate
                 case PageType.Intersection:
                     switch(subPage)
                     {
-                        case SubPageType.List:
-                        case SubPageType.Lens:
+                        case Globals.SubPageType.List:
+                        case Globals.SubPageType.Lens:
                             Current.Passes.Item[] savedItems = (Current.Passes.Item[])Calculate.PageAdapter.getSavedItems(page);
 
                             switch(subPage)
                             {
-                                case SubPageType.List:
+                                case Globals.SubPageType.List:
                                     listAdapter = new Current.Passes.ItemListAdapter(context, page, savedItems, null, MainActivity.getTimeZone(), true);
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
 
-                                case SubPageType.Lens:
+                                case Globals.SubPageType.Lens:
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PathDivisions, 8);
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PassIndex, params.getInt(MainActivity.ParamTypes.PassIndex, 0));
                                     savedInstanceState.putBoolean(MainActivity.ParamTypes.GetPassItems, true);
@@ -222,27 +213,27 @@ public abstract class Calculate
                 case PageType.Coordinates:
                     switch(subPage)
                     {
-                        case SubPageType.Input:
+                        case Globals.SubPageType.Input:
                             savedInstanceState.putInt(ParamTypes.IncrementUnit, params.getInt(ParamTypes.IncrementUnit));
                             savedInstanceState.putInt(ParamTypes.IncrementType, params.getInt(ParamTypes.IncrementType));
                             break;
 
-                        case SubPageType.List:
-                        case SubPageType.Map:
-                        case SubPageType.Globe:
+                        case Globals.SubPageType.List:
+                        case Globals.SubPageType.Map:
+                        case Globals.SubPageType.Globe:
                             Current.Coordinates.Item[] savedItems = (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(page);
 
                             switch(subPage)
                             {
-                                case SubPageType.List:
+                                case Globals.SubPageType.List:
                                     listAdapter = new Current.Coordinates.ItemListAdapter(context, savedItems, MainActivity.getTimeZone());
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
 
-                                case SubPageType.Map:
-                                case SubPageType.Globe:
-                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, (subPage == SubPageType.Globe), savedInstanceState);
+                                case Globals.SubPageType.Map:
+                                case Globals.SubPageType.Globe:
+                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, (subPage == Globals.SubPageType.Globe), savedInstanceState);
                                     break;
                             }
                             break;
@@ -421,7 +412,7 @@ public abstract class Calculate
             {
                 //add values to params
                 pageParams.putInt(Selectable.ParamTypes.PageNumber, pageNumber);
-                pageParams.putInt(Selectable.ParamTypes.SubPageNumber, SubPageType.List);
+                pageParams.putInt(Selectable.ParamTypes.SubPageNumber, Globals.SubPageType.List);
                 pageParams.putInt(ParamTypes.NoradId, (int)orbitalList.getSelectedValue(Universe.IDs.Invalid));
                 pageParams.putInt(ParamTypes.NoradId2, (pageNumber == PageType.Intersection ? (int)orbital2List.getSelectedValue(Universe.IDs.Invalid) : Universe.IDs.Invalid));
                 pageParams.putLong(ParamTypes.StartDateMs, startTime.getTimeInMillis());
@@ -599,7 +590,7 @@ public abstract class Calculate
                         //handle based on sub page
                         switch(subPageNum)
                         {
-                            case SubPageType.Input:
+                            case Globals.SubPageType.Input:
                                 //save inputs
                                 savedInputs[pageNum] = ((Page)page).getInputValues();
                                 break;
@@ -611,7 +602,7 @@ public abstract class Calculate
             //get saved params
             switch(subPageNum)
             {
-                case SubPageType.Input:
+                case Globals.SubPageType.Input:
                     savedParams = savedInputs[position];
                     break;
             }

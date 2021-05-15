@@ -61,18 +61,6 @@ public abstract class Settings
         static final int PageCount = 6;
     }
 
-    //Sub page types
-    public static abstract class SubPageType
-    {
-        static final int None = 0;
-        static final int Accounts = 1;
-        static final int Display = 2;
-        static final int ListView = 3;
-        static final int LensView = 4;
-        static final int MapView = 5;
-        static final int Widgets = 6;
-    }
-
     //Preference names
     public static abstract class PreferenceName
     {
@@ -1254,12 +1242,12 @@ public abstract class Settings
             final IconSpinner.CustomAdapter rateListAdapter;
             final IconSpinner.CustomAdapter sensorSmoothingAdapter;
             final Activity context = page.getActivity();
-            final ViewGroup rootView = (ViewGroup)inflater.inflate(pageNum == PageType.Updates     ? R.layout.settings_updates :
-                                                                   subPage == SubPageType.Accounts ? R.layout.settings_other_accounts :
-                                                                   subPage == SubPageType.Display  ? R.layout.settings_other_display :
-                                                                   subPage == SubPageType.ListView ? R.layout.settings_other_list_view :
-                                                                   subPage == SubPageType.LensView ? R.layout.settings_other_lens_view :
-                                                                   subPage == SubPageType.MapView  ? R.layout.settings_other_map_view :
+            final ViewGroup rootView = (ViewGroup)inflater.inflate(pageNum == PageType.Updates             ? R.layout.settings_updates :
+                                                                   subPage == Globals.SubPageType.Accounts ? R.layout.settings_other_accounts :
+                                                                   subPage == Globals.SubPageType.Display  ? R.layout.settings_other_display :
+                                                                   subPage == Globals.SubPageType.ListView ? R.layout.settings_other_list_view :
+                                                                   subPage == Globals.SubPageType.LensView ? R.layout.settings_other_lens_view :
+                                                                   subPage == Globals.SubPageType.MapView  ? R.layout.settings_other_map_view :
                                                                                                      R.layout.settings_other, container, false);
             //if context exists
             if(context != null)
@@ -1409,7 +1397,7 @@ public abstract class Settings
                         //handle based on sub page
                         switch(subPage)
                         {
-                            case SubPageType.Display:
+                            case Globals.SubPageType.Display:
                                 final boolean isMetric = getMetricUnits(context);
                                 final SwitchCompat darkThemeSwitch = rootView.findViewById(R.id.Settings_Display_Dark_Theme_Switch);
                                 final IconSpinner colorThemeList = rootView.findViewById(R.id.Settings_Display_Color_Theme_List);
@@ -1447,7 +1435,7 @@ public abstract class Settings
                                 imperialRadio.setChecked(!isMetric);
                                 break;
 
-                            case SubPageType.ListView:
+                            case Globals.SubPageType.ListView:
                                 final SwitchCompat combinedSwitch = rootView.findViewById(R.id.Settings_List_View_Combined_Switch);
                                 final SwitchCompat pathProgressSwitch = rootView.findViewById(R.id.Settings_List_View_Pass_Progress_Switch);
                                 final IconSpinner listUpdateRateList = rootView.findViewById(R.id.Settings_List_View_Update_Rate_List);
@@ -1466,7 +1454,7 @@ public abstract class Settings
                                 listUpdateRateList.setSelectedValue(getListUpdateDelay(context));
                                 break;
 
-                            case SubPageType.LensView:
+                            case Globals.SubPageType.LensView:
                                 final IconSpinner lensOrbitalIconList = rootView.findViewById(R.id.Settings_Lens_View_Orbital_Icon_List);
                                 final IconSpinner lensUpdateRateList = rootView.findViewById(R.id.Settings_Lens_View_Update_Rate_List);
                                 final IconSpinner lensSensorSmoothingList = rootView.findViewById(R.id.Settings_Lens_View_Sensor_Smoothing_List);
@@ -1534,7 +1522,7 @@ public abstract class Settings
                                 azimuthOffsetText.setText(Globals.getNumberString(Settings.getLensAzimuthUserOffset(context), 3));
                                 break;
 
-                            case SubPageType.MapView:
+                            case Globals.SubPageType.MapView:
                                 final IconSpinner globeTypeList = rootView.findViewById(R.id.Settings_Map_View_Globe_Type_List);
                                 final IconSpinner mapTypeList = rootView.findViewById(R.id.Settings_Map_View_Map_Type_List);
                                 final IconSpinner informationLocationList = rootView.findViewById(R.id.Settings_Map_View_Information_Location_List);
@@ -1644,7 +1632,7 @@ public abstract class Settings
                                 break;
 
                             default:
-                            case SubPageType.None:
+                            case Globals.SubPageType.None:
                                 final boolean havePositionSensors = SensorUpdate.havePositionSensors(context);
                                 final TextView accountsText = rootView.findViewById(R.id.Settings_Accounts_Text);
                                 final TextView displayText = rootView.findViewById(R.id.Settings_Display_Text);
@@ -1666,15 +1654,15 @@ public abstract class Settings
                                 widgetsText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_widgets_black, true), null, null, null);
 
                                 //set events
-                                accountsText.setOnClickListener(createOnSettingsItemClickListener(page, SubPageType.Accounts));
-                                displayText.setOnClickListener(createOnSettingsItemClickListener(page, SubPageType.Display));
-                                listViewText.setOnClickListener(createOnSettingsItemClickListener(page, SubPageType.ListView));
+                                accountsText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.Accounts));
+                                displayText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.Display));
+                                listViewText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.ListView));
                                 if(havePositionSensors)
                                 {
-                                    lensViewText.setOnClickListener(createOnSettingsItemClickListener(page, SubPageType.LensView));
+                                    lensViewText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.LensView));
                                 }
-                                mapViewText.setOnClickListener(createOnSettingsItemClickListener(page, SubPageType.MapView));
-                                widgetsText.setOnClickListener(createOnSettingsItemClickListener(page, SubPageType.Widgets));
+                                mapViewText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.MapView));
+                                widgetsText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.Widgets));
                                 break;
                         }
                         break;
@@ -2398,11 +2386,11 @@ public abstract class Settings
                 case PageType.Other:
                     switch(subPage)
                     {
-                        case SubPageType.Accounts:
+                        case Globals.SubPageType.Accounts:
                             listAdapter = new Options.Accounts.ItemListAdapter(this, null);
                             break;
 
-                        case SubPageType.Widgets:
+                        case Globals.SubPageType.Widgets:
                             listAdapter = new Widgets.ItemListAdapter(this.listParentView, null);
                             break;
 
@@ -2557,7 +2545,7 @@ public abstract class Settings
         //Returns if on accounts page
         private boolean isOnAccounts()
         {
-            return(pageNum == PageType.Accounts || (pageNum == PageType.Other && this.getSubPageParam() == SubPageType.Accounts));
+            return(pageNum == PageType.Accounts || (pageNum == PageType.Other && this.getSubPageParam() == Globals.SubPageType.Accounts));
         }
     }
 

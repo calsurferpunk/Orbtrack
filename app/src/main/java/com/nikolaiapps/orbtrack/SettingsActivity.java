@@ -451,7 +451,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //set receivers/listeners
         locationReceiver = createLocationReceiver();
         locationReceiver.register(this);
-        preferences = Settings.getPreferences(this);
+        preferences = Settings.getReadSettings(this);
         preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener()
         {
             @Override
@@ -1116,7 +1116,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(preference != null)
         {
             final Context context = preference.getContext();
-            final SharedPreferences readSettings = Settings.getPreferences(context);
+            final SharedPreferences readSettings = Settings.getReadSettings(context);
             final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
             final String preferenceKey = preference.getKey();
             final boolean checked = readSettings.getBoolean(preferenceKey, false);
@@ -1237,7 +1237,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             final int titleId;
             final int startColor;
             final boolean allowOpacity;
-            final SharedPreferences readSettings = Settings.getPreferences(context);
+            final SharedPreferences readSettings = Settings.getReadSettings(context);
             final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
             final String preferenceKey = preference.getKey();
             final String buttonPreferenceKey;

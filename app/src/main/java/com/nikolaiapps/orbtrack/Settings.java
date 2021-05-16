@@ -316,9 +316,8 @@ public abstract class Settings
             //Sets the theme
             public static void setTheme(Context context)
             {
-                SharedPreferences readSettings = getPreferences(context);
-                boolean darkTheme = readSettings.getBoolean(PreferenceName.DarkTheme, false);
-                int colorTheme = readSettings.getInt(PreferenceName.ColorTheme, ThemeIndex.Cyan);
+                boolean darkTheme = getDarkTheme(context);
+                int colorTheme = getColorTheme(context);
                 int themeID;
 
                 //get theme ID
@@ -1254,7 +1253,7 @@ public abstract class Settings
             {
                 //get resources and settings
                 res = context.getResources();
-                readSettings = getPreferences(context);
+                readSettings = getReadSettings(context);
                 writeSettings = readSettings.edit();
 
                 //initialize values
@@ -2605,8 +2604,8 @@ public abstract class Settings
     private static boolean usingCurrentGridLayout = false;
     private static boolean mapMarkerInfoBottom = true;
 
-    //Gets settings preferences
-    public static SharedPreferences getPreferences(Context context)
+    //Gets read settings
+    public static SharedPreferences getReadSettings(Context context)
     {
         return(context.getSharedPreferences("Settings", Context.MODE_PRIVATE));
     }
@@ -2614,25 +2613,128 @@ public abstract class Settings
     //Gets write settings
     public static SharedPreferences.Editor getWriteSettings(Context context)
     {
-        return(getPreferences(context).edit());
+        return(getReadSettings(context).edit());
+    }
+
+    //Gets default boolean value for given preference
+    public static boolean getDefaultBooleanValue(String preferenceName, Object dependency)
+    {
+        if(preferenceName.startsWith(PreferenceName.SatelliteSourceUseGP) && dependency instanceof Integer)
+        {
+            return((int)dependency != Database.UpdateSource.N2YO);
+        }
+        else
+        {
+            return(getDefaultBooleanValue(preferenceName));
+        }
+    }
+    public static boolean getDefaultBooleanValue(String preferenceName)
+    {
+        switch(preferenceName)
+        {
+            case PreferenceName.FirstRun:
+            case PreferenceName.MetricUnits:
+            case PreferenceName.LensFirstRun:
+            case PreferenceName.ListShowPassProgress:
+            case PreferenceName.MapShow3dPaths:
+            case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
+            case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
+            case PreferenceName.MapShowLabelsAlways:
+            case PreferenceName.MapShowStars:
+            case PreferenceName.MapRotateAllowed:
+            case PreferenceName.MapShowSearchList:
+            case PreferenceName.MapMarkerShowShadow:
+            case PreferenceName.UseCombinedCurrentLayout:
+            case PreferenceName.TranslateInformation:
+            case PreferenceName.ShareTranslations:
+            case PreferenceName.AskInternet:
+                return(true);
+
+            default:
+                return(false);
+        }
+    }
+
+    //Gets given boolean preference
+    private static boolean getPreferenceBoolean(Context context, String preferenceName)
+    {
+        return(getReadSettings(context).getBoolean(preferenceName, getDefaultBooleanValue(preferenceName)));
     }
 
     //Sets given boolean preference
-    private static void setPreferenceBoolean(Context context, String name, boolean value)
+    private static void setPreferenceBoolean(Context context, String preferenceName, boolean value)
     {
-        getWriteSettings(context).putBoolean(name, value).apply();
+        getWriteSettings(context).putBoolean(preferenceName, value).apply();
+    }
+
+    //Get default int value for the given preference
+    private static int getDefaultIntValue(String preferenceName)
+    {
+        switch(preferenceName)
+        {
+            case PreferenceName.AltitudeSource:
+                return(LocationService.OnlineSource.MapQuest);
+
+            case PreferenceName.ColorTheme:
+                return(Options.Display.ThemeIndex.Cyan);
+
+            case PreferenceName.InformationSource:
+                return(Database.UpdateSource.NASA);
+
+            case PreferenceName.LensIndicator:
+                return(Options.LensView.IndicatorType.Icon);
+
+            case PreferenceName.LensAverageCount:
+                return(40);
+
+            case PreferenceName.LensHorizonColor:
+                return(Color.rgb(150, 150, 150));
+
+            case PreferenceName.ListUpdateDelay:
+            case PreferenceName.LensUpdateDelay:
+                return(1000);
+
+            case PreferenceName.MapLayerType + SubPreferenceName.Globe:
+                return(CoordinatesFragment.MapLayerType.Hybrid);
+
+            case PreferenceName.MapLayerType + SubPreferenceName.Map:
+                return(CoordinatesFragment.MapLayerType.Normal);
+
+            case PreferenceName.MapDisplayType:
+                return(CoordinatesFragment.MapDisplayType.Globe);
+
+            case PreferenceName.MapGridColor:
+                return(Color.argb(180, 0, 0, 255));
+
+            case PreferenceName.MapMarkerInfoLocation:
+                return(CoordinatesFragment.MapMarkerInfoLocation.ScreenBottom);
+
+            case PreferenceName.SatelliteSource:
+                return(Database.UpdateSource.SpaceTrack);
+
+            case PreferenceName.TimeZoneSource:
+                return(LocationService.OnlineSource.Google);
+        }
+
+        return(0);
+    }
+
+    //Gets given int preference
+    private static int getPreferenceInt(Context context, String preferenceName)
+    {
+        return(getReadSettings(context).getInt(preferenceName, getDefaultIntValue(preferenceName)));
     }
 
     //Sets given int preference
-    private static void setPreferenceInt(Context context, String name, int value)
+    private static void setPreferenceInt(Context context, String preferenceName, int value)
     {
-        getWriteSettings(context).putInt(name, value).apply();
+        getWriteSettings(context).putInt(preferenceName, value).apply();
     }
 
     //Gets if first run
     public static boolean getFirstRun(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.FirstRun, true));
+        return(getPreferenceBoolean(context, PreferenceName.FirstRun));
     }
 
     //Sets if first run
@@ -2644,7 +2746,7 @@ public abstract class Settings
     //Gets if accepted privacy policy
     public static boolean getAcceptedPrivacy(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.AcceptedPrivacy, false));
+        return(getPreferenceBoolean(context, PreferenceName.AcceptedPrivacy));
     }
 
     //Sets if accepted privacy policy
@@ -2656,7 +2758,7 @@ public abstract class Settings
     //Gets if combined notice shown
     public static boolean getCombinedShown(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.CombinedNotice, false));
+        return(getPreferenceBoolean(context, PreferenceName.CombinedNotice));
     }
 
     //Sets if combined noticed shown
@@ -2668,7 +2770,7 @@ public abstract class Settings
     //Gets indicator type
     public static int getIndicator(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.LensIndicator, Options.LensView.IndicatorType.Icon));
+        return(getPreferenceInt(context, PreferenceName.LensIndicator));
     }
 
     //Sets indicator type
@@ -2680,25 +2782,25 @@ public abstract class Settings
     //Gets lens average count
     public static int getLensAverageCount(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.LensAverageCount, 40));
+        return(getPreferenceInt(context, PreferenceName.LensAverageCount));
     }
 
     //Gets dark theme value
     public static boolean getDarkTheme(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.DarkTheme, false));
+        return(getPreferenceBoolean(context, PreferenceName.DarkTheme));
     }
 
     //Gets color theme value
     public static int getColorTheme(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.ColorTheme, Options.Display.ThemeIndex.Cyan));
+        return(getPreferenceInt(context, PreferenceName.ColorTheme));
     }
 
     //Gets metric units value
     public static boolean getMetricUnits(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MetricUnits, true));
+        return(getPreferenceBoolean(context, PreferenceName.MetricUnits));
     }
 
     //Sets metric units value
@@ -2718,7 +2820,7 @@ public abstract class Settings
     //Get lens first run
     public static boolean getLensFirstRun(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.LensFirstRun, true));
+        return(getPreferenceBoolean(context, PreferenceName.LensFirstRun));
     }
 
     //Sets lens first run
@@ -2730,13 +2832,13 @@ public abstract class Settings
     //Get lens horizon color
     public static int getLensHorizonColor(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.LensHorizonColor, Color.rgb(150, 150, 150)));
+        return(getPreferenceInt(context, PreferenceName.LensHorizonColor));
     }
 
     //Get showing lens horizon
     public static boolean getLensShowHorizon(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.LensUseHorizon, false));
+        return(getPreferenceBoolean(context, PreferenceName.LensUseHorizon));
     }
 
     //Sets showing lens horizon
@@ -2748,7 +2850,7 @@ public abstract class Settings
     //Gets lens azimuth user offset
     public static float getLensAzimuthUserOffset(Context context)
     {
-        return(getPreferences(context).getFloat(PreferenceName.LensAzimuthUserOffset, 0));
+        return(getReadSettings(context).getFloat(PreferenceName.LensAzimuthUserOffset, 0));
     }
 
     //Sets lens azimuth user offset
@@ -2762,19 +2864,13 @@ public abstract class Settings
     //Gets if lens needs rotating
     public static boolean getLensRotate(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.LensRotate, false));
+        return(getPreferenceBoolean(context, PreferenceName.LensRotate));
     }
-
-    /*//Sets if lens needs rotating
-    public static void setLensRotate(Context context, boolean rotate)
-    {
-        setPreferenceBoolean(context, PreferenceName.LensRotate, rotate);
-    }*/
 
     //Gets lens using auto width
     public static boolean getLensAutoWidth(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.LensUseAutoWidth, false));
+        return(getPreferenceBoolean(context, PreferenceName.LensUseAutoWidth));
     }
 
     //Sets lens using auto width
@@ -2786,7 +2882,7 @@ public abstract class Settings
     //Gets lens width
     public static float getLensWidth(Context context)
     {
-        return(getPreferences(context).getFloat(PreferenceName.LensWidth, 39.279f));
+        return(getReadSettings(context).getFloat(PreferenceName.LensWidth, 39.279f));
     }
 
     //Set lens width
@@ -2800,7 +2896,7 @@ public abstract class Settings
     //Gets lens using auto height
     public static boolean getLensAutoHeight(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.LensUseAutoHeight, false));
+        return(getPreferenceBoolean(context, PreferenceName.LensUseAutoHeight));
     }
 
     //Sets lens using auto height
@@ -2812,7 +2908,7 @@ public abstract class Settings
     //Gets lens height
     public static float getLensHeight(Context context)
     {
-        return(getPreferences(context).getFloat(PreferenceName.LensHeight, 65.789f));
+        return(getReadSettings(context).getFloat(PreferenceName.LensHeight, 65.789f));
     }
 
     //Set lens height
@@ -2825,37 +2921,37 @@ public abstract class Settings
     //Gets list path progress being shown
     public static boolean getListPathProgress(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.ListShowPassProgress, true));
+        return(getPreferenceBoolean(context, PreferenceName.ListShowPassProgress));
     }
 
     //Gets list update delay
     public static int getListUpdateDelay(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.ListUpdateDelay, 1000));
+        return(getPreferenceInt(context, PreferenceName.ListUpdateDelay));
     }
 
     //Gets lens update delay
     public static int getLensUpdateDelay(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.LensUpdateDelay, 1000));
+        return(getPreferenceInt(context, PreferenceName.LensUpdateDelay));
     }
 
     //Returns map layer type
     public static int getMapLayerType(Context context, boolean forGlobe)
     {
-        return(getPreferences(context).getInt(PreferenceName.MapLayerType + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), (forGlobe ? CoordinatesFragment.MapLayerType.Hybrid : CoordinatesFragment.MapLayerType.Normal)));
+        return(getPreferenceInt(context, PreferenceName.MapLayerType + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map)));
     }
 
     //Returns if using 3d path on globe
     public static boolean getMapShow3dPaths(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapShow3dPaths, true));
+        return(getPreferenceBoolean(context, PreferenceName.MapShow3dPaths));
     }
 
     //Returns if using clouds on satellite layer for map/globe
     public static boolean getSatelliteClouds(Context context, boolean forMap)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.ShowSatelliteClouds + (forMap ? SubPreferenceName.Map : SubPreferenceName.Globe), true));
+        return(getPreferenceBoolean(context, PreferenceName.ShowSatelliteClouds + (forMap ? SubPreferenceName.Map : SubPreferenceName.Globe)));
     }
 
     /*//Returns google map type
@@ -2889,13 +2985,13 @@ public abstract class Settings
     //Returns map display type
     public static int getMapDisplayType(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.MapDisplayType, CoordinatesFragment.MapDisplayType.Globe));
+        return(getPreferenceInt(context, PreferenceName.MapDisplayType));
     }
 
     //Returns map showing zoom
     public static boolean getMapShowZoom(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapShowZoom, false));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowZoom));
     }
 
     //Sets map showing zoom
@@ -2907,7 +3003,7 @@ public abstract class Settings
     //Returns map showing labels always
     public static boolean getMapShowLabelsAlways(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapShowLabelsAlways, true));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowLabelsAlways));
     }
 
     //Sets map showing labels always
@@ -2919,13 +3015,13 @@ public abstract class Settings
     //Returns map showing stars
     public static boolean getMapShowStars(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapShowStars, true));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowStars));
     }
 
     //Gets map speed scale
     public static float getMapSpeedScale(Context context, boolean forGlobe)
     {
-        return(getPreferences(context).getFloat(PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.5f));
+        return(getReadSettings(context).getFloat(PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.5f));
     }
 
     //Sets map speed scale
@@ -2942,7 +3038,7 @@ public abstract class Settings
     //Gets map sensitivity scale
     public static float getMapSensitivityScale(Context context, boolean forGlobe)
     {
-        return(getPreferences(context).getFloat(PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.8f));
+        return(getReadSettings(context).getFloat(PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.8f));
     }
 
     //Sets map sensitivity scale
@@ -2959,13 +3055,13 @@ public abstract class Settings
     //Returns map rotate allowed
     public static boolean getMapRotateAllowed(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapRotateAllowed, true));
+        return(getPreferenceBoolean(context, PreferenceName.MapRotateAllowed));
     }
 
     //Returns map showing grid
     public static boolean getMapShowGrid(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapShowGrid, false));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowGrid));
     }
 
     //Sets map showing grid
@@ -2977,14 +3073,14 @@ public abstract class Settings
     //Returns map view grid color
     public static int getMapGridColor(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.MapGridColor, Color.argb(180, 0, 0, 255)));
+        return(getPreferenceInt(context, PreferenceName.MapGridColor));
     }
 
     //Returns map marker scale
     public static float getMapMarkerScale(Context context)
     {
         //get scale
-        return(getPreferences(context).getFloat(PreferenceName.MapMarkerScale, 0.65f));
+        return(getReadSettings(context).getFloat(PreferenceName.MapMarkerScale, 0.65f));
     }
 
     //Sets map marker scale
@@ -3001,7 +3097,7 @@ public abstract class Settings
     //Returns map showing search list
     public static boolean getMapShowSearchList(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapShowSearchList, true));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowSearchList));
     }
 
     //Sets map showing search list
@@ -3013,7 +3109,7 @@ public abstract class Settings
     //Returns map marker info location
     public static int getMapMarkerInfoLocation(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.MapMarkerInfoLocation, CoordinatesFragment.MapMarkerInfoLocation.ScreenBottom));
+        return(getPreferenceInt(context, PreferenceName.MapMarkerInfoLocation));
     }
 
     //Sets map marker info location
@@ -3033,31 +3129,25 @@ public abstract class Settings
     //Returns map marker showing background
     public static boolean getMapMarkerShowBackground(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapMarkerShowBackground, false));
+        return(getPreferenceBoolean(context, PreferenceName.MapMarkerShowBackground));
     }
 
     //Returns map marker showing shadow
     public static boolean getMapMarkerShowShadow(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.MapMarkerShowShadow, true));
+        return(getPreferenceBoolean(context, PreferenceName.MapMarkerShowShadow));
     }
 
     //Gets if using combined current layout
     public static boolean getCombinedCurrentLayout(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.UseCombinedCurrentLayout, true));
+        return(getPreferenceBoolean(context, PreferenceName.UseCombinedCurrentLayout));
     }
-
-    /*//Sets using combined current layout
-    public static void setUsingCombinedCurrentLayout(Context context, boolean use)
-    {
-        setPreferenceBoolean(context, PreferenceName.UseCombinedCurrentLayout, use);
-    }*/
 
     //Gets current grid layout setting
     public static boolean getCurrentGridLayout(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.UseCurrentGridLayout, false));
+        return(getPreferenceBoolean(context, PreferenceName.UseCurrentGridLayout));
     }
 
     //Sets using current grid layout
@@ -3156,7 +3246,7 @@ public abstract class Settings
     //Gets current sort by for given page
     public static int getCurrentSortBy(Context context, int page)
     {
-        return(getPreferences(context).getInt(getCurrentSortByName(page), Current.Items.SortBy.Name));
+        return(getReadSettings(context).getInt(getCurrentSortByName(page), Current.Items.SortBy.Name));
     }
     public static String getCurrentSortByString(Context context, int page)
     {
@@ -3177,7 +3267,7 @@ public abstract class Settings
     public static Location getLastLocation(Context context)
     {
         Location lastLocation = new Location("");
-        SharedPreferences readSettings = getPreferences(context);
+        SharedPreferences readSettings = getReadSettings(context);
 
         //set location
         lastLocation.setLatitude(readSettings.getFloat(PreferenceName.LocationLastLatitude, 0));
@@ -3202,13 +3292,13 @@ public abstract class Settings
     //Gets altitude source
     public static int getAltitudeSource(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.AltitudeSource, LocationService.OnlineSource.MapQuest));
+        return(getPreferenceInt(context, PreferenceName.AltitudeSource));
     }
 
     //Gets time zone source
     public static int getTimeZoneSource(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.TimeZoneSource, LocationService.OnlineSource.Google));
+        return(getPreferenceInt(context, PreferenceName.TimeZoneSource));
     }
 
     //Sets satellite source
@@ -3228,19 +3318,13 @@ public abstract class Settings
     //Gets satellites source
     public static int getSatelliteSource(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack));
+        return(getPreferenceInt(context, PreferenceName.SatelliteSource));
     }
-
-    /*//Sets satellite source using GP
-    public static void setSatelliteSourceUseGP(Context context, int source, boolean use)
-    {
-        setPreferenceBoolean(context, PreferenceName.SatelliteSourceUseGP + source, use);
-    }*/
 
     //Gets satellite source using GP
     public static boolean getSatelliteSourceUseGP(Context context, int source)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.SatelliteSourceUseGP + source, (source != Database.UpdateSource.N2YO)));
+        return(getDefaultBooleanValue(PreferenceName.SatelliteSourceUseGP + source, source));
     }
 
     //Gets owner icon(s)
@@ -3266,37 +3350,37 @@ public abstract class Settings
     //Gets catalog debris usage
     public static boolean getCatalogDebris(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.CatalogDebris, false));
+        return(getPreferenceBoolean(context, PreferenceName.CatalogDebris));
     }
 
     //Gets catalog rocket bodies usage
     public static boolean getCatalogRocketBodies(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.CatalogRocketBodies, false));
+        return(getPreferenceBoolean(context, PreferenceName.CatalogRocketBodies));
     }
 
     //Gets information source
     public static int getInformationSource(Context context)
     {
-        return(getPreferences(context).getInt(PreferenceName.InformationSource, Database.UpdateSource.NASA));
+        return(getPreferenceInt(context, PreferenceName.InformationSource));
     }
 
     //Gets if translating information
     public static boolean getTranslateInformation(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.TranslateInformation, true));
+        return(getPreferenceBoolean(context, PreferenceName.TranslateInformation));
     }
 
     //Gets if sharing translations
     public static boolean getShareTranslations(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.ShareTranslations, true));
+        return(getPreferenceBoolean(context, PreferenceName.ShareTranslations));
     }
 
     //Gets login name and password
     public static String[] getLogin(Context context, int accountType)
     {
-        SharedPreferences currentPreferences = getPreferences(context);
+        SharedPreferences currentPreferences = getReadSettings(context);
 
         switch(accountType)
         {
@@ -3545,7 +3629,7 @@ public abstract class Settings
     public static CalculateService.AlarmNotifySettings getNotifyPassSettings(Context context, int noradId, byte notifyType)
     {
         CalculateService.AlarmNotifySettings settings = new CalculateService.AlarmNotifySettings();
-        SharedPreferences readSettings = getPreferences(context);
+        SharedPreferences readSettings = getReadSettings(context);
 
         settings.nextOnly = readSettings.getBoolean(getNotifyPassNextOnlyKey(noradId, notifyType), true);
         settings.noradId = noradId;
@@ -3579,7 +3663,7 @@ public abstract class Settings
     //Gets auto update next update time in ms
     public static long getAutoUpdateNextMs(Context context, byte updateType)
     {
-        SharedPreferences readSettings = getPreferences(context);
+        SharedPreferences readSettings = getReadSettings(context);
 
         switch(updateType)
         {
@@ -3625,14 +3709,14 @@ public abstract class Settings
     }
     public static long getAutoUpdateRateMs(Context context, byte updateType)
     {
-        return(getAutoUpdateRateMs(getPreferences(context), updateType));
+        return(getAutoUpdateRateMs(getReadSettings(context), updateType));
     }
 
     //Gets auto update alarm settings
     public static UpdateService.AlarmUpdateSettings getAutoUpdateSettings(Context context, byte updateType)
     {
         UpdateService.AlarmUpdateSettings settings = new UpdateService.AlarmUpdateSettings();
-        SharedPreferences readSettings = getPreferences(context);
+        SharedPreferences readSettings = getReadSettings(context);
 
         switch(updateType)
         {
@@ -3701,7 +3785,7 @@ public abstract class Settings
     //Gets asking of internet connection
     public static boolean getAskInternet(Context context)
     {
-        return(getPreferences(context).getBoolean(PreferenceName.AskInternet, true));
+        return(getPreferenceBoolean(context, PreferenceName.AskInternet));
     }
 
     //Sets asking of internet connection

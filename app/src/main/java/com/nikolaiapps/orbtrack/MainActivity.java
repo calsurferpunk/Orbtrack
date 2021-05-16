@@ -225,7 +225,7 @@ public class MainActivity extends AppCompatActivity
         //create receivers
         startCalculationListener = createOnStartCalculationListener();
         localUpdateReceiver = createUpdateReceiver(localUpdateReceiver);
-        preferences = Settings.getPreferences(this);
+        preferences = Settings.getReadSettings(this);
         preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener()
         {
             @Override

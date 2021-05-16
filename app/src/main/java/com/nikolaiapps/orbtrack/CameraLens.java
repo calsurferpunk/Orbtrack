@@ -606,7 +606,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int index;
         int averageCount = Settings.getLensAverageCount(context);
         boolean darkTheme = Settings.getDarkTheme(context);
-        SharedPreferences readSettings = Settings.getPreferences(context);
+        SharedPreferences readSettings = Settings.getReadSettings(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
         float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42);
@@ -1554,7 +1554,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int cameraOrientation;
         boolean inPortrait = inOrientationPortrait();
         Context context = this.getContext();
-        SharedPreferences readSettings = Settings.getPreferences(context);
+        SharedPreferences readSettings = Settings.getReadSettings(context);
         boolean startSensors = false;
         boolean havePermission = Globals.haveCameraPermission(context);
         boolean useCamera = readSettings.getBoolean(Settings.PreferenceName.LensUseCamera, true);

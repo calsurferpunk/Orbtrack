@@ -6,7 +6,6 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -606,7 +605,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int index;
         int averageCount = Settings.getLensAverageCount(context);
         boolean darkTheme = Settings.getDarkTheme(context);
-        SharedPreferences readSettings = Settings.getReadSettings(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
         float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42);
@@ -617,7 +615,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         horizonLineColor = Settings.getLensHorizonColor(context);
         horizonColor = Globals.getColor(horizonLineColor, 70);
         showPaths = showCalibration = compassBad = compassHadBad = false;
-        showHorizon = readSettings.getBoolean(Settings.PreferenceName.LensUseHorizon, false);
+        showHorizon = Settings.getLensShowHorizon(context);
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 8, metrics);
         textOffset = textSize / 1.5f;
         textPadding = (textSize * 0.15f);
@@ -1554,10 +1552,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int cameraOrientation;
         boolean inPortrait = inOrientationPortrait();
         Context context = this.getContext();
-        SharedPreferences readSettings = Settings.getReadSettings(context);
         boolean startSensors = false;
         boolean havePermission = Globals.haveCameraPermission(context);
-        boolean useCamera = readSettings.getBoolean(Settings.PreferenceName.LensUseCamera, true);
+        boolean useCamera = Settings.getLensUseCamera(context);
         boolean useAutoWidth = Settings.getLensAutoWidth(context);
         boolean useAutoHeight = Settings.getLensAutoHeight(context);
         boolean cameraRotate = Settings.getLensRotate(context);
@@ -1685,57 +1682,55 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         elIndex = (elIndex + 1) % elDegArray.length;
 
         //handle based on type
-        switch(type)
+        if(type == Sensor.TYPE_MAGNETIC_FIELD)
         {
-            case Sensor.TYPE_MAGNETIC_FIELD:
-                switch(accuracy)
-                {
-                    case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
-                    case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
-                        //if had been bad
-                        if(compassHadBad)
+            switch(accuracy)
+            {
+                case SensorManager.SENSOR_STATUS_ACCURACY_HIGH:
+                case SensorManager.SENSOR_STATUS_ACCURACY_MEDIUM:
+                    //if had been bad
+                    if(compassHadBad)
+                    {
+                        //if calibrate okay button exists
+                        if(calibrateOkayButton != null)
                         {
-                            //if calibrate okay button exists
-                            if(calibrateOkayButton != null)
-                            {
-                                //close displays
-                                calibrateOkayButton.callOnClick();
-                                calibrateOkayButton = null;
-                            }
-
-                            //if help text exists and not showing calibration
-                            if(helpText != null && !showCalibration)
-                            {
-                                //clear and hide help
-                                helpText.setOnClickListener(null);
-                                helpText.setVisibility(View.GONE);
-                            }
+                            //close displays
+                            calibrateOkayButton.callOnClick();
+                            calibrateOkayButton = null;
                         }
 
-                        //update status
-                        compassBad = compassHadBad = false;
-                        break;
-
-                    case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
-                    case SensorManager.SENSOR_STATUS_UNRELIABLE:
-                        //update status
-                        compassBad = true;
+                        //if help text exists and not showing calibration
                         if(helpText != null && !showCalibration)
                         {
-                            helpText.setOnClickListener(new OnClickListener()
-                            {
-                                @Override
-                                public void onClick(View v)
-                                {
-                                    showCompassErrorDialog();
-                                }
-                            });
-                            helpText.setText(getResources().getString(R.string.title_compass_inaccurate_fix));
-                            helpText.setVisibility(View.VISIBLE);
+                            //clear and hide help
+                            helpText.setOnClickListener(null);
+                            helpText.setVisibility(View.GONE);
                         }
-                        break;
-                }
-                break;
+                    }
+
+                    //update status
+                    compassBad = compassHadBad = false;
+                    break;
+
+                case SensorManager.SENSOR_STATUS_ACCURACY_LOW:
+                case SensorManager.SENSOR_STATUS_UNRELIABLE:
+                    //update status
+                    compassBad = true;
+                    if(helpText != null && !showCalibration)
+                    {
+                        helpText.setOnClickListener(new OnClickListener()
+                        {
+                            @Override
+                            public void onClick(View v)
+                            {
+                                showCompassErrorDialog();
+                            }
+                        });
+                        helpText.setText(getResources().getString(R.string.title_compass_inaccurate_fix));
+                        helpText.setVisibility(View.VISIBLE);
+                    }
+                    break;
+            }
         }
     }
 

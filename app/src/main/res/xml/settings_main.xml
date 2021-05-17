@@ -169,6 +169,11 @@
                     app:titleText="@string/title_type"
                     android:key="MapLayerTypeMap"/>
 
+                <SwitchPreference
+                    android:title="@string/title_show_clouds"
+                    android:key="ShowSatelliteCloudsMap"
+                    android:persistent="false"/>
+
                 <com.nikolaiapps.orbtrack.SliderPreference
                     app:titleText="@string/title_sensitivity"
                     android:key="MapSensitivityScaleMap"

@@ -75,6 +75,7 @@ public class SwitchTextPreference extends Preference
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressWarnings("unused")
     public SwitchTextPreference(Context context, AttributeSet attrs)
     {
         this(context, attrs, 0);
@@ -91,7 +92,6 @@ public class SwitchTextPreference extends Preference
         final TextView summaryView;
         final TextView valueSuffixView;
         final ViewGroup rootView;
-        final SharedPreferences readSettings = getPreferences(context);
         final SharedPreferences.Editor writeSettings = getWriteSettings(context);
         final CompoundButton.OnCheckedChangeListener checkedChangeListener;
 
@@ -147,7 +147,7 @@ public class SwitchTextPreference extends Preference
         if(showSwitch)
         {
             switchView.setText(titleText);
-            switchView.setChecked(readSettings.getBoolean(switchKey, false));
+            switchView.setChecked(Settings.getPreferenceBoolean(context, switchKey));
             checkedChangeListener = new CompoundButton.OnCheckedChangeListener()
             {
                 @Override

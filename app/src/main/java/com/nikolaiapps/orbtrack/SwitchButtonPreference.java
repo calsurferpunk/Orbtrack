@@ -52,6 +52,7 @@ public class SwitchButtonPreference extends Preference
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressWarnings("unused")
     public SwitchButtonPreference(Context context, AttributeSet attrs)
     {
         this(context, attrs, 0);
@@ -70,7 +71,6 @@ public class SwitchButtonPreference extends Preference
         final TextView summaryView;
         final SwitchCompat switchView;
         final ViewGroup rootView;
-        final SharedPreferences readSettings = getPreferences(context);
         final SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
         //get displays
@@ -92,7 +92,7 @@ public class SwitchButtonPreference extends Preference
             summaryView.setText(summary);
             summaryView.setVisibility(View.VISIBLE);
         }
-        switchView.setChecked(readSettings.getBoolean(preferenceName, false));
+        switchView.setChecked(Settings.getPreferenceBoolean(context, preferenceName));
         switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {
             @Override

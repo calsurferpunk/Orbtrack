@@ -24,7 +24,6 @@ public class SliderPreference extends Preference
     private int scaleType;
     private int minValue;
     private int maxValue;
-    private float defaultValue;
     private String sharedName;
     private String titleText;
     private PlayBar sliderView;
@@ -68,6 +67,7 @@ public class SliderPreference extends Preference
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressWarnings("unused")
     public SliderPreference(Context context, AttributeSet attrs)
     {
         this(context, attrs, 0);
@@ -82,7 +82,6 @@ public class SliderPreference extends Preference
         final String preferenceName = this.getKey();
         final TextView titleView;
         final ViewGroup rootView;
-        final SharedPreferences readSettings = getPreferences(context);
         final SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
         //get displays
@@ -129,11 +128,11 @@ public class SliderPreference extends Preference
         switch(scaleType)
         {
             case ScaleType.Integer:
-                sliderView.setValue(readSettings.getInt(preferenceName, (int)defaultValue), true);
+                sliderView.setValue(Settings.getPreferenceInt(context, preferenceName), true);
                 break;
 
             case ScaleType.Percent:
-                sliderView.setValue((int)(readSettings.getFloat(preferenceName, defaultValue) * 100), true);
+                sliderView.setValue((int)(Settings.getPreferenceFloat(context, preferenceName) * 100), true);
                 break;
         }
     }
@@ -161,14 +160,5 @@ public class SliderPreference extends Preference
             sliderView.setMin(minValue);
             sliderView.setMax(maxValue);
         }
-    }
-
-    public void setDefault(int value)
-    {
-        defaultValue = (float)value;
-    }
-    public void setDefault(float value)
-    {
-        defaultValue = value;
     }
 }

@@ -141,6 +141,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     case ScreenKey.MapView:
                         SwitchPreference showCloudsGlobeSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Globe);
+                        SwitchPreference showCloudsMapSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Map);
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
                         SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
                         SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
@@ -164,6 +165,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(showCloudsGlobeSwitch, null);
+                        setupSwitch(showCloudsMapSwitch, null);
                         setupSwitch(show3dPathsSwitch, null);
                         setupSwitch(allowRotationSwitch, null);
                         setupSwitch(showInformationBackgroundSwitch, null);
@@ -179,7 +181,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSlider(mapSpeedScaleSlider);
                         setupSlider(iconScaleSlider);
                         setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
-                        setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, null);
+                        setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsMapSwitch);
                         setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
                         break;
 
@@ -952,14 +954,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     //Creates an on color button click listener
-    private static View.OnClickListener createOnColorButtonClickListener(final Context context, final String preferenceKey, final int titleId, final int startColor, boolean allowOpacity, SharedPreferences readSettings, SharedPreferences.Editor writeSettings)
+    private static View.OnClickListener createOnColorButtonClickListener(final Context context, final String preferenceKey, final int titleId, final boolean allowOpacity, SharedPreferences.Editor writeSettings)
     {
         return(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                ChooseColorDialog colorDialog = new ChooseColorDialog(context, readSettings.getInt(preferenceKey, startColor));
+                ChooseColorDialog colorDialog = new ChooseColorDialog(context, Settings.getPreferenceInt(context, preferenceKey));
                 colorDialog.setAllowOpacity(allowOpacity);
                 colorDialog.setAllowTransparent(allowOpacity);
                 colorDialog.setTitle(context.getResources().getString(titleId));
@@ -1116,10 +1118,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(preference != null)
         {
             final Context context = preference.getContext();
-            final SharedPreferences readSettings = Settings.getReadSettings(context);
             final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
             final String preferenceKey = preference.getKey();
-            final boolean checked = readSettings.getBoolean(preferenceKey, false);
+            final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
+            final Object dependency = Settings.getSatelliteSource(context);
+            final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
 
             //set state and listener
             preference.setIconSpaceReserved(false);
@@ -1138,7 +1141,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     if(!isAutoUpdate || settings.enabled != checked)
                     {
                         //if for GP data usage
-                        if(preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP))
+                        if(isGPDataUsage)
                         {
                             //get sub key
                             subKey = String.valueOf(Settings.getSatelliteSource(context));
@@ -1185,12 +1188,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //if preference exists
         if(preference != null)
         {
-            final Context context = preference.getContext();
             final String preferenceKey = preference.getKey();
-            boolean forGlobe = preferenceKey.endsWith(Settings.SubPreferenceName.Globe);
             int min = -1;
             int max = -1;
-            float defaultValue = 0;
 
             switch(preferenceKey)
             {
@@ -1198,20 +1198,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map:
                     min = Settings.SensitivityScaleMin;
                     max = Settings.SensitivityScaleMax;
-                    defaultValue = Settings.getMapSensitivityScale(context, forGlobe);
                     break;
 
                 case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe:
                 case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map:
                     min = Settings.SpeedScaleMin;
                     max = Settings.SpeedScaleMax;
-                    defaultValue = Settings.getMapSpeedScale(context, forGlobe);
                     break;
 
                 case Settings.PreferenceName.MapMarkerScale:
                     min = Settings.IconScaleMin;
                     max = Settings.IconScaleMax;
-                    defaultValue = Settings.getMapMarkerScale(context);
                     break;
             }
 
@@ -1221,9 +1218,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 //set range
                 preference.setRange(min, max);
             }
-
-            //set default value
-            preference.setDefault(defaultValue);
         }
     }
 
@@ -1235,9 +1229,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         {
             final Context context = preference.getContext();
             final int titleId;
-            final int startColor;
             final boolean allowOpacity;
-            final SharedPreferences readSettings = Settings.getReadSettings(context);
             final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
             final String preferenceKey = preference.getKey();
             final String buttonPreferenceKey;
@@ -1255,23 +1247,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
                     {
                         titleId = R.string.title_horizon_color;
-                        startColor = Settings.getLensHorizonColor(context);
                         buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
                         allowOpacity = false;
                     }
                     else
                     {
                         titleId = R.string.title_grid_color;
-                        startColor = Settings.getMapGridColor(context);
                         buttonPreferenceKey = Settings.PreferenceName.MapGridColor;
                         allowOpacity = true;
                     }
 
                     //setup button
-                    switchButton.setBackgroundColor(startColor);
+                    switchButton.setBackgroundColor(Settings.getPreferenceInt(context, buttonPreferenceKey));
                     switchButton.setLayoutParams(params);
                     preference.setButton(switchButton);
-                    preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, startColor, allowOpacity, readSettings, writeSettings));
+                    preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, allowOpacity, writeSettings));
                     break;
             }
         }
@@ -1510,7 +1500,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     else
                                     {
                                         //remove account attempt
-                                        Settings.removeLogin(SettingsActivity.this, which);
+                                        Settings.removeSpaceTrackLogin(SettingsActivity.this);
                                     }
                                 }
                             }, true);

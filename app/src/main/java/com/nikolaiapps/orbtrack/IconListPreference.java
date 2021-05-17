@@ -53,6 +53,7 @@ public class IconListPreference extends Preference
     {
         this(context, attrs, defStyleAttr, 0);
     }
+    @SuppressWarnings("unused")
     public IconListPreference(Context context, AttributeSet attrs)
     {
         this(context, attrs, 0);

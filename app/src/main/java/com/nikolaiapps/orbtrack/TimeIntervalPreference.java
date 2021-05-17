@@ -105,6 +105,7 @@ public class TimeIntervalPreference extends Preference
     {
         this(context, attrs, defStyleAttr, 0);
     }
+    @SuppressWarnings("unused")
     public TimeIntervalPreference(Context context, AttributeSet attrs)
     {
         this(context, attrs, 0);

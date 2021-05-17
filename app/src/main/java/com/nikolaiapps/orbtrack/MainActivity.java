@@ -3108,7 +3108,7 @@ public class MainActivity extends AppCompatActivity
                                     else
                                     {
                                         //remove account attempt
-                                        Settings.removeLogin(MainActivity.this, which);
+                                        Settings.removeSpaceTrackLogin(MainActivity.this);
                                     }
                                 }
                             }, true);

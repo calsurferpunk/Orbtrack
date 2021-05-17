@@ -697,7 +697,7 @@ public abstract class Settings
                             break;
 
                         case Globals.AccountType.SpaceTrack:
-                            removeLogin(currentContext, accountType);
+                            removeSpaceTrackLogin(currentContext);
                             break;
                     }
 
@@ -2635,6 +2635,7 @@ public abstract class Settings
             case PreferenceName.FirstRun:
             case PreferenceName.MetricUnits:
             case PreferenceName.LensFirstRun:
+            case PreferenceName.LensUseCamera:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.MapShow3dPaths:
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
@@ -2656,7 +2657,11 @@ public abstract class Settings
     }
 
     //Gets given boolean preference
-    private static boolean getPreferenceBoolean(Context context, String preferenceName)
+    public static boolean getPreferenceBoolean(Context context, String preferenceName, Object dependency)
+    {
+        return(getReadSettings(context).getBoolean(preferenceName, getDefaultBooleanValue(preferenceName, dependency)));
+    }
+    public static boolean getPreferenceBoolean(Context context, String preferenceName)
     {
         return(getReadSettings(context).getBoolean(preferenceName, getDefaultBooleanValue(preferenceName)));
     }
@@ -2668,7 +2673,7 @@ public abstract class Settings
     }
 
     //Get default int value for the given preference
-    private static int getDefaultIntValue(String preferenceName)
+    public static int getDefaultIntValue(String preferenceName)
     {
         switch(preferenceName)
         {
@@ -2720,7 +2725,7 @@ public abstract class Settings
     }
 
     //Gets given int preference
-    private static int getPreferenceInt(Context context, String preferenceName)
+    public static int getPreferenceInt(Context context, String preferenceName)
     {
         return(getReadSettings(context).getInt(preferenceName, getDefaultIntValue(preferenceName)));
     }
@@ -2729,6 +2734,44 @@ public abstract class Settings
     private static void setPreferenceInt(Context context, String preferenceName, int value)
     {
         getWriteSettings(context).putInt(preferenceName, value).apply();
+    }
+
+    //Get default float value for the given preference
+    public static float getDefaultFloatValue(String preferenceName)
+    {
+        switch(preferenceName)
+        {
+            case PreferenceName.LensWidth:
+                return(39.279f);
+
+            case PreferenceName.LensHeight:
+                return(65.789f);
+
+            case PreferenceName.MapSpeedScale + SubPreferenceName.Globe:
+            case PreferenceName.MapSpeedScale + SubPreferenceName.Map:
+                return(0.5f);
+
+            case PreferenceName.MapSensitivityScale + SubPreferenceName.Globe:
+            case PreferenceName.MapSensitivityScale + SubPreferenceName.Map:
+                return(0.8f);
+
+            case PreferenceName.MapMarkerScale:
+                return(0.65f);
+        }
+
+        return(0);
+    }
+
+    //Gets given float preference
+    public static float getPreferenceFloat(Context context, String preferenceName)
+    {
+        return(getReadSettings(context).getFloat(preferenceName, getDefaultFloatValue(preferenceName)));
+    }
+
+    //Sets given float preference
+    private static void setPreferenceFloat(Context context, String preferenceName, float value)
+    {
+        getWriteSettings(context).putFloat(preferenceName, value).apply();
     }
 
     //Gets if first run
@@ -2847,18 +2890,22 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensUseHorizon, show);
     }
 
+    //Gets lens using camera
+    public static boolean getLensUseCamera(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensUseCamera));
+    }
+
     //Gets lens azimuth user offset
     public static float getLensAzimuthUserOffset(Context context)
     {
-        return(getReadSettings(context).getFloat(PreferenceName.LensAzimuthUserOffset, 0));
+        return(getPreferenceFloat(context, PreferenceName.LensAzimuthUserOffset));
     }
 
     //Sets lens azimuth user offset
     public static void setLensAzimuthUserOffset(Context context, float offset)
     {
-        SharedPreferences.Editor writeSettings = getWriteSettings(context);
-        writeSettings.putFloat(PreferenceName.LensAzimuthUserOffset, offset);
-        writeSettings.apply();
+        setPreferenceFloat(context, PreferenceName.LensAzimuthUserOffset, offset);
     }
 
     //Gets if lens needs rotating
@@ -2882,15 +2929,13 @@ public abstract class Settings
     //Gets lens width
     public static float getLensWidth(Context context)
     {
-        return(getReadSettings(context).getFloat(PreferenceName.LensWidth, 39.279f));
+        return(getPreferenceFloat(context, PreferenceName.LensWidth));
     }
 
     //Set lens width
     public static void setLensWidth(Context context, float width)
     {
-        SharedPreferences.Editor writeSettings = getWriteSettings(context);
-        writeSettings.putFloat(PreferenceName.LensWidth, width);
-        writeSettings.apply();
+        setPreferenceFloat(context, PreferenceName.LensWidth, width);
     }
 
     //Gets lens using auto height
@@ -2908,14 +2953,13 @@ public abstract class Settings
     //Gets lens height
     public static float getLensHeight(Context context)
     {
-        return(getReadSettings(context).getFloat(PreferenceName.LensHeight, 65.789f));
+        return(getPreferenceFloat(context, PreferenceName.LensHeight));
     }
 
     //Set lens height
     public static void setLensHeight(Context context, float height)
     {
-        SharedPreferences.Editor writeSettings = getWriteSettings(context);
-        writeSettings.putFloat(PreferenceName.LensHeight, height).apply();
+        setPreferenceFloat(context, PreferenceName.LensHeight, height);
     }
 
     //Gets list path progress being shown
@@ -3021,7 +3065,7 @@ public abstract class Settings
     //Gets map speed scale
     public static float getMapSpeedScale(Context context, boolean forGlobe)
     {
-        return(getReadSettings(context).getFloat(PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.5f));
+        return(getPreferenceFloat(context, PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map)));
     }
 
     //Sets map speed scale
@@ -3031,14 +3075,14 @@ public abstract class Settings
         if(scale >= (SpeedScaleMin / 100.0f) && scale <= (SpeedScaleMax / 100.0f))
         {
             //set scale
-            getWriteSettings(context).putFloat(PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale).apply();
+            setPreferenceFloat(context, PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale);
         }
     }
 
     //Gets map sensitivity scale
     public static float getMapSensitivityScale(Context context, boolean forGlobe)
     {
-        return(getReadSettings(context).getFloat(PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), 0.8f));
+        return(getPreferenceFloat(context, PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map)));
     }
 
     //Sets map sensitivity scale
@@ -3048,7 +3092,7 @@ public abstract class Settings
         if(scale >= (SensitivityScaleMin / 100.0f) && scale <= (SensitivityScaleMax / 100.0f))
         {
             //set scale
-            getWriteSettings(context).putFloat(PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale).apply();
+            setPreferenceFloat(context, PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale);
         }
     }
 
@@ -3080,7 +3124,7 @@ public abstract class Settings
     public static float getMapMarkerScale(Context context)
     {
         //get scale
-        return(getReadSettings(context).getFloat(PreferenceName.MapMarkerScale, 0.65f));
+        return(getPreferenceFloat(context, PreferenceName.MapMarkerScale));
     }
 
     //Sets map marker scale
@@ -3090,7 +3134,7 @@ public abstract class Settings
         if(scale >= (IconScaleMin / 100.0f) && scale <= (IconScaleMax / 100.0f))
         {
             //set scale
-            getWriteSettings(context).putFloat(PreferenceName.MapMarkerScale, scale).apply();
+            setPreferenceFloat(context, PreferenceName.MapMarkerScale, scale);
         }
     }
 
@@ -3324,7 +3368,7 @@ public abstract class Settings
     //Gets satellite source using GP
     public static boolean getSatelliteSourceUseGP(Context context, int source)
     {
-        return(getDefaultBooleanValue(PreferenceName.SatelliteSourceUseGP + source, source));
+        return(getPreferenceBoolean(context, PreferenceName.SatelliteSourceUseGP + source, source));
     }
 
     //Gets owner icon(s)
@@ -3392,34 +3436,24 @@ public abstract class Settings
         }
     }
 
-    //Sets login name and password
-    public static void setLogin(Context context, String user, String password, int accountType)
+    //Sets space-track login name and password
+    public static void setSpaceTrackLogin(Context context, String user, String password)
     {
         SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
-        switch(accountType)
-        {
-            case Globals.AccountType.SpaceTrack:
-                writeSettings.putString(PreferenceName.SpaceTrackUser, user);
-                writeSettings.putString(PreferenceName.SpaceTrackPassword, Encryptor.encrypt(context, password));
-                writeSettings.apply();
-                break;
-        }
+        writeSettings.putString(PreferenceName.SpaceTrackUser, user);
+        writeSettings.putString(PreferenceName.SpaceTrackPassword, Encryptor.encrypt(context, password));
+        writeSettings.apply();
     }
 
-    //Removes login name and password
-    public static void removeLogin(Context context, int accountType)
+    //Removes space-track login name and password
+    public static void removeSpaceTrackLogin(Context context)
     {
         SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
-        switch(accountType)
-        {
-            case Globals.AccountType.SpaceTrack:
-                writeSettings.remove(PreferenceName.SpaceTrackUser);
-                writeSettings.remove(PreferenceName.SpaceTrackPassword);
-                writeSettings.apply();
-                break;
-        }
+        writeSettings.remove(PreferenceName.SpaceTrackUser);
+        writeSettings.remove(PreferenceName.SpaceTrackPassword);
+        writeSettings.apply();
     }
 
     //Gets notify pass next only key

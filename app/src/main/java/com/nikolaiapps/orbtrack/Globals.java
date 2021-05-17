@@ -483,7 +483,7 @@ public abstract class Globals
                                 if(list2Value == null || list2Value.equals(Settings.Options.Sources.SpaceTrack))
                                 {
                                     //update login
-                                    Settings.setLogin(context, textValue, text2Value, accountType);
+                                    Settings.setSpaceTrackLogin(context, textValue, text2Value);
                                 }
 
                                 //if setting source and it is valid

@@ -88,6 +88,7 @@ public class RadioGroupPreference extends Preference
         this(context, attrs, defStyleAttr, 0);
     }
 
+    @SuppressWarnings("unused")
     public RadioGroupPreference(Context context, AttributeSet attrs)
     {
         this(context, attrs, 0);
@@ -243,11 +244,11 @@ public class RadioGroupPreference extends Preference
 
         if(valueType == Boolean.class)
         {
-            value = String.valueOf(readSettings.getBoolean(preferenceName, false));
+            value = String.valueOf(Settings.getPreferenceBoolean(context, preferenceName));
         }
         else if(valueType == Byte.class || valueType == Integer.class)
         {
-            value = String.valueOf(readSettings.getInt(preferenceName, 0));
+            value = String.valueOf(Settings.getPreferenceInt(context, preferenceName));
         }
         else if(valueType == Long.class)
         {

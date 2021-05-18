@@ -156,7 +156,7 @@ public class EditValuesDialog
                             savedCount++;
                             if(saveListener != null)
                             {
-                                saveListener.onSave(EditValuesDialog.this, currentIndex, (itemIDs != null ? itemIDs[currentIndex] : -1), textValue, text2Value, number, number2, number3, (itemListValues != null ? editValueList.getSelectedValue("").toString() : null), (itemList2Values != null ? editValueList2.getSelectedValue("").toString() : null), (itemDateValues != null ? editDate.getDate().getTimeInMillis() : -1));
+                                saveListener.onSave(EditValuesDialog.this, currentIndex, (itemIDs != null && currentIndex < itemIDs.length ? itemIDs[currentIndex] : -1), textValue, text2Value, number, number2, number3, (itemListValues != null ? editValueList.getSelectedValue("").toString() : null), (itemList2Values != null ? editValueList2.getSelectedValue("").toString() : null), (itemDateValues != null ? editDate.getDate().getTimeInMillis() : -1));
                             }
                         }
                         else
@@ -227,20 +227,20 @@ public class EditValuesDialog
         editValue2Title.setText(itemTitle);
 
         //set texts
-        if(itemTextValues != null)
+        if(itemTextValues != null && currentIndex < itemTextValues.length)
         {
             editValueText.setText(itemTextValues[currentIndex]);
             editValueText.selectAll();
         }
-        if(itemText2Values != null)
+        if(itemText2Values != null && currentIndex < itemText2Values.length)
         {
             editValue2Text.setText(itemText2Values[currentIndex]);
         }
-        if(itemTextRowValues != null)
+        if(itemTextRowValues != null && currentIndex < itemTextRowValues.length)
         {
             editText.setText(itemTextRowValues[currentIndex]);
         }
-        if(itemTextRow2Values != null)
+        if(itemTextRow2Values != null && currentIndex < itemTextRow2Values.length)
         {
             editText2.setText(itemTextRow2Values[currentIndex]);
         }
@@ -249,21 +249,21 @@ public class EditValuesDialog
         if(itemNumberTitles != null)
         {
             //set number texts
-            if(itemNumberValues != null)
+            if(itemNumberValues != null && currentIndex < itemNumberValues.length)
             {
                 numberText = Globals.getNumberString(itemNumberValues[currentIndex], 4);
                 itemTitle = (itemNumberTitles.length > 0 && itemNumberTitles[0] != null ? itemNumberTitles[0] : "");
                 editNumberTitle.setText(itemTitle);
                 editNumberText.setText(numberText);
             }
-            if(itemNumber2Values != null)
+            if(itemNumber2Values != null && currentIndex < itemNumber2Values.length)
             {
                 numberText = Globals.getNumberString(itemNumber2Values[currentIndex], 4);
                 itemTitle = (itemNumberTitles.length > 1 && itemNumberTitles[1] != null ? itemNumberTitles[1] : "");
                 editNumber2Title.setText(itemTitle);
                 editNumber2Text.setText(numberText);
             }
-            if(itemNumber3Values != null)
+            if(itemNumber3Values != null && currentIndex < itemNumber3Values.length)
             {
                 numberText = Globals.getNumberString(itemNumber3Values[currentIndex], 2);
                 itemTitle = (itemNumberTitles.length > 2 && itemNumberTitles[2] != null ? itemNumberTitles[2] : "");
@@ -273,14 +273,14 @@ public class EditValuesDialog
         }
 
         //if using list
-        if(itemListValues != null && itemDefaultListValues != null)
+        if(itemListValues != null && itemDefaultListValues != null && currentIndex < itemDefaultListValues.length)
         {
             //set list
             editValueList.setSelectedValue(itemDefaultListValues[currentIndex]);
         }
 
         //if using list 2
-        if(itemList2Values != null && itemDefaultList2Values != null)
+        if(itemList2Values != null && itemDefaultList2Values != null && currentIndex < itemDefaultList2Values.length)
         {
             //set title and list
             itemTitle = (itemList2Title != null ? itemList2Title : "");
@@ -289,7 +289,7 @@ public class EditValuesDialog
         }
 
         //if using date
-        if(itemDateValues != null)
+        if(itemDateValues != null && currentIndex < itemDateValues.length)
         {
             //set date
             date = Globals.getGMTTime();

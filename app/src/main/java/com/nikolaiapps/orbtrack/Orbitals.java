@@ -116,9 +116,9 @@ public abstract class Orbitals
         private final int columnTitleStringId;
         private final PageListItem[] items;
 
-        public PageListAdapter(View parentView, int page, int titleStringId, boolean simple)
+        public PageListAdapter(View parentView, int page, int titleStringId, String categoryTitle, boolean simple)
         {
-            super(parentView, null);
+            super(parentView, categoryTitle);
 
             int index;
             String sqlConditions = null;
@@ -169,10 +169,6 @@ public abstract class Orbitals
 
             this.itemsRefID = R.layout.orbitals_item;
         }
-        public PageListAdapter(View parentView, int page)
-        {
-            this(parentView, page, -1, false);
-        }
 
         @Override
         public int getItemCount()
@@ -193,20 +189,35 @@ public abstract class Orbitals
         }
 
         @Override
+        protected boolean showColumnTitles(int page)
+        {
+            return(categoryTitle == null);
+        }
+
+        @Override
         protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
         {
-            int nonNameVisibility = (currentPage == PageType.Satellites && !forSetup ? View.VISIBLE : View.GONE);
-            TextView tleDateText = listColumns.findViewById(R.id.Object_TLE_Age_Text);
-            BorderButton colorButton = listColumns.findViewById(R.id.Object_Color_Button);
-            AppCompatButton visibleButton = listColumns.findViewById(R.id.Object_Visible_Button);
+            //if have category
+            if(categoryText != null && categoryTitle != null)
+            {
+                categoryText.setText(categoryTitle);
+                ((View)categoryText.getParent()).setVisibility(View.VISIBLE);
+            }
+            else
+            {
+                int nonNameVisibility = (currentPage == PageType.Satellites && !forSetup ? View.VISIBLE : View.GONE);
+                TextView tleDateText = listColumns.findViewById(R.id.Object_TLE_Age_Text);
+                BorderButton colorButton = listColumns.findViewById(R.id.Object_Color_Button);
+                AppCompatButton visibleButton = listColumns.findViewById(R.id.Object_Visible_Button);
 
-            ((TextView)listColumns.findViewById(R.id.Object_Item_Text)).setText(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name);
-            visibleButton.setVisibility(View.INVISIBLE);
-            tleDateText.setText(R.string.title_tle_age);
-            tleDateText.setVisibility(nonNameVisibility);
-            listColumns.findViewById(R.id.Object_TLE_Age_Under).setVisibility(View.GONE);
-            colorButton.setVisibility(View.GONE);
-            listColumns.findViewById(R.id.Object_Color_Button_Replace).setVisibility(View.VISIBLE);
+                ((TextView)listColumns.findViewById(R.id.Object_Item_Text)).setText(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name);
+                visibleButton.setVisibility(View.INVISIBLE);
+                tleDateText.setText(R.string.title_tle_age);
+                tleDateText.setVisibility(nonNameVisibility);
+                listColumns.findViewById(R.id.Object_TLE_Age_Under).setVisibility(View.GONE);
+                colorButton.setVisibility(View.GONE);
+                listColumns.findViewById(R.id.Object_Color_Button_Replace).setVisibility(View.VISIBLE);
+            }
 
             super.setColumnTitles(listColumns, categoryText, page);
         }
@@ -435,9 +446,19 @@ public abstract class Orbitals
     //Page view
     public static class Page extends Selectable.ListFragment
     {
+        private final boolean simple;
+        private final String categoryTitle;
+
         private BroadcastReceiver updateReceiver;
         private BroadcastReceiver saveReceiver;
         private Globals.PendingFile pendingSaveFile;
+
+        public Page(String title, boolean simple)
+        {
+            super();
+            this.simple = simple;
+            this.categoryTitle = title;
+        }
 
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -447,7 +468,7 @@ public abstract class Orbitals
             View newView;
             Intent serviceIntent;
             ArrayList<Database.DatabaseSatellite> satelliteList;
-            final PageListAdapter listAdapter = new PageListAdapter(listParentView, page);
+            final PageListAdapter listAdapter = new PageListAdapter(listParentView, page, -1, categoryTitle, simple);
 
             //create view
             newView = this.onCreateView(inflater, container, listAdapter, group, page);
@@ -1113,7 +1134,7 @@ public abstract class Orbitals
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, -1, new Page()));
+            return(this.getItem(group, position, -1, new Page(null, false)));
         }
 
         @Override

@@ -8,14 +8,20 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.ContextThemeWrapper;
+import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.FrameLayout;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -31,13 +37,17 @@ import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.TimeZone;
 
 
@@ -46,6 +56,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     static
     {
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
+
+    private static abstract class SetupPageType
+    {
+        static final int Welcome = 0;
+        static final int Display = 1;
+        static final int Location = 2;
+        static final int Updates = 3;
+        static final int Satellites = 4;
+        static final int Finished = 5;
+        static final int PageCount = 6;
     }
 
     public static abstract class ScreenKey
@@ -63,6 +84,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     public static class SettingsSubFragment extends PreferenceFragmentCompat
     {
+        private static boolean showSetup;
+
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
         {
@@ -77,8 +100,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 args = new Bundle();
             }
 
-            //get screen key and set display
-            screenKey = args.getString("rootKey");
+            //get if showing setup and screen key
+            showSetup = args.getBoolean(EXTRA_SHOW_SETUP, false);
+            screenKey = args.getString(RootKey);
+
+            //set display
             setPreferencesFromResource(R.xml.settings_main, screenKey);
 
             //if context and screen key exist
@@ -200,6 +226,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         IconListPreference informationList = this.findPreference(Settings.PreferenceName.InformationSource);
                         TimeIntervalPreference tleAutoTime = this.findPreference(Settings.PreferenceName.TLEAutoUpdateRate);
                         TimeIntervalPreference catalogAutoTime = this.findPreference(Settings.PreferenceName.CatalogAutoUpdateRate);
+                        PreferenceCategory altitudeCategory = this.findPreference("AltitudeCategory");
+                        PreferenceCategory timeZoneCategory = this.findPreference("TimeZoneCategory");
+                        PreferenceCategory informationCategory = this.findPreference("InformationCategory");
 
                         //initialize values
                         Settings.Options.Updates.initValues(context);
@@ -218,31 +247,569 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(informationList, Settings.Options.Updates.InformationSourceItems, Settings.Options.Updates.InformationSourceValues, Settings.Options.Updates.InformationSourceImageIds, null, null);
                         setupTimeInterval(tleAutoTime);
                         setupTimeInterval(catalogAutoTime);
+                        setupCategory(altitudeCategory);
+                        setupCategory(timeZoneCategory);
+                        setupCategory(informationCategory);
                         break;
                 }
             }
+        }
+
+        //Gets if preference should be visible
+        private static boolean preferenceVisible(String preferenceKey)
+        {
+            switch(preferenceKey)
+            {
+                case Settings.PreferenceName.SatelliteSourceUseGP:
+                case Settings.PreferenceName.AltitudeSource:
+                case Settings.PreferenceName.TimeZoneSource:
+                case Settings.PreferenceName.InformationSource:
+                case Settings.PreferenceName.TranslateInformation:
+                case Settings.PreferenceName.ShareTranslations:
+                    return(!showSetup);
+
+                default:
+                    return(true);
+            }
+        }
+
+        //Sets up a list
+        private static void setupList(IconListPreference preference, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts, Preference childPreference)
+        {
+            //if preference exists
+            if(preference != null)
+            {
+                final Context context = preference.getContext();
+                final String preferenceKey = preference.getKey();
+                boolean forGlobe = false;
+                int valueIndex = -1;
+                Object currentValue = null;
+
+                //if preference should be visible
+                if(preferenceVisible(preferenceKey))
+                {
+                    //get current value based on key
+                    switch(preferenceKey)
+                    {
+                        case Settings.PreferenceName.ColorTheme:
+                            currentValue = Settings.getColorTheme(context);
+
+                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            {
+                                @Override
+                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                {
+                                    //allow if changing
+                                    return((int)newValue != Settings.getColorTheme(context));
+                                }
+                            });
+                            break;
+
+                        case Settings.PreferenceName.LensIndicator:
+                            currentValue = Settings.getIndicator(context);
+                            break;
+
+                        case Settings.PreferenceName.LensUpdateDelay:
+                            currentValue = Settings.getLensUpdateDelay(context);
+                            break;
+
+                        case Settings.PreferenceName.ListUpdateDelay:
+                            currentValue = Settings.getListUpdateDelay(context);
+                            break;
+
+                        case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe:
+                            forGlobe = true;
+                            //fall through
+
+                        case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map:
+                            currentValue = Settings.getMapLayerType(context, forGlobe);
+
+                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            {
+                                @Override
+                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                {
+                                    int layerType = (int)newValue;
+
+                                    //if child preference exists
+                                    if(childPreference != null)
+                                    {
+                                        //update child visibility
+                                        childPreference.setVisible(layerType == CoordinatesFragment.MapLayerType.Satellite || layerType == CoordinatesFragment.MapLayerType.Hybrid);
+                                    }
+
+                                    //allow change
+                                    return(true);
+                                }
+                            });
+                            break;
+
+                        case Settings.PreferenceName.MapMarkerInfoLocation:
+                            currentValue = Settings.getMapMarkerInfoLocation(context);
+                            break;
+
+                        case Settings.PreferenceName.SatelliteSource:
+                            valueIndex = Settings.getSatelliteSource(context);
+
+                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            {
+                                @Override
+                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                {
+                                    byte source = (byte)newValue;
+                                    SwitchPreference childSwitch = (SwitchPreference)childPreference;
+                                    boolean sourceUseGP = !Settings.getSatelliteSourceUseGP(context, source);
+
+                                    //update child switch
+                                    childSwitch.setChecked(sourceUseGP);
+                                    childSwitch.setEnabled(source != Database.UpdateSource.N2YO);
+
+                                    //if changing source
+                                    if(source != Settings.getSatelliteSource(context))
+                                    {
+                                        //clear master satellites
+                                        Database.clearMasterSatelliteTable(context);
+                                    }
+
+                                    //allow change
+                                    return(true);
+                                }
+                            });
+                            break;
+
+                        case Settings.PreferenceName.AltitudeSource:
+                            valueIndex = (Settings.getAltitudeSource(context) == LocationService.OnlineSource.MapQuest ? 0 : 1);
+                            break;
+
+                        case Settings.PreferenceName.TimeZoneSource:
+                            valueIndex = (Settings.getTimeZoneSource(context) == LocationService.OnlineSource.GeoNames ? 0 : 1);
+                            break;
+
+                        case Settings.PreferenceName.InformationSource:
+                            valueIndex = Settings.getInformationSource(context);
+                            valueIndex = (valueIndex == Database.UpdateSource.NASA ? 0 : valueIndex == Database.UpdateSource.Celestrak ? 1 : 2);
+                            break;
+                    }
+                    if(valueIndex >= 0 && valueIndex < values.length)
+                    {
+                        currentValue = values[valueIndex];
+                    }
+
+                    //set adapter and state
+                    if(items instanceof IconSpinner.Item[])
+                    {
+                        preference.setAdapter(context, (IconSpinner.Item[])items);
+                    }
+                    else
+                    {
+                        preference.setAdapter(context, items, values, itemImageIds, subTexts);
+                    }
+                    preference.setSelectedValue(currentValue);
+                }
+                else
+                {
+                    //hide preference
+                    preference.setVisible(false);
+                }
+            }
+        }
+
+        //Sets up up a preference switch
+        private static void setupSwitch(SwitchPreference preference, TimeIntervalPreference timePreference)
+        {
+            //if preference exists
+            if(preference != null)
+            {
+                final Context context = preference.getContext();
+                final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
+                final String preferenceKey = preference.getKey();
+                final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
+                final Object dependency = Settings.getSatelliteSource(context);
+                final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
+
+                //if preference should be visible
+                if(preferenceVisible(preferenceKey))
+                {
+                    //set state and listener
+                    preference.setIconSpaceReserved(false);
+                    preference.setChecked(checked);
+                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                    {
+                        @Override
+                        public boolean onPreferenceChange(Preference preference, Object newValue)
+                        {
+                            boolean checked = (Boolean)newValue;
+                            boolean isAutoUpdate = (timePreference != null);
+                            String subKey = "";
+                            UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
+
+                            //if -not for auto update- or -settings are changing-
+                            if(!isAutoUpdate || settings.enabled != checked)
+                            {
+                                //if for GP data usage
+                                if(isGPDataUsage)
+                                {
+                                    //get sub key
+                                    subKey = String.valueOf(Settings.getSatelliteSource(context));
+
+                                    //invert value
+                                    checked = !checked;
+                                }
+
+                                //save preference
+                                writeSettings.putBoolean(preferenceKey + subKey, checked).apply();
+
+                                //if auto update
+                                if(isAutoUpdate)
+                                {
+                                    //apply changes
+                                    Settings.setAutoUpdate(context, preferenceKey);
+                                }
+                            }
+
+                            //if time preference is set
+                            if(timePreference != null)
+                            {
+                                //update visibility
+                                timePreference.setVisible(checked);
+                            }
+
+                            //allow change
+                            return(true);
+                        }
+                    });
+
+                    //if might need changes
+                    if(timePreference != null)
+                    {
+                        //call once to update changes
+                        preference.getOnPreferenceChangeListener().onPreferenceChange(preference, checked);
+                    }
+                }
+                else
+                {
+                    //hide preference
+                    preference.setVisible(false);
+                }
+            }
+        }
+
+        //Sets up a slider preference
+        private static void setupSlider(SliderPreference preference)
+        {
+            //if preference exists
+            if(preference != null)
+            {
+                final String preferenceKey = preference.getKey();
+                int min = -1;
+                int max = -1;
+
+                switch(preferenceKey)
+                {
+                    case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe:
+                    case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map:
+                        min = Settings.SensitivityScaleMin;
+                        max = Settings.SensitivityScaleMax;
+                        break;
+
+                    case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe:
+                    case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map:
+                        min = Settings.SpeedScaleMin;
+                        max = Settings.SpeedScaleMax;
+                        break;
+
+                    case Settings.PreferenceName.MapMarkerScale:
+                        min = Settings.IconScaleMin;
+                        max = Settings.IconScaleMax;
+                        break;
+                }
+
+                //if range is valid
+                if(min >= 0)
+                {
+                    //set range
+                    preference.setRange(min, max);
+                }
+            }
+        }
+
+        //Sets up a switch button preference
+        private static void setupSwitchButton(SwitchButtonPreference preference)
+        {
+            //if preference exists
+            if(preference != null)
+            {
+                final Context context = preference.getContext();
+                final int titleId;
+                final boolean allowOpacity;
+                final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
+                final String preferenceKey = preference.getKey();
+                final String buttonPreferenceKey;
+
+                //if lens horizon or show grid toggle
+                switch(preferenceKey)
+                {
+                    case Settings.PreferenceName.LensUseHorizon:
+                    case Settings.PreferenceName.MapShowGrid:
+                        BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
+                        float[] size = Globals.dpsToPixels(context, 60, 40);
+                        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
+
+                        //get specific settings
+                        if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
+                        {
+                            titleId = R.string.title_horizon_color;
+                            buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
+                            allowOpacity = false;
+                        }
+                        else
+                        {
+                            titleId = R.string.title_grid_color;
+                            buttonPreferenceKey = Settings.PreferenceName.MapGridColor;
+                            allowOpacity = true;
+                        }
+
+                        //setup button
+                        switchButton.setBackgroundColor(Settings.getPreferenceInt(context, buttonPreferenceKey));
+                        switchButton.setLayoutParams(params);
+                        preference.setButton(switchButton);
+                        preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, allowOpacity, writeSettings));
+                        break;
+                }
+            }
+        }
+
+        //Sets up a switch text preference
+        private static void setupSwitchText(SwitchTextPreference preference)
+        {
+            //if preference exists
+            if(preference != null)
+            {
+                final Context context = preference.getContext();
+                final String preferenceKey = preference.getKey();
+                float enabledValue;
+                float disabledValue;
+
+                switch(preferenceKey)
+                {
+                    case Settings.PreferenceName.LensWidth:
+                    case Settings.PreferenceName.LensHeight:
+                        boolean isWidth = preferenceKey.equals(Settings.PreferenceName.LensWidth);
+
+                        //get lens width and height
+                        try
+                        {
+                            Camera.Parameters cameraParams;
+                            cameraParams = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK).getParameters();
+                            enabledValue = (isWidth ? cameraParams.getHorizontalViewAngle() : cameraParams.getVerticalViewAngle());
+                        }
+                        catch(Exception ex)
+                        {
+                            enabledValue = 45;
+                        }
+                        disabledValue = (isWidth ? Settings.getLensWidth(context) : Settings.getLensHeight(context));
+
+                        //set values
+                        preference.setValueText(String.valueOf(enabledValue), String.valueOf(disabledValue));
+                        break;
+
+                    case Settings.PreferenceName.LensAzimuthUserOffset:
+                        //set value
+                        preference.setValueText(String.valueOf(Settings.getLensAzimuthUserOffset(context)));
+                        break;
+                }
+            }
+        }
+
+        //Sets up a time interval
+        private static void setupTimeInterval(TimeIntervalPreference preference)
+        {
+            //if preference exists
+            if(preference != null)
+            {
+                final Context context = preference.getContext();
+                final String preferenceKey = preference.getKey();
+
+                //set listener
+                preference.setOnPreferenceChangedListener(new TimeIntervalPreference.OnPreferenceChangedListener()
+                {
+                    @Override
+                    public void onPreferenceChanged(TimeIntervalPreference preference, Object newValue)
+                    {
+                        TimeIntervalPreference.IntervalValues values = (TimeIntervalPreference.IntervalValues)newValue;
+                        UpdateService.AlarmUpdateSettings settings = Settings.getAutoUpdateSettings(context, preferenceKey);
+
+                        //if settings changed
+                        if(values.hour != settings.hour || values.minute != settings.minute || values.intervalMs != settings.rate)
+                        {
+                            //apply changes
+                            Settings.setAutoUpdate(context, preferenceKey);
+                        }
+                    }
+                });
+            }
+        }
+
+        //Setups a category
+        private static void setupCategory(PreferenceCategory category)
+        {
+            //if category exists
+            if(category != null)
+            {
+                //set visibility
+                category.setVisible(!showSetup);
+            }
+        }
+    }
+
+    public static class SetupPage extends Selectable.ListFragment
+    {
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        {
+            int page = this.getPageParam();
+            boolean onWelcome = (page == SetupPageType.Welcome);
+            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.setup_view, container, false);
+
+            //handle display based on page
+            switch(page)
+            {
+                case SetupPageType.Welcome:
+                case SetupPageType.Finished:
+                    rootView.findViewById(R.id.Setup_Text_Layout).setVisibility(View.VISIBLE);
+                    ((TextView)rootView.findViewById(R.id.Setup_Text_Title)).setText(onWelcome ? R.string.title_welcome : R.string.title_finished);
+                    ((TextView)rootView.findViewById(R.id.Setup_Text)).setText(onWelcome ? R.string.desc_quick_setup : R.string.desc_finished_setup);
+                    break;
+            }
+
+            //return view
+            return(rootView);
+        }
+
+        @Override
+        protected boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
+        {
+            return(false);
+        }
+
+        @Override
+        protected void onActionModeEdit() {}
+
+        @Override
+        protected void onActionModeDelete() {}
+
+        @Override
+        protected int onActionModeConfirmDelete()
+        {
+            return(0);
+        }
+
+        @Override
+        protected void onActionModeSave() {}
+
+        @Override
+        protected void onActionModeSync() {}
+
+        @Override
+        protected void onUpdateStarted() {}
+
+        @Override
+        protected void onUpdateFinished(boolean success) {}
+    }
+
+    private class SetupPageAdapter extends Selectable.ListFragmentAdapter
+    {
+        public SetupPageAdapter(FragmentManager fm, View parentView)
+        {
+            super(fm, parentView, null, null, null, null, null, null, null, -1, null);
+        }
+
+        @Override
+        public @NonNull Fragment getItem(int position)
+        {
+            Bundle params;
+            Context context = SettingsActivity.this;
+            Fragment page;
+
+            //get page for position
+            switch(position)
+            {
+                case SetupPageType.Location:
+                    page = getSettingsFragment(ScreenKey.Locations, context.getString(R.string.title_locations));
+                    params = page.getArguments();
+                    break;
+
+                case SetupPageType.Display:
+                case SetupPageType.Updates:
+                    page = new SettingsSubFragment();
+                    params = new Bundle();
+                    params.putBoolean(EXTRA_SHOW_SETUP, true);
+                    params.putString(RootKey, (position == SetupPageType.Updates ? ScreenKey.Updates : ScreenKey.Display));
+                    break;
+
+                case SetupPageType.Satellites:
+                    page = getOrbitalsFragment();
+                    params = page.getArguments();
+                    break;
+
+                default:
+                case SetupPageType.Welcome:
+                case SetupPageType.Finished:
+                    page = this.getItem(-1, position, -1, new SetupPage());
+                    params = page.getArguments();
+                    break;
+            }
+
+            //add SetupPageType to params
+            if(params == null)
+            {
+                params = new Bundle();
+            }
+            params.putInt(SetupPageParam, position);
+            page.setArguments(params);
+
+            //return page
+            return(page);
+        }
+
+        @Override
+        public int getCount()
+        {
+            return(SetupPageType.PageCount);
         }
     }
 
     public static final String EXTRA_RECREATE = "recreate";
     public static final String EXTRA_RECREATE_MAP = "recreateMap";
     public static final String EXTRA_START_SCREEN = "startScreen";
+    public static final String EXTRA_SHOW_SETUP = "showSetup";
     private static final String RootKey = "rootKey";
+    private static final String SetupPageParam = "setupPageParam";
 
     private static boolean inEditMode = false;
     private static Intent resultIntent = null;
 
     private byte locationSource;
     private int currentPage;
+    private boolean isLoading;
+    private boolean showSetup;
+    private boolean updateNow;
     private boolean pendingUpdate;
     private boolean needSaveCurrentLocation;
     private String currentPageKey;
-    private FrameLayout settingsLayout;
+    private TextView infoText;
+    private CheckBox inputCheckBox;
+    private ViewGroup settingsLayout;
+    private LinearLayout progressLayout;
     private FragmentManager manager;
+    private SwipeStateViewPager setupPager;
     private MaterialButton backButton;
+    private MaterialButton nextButton;
     private FloatingActionButton floatingButton;
+    private CircularProgressIndicator loadingBar;
     private AlertDialog addCurrentLocationDialog;
     private LocationReceiver locationReceiver;
+    private Orbitals.PageAdapter orbitalsPageAdapter;
     private Settings.PageAdapter settingsPageAdapter;
     private Settings.Locations.ItemListAdapter settingsLocationsListAdapter;
     private Settings.Options.Accounts.ItemListAdapter accountsListAdapter;
@@ -301,12 +868,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         Intent startIntent = this.getIntent();
         ActionBar mainActionBar;
         Fragment startFragment;
+        List<Fragment> previousPages;
 
         //get start intent and values
         if(startIntent == null)
         {
             startIntent = new Intent();
         }
+        showSetup = startIntent.getBooleanExtra(EXTRA_SHOW_SETUP, false);
         startScreenKey = startIntent.getStringExtra(EXTRA_START_SCREEN);
 
         //if result intent does not exist yet
@@ -319,18 +888,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //set defaults
         currentPage = -1;
         currentPageKey = startScreenKey;
-        pendingUpdate = false;
+        isLoading = pendingUpdate = updateNow = false;
         locationSource = Database.LocationType.Current;
+        orbitalsPageAdapter = null;
         settingsPageAdapter = null;
         settingsLocationsListAdapter = null;
         accountsListAdapter = null;
 
         //set view
-        this.setContentView(R.layout.settings_layout);
+        this.setContentView(showSetup ? R.layout.setup_layout : R.layout.settings_layout);
 
         //setup displays
-        settingsLayout = this.findViewById(R.id.Settings_Layout);
-        floatingButton = this.findViewById(R.id.Settings_Layout_Floating_Button);
+        settingsLayout = this.findViewById(showSetup ? R.id.Setup_Layout : R.id.Settings_Layout);
+        progressLayout = (showSetup ? this.findViewById(R.id.Setup_Progress_Layout) : null);
+        floatingButton = this.findViewById(showSetup ? R.id.Setup_Floating_Button : R.id.Settings_Layout_Floating_Button);
         floatingButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
@@ -348,86 +919,152 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 return(true);
             }
         });
-        backButton = this.findViewById(R.id.Settings_Layout_Back_Button);
+        backButton = this.findViewById(showSetup ? R.id.Setup_Back_Button : R.id.Settings_Layout_Back_Button);
         backButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
             public void onClick(View v)
             {
-                if(manager.getBackStackEntryCount() > 0)
+                //if showing setup
+                if(showSetup)
                 {
-                    manager.popBackStack();
+                    //go back a page
+                    moveSetupPage(false);
                 }
                 else
                 {
-                    SettingsActivity.this.finish();
+                    //if on a sub page
+                    if(manager.getBackStackEntryCount() > 0)
+                    {
+                        //go back a page
+                        manager.popBackStack();
+                    }
+                    else
+                    {
+                        //done
+                        SettingsActivity.this.finish();
+                    }
                 }
             }
         });
-
-        //setup starting fragment
-        switch(startScreenKey)
+        nextButton = (showSetup ? this.findViewById(R.id.Setup_Next_Button) : null);
+        if(nextButton != null)
         {
-            case ScreenKey.Accounts:
-            case ScreenKey.Locations:
-            case ScreenKey.Notifications:
-            case ScreenKey.Widgets:
-                switch(startScreenKey)
+            nextButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
                 {
-                    case ScreenKey.Accounts:
-                        titleId = R.string.title_accounts;
-                        break;
-
-                    case ScreenKey.Locations:
-                        titleId = R.string.title_locations;
-                        break;
-
-                    case ScreenKey.Notifications:
-                        titleId = R.string.title_notifications;
-                        break;
-
-                    default:
-                    case ScreenKey.Widgets:
-                        titleId = R.string.title_widgets;
-                        break;
+                    //go forward a page
+                    moveSetupPage(true);
                 }
+            });
+        }
+        infoText = (showSetup ? this.findViewById(R.id.Setup_Info_Text) : null);
+        loadingBar = (showSetup ? this.findViewById(R.id.Setup_Loading_Bar) : null);
+        inputCheckBox = (showSetup ? this.findViewById(R.id.Setup_Input_CheckBox) : null);
+        if(inputCheckBox != null)
+        {
+            inputCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+            {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                {
+                    int page = setupPager.getCurrentItem();
 
-                startFragment = getSettingsFragment(startScreenKey, this.getString(titleId));
-                break;
+                    //if on satellites
+                    if(page == SetupPageType.Satellites)
+                    {
+                        //update if updating and allow swiping if not
+                        updateNow = isChecked;
+                        setupPager.setSwipeEnabled(!updateNow);
+                    }
+                }
+            });
+        }
+        setupPager = (showSetup ? this.findViewById(R.id.Setup_Pager) : null);
 
-            case ScreenKey.Display:
-            case ScreenKey.LensView:
-            case ScreenKey.ListView:
-            case ScreenKey.MapView:
-            case ScreenKey.Updates:
-                startFragment = new SettingsSubFragment();
+        //get fragment manager
+        manager = this.getSupportFragmentManager();
 
-                args.putString(RootKey, startScreenKey);
-                startFragment.setArguments(args);
-                break;
-
-            default:
-                startFragment = new SettingsMainFragment();
-                currentPageKey = null;
-                break;
+        //if there were previous pages
+        previousPages = manager.getFragments();
+        for(Fragment currentFragment : previousPages)
+        {
+            //if a Selectable.ListFragment
+            if(currentFragment instanceof Selectable.ListFragment)
+            {
+                //update with current parent view
+                ((Selectable.ListFragment)currentFragment).setParentView(settingsLayout);
+            }
         }
 
-        //setup fragment manager
-        manager = this.getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, startFragment, startScreenKey).commit();
-        manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
+        //if not showing setup
+        if(!showSetup)
         {
-            @Override
-            public void onBackStackChanged()
+            //setup starting fragment
+            switch(startScreenKey)
             {
-                if(manager.getBackStackEntryCount() == 0)
-                {
-                    currentPage = -1;
-                }
-                updateFloatingButton();
-                updateBackButton();
+                case ScreenKey.Accounts:
+                case ScreenKey.Locations:
+                case ScreenKey.Notifications:
+                case ScreenKey.Widgets:
+                    switch(startScreenKey)
+                    {
+                        case ScreenKey.Accounts:
+                            titleId = R.string.title_accounts;
+                            break;
+
+                        case ScreenKey.Locations:
+                            titleId = R.string.title_locations;
+                            break;
+
+                        case ScreenKey.Notifications:
+                            titleId = R.string.title_notifications;
+                            break;
+
+                        default:
+                        case ScreenKey.Widgets:
+                            titleId = R.string.title_widgets;
+                            break;
+                    }
+
+                    startFragment = getSettingsFragment(startScreenKey, this.getString(titleId));
+                    break;
+
+                case ScreenKey.Display:
+                case ScreenKey.LensView:
+                case ScreenKey.ListView:
+                case ScreenKey.MapView:
+                case ScreenKey.Updates:
+                    startFragment = new SettingsSubFragment();
+
+                    args.putString(RootKey, startScreenKey);
+                    startFragment.setArguments(args);
+                    break;
+
+                default:
+                    startFragment = new SettingsMainFragment();
+                    currentPageKey = null;
+                    break;
             }
-        });
+
+            //setup fragment manager
+            manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, startFragment, startScreenKey).commit();
+            manager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener()
+            {
+                @Override
+                public void onBackStackChanged()
+                {
+                    if(manager.getBackStackEntryCount() == 0)
+                    {
+                        currentPage = -1;
+                    }
+                    updateFloatingButton();
+                    updateBackButton();
+                }
+            });
+        }
 
         //setup dialog
         addCurrentLocationDialog = Globals.createAddCurrentLocationDialog(this, new DialogInterface.OnClickListener()
@@ -449,6 +1086,43 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 lockScreenOrientation(false);
             }
         });
+
+        //if using setup pager
+        if(setupPager != null)
+        {
+            //setup pager
+            setupPager.setAdapter(new SetupPageAdapter(manager, settingsLayout));
+            setupPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
+            {
+                @Override
+                public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+
+                @Override
+                public void onPageSelected(int position)
+                {
+                    //update status
+                    switch(position)
+                    {
+                        case SetupPageType.Location:
+                            currentPage = Settings.PageType.Locations;
+                            break;
+
+                        case SetupPageType.Updates:
+                            currentPage = Settings.PageType.Updates;
+                            break;
+
+                        default:
+                            currentPage = -1;
+                            break;
+                    }
+                    updateProgress();
+                    updateFloatingButton();
+                }
+
+                @Override
+                public void onPageScrollStateChanged(int state) {}
+            });
+        }
 
         //set receivers/listeners
         locationReceiver = createLocationReceiver();
@@ -483,6 +1157,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             //if need to recreate this activity
                             if(recreateThis)
                             {
+                                Settings.Options.Display.setTheme(SettingsActivity.this);
                                 SettingsActivity.this.recreate();
                             }
                             break;
@@ -512,13 +1187,30 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         mainActionBar = getSupportActionBar();
         if(mainActionBar != null)
         {
-            //hide it
-            mainActionBar.hide();
+            //if showing setup
+            if(showSetup)
+            {
+                //set background
+                mainActionBar.setBackgroundDrawable(new ColorDrawable(Globals.resolveColorID(this, R.attr.actionBarBackground)));
+            }
+            else
+            {
+                //hide it
+                mainActionBar.hide();
+            }
         }
 
         //update display
         updateBackButton();
         updateFloatingButton();
+
+        //if showing setup
+        if(showSetup)
+        {
+            //set page
+            setupPager.setCurrentItem(SetupPageType.Welcome);
+            updateProgress();
+        }
     }
 
     @Override
@@ -534,10 +1226,51 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     @Override
+    public void onBackPressed()
+    {
+        int page;
+
+        //if showing setup
+        if(showSetup)
+        {
+            //if not loading
+            if(!isLoading)
+            {
+                //if after first page
+                page = (setupPager != null ? setupPager.getCurrentItem() : -1);
+                if(page >= 1)
+                {
+                    //go back 1 page
+                    setupPager.setCurrentItem(page - 1);
+                }
+                else
+                {
+                    //call base
+                    super.onBackPressed();
+                }
+            }
+        }
+        else
+        {
+            //call base
+            super.onBackPressed();
+        }
+    }
+
+    @Override
     public void finish()
     {
         //set result and reset
         setResult(RESULT_OK, resultIntent);
+        resultIntent = null;
+
+        super.finish();
+    }
+
+    public void cancel()
+    {
+        //set result and reset
+        setResult(RESULT_CANCELED, resultIntent);
         resultIntent = null;
 
         super.finish();
@@ -680,7 +1413,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             fragment = manager.getFragmentFactory().instantiate(getClassLoader(), fragmentClass);
 
             //set arguments
-            args.putString("rootKey", currentPageKey);
+            args.putString(RootKey, currentPageKey);
             fragment.setArguments(args);
         }
 
@@ -689,6 +1422,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, fragment, (isPage ? currentPageKey : null)).addToBackStack(null).commit();
 
         return(true);
+    }
+
+    //Gets orbital fragment with given title
+    private Fragment getOrbitalsFragment()
+    {
+        //if adapter not set yet
+        if(orbitalsPageAdapter == null)
+        {
+            //create adapter
+            orbitalsPageAdapter = new Orbitals.PageAdapter(manager, settingsLayout, null, null, null);
+        }
+
+        //return page fragment
+        return(orbitalsPageAdapter.getItem(MainActivity.Groups.Orbitals, Orbitals.PageType.Satellites, -1, new Orbitals.Page(this.getString(R.string.title_satellites), true)));
     }
 
     //Gets fragment for settings page with given screen key and title
@@ -979,365 +1726,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         });
     }
 
-    //Sets up a list
-    private static void setupList(IconListPreference preference, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts, Preference childPreference)
-    {
-        //if preference exists
-        if(preference != null)
-        {
-            final Context context = preference.getContext();
-            final String preferenceKey = preference.getKey();
-            boolean forGlobe = false;
-            int valueIndex = -1;
-            Object currentValue = null;
-
-            //get current value based on key
-            switch(preferenceKey)
-            {
-                case Settings.PreferenceName.ColorTheme:
-                    currentValue = Settings.getColorTheme(context);
-
-                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
-                    {
-                        @Override
-                        public boolean onPreferenceChange(Preference preference, Object newValue)
-                        {
-                            //allow if changing
-                            return((int)newValue != Settings.getColorTheme(context));
-                        }
-                    });
-                    break;
-
-                case Settings.PreferenceName.LensIndicator:
-                    currentValue = Settings.getIndicator(context);
-                    break;
-
-                case Settings.PreferenceName.LensUpdateDelay:
-                    currentValue = Settings.getLensUpdateDelay(context);
-                    break;
-
-                case Settings.PreferenceName.ListUpdateDelay:
-                    currentValue = Settings.getListUpdateDelay(context);
-                    break;
-
-                case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe:
-                    forGlobe = true;
-                    //fall through
-
-                case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map:
-                    currentValue = Settings.getMapLayerType(context, forGlobe);
-
-                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
-                    {
-                        @Override
-                        public boolean onPreferenceChange(Preference preference, Object newValue)
-                        {
-                            int layerType = (int)newValue;
-
-                            //if child preference exists
-                            if(childPreference != null)
-                            {
-                                //update child visibility
-                                childPreference.setVisible(layerType == CoordinatesFragment.MapLayerType.Satellite || layerType == CoordinatesFragment.MapLayerType.Hybrid);
-                            }
-
-                            //allow change
-                            return(true);
-                        }
-                    });
-                    break;
-
-                case Settings.PreferenceName.MapMarkerInfoLocation:
-                    currentValue = Settings.getMapMarkerInfoLocation(context);
-                    break;
-
-                case Settings.PreferenceName.SatelliteSource:
-                    valueIndex = Settings.getSatelliteSource(context);
-
-                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
-                    {
-                        @Override
-                        public boolean onPreferenceChange(Preference preference, Object newValue)
-                        {
-                            byte source = (byte)newValue;
-                            SwitchPreference childSwitch = (SwitchPreference)childPreference;
-                            boolean sourceUseGP = !Settings.getSatelliteSourceUseGP(context, source);
-
-                            //update child switch
-                            childSwitch.setChecked(sourceUseGP);
-                            childSwitch.setEnabled(source != Database.UpdateSource.N2YO);
-
-                            //if changing source
-                            if(source != Settings.getSatelliteSource(context))
-                            {
-                                //clear master satellites
-                                Database.clearMasterSatelliteTable(context);
-                            }
-
-                            //allow change
-                            return(true);
-                        }
-                    });
-                    break;
-
-                case Settings.PreferenceName.AltitudeSource:
-                    valueIndex = (Settings.getAltitudeSource(context) == LocationService.OnlineSource.MapQuest ? 0 : 1);
-                    break;
-
-                case Settings.PreferenceName.TimeZoneSource:
-                    valueIndex = (Settings.getTimeZoneSource(context) == LocationService.OnlineSource.GeoNames ? 0 : 1);
-                    break;
-
-                case Settings.PreferenceName.InformationSource:
-                    valueIndex = Settings.getInformationSource(context);
-                    valueIndex = (valueIndex == Database.UpdateSource.NASA ? 0 : valueIndex == Database.UpdateSource.Celestrak ? 1 : 2);
-                    break;
-            }
-            if(valueIndex >= 0 && valueIndex < values.length)
-            {
-                currentValue = values[valueIndex];
-            }
-
-            //set adapter and state
-            if(items instanceof IconSpinner.Item[])
-            {
-                preference.setAdapter(context, (IconSpinner.Item[])items);
-            }
-            else
-            {
-                preference.setAdapter(context, items, values, itemImageIds, subTexts);
-            }
-            preference.setSelectedValue(currentValue);
-        }
-    }
-
-    //Sets up up a preference switch
-    private static void setupSwitch(SwitchPreference preference, TimeIntervalPreference timePreference)
-    {
-        //if preference exists
-        if(preference != null)
-        {
-            final Context context = preference.getContext();
-            final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
-            final String preferenceKey = preference.getKey();
-            final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
-            final Object dependency = Settings.getSatelliteSource(context);
-            final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
-
-            //set state and listener
-            preference.setIconSpaceReserved(false);
-            preference.setChecked(checked);
-            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
-            {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue)
-                {
-                    boolean checked = (Boolean)newValue;
-                    boolean isAutoUpdate = (timePreference != null);
-                    String subKey = "";
-                    UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
-
-                    //if -not for auto update- or -settings are changing-
-                    if(!isAutoUpdate || settings.enabled != checked)
-                    {
-                        //if for GP data usage
-                        if(isGPDataUsage)
-                        {
-                            //get sub key
-                            subKey = String.valueOf(Settings.getSatelliteSource(context));
-
-                            //invert value
-                            checked = !checked;
-                        }
-
-                        //save preference
-                        writeSettings.putBoolean(preferenceKey + subKey, checked).apply();
-
-                        //if auto update
-                        if(isAutoUpdate)
-                        {
-                            //apply changes
-                            Settings.setAutoUpdate(context, preferenceKey);
-                        }
-                    }
-
-                    //if time preference is set
-                    if(timePreference != null)
-                    {
-                        //update visibility
-                        timePreference.setVisible(checked);
-                    }
-
-                    //allow change
-                    return(true);
-                }
-            });
-
-            //if might need changes
-            if(timePreference != null)
-            {
-                //call once to update changes
-                preference.getOnPreferenceChangeListener().onPreferenceChange(preference, checked);
-            }
-        }
-    }
-
-    //Sets up a slider preference
-    private static void setupSlider(SliderPreference preference)
-    {
-        //if preference exists
-        if(preference != null)
-        {
-            final String preferenceKey = preference.getKey();
-            int min = -1;
-            int max = -1;
-
-            switch(preferenceKey)
-            {
-                case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe:
-                case Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map:
-                    min = Settings.SensitivityScaleMin;
-                    max = Settings.SensitivityScaleMax;
-                    break;
-
-                case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe:
-                case Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map:
-                    min = Settings.SpeedScaleMin;
-                    max = Settings.SpeedScaleMax;
-                    break;
-
-                case Settings.PreferenceName.MapMarkerScale:
-                    min = Settings.IconScaleMin;
-                    max = Settings.IconScaleMax;
-                    break;
-            }
-
-            //if range is valid
-            if(min >= 0)
-            {
-                //set range
-                preference.setRange(min, max);
-            }
-        }
-    }
-
-    //Sets up a switch button preference
-    private static void setupSwitchButton(SwitchButtonPreference preference)
-    {
-        //if preference exists
-        if(preference != null)
-        {
-            final Context context = preference.getContext();
-            final int titleId;
-            final boolean allowOpacity;
-            final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
-            final String preferenceKey = preference.getKey();
-            final String buttonPreferenceKey;
-
-            //if lens horizon or show grid toggle
-            switch(preferenceKey)
-            {
-                case Settings.PreferenceName.LensUseHorizon:
-                case Settings.PreferenceName.MapShowGrid:
-                    BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
-                    float[] size = Globals.dpsToPixels(context, 60, 40);
-                    ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
-
-                    //get specific settings
-                    if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
-                    {
-                        titleId = R.string.title_horizon_color;
-                        buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
-                        allowOpacity = false;
-                    }
-                    else
-                    {
-                        titleId = R.string.title_grid_color;
-                        buttonPreferenceKey = Settings.PreferenceName.MapGridColor;
-                        allowOpacity = true;
-                    }
-
-                    //setup button
-                    switchButton.setBackgroundColor(Settings.getPreferenceInt(context, buttonPreferenceKey));
-                    switchButton.setLayoutParams(params);
-                    preference.setButton(switchButton);
-                    preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, allowOpacity, writeSettings));
-                    break;
-            }
-        }
-    }
-
-    //Sets up a switch text preference
-    private static void setupSwitchText(SwitchTextPreference preference)
-    {
-        //if preference exists
-        if(preference != null)
-        {
-            final Context context = preference.getContext();
-            final String preferenceKey = preference.getKey();
-            float enabledValue;
-            float disabledValue;
-
-            switch(preferenceKey)
-            {
-                case Settings.PreferenceName.LensWidth:
-                case Settings.PreferenceName.LensHeight:
-                    boolean isWidth = preferenceKey.equals(Settings.PreferenceName.LensWidth);
-
-                    //get lens width and height
-                    try
-                    {
-                        Camera.Parameters cameraParams;
-                        cameraParams = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK).getParameters();
-                        enabledValue = (isWidth ? cameraParams.getHorizontalViewAngle() : cameraParams.getVerticalViewAngle());
-                    }
-                    catch(Exception ex)
-                    {
-                        enabledValue = 45;
-                    }
-                    disabledValue = (isWidth ? Settings.getLensWidth(context) : Settings.getLensHeight(context));
-
-                    //set values
-                    preference.setValueText(String.valueOf(enabledValue), String.valueOf(disabledValue));
-                    break;
-
-                case Settings.PreferenceName.LensAzimuthUserOffset:
-                    //set value
-                    preference.setValueText(String.valueOf(Settings.getLensAzimuthUserOffset(context)));
-                    break;
-            }
-        }
-    }
-
-    //Sets up a time interval
-    private static void setupTimeInterval(TimeIntervalPreference preference)
-    {
-        //if preference exists
-        if(preference != null)
-        {
-            final Context context = preference.getContext();
-            final String preferenceKey = preference.getKey();
-
-            //set listener
-            preference.setOnPreferenceChangedListener(new TimeIntervalPreference.OnPreferenceChangedListener()
-            {
-                @Override
-                public void onPreferenceChanged(TimeIntervalPreference preference, Object newValue)
-                {
-                    TimeIntervalPreference.IntervalValues values = (TimeIntervalPreference.IntervalValues)newValue;
-                    UpdateService.AlarmUpdateSettings settings = Settings.getAutoUpdateSettings(context, preferenceKey);
-
-                    //if settings changed
-                    if(values.hour != settings.hour || values.minute != settings.minute || values.intervalMs != settings.rate)
-                    {
-                        //apply changes
-                        Settings.setAutoUpdate(context, preferenceKey);
-                    }
-                }
-            });
-        }
-    }
-
     //Gets the desired settings page
     private Settings.Page getSettingsPage(String fragmentName)
     {
@@ -1345,11 +1733,167 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         return(page != null ? (Settings.Page)page : new Settings.Page(null));
     }
 
+    //Gets the desired fragment
+    private Fragment getFragment(int setupPageType)
+    {
+        List<Fragment> pages = manager.getFragments();
+
+        //go through all pages
+        for(Fragment currentPage : pages)
+        {
+            Bundle args = currentPage.getArguments();
+
+            //make sure arguments exist
+            if(args == null)
+            {
+                args = new Bundle();
+            }
+
+            //if a match
+            if(args.getInt(SetupPageParam, -1) == setupPageType)
+            {
+                //return page
+                return(currentPage);
+            }
+        }
+
+        //not found
+        //note: Settings.Page chosen for convenience, but should be any Selectable.ListFragment
+        return(new Settings.Page(null));
+    }
+
+    //Moves setup page forward/back
+    private void moveSetupPage(boolean forward)
+    {
+        int page;
+
+        //if adapter exists
+        if(setupPager != null)
+        {
+            //get page
+            page = setupPager.getCurrentItem();
+
+            //handle based on page
+            switch(page)
+            {
+                case SetupPageType.Welcome:
+                    //if forward
+                    if(forward)
+                    {
+                        //go forward
+                        setupPager.setCurrentItem(page + 1);
+                    }
+                    else
+                    {
+                        //skip
+                        cancel();
+                    }
+                    break;
+
+                case SetupPageType.Finished:
+                    //if forward
+                    if(forward)
+                    {
+                        //finished
+                        finish();
+                    }
+                    //else fall through
+
+                default:
+                    //if on satellites, forward, and need to update now
+                    if(page == SetupPageType.Satellites && forward && updateNow)
+                    {
+                        //updateSatellites(true);
+                        break;
+                    }
+                    //else fall through
+
+                    //go forward or back
+                    setupPager.setCurrentItem(page + (forward ? 1 : -1));
+                    break;
+            }
+        }
+    }
+
+    //Update loading status
+    private void setLoading(boolean loading)
+    {
+        int page = (setupPager != null ? setupPager.getCurrentItem() : -1);
+        boolean onSatellites = (page == SetupPageType.Satellites);
+
+        //update status
+        isLoading = loading;
+
+        //update displays
+        if(setupPager != null)
+        {
+            setupPager.setEnabled(!isLoading);
+        }
+        if(loadingBar != null)
+        {
+            loadingBar.setVisibility(isLoading && onSatellites ? View.VISIBLE : View.GONE);
+        }
+        if(inputCheckBox != null)
+        {
+            inputCheckBox.setVisibility(isLoading || !onSatellites ? View.GONE : View.VISIBLE);
+        }
+        if(backButton != null)
+        {
+            backButton.setEnabled(!isLoading);
+        }
+        if(nextButton != null)
+        {
+            nextButton.setEnabled(!isLoading);
+        }
+    }
+
+    //Updates progress
+    private void updateProgress()
+    {
+        int currentPage;
+        int page = setupPager.getCurrentItem();
+        boolean onUpdates = (page == SetupPageType.Updates);
+        boolean onSatellites = (page == SetupPageType.Satellites);
+        Resources res = this.getResources();
+
+        //update visibility
+        progressLayout.setVisibility(page == SetupPageType.Welcome || page == SetupPageType.Finished ? View.INVISIBLE : View.VISIBLE);
+
+        //go through each page
+        for(currentPage = 1; currentPage < SetupPageType.PageCount - 1; currentPage++)
+        {
+            //get progress box
+            View progressBox = progressLayout.findViewWithTag(String.valueOf(currentPage - 1));
+            if(progressBox != null)
+            {
+                //set progress box color
+                progressBox.setBackgroundResource(currentPage <= page ? Globals.resolveAttributeID(this, currentPage < page ? R.attr.actionBarBackground : R.attr.colorAccent) : R.color.light_gray);
+            }
+        }
+
+        //allow swiping if not SetupPage.Satellites or not updating
+        setupPager.setSwipeEnabled(page != SetupPageType.Satellites || !updateNow);
+
+        //update info text
+        infoText.setText(onUpdates ? res.getString(R.string.text_spacetrack_create_account) : "");
+        infoText.setVisibility(onUpdates ? View.VISIBLE : View.GONE);
+
+        //update checkbox
+        inputCheckBox.setChecked(onSatellites && updateNow);
+        inputCheckBox.setText(onSatellites ? res.getString(R.string.desc_update_now) : "");
+        inputCheckBox.setVisibility(onSatellites ? View.VISIBLE : View.GONE);
+
+        //update buttons
+        backButton.setText(page == SetupPageType.Welcome ? R.string.title_skip : R.string.title_back);
+        nextButton.setText(page == SetupPageType.Finished ? R.string.title_finish : R.string.title_next);
+    }
+
     //Update list
     private void updateList()
     {
         Fragment currentFragment = manager.findFragmentByTag(currentPageKey);
         FragmentTransaction currentTransaction;
+        PagerAdapter currentAdapter = (setupPager != null ? setupPager.getAdapter() : null);
 
         //if found current fragment
         if(currentFragment != null)
@@ -1368,6 +1912,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 //do nothing
             }
+        }
+
+        //if found current adapter
+        if(currentAdapter != null)
+        {
+            //update list
+            currentAdapter.notifyDataSetChanged();
         }
     }
 
@@ -1401,6 +1952,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             case Settings.PageType.Notifications:
                 show = !inEditMode;
+                break;
+
+            default:
+                if(showSetup && setupPager != null)
+                {
+                    show = (setupPager.getCurrentItem() == SetupPageType.Satellites && !UpdateService.modifyingSatellites());
+                }
                 break;
         }
 
@@ -1516,7 +2074,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         int index;
         final Resources res = this.getResources();
-        ArrayList<Selectable.ListItem> selectedItems = getSettingsPage(currentPageKey).getSelectedItems();
+        final Fragment setupFragment = (showSetup ? getFragment(SetupPageType.Location) : null);
+        ArrayList<Selectable.ListItem> selectedItems = (showSetup && setupFragment instanceof Selectable.ListFragment ? (Selectable.ListFragment)setupFragment : getSettingsPage(currentPageKey)).getSelectedItems();
         int itemCount = selectedItems.size();
         final int[] ids = new int[itemCount];
         final double[] numberValues = new double[itemCount];
@@ -1581,7 +2140,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                 //end edit mode
                 inEditMode = false;
-                getSettingsPage(currentPageKey).cancelEditMode();
+                if(showSetup)
+                {
+                    ((Selectable.ListFragment)getFragment(SetupPageType.Location)).cancelEditMode();
+                }
+                else
+                {
+                    getSettingsPage(currentPageKey).cancelEditMode();
+                }
                 updateList();
                 updateFloatingButton();
             }

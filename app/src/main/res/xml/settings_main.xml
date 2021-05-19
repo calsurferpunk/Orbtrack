@@ -309,21 +309,21 @@
                         android:persistent="false"/>
                 </PreferenceCategory>
 
-                <PreferenceCategory android:title="@string/title_altitude">
+                <PreferenceCategory android:title="@string/title_altitude" android:key="AltitudeCategory">
                     <com.nikolaiapps.orbtrack.IconListPreference
                         app:titleText="@string/title_source"
                         android:key="AltitudeSource"
                         android:summary="@string/desc_altitude_source"/>
                 </PreferenceCategory>
 
-                <PreferenceCategory android:title="@string/title_time_zone">
+                <PreferenceCategory android:title="@string/title_time_zone" android:key="TimeZoneCategory">
                     <com.nikolaiapps.orbtrack.IconListPreference
                         app:titleText="@string/title_source"
                         android:key="TimeZoneSource"
                         android:summary="@string/desc_time_zone_source"/>
                 </PreferenceCategory>
 
-                <PreferenceCategory android:title="@string/title_information">
+                <PreferenceCategory android:title="@string/title_information" android:key="InformationCategory">
                     <com.nikolaiapps.orbtrack.IconListPreference
                         app:titleText="@string/title_information"
                         android:key="InformationSource"

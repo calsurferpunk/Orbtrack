@@ -90,7 +90,7 @@ public class SetupActivity extends BaseInputActivity
                     break;
 
                 case SetupPage.Satellites:
-                    listAdapter = new Orbitals.PageListAdapter(rootView, Orbitals.PageType.Satellites, R.string.title_satellites, true);
+                    listAdapter = new Orbitals.PageListAdapter(rootView, Orbitals.PageType.Satellites, R.string.title_satellites, null, true);
                     PageAdapter.setInformationChangedListener(createOnInformationChangedListener(listAdapter));
                     break;
             }

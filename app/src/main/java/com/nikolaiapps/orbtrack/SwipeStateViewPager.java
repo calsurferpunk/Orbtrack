@@ -25,12 +25,22 @@ public class SwipeStateViewPager extends ViewPager
     @Override
     public boolean onTouchEvent(MotionEvent ev)
     {
+        boolean superResult;
+
         if(allowSwipe)
         {
             performClick();
         }
 
-        return(allowSwipe && super.onTouchEvent(ev));
+        try
+        {
+            superResult = super.onTouchEvent(ev);
+        }
+        catch(Exception ex)
+        {
+            superResult = allowSwipe;
+        }
+        return(allowSwipe && superResult);
     }
 
     @Override

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="start|center_vertical"
+    android:padding="5dp"
+    android:background="?attr/itemSelect">
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/Location_Item_Image"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:tint="?attr/defaultTextColor"/>
+
+    <TextView
+        android:id="@+id/Location_Item_Text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="0.9"
+        android:textColor="?attr/defaultTextColor"/>
+
+    <CheckBox
+        android:id="@+id/Location_Item_CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:focusable="false"
+        android:focusableInTouchMode="false"
+        android:visibility="gone"/>
+</LinearLayout>

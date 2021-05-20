@@ -779,6 +779,11 @@ public class Database extends SQLiteOpenHelper
             locationType = ltype;
             isChecked = checked;
         }
+
+        public boolean isValid()
+        {
+            return(latitude != 0 || longitude != 0 || altitudeKM != 0);
+        }
     }
 
     private static class UpdateStatusType

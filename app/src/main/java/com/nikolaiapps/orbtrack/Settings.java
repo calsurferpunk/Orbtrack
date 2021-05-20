@@ -10,30 +10,20 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.hardware.Camera;
 import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.recyclerview.widget.RecyclerView;
-import androidx.appcompat.widget.SwitchCompat;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Locale;
 import java.util.TimeZone;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -56,9 +46,8 @@ public abstract class Settings
         static final int Locations = 1;
         static final int Notifications = 2;
         static final int Updates = 3;
-        static final int Other = 4;
-        static final int Widgets = 5;
-        static final int PageCount = 6;
+        static final int Widgets = 4;
+        static final int PageCount = 5;
     }
 
     //Preference names
@@ -261,58 +250,6 @@ public abstract class Settings
                 }
             }
 
-            //Creates an on dark theme check changed listener
-            private static CompoundButton.OnCheckedChangeListener createOnDarkThemeCheckedChangedListener(final Selectable.ListFragment page, final Activity context, final SharedPreferences.Editor writeSettings)
-            {
-                return(new CompoundButton.OnCheckedChangeListener()
-                {
-                    @Override
-                    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
-                    {
-                        //if view exists and user changed
-                        if(compoundButton != null && compoundButton.isPressed())
-                        {
-                            //update value
-                            writeSettings.putBoolean(PreferenceName.DarkTheme, isChecked).apply();
-
-                            //set theme and apply
-                            setTheme(context);
-                            context.recreate();
-                            page.onUpdateNeeded();
-                        }
-                    }
-                });
-            }
-
-            //Creates an on color item selected listener
-            private static AdapterView.OnItemSelectedListener createOnColorItemSelectedListener(final Selectable.ListFragment page, final Activity context, final SharedPreferences.Editor writeSettings)
-            {
-                return(new AdapterView.OnItemSelectedListener()
-                {
-                    @Override
-                    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id)
-                    {
-                        int desiredThemeValue = (int) colorAdvancedItems[position].value;
-                        int currentThemeValue = getColorTheme(context);
-
-                        //if view exists
-                        if(adapterView != null && desiredThemeValue != currentThemeValue)
-                        {
-                            //update value
-                            writeSettings.putInt(PreferenceName.ColorTheme, desiredThemeValue).apply();
-
-                            //set theme and apply
-                            setTheme(context);
-                            context.recreate();
-                            page.onUpdateNeeded();
-                        }
-                    }
-
-                    @Override
-                    public void onNothingSelected(AdapterView<?> adapterView) { }
-                });
-            }
-
             //Sets the theme
             public static void setTheme(Context context)
             {
@@ -415,8 +352,8 @@ public abstract class Settings
                     super(itemView, -1);
 
                     //get displays
-                    accountImage = itemView.findViewById(R.id.Settings_Accounts_Item_Image);
-                    nameText = itemView.findViewById(R.id.Settings_Accounts_Item_Name_Text);
+                    accountImage = itemView.findViewById(R.id.Accounts_Item_Image);
+                    nameText = itemView.findViewById(R.id.Accounts_Item_Name_Text);
                 }
             }
 
@@ -440,7 +377,7 @@ public abstract class Settings
 
                         //setup items
                         initItems();
-                        this.itemsRefID = R.layout.settings_other_accounts_item;
+                        this.itemsRefID = R.layout.accounts_item;
                     }
                 }
 
@@ -516,11 +453,11 @@ public abstract class Settings
                     }
                     else
                     {
-                        AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Accounts_Item_Image);
+                        AppCompatImageView imageColumn = listColumns.findViewById(R.id.Accounts_Item_Image);
 
                         imageColumn.setVisibility(View.INVISIBLE);
                         imageColumn.setImageResource(R.drawable.org_gdrive);
-                        ((TextView)listColumns.findViewById(R.id.Settings_Accounts_Item_Name_Text)).setText(R.string.title_account);
+                        ((TextView)listColumns.findViewById(R.id.Accounts_Item_Name_Text)).setText(R.string.title_account);
                     }
 
                     super.setColumnTitles(listColumns, categoryText, page);
@@ -618,27 +555,25 @@ public abstract class Settings
                 public void editAccount(int accountType)
                 {
                     //handle based on account
-                    switch(accountType)
+                    if(accountType == Globals.AccountType.SpaceTrack)
                     {
-                        case Globals.AccountType.SpaceTrack:
-                            Globals.showAccountLogin(activity, accountType, new Globals.WebPageListener()
+                        Globals.showAccountLogin(activity, accountType, new Globals.WebPageListener()
+                        {
+                            @Override
+                            public void onResult(Globals.WebPageData pageData, boolean success)
                             {
-                                @Override
-                                public void onResult(Globals.WebPageData pageData, boolean success)
+                                //update list
+                                activity.runOnUiThread(new Runnable()
                                 {
-                                    //update list
-                                    activity.runOnUiThread(new Runnable()
+                                    @Override
+                                    public void run()
                                     {
-                                        @Override
-                                        public void run()
-                                        {
-                                            //reload items
-                                            reloadItems();
-                                        }
-                                    });
-                                }
-                            }, true);
-                            break;
+                                        //reload items
+                                        reloadItems();
+                                    }
+                                });
+                            }
+                        }, true);
                     }
                 }
 
@@ -788,8 +723,6 @@ public abstract class Settings
             private static final long MsPerDay = (long)Calculations.MsPerDay;
             private static final long MsPer3Days = MsPerDay * 3;
             private static final long MsPer4Weeks = MsPerDay * 28;
-            private static String[] updateFrequencyItems;
-            private static final Long[] UpdateFrequencyValues = new Long[]{MsPerDay, MsPerDay * 2, MsPer3Days, MsPerDay * 5, MsPerDay * 7, MsPerDay * 14, MsPer4Weeks};
 
             //Initializes values
             public static void initValues(Context context)
@@ -839,838 +772,6 @@ public abstract class Settings
                 }
             }
         }
-
-        //Creates an on play bar changed listener
-        private static PlayBar.OnPlayBarChangedListener createOnPlayBarChangedListener(final Context context, boolean forGlobe, boolean forSensitivity)
-        {
-            return(new PlayBar.OnPlayBarChangedListener()
-            {
-                @Override
-                public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
-                {
-                    float scaleValue = progressValue / 100f;
-
-                    if(forSensitivity)
-                    {
-                        //set sensitivity
-                        Settings.setMapSensitivityScale(context, scaleValue, forGlobe);
-                    }
-                    else
-                    {
-                        //set speed
-                        Settings.setMapSpeedScale(context, scaleValue, forGlobe);
-                    }
-
-                    //update text
-                    seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));
-                }
-            });
-        }
-
-        //Creates an on item selected listener
-        private static AdapterView.OnItemSelectedListener createOnItemSelectedListener(final Context context, final View childView, final String preferenceKey, final Integer[] itemValues, final SharedPreferences.Editor writeSettings)
-        {
-            return(new AdapterView.OnItemSelectedListener()
-            {
-                @Override
-                public void onItemSelected(final AdapterView<?> parent, View view, final int position, long id)
-                {
-                    boolean resetData = false;
-                    boolean updateSwitch = false;
-                    boolean saveSetting = true;
-                    boolean switchValue = false;
-                    boolean switchEnabled = true;
-                    Integer selectedValue;
-
-                    //if there are items and position is valid
-                    if(itemValues != null && position < itemValues.length)
-                    {
-                        selectedValue = itemValues[position];
-
-                        //if for map layer
-                        if(preferenceKey.startsWith(PreferenceName.MapLayerType))
-                        {
-                            //if child view is set
-                            if(childView != null)
-                            {
-                                //show clouds selection if on a satellite layer
-                                childView.setVisibility(selectedValue == CoordinatesFragment.MapLayerType.Satellite || selectedValue == CoordinatesFragment.MapLayerType.Hybrid ? View.VISIBLE : View.GONE);
-                            }
-                        }
-                        //else if for marker information location
-                        else if(preferenceKey.equals(PreferenceName.MapMarkerInfoLocation))
-                        {
-                            //save setting here
-                            Settings.setMapMarkerInfoLocation(context, selectedValue);
-                            saveSetting = false;
-                        }
-                        else
-                        {
-                            switch(preferenceKey)
-                            {
-                                case PreferenceName.SatelliteSource:
-                                    //if context is set and child view is a switch
-                                    if(context != null && childView instanceof SwitchCompat)
-                                    {
-                                        //update switch
-                                        updateSwitch = true;
-                                        switchValue = !Settings.getSatelliteSourceUseGP(context, selectedValue);
-                                        switchEnabled = (selectedValue != Database.UpdateSource.N2YO);
-                                    }
-
-                                    //reset if not current source
-                                    resetData = (context != null && selectedValue != getSatelliteSource(context));
-                                    break;
-
-                                default:
-                                    //reset if context is set
-                                    resetData = (context != null);
-                                    break;
-                            }
-                        }
-
-                        //if saving setting
-                        if(saveSetting)
-                        {
-                            //save setting
-                            writeSettings.putInt(preferenceKey, selectedValue).apply();
-                        }
-
-                        //if updating switch
-                        if(updateSwitch)
-                        {
-                            //remember switch
-                            SwitchCompat currentSwitch = (SwitchCompat)childView;
-
-                            //set switch
-                            currentSwitch.setChecked(switchValue);
-                            currentSwitch.setEnabled(switchEnabled);
-                        }
-
-                        //if resetting data
-                        if(resetData)
-                        {
-                            //clear master satellites
-                            Database.clearMasterSatelliteTable(context);
-                        }
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) { }
-            });
-        }
-        private static AdapterView.OnItemSelectedListener createOnItemSelectedListener(View childView, final String preferenceKey, final Integer[] itemValues, final SharedPreferences.Editor writeSettings)
-        {
-            return(createOnItemSelectedListener(null, childView, preferenceKey, itemValues, writeSettings));
-        }
-        private static AdapterView.OnItemSelectedListener createOnItemSelectedListener(final Context context, final View childView, final String preferenceKey, final Byte[] itemValues, final SharedPreferences.Editor writeSettings)
-        {
-            int index;
-            Integer[] intItemValues = new Integer[itemValues.length];
-
-            for(index = 0; index < intItemValues.length; index++)
-            {
-                intItemValues[index] = (int)itemValues[index];
-            }
-
-            return(createOnItemSelectedListener(context, childView, preferenceKey, intItemValues, writeSettings));
-        }
-        private static AdapterView.OnItemSelectedListener createOnItemSelectedListener(final String preferenceKey, final Byte[] itemValues, final SharedPreferences.Editor writeSettings)
-        {
-            return(createOnItemSelectedListener(null, null, preferenceKey, itemValues, writeSettings));
-        }
-        private static AdapterView.OnItemSelectedListener createOnItemSelectedListener(final IconSpinner.CustomAdapter adapter, final String preferenceKey, final SharedPreferences.Editor writeSettings)
-        {
-            return(new AdapterView.OnItemSelectedListener()
-            {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-                {
-                    //save setting
-                    writeSettings.putInt(preferenceKey, (Integer)adapter.getItemValue(position)).apply();
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) { }
-            });
-        }
-
-        //Creates an on frequency item selected listener
-        private static AdapterView.OnItemSelectedListener createOnFrequencyItemSelectedListener(final String preferenceKey)
-        {
-            return(new AdapterView.OnItemSelectedListener()
-            {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-                {
-                    Context context = parent.getContext();
-                    UpdateService.AlarmUpdateSettings settings = getAutoUpdateSettings(context, preferenceKey);
-
-                    //if values are set, valid index, and settings are changing
-                    if(position < Updates.UpdateFrequencyValues.length && settings.rate != Updates.UpdateFrequencyValues[position])
-                    {
-                        //save setting
-                        setPreferenceLong(context, preferenceKey, Updates.UpdateFrequencyValues[position]);
-
-                        //apply changes
-                        setAutoUpdate(context, preferenceKey);
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> adapterView) { }
-            });
-        }
-
-        private static View.OnClickListener createColorButtonClickedListener(final Context context, final int startColor, final int titleId, final String preferenceKey, final boolean allowOpacity, final SharedPreferences readSettings, final SharedPreferences.Editor writeSettings)
-        {
-            return(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(final View v)
-                {
-                    ChooseColorDialog colorDialog = new ChooseColorDialog(context, readSettings.getInt(preferenceKey, startColor));
-                    colorDialog.setAllowOpacity(allowOpacity);
-                    colorDialog.setAllowTransparent(allowOpacity);
-                    colorDialog.setTitle(context.getResources().getString(titleId));
-                    colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
-                    {
-                        @Override
-                        public void onColorSelected(int color)
-                        {
-                            writeSettings.putInt(preferenceKey, color).apply();
-                            v.setBackgroundColor(color);
-                        }
-                    });
-                    colorDialog.show(context);
-                }
-            });
-        }
-
-        //Creates an on checked changed listener
-        private static CompoundButton.OnCheckedChangeListener createAutoCheckedChangedListener(final String preferenceKey, final float textValue, final float userValue, final EditText textView, final SharedPreferences.Editor writeSettings)
-        {
-            return(new CompoundButton.OnCheckedChangeListener()
-            {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
-                {
-                    //update display
-                    if(isChecked)
-                    {
-                        //reset to hardware value
-                        textView.setEnabled(true);
-                        textView.setText(Globals.getNumberString(textValue, 3));
-                    }
-                    else
-                    {
-                        //show user value
-                        textView.setText(Globals.getNumberString(userValue, 3));
-                    }
-
-                    //update state
-                    textView.setEnabled(!isChecked);
-
-                    //save setting
-                    writeSettings.putBoolean(preferenceKey, isChecked).apply();
-                }
-            });
-        }
-        private static CompoundButton.OnCheckedChangeListener createStateCheckedChangedListener(final String preferenceKey, final SharedPreferences.Editor writeSettings)
-        {
-            return(new CompoundButton.OnCheckedChangeListener()
-            {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
-                {
-                    //save setting
-                    writeSettings.putBoolean(preferenceKey, isChecked).apply();
-                }
-            });
-        }
-        private static CompoundButton.OnCheckedChangeListener createCheckedChangedListener(final String preferenceKey, final SharedPreferences.Editor writeSettings, final View autoRow)
-        {
-            return(new CompoundButton.OnCheckedChangeListener()
-            {
-                @Override
-                public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
-                {
-                    boolean forUpdate = (autoRow != null);
-                    Context context = compoundButton.getContext();
-                    String subKey = "";
-                    UpdateService.AlarmUpdateSettings settings = getAutoUpdateSettings(context, preferenceKey);
-
-                    //if -not for auto- or -auto settings are changing-
-                    if(!forUpdate || settings.enabled != isChecked)
-                    {
-                        //if for GP data usage
-                        if(preferenceKey.equals(PreferenceName.SatelliteSourceUseGP))
-                        {
-                            //get sub key
-                            subKey = String.valueOf(Settings.getSatelliteSource(context));
-
-                            //invert value
-                            isChecked = !isChecked;
-                        }
-
-                        //save setting
-                        writeSettings.putBoolean(preferenceKey + subKey, isChecked).apply();
-
-                        //if for update
-                        if(forUpdate)
-                        {
-                            //apply changes
-                            setAutoUpdate(context, preferenceKey);
-                        }
-                    }
-
-                    //if for auto
-                    if(forUpdate)
-                    {
-                        //update display
-                        autoRow.setVisibility(isChecked ? View.VISIBLE : View.GONE);
-                    }
-                }
-            });
-        }
-
-        //Creates an on time set listener
-        private static TimeInputView.OnTimeSetListener createOnTimeSetListener(final String preferenceHourKey, final String preferenceMinuteKey, final SharedPreferences.Editor writeSettings)
-        {
-            return(new TimeInputView.OnTimeSetListener()
-            {
-                @Override
-                public void onTimeSet(TimeInputView timeView, int hour, int minute)
-                {
-                    Context context = timeView.getContext();
-                    UpdateService.AlarmUpdateSettings settings = getAutoUpdateSettings(context, preferenceHourKey);
-
-                    //if settings are changing
-                    if(settings.hour != hour || settings.minute != minute)
-                    {
-                        //save setting
-                        writeSettings.putInt(preferenceHourKey, hour);
-                        writeSettings.putInt(preferenceMinuteKey, minute);
-                        writeSettings.apply();
-
-                        //apply changes
-                        setAutoUpdate(context, preferenceHourKey);
-                    }
-                }
-            });
-        }
-
-        //Creates an on text changed listener
-        private static TextWatcher createOnTextChangedListener(final EditText view, final String preferenceKey, final SharedPreferences.Editor writeSettings)
-        {
-            return(new TextWatcher()
-            {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) { }
-
-                @Override
-                public void afterTextChanged(Editable editable)
-                {
-                    boolean save = false;
-                    float value = Globals.tryParseFloat(editable.toString());
-
-                    //if valid
-                    if(value != Float.MAX_VALUE)
-                    {
-                        switch(preferenceKey)
-                        {
-                            case PreferenceName.LensWidth:
-                            case PreferenceName.LensHeight:
-                                //save if valid range
-                                save = (value >= 0 && value <= 360);
-                                break;
-
-                            case PreferenceName.LensAzimuthUserOffset:
-                                //save if valid range
-                                save = (value >= -180 && value <= 360);
-                                break;
-                        }
-                    }
-
-                    //if saving
-                    if(save)
-                    {
-                        //save setting
-                        writeSettings.putFloat(preferenceKey, value).apply();
-
-                        //clear any error
-                        view.setError(null);
-                    }
-                    else
-                    {
-                        //show error
-                        view.setError(view.getContext().getResources().getString(R.string.title_invalid));
-                    }
-                }
-            });
-        }
-
-        //Creates an on settings item clicked listener
-        private static View.OnClickListener createOnSettingsItemClickListener(final Selectable.ListFragment page, final int subPage)
-        {
-            return(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View view)
-                {
-                    //update page
-                    page.onUpdatePage(PageType.Other, subPage);
-                }
-            });
-        }
-
-        //Creates the view
-        public static View onCreateView(Selectable.ListFragment page, int pageNum, int subPage, LayoutInflater inflater, ViewGroup container, boolean simple)
-        {
-            float cameraWidth;
-            float cameraHeight;
-            float userCameraWidth;
-            float userCameraHeight;
-            final Resources res;
-            final SharedPreferences readSettings;
-            final SharedPreferences.Editor writeSettings;
-            final IconSpinner.CustomAdapter rateListAdapter;
-            final IconSpinner.CustomAdapter sensorSmoothingAdapter;
-            final Activity context = page.getActivity();
-            final ViewGroup rootView = (ViewGroup)inflater.inflate(pageNum == PageType.Updates             ? R.layout.settings_updates :
-                                                                   subPage == Globals.SubPageType.Accounts ? R.layout.settings_other_accounts :
-                                                                   subPage == Globals.SubPageType.Display  ? R.layout.settings_other_display :
-                                                                   subPage == Globals.SubPageType.ListView ? R.layout.settings_other_list_view :
-                                                                   subPage == Globals.SubPageType.LensView ? R.layout.settings_other_lens_view :
-                                                                   subPage == Globals.SubPageType.MapView  ? R.layout.settings_other_map_view :
-                                                                                                     R.layout.settings_other, container, false);
-            //if context exists
-            if(context != null)
-            {
-                //get resources and settings
-                res = context.getResources();
-                readSettings = getReadSettings(context);
-                writeSettings = readSettings.edit();
-
-                //initialize values
-                Rates.initValues(context);
-                LensView.initValues(context);
-                Updates.updateFrequencyItems = new String[]
-                {
-                    res.getQuantityString(R.plurals.text_days, 1, 1),
-                    res.getQuantityString(R.plurals.text_days, 2, 2),
-                    res.getQuantityString(R.plurals.text_days, 3, 3),
-                    res.getQuantityString(R.plurals.text_days, 5, 5),
-                    res.getQuantityString(R.plurals.text_weeks, 1, 1),
-                    res.getQuantityString(R.plurals.text_weeks, 2, 2),
-                    res.getQuantityString(R.plurals.text_weeks, 4, 4)
-                };
-                MapView.initValues(context);
-                Display.initValues(context);
-
-                //create adapters
-                rateListAdapter = new IconSpinner.CustomAdapter(context, Rates.updateRateItems);
-                sensorSmoothingAdapter = new IconSpinner.CustomAdapter(context, LensView.sensorSmoothingItems);
-
-                switch(pageNum)
-                {
-                    case PageType.Updates:
-                        final IconSpinner satellitesList = rootView.findViewById(R.id.Settings_Updates_Satellites_List);
-                        final IconSpinner catalogAutoList = rootView.findViewById(R.id.Settings_Updates_Catalog_Auto_List);
-                        final IconSpinner tleAutoList = rootView.findViewById(R.id.Settings_Updates_TLE_Auto_List);
-                        final IconSpinner altitudeList = rootView.findViewById(R.id.Settings_Updates_Altitude_List);
-                        final IconSpinner timeZoneList = rootView.findViewById(R.id.Settings_Updates_Time_Zone_List);
-                        final IconSpinner informationList = rootView.findViewById(R.id.Settings_Updates_Information_List);
-                        final SwitchCompat rocketBodySwitch = rootView.findViewById(R.id.Settings_Updates_Catalog_Rocket_Body_Switch);
-                        final SwitchCompat debrisSwitch = rootView.findViewById(R.id.Settings_Updates_Catalog_Debris_Switch);
-                        final SwitchCompat legacyDataSwitch = rootView.findViewById(R.id.Settings_Updates_Use_Legacy_Data_Switch);
-                        final SwitchCompat catalogAutoSwitch = rootView.findViewById(R.id.Settings_Updates_Catalog_Auto_Switch);
-                        final SwitchCompat tleAutoSwitch = rootView.findViewById(R.id.Settings_Updates_TLE_Auto_Switch);
-                        final SwitchCompat translateInformationSwitch = rootView.findViewById(R.id.Settings_Updates_Information_Translate_Switch);
-                        final SwitchCompat shareTranslateSwitch = rootView.findViewById(R.id.Settings_Updates_Information_Translate_Share_Switch);
-                        final TimeInputView catalogAutoTimeText = rootView.findViewById(R.id.Settings_Updates_Catalog_Auto_Time_Text);
-                        final TimeInputView tleAutoTimeText = rootView.findViewById(R.id.Settings_Updates_TLE_Auto_Time_Text);
-                        final View catalogAutoRow = rootView.findViewById(R.id.Settings_Updates_Catalog_Auto_Row);
-                        final View tleAutoRow = rootView.findViewById(R.id.Settings_Updates_TLE_Auto_Row);
-                        final UpdateService.AlarmUpdateSettings catalogAutoSettings = getAutoUpdateSettings(context, UpdateService.UpdateType.GetMasterList);
-                        final UpdateService.AlarmUpdateSettings tleAutoSettings = getAutoUpdateSettings(context, UpdateService.UpdateType.UpdateSatellites);
-                        int altitudeSource = getAltitudeSource(context);
-                        int timeZoneSource = getTimeZoneSource(context);
-                        int informationSource = getInformationSource(context);
-                        int satelliteSource = getSatelliteSource(context);
-
-                        //initialize values
-                        Updates.initValues(context);
-
-                        //set events
-                        satellitesList.setOnItemSelectedListener(createOnItemSelectedListener((simple ? null : context), (simple ? null : legacyDataSwitch), PreferenceName.SatelliteSource, Updates.SatelliteSourceValues, writeSettings));
-                        debrisSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.CatalogDebris, writeSettings, null));
-                        rocketBodySwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.CatalogRocketBodies, writeSettings, null));
-                        if(!simple)
-                        {
-                            legacyDataSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.SatelliteSourceUseGP, writeSettings, null));
-                            altitudeList.setOnItemSelectedListener(createOnItemSelectedListener(PreferenceName.AltitudeSource, Updates.AltitudeSourceValues, writeSettings));
-                            timeZoneList.setOnItemSelectedListener(createOnItemSelectedListener(PreferenceName.TimeZoneSource, Updates.TimeZoneSourceValues, writeSettings));
-                            informationList.setOnItemSelectedListener(createOnItemSelectedListener(PreferenceName.InformationSource, Updates.InformationSourceValues, writeSettings));
-                            translateInformationSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.TranslateInformation, writeSettings, null));
-                            shareTranslateSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.ShareTranslations, writeSettings, null));
-                        }
-
-                        //set auto events
-                        catalogAutoSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.CatalogAutoUpdate, writeSettings, catalogAutoRow));
-                        catalogAutoList.setOnItemSelectedListener(createOnFrequencyItemSelectedListener(PreferenceName.CatalogAutoUpdateRate));
-                        catalogAutoTimeText.setOnTimeSetListener(createOnTimeSetListener(PreferenceName.CatalogAutoUpdateHour, PreferenceName.CatalogAutoUpdateMinute, writeSettings));
-                        tleAutoSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.TLEAutoUpdate, writeSettings, tleAutoRow));
-                        tleAutoList.setOnItemSelectedListener(createOnFrequencyItemSelectedListener(PreferenceName.TLEAutoUpdateRate));
-                        tleAutoTimeText.setOnTimeSetListener(createOnTimeSetListener(PreferenceName.TLEAutoUpdateHour, PreferenceName.TLEAutoUpdateMinute, writeSettings));
-
-                        //set list items
-                        satellitesList.setAdapter(new IconSpinner.CustomAdapter(context, Updates.SatelliteSourceItems, Updates.SatelliteSourceImageIds, Updates.SatelliteSourceSubTexts));
-                        catalogAutoList.setAdapter(new IconSpinner.CustomAdapter(context, Updates.updateFrequencyItems));
-                        tleAutoList.setAdapter(new IconSpinner.CustomAdapter(context, Updates.updateFrequencyItems));
-                        if(!simple)
-                        {
-                            altitudeList.setAdapter(new IconSpinner.CustomAdapter(context, Updates.AltitudeSourceItems, Updates.AltitudeSourceImageIds));
-                            timeZoneList.setAdapter(new IconSpinner.CustomAdapter(context, Updates.TimeZoneSourceItems, Updates.TimeZoneSourceImageIds));
-                            informationList.setAdapter(new IconSpinner.CustomAdapter(context, Updates.InformationSourceItems, Updates.InformationSourceImageIds));
-                        }
-
-                        //update displays
-                        satellitesList.setSelectedValue(Updates.SatelliteSourceItems[satelliteSource]);
-                        catalogAutoSwitch.setChecked(catalogAutoSettings.enabled);
-                        catalogAutoList.setSelection(Arrays.asList(Updates.UpdateFrequencyValues).indexOf(catalogAutoSettings.rate));
-                        catalogAutoTimeText.setTime(catalogAutoSettings.hour, catalogAutoSettings.minute);
-                        debrisSwitch.setChecked(getCatalogDebris(context));
-                        rocketBodySwitch.setChecked(getCatalogRocketBodies(context));
-                        if(!simple)
-                        {
-                            legacyDataSwitch.setChecked(!Settings.getSatelliteSourceUseGP(context, satelliteSource));
-                            legacyDataSwitch.setEnabled(satelliteSource != Database.UpdateSource.N2YO);
-                        }
-                        if(simple && !tleAutoSettings.enabled)
-                        {
-                            //set opposite to force change
-                            tleAutoSwitch.setChecked(!tleAutoSettings.enabled);
-                            tleAutoSettings.enabled = !tleAutoSettings.enabled;
-                        }
-                        else
-                        {
-                            //set to current
-                            tleAutoSwitch.setChecked(tleAutoSettings.enabled);
-                        }
-                        tleAutoList.setSelection(Arrays.asList(Updates.UpdateFrequencyValues).indexOf(tleAutoSettings.rate));
-                        tleAutoTimeText.setTime(tleAutoSettings.hour, tleAutoSettings.minute);
-                        if(!simple)
-                        {
-                            altitudeList.setSelectedValue(Updates.AltitudeSourceItems[altitudeSource == LocationService.OnlineSource.MapQuest ? 0 : 1]);
-                            timeZoneList.setSelectedValue(Updates.TimeZoneSourceItems[timeZoneSource == LocationService.OnlineSource.GeoNames ? 0 : 1]);
-                            informationList.setSelectedValue(Updates.InformationSourceItems[informationSource == Database.UpdateSource.NASA ? 0 : 1]);
-                            translateInformationSwitch.setChecked(getTranslateInformation(context));
-                            shareTranslateSwitch.setChecked(getShareTranslations(context));
-                        }
-
-                        //if simple
-                        if(simple)
-                        {
-                            //hide displays
-                            legacyDataSwitch.setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Altitude_Row).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Altitude_Text).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Altitude_Divider).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Time_Zone_Row).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Time_Zone_Text).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Time_Zone_Divider).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Information_Row).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Information_Text).setVisibility(View.GONE);
-                            rootView.findViewById(R.id.Settings_Updates_Information_Divider).setVisibility(View.GONE);
-                            translateInformationSwitch.setVisibility(View.GONE);
-                            shareTranslateSwitch.setVisibility(View.GONE);
-                        }
-                        break;
-
-                    default:
-                        //handle based on sub page
-                        switch(subPage)
-                        {
-                            case Globals.SubPageType.Display:
-                                final boolean isMetric = getMetricUnits(context);
-                                final SwitchCompat darkThemeSwitch = rootView.findViewById(R.id.Settings_Display_Dark_Theme_Switch);
-                                final IconSpinner colorThemeList = rootView.findViewById(R.id.Settings_Display_Color_Theme_List);
-                                final AppCompatRadioButton metricRadio = rootView.findViewById(R.id.Settings_Display_Metric_Radio);
-                                final AppCompatRadioButton imperialRadio = rootView.findViewById(R.id.Settings_Display_Imperial_Radio);
-
-                                //set events
-                                darkThemeSwitch.setOnCheckedChangeListener(Display.createOnDarkThemeCheckedChangedListener(page, context, writeSettings));
-                                colorThemeList.setOnItemSelectedListener(Display.createOnColorItemSelectedListener(page, context, writeSettings));
-                                metricRadio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-                                {
-                                    @Override
-                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                                    {
-                                        imperialRadio.setChecked(!isChecked);
-                                        setMetricUnits(context, isChecked);
-                                    }
-                                });
-                                imperialRadio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-                                {
-                                    @Override
-                                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-                                    {
-                                        metricRadio.setChecked(!isChecked);
-                                    }
-                                });
-
-                                //set list items
-                                colorThemeList.setAdapter(new IconSpinner.CustomAdapter(context, Display.colorAdvancedItems));
-
-                                //update displays
-                                darkThemeSwitch.setChecked(readSettings.getBoolean(PreferenceName.DarkTheme, false));
-                                colorThemeList.setSelectedValue(readSettings.getInt(PreferenceName.ColorTheme, Display.ThemeIndex.Cyan));       //default to Display.ThemeIndex.Cyan
-                                metricRadio.setChecked(isMetric);
-                                imperialRadio.setChecked(!isMetric);
-                                break;
-
-                            case Globals.SubPageType.ListView:
-                                final SwitchCompat combinedSwitch = rootView.findViewById(R.id.Settings_List_View_Combined_Switch);
-                                final SwitchCompat pathProgressSwitch = rootView.findViewById(R.id.Settings_List_View_Pass_Progress_Switch);
-                                final IconSpinner listUpdateRateList = rootView.findViewById(R.id.Settings_List_View_Update_Rate_List);
-
-                                //set events
-                                combinedSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.UseCombinedCurrentLayout, writeSettings));
-                                pathProgressSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.ListShowPassProgress, writeSettings));
-                                listUpdateRateList.setOnItemSelectedListener(createOnItemSelectedListener(rateListAdapter, PreferenceName.ListUpdateDelay, writeSettings));
-
-                                //set list items
-                                listUpdateRateList.setAdapter(rateListAdapter);
-
-                                //update displays
-                                combinedSwitch.setChecked(Settings.getCombinedCurrentLayout(context));
-                                pathProgressSwitch.setChecked(Settings.getListPathProgress(context));
-                                listUpdateRateList.setSelectedValue(getListUpdateDelay(context));
-                                break;
-
-                            case Globals.SubPageType.LensView:
-                                final IconSpinner lensOrbitalIconList = rootView.findViewById(R.id.Settings_Lens_View_Orbital_Icon_List);
-                                final IconSpinner lensUpdateRateList = rootView.findViewById(R.id.Settings_Lens_View_Update_Rate_List);
-                                final IconSpinner lensSensorSmoothingList = rootView.findViewById(R.id.Settings_Lens_View_Sensor_Smoothing_List);
-                                final BorderButton horizonColorButton = rootView.findViewById(R.id.Settings_Lens_View_Horizon_Color_Button);
-                                final SwitchCompat useHorizonSwitch = rootView.findViewById(R.id.Settings_Lens_View_Use_Horizon_Switch);
-                                final SwitchCompat useCameraSwitch = rootView.findViewById(R.id.Settings_Lens_View_Use_Camera_Switch);
-                                final SwitchCompat rotateSwitch = rootView.findViewById(R.id.Settings_Lens_Rotate_Camera_Switch);
-                                final SwitchCompat autoWidthSwitch = rootView.findViewById(R.id.Settings_Lens_View_Lens_Auto_Width_Switch);
-                                final SwitchCompat autoHeightSwitch = rootView.findViewById(R.id.Settings_Lens_View_Lens_Auto_Height_Switch);
-                                final EditText widthText = rootView.findViewById(R.id.Settings_Lens_View_Lens_Width_Text);
-                                final EditText heightText = rootView.findViewById(R.id.Settings_Lens_View_Lens_Height_Text);
-                                final EditText azimuthOffsetText = rootView.findViewById(R.id.Settings_Lens_View_Azimuth_Offset_Text);
-                                final boolean useRotate = Settings.getLensRotate(context);
-                                final boolean useAutoWidth = Settings.getLensAutoWidth(context);
-                                final boolean useAutoHeight = Settings.getLensAutoHeight(context);
-
-                                IconSpinner.CustomAdapter indicatorListAdapter = new IconSpinner.CustomAdapter(context, LensView.indicatorItems);
-
-                                //get lens width and height
-                                try
-                                {
-                                    Camera.Parameters cameraParams;
-                                    cameraParams = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK).getParameters();
-                                    cameraWidth = cameraParams.getHorizontalViewAngle();
-                                    cameraHeight = cameraParams.getVerticalViewAngle();
-                                }
-                                catch(Exception ex)
-                                {
-                                    cameraWidth = cameraHeight = 45;
-                                }
-                                userCameraWidth = Settings.getLensWidth(context);
-                                userCameraHeight = Settings.getLensHeight(context);
-
-                                //set events
-                                lensOrbitalIconList.setOnItemSelectedListener(createOnItemSelectedListener(indicatorListAdapter, PreferenceName.LensIndicator, writeSettings));
-                                lensUpdateRateList.setOnItemSelectedListener(createOnItemSelectedListener(rateListAdapter, PreferenceName.LensUpdateDelay, writeSettings));
-                                lensSensorSmoothingList.setOnItemSelectedListener(createOnItemSelectedListener(sensorSmoothingAdapter, PreferenceName.LensAverageCount, writeSettings));
-                                horizonColorButton.setOnClickListener(createColorButtonClickedListener(context, Settings.getLensHorizonColor(context), R.string.title_horizon_color, PreferenceName.LensHorizonColor, false, readSettings, writeSettings));
-                                useHorizonSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.LensUseHorizon, writeSettings));
-                                useCameraSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.LensUseCamera, writeSettings));
-                                rotateSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.LensRotate, writeSettings));
-                                autoWidthSwitch.setOnCheckedChangeListener(createAutoCheckedChangedListener(PreferenceName.LensUseAutoWidth, cameraWidth, userCameraWidth, widthText, writeSettings));
-                                autoHeightSwitch.setOnCheckedChangeListener(createAutoCheckedChangedListener(PreferenceName.LensUseAutoHeight, cameraHeight, userCameraHeight, heightText, writeSettings));
-                                widthText.addTextChangedListener(createOnTextChangedListener(widthText, PreferenceName.LensWidth, writeSettings));
-                                heightText.addTextChangedListener(createOnTextChangedListener(heightText, PreferenceName.LensHeight, writeSettings));
-                                azimuthOffsetText.addTextChangedListener(createOnTextChangedListener(azimuthOffsetText, PreferenceName.LensAzimuthUserOffset, writeSettings));
-
-                                //set list items
-                                lensOrbitalIconList.setAdapter(indicatorListAdapter);
-                                lensUpdateRateList.setAdapter(rateListAdapter);
-                                lensSensorSmoothingList.setAdapter(sensorSmoothingAdapter);
-
-                                //update displays
-                                lensOrbitalIconList.setSelectedValue(getIndicator(context));
-                                lensUpdateRateList.setSelectedValue(getLensUpdateDelay(context));
-                                lensSensorSmoothingList.setSelectedValue(readSettings.getInt(PreferenceName.LensAverageCount, 40));
-                                horizonColorButton.setBackgroundColor(Settings.getLensHorizonColor(context));
-                                useHorizonSwitch.setChecked(readSettings.getBoolean(PreferenceName.LensUseHorizon, false));
-                                useCameraSwitch.setChecked(readSettings.getBoolean(PreferenceName.LensUseCamera, true));
-                                rotateSwitch.setChecked(useRotate);
-                                autoWidthSwitch.setChecked(useAutoWidth);
-                                autoHeightSwitch.setChecked(useAutoHeight);
-                                widthText.setText(Globals.getNumberString(useAutoWidth ? cameraWidth : Settings.getLensWidth(context), 3));
-                                heightText.setText(Globals.getNumberString(useAutoHeight ? cameraHeight : Settings.getLensHeight(context), 3));
-                                azimuthOffsetText.setText(Globals.getNumberString(Settings.getLensAzimuthUserOffset(context), 3));
-                                break;
-
-                            case Globals.SubPageType.MapView:
-                                final IconSpinner globeTypeList = rootView.findViewById(R.id.Settings_Map_View_Globe_Type_List);
-                                final IconSpinner mapTypeList = rootView.findViewById(R.id.Settings_Map_View_Map_Type_List);
-                                final IconSpinner informationLocationList = rootView.findViewById(R.id.Settings_Map_View_Information_Location_List);
-                                final BorderButton gridColorButton = rootView.findViewById(R.id.Settings_Map_View_Grid_Color_Button);
-                                final PlayBar globeSensitivityScaleBar = rootView.findViewById(R.id.Settings_Map_View_Globe_Sensitivity_Scale_Bar);
-                                final PlayBar globeSpeedScaleBar = rootView.findViewById(R.id.Settings_Map_View_Globe_Speed_Scale_Bar);
-                                final PlayBar mapSensitivityScaleBar = rootView.findViewById(R.id.Settings_Map_View_Map_Sensitivity_Scale_Bar);
-                                final PlayBar mapSpeedScaleBar = rootView.findViewById(R.id.Settings_Map_View_Map_Speed_Scale_Bar);
-                                final PlayBar iconScaleBar = rootView.findViewById(R.id.Settings_Map_View_Icon_Scale_Bar);
-                                final SwitchCompat show3dPathsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_3d_Paths_Switch);
-                                final SwitchCompat showGlobeCloudsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Globe_Clouds_Switch);
-                                final SwitchCompat showMapCloudsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Map_Clouds_Switch);
-                                final SwitchCompat showInformationBackgroundSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Information_Background_Switch);
-                                final SwitchCompat useSearchSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Search_Switch);
-                                final SwitchCompat useZoomSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Zoom_Switch);
-                                final SwitchCompat useLabelsAlwaysSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Labels_Always_Switch);
-                                final SwitchCompat useShadowsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Shadows_Switch);
-                                final SwitchCompat useStarsSwitch = rootView.findViewById(R.id.Settings_Map_View_Show_Stars_Switch);
-                                final SwitchCompat useGridSwitch = rootView.findViewById(R.id.Settings_Map_View_Use_Grid_Switch);
-                                final SwitchCompat allowRotationSwitch = rootView.findViewById(R.id.Settings_Map_View_Allow_Rotation_Switch);
-
-                                //set events
-                                globeTypeList.setOnItemSelectedListener(createOnItemSelectedListener(showGlobeCloudsSwitch, PreferenceName.MapLayerType + SubPreferenceName.Globe, MapView.MapTypeValues, writeSettings));
-                                mapTypeList.setOnItemSelectedListener(createOnItemSelectedListener(showMapCloudsSwitch, PreferenceName.MapLayerType + SubPreferenceName.Map, MapView.MapTypeValues, writeSettings));
-                                informationLocationList.setOnItemSelectedListener(createOnItemSelectedListener(context, null, PreferenceName.MapMarkerInfoLocation, MapView.InfoLocationValues, writeSettings));
-                                showInformationBackgroundSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapMarkerShowBackground, writeSettings));
-                                gridColorButton.setOnClickListener(createColorButtonClickedListener(context, Settings.getMapGridColor(context), R.string.title_grid_color, PreferenceName.MapGridColor, true, readSettings, writeSettings));
-                                show3dPathsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShow3dPaths, writeSettings));
-                                showGlobeCloudsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe, writeSettings));
-                                showMapCloudsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map, writeSettings));
-                                useSearchSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShowSearchList, writeSettings));
-                                useZoomSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShowZoom, writeSettings));
-                                useLabelsAlwaysSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShowLabelsAlways, writeSettings));
-                                useShadowsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapMarkerShowShadow, writeSettings));
-                                useStarsSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShowStars, writeSettings));
-                                useGridSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapShowGrid, writeSettings));
-                                allowRotationSwitch.setOnCheckedChangeListener(createStateCheckedChangedListener(PreferenceName.MapRotateAllowed, writeSettings));
-
-                                //set list items
-                                globeTypeList.setAdapter(new IconSpinner.CustomAdapter(context, MapView.mapTypeItems));
-                                mapTypeList.setAdapter(new IconSpinner.CustomAdapter(context, MapView.mapTypeItems));
-                                informationLocationList.setAdapter(new IconSpinner.CustomAdapter(context, MapView.infoLocationItems));
-
-                                //setup sensitivities
-                                globeSensitivityScaleBar.setMin(Settings.SensitivityScaleMin);
-                                globeSensitivityScaleBar.setMax(Settings.SensitivityScaleMax);
-                                globeSensitivityScaleBar.setPlayIndexIncrementUnits(1);
-                                globeSensitivityScaleBar.setPlayActivity(null);
-                                globeSensitivityScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, true, true));
-                                mapSensitivityScaleBar.setMin(Settings.SensitivityScaleMin);
-                                mapSensitivityScaleBar.setMax(Settings.SensitivityScaleMax);
-                                mapSensitivityScaleBar.setPlayIndexIncrementUnits(1);
-                                mapSensitivityScaleBar.setPlayActivity(null);
-                                mapSensitivityScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, false, true));
-
-                                //setup speeds
-                                globeSpeedScaleBar.setMin(Settings.SpeedScaleMin);
-                                globeSpeedScaleBar.setMax(Settings.SpeedScaleMax);
-                                globeSpeedScaleBar.setPlayIndexIncrementUnits(1);
-                                globeSpeedScaleBar.setPlayActivity(null);
-                                globeSpeedScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, true, false));
-                                mapSpeedScaleBar.setMin(Settings.SpeedScaleMin);
-                                mapSpeedScaleBar.setMax(Settings.SpeedScaleMax);
-                                mapSpeedScaleBar.setPlayIndexIncrementUnits(1);
-                                mapSpeedScaleBar.setPlayActivity(null);
-                                mapSpeedScaleBar.setOnSeekChangedListener(createOnPlayBarChangedListener(context, false, false));
-
-                                //setup scale
-                                iconScaleBar.setMin(Settings.IconScaleMin);
-                                iconScaleBar.setMax(Settings.IconScaleMax);
-                                iconScaleBar.setPlayIndexIncrementUnits(1);
-                                iconScaleBar.setPlayActivity(null);
-                                iconScaleBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
-                                {
-                                    @Override
-                                    public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
-                                    {
-                                        //set scale
-                                        Settings.setMapMarkerScale(context, progressValue / 100f);
-
-                                        //update text
-                                        seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));
-                                    }
-                                });
-
-                                //update displays
-                                globeTypeList.setSelection(Arrays.asList(MapView.MapTypeValues).indexOf(getMapLayerType(context, true)));
-                                mapTypeList.setSelection(Arrays.asList(MapView.MapTypeValues).indexOf(getMapLayerType(context, false)));
-                                informationLocationList.setSelection(Arrays.asList(MapView.InfoLocationValues).indexOf(getMapMarkerInfoLocation(context)));
-                                gridColorButton.setBackgroundColor(Settings.getMapGridColor(context));
-                                globeSensitivityScaleBar.setValue((int)Math.floor(Settings.getMapSensitivityScale(context, true) * 100));
-                                globeSpeedScaleBar.setValue((int)Math.floor(Settings.getMapSpeedScale(context, true) * 100));
-                                mapSensitivityScaleBar.setValue((int)Math.floor(Settings.getMapSensitivityScale(context, false) * 100));
-                                mapSpeedScaleBar.setValue((int)Math.floor(Settings.getMapSpeedScale(context, false) * 100));
-                                iconScaleBar.setValue((int)Math.floor(Settings.getMapMarkerScale(context) * 100));
-                                showInformationBackgroundSwitch.setChecked(Settings.getMapMarkerShowBackground(context));
-                                show3dPathsSwitch.setChecked(Settings.getMapShow3dPaths(context));
-                                showGlobeCloudsSwitch.setChecked(Settings.getSatelliteClouds(context, false));
-                                showMapCloudsSwitch.setChecked(Settings.getSatelliteClouds(context, true));
-                                useSearchSwitch.setChecked(Settings.getMapShowSearchList(context));
-                                useZoomSwitch.setChecked(Settings.getMapShowZoom(context));
-                                useLabelsAlwaysSwitch.setChecked(Settings.getMapShowLabelsAlways(context));
-                                useShadowsSwitch.setChecked(Settings.getMapMarkerShowShadow(context));
-                                useStarsSwitch.setChecked(Settings.getMapShowStars(context));
-                                useGridSwitch.setChecked(Settings.getMapShowGrid(context));
-                                allowRotationSwitch.setChecked(Settings.getMapRotateAllowed(context));
-                                break;
-
-                            default:
-                            case Globals.SubPageType.None:
-                                final boolean havePositionSensors = SensorUpdate.havePositionSensors(context);
-                                final TextView accountsText = rootView.findViewById(R.id.Settings_Accounts_Text);
-                                final TextView displayText = rootView.findViewById(R.id.Settings_Display_Text);
-                                final TextView listViewText = rootView.findViewById(R.id.Settings_List_View_Text);
-                                final TextView lensViewText = rootView.findViewById(R.id.Settings_Lens_View_Text);
-                                final TextView mapViewText = rootView.findViewById(R.id.Settings_Map_View_Text);
-                                final TextView widgetsText = rootView.findViewById(R.id.Settings_Widgets_Text);
-
-                                //update displays
-                                accountsText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_account_circle_white, true), null, null, null);
-                                displayText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_tablet_white, true), null, null, null);
-                                listViewText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_list_white, true), null, null, null);
-                                if(havePositionSensors)
-                                {
-                                    lensViewText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_photo_camera_white, true), null, null, null);
-                                }
-                                lensViewText.setVisibility(havePositionSensors ? View.VISIBLE : View.GONE);
-                                mapViewText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_map_white, true), null, null, null);
-                                widgetsText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(context, R.drawable.ic_widgets_black, true), null, null, null);
-
-                                //set events
-                                accountsText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.Accounts));
-                                displayText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.Display));
-                                listViewText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.ListView));
-                                if(havePositionSensors)
-                                {
-                                    lensViewText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.LensView));
-                                }
-                                mapViewText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.MapView));
-                                widgetsText.setOnClickListener(createOnSettingsItemClickListener(page, Globals.SubPageType.Widgets));
-                                break;
-                        }
-                        break;
-                }
-            }
-
-            //return view
-            return(rootView);
-        }
     }
 
     //Locations
@@ -1719,29 +820,19 @@ public abstract class Settings
             private double knownLongitude;
             private double knownAltitude;
             private final int columnTitleStringId;
-            private final Item[] locations;
+            private Item[] locations;
 
             public ItemListAdapter(View parentView, int titleStringId, String categoryTitle)
             {
                 super(parentView, categoryTitle);
 
-                int index;
-                Database.DatabaseLocation[] dbLocations = Database.getLocations(currentContext);
-
-                //set displays and pending data
+                //set pending data and title
                 knownLatitude = Double.MAX_VALUE;
                 knownLongitude = Double.MAX_VALUE;
                 knownAltitude = Double.MAX_VALUE;
                 columnTitleStringId = titleStringId;
 
-                //setup items
-                locations = new Item[dbLocations.length];
-                for(index = 0; index < dbLocations.length; index++)
-                {
-                    Database.DatabaseLocation currentLoc = dbLocations[index];
-                    locations[index] = new Item(currentLoc.id, index, currentLoc.name, currentLoc.latitude, currentLoc.longitude, currentLoc.altitudeKM * 1000, currentLoc.zoneId, currentLoc.locationType, (titleStringId < 0 && currentLoc.locationType != Database.LocationType.Current), false, currentLoc.isChecked);
-                }
-                this.itemsRefID = R.layout.settings_locations_item;
+                this.itemsRefID = R.layout.location_item;
             }
             public ItemListAdapter(View parentView, String title)
             {
@@ -1751,13 +842,13 @@ public abstract class Settings
             @Override
             public int getItemCount()
             {
-                return(locations.length);
+                return(locations != null ? locations.length : 0);
             }
 
             @Override
             public Item getItem(int position)
             {
-                return(locations[position]);
+                return(locations != null ? locations[position] : null);
             }
 
             @Override
@@ -1923,6 +1014,24 @@ public abstract class Settings
                 setItemBackground(itemHolder.itemView, currentItem.isSelected);
             }
 
+            //Reloads items
+            public void reload()
+            {
+                int index;
+                Database.DatabaseLocation[] dbLocations = Database.getLocations(currentContext);
+
+                //setup items
+                locations = new Item[dbLocations.length];
+                for(index = 0; index < dbLocations.length; index++)
+                {
+                    Database.DatabaseLocation currentLoc = dbLocations[index];
+                    locations[index] = new Item(currentLoc.id, index, currentLoc.name, currentLoc.latitude, currentLoc.longitude, currentLoc.altitudeKM * 1000, currentLoc.zoneId, currentLoc.locationType, (columnTitleStringId < 0 && currentLoc.locationType != Database.LocationType.Current), false, currentLoc.isChecked);
+                }
+
+                //update display
+                notifyDataSetChanged();
+            }
+
             //Sets current location displays
             public void setCurrentLocation(double lat, double lon, double altM)
             {
@@ -1986,56 +1095,25 @@ public abstract class Settings
         //Item list adapter
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
-            private final Item[] notifications;
+            private Item[] notifications;
 
             public ItemListAdapter(View parentView, String title)
             {
                 super(parentView, title);
 
-                Resources res = (currentContext != null ? currentContext.getResources() : null);
-                Database.DatabaseSatellite[] orbitals = Database.getOrbitals(currentContext);
-                ArrayList<Item> notifyList = new ArrayList<>(0);
-
-                //if context is set
-                if(currentContext != null)
-                {
-                    //go through each orbital
-                    for(Database.DatabaseSatellite currentOrbital : orbitals)
-                    {
-                        CalculateService.AlarmNotifySettings passStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassStart);
-                        CalculateService.AlarmNotifySettings passEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassEnd);
-                        CalculateService.AlarmNotifySettings fullStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonStart);
-                        CalculateService.AlarmNotifySettings fullEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonEnd);
-
-                        //if using start or ending notification for any
-                        if(passStartSettings.isEnabled() || passEndSettings.isEnabled() || fullStartSettings.isEnabled() || fullEndSettings.isEnabled())
-                        {
-                            //add orbital
-                            notifyList.add(new Item(currentOrbital.norad, currentOrbital.getName(), passStartSettings, passEndSettings, fullStartSettings, fullEndSettings));
-                        }
-                    }
-
-                    //set items and layout ID
-                    if(notifyList.size() == 0)
-                    {
-                        notifyList.add(new Item(Integer.MIN_VALUE, res.getString(R.string.title_none), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
-                    }
-                }
-
-                notifications = notifyList.toArray(new Item[0]);
-                this.itemsRefID = R.layout.settings_notify_item;
+                this.itemsRefID = R.layout.notify_item;
             }
 
             @Override
             public int getItemCount()
             {
-                return(notifications.length);
+                return(notifications != null ? notifications.length : 0);
             }
 
             @Override
             public Item getItem(int position)
             {
-                return(notifications[position]);
+                return(notifications != null ? notifications[position] : null);
             }
 
             @Override
@@ -2061,10 +1139,10 @@ public abstract class Settings
                 }
                 else
                 {
-                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Notify_Item_Image);
+                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Notify_Item_Image);
 
                     imageColumn.setVisibility(View.INVISIBLE);
-                    ((TextView)listColumns.findViewById(R.id.Settings_Notify_Item_Name_Text)).setText(R.string.title_name);
+                    ((TextView)listColumns.findViewById(R.id.Notify_Item_Name_Text)).setText(R.string.title_name);
                 }
 
                 super.setColumnTitles(listColumns, categoryText, page);
@@ -2088,7 +1166,7 @@ public abstract class Settings
             public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Settings_Notify_Item_Image, R.id.Settings_Notify_Item_Name_Text, R.id.Settings_Notify_Item_Pass_Text, R.id.Settings_Notify_Item_Pass_Start_Text, R.id.Settings_Notify_Item_Pass_End_Text, R.id.Settings_Notify_Item_Full_Text, R.id.Settings_Notify_Item_Full_Start_Text, R.id.Settings_Notify_Item_Full_End_Text);
+                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Notify_Item_Image, R.id.Notify_Item_Name_Text, R.id.Notify_Item_Pass_Text, R.id.Notify_Item_Pass_Start_Text, R.id.Notify_Item_Pass_End_Text, R.id.Notify_Item_Full_Text, R.id.Notify_Item_Full_Start_Text, R.id.Notify_Item_Full_End_Text);
 
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
@@ -2113,6 +1191,10 @@ public abstract class Settings
                     if(noradId < 0)
                     {
                         itemHolder.notifyImage.setColorFilter(Color.TRANSPARENT);
+                    }
+                    else
+                    {
+                        itemHolder.notifyImage.clearColorFilter();
                     }
                 }
                 itemHolder.nameText.setText(currentItem.name);
@@ -2145,6 +1227,46 @@ public abstract class Settings
 
                 //set background
                 setItemBackground(itemHolder.itemView, false);
+            }
+
+            //Reloads items
+            public void reload()
+            {
+                Resources res = (currentContext != null ? currentContext.getResources() : null);
+                Database.DatabaseSatellite[] orbitals = Database.getOrbitals(currentContext);
+                ArrayList<Item> notifyList = new ArrayList<>(0);
+
+                //if context is set
+                if(currentContext != null)
+                {
+                    //go through each orbital
+                    for(Database.DatabaseSatellite currentOrbital : orbitals)
+                    {
+                        CalculateService.AlarmNotifySettings passStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassStart);
+                        CalculateService.AlarmNotifySettings passEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassEnd);
+                        CalculateService.AlarmNotifySettings fullStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonStart);
+                        CalculateService.AlarmNotifySettings fullEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonEnd);
+
+                        //if using start or ending notification for any
+                        if(passStartSettings.isEnabled() || passEndSettings.isEnabled() || fullStartSettings.isEnabled() || fullEndSettings.isEnabled())
+                        {
+                            //add orbital
+                            notifyList.add(new Item(currentOrbital.norad, currentOrbital.getName(), passStartSettings, passEndSettings, fullStartSettings, fullEndSettings));
+                        }
+                    }
+
+                    //set items and layout ID
+                    if(notifyList.size() == 0)
+                    {
+                        notifyList.add(new Item(Integer.MIN_VALUE, res.getString(R.string.title_none), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
+                    }
+                }
+
+                //set items
+                notifications = notifyList.toArray(new Item[0]);
+
+                //update display
+                notifyDataSetChanged();
             }
 
             //Sets notify text
@@ -2201,7 +1323,7 @@ public abstract class Settings
             {
                 super(parentView, title);
 
-                this.itemsRefID = R.layout.settings_widgets_item;
+                this.itemsRefID = R.layout.widgets_item;
             }
 
             @Override
@@ -2239,11 +1361,11 @@ public abstract class Settings
                 }
                 else
                 {
-                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Settings_Widget_Item_Image);
+                    AppCompatImageView imageColumn = listColumns.findViewById(R.id.Widget_Item_Image);
 
                     imageColumn.setVisibility(View.INVISIBLE);
-                    ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Name_Text)).setText(R.string.title_name);
-                    ((TextView)listColumns.findViewById(R.id.Settings_Widget_Item_Location_Text)).setText(R.string.title_location);
+                    ((TextView)listColumns.findViewById(R.id.Widget_Item_Name_Text)).setText(R.string.title_name);
+                    ((TextView)listColumns.findViewById(R.id.Widget_Item_Location_Text)).setText(R.string.title_location);
                 }
 
                 super.setColumnTitles(listColumns, categoryText, page);
@@ -2273,7 +1395,7 @@ public abstract class Settings
             public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Settings_Widget_Item_Image, R.id.Settings_Widget_Item_Name_Text, R.id.Settings_Widget_Item_Location_Text);
+                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Widget_Item_Image, R.id.Widget_Item_Name_Text, R.id.Widget_Item_Location_Text);
 
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
@@ -2288,10 +1410,14 @@ public abstract class Settings
                 int noradId = WidgetBaseSetupActivity.getNoradID(currentContext, currentItem.id);
 
                 //set displays
-                itemHolder.widgetImage.setImageDrawable(widgetId != 0 ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, WidgetBaseSetupActivity.getOrbitalType(currentContext, currentItem.id)) : Globals.getDrawable(currentContext, R.drawable.ic_widgets_black, (noradId > 0)));
-                if(noradId < 0)
+                itemHolder.widgetImage.setImageDrawable(widgetId != 0 ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, WidgetBaseSetupActivity.getOrbitalType(currentContext, currentItem.id)) : Globals.getDrawable(currentContext, R.drawable.ic_widgets_black, true));
+                if(noradId < 0 && widgetId != 0)
                 {
                     itemHolder.widgetImage.setColorFilter(Color.TRANSPARENT);
+                }
+                else
+                {
+                    itemHolder.widgetImage.clearColorFilter();
                 }
                 itemHolder.nameText.setText(currentItem.name);
                 itemHolder.locationText.setText(currentItem.location);
@@ -2300,6 +1426,7 @@ public abstract class Settings
                 setItemBackground(itemHolder.itemView, false);
             }
 
+            //Reloads items
             public void reload()
             {
                 int index;
@@ -2338,6 +1465,7 @@ public abstract class Settings
                 //if no items
                 if(widgets.length == 0)
                 {
+                    //add blank widget
                     widgets = new Item[]{new Item(0, 0, null,  res.getString(R.string.desc_widgets_add), null)};
                 }
 
@@ -2363,8 +1491,7 @@ public abstract class Settings
         {
             int group = this.getGroupParam();
             int page = this.getPageParam();
-            int subPage = this.getSubPageParam();
-            Selectable.ListBaseAdapter listAdapter;
+            Selectable.ListBaseAdapter listAdapter = null;
 
             //set list adapter based on page
             switch(page)
@@ -2381,29 +1508,8 @@ public abstract class Settings
                     listAdapter = new Notifications.ItemListAdapter(this.listParentView, categoryTitle);
                     break;
 
-                case PageType.Updates:
-                case PageType.Other:
-                    switch(subPage)
-                    {
-                        case Globals.SubPageType.Accounts:
-                            listAdapter = new Options.Accounts.ItemListAdapter(this, null);
-                            break;
-
-                        case Globals.SubPageType.Widgets:
-                            listAdapter = new Widgets.ItemListAdapter(this.listParentView, null);
-                            break;
-
-                        default:
-                            return(Options.onCreateView(this, page, subPage, inflater, container, false));
-                    }
-                    break;
-
                 case PageType.Widgets:
                     listAdapter = new Widgets.ItemListAdapter(this.listParentView, categoryTitle);
-                    break;
-
-                default:
-                    listAdapter = null;
                     break;
             }
 
@@ -2510,7 +1616,6 @@ public abstract class Settings
                         break;
 
                     case PageType.Accounts:
-                    case PageType.Other:
                         //remove account
                         ((Options.Accounts.ItemListAdapter)getAdapter()).removeAccount(currentItem.id);
                         deleteCount++;
@@ -2544,7 +1649,7 @@ public abstract class Settings
         //Returns if on accounts page
         private boolean isOnAccounts()
         {
-            return(pageNum == PageType.Accounts || (pageNum == PageType.Other && this.getSubPageParam() == Globals.SubPageType.Accounts));
+            return(pageNum == PageType.Accounts);
         }
     }
 
@@ -2586,9 +1691,6 @@ public abstract class Settings
 
                 case PageType.Updates:
                     return(res.getString(R.string.title_updates));
-
-                case PageType.Other:
-                    return(res.getString(R.string.title_other));
 
                 case PageType.Widgets:
                     return(res.getString(R.string.title_widgets));
@@ -3498,24 +2600,14 @@ public abstract class Settings
     //Gets login name and password
     public static String[] getLogin(Context context, int accountType)
     {
-        switch(accountType)
-        {
-            case Globals.AccountType.SpaceTrack:
-                return(new String[]{getPreferenceString(context, PreferenceName.SpaceTrackUser), Encryptor.decrypt(context, getPreferenceString(context, PreferenceName.SpaceTrackPassword))});
-
-            default:
-                return(new String[]{null, null});
-        }
+        return(accountType == Globals.AccountType.SpaceTrack ? new String[]{getPreferenceString(context, PreferenceName.SpaceTrackUser), Encryptor.decrypt(context, getPreferenceString(context, PreferenceName.SpaceTrackPassword))} : new String[]{null, null});
     }
 
     //Sets space-track login name and password
     public static void setSpaceTrackLogin(Context context, String user, String password)
     {
-        SharedPreferences.Editor writeSettings = getWriteSettings(context);
-
-        writeSettings.putString(PreferenceName.SpaceTrackUser, user);
-        writeSettings.putString(PreferenceName.SpaceTrackPassword, Encryptor.encrypt(context, password));
-        writeSettings.apply();
+        setPreferenceString(context, PreferenceName.SpaceTrackUser, user);
+        setPreferenceString(context, PreferenceName.SpaceTrackPassword, Encryptor.encrypt(context, password));
     }
 
     //Removes space-track login name and password

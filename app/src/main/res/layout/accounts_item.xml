@@ -7,7 +7,7 @@
     android:padding="5dp"
     android:background="?attr/itemSelect">
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/Settings_Accounts_Item_Image"
+        android:id="@+id/Accounts_Item_Image"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:paddingLeft="5dp"
@@ -15,7 +15,7 @@
         android:tint="@color/transparent"/>
 
     <TextView
-        android:id="@+id/Settings_Accounts_Item_Name_Text"
+        android:id="@+id/Accounts_Item_Name_Text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"

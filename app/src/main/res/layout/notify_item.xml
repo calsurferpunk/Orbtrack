@@ -7,7 +7,7 @@
     android:padding="5dp"
     android:background="?attr/itemSelect">
     <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/Settings_Notify_Item_Image"
+        android:id="@+id/Notify_Item_Image"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:paddingLeft="5dp"
@@ -15,7 +15,7 @@
         android:tint="?attr/defaultTextColor"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Name_Text"
+        android:id="@+id/Notify_Item_Name_Text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -24,28 +24,28 @@
         android:textColor="?attr/defaultTextColor"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Pass_Text"
+        android:id="@+id/Notify_Item_Pass_Text"
         style="@style/NotifyItemTitle"
         android:text="@string/title_pass"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Pass_Start_Text"
+        android:id="@+id/Notify_Item_Pass_Start_Text"
         style="@style/NotifyItemText"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Pass_End_Text"
+        android:id="@+id/Notify_Item_Pass_End_Text"
         style="@style/NotifyItemText"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Full_Text"
+        android:id="@+id/Notify_Item_Full_Text"
         style="@style/NotifyItemTitle"
         android:text="@string/title_full"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Full_Start_Text"
+        android:id="@+id/Notify_Item_Full_Start_Text"
         style="@style/NotifyItemText"/>
 
     <TextView
-        android:id="@+id/Settings_Notify_Item_Full_End_Text"
+        android:id="@+id/Notify_Item_Full_End_Text"
         style="@style/NotifyItemText"/>
 </LinearLayout>

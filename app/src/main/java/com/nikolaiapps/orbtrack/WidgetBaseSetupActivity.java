@@ -1381,7 +1381,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
         //get views
         parentView = this.findViewById(R.id.Widget_Setup_Layout);
-        widgetPreview = this.findViewById(R.id.Widget_View);
+        widgetPreview = this.findViewById(R.id.Widget_Pass_View);
         okButton = this.findViewById(R.id.Widget_Setup_Ok_Button);
         cancelButton = this.findViewById(R.id.Widget_Setup_Cancel_Button);
 

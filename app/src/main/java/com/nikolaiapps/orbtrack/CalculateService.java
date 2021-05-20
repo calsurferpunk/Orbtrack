@@ -301,6 +301,16 @@ public class CalculateService extends NotifyService
             passViews2 = copyViewArray(otherItem.passViews2);
         }
 
+        public void clearPass()
+        {
+            passCalculated = passCalculating = passCalculateFinished = passStartFound = false;
+            passTimeStart = null;
+            passTimeEnd = null;
+            passDuration = "";
+            illumination = 0;
+            phaseName = null;
+        }
+
         public boolean inUnknownPassTimeStartNow()
         {
             Calendar timeNow = Globals.getGMTTime();
@@ -1283,13 +1293,8 @@ public class CalculateService extends NotifyService
             currentGMT.setTimeInMillis(startGMT.getTimeInMillis());
 
             //update status
+            currentItem.clearPass();
             currentItem.passCalculating = true;
-            currentItem.passCalculated = currentItem.passCalculateFinished = currentItem.passStartFound = false;
-            currentItem.passTimeStart = null;
-            currentItem.passTimeEnd = null;
-            currentItem.passDuration = "";
-            currentItem.illumination = 0;
-            currentItem.phaseName = null;
 
             //if satellite was set
             if(currentItem.satellite != null)

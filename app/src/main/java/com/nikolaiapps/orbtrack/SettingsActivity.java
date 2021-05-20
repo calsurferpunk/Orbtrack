@@ -2,6 +2,7 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.app.Activity;
+import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -789,7 +790,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     public static final String EXTRA_RECREATE = "recreate";
+    public static final String EXTRA_RECREATE_LENS = "recreateLens";
     public static final String EXTRA_RECREATE_MAP = "recreateMap";
+    public static final String EXTRA_RELOAD_LOCATION = "reloadLocation";
+    public static final String EXTRA_UPDATE_COMBINED_LAYOUT = "updateCombinedLayout";
     public static final String EXTRA_START_SCREEN = "startScreen";
     public static final String EXTRA_SHOW_SETUP = "showSetup";
     private static final String RootKey = "rootKey";
@@ -1163,6 +1167,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             recreateThis = true;
                             //fall through
 
+                        case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.MetricUnits:
                             //recreate activity
                             setRecreateNeeded();
@@ -1170,9 +1175,24 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             //if need to recreate this activity
                             if(recreateThis)
                             {
+                                //update theme and recreate
                                 Settings.Options.Display.setTheme(SettingsActivity.this);
                                 SettingsActivity.this.recreate();
                             }
+                            break;
+
+                        case Settings.PreferenceName.LensIndicator:
+                        case Settings.PreferenceName.LensHorizonColor:
+                        case Settings.PreferenceName.LensUseHorizon:
+                        case Settings.PreferenceName.LensUseCamera:
+                        case Settings.PreferenceName.LensRotate:
+                        case Settings.PreferenceName.LensUseAutoWidth:
+                        case Settings.PreferenceName.LensUseAutoHeight:
+                        case Settings.PreferenceName.LensAzimuthUserOffset:
+                        case Settings.PreferenceName.LensWidth:
+                        case Settings.PreferenceName.LensHeight:
+                            //lens needs recreate
+                            setLensRecreateNeed();
                             break;
 
                         case Settings.PreferenceName.MapShow3dPaths:
@@ -1189,6 +1209,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapMarkerInfoLocation:
                             //map needs recreate
                             setMapRecreateNeeded();
+                            break;
+
+                        case Settings.PreferenceName.UseCombinedCurrentLayout:
+                            //combined layout needed update
+                            setUpdateCombinedLayoutNeeded();
                             break;
                     }
                 }
@@ -1297,6 +1322,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
         boolean isOkay = (resultCode == RESULT_OK);
+        int id;
         int progressType = Globals.ProgressType.Unknown;
         Resources res = this.getResources();
 
@@ -1345,6 +1371,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     //update list
                     updateList();
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.EditWidget:
+                //if set
+                if(isOkay)
+                {
+                    //if valid ID
+                    id = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
+                    if(id != 0)
+                    {
+                        //update list
+                        updateList();
+                    }
                 }
                 break;
 
@@ -1795,6 +1835,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //update source
                         locationSource = currentItem.locationType;
                         Database.saveLocation(context, currentItem.name, currentItem.locationType, true);
+                        setReloadLocationNeeded();
 
                         //if current location and not on setup
                         if(locationSource == Database.LocationType.Current && !showSetup)
@@ -1881,8 +1922,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     //get adapter
                     Selectable.ListBaseAdapter listAdapter = page.getAdapter();
 
-                    //if adapter is set and is the widget list
-                    if(listAdapter instanceof Settings.Widgets.ItemListAdapter)
+                    //if adapter is the locations list
+                    if(listAdapter instanceof Settings.Locations.ItemListAdapter)
+                    {
+                        //reload locations list
+                        ((Settings.Locations.ItemListAdapter)listAdapter).reload();
+                    }
+                    //else if adapter is the notifications list
+                    else if(listAdapter instanceof Settings.Notifications.ItemListAdapter)
+                    {
+                        //reload notification list
+                        ((Settings.Notifications.ItemListAdapter)listAdapter).reload();
+                    }
+                    //else if adapter is the widget list
+                    else if(listAdapter instanceof Settings.Widgets.ItemListAdapter)
                     {
                         //reload widget list
                         ((Settings.Widgets.ItemListAdapter)listAdapter).reload();
@@ -2221,10 +2274,28 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         resultIntent.putExtra(EXTRA_RECREATE, true);
     }
 
+    //Sets lens recreate needed
+    private void setLensRecreateNeed()
+    {
+        resultIntent.putExtra(EXTRA_RECREATE_LENS, true);
+    }
+
     //Sets map recreate needed
     private void setMapRecreateNeeded()
     {
         resultIntent.putExtra(EXTRA_RECREATE_MAP, true);
+    }
+
+    //Sets reload location needed
+    private void setReloadLocationNeeded()
+    {
+        resultIntent.putExtra(EXTRA_RELOAD_LOCATION, true);
+    }
+
+    //Sets update combined layout needed
+    private void setUpdateCombinedLayoutNeeded()
+    {
+        resultIntent.putExtra(EXTRA_UPDATE_COMBINED_LAYOUT, true);
     }
 
     //Locks screen orientation
@@ -2362,7 +2433,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if(idChecked[itemIndex])
                 {
                     //updated observer
-                    setRecreateNeeded();
+                    setReloadLocationNeeded();
                 }
             }
         }, new EditValuesDialog.OnDismissListener()

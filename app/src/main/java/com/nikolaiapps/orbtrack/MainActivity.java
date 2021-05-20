@@ -2,12 +2,11 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.app.Activity;
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -20,7 +19,6 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
@@ -42,7 +40,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -72,7 +69,6 @@ public class MainActivity extends AppCompatActivity
         static final String CalculatePageInputs = "calcPageInputs";
         static final String CalculatePageSubInputs = "calcPageSubInputs";
         static final String CalculateSubPage = "calcSubPage";
-        static final String SettingsSubPage = "settingsSubPage";
         static final String MainPagerItem = "mainPagerItem";
         static final String PassIndex = "passIndex";
         static final String GetPassItems = "getPassItems";
@@ -109,9 +105,6 @@ public class MainActivity extends AppCompatActivity
     private Current.PageAdapter currentPageAdapter;
     private Calculate.PageAdapter calculatePageAdapter;
     private Orbitals.PageAdapter orbitalPageAdapter;
-    private Settings.Locations.ItemListAdapter settingsLocationsListAdapter;
-    private Settings.Options.Accounts.ItemListAdapter accountsListAdapter;
-    private Settings.PageAdapter settingsPagerAdapter;
     //
     //Current
     private int mainGroup;
@@ -126,7 +119,6 @@ public class MainActivity extends AppCompatActivity
     private static int lastSideMenuPosition = -1;
     private int[] currentSubPage;
     private int[] calculateSubPage;
-    private int[] settingsSubPage;
     private long timerDelay;
     private long listTimerDelay;
     private long lensTimerDelay;
@@ -147,16 +139,11 @@ public class MainActivity extends AppCompatActivity
     //Location
     private byte locationSource;
     private boolean pendingLocationUpdate;
-    private boolean needSaveCurrentLocation;
-    private boolean userChangedLocation;
     private static ObserverType observer;
-    private AlertDialog addCurrentLocationDialog;
     //
     //Listeners
     private static Calculate.OnStartCalculationListener startCalculationListener;
     private static Selectable.ListFragment.OnEditModeChangedListener editModeChangedListener;
-    private SharedPreferences preferences;
-    private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
     //
     //Receivers
     private LocationReceiver locationReceiver;
@@ -187,7 +174,7 @@ public class MainActivity extends AppCompatActivity
         savedStateBundle = savedInstanceState;
         mainGroup = savedInstanceState.getInt(ParamTypes.MainGroup, Groups.Current);
         previousGroup = previousPage = previousSubPage = -1;
-        inEditMode = pendingLocationUpdate = needSaveCurrentLocation = userChangedLocation = false;
+        inEditMode = pendingLocationUpdate = false;
         observer = null;
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
@@ -207,8 +194,6 @@ public class MainActivity extends AppCompatActivity
         {
             calculateSubPage[index] = savedInstanceState.getInt(ParamTypes.CalculateSubPage + index, Globals.SubPageType.Input);
         }
-        settingsSubPage = new int[Settings.PageType.PageCount];
-        settingsSubPage[Settings.PageType.Other] = savedInstanceState.getInt(ParamTypes.SettingsSubPage + Settings.PageType.Other, Globals.SubPageType.None);
 
         //setup bundles
         calculateBundle = new Bundle();
@@ -223,25 +208,6 @@ public class MainActivity extends AppCompatActivity
         //create receivers
         startCalculationListener = createOnStartCalculationListener();
         localUpdateReceiver = createUpdateReceiver(localUpdateReceiver);
-        preferences = Settings.getReadSettings(this);
-        preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener()
-        {
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key)
-            {
-                switch(key)
-                {
-                    case Settings.PreferenceName.UseCombinedCurrentLayout:
-                        if(mainGroup == Groups.Current)
-                        {
-                            updateMainPagerAdapter(true, false);
-                        }
-                        updateSideMenu();
-                        break;
-                }
-            }
-        };
-        preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
 
         //if privacy policy has been accepted
         stateCopy = savedInstanceState;
@@ -288,7 +254,6 @@ public class MainActivity extends AppCompatActivity
         {
             outState.putInt(ParamTypes.CurrentSubPage + index, currentSubPage[index]);
         }
-        outState.putInt(ParamTypes.SettingsSubPage + Settings.PageType.Other, settingsSubPage[Settings.PageType.Other]);
         outState.putInt(ParamTypes.MainPagerItem, getMainPage());
 
         super.onSaveInstanceState(outState);
@@ -341,12 +306,6 @@ public class MainActivity extends AppCompatActivity
         if(localUpdateReceiver != null)
         {
             manager.unregisterReceiver(localUpdateReceiver);
-        }
-
-        //stop listener
-        if(preferences != null && preferenceChangeListener != null)
-        {
-            preferences.unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
         }
 
         //if progress display is visible
@@ -479,36 +438,37 @@ public class MainActivity extends AppCompatActivity
                         //update theme
                         updateTheme();
                     }
-                    //else if need to recreate map and on a map view
-                    else if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map))
+                    //else if -need to recreate lens view and on a lens view- or -need to recreate map and on a map view-
+                    else if((data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_LENS, false) && subPage == Globals.SubPageType.Lens) ||
+                            (data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map)))
                     {
                         //recreate
                         wasRecreated = true;
                         this.recreate();
                     }
-                }
-                break;
-
-            case BaseInputActivity.RequestCode.EditWidget:
-                //if set
-                if(isOkay)
-                {
-                    //if valid ID
-                    id = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, 0);
-                    if(id != 0)
+                    else
                     {
-                        //update list
-                        updateMainPager(false);
-                    }
-                }
-                break;
+                        //if need to reload location
+                        if(data.getBooleanExtra(SettingsActivity.EXTRA_RELOAD_LOCATION, false))
+                        {
+                            //reload observer
+                            loadObserver();
+                        }
 
-            case BaseInputActivity.RequestCode.EditNotify:
-                //if set
-                if(isOkay)
-                {
-                    //update list
-                    updateMainPager(false);
+                        //if need to update combined layout
+                        if(data.getBooleanExtra(SettingsActivity.EXTRA_UPDATE_COMBINED_LAYOUT, false))
+                        {
+                            //if on current
+                            if(mainGroup == Groups.Current)
+                            {
+                                //update pager
+                                updateMainPagerAdapter(true, false);
+                            }
+
+                            //update side menu
+                            updateSideMenu();
+                        }
+                    }
                 }
                 break;
 
@@ -532,32 +492,12 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.MapLocationInput:
-                //if set
-                if(isOkay)
-                {
-                    //update list and observer
-                    updateMainPager(false);
-                    loadObserver(true);
-                }
-                break;
-
             case BaseInputActivity.RequestCode.SDCardOpenItem:
                 //if set
                 if(isOkay)
                 {
                     //handle SD card open files request
                     BaseInputActivity.handleActivitySDCardOpenFilesRequest(this, data);
-                }
-                break;
-
-            case BaseInputActivity.RequestCode.GoogleDriveAddAccount:
-            case BaseInputActivity.RequestCode.DropboxAddAccount:
-                //if adapter is set
-                if(accountsListAdapter != null)
-                {
-                    //reload items
-                    accountsListAdapter.reloadItems();
                 }
                 break;
 
@@ -747,7 +687,6 @@ public class MainActivity extends AppCompatActivity
         boolean onCurrent = (mainGroup == Groups.Current);
         boolean onCalculate = (mainGroup == Groups.Calculate);
         boolean onOrbitals = (mainGroup == Groups.Orbitals);
-        boolean onSettings = (mainGroup == Groups.Settings);
         int subPage = getSubPage();
         int mapDisplayType = Settings.getMapDisplayType(this);
         boolean usingCurrentViewGrid = Settings.getUsingCurrentGridLayout(Current.PageType.View);
@@ -785,7 +724,6 @@ public class MainActivity extends AppCompatActivity
         boolean onCalculateIntersectionList = (onCalculateIntersection && onSubPageList);
         boolean onCalculateIntersectionLens = (onCalculateIntersection && onSubPageLens);
         boolean onOrbitalSatellites = (onOrbitals && page == Orbitals.PageType.Satellites);
-        boolean onSettingsOtherSub = (onSettings && page == Settings.PageType.Other && settingsSubPage[Settings.PageType.Other] != Globals.SubPageType.None);
         boolean haveSatellites = (onOrbitalSatellites && orbitalPageAdapter != null && orbitalPageAdapter.getPageItemCount(mainPager, Orbitals.PageType.Satellites) > 0);
         boolean onOrbitalSatellitesExistNoModify = (onOrbitalSatellites && haveSatellites && !UpdateService.modifyingSatellites());
         boolean calculatingViews = (calculateViewAnglesTask != null && calculateViewAnglesTask.isRunning());
@@ -800,7 +738,6 @@ public class MainActivity extends AppCompatActivity
         boolean onCurrentNoSelected = ((onCurrentView && viewLensNoradID == Integer.MAX_VALUE) || (onCurrentPasses && passesLensNoradID == Integer.MAX_VALUE) || (onCurrentCoordinates && mapViewNoradID == Integer.MAX_VALUE) || (onCurrentCombined && viewLensNoradID == Integer.MAX_VALUE && passesLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE));
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
-        menu.findItem(R.id.menu_back).setVisible(onSettingsOtherSub);
         menu.findItem(R.id.menu_list).setVisible(showList);
         menu.findItem(R.id.menu_grid).setVisible(showGrid);
         menu.findItem(R.id.menu_map).setVisible(showMap);
@@ -857,40 +794,6 @@ public class MainActivity extends AppCompatActivity
                         break;
                 }
                 break;
-
-            case Groups.Settings:
-                switch(page)
-                {
-                    case Settings.PageType.Locations:
-                        show = true;
-                        if(inEditMode)
-                        {
-                            imageID = R.drawable.ic_mode_edit_white;
-                        }
-                        break;
-
-                    case Settings.PageType.Notifications:
-                        show = !inEditMode;
-                        break;
-
-                    case Settings.PageType.Other:
-                        switch(settingsSubPage[page])
-                        {
-                            case Globals.SubPageType.Accounts:
-                                if(inEditMode)
-                                {
-                                    show = (accountsListAdapter != null && !accountsListAdapter.haveNonEditItemsSelected());
-                                    imageID = R.drawable.ic_mode_edit_white;
-                                }
-                                else
-                                {
-                                    show = (accountsListAdapter != null && accountsListAdapter.getUsedAccounts().size() < Globals.AccountType.Count);
-                                }
-                                break;
-                        }
-                        break;
-                }
-                break;
         }
 
         //update visibility
@@ -941,23 +844,6 @@ public class MainActivity extends AppCompatActivity
         //handle item
         switch(id)
         {
-            case R.id.menu_back:
-                switch(mainGroup)
-                {
-                    case Groups.Settings:
-                        //if went back to previous page
-                        if(showPreviousPage())
-                        {
-                            //done
-                            return(true);
-                        }
-
-                        setSubPage(Groups.Settings, page, Globals.SubPageType.None);
-                        setDisplayGroup = true;
-                        break;
-                }
-                break;
-
             case R.id.menu_list:
             case R.id.menu_grid:
                 switch(mainGroup)
@@ -1290,28 +1176,6 @@ public class MainActivity extends AppCompatActivity
                         break;
                 }
                 break;
-
-            case Groups.Settings:
-                switch(page)
-                {
-                    case Settings.PageType.Other:
-                        //if not on the main display page
-                        if(settingsSubPage[page] != Globals.SubPageType.None)
-                        {
-                            //if went back to previous page
-                            if(showPreviousPage())
-                            {
-                                //stop
-                                return;
-                            }
-
-                            //go back to main display page
-                            setSubPage(Groups.Settings, page, Globals.SubPageType.None);
-                            updateDisplay = true;
-                        }
-                        break;
-                }
-                break;
         }
 
         //if updating display
@@ -1486,27 +1350,6 @@ public class MainActivity extends AppCompatActivity
             //handle any updates
             DatabaseManager.handleUpdates(this);
 
-            //create add current location dialog
-            addCurrentLocationDialog = Globals.createAddCurrentLocationDialog(this, new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    //cancel
-                    needSaveCurrentLocation = false;
-                    lockScreenOrientation(false);
-                }
-            }, new DialogInterface.OnCancelListener()
-            {
-                @Override
-                public void onCancel(DialogInterface dialog)
-                {
-                    //cancel
-                    needSaveCurrentLocation = false;
-                    lockScreenOrientation(false);
-                }
-            });
-
             //load orbitals
             loadOrbitals(this);
 
@@ -1627,10 +1470,6 @@ public class MainActivity extends AppCompatActivity
             case Groups.Orbitals:
                 subTitle = res.getString(R.string.title_orbitals);
                 break;
-
-            case Groups.Settings:
-                subTitle = res.getString(R.string.title_settings);
-                break;
         }
 
         //if action bar exists
@@ -1679,63 +1518,125 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Updates the current location display
-    private void updateCurrentLocationDisplay()
+    //Updates the observer usage
+    private void updateObserverUsage(boolean updateNotify)
     {
-        if(settingsLocationsListAdapter != null)
-        {
-            settingsLocationsListAdapter.setCurrentLocation(observer.geo.latitude, observer.geo.longitude, observer.geo.altitudeKm * 1000);
-        }
+        boolean usingCombined;
+        boolean usingCurrent = (locationSource == Database.LocationType.Current);
 
+        //update displays and calculations
         Current.Coordinates.setCurrentLocation(this, observer);
-    }
-
-    //Loads the observer
-    private void loadObserver(boolean showStatus)
-    {
-        Database.DatabaseLocation selectedLocation = Database.getSelectedLocation(this);
-
-        //if observer is set, using current location, and nothing is set
-        if(observer != null && selectedLocation.locationType == Database.LocationType.Current && selectedLocation.latitude == 0 && selectedLocation.longitude == 0 && selectedLocation.altitudeKM == 0)
+        if(Current.cameraView != null)
         {
-            //use observer instead
-            selectedLocation.latitude = observer.geo.latitude;
-            selectedLocation.longitude = observer.geo.longitude;
-            selectedLocation.altitudeKM = observer.geo.altitudeKm;
-            selectedLocation.zoneId = observer.timeZone.getID();
+            //update camera view
+            Current.cameraView.updateAzDeclination(observer);
+        }
+        if(mainGroup == Groups.Current)
+        {
+            //if there are pass items
+            usingCombined = Settings.getCombinedCurrentLayout(this);
+            if(Current.PageAdapter.hasItems(usingCombined ? Current.PageType.Combined : Current.PageType.Passes))
+            {
+                //go through each pass item
+                CalculateService.PassData[] passItems = (usingCombined ? Current.PageAdapter.getCombinedItems() : Current.PageAdapter.getPassItems());
+                for(CalculateService.PassData currentItem : passItems)
+                {
+                    //clear pass
+                    currentItem.clearPass();
+                }
+            }
+
+            //recalculate
+            setCurrentPassCalculations(true);
         }
 
-        updateObserver(selectedLocation.latitude, selectedLocation.longitude, selectedLocation.altitudeKM, selectedLocation.zoneId, selectedLocation.locationType, showStatus);
+        //if updating notifications
+        if(updateNotify)
+        {
+            //update notifications
+            CalculateService.NotifyReceiver.updateNotifyLocations(this, observer, usingCurrent, false);
+        }
     }
 
     //Updates the observer
-    private void updateObserver(double latitude, double longitude, double altitudeKM, String zoneId, byte locationType, boolean showStatus)
+    private void updateObserver(Database.DatabaseLocation selectedLocation, boolean allowGetLocation, boolean showStatus)
     {
         //update location source and observer
-        locationSource = locationType;
-        observer = Calculations.loadObserver(latitude, longitude, altitudeKM, zoneId);
-        switch(locationSource)
+        locationSource = selectedLocation.locationType;
+        observer = Calculations.loadObserver(selectedLocation.latitude, selectedLocation.longitude, selectedLocation.altitudeKM, selectedLocation.zoneId);
+
+        //if using current location
+        if(locationSource == Database.LocationType.Current)
         {
-            case Database.LocationType.Current:
+            //if allowing location updates
+            if(allowGetLocation)
+            {
+                //get location update
                 pendingLocationUpdate = true;
                 if(showStatus)
                 {
                     Globals.showSnackBar(mainDrawerLayout, this.getResources().getString(R.string.title_location_getting));
                 }
                 LocationService.getCurrentLocation(this, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
-                break;
-
-            default:
+            }
+            else
+            {
+                //use as is
                 pendingLocationUpdate = false;
-                Current.Coordinates.setCurrentLocation(this, observer);
-                if(Current.cameraView != null)
-                {
-                    Current.cameraView.updateAzDeclination(observer);
-                }
-                CalculateService.NotifyReceiver.updateNotifyLocations(this, observer, false, userChangedLocation);
-                userChangedLocation = false;
-                break;
+                updateObserverUsage(true);
+            }
         }
+        else
+        {
+            pendingLocationUpdate = false;
+            updateObserverUsage(true);
+        }
+    }
+
+    //Gets the most recently selected location
+    private Database.DatabaseLocation getSelectedLocation()
+    {
+        Location lastLocation;
+        Database.DatabaseLocation selectedLocation = Database.getSelectedLocation(this);
+        boolean isCurrent = (selectedLocation.locationType == Database.LocationType.Current);
+
+        //if is current location
+        if(isCurrent)
+        {
+            //update with last known location
+            lastLocation = Settings.getLastLocation(this);
+            selectedLocation.latitude = lastLocation.getLatitude();
+            selectedLocation.longitude = lastLocation.getLongitude();
+            selectedLocation.altitudeKM = lastLocation.getAltitude() / 1000;
+        }
+
+        //if observer is set, using current location, and selected is not valid
+        if(observer != null && isCurrent && !selectedLocation.isValid())
+        {
+            //use current observer instead
+            selectedLocation.latitude = observer.geo.latitude;
+            selectedLocation.longitude = observer.geo.longitude;
+            selectedLocation.altitudeKM = observer.geo.altitudeKm;
+            selectedLocation.zoneId = observer.timeZone.getID();
+        }
+
+        //return selected location
+        return(selectedLocation);
+    }
+
+    //Loads the observer
+    private void loadObserver(boolean showStatus)
+    {
+        //load the most recent location and allow an update
+        updateObserver(getSelectedLocation(), true, showStatus);
+    }
+    private void loadObserver()
+    {
+        Database.DatabaseLocation selectedLocation = getSelectedLocation();
+        boolean haveLocation = selectedLocation.isValid();
+
+        //load most recent location and only update/show status if update is needed
+        updateObserver(selectedLocation, !haveLocation, !haveLocation);
     }
 
     //Sets save file data
@@ -2123,7 +2024,6 @@ public class MainActivity extends AppCompatActivity
         int page = getMainPage();
         boolean showCurrent = (mainGroup == Groups.Current);
         boolean showCalculate = (mainGroup == Groups.Calculate);
-        boolean showSettings = (mainGroup == Groups.Settings);
         PagerAdapter currentAdapter = mainPager.getAdapter();
         PagerAdapter desiredAdapter = null;
         FragmentManager currentManger = this.getSupportFragmentManager();
@@ -2197,10 +2097,6 @@ public class MainActivity extends AppCompatActivity
                 case Groups.Orbitals:
                     desiredAdapter = orbitalPageAdapter = new Orbitals.PageAdapter(currentManger, mainDrawerLayout, createOnItemDetailButtonClickListener(), null, createOnUpdateNeededListener(), createOnPageResumeListener());
                     break;
-
-                case Groups.Settings:
-                    desiredAdapter = settingsPagerAdapter = new Settings.PageAdapter(currentManger, mainDrawerLayout, createOnItemSelectedListener(), createOnSettingsItemCheckChangedListener(), createOnSetAdapterListener(), createOnUpdateNeededListener(), createOnUpdatePageListener(), createOnPageResumeListener(), settingsSubPage);
-                    break;
             }
 
             //if the group changed
@@ -2214,17 +2110,6 @@ public class MainActivity extends AppCompatActivity
                     {
                         //reset each sub page to input
                         setSubPage(Groups.Calculate, index, Globals.SubPageType.Input, false);
-                    }
-                }
-
-                //if now showing settings
-                if(showSettings)
-                {
-                    //go through each settings sub page
-                    for(index = 0; index < Settings.PageType.PageCount; index++)
-                    {
-                        //reset each sub page to main page
-                        setSubPage(Groups.Settings, index, Globals.SubPageType.None, false);
                     }
                 }
             }
@@ -2520,13 +2405,6 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            protected void onDenied(Context context)
-            {
-                //dismiss dialog
-                showAddCurrentLocationDialog(false);
-            }
-
-            @Override
             protected void onRestart(Context context, boolean close, boolean checkClose)
             {
                 //if using current location
@@ -2544,13 +2422,6 @@ public class MainActivity extends AppCompatActivity
                 boolean showStatus = (pendingLocationUpdate && updated);
                 boolean usingCurrent = (locationSource == Database.LocationType.Current);
 
-                //if need to save current location
-                if(needSaveCurrentLocation)
-                {
-                    //save location after resolving it
-                    saveResolvedLocation(context, updatedObserver);
-                }
-
                 //if pending location update or using current location
                 if(pendingLocationUpdate || usingCurrent)
                 {
@@ -2561,38 +2432,8 @@ public class MainActivity extends AppCompatActivity
                     //if updated
                     if(updated)
                     {
-                        //update displays
-                        updateCurrentLocationDisplay();
-                        if(Current.cameraView != null)
-                        {
-                            Current.cameraView.updateAzDeclination(observer);
-                        }
-                        switch(mainGroup)
-                        {
-                            case Groups.Current:
-                                setCurrentPassCalculations(true);
-                                break;
-
-                            case Groups.Settings:
-                                if(settingsPagerAdapter != null)
-                                {
-                                    runOnUiThread(new Runnable()
-                                    {
-                                        @Override
-                                        public void run()
-                                        {
-                                            settingsPagerAdapter.notifyDataSetChanged();
-                                        }
-                                    });
-                                }
-                                break;
-                        }
-                        Current.Coordinates.setCurrentLocation(MainActivity.this, observer);
-                        if(usingCurrent)
-                        {
-                            CalculateService.NotifyReceiver.updateNotifyLocations(MainActivity.this, observer, true, userChangedLocation);
-                            userChangedLocation = false;
-                        }
+                        //update displays and calculations
+                        updateObserverUsage(usingCurrent);
                     }
                 }
 
@@ -2606,9 +2447,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             protected void onSaveLocation(boolean success)
             {
-                //dismiss dialog
-                showAddCurrentLocationDialog(false);
-
                 //if success
                 if(success)
                 {
@@ -2740,12 +2578,6 @@ public class MainActivity extends AppCompatActivity
         return(receiver);
     }
 
-    //Locks screen orientation
-    private void lockScreenOrientation(boolean lock)
-    {
-        Globals.lockScreenOrientation(this, lock);
-    }
-
     //Shows setup dialog
     private void showSetupDialog()
     {
@@ -2868,208 +2700,10 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    //Shows an edit location dialog
-    private void showEditLocationDialog()
-    {
-        int index;
-        final Resources res = this.getResources();
-        ArrayList<Selectable.ListItem> selectedItems = settingsPagerAdapter.getSelectedItems(mainPager, Settings.PageType.Locations);
-        int itemCount = selectedItems.size();
-        final int[] ids = new int[itemCount];
-        final double[] numberValues = new double[itemCount];
-        final double[] number2Values = new double[itemCount];
-        final double[] number3Values = new double[itemCount];
-        final String[] names = new String[itemCount];
-        final String[] defaultZones = new String[itemCount];
-        final boolean[] idChecked = new boolean[itemCount];
-        final ArrayList<TimeZone> zones = Globals.getTimeZoneList();
-        final String[] zoneNames = new String[zones.size()];
-
-        //get ids and values
-        for(index = 0; index < ids.length; index++)
-        {
-            //remember current item
-            Settings.Locations.Item currentItem = (Settings.Locations.Item)selectedItems.get(index);
-
-            //get current ID and values
-            ids[index] = currentItem.id;
-            numberValues[index] = currentItem.latitude;
-            number2Values[index] = currentItem.longitude;
-            number3Values[index] = Globals.getMetersUnitValue(currentItem.altitudeM);
-            names[index] = currentItem.name;
-            defaultZones[index] = Globals.getGMTOffsetString(currentItem.zone);
-            idChecked[index] = currentItem.isChecked;
-        }
-        for(index = 0; index < zoneNames.length; index++)
-        {
-            zoneNames[index] = Globals.getGMTOffsetString(zones.get(index));
-        }
-
-        //show dialog
-        new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
-        {
-            @Override
-            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
-            {
-                String zoneId = zones.get(Arrays.asList(zoneNames).indexOf(list2Value)).getID();
-                double altitudeM = (Settings.getUsingMetric() ? number3 : (number3 / Globals.FEET_PER_METER));
-
-                //save location
-                Database.saveLocation(MainActivity.this, id, textValue, number1, number2, altitudeM, zoneId, Database.LocationType.Online);
-
-                //if the selected location
-                if(idChecked[itemIndex])
-                {
-                    //update observer
-                    updateObserver(number1, number2, altitudeM / 1000, zoneId, Database.LocationType.Online, false);
-                }
-            }
-        }, new EditValuesDialog.OnDismissListener()
-        {
-            @Override
-            public void onDismiss(EditValuesDialog dialog, int saveCount)
-            {
-                //if any were saved
-                if(saveCount > 0)
-                {
-                    //need update
-                    settingsPagerAdapter.notifyDataSetChanged();
-                }
-
-                //end edit mode
-                cancelEditMode(mainPager);
-            }
-        }).getLocation(res.getString(R.string.title_edit), ids, res.getString(R.string.title_name), names, new String[]{res.getString(R.string.title_latitude), res.getString(R.string.title_longitude), res.getString(R.string.title_altitude) + " (" + Globals.getMetersLabel(res) + ")"}, numberValues, number2Values, number3Values, res.getString(R.string.title_time_zone), zoneNames, defaultZones);
-    }
-
-    //Shows/dismisses add current location dialog
-    private void showAddCurrentLocationDialog(boolean show)
-    {
-        //update status
-        needSaveCurrentLocation = show;
-        lockScreenOrientation(show);
-
-        //if showing
-        if(show)
-        {
-            //show
-            addCurrentLocationDialog.show();
-        }
-        //else if dialog exists and is shown
-        else if(addCurrentLocationDialog != null && addCurrentLocationDialog.isShowing())
-        {
-            //dismiss
-            addCurrentLocationDialog.dismiss();
-        }
-    }
-
-    //Shows an add location dialog
-    private void showAddLocationDialog()
-    {
-        Resources res = this.getResources();
-
-        Globals.showSelectDialog(this, res.getString(R.string.title_location_add), AddSelectListAdapter.SelectType.Location, new AddSelectListAdapter.OnItemClickListener()
-        {
-            @Override
-            public void onItemClick(int which)
-            {
-                //handle based on source
-                switch(which)
-                {
-                    case AddSelectListAdapter.LocationSourceType.Current:
-                        //show dialog and wait for update
-                        showAddCurrentLocationDialog(true);
-                        LocationService.getCurrentLocation(MainActivity.this, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
-                        break;
-
-                    case AddSelectListAdapter.LocationSourceType.Custom:
-                    case AddSelectListAdapter.LocationSourceType.Search:
-                        MapLocationInputActivity.show(MainActivity.this, which == AddSelectListAdapter.LocationSourceType.Search);
-                        break;
-                }
-            }
-        });
-    }
-
     //Shows getting location display
     private void showLocationGettingDisplay()
     {
         Toast.makeText(this, this.getResources().getString(R.string.title_location_getting), Toast.LENGTH_SHORT).show();
-    }
-
-    //Shows an add account dialog
-    private void showAddAccountDialog(ArrayList<Integer> usedAccounts)
-    {
-        Resources res = this.getResources();
-        ArrayList<Integer> unused = new ArrayList<>(0);
-        int[] all = new int[]{Globals.AccountType.GoogleDrive, Globals.AccountType.Dropbox, Globals.AccountType.SpaceTrack};
-
-        //get all unused
-        for(int currentAccount : all)
-        {
-            //if not used
-            if(!usedAccounts.contains(currentAccount))
-            {
-                //add to unused
-                unused.add(currentAccount);
-            }
-        }
-
-        //if there are unused
-        if(unused.size() > 0)
-        {
-            //show dialog
-            Globals.showSelectDialog(this, res.getString(R.string.title_account_add), AddSelectListAdapter.SelectType.AddAccount, unused.toArray(new Integer[0]), new AddSelectListAdapter.OnItemClickListener()
-            {
-                @Override
-                public void onItemClick(final int which)
-                {
-                    //handle based on account type
-                    switch(which)
-                    {
-                        case Globals.AccountType.GoogleDrive:
-                            Globals.askGoogleDriveAccount(MainActivity.this, BaseInputActivity.RequestCode.GoogleDriveAddAccount);
-                            break;
-
-                        case Globals.AccountType.Dropbox:
-                            DropboxAccess.start(MainActivity.this);
-                            break;
-
-                        case Globals.AccountType.SpaceTrack:
-                            Globals.showAccountLogin(MainActivity.this, which, new Globals.WebPageListener()
-                            {
-                                @Override
-                                public void onResult(Globals.WebPageData pageData, boolean success)
-                                {
-                                    //if success
-                                    if(success)
-                                    {
-                                        //if adapter is set
-                                        if(accountsListAdapter != null)
-                                        {
-                                            MainActivity.this.runOnUiThread(new Runnable()
-                                            {
-                                                @Override
-                                                public void run()
-                                                {
-                                                    //reload items
-                                                    accountsListAdapter.reloadItems();
-                                                }
-                                            });
-                                        }
-                                    }
-                                    else
-                                    {
-                                        //remove account attempt
-                                        Settings.removeSpaceTrackLogin(MainActivity.this);
-                                    }
-                                }
-                            }, true);
-                            break;
-                    }
-                }
-            });
-        }
     }
 
     //Shows a confirm update dialog
@@ -3232,55 +2866,6 @@ public class MainActivity extends AppCompatActivity
                 else
                 {
                     Orbitals.showAddDialog(this, mainDrawerLayout, isLong);
-                }
-                break;
-
-            case Groups.Settings:
-                switch(page)
-                {
-                    case Settings.PageType.Locations:
-                        if(inEditMode)
-                        {
-                            showEditLocationDialog();
-                        }
-                        else
-                        {
-                            showAddLocationDialog();
-                        }
-                        break;
-
-                    case Settings.PageType.Notifications:
-                        NotifySettingsActivity.show(this, observer);
-                        break;
-
-                    case Settings.PageType.Other:
-                        switch(settingsSubPage[page])
-                        {
-                            case Globals.SubPageType.Accounts:
-                                //if adapter exists
-                                if(accountsListAdapter != null)
-                                {
-                                    if(inEditMode)
-                                    {
-                                        //get selected items
-                                        ArrayList<Selectable.ListItem> selectedItems = settingsPagerAdapter.getSelectedItems(mainPager, page);
-
-                                        //go through selected items
-                                        for(Selectable.ListItem currentItem : selectedItems)
-                                        {
-                                            //edit account
-                                            accountsListAdapter.editAccount(currentItem.id);
-                                        }
-                                    }
-                                    else
-                                    {
-                                        //show add account dialog
-                                        showAddAccountDialog(accountsListAdapter.getUsedAccounts());
-                                    }
-                                }
-                                break;
-                        }
-                        break;
                 }
                 break;
         }
@@ -3572,35 +3157,6 @@ public class MainActivity extends AppCompatActivity
 
                                 //recreate tasks
                                 updateRunningTasks(true);
-                                break;
-                        }
-                        break;
-
-                    case Groups.Settings:
-                        switch(position)
-                        {
-                            case Settings.PageType.Locations:
-                                //set adapter
-                                settingsLocationsListAdapter = (Settings.Locations.ItemListAdapter)adapter;
-
-                                //create receiver
-                                locationReceiver = createLocationReceiver(locationReceiver);
-
-                                //if using current location
-                                if(locationSource == Database.LocationType.Current)
-                                {
-                                    updateCurrentLocationDisplay();
-                                }
-                                break;
-
-                            case Settings.PageType.Other:
-                                switch(settingsSubPage[Settings.PageType.Other])
-                                {
-                                    case Globals.SubPageType.Accounts:
-                                        //set adapter
-                                        accountsListAdapter = (Settings.Options.Accounts.ItemListAdapter)adapter;
-                                        break;
-                                }
                                 break;
                         }
                         break;
@@ -3914,29 +3470,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    private Selectable.ListFragment.OnUpdatePageListener createOnUpdatePageListener()
-    {
-        return(new Selectable.ListFragment.OnUpdatePageListener()
-        {
-            @Override
-            public void updatePage(int page, int subPage)
-            {
-                switch(mainGroup)
-                {
-                    case Groups.Settings:
-                        switch(page)
-                        {
-                            case Settings.PageType.Other:
-                                setSubPage(Groups.Settings, page, subPage);
-                                setMainGroup(mainGroup, true);
-                                break;
-                        }
-                        break;
-                }
-            }
-        });
-    }
-
     //Creates an on page resume listener
     private Selectable.ListFragment.OnPageResumeListener createOnPageResumeListener()
     {
@@ -3960,77 +3493,6 @@ public class MainActivity extends AppCompatActivity
                         //reload widget list
                         ((Settings.Widgets.ItemListAdapter)listAdapter).reload();
                     }
-                }
-            }
-        });
-    }
-
-    //Creates an on item selected listener
-    private Selectable.ListFragment.OnItemSelectedListener createOnItemSelectedListener()
-    {
-        return(new Selectable.ListFragment.OnItemSelectedListener()
-        {
-            @Override
-            public void itemSelected(int group, int page, int subPage, int position, boolean selected)
-            {
-                switch(group)
-                {
-                    case Groups.Settings:
-                        switch(page)
-                        {
-                            case Settings.PageType.Other:
-                                switch(subPage)
-                                {
-                                    case Globals.SubPageType.Accounts:
-                                        //update floating button
-                                        updateMainFloatingButton();
-                                        break;
-                                }
-                                break;
-                        }
-                        break;
-                }
-            }
-        });
-    }
-
-    //Creates an on settings item check changed listener
-    private Selectable.ListFragment.OnItemCheckChangedListener createOnSettingsItemCheckChangedListener()
-    {
-        return(new Selectable.ListFragment.OnItemCheckChangedListener()
-        {
-            @Override
-            public void itemCheckedChanged(int page, Selectable.ListItem item)
-            {
-                switch(page)
-                {
-                    case Settings.PageType.Locations:
-                        //remember current item and if current location
-                        Settings.Locations.Item currentItem = (Settings.Locations.Item)item;
-                        boolean isCurrentLocation = (currentItem.locationType == Database.LocationType.Current);
-
-                        //if now checked
-                        if(item.isChecked)
-                        {
-                            //update status
-                            userChangedLocation = true;
-
-                            //update observer and checked in database
-                            Database.saveLocation(MainActivity.this, currentItem.name, currentItem.locationType, true);
-                            if(isCurrentLocation)
-                            {
-                                //reset item
-                                currentItem.latitude = currentItem.longitude = currentItem.altitudeM = 0;
-                            }
-                            updateObserver(currentItem.latitude, currentItem.longitude, currentItem.altitudeM / 1000, currentItem.zone.getID(), currentItem.locationType, true);
-                        }
-                        //else if now unchecked and the current location
-                        else if(isCurrentLocation)
-                        {
-                            //stop location updates
-                            pendingLocationUpdate = false;
-                        }
-                        break;
                 }
             }
         });
@@ -4702,13 +4164,6 @@ public class MainActivity extends AppCompatActivity
                         previousSubPage = calculateSubPage[previousPage];
                     }
                     break;
-
-                case Groups.Settings:
-                    if(previousPage < settingsSubPage.length)
-                    {
-                        previousSubPage = settingsSubPage[previousPage];
-                    }
-                    break;
             }
         }
     }
@@ -4717,7 +4172,7 @@ public class MainActivity extends AppCompatActivity
     private int getSubPage()
     {
         int page = getMainPage();
-        return(mainGroup == Groups.Current ? currentSubPage[page] : mainGroup == Groups.Calculate ? calculateSubPage[page] : mainGroup == Groups.Settings ? settingsSubPage[page] : 0);
+        return(mainGroup == Groups.Current ? currentSubPage[page] : mainGroup == Groups.Calculate ? calculateSubPage[page] : 0);
     }
 
     //Sets the sub page for the given group
@@ -4835,15 +4290,6 @@ public class MainActivity extends AppCompatActivity
                             }
                             break;
                     }
-                    return;
-                }
-                break;
-
-            case Groups.Settings:
-                if(page < settingsSubPage.length && settingsPagerAdapter != null)
-                {
-                    settingsSubPage[page] = subPage;
-                    settingsPagerAdapter.setSubPage(page, subPage);
                     return;
                 }
                 break;

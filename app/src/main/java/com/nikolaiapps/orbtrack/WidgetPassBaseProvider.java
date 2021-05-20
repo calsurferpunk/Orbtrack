@@ -385,7 +385,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //handle based on view
             switch(viewId)
             {
-                case R.id.Widget_Border:
+                case R.id.Widget_Pass_Border:
                     borderType = WidgetBaseSetupActivity.getBorderType(context, widgetId);
                     argbColor = WidgetBaseSetupActivity.getBorderColor(context, widgetId);
                     break;
@@ -440,16 +440,16 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //handle base on view
             switch(viewId)
             {
-                case R.id.Widget_Top_Layout:
+                case R.id.Widget_Pass_Top_Layout:
                     color = WidgetBaseSetupActivity.getTopBackgroundColor(context, widgetId);
                     break;
 
-                case R.id.Widget_Tiny_Middle_Layout:
-                case R.id.Widget_Middle_Layout:
+                case R.id.Widget_Pass_Tiny_Middle_Layout:
+                case R.id.Widget_Pass_Middle_Layout:
                     color = WidgetBaseSetupActivity.getMiddleBackgroundColor(context, widgetId);
                     break;
 
-                case R.id.Widget_Bottom_Layout:
+                case R.id.Widget_Pass_Bottom_Layout:
                     color = WidgetBaseSetupActivity.getBottomBackgroundColor(context, widgetId);
                     break;
             }
@@ -495,52 +495,52 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //handle based on view
             switch(viewId)
             {
-                case R.id.Widget_Name_Text:
+                case R.id.Widget_Pass_Name_Text:
                     size = WidgetBaseSetupActivity.getOrbitalTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getOrbitalTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getOrbitalTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_Start_Text:
-                case R.id.Widget_Start_Direction_Text:
-                case R.id.Widget_Start_Date_Text:
-                case R.id.Widget_Start_Time_Text:
+                case R.id.Widget_Pass_Start_Text:
+                case R.id.Widget_Pass_Start_Direction_Text:
+                case R.id.Widget_Pass_Start_Date_Text:
+                case R.id.Widget_Pass_Start_Time_Text:
                     size = WidgetBaseSetupActivity.getPassStartTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassStartTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getPassStartTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_End_Text:
+                case R.id.Widget_Pass_End_Text:
                     size = WidgetBaseSetupActivity.getPassEndTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassEndTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getPassEndTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_El_Max_Text:
+                case R.id.Widget_Pass_El_Max_Text:
                     size = WidgetBaseSetupActivity.getPassElevationTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassElevationTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getPassElevationTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_Az_Start_Text:
+                case R.id.Widget_Pass_Az_Start_Text:
                     size = WidgetBaseSetupActivity.getPassAzimuthStartTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassAzimuthStartTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getPassAzimuthStartTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_Az_End_Text:
+                case R.id.Widget_Pass_Az_End_Text:
                     size = WidgetBaseSetupActivity.getPassAzimuthEndTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassAzimuthEndTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getPassAzimuthEndTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_Duration_Text:
+                case R.id.Widget_Pass_Duration_Text:
                     size = WidgetBaseSetupActivity.getPassDurationTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassDurationTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getPassDurationTextWeight(context, widgetId);
                     break;
 
-                case R.id.Widget_Location_Text:
+                case R.id.Widget_Pass_Location_Text:
                     size = WidgetBaseSetupActivity.getLocationTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getLocationTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getLocationTextWeight(context, widgetId);
@@ -674,24 +674,24 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         PendingIntent actionIntent = (useParent ? null : getActionIntent(context, widgetClass, ACTION_SETTINGS_CLICK, widgetId));
 
         //update visibility
-        itemImageId = (useNormal ? R.id.Widget_Item_Image : R.id.Widget_Item_Tiny_Image);
-        setViewVisibility(views, parent, R.id.Widget_Settings_Button, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Item_Image, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Tiny_Middle_Layout, !useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Middle_Layout, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Normal_Layout, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Extended_Layout, useExtended);
-        setViewVisibility(views, parent, R.id.Widget_Location_Image, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Location_Text, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Tiny_Start_Layout, !useNormal);
+        itemImageId = (useNormal ? R.id.Widget_Pass_Item_Image : R.id.Widget_Pass_Item_Tiny_Image);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Settings_Button, useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Item_Image, useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Middle_Layout, !useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Middle_Layout, useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Normal_Layout, useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Extended_Layout, useExtended);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Image, useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Text, useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Start_Layout, !useNormal);
 
         //set border, background, and name
-        setBorder(context, widgetId, views, parent, R.id.Widget_Border);
-        setViewBackground(context, widgetId, views, parent, R.id.Widget_Top_Layout);
-        setViewBackground(context, widgetId, views, parent, R.id.Widget_Tiny_Middle_Layout);
-        setViewBackground(context, widgetId, views, parent, R.id.Widget_Middle_Layout);
-        setViewBackground(context, widgetId, views, parent, R.id.Widget_Bottom_Layout);
-        setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Name_Text, WidgetBaseSetupActivity.getName(context, widgetId));
+        setBorder(context, widgetId, views, parent, R.id.Widget_Pass_Border);
+        setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Top_Layout);
+        setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Tiny_Middle_Layout);
+        setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Middle_Layout);
+        setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Bottom_Layout);
+        setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Name_Text, WidgetBaseSetupActivity.getName(context, widgetId));
 
         //if the moon
         if(noradId == Universe.IDs.Moon)
@@ -720,36 +720,36 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         //set font colors
         if(useNormal)
         {
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_End_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_El_Max_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_End_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_El_Max_Text, null);
 
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Location_Text, (useParent ? WidgetBaseSetupActivity.getLocationName(context, widgetId) : null));
-            setImageViewBitmap(views, parent, R.id.Widget_Location_Image, Globals.getBitmap(context, R.drawable.ic_my_location_black, (useGlobalImage ? globalImageColor : locationImageColor)));
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Location_Text, (useParent ? WidgetBaseSetupActivity.getLocationName(context, widgetId) : null));
+            setImageViewBitmap(views, parent, R.id.Widget_Pass_Location_Image, Globals.getBitmap(context, R.drawable.ic_my_location_black, (useGlobalImage ? globalImageColor : locationImageColor)));
         }
         else
         {
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Direction_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Date_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Time_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Date_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, null);
         }
         if(useExtended)
         {
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Az_Start_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Az_End_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Duration_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Az_Start_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Az_End_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Duration_Text, null);
         }
 
         //set settings
         if(!useParent)
         {
-            views.setOnClickPendingIntent(R.id.Widget_Name_Text, actionIntent);
+            views.setOnClickPendingIntent(R.id.Widget_Pass_Name_Text, actionIntent);
             if(useNormal)
             {
-                views.setOnClickPendingIntent(R.id.Widget_Settings_Button, actionIntent);
+                views.setOnClickPendingIntent(R.id.Widget_Pass_Settings_Button, actionIntent);
             }
         }
-        setImageViewBitmap(views, parent, R.id.Widget_Settings_Button, Globals.getBitmap(context, R.drawable.ic_settings_black, (useGlobalImage ? globalImageColor : settingsImageColor)));
+        setImageViewBitmap(views, parent, R.id.Widget_Pass_Settings_Button, Globals.getBitmap(context, R.drawable.ic_settings_black, (useGlobalImage ? globalImageColor : settingsImageColor)));
 
         //return views
         return(views);
@@ -878,9 +878,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //set pass start, end, and max elevation text
             if(useNormal)
             {
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Text, Globals.Symbols.Up + Globals.getDateString(context, currentPass.passTimeStart, zone, false, true, true));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_End_Text, Globals.Symbols.Down + Globals.getDateString(context, currentPass.passTimeEnd, zone, false, true, true));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_El_Max_Text, Globals.Symbols.Elevating + (currentPass.isKnownPassElevationMax() ? Globals.getDegreeString(currentPass.passElMax) : unknown));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Text, Globals.Symbols.Up + Globals.getDateString(context, currentPass.passTimeStart, zone, false, true, true));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_End_Text, Globals.Symbols.Down + Globals.getDateString(context, currentPass.passTimeEnd, zone, false, true, true));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_El_Max_Text, Globals.Symbols.Elevating + (currentPass.isKnownPassElevationMax() ? Globals.getDegreeString(currentPass.passElMax) : unknown));
             }
             else
             {
@@ -890,20 +890,20 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 currentLocalTime = Globals.getLocalTime(Calendar.getInstance(), zone);
                 sameDay = (displayLocalTime != null && currentLocalTime != null && displayLocalTime.get(Calendar.DAY_OF_YEAR) == currentLocalTime.get(Calendar.DAY_OF_YEAR));
 
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Direction_Text, (useStart ? Globals.Symbols.Up : Globals.Symbols.Down));
-                setViewVisibility(views, parent, R.id.Widget_Start_Date_Text, !sameDay);
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, (useStart ? Globals.Symbols.Up : Globals.Symbols.Down));
+                setViewVisibility(views, parent, R.id.Widget_Pass_Start_Date_Text, !sameDay);
                 if(!sameDay)
                 {
-                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Date_Text, Globals.getLocalDayString(context, displayTime, zone));
+                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Date_Text, Globals.getLocalDayString(context, displayTime, zone));
                 }
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Start_Time_Text, Globals.getDateString(context, displayTime, zone, false, false, false, true));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, Globals.getDateString(context, displayTime, zone, false, false, false, true));
             }
             if(useExtended)
             {
                 //set az start, end, and pass duration text
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Az_Start_Text, Globals.Symbols.Up + (currentPass.passTimeStart != null ? Globals.getAzimuthDirectionString(res, currentPass.passAzStart) : unknown));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Az_End_Text, Globals.Symbols.Down + (currentPass.passTimeEnd != null ? Globals.getAzimuthDirectionString(res, currentPass.passAzEnd) : unknown));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Duration_Text, Globals.Symbols.Time + currentPass.passDuration);
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Az_Start_Text, Globals.Symbols.Up + (currentPass.passTimeStart != null ? Globals.getAzimuthDirectionString(res, currentPass.passAzStart) : unknown));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Az_End_Text, Globals.Symbols.Down + (currentPass.passTimeEnd != null ? Globals.getAzimuthDirectionString(res, currentPass.passAzEnd) : unknown));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Duration_Text, Globals.Symbols.Time + currentPass.passDuration);
             }
         }
 
@@ -1043,7 +1043,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                                 }
 
                                 //set location text and next alarm
-                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Location_Text, locationName);
+                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, locationName);
                                 updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
                                 updatePassAlarm(context, alarmReceiverClass, widgetId, pass.passTimeStart, pass.passTimeEnd, true);
                             }
@@ -1061,7 +1061,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                                 updatePass(context, widgetClass, alarmReceiverClass, widgetId, manager, views, pass, TimeZone.getTimeZone(zoneId));
 
                                 //set location text
-                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
+                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
                                 updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
                                 updatePassAlarm(context, alarmReceiverClass, widgetId, pass.passTimeStart, pass.passTimeEnd, true);
                             }

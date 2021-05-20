@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/Widget_View"
+    android:id="@+id/Widget_Pass_View"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:layout_gravity="center"
@@ -9,31 +9,31 @@
     android:orientation="vertical"
     android:background="@color/transparent">
     <ImageView
-        android:id="@+id/Widget_Border"
+        android:id="@+id/Widget_Pass_Border"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:contentDescription="@null"/>
 
     <LinearLayout
-        android:id="@+id/Widget_Layout"
+        android:id="@+id/Widget_Pass_Layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:layout_margin="3dp"
         android:orientation="vertical">
         <LinearLayout
-            android:id="@+id/Widget_Top_Layout"
+            android:id="@+id/Widget_Pass_Top_Layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables">
             <TextView
-                android:id="@+id/Widget_Name_Text"
+                android:id="@+id/Widget_Pass_Name_Text"
                 style="@style/WidgetBarText"/>
 
             <ImageView
-                android:id="@+id/Widget_Settings_Button"
+                android:id="@+id/Widget_Pass_Settings_Button"
                 style="@style/WidgetImage"
                 android:layout_width="16dp"
                 android:layout_height="wrap_content"
@@ -42,7 +42,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/Widget_Tiny_Middle_Layout"
+            android:id="@+id/Widget_Pass_Tiny_Middle_Layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -51,7 +51,7 @@
             android:visibility="gone"
             tools:ignore="NestedWeights">
             <ImageView
-                android:id="@+id/Widget_Item_Tiny_Image"
+                android:id="@+id/Widget_Pass_Item_Tiny_Image"
                 style="@style/WidgetImage"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -60,7 +60,7 @@
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/Widget_Middle_Layout"
+            android:id="@+id/Widget_Pass_Middle_Layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
@@ -73,7 +73,7 @@
                 android:orientation="horizontal"
                 tools:ignore="UselessParent">
                 <ImageView
-                    android:id="@+id/Widget_Item_Image"
+                    android:id="@+id/Widget_Pass_Item_Image"
                     style="@style/WidgetImage"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -82,7 +82,7 @@
                     android:contentDescription="@string/title_orbital"/>
 
                 <LinearLayout
-                    android:id="@+id/Widget_Normal_Layout"
+                    android:id="@+id/Widget_Pass_Normal_Layout"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.4"
@@ -90,20 +90,20 @@
                     android:gravity="center"
                     android:orientation="vertical">
                     <TextView
-                        android:id="@+id/Widget_Start_Text"
+                        android:id="@+id/Widget_Pass_Start_Text"
                         style="@style/WidgetDetailText"/>
 
                     <TextView
-                        android:id="@+id/Widget_End_Text"
+                        android:id="@+id/Widget_Pass_End_Text"
                         style="@style/WidgetDetailText"/>
 
                     <TextView
-                        android:id="@+id/Widget_El_Max_Text"
+                        android:id="@+id/Widget_Pass_El_Max_Text"
                         style="@style/WidgetDetailText"/>
                 </LinearLayout>
 
                 <LinearLayout
-                    android:id="@+id/Widget_Extended_Layout"
+                    android:id="@+id/Widget_Pass_Extended_Layout"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="0.4"
@@ -112,31 +112,31 @@
                     android:orientation="vertical"
                     android:visibility="gone">
                     <TextView
-                        android:id="@+id/Widget_Az_Start_Text"
+                        android:id="@+id/Widget_Pass_Az_Start_Text"
                         style="@style/WidgetDetailText"
                         android:text="@string/title_loading_dots"
                         tools:ignore="SmallSp" />
 
                     <TextView
-                        android:id="@+id/Widget_Az_End_Text"
+                        android:id="@+id/Widget_Pass_Az_End_Text"
                         style="@style/WidgetDetailText"/>
 
                     <TextView
-                        android:id="@+id/Widget_Duration_Text"
+                        android:id="@+id/Widget_Pass_Duration_Text"
                         style="@style/WidgetDetailText"/>
                 </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/Widget_Bottom_Layout"
+            android:id="@+id/Widget_Pass_Bottom_Layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables">
             <ImageView
-                android:id="@+id/Widget_Location_Image"
+                android:id="@+id/Widget_Pass_Location_Image"
                 style="@style/WidgetImage"
                 android:layout_width="16dp"
                 android:layout_height="wrap_content"
@@ -144,17 +144,17 @@
                 android:contentDescription="@string/title_location"/>
 
             <TextView
-                android:id="@+id/Widget_Location_Text"
+                android:id="@+id/Widget_Pass_Location_Text"
                 style="@style/WidgetBarText"/>
 
             <LinearLayout
-                android:id="@+id/Widget_Tiny_Start_Layout"
+                android:id="@+id/Widget_Pass_Tiny_Start_Layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:visibility="gone">
                 <TextView
-                    android:id="@+id/Widget_Start_Direction_Text"
+                    android:id="@+id/Widget_Pass_Start_Direction_Text"
                     style="@style/WidgetDetailText"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
@@ -168,13 +168,13 @@
                     android:layout_gravity="center"
                     android:orientation="vertical">
                     <TextView
-                        android:id="@+id/Widget_Start_Date_Text"
+                        android:id="@+id/Widget_Pass_Start_Date_Text"
                         style="@style/WidgetDetailText"
                         android:layout_height="wrap_content"
                         android:gravity="center"/>
 
                     <TextView
-                        android:id="@+id/Widget_Start_Time_Text"
+                        android:id="@+id/Widget_Pass_Start_Time_Text"
                         style="@style/WidgetDetailText"
                         android:layout_height="wrap_content"
                         android:gravity="center"/>

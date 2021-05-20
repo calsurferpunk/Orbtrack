@@ -51,6 +51,7 @@ import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -1263,13 +1264,20 @@ public abstract class Globals
     //Starts a service
     public static void startService(Context context, Intent intent, boolean runForeground)
     {
-        if(runForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        try
         {
-            context.startForegroundService(intent);
+            if(runForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            {
+                context.startForegroundService(intent);
+            }
+            else
+            {
+                context.startService(intent);
+            }
         }
-        else
+        catch(Exception ex)
         {
-            context.startService(intent);
+            Log.d("startService Error", ex.getMessage());
         }
     }
 

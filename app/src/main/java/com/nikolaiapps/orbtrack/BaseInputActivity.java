@@ -7,6 +7,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +17,9 @@ import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.tasks.Task;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -78,6 +82,51 @@ public abstract class BaseInputActivity extends AppCompatActivity
     public void lockScreenOrientation(boolean lock)
     {
         Globals.lockScreenOrientation(this, lock);
+    }
+
+    //Handles activity master add list result and returns progress type
+    public static int handleActivityMasterAddListResult(Resources res, View parentView, Intent data)
+    {
+        boolean isError = true;
+        int progressType = data.getIntExtra(MasterAddListActivity.ParamTypes.ProgressType, Globals.ProgressType.Unknown);
+        long count;
+        String message;
+
+        //if a known progress type
+        if(progressType != Globals.ProgressType.Unknown)
+        {
+            //handle based on progress type
+            switch(progressType)
+            {
+                case Globals.ProgressType.Denied:
+                    //show login failed
+                    message = res.getString(R.string.text_login_failed);
+                    break;
+
+                case Globals.ProgressType.Cancelled:
+                    //show cancelled
+                    message = res.getString(R.string.text_update_cancelled);
+                    break;
+
+                case Globals.ProgressType.Failed:
+                    //show failed
+                    message = res.getString(R.string.text_download_failed);
+                    break;
+
+                default:
+                    //get and show count
+                    count = data.getLongExtra(MasterAddListActivity.ParamTypes.SuccessCount, 0);
+                    message = res.getQuantityString(R.plurals.title_satellites_added, (int)count, (int)count);
+                    isError = (count < 1);
+                    break;
+            }
+
+            //show message
+            Globals.showSnackBar(parentView, message, isError);
+        }
+
+        //return progress type
+        return(progressType);
     }
 
     //Handles activity open file request
@@ -234,6 +283,49 @@ public abstract class BaseInputActivity extends AppCompatActivity
                     Globals.showSnackBar(parentView, activity.getString(R.string.text_file_error_using), ex.getMessage(), true, true);
                 }
                 break;
+        }
+    }
+
+    //Handles activity Google Drive file browser request
+    public static void handleActivityGoogleDriveOpenFileBrowserRequest(Activity activity, View parentView, Intent data, boolean isOkay)
+    {
+        boolean isError = true;
+
+        //if signed in
+        if(isOkay)
+        {
+            //try to get account
+            Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
+
+            //if got account
+            if(getAccountTask.isSuccessful())
+            {
+                //note: don't confirm internet since would have done already to get past sign in
+
+                //show google drive file browser
+                Orbitals.showGoogleDriveFileBrowser(activity, false);
+
+                //no error
+                isError = false;
+            }
+        }
+
+        //if there was an error
+        if(isError)
+        {
+            //show error message
+            Globals.showSnackBar(parentView, activity.getString(R.string.text_login_failed), true);
+        }
+    }
+
+    //Handles activity SD card open files request
+    public static void handleActivitySDCardOpenFilesRequest(Activity activity, Intent data)
+    {
+        //load from file if not already
+        ArrayList<String> fileNames = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileNames);
+        if(!UpdateService.isRunning(UpdateService.UpdateType.LoadFile))
+        {
+            UpdateService.loadFile(activity, fileNames);
         }
     }
 }

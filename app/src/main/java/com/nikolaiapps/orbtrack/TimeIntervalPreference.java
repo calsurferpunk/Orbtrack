@@ -122,7 +122,6 @@ public class TimeIntervalPreference extends Preference
         final int currentMinute = now.get(Calendar.MINUTE);
         int index;
         View rootView = holder.itemView;
-        SharedPreferences readSettings = getPreferences(context);
         IconSpinner.CustomAdapter frequencyAdapter = new IconSpinner.CustomAdapter(context, frequencyItems);
 
         rootView.setClickable(false);
@@ -133,7 +132,7 @@ public class TimeIntervalPreference extends Preference
         if(intervalKey != null)
         {
             //if a valid index
-            index = Arrays.asList(FrequencyValues).indexOf(readSettings.getLong(intervalKey, 0));
+            index = Arrays.asList(FrequencyValues).indexOf(Settings.getPreferenceLong(context, intervalKey));
             if(index >= 0 && index < frequencyItems.length)
             {
                 //set value
@@ -159,7 +158,7 @@ public class TimeIntervalPreference extends Preference
         timeView = rootView.findViewById(R.id.Time_Interval_Preference_Time_Text);
         if(hourKey != null || minuteKey != null)
         {
-            timeView.setTime((hourKey != null ? readSettings.getInt(hourKey, currentHour) : currentHour), (minuteKey != null ? readSettings.getInt(minuteKey, currentMinute) : currentMinute));
+            timeView.setTime((hourKey != null ? Settings.getPreferenceInt(context, hourKey) : currentHour), (minuteKey != null ? Settings.getPreferenceInt(context, minuteKey) : currentMinute));
         }
         timeView.setOnTimeSetListener(new TimeInputView.OnTimeSetListener()
         {

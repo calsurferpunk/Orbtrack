@@ -1126,9 +1126,9 @@ public abstract class Orbitals
         private static final Selectable.ListFragment.OnPreview3dChangedListener[] preview3dChangedListeners = new Selectable.ListFragment.OnPreview3dChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
 
-        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener)
+        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener)
         {
-            super(fm, parentView, null, updateListener, null, null,  detailListener,null, resumeListener, MainActivity.Groups.Orbitals, null);
+            super(fm, parentView, null, updateListener, null, null,  detailListener, adapterListener, resumeListener, MainActivity.Groups.Orbitals, null);
         }
 
         @Override

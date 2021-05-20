@@ -521,7 +521,7 @@ public abstract class Globals
                                     loginListener.onResult(null, false);
                                 }
                             }
-                        }).getLogin(title, res.getString(R.string.title_username), new String[]{user}, res.getString(R.string.title_password), new String[]{password}, createLink, /*(createOnly ? null : changeText)*/ null, (createOnly ? null : res.getString(R.string.title_source)));
+                        }).getLogin(title, res.getString(R.string.title_username), new String[]{user}, res.getString(R.string.title_password), new String[]{password}, createLink, null, (createOnly ? null : res.getString(R.string.title_source)));
                     }
                 });
             }
@@ -3766,6 +3766,24 @@ public abstract class Globals
         {
             return(null);
         }
+    }
+
+    //Returns if given string starts with any of the given strings
+    public static boolean startsWith(String value, String ...startValues)
+    {
+        //go through each start value
+        for(String currentStartValue : startValues)
+        {
+            //if value starts with current
+            if(value.startsWith(currentStartValue))
+            {
+                //yes
+                return(true);
+            }
+        }
+
+        //no
+        return(false);
     }
 
     //Normalizes an angle to +/- 180 degrees

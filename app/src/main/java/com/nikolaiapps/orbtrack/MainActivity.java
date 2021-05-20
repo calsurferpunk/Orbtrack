@@ -46,9 +46,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.Task;
 import com.nikolaiapps.orbtrack.SideMenuListAdapter.*;
 import com.nikolaiapps.orbtrack.Calculations.*;
 
@@ -90,6 +87,7 @@ public class MainActivity extends AppCompatActivity
     private static boolean wasPaused = false;
     private static boolean wasRecreated = false;
     private static boolean runningUserSetup = false;
+    private static boolean recreateAfterSetup = false;
     private boolean savedState;
     private boolean finishedSetup;
     private Bundle calculateBundle;
@@ -424,12 +422,10 @@ public class MainActivity extends AppCompatActivity
         int subPage;
         int progressType = Globals.ProgressType.Finished;
         long count;
-        boolean isError = true;
         boolean isOkay = (resultCode == RESULT_OK);
         boolean handle = (requestCode == BaseInputActivity.RequestCode.Setup || finishedSetup);
-        String message;
+        boolean needRecreate;
         Resources res = this.getResources();
-        ArrayList<String> fileNames;
 
         //if not handling
         if(!handle)
@@ -445,6 +441,9 @@ public class MainActivity extends AppCompatActivity
             data = new Intent();
         }
 
+        //get status
+        needRecreate = data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false);
+
         //handle based on request code
         switch(requestCode)
         {
@@ -452,6 +451,7 @@ public class MainActivity extends AppCompatActivity
                 //update status
                 runningUserSetup = false;
                 finishedSetup = !Settings.getFirstRun(this);
+                recreateAfterSetup = needRecreate;
 
                 //if finished updating database
                 if(finishedSetup)
@@ -463,6 +463,29 @@ public class MainActivity extends AppCompatActivity
                 {
                     //show progress dialog
                     showDatabaseProgressDialog(true);
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.Settings:
+                //if changed settings
+                if(isOkay)
+                {
+                    //get sub page
+                    subPage = getSubPage();
+
+                    //if need to recreate everything
+                    if(needRecreate)
+                    {
+                        //update theme
+                        updateTheme();
+                    }
+                    //else if need to recreate map and on a map view
+                    else if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map))
+                    {
+                        //recreate
+                        wasRecreated = true;
+                        this.recreate();
+                    }
                 }
                 break;
 
@@ -490,45 +513,14 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case BaseInputActivity.RequestCode.MasterAddList:
-                //get progress type
-                progressType = data.getIntExtra(MasterAddListActivity.ParamTypes.ProgressType, Globals.ProgressType.Unknown);
-
-                //if unknown
+                //if able to get progress type
+                progressType = BaseInputActivity.handleActivityMasterAddListResult(res, mainDrawerLayout, data);
                 if(progressType == Globals.ProgressType.Unknown)
                 {
                     //stop
                     break;
                 }
-
-                //handle based on progress type
-                switch(progressType)
-                {
-                    case Globals.ProgressType.Denied:
-                        //show login failed
-                        message = res.getString(R.string.text_login_failed);
-                        break;
-
-                    case Globals.ProgressType.Cancelled:
-                        //show cancelled
-                        message = res.getString(R.string.text_update_cancelled);
-                        break;
-
-                    case Globals.ProgressType.Failed:
-                        //show failed
-                        message = res.getString(R.string.text_download_failed);
-                        break;
-
-                    default:
-                        //get and show count
-                        count = data.getLongExtra(MasterAddListActivity.ParamTypes.SuccessCount, 0);
-                        message = res.getQuantityString(R.plurals.title_satellites_added, (int)count, (int)count);
-                        isError = (count < 1);
-                        break;
-                }
-
-                //show message
-                Globals.showSnackBar(mainDrawerLayout, message, isError);
-                //fall through
+                //else fall through
 
             case BaseInputActivity.RequestCode.OrbitalViewList:
             case BaseInputActivity.RequestCode.ManualOrbitalInput:
@@ -554,12 +546,8 @@ public class MainActivity extends AppCompatActivity
                 //if set
                 if(isOkay)
                 {
-                    //load from file if not already
-                    fileNames = data.getStringArrayListExtra(FileBrowserBaseActivity.ParamTypes.FileNames);
-                    if(!UpdateService.isRunning(UpdateService.UpdateType.LoadFile))
-                    {
-                        UpdateService.loadFile(this, fileNames);
-                    }
+                    //handle SD card open files request
+                    BaseInputActivity.handleActivitySDCardOpenFilesRequest(this, data);
                 }
                 break;
 
@@ -574,31 +562,8 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case BaseInputActivity.RequestCode.GoogleDriveSignIn:
-                //if signed in
-                if(isOkay)
-                {
-                    //try to get account
-                    Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
-
-                    //if got account
-                    if(getAccountTask.isSuccessful())
-                    {
-                        //note: don't confirm internet since would have done already to get past sign in
-
-                        //show google drive file browser
-                        Orbitals.showGoogleDriveFileBrowser(this, false);
-
-                        //no error
-                        isError = false;
-                    }
-                }
-
-                //if there was an error
-                if(isError)
-                {
-                    //show error message
-                    Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_login_failed), true);
-                }
+                //handle Google Drive open file browser request
+                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, mainDrawerLayout, data, isOkay);
                 break;
 
             case BaseInputActivity.RequestCode.GoogleDriveOpenFolder:
@@ -655,29 +620,6 @@ public class MainActivity extends AppCompatActivity
                     {
                         //show error
                         Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_file_error_saving), ex.getMessage(), true, true);
-                    }
-                }
-                break;
-
-            case BaseInputActivity.RequestCode.Settings:
-                //if changed settings
-                if(isOkay)
-                {
-                    //get sub page
-                    subPage = getSubPage();
-
-                    //if need to recreate everything
-                    if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false))
-                    {
-                        //update theme
-                        updateTheme();
-                    }
-                    //else if need to recreate map and on a map view
-                    else if(data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map))
-                    {
-                        //recreate
-                        wasRecreated = true;
-                        this.recreate();
                     }
                 }
                 break;
@@ -1495,87 +1437,97 @@ public class MainActivity extends AppCompatActivity
     //Loads start data and updates display
     private void loadStartData(Bundle savedInstanceState)
     {
-        //get displays
-        optionsMenu = null;
-        sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
-        sideActionMenu = this.findViewById(R.id.Side_Action_Menu);
-        sideMenu = this.findViewById(R.id.Side_Menu);
-        mainFloatingButton = this.findViewById(R.id.Main_Floating_Button);
-        mainFloatingButton.setOnClickListener(new View.OnClickListener()
+        //if need to recreate after setup
+        if(recreateAfterSetup)
         {
-            @Override
-            public void onClick(View view)
-            {
-                handleMainFloatingButtonClick(false);
-            }
-        });
-        mainFloatingButton.setOnLongClickListener(new View.OnLongClickListener()
+            //handle recreating
+            recreateAfterSetup = false;
+            updateTheme();
+        }
+        else
         {
-            @Override
-            public boolean onLongClick(View view)
+            //get displays
+            optionsMenu = null;
+            sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
+            sideActionMenu = this.findViewById(R.id.Side_Action_Menu);
+            sideMenu = this.findViewById(R.id.Side_Menu);
+            mainFloatingButton = this.findViewById(R.id.Main_Floating_Button);
+            mainFloatingButton.setOnClickListener(new View.OnClickListener()
             {
-                handleMainFloatingButtonClick(true);
-                return(true);
-            }
-        });
-
-        //set mode changed listener
-        editModeChangedListener = createOnEditModeChangedListener();
-
-        //setup drawer menu
-        BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
-        updateSideMenu();
-
-        //setup location retrieving
-        locationReceiver = createLocationReceiver(locationReceiver);
-
-        //get observer
-        loadObserver(!savedState);
-
-        //handle any updates
-        DatabaseManager.handleUpdates(this);
-
-        //create add current location dialog
-        addCurrentLocationDialog = Globals.createAddCurrentLocationDialog(this, new DialogInterface.OnClickListener()
-        {
-            @Override
-            public void onClick(DialogInterface dialog, int which)
+                @Override
+                public void onClick(View view)
+                {
+                    handleMainFloatingButtonClick(false);
+                }
+            });
+            mainFloatingButton.setOnLongClickListener(new View.OnLongClickListener()
             {
-                //cancel
-                needSaveCurrentLocation = false;
-                lockScreenOrientation(false);
-            }
-        }, new DialogInterface.OnCancelListener()
-        {
-            @Override
-            public void onCancel(DialogInterface dialog)
+                @Override
+                public boolean onLongClick(View view)
+                {
+                    handleMainFloatingButtonClick(true);
+                    return(true);
+                }
+            });
+
+            //set mode changed listener
+            editModeChangedListener = createOnEditModeChangedListener();
+
+            //setup drawer menu
+            BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
+            updateSideMenu();
+
+            //setup location retrieving
+            locationReceiver = createLocationReceiver(locationReceiver);
+
+            //get observer
+            loadObserver(!savedState);
+
+            //handle any updates
+            DatabaseManager.handleUpdates(this);
+
+            //create add current location dialog
+            addCurrentLocationDialog = Globals.createAddCurrentLocationDialog(this, new DialogInterface.OnClickListener()
             {
-                //cancel
-                needSaveCurrentLocation = false;
-                lockScreenOrientation(false);
-            }
-        });
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    //cancel
+                    needSaveCurrentLocation = false;
+                    lockScreenOrientation(false);
+                }
+            }, new DialogInterface.OnCancelListener()
+            {
+                @Override
+                public void onCancel(DialogInterface dialog)
+                {
+                    //cancel
+                    needSaveCurrentLocation = false;
+                    lockScreenOrientation(false);
+                }
+            });
 
-        //load orbitals
-        loadOrbitals(this);
+            //load orbitals
+            loadOrbitals(this);
 
-        //update timer delays
-        updateTimerDelays();
+            //update timer delays
+            updateTimerDelays();
 
-        //set tasks
-        timerTask = null;
-        timerRunnable = null;
-        timerDelay = listTimerDelay;
-        calculateCoordinatesTask = null;
+            //set tasks
+            timerTask = null;
+            timerRunnable = null;
+            timerDelay = listTimerDelay;
+            calculateCoordinatesTask = null;
 
-        //setup pager
-        mainPager.addOnPageChangeListener(createOnPageChangedListener());
+            //setup pager
+            mainPager.addOnPageChangeListener(createOnPageChangedListener());
 
-        //update display
-        setMainGroup(mainGroup, true);
+            //update display
+            setMainGroup(mainGroup, true);
 
-        //force refresh first time
-        setMainPage(savedInstanceState.getInt(ParamTypes.MainPagerItem, 0));
+            //force refresh first time
+            setMainPage(savedInstanceState.getInt(ParamTypes.MainPagerItem, 0));
+        }
     }
 
     //Loads currently selected orbitals
@@ -2243,7 +2195,7 @@ public class MainActivity extends AppCompatActivity
                     break;
 
                 case Groups.Orbitals:
-                    desiredAdapter = orbitalPageAdapter = new Orbitals.PageAdapter(currentManger, mainDrawerLayout, createOnItemDetailButtonClickListener(), createOnUpdateNeededListener(), createOnPageResumeListener());
+                    desiredAdapter = orbitalPageAdapter = new Orbitals.PageAdapter(currentManger, mainDrawerLayout, createOnItemDetailButtonClickListener(), null, createOnUpdateNeededListener(), createOnPageResumeListener());
                     break;
 
                 case Groups.Settings:
@@ -2797,10 +2749,11 @@ public class MainActivity extends AppCompatActivity
     //Shows setup dialog
     private void showSetupDialog()
     {
-        Intent setupIntent = new Intent(this, SetupActivity.class);
+        Intent setupIntent = new Intent(this, SettingsActivity.class);
 
         runningUserSetup = true;
         finishedSetup = false;
+        setupIntent.putExtra(SettingsActivity.EXTRA_SHOW_SETUP, true);
         this.startActivityForResult(setupIntent, BaseInputActivity.RequestCode.Setup);
     }
 
@@ -3509,7 +3462,7 @@ public class MainActivity extends AppCompatActivity
         return(new Selectable.ListFragment.OnAdapterSetListener()
         {
             @Override
-            public void setAdapter(final int group, final int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter)
+            public void setAdapter(Selectable.ListFragment fragment, final int group, final int position, Selectable.ListBaseAdapter adapter)
             {
                 int orbitalId;
                 Bundle params;

@@ -239,7 +239,6 @@ public class RadioGroupPreference extends Preference
     {
         final Context context = this.getContext();
         final String preferenceName = this.getKey();
-        final SharedPreferences readSettings = getPreferences(context);
         String value = null;
 
         if(valueType == Boolean.class)
@@ -252,11 +251,11 @@ public class RadioGroupPreference extends Preference
         }
         else if(valueType == Long.class)
         {
-            value = String.valueOf(readSettings.getLong(preferenceName, 0));
+            value = String.valueOf(Settings.getPreferenceLong(context, preferenceName));
         }
         else if(valueType == String.class)
         {
-            value = String.valueOf(readSettings.getString(preferenceName, null));
+            value = String.valueOf(Settings.getPreferenceString(context, preferenceName));
         }
 
         return(value);

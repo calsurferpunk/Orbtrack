@@ -173,12 +173,6 @@
         </activity>
 
         <activity
-            android:name=".SetupActivity"
-            android:screenOrientation="portrait"
-            android:configChanges="orientation|screenSize"
-            tools:ignore="LockedOrientationActivity" />
-
-        <activity
             android:name=".SettingsActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"

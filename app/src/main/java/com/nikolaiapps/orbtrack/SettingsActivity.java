@@ -13,6 +13,7 @@ import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Spanned;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -36,12 +37,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.SwitchPreference;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -250,6 +247,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupCategory(altitudeCategory);
                         setupCategory(timeZoneCategory);
                         setupCategory(informationCategory);
+
+                        //if showing setup
+                        if(showSetup)
+                        {
+                            //if TLE auto switch exists and is checked
+                            if(tleAutoSwitch != null && tleAutoSwitch.isChecked())
+                            {
+                                //set checked state to reverse then back to apply updates
+                                tleAutoSwitch.setChecked(false);
+                                tleAutoSwitch.setChecked(true);
+                            }
+                        }
                         break;
                 }
             }
@@ -794,7 +803,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private boolean isLoading;
     private boolean showSetup;
     private boolean updateNow;
-    private boolean pendingUpdate;
     private boolean needSaveCurrentLocation;
     private String currentPageKey;
     private TextView infoText;
@@ -809,12 +817,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private CircularProgressIndicator loadingBar;
     private AlertDialog addCurrentLocationDialog;
     private LocationReceiver locationReceiver;
+    private UpdateReceiver localUpdateReceiver;
     private Orbitals.PageAdapter orbitalsPageAdapter;
     private Settings.PageAdapter settingsPageAdapter;
     private Settings.Locations.ItemListAdapter settingsLocationsListAdapter;
     private Settings.Options.Accounts.ItemListAdapter accountsListAdapter;
     private SharedPreferences preferences;
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
+    private Selectable.ListFragment.OnInformationChangedListener informationChangedListener;
 
     public static class SettingsMainFragment extends PreferenceFragmentCompat
     {
@@ -888,12 +898,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //set defaults
         currentPage = -1;
         currentPageKey = startScreenKey;
-        isLoading = pendingUpdate = updateNow = false;
+        isLoading = updateNow = false;
         locationSource = Database.LocationType.Current;
         orbitalsPageAdapter = null;
         settingsPageAdapter = null;
         settingsLocationsListAdapter = null;
         accountsListAdapter = null;
+        informationChangedListener = null;
 
         //set view
         this.setContentView(showSetup ? R.layout.setup_layout : R.layout.settings_layout);
@@ -907,7 +918,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             @Override
             public void onClick(View view)
             {
-                handleFloatingButtonClick();
+                handleFloatingButtonClick(false);
             }
         });
         floatingButton.setOnLongClickListener(new View.OnLongClickListener()
@@ -915,7 +926,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             @Override
             public boolean onLongClick(View view)
             {
-                handleFloatingButtonClick();
+                handleFloatingButtonClick(true);
                 return(true);
             }
         });
@@ -1127,6 +1138,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //set receivers/listeners
         locationReceiver = createLocationReceiver();
         locationReceiver.register(this);
+        localUpdateReceiver = createUpdateReceiver();
+        localUpdateReceiver.register(this);
         preferences = Settings.getReadSettings(this);
         preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener()
         {
@@ -1214,18 +1227,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     @Override
-    protected void onResume()
-    {
-        super.onResume();
-
-        if(pendingUpdate)
-        {
-            updateList();
-            pendingUpdate = false;
-        }
-    }
-
-    @Override
     public void onBackPressed()
     {
         int page;
@@ -1281,8 +1282,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         super.onDestroy();
 
-        //remove receiver
+        //remove receivers
         locationReceiver.unregister(this);
+        localUpdateReceiver.unregister(this);
 
         //stop listener
         if(preferences != null && preferenceChangeListener != null)
@@ -1294,20 +1296,55 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        boolean isError = true;
         boolean isOkay = (resultCode == RESULT_OK);
+        int progressType = Globals.ProgressType.Unknown;
         Resources res = this.getResources();
+
+        //if no data
+        if(data == null)
+        {
+            //set to empty
+            data = new Intent();
+        }
 
         //handle response
         switch(requestCode)
         {
+            case BaseInputActivity.RequestCode.MasterAddList:
+                //if able to get progress type
+                progressType = BaseInputActivity.handleActivityMasterAddListResult(res, settingsLayout, data);
+                if(progressType == Globals.ProgressType.Unknown)
+                {
+                    //stop
+                    break;
+                }
+                //else fall through
+
+            case BaseInputActivity.RequestCode.ManualOrbitalInput:
+                //if set and weren't denied
+                if(isOkay && progressType != Globals.ProgressType.Denied)
+                {
+                    //update list
+                    updateList();
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.SDCardOpenItem:
+                //if set
+                if(isOkay)
+                {
+                    //handle SD card open files request
+                    BaseInputActivity.handleActivitySDCardOpenFilesRequest(this, data);
+                }
+                break;
+
             case BaseInputActivity.RequestCode.MapLocationInput:
             case BaseInputActivity.RequestCode.EditNotify:
                 //if set
                 if(isOkay)
                 {
-                    //update list later
-                    pendingUpdate = true;
+                    //update list
+                    updateList();
                 }
                 break;
 
@@ -1322,30 +1359,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 break;
 
             case BaseInputActivity.RequestCode.GoogleDriveSignIn:
-                //if signed in
+                //handle Google Drive open file browser request
+                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, settingsLayout, data, isOkay);
+                break;
+
+            case BaseInputActivity.RequestCode.GoogleDriveOpenFile:
+            case BaseInputActivity.RequestCode.DropboxOpenFile:
+            case BaseInputActivity.RequestCode.OthersOpenItem:
+                //if selected item
                 if(isOkay)
                 {
-                    //try to get account
-                    Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
-
-                    //if got account
-                    if(getAccountTask.isSuccessful())
-                    {
-                        //note: don't confirm internet since would have done already to get past sign in
-
-                        //show google drive file browser
-                        Orbitals.showGoogleDriveFileBrowser(this, false);
-
-                        //no error
-                        isError = false;
-                    }
-                }
-
-                //if there was an error
-                if(isError)
-                {
-                    //show error message
-                    Globals.showSnackBar(settingsLayout, res.getString(R.string.text_login_failed), true);
+                    //handle open file request
+                    BaseInputActivity.handleActivityOpenFileRequest(this, settingsLayout, data, requestCode);
                 }
                 break;
         }
@@ -1357,7 +1382,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
         boolean granted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
-        boolean retrying = (requestCode == Globals.PermissionType.LocationRetry);
+        boolean retrying = false;
+
+        //check if retrying
+        switch(requestCode)
+        {
+            case Globals.PermissionType.LocationRetry:
+            case Globals.PermissionType.ReadExternalStorageRetry:
+                retrying = true;
+                break;
+        }
 
         //handle response
         switch(requestCode)
@@ -1375,6 +1409,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     //ask permission again
                     Globals.askLocationPermission(this, true);
+                }
+                break;
+
+            case Globals.PermissionType.ReadExternalStorage:
+            case Globals.PermissionType.ReadExternalStorageRetry:
+                //if granted
+                if(granted)
+                {
+                    Orbitals.showSDCardFileBrowser(this, settingsLayout);
+                }
+                //else if not retrying
+                else if(!retrying)
+                {
+                    //ask permission again
+                    Globals.askReadPermission(this, true);
                 }
                 break;
         }
@@ -1431,7 +1480,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(orbitalsPageAdapter == null)
         {
             //create adapter
-            orbitalsPageAdapter = new Orbitals.PageAdapter(manager, settingsLayout, null, null, null);
+            orbitalsPageAdapter = new Orbitals.PageAdapter(manager, settingsLayout, new Selectable.ListFragment.OnItemDetailButtonClickListener()
+            {
+                @Override
+                public void onClick(int group, int pageType, int itemID, Selectable.ListItem item, int buttonNum)
+                {
+                    //if info button
+                    if(buttonNum == Selectable.ListBaseAdapter.DetailButtonType.Info)
+                    {
+                        //get information
+                        UpdateService.getInformation(SettingsActivity.this, group, new Database.SatelliteData(Database.getOrbital(SettingsActivity.this, itemID)).satellite.tle);
+                    }
+                }
+            }, createOnSetAdapterListener(), null, null);
         }
 
         //return page fragment
@@ -1473,8 +1534,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     //Handles main floating button click
-    private void handleFloatingButtonClick()
+    private void handleFloatingButtonClick(boolean isLong)
     {
+        //if showing setup and on SetupPageType.Satellites
+        if(showSetup && setupPager.getCurrentItem() == SetupPageType.Satellites)
+        {
+            //show add satellite dialog
+            Orbitals.showAddDialog(this, settingsLayout, isLong);
+            return;
+        }
+
         switch(currentPage)
         {
             case Settings.PageType.Accounts:
@@ -1591,6 +1660,119 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         });
     }
 
+    //Creates an update receiver
+    private UpdateReceiver createUpdateReceiver()
+    {
+        Activity activity = SettingsActivity.this;
+
+        //create receiver
+        return(new UpdateReceiver()
+        {
+            @Override
+            protected View getParentView()
+            {
+                return(settingsLayout);
+            }
+
+            @Override
+            protected void onLoadPending(ArrayList<Database.DatabaseSatellite> pendingLoadSatellites)
+            {
+                //show dialog to load pending
+                Orbitals.showLoadDialog(activity, setupPager, (Selectable.ListFragmentAdapter) setupPager.getAdapter(), pendingLoadSatellites, new EditValuesDialog.OnDismissListener()
+                {
+                    @Override
+                    public void onDismiss(EditValuesDialog dialog, int saveCount)
+                    {
+                        //if some were saved
+                        if(saveCount > 0)
+                        {
+                            //update list
+                            updateList();
+                        }
+                    }
+                });
+            }
+
+            @Override
+            protected void onGotInformation(Spanned infoText, int index)
+            {
+                //if listener is set
+                if(informationChangedListener != null)
+                {
+                    //update display
+                    informationChangedListener.informationChanged(infoText);
+                }
+            }
+
+            @Override
+            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
+            {
+                //if button and pager exist and on satellites
+                if(floatingButton != null && setupPager != null && setupPager.getCurrentItem() == SetupPageType.Satellites)
+                {
+                    //update visibility
+                    Globals.setVisible(floatingButton, ended);
+                }
+
+                //if ended
+                if(ended)
+                {
+                    updateList();
+                }
+
+                //handle based on update type
+                switch(updateType)
+                {
+                    case UpdateService.UpdateType.UpdateSatellites:
+                        //handle based on progress type
+                        switch(progressType)
+                        {
+                            case Globals.ProgressType.Denied:
+                                //show login
+                                Globals.showAccountLogin(activity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
+                                {
+                                    @Override
+                                    public void onResult(Globals.WebPageData pageData, boolean success)
+                                    {
+                                        //if success or attempted to login
+                                        if(success || pageData != null)
+                                        {
+                                            //try again
+                                            updateSatellites(false);
+                                        }
+                                        else
+                                        {
+                                            //allow inputs
+                                            setLoading(false);
+                                        }
+                                    }
+                                });
+                                break;
+
+                            case Globals.ProgressType.Finished:
+                                //if pager exists
+                                if(setupPager != null)
+                                {
+                                    //done with update
+                                    updateNow = false;
+
+                                    //go to next page
+                                    setupPager.setCurrentItem(setupPager.getCurrentItem() + 1);
+                                }
+                                //fall through
+
+                            default:
+                                //allow inputs if ended
+                                setLoading(!ended);
+                                break;
+
+                        }
+                        break;
+                }
+            }
+        });
+    }
+
     //Creates an on item check changed listener
     private Selectable.ListFragment.OnItemCheckChangedListener createOnItemCheckChangedListener()
     {
@@ -1614,12 +1796,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         locationSource = currentItem.locationType;
                         Database.saveLocation(context, currentItem.name, currentItem.locationType, true);
 
-                        //if current location
-                        if(locationSource == Database.LocationType.Current)
+                        //if current location and not on setup
+                        if(locationSource == Database.LocationType.Current && !showSetup)
                         {
                             //show status and update location
                             Globals.showSnackBar(settingsLayout, context.getResources().getString(R.string.title_location_getting));
-                            LocationService.getCurrentLocation(SettingsActivity.this, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
+                            LocationService.getCurrentLocation(context, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
                         }
                     }
                 }
@@ -1633,18 +1815,28 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         return(new Selectable.ListFragment.OnAdapterSetListener()
         {
             @Override
-            public void setAdapter(final int group, final int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter)
+            public void setAdapter(Selectable.ListFragment fragment, final int group, final int position, Selectable.ListBaseAdapter adapter)
             {
-                switch(position)
+                switch(group)
                 {
-                    case Settings.PageType.Accounts:
-                        //set adapter
-                        accountsListAdapter = (Settings.Options.Accounts.ItemListAdapter)adapter;
+                    case MainActivity.Groups.Settings:
+                        switch(position)
+                        {
+                            case Settings.PageType.Accounts:
+                                //set adapter
+                                accountsListAdapter = (Settings.Options.Accounts.ItemListAdapter)adapter;
+                                break;
+
+                            case Settings.PageType.Locations:
+                                //set adapter
+                                settingsLocationsListAdapter = (Settings.Locations.ItemListAdapter)adapter;
+                                break;
+                        }
                         break;
 
-                    case Settings.PageType.Locations:
-                        //set adapter
-                        settingsLocationsListAdapter = (Settings.Locations.ItemListAdapter)adapter;
+                    case MainActivity.Groups.Orbitals:
+                        //set listener
+                        informationChangedListener = fragment.createOnInformationChangedListener(adapter);
                         break;
                 }
             }
@@ -1803,7 +1995,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     //if on satellites, forward, and need to update now
                     if(page == SetupPageType.Satellites && forward && updateNow)
                     {
-                        //updateSatellites(true);
+                        updateSatellites(true);
                         break;
                     }
                     //else fall through
@@ -1844,6 +2036,53 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(nextButton != null)
         {
             nextButton.setEnabled(!isLoading);
+        }
+    }
+
+    //Update satellites
+    private void updateSatellites(boolean confirmInternet)
+    {
+        int index;
+        boolean askInternet = (confirmInternet && Globals.shouldAskInternetConnection(this));
+        Resources res = this.getResources();
+        Database.DatabaseSatellite[] satellites;
+        ArrayList<Database.DatabaseSatellite> satelliteList = new ArrayList<>(0);
+
+        //if asking about internet
+        if(askInternet)
+        {
+            //get confirmation
+            Globals.showConfirmInternetDialog(this, new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    //don't ask this time
+                    updateSatellites(false);
+                }
+            });
+        }
+        else
+        {
+            //if not already updating satellites
+            if(!UpdateService.updatingSatellites())
+            {
+                //get satellites
+                satellites = Database.getOrbitals(this, Database.getSatelliteConditions());
+                for(index = 0; index < satellites.length; index++)
+                {
+                    //add satellite to list
+                    satelliteList.add(satellites[index]);
+                }
+
+                //update satellites
+                UpdateService.updateSatellites(this, res.getQuantityString(R.plurals.title_satellites_updating, satelliteList.size()), satelliteList, false);
+            }
+            else
+            {
+                //hide notification
+                UpdateService.setNotificationVisible(UpdateService.UpdateType.UpdateSatellites, false);
+            }
         }
     }
 

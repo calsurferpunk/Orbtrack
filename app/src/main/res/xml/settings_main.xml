@@ -273,7 +273,7 @@
                     android:key="TLEAutoUpdateRate"
                     app:hourKey="TLEAutoUpdateHour"
                     app:minuteKey="TLEAutoUpdateMinute"
-                    app:intervalKey="TLEAutoUpdateInterval"
+                    app:intervalKey="TLEAutoUpdateRate"
                     app:isPreferenceVisible="false"/>
 
                 <SwitchPreference

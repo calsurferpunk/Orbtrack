@@ -997,7 +997,7 @@ public abstract class Settings
         }
 
         //Creates an on frequency item selected listener
-        private static AdapterView.OnItemSelectedListener createOnFrequencyItemSelectedListener(final String preferenceKey, final SharedPreferences.Editor writeSettings)
+        private static AdapterView.OnItemSelectedListener createOnFrequencyItemSelectedListener(final String preferenceKey)
         {
             return(new AdapterView.OnItemSelectedListener()
             {
@@ -1011,7 +1011,7 @@ public abstract class Settings
                     if(position < Updates.UpdateFrequencyValues.length && settings.rate != Updates.UpdateFrequencyValues[position])
                     {
                         //save setting
-                        writeSettings.putLong(preferenceKey, Updates.UpdateFrequencyValues[position]).apply();
+                        setPreferenceLong(context, preferenceKey, Updates.UpdateFrequencyValues[position]);
 
                         //apply changes
                         setAutoUpdate(context, preferenceKey);
@@ -1322,10 +1322,10 @@ public abstract class Settings
 
                         //set auto events
                         catalogAutoSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.CatalogAutoUpdate, writeSettings, catalogAutoRow));
-                        catalogAutoList.setOnItemSelectedListener(createOnFrequencyItemSelectedListener(PreferenceName.CatalogAutoUpdateRate, writeSettings));
+                        catalogAutoList.setOnItemSelectedListener(createOnFrequencyItemSelectedListener(PreferenceName.CatalogAutoUpdateRate));
                         catalogAutoTimeText.setOnTimeSetListener(createOnTimeSetListener(PreferenceName.CatalogAutoUpdateHour, PreferenceName.CatalogAutoUpdateMinute, writeSettings));
                         tleAutoSwitch.setOnCheckedChangeListener(createCheckedChangedListener(PreferenceName.TLEAutoUpdate, writeSettings, tleAutoRow));
-                        tleAutoList.setOnItemSelectedListener(createOnFrequencyItemSelectedListener(PreferenceName.TLEAutoUpdateRate, writeSettings));
+                        tleAutoList.setOnItemSelectedListener(createOnFrequencyItemSelectedListener(PreferenceName.TLEAutoUpdateRate));
                         tleAutoTimeText.setOnTimeSetListener(createOnTimeSetListener(PreferenceName.TLEAutoUpdateHour, PreferenceName.TLEAutoUpdateMinute, writeSettings));
 
                         //set list items
@@ -2632,28 +2632,34 @@ public abstract class Settings
     {
         switch(preferenceName)
         {
+            case PreferenceName.AskInternet:
             case PreferenceName.FirstRun:
-            case PreferenceName.MetricUnits:
             case PreferenceName.LensFirstRun:
             case PreferenceName.LensUseCamera:
             case PreferenceName.ListShowPassProgress:
+            case PreferenceName.MapMarkerShowShadow:
+            case PreferenceName.MapRotateAllowed:
             case PreferenceName.MapShow3dPaths:
-            case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
-            case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
             case PreferenceName.MapShowLabelsAlways:
             case PreferenceName.MapShowStars:
-            case PreferenceName.MapRotateAllowed:
             case PreferenceName.MapShowSearchList:
-            case PreferenceName.MapMarkerShowShadow:
-            case PreferenceName.UseCombinedCurrentLayout:
-            case PreferenceName.TranslateInformation:
+            case PreferenceName.MetricUnits:
             case PreferenceName.ShareTranslations:
-            case PreferenceName.AskInternet:
+            case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
+            case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
+            case PreferenceName.TLEAutoUpdate:
+            case PreferenceName.TranslateInformation:
+            case PreferenceName.UseCombinedCurrentLayout:
                 return(true);
 
-            default:
-                return(false);
         }
+
+        if(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartNextOnly, PreferenceName.NotifyFullMoonEndNextOnly, PreferenceName.NotifyPassStartNextOnly, PreferenceName.NotifyPassEndNextOnly))
+        {
+            return(true);
+        }
+
+        return(false);
     }
 
     //Gets given boolean preference
@@ -2679,6 +2685,16 @@ public abstract class Settings
         {
             case PreferenceName.AltitudeSource:
                 return(LocationService.OnlineSource.MapQuest);
+
+            case PreferenceName.CatalogAutoUpdateHour:
+            case PreferenceName.TLEAutoUpdateHour:
+                return(12);
+
+            case PreferenceName.CurrentViewSortBy:
+            case PreferenceName.CurrentPassesSortBy:
+            case PreferenceName.CurrentCoordinatesSortBy:
+            case PreferenceName.CurrentCombinedSortBy:
+                return(Current.Items.SortBy.Name);
 
             case PreferenceName.ColorTheme:
                 return(Options.Display.ThemeIndex.Cyan);
@@ -2736,6 +2752,33 @@ public abstract class Settings
         getWriteSettings(context).putInt(preferenceName, value).apply();
     }
 
+    //Get default long value for the given preference
+    public static long getDefaultLongValue(String preferenceName)
+    {
+        switch(preferenceName)
+        {
+            case PreferenceName.CatalogAutoUpdateRate:
+                return(Options.Updates.MsPer4Weeks);
+
+            case PreferenceName.TLEAutoUpdateRate:
+                return(Options.Updates.MsPer3Days);
+        }
+
+        return(0);
+    }
+
+    //Gets given long preference
+    public static long getPreferenceLong(Context context, String preferenceName)
+    {
+        return(getReadSettings(context).getLong(preferenceName, getDefaultLongValue(preferenceName)));
+    }
+
+    //Sets given long preference
+    private static void setPreferenceLong(Context context, String preferenceName, long value)
+    {
+        getWriteSettings(context).putLong(preferenceName, value).apply();
+    }
+
     //Get default float value for the given preference
     public static float getDefaultFloatValue(String preferenceName)
     {
@@ -2759,6 +2802,15 @@ public abstract class Settings
                 return(0.65f);
         }
 
+        if(Globals.startsWith(preferenceName,
+            PreferenceName.NotifyFullMoonStartLatitude, PreferenceName.NotifyFullMoonStartLongitude, PreferenceName.NotifyFullMoonStartAltitude,
+            PreferenceName.NotifyFullMoonEndLatitude, PreferenceName.NotifyFullMoonEndLongitude, PreferenceName.NotifyFullMoonEndAltitude,
+            PreferenceName.NotifyPassStartLatitude, PreferenceName.NotifyPassStartLongitude, PreferenceName.NotifyPassStartAltitude,
+            PreferenceName.NotifyPassEndLatitude, PreferenceName.NotifyPassEndLongitude, PreferenceName.NotifyPassEndAltitude))
+        {
+            return(Float.MIN_VALUE);
+        }
+
         return(0);
     }
 
@@ -2772,6 +2824,29 @@ public abstract class Settings
     private static void setPreferenceFloat(Context context, String preferenceName, float value)
     {
         getWriteSettings(context).putFloat(preferenceName, value).apply();
+    }
+
+    //Gets default string value for the given preference
+    public static String getDefaultStringValue(String preferenceName)
+    {
+        if(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartZoneId, PreferenceName.NotifyFullMoonEndZoneId, PreferenceName.NotifyPassStartZoneId, PreferenceName.NotifyPassEndZoneId))
+        {
+            return(TimeZone.getDefault().getID());
+        }
+
+        return(null);
+    }
+
+    //Gets given string preference
+    public static String getPreferenceString(Context context, String preferenceName)
+    {
+        return(getReadSettings(context).getString(preferenceName, getDefaultStringValue(preferenceName)));
+    }
+
+    //Sets given string preference
+    private static void setPreferenceString(Context context, String preferenceName, String value)
+    {
+        getWriteSettings(context).putString(preferenceName, value).apply();
     }
 
     //Gets if first run
@@ -3290,7 +3365,7 @@ public abstract class Settings
     //Gets current sort by for given page
     public static int getCurrentSortBy(Context context, int page)
     {
-        return(getReadSettings(context).getInt(getCurrentSortByName(page), Current.Items.SortBy.Name));
+        return(getPreferenceInt(context, getCurrentSortByName(page)));
     }
     public static String getCurrentSortByString(Context context, int page)
     {
@@ -3311,12 +3386,11 @@ public abstract class Settings
     public static Location getLastLocation(Context context)
     {
         Location lastLocation = new Location("");
-        SharedPreferences readSettings = getReadSettings(context);
 
         //set location
-        lastLocation.setLatitude(readSettings.getFloat(PreferenceName.LocationLastLatitude, 0));
-        lastLocation.setLongitude(readSettings.getFloat(PreferenceName.LocationLastLongitude, 0));
-        lastLocation.setAltitude(readSettings.getFloat(PreferenceName.LocationLastAltitude, 0));
+        lastLocation.setLatitude(getPreferenceFloat(context, PreferenceName.LocationLastLatitude));
+        lastLocation.setLongitude(getPreferenceFloat(context, PreferenceName.LocationLastLongitude));
+        lastLocation.setAltitude(getPreferenceFloat(context, PreferenceName.LocationLastAltitude));
 
         //return
         return(lastLocation);
@@ -3424,12 +3498,10 @@ public abstract class Settings
     //Gets login name and password
     public static String[] getLogin(Context context, int accountType)
     {
-        SharedPreferences currentPreferences = getReadSettings(context);
-
         switch(accountType)
         {
             case Globals.AccountType.SpaceTrack:
-                return(new String[]{currentPreferences.getString(PreferenceName.SpaceTrackUser, null), Encryptor.decrypt(context, currentPreferences.getString(PreferenceName.SpaceTrackPassword, null))});
+                return(new String[]{getPreferenceString(context, PreferenceName.SpaceTrackUser), Encryptor.decrypt(context, getPreferenceString(context, PreferenceName.SpaceTrackPassword))});
 
             default:
                 return(new String[]{null, null});
@@ -3663,15 +3735,14 @@ public abstract class Settings
     public static CalculateService.AlarmNotifySettings getNotifyPassSettings(Context context, int noradId, byte notifyType)
     {
         CalculateService.AlarmNotifySettings settings = new CalculateService.AlarmNotifySettings();
-        SharedPreferences readSettings = getReadSettings(context);
 
-        settings.nextOnly = readSettings.getBoolean(getNotifyPassNextOnlyKey(noradId, notifyType), true);
+        settings.nextOnly = Settings.getPreferenceBoolean(context, getNotifyPassNextOnlyKey(noradId, notifyType));
         settings.noradId = noradId;
-        settings.timeMs = readSettings.getLong(getNotifyPassNextMsKey(noradId, notifyType), 0);
-        settings.location.timeZone = TimeZone.getTimeZone(readSettings.getString(getNotifyPassZoneIdKey(noradId, notifyType), TimeZone.getDefault().getID()));
-        settings.location.geo.latitude = readSettings.getFloat(getNotifyPassLatitudeKey(noradId, notifyType), Float.MIN_VALUE);
-        settings.location.geo.longitude = readSettings.getFloat(getNotifyPassLongitudeKey(noradId, notifyType), Float.MIN_VALUE);
-        settings.location.geo.altitudeKm = readSettings.getFloat(getNotifyPassAltitudeKey(noradId, notifyType), Float.MIN_VALUE);
+        settings.timeMs = Settings.getPreferenceLong(context, getNotifyPassNextMsKey(noradId, notifyType));
+        settings.location.timeZone = TimeZone.getTimeZone(Settings.getPreferenceString(context, getNotifyPassZoneIdKey(noradId, notifyType)));
+        settings.location.geo.latitude = Settings.getPreferenceFloat(context, getNotifyPassLatitudeKey(noradId, notifyType));
+        settings.location.geo.longitude = Settings.getPreferenceFloat(context, getNotifyPassLongitudeKey(noradId, notifyType));
+        settings.location.geo.altitudeKm = Settings.getPreferenceFloat(context, getNotifyPassAltitudeKey(noradId, notifyType));
 
         return(settings);
     }
@@ -3697,15 +3768,13 @@ public abstract class Settings
     //Gets auto update next update time in ms
     public static long getAutoUpdateNextMs(Context context, byte updateType)
     {
-        SharedPreferences readSettings = getReadSettings(context);
-
         switch(updateType)
         {
             case UpdateService.UpdateType.GetMasterList:
-                return(readSettings.getLong(PreferenceName.CatalogAutoUpdateNextMs, 0));
+                return(Settings.getPreferenceLong(context, PreferenceName.CatalogAutoUpdateNextMs));
 
             case UpdateService.UpdateType.UpdateSatellites:
-                return(readSettings.getLong(PreferenceName.TLEAutoUpdateNextMs, 0));
+                return(Settings.getPreferenceLong(context, PreferenceName.TLEAutoUpdateNextMs));
         }
 
         return(0);
@@ -3714,60 +3783,53 @@ public abstract class Settings
     //Sets auto update next time in ms
     public static void setAutoUpdateNextMs(Context context, byte updateType, long timeMs)
     {
-        SharedPreferences.Editor writeSettings = getWriteSettings(context);
-
         switch(updateType)
         {
             case UpdateService.UpdateType.GetMasterList:
-                writeSettings.putLong(PreferenceName.CatalogAutoUpdateNextMs, timeMs).apply();
+                setPreferenceLong(context, PreferenceName.CatalogAutoUpdateNextMs, timeMs);
                 break;
 
             case UpdateService.UpdateType.UpdateSatellites:
-                writeSettings.putLong(PreferenceName.TLEAutoUpdateNextMs, timeMs).apply();
+                setPreferenceLong(context, PreferenceName.TLEAutoUpdateNextMs, timeMs);
                 break;
         }
     }
 
     //Gets auto update alarm rate
-    private static long getAutoUpdateRateMs(SharedPreferences readSettings, byte updateType)
+    public static long getAutoUpdateRateMs(Context context, byte updateType)
     {
         switch(updateType)
         {
             case UpdateService.UpdateType.GetMasterList:
-                return(readSettings.getLong(PreferenceName.CatalogAutoUpdateRate, Options.Updates.MsPer4Weeks));
+                return(Settings.getPreferenceLong(context, PreferenceName.CatalogAutoUpdateRate));
 
             default:
             case UpdateService.UpdateType.UpdateSatellites:
-                return(readSettings.getLong(PreferenceName.TLEAutoUpdateRate, Options.Updates.MsPer3Days));
+                return(Settings.getPreferenceLong(context, PreferenceName.TLEAutoUpdateRate));
         }
-    }
-    public static long getAutoUpdateRateMs(Context context, byte updateType)
-    {
-        return(getAutoUpdateRateMs(getReadSettings(context), updateType));
     }
 
     //Gets auto update alarm settings
     public static UpdateService.AlarmUpdateSettings getAutoUpdateSettings(Context context, byte updateType)
     {
         UpdateService.AlarmUpdateSettings settings = new UpdateService.AlarmUpdateSettings();
-        SharedPreferences readSettings = getReadSettings(context);
 
         switch(updateType)
         {
             case UpdateService.UpdateType.GetMasterList:
-                settings.enabled = readSettings.getBoolean(PreferenceName.CatalogAutoUpdate, false);
-                settings.hour = readSettings.getInt(PreferenceName.CatalogAutoUpdateHour, 12);
-                settings.minute = readSettings.getInt(PreferenceName.CatalogAutoUpdateMinute, 0);
+                settings.enabled = getPreferenceBoolean(context, PreferenceName.CatalogAutoUpdate);
+                settings.hour = getPreferenceInt(context, PreferenceName.CatalogAutoUpdateHour);
+                settings.minute = getPreferenceInt(context, PreferenceName.CatalogAutoUpdateMinute);
                 break;
 
             default:
             case UpdateService.UpdateType.UpdateSatellites:
-                settings.enabled = readSettings.getBoolean(PreferenceName.TLEAutoUpdate, false);
-                settings.hour = readSettings.getInt(PreferenceName.TLEAutoUpdateHour, 12);
-                settings.minute = readSettings.getInt(PreferenceName.TLEAutoUpdateMinute, 0);
+                settings.enabled = getPreferenceBoolean(context, PreferenceName.TLEAutoUpdate);
+                settings.hour = getPreferenceInt(context, PreferenceName.TLEAutoUpdateHour);
+                settings.minute = getPreferenceInt(context, PreferenceName.TLEAutoUpdateMinute);
                 break;
         }
-        settings.rate = getAutoUpdateRateMs(readSettings, updateType);
+        settings.rate = getAutoUpdateRateMs(context, updateType);
 
         return(settings);
     }

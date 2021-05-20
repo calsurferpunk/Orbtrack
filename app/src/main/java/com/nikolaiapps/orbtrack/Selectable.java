@@ -1280,7 +1280,7 @@ public abstract class Selectable
         //On adapter set listener
         public interface OnAdapterSetListener
         {
-            void setAdapter(int group, int position, RecyclerView.Adapter<RecyclerView.ViewHolder> adapter);
+            void setAdapter(ListFragment fragment, int group, int position, ListBaseAdapter adapter);
         }
 
         //On item selected listener
@@ -1530,7 +1530,7 @@ public abstract class Selectable
                 selectList.setAdapter(selectListAdapter);
                 if(adapterSetListener != null)
                 {
-                    adapterSetListener.setAdapter(group, pageNum, selectListAdapter);
+                    adapterSetListener.setAdapter(this, group, pageNum, selectListAdapter);
                 }
                 selectListAdapter.setOnItemClickedListener(createOnItemClickListener());
                 selectListAdapter.setOnItemLongClickedListener(createOnItemLongClickListener());

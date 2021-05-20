@@ -46,6 +46,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.LocaleList;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -1977,7 +1979,8 @@ public abstract class Globals
         {
             //get language
             Configuration config = context.getResources().getConfiguration();
-            Locale currentLocale = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N ? config.getLocales().get(0) : config.locale);
+            LocaleList locales = (Build.VERSION.SDK_INT >= 24 ? config.getLocales() : null);
+            Locale currentLocale = (Build.VERSION.SDK_INT >= 24 && locales != null && locales.size() > 0 ? locales.get(0) : Locale.getDefault());
             return(currentLocale.getLanguage());
         }
         else

@@ -1249,7 +1249,7 @@ public abstract class Globals
     public static boolean shouldAskInternetConnection(Context context)
     {
         //should ask if don't have connection and can ask
-        return(!Globals.haveInternetConnection(context) && Settings.getAskInternet(context));
+        return(context != null && !Globals.haveInternetConnection(context) && Settings.getAskInternet(context));
     }
 
     //Get google drive account if valid

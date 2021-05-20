@@ -37,6 +37,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import androidx.core.app.ActivityCompat;
@@ -46,7 +47,6 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.os.LocaleList;
 import android.text.Html;
 import android.text.TextUtils;
@@ -113,6 +113,11 @@ import javax.net.ssl.SSLSocketFactory;
 
 public abstract class Globals
 {
+    static
+    {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
+
     //Progress types
     public static abstract class ProgressType
     {
@@ -2777,7 +2782,7 @@ public abstract class Globals
     //Gets an orbital icon ID
     public static int getOrbitalIconID(int satelliteNum, byte orbitalType)
     {
-        int iconId = -1;
+        int iconId = R.drawable.orbital_satellite;
 
         if(satelliteNum > 0)
         {
@@ -2789,11 +2794,6 @@ public abstract class Globals
 
                 case Database.OrbitalType.Debris:
                     iconId = R.drawable.orbital_debris;
-                    break;
-
-                default:
-                case Database.OrbitalType.Satellite:
-                    iconId = R.drawable.orbital_satellite;
                     break;
             }
         }

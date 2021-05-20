@@ -330,9 +330,18 @@ public abstract class Orbitals
 
             //update display visibilities
             detailDialog.showItemDetailRows(offset);
-            notifyButton.setVisibility(!forSetup ? View.VISIBLE : View.GONE);
-            preview3dButton.setVisibility(use3dPreview ? View.VISIBLE : View.GONE);
-            infoButton.setVisibility(View.VISIBLE);
+            if(notifyButton != null)
+            {
+                notifyButton.setVisibility(!forSetup ? View.VISIBLE : View.GONE);
+            }
+            if(preview3dButton != null)
+            {
+                preview3dButton.setVisibility(use3dPreview ? View.VISIBLE : View.GONE);
+            }
+            if(infoButton != null)
+            {
+                infoButton.setVisibility(View.VISIBLE);
+            }
             detailDialog.show();
         }
 

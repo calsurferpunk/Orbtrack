@@ -556,6 +556,13 @@ public abstract class Selectable
             {
                 int mapLayerType = ListBaseAdapter.getMapLayerType(noradId);
 
+                //if button does not exist
+                if(button == null)
+                {
+                    //stop
+                    return;
+                }
+
                 //if view is set, for DetailButtonType.Preview3d, and map layer type is set
                 if(itemDetail3dView != null && buttonNum == DetailButtonType.Preview3d && mapLayerType != CoordinatesFragment.MapLayerType.None)
                 {

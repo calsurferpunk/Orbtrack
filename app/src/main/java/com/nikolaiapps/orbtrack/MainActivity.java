@@ -669,6 +669,8 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
         }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
@@ -2554,8 +2556,8 @@ public class MainActivity extends AppCompatActivity
             {
                 int page = getMainPage();
 
-                //if button exists, on orbitals, and on satellites
-                if(mainFloatingButton != null && mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)
+                //if button exists and --on current- or -on orbitals and satellite page--
+                if(mainFloatingButton != null && (mainGroup == Groups.Current || (mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)))
                 {
                     //update visibility
                     Globals.setVisible(mainFloatingButton, ended);

@@ -1760,7 +1760,7 @@ class Whirly
                         }
                         drawPriorities.add(DrawPriority.Layer);
                         cacheDirNames.add(name);
-                        layerSources.add(new RemoteTileInfoNew("http://nikolaiapps.infinityfreeapp.com/tiles/" + name + "/{z}/{x}/{y}.jpg", 0, maxZoom));
+                        layerSources.add(new RemoteTileInfoNew("https://nikolaiapps.infinityfreeapp.com/tiles/" + name + "/{z}/{x}/{y}.jpg", 0, maxZoom));
                         break;
 
                     default:

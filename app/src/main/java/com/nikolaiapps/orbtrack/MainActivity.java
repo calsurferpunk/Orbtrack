@@ -4494,7 +4494,7 @@ public class MainActivity extends AppCompatActivity
         ///if want to run, not waiting for location update, and have items
         havePasses = (onCurrent && !usingCombined && Current.PageAdapter.hasItems(Current.PageType.Passes));
         haveCombined = (onCurrent && usingCombined && Current.PageAdapter.hasItems(Current.PageType.Combined));
-        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && (observer.geo.latitude != 0 || observer.geo.longitude != 0 || observer.geo.altitudeKm != 0) && (havePasses || haveCombined))
+        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.latitude != 0 || observer.geo.longitude != 0 || observer.geo.altitudeKm != 0) && (havePasses || haveCombined))
         {
             //get items
             passItems = (havePasses ? Current.PageAdapter.getPassItems() : Current.PageAdapter.getCombinedItems());

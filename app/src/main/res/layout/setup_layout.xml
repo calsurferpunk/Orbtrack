@@ -36,6 +36,7 @@
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/Setup_Loading_Bar"
         style="@style/ProgressCircle"
+        android:background="?attr/viewPagerBackground"
         android:visibility="gone"/>
 
     <CheckBox

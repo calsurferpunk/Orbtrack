@@ -2279,11 +2279,14 @@ public abstract class Globals
     {
         int index;
         float[] pixels = new float[dp.length];
-        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        DisplayMetrics metrics = (context != null ? context.getResources().getDisplayMetrics() : null);
 
-        for(index = 0; index < dp.length; index++)
+        if(context != null)
         {
-            pixels[index] = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp[index], metrics);
+            for(index = 0; index < dp.length; index++)
+            {
+                pixels[index] = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp[index], metrics);
+            }
         }
 
         return(pixels);
@@ -2537,7 +2540,7 @@ public abstract class Globals
     {
         if(Build.VERSION.SDK_INT >= 21)
         {
-            return(ContextCompat.getDrawable(context, resId));
+            return(context != null ? ContextCompat.getDrawable(context, resId) : null);
         }
         else
         {

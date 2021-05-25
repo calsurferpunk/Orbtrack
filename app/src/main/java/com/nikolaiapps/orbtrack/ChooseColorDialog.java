@@ -122,7 +122,7 @@ public class ChooseColorDialog
         colorSelectedListener = null;
         rgbOffset = rgbTextOffset = 0;
         rgbBase = new float[]{0, 0, 0, 0};
-        title = context.getResources().getString(R.string.title_select_color);
+        title = (context != null ? context.getResources().getString(R.string.title_select_color) : null);
     }
 
     public void show(final Context context)
@@ -140,19 +140,19 @@ public class ChooseColorDialog
         int paddingSize = (int)Globals.dpToPixels(context, 3);
         final Button neutralButton;
         final Button[] buttons;
-        LayoutInflater viewInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        LayoutInflater viewInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
         TableRow currentRow = null;
         TableLayout colorTable;
         BorderButton colorBefore2View;
         ViewGroup.LayoutParams colorImageParams;
         ViewGroup.LayoutParams brightBarParams;
         View colorDialogView = (viewInflater != null ? viewInflater.inflate(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270 ? R.layout.choose_color_landscape_dialog : R.layout.choose_color_portrait_dialog, null, false) : null);
-        final Resources res = context.getResources();
+        final Resources res = (context != null ? context.getResources() : null);
         final CircularProgressIndicator colorProgress = (colorDialogView != null ? colorDialogView.findViewById(R.id.Color_Progress) : null);
         float[] buttonSize = Globals.dpsToPixels(context, 45, 35);
 
-        //if view is set
-        if(colorProgress != null)
+        //if context and view are set
+        if(context != null && colorProgress != null)
         {
             colorBeforeText = colorDialogView.findViewById(R.id.Color_Before_Text);
             colorCurrentText = colorDialogView.findViewById(R.id.Color_Current_Text);

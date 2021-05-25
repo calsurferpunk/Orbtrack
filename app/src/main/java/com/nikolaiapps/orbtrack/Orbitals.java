@@ -157,7 +157,7 @@ public abstract class Orbitals
                     for(index = 0; index < satellites.length; index++)
                     {
                         Database.DatabaseSatellite currentSat = satellites[index];
-                        items[index] = new PageListItem(parentView.getContext(), index, currentSat, (page == PageType.Satellites && !simple), false);
+                        items[index] = new PageListItem((parentView != null ? parentView.getContext() : null), index, currentSat, (page == PageType.Satellites && !simple), false);
                     }
                     break;
 
@@ -236,10 +236,17 @@ public abstract class Orbitals
             final boolean onSatellite = (currentItem.id > 0);
             final boolean use3dPreview = have3dPreview(currentItem.id);
             final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.titleIcon, itemDetailButtonClickListener);
-            final Resources res = currentContext.getResources();
+            final Resources res = (currentContext != null ? currentContext.getResources() : null);
             final TextView[] titles;
             final TextView[] texts;
             final AppCompatImageButton[] buttons;
+
+            //if no context
+            if(currentContext == null)
+            {
+                //stop
+                return;
+            }
 
             //get info displays
             buttons = detailDialog.getItemDetailButtons();
@@ -359,11 +366,11 @@ public abstract class Orbitals
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
         {
             boolean onSatellites = (currentPage == PageType.Satellites);
-            final Resources res = currentContext.getResources();
+            final Resources res = (currentContext != null ? currentContext.getResources() : null);
             final PageListItemHolder itemHolder = (PageListItemHolder)holder;
             final PageListItem item = items[position];
             double ageDays = (System.currentTimeMillis() - item.tleDateMs) / Calculations.MsPerDay;
-            String dayText = Globals.getNumberString(ageDays, 1) + " " + res.getString(R.string.title_days);
+            String dayText = Globals.getNumberString(ageDays, 1) + " " + (res != null ? res.getString(R.string.title_days) : "");
 
             //set displays
             itemHolder.itemImage.setImageDrawable(item.icon);
@@ -423,7 +430,7 @@ public abstract class Orbitals
                         }
                     });
                     colorDialog.setIcon(item.icon);
-                    colorDialog.setTitle(res.getString(R.string.title_select) + " " + item.text + " " + res.getString(R.string.title_color));
+                    colorDialog.setTitle(res != null ? (res.getString(R.string.title_select) + " " + item.text + " " + res.getString(R.string.title_color)) : item.text);
                     colorDialog.show(currentContext);
                 }
             });

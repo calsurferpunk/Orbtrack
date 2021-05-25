@@ -1767,17 +1767,22 @@ public abstract class Settings
     //Gets given boolean preference
     public static boolean getPreferenceBoolean(Context context, String preferenceName, Object dependency)
     {
-        return(getReadSettings(context).getBoolean(preferenceName, getDefaultBooleanValue(preferenceName, dependency)));
+        boolean defaultValue = getDefaultBooleanValue(preferenceName, dependency);
+        return(context != null ? getReadSettings(context).getBoolean(preferenceName, defaultValue) : defaultValue);
     }
     public static boolean getPreferenceBoolean(Context context, String preferenceName)
     {
-        return(getReadSettings(context).getBoolean(preferenceName, getDefaultBooleanValue(preferenceName)));
+        boolean defaultValue = getDefaultBooleanValue(preferenceName);
+        return(context != null ? getReadSettings(context).getBoolean(preferenceName, defaultValue) : defaultValue);
     }
 
     //Sets given boolean preference
     private static void setPreferenceBoolean(Context context, String preferenceName, boolean value)
     {
-        getWriteSettings(context).putBoolean(preferenceName, value).apply();
+        if(context != null)
+        {
+            getWriteSettings(context).putBoolean(preferenceName, value).apply();
+        }
     }
 
     //Get default int value for the given preference
@@ -1845,13 +1850,17 @@ public abstract class Settings
     //Gets given int preference
     public static int getPreferenceInt(Context context, String preferenceName)
     {
-        return(getReadSettings(context).getInt(preferenceName, getDefaultIntValue(preferenceName)));
+        int defaultValue = getDefaultIntValue(preferenceName);
+        return(context != null ? getReadSettings(context).getInt(preferenceName, defaultValue) : defaultValue);
     }
 
     //Sets given int preference
     private static void setPreferenceInt(Context context, String preferenceName, int value)
     {
-        getWriteSettings(context).putInt(preferenceName, value).apply();
+        if(context != null)
+        {
+            getWriteSettings(context).putInt(preferenceName, value).apply();
+        }
     }
 
     //Get default long value for the given preference
@@ -1872,13 +1881,17 @@ public abstract class Settings
     //Gets given long preference
     public static long getPreferenceLong(Context context, String preferenceName)
     {
-        return(getReadSettings(context).getLong(preferenceName, getDefaultLongValue(preferenceName)));
+        long defaultValue = getDefaultLongValue(preferenceName);
+        return(context != null ? getReadSettings(context).getLong(preferenceName, defaultValue) : defaultValue);
     }
 
     //Sets given long preference
     private static void setPreferenceLong(Context context, String preferenceName, long value)
     {
-        getWriteSettings(context).putLong(preferenceName, value).apply();
+        if(context != null)
+        {
+            getWriteSettings(context).putLong(preferenceName, value).apply();
+        }
     }
 
     //Get default float value for the given preference
@@ -1919,13 +1932,17 @@ public abstract class Settings
     //Gets given float preference
     public static float getPreferenceFloat(Context context, String preferenceName)
     {
-        return(getReadSettings(context).getFloat(preferenceName, getDefaultFloatValue(preferenceName)));
+        float defaultValue = getDefaultFloatValue(preferenceName);
+        return(context != null ? getReadSettings(context).getFloat(preferenceName, defaultValue) : defaultValue);
     }
 
     //Sets given float preference
     private static void setPreferenceFloat(Context context, String preferenceName, float value)
     {
-        getWriteSettings(context).putFloat(preferenceName, value).apply();
+        if(context != null)
+        {
+            getWriteSettings(context).putFloat(preferenceName, value).apply();
+        }
     }
 
     //Gets default string value for the given preference
@@ -1942,13 +1959,17 @@ public abstract class Settings
     //Gets given string preference
     public static String getPreferenceString(Context context, String preferenceName)
     {
-        return(getReadSettings(context).getString(preferenceName, getDefaultStringValue(preferenceName)));
+        String defaultValue = getDefaultStringValue(preferenceName);
+        return(context != null ? getReadSettings(context).getString(preferenceName, defaultValue) : defaultValue);
     }
 
     //Sets given string preference
     private static void setPreferenceString(Context context, String preferenceName, String value)
     {
-        getWriteSettings(context).putString(preferenceName, value).apply();
+        if(context != null)
+        {
+            getWriteSettings(context).putString(preferenceName, value).apply();
+        }
     }
 
     //Gets if first run

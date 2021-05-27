@@ -4123,48 +4123,60 @@ public abstract class Current
             switch(page)
             {
                 case PageType.View:
-                    Arrays.sort(viewItems, new ViewAngles.Item.Comparer(sortBy));
-
-                    viewNoradIndex.clear();
-                    for(index = 0; index < viewItems.length; index++)
+                    if(viewItems != null)
                     {
-                        viewNoradIndex.add(new Items.NoradIndex(viewItems[index].satellite.getSatelliteNum(), index));
+                        Arrays.sort(viewItems, new ViewAngles.Item.Comparer(sortBy));
+
+                        viewNoradIndex.clear();
+                        for(index = 0; index < viewItems.length; index++)
+                        {
+                            viewNoradIndex.add(new Items.NoradIndex(viewItems[index].satellite.getSatelliteNum(), index));
+                        }
+                        Collections.sort(viewNoradIndex, new Items.NoradIndex.Comparer());
                     }
-                    Collections.sort(viewNoradIndex, new Items.NoradIndex.Comparer());
                     break;
 
                 case PageType.Passes:
-                    Arrays.sort(passItems, new Passes.Item.Comparer(sortBy));
-
-                    passNoradIndex.clear();
-                    for(index = 0; index < passItems.length; index++)
+                    if(passItems != null && passNoradIndex != null)
                     {
-                        passNoradIndex.add(new Items.NoradIndex(passItems[index].satellite.getSatelliteNum(), index));
+                        Arrays.sort(passItems, new Passes.Item.Comparer(sortBy));
+
+                        passNoradIndex.clear();
+                        for(index = 0; index < passItems.length; index++)
+                        {
+                            passNoradIndex.add(new Items.NoradIndex(passItems[index].satellite.getSatelliteNum(), index));
+                        }
+                        Collections.sort(passNoradIndex, new Items.NoradIndex.Comparer());
                     }
-                    Collections.sort(passNoradIndex, new Items.NoradIndex.Comparer());
                     break;
 
                 case PageType.Coordinates:
-                    Arrays.sort(coordinateItems, new Coordinates.Item.Comparer(sortBy));
-
-                    coordinateNoradIndex.clear();
-                    for(index = 0; index < coordinateItems.length; index++)
+                    if(combinedItems != null && coordinateNoradIndex != null)
                     {
-                        coordinateNoradIndex.add(new Items.NoradIndex(coordinateItems[index].satellite.getSatelliteNum(), index));
+                        Arrays.sort(coordinateItems, new Coordinates.Item.Comparer(sortBy));
+
+                        coordinateNoradIndex.clear();
+                        for(index = 0; index < coordinateItems.length; index++)
+                        {
+                            coordinateNoradIndex.add(new Items.NoradIndex(coordinateItems[index].satellite.getSatelliteNum(), index));
+                        }
+                        Collections.sort(coordinateNoradIndex, new Items.NoradIndex.Comparer());
                     }
-                    Collections.sort(coordinateNoradIndex, new Items.NoradIndex.Comparer());
                     break;
 
                 default:
                 case PageType.Combined:
-                    Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
-
-                    combinedNoradIndex.clear();
-                    for(index = 0; index < combinedItems.length; index++)
+                    if(combinedItems != null && combinedNoradIndex != null)
                     {
-                        combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                        Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
+
+                        combinedNoradIndex.clear();
+                        for(index = 0; index < combinedItems.length; index++)
+                        {
+                            combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                        }
+                        Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
                     }
-                    Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
                     break;
             }
         }

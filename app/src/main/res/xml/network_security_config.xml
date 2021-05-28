@@ -3,5 +3,13 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">tile.stamen.com</domain>
         <domain includeSubdomains="true">nikolaiapps.infinityfreeapp.com</domain>
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
     </domain-config>
+    <base-config>
+        <trust-anchors>
+            <certificates src="system"/>
+        </trust-anchors>
+    </base-config>
 </network-security-config>

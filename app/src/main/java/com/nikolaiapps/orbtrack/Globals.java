@@ -32,6 +32,9 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import androidx.annotation.NonNull;
+import com.franmontiel.persistentcookiejar.PersistentCookieJar;
+import com.franmontiel.persistentcookiejar.cache.SetCookieCache;
+import com.franmontiel.persistentcookiejar.persistence.SharedPrefsCookiePersistor;
 import com.google.android.gms.security.ProviderInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -81,15 +84,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PushbackInputStream;
 import java.math.BigDecimal;
-import java.net.CookieHandler;
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.URL;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -103,12 +101,21 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import okhttp3.CookieJar;
+import okhttp3.FormBody;
+import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 
 public abstract class Globals
@@ -355,10 +362,10 @@ public abstract class Globals
     public static class WebPageData
     {
         int responseCode;
-        HttpsURLConnection connection;
+        Response connection;
         String pageData;
 
-        public WebPageData(HttpsURLConnection https, String data, int rspCode)
+        public WebPageData(Response https, String data, int rspCode)
         {
             responseCode = rspCode;
             connection = https;
@@ -459,7 +466,7 @@ public abstract class Globals
             final String title = res.getString(forSpaceTrack && alwaysShow ? R.string.title_login : updateType == UpdateService.UpdateType.UpdateSatellites ? R.string.title_update : R.string.title_list_update);
             final String[] createLink = (forSpaceTrack ? new String[]{context.getResources().getString(R.string.spacetrack_create_link)} : null);
             //final String[] changeText = new String[]{context.getString(R.string.desc_change_source)};
-            final WebPageData loginData = (alwaysShow || !forSpaceTrack ? null : loginSpaceTrack(user, password));
+            final WebPageData loginData = (alwaysShow || !forSpaceTrack ? null : loginSpaceTrack(context, user, password));
 
             //not canceled yet
             canceled = false;
@@ -626,7 +633,7 @@ public abstract class Globals
                     }
 
                     //try up to 3 times to get section
-                    currentData = getWebPage(urlString, String.format(PostBody, outString.substring(currentIndex, breakIndex)), authToken, contentType, null, 1, 3);
+                    currentData = getWebPage(urlString, null, null, String.format(PostBody, outString.substring(currentIndex, breakIndex)), authToken, null, contentType, null, 1, 3);
                     fullData.responseCode = currentData.responseCode;
                     fullData.connection = currentData.connection;
 
@@ -659,7 +666,7 @@ public abstract class Globals
             else
             {
                 //try up to 3 times to get web page
-                fullData = getWebPage(urlString, String.format(PostBody, outString), authToken, contentType, null, 1, 3);
+                fullData = getWebPage(urlString, null, null, String.format(PostBody, outString), authToken, null, contentType, null, 1, 3);
             }
 
             //return data
@@ -4191,15 +4198,19 @@ public abstract class Globals
         char[] readBuffer = new char[WEB_READ_SIZE];
         StringBuilder streamString = new StringBuilder();
 
-        //while there is data to read
-        while((readCount = streamReader.read(readBuffer, 0, WEB_READ_SIZE)) > 0)
+        //if reader is set
+        if(streamReader != null)
         {
-            //add data
-            streamString.append((new String(readBuffer, 0, readCount)));
-            bytesReceived += readCount;
-            if(listener != null)
+            //while there is data to read
+            while((readCount = streamReader.read(readBuffer, 0, WEB_READ_SIZE)) > 0)
             {
-                listener.onProgressChanged(Globals.ProgressType.Success, null, bytesReceived, totalBytes);
+                //add data
+                streamString.append((new String(readBuffer, 0, readCount)));
+                bytesReceived += readCount;
+                if(listener != null)
+                {
+                    listener.onProgressChanged(Globals.ProgressType.Success, null, bytesReceived, totalBytes);
+                }
             }
         }
 
@@ -4215,17 +4226,22 @@ public abstract class Globals
     }
 
     //Tries to get a web page
-    private static WebPageData getWebPage(String urlString, String outString, String authToken, String contentType, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
+    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String postData, String authToken, CookieJar cookieJar, String contentType, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
     {
+        int index;
         int responseCode = -1;
         long totalBytes;
         String message;
         String pageString = "";
-        URL siteURL;
-        OutputStream outStream;
-        BufferedReader streamReader;
-        BufferedReader errorReader;
-        HttpsURLConnection siteHttpsConnection = null;
+        HttpUrl siteURL;
+        ResponseBody body;
+        OkHttpClient client;
+        OkHttpClient.Builder clientBuilder;
+        InputStream dataStream;
+        FormBody.Builder postBuilder;
+        BufferedReader streamReader = null;
+        Request.Builder siteRequestBuilder;
+        Response siteHttpsConnection = null;
 
         //if listener is set
         if(listener != null)
@@ -4237,34 +4253,52 @@ public abstract class Globals
         try
         {
             //set page
-            siteURL = new URL(urlString);
+            siteURL = HttpUrl.parse(urlString);
+            if(siteURL == null)
+            {
+                throw(new Exception("Could not parse url"));
+            }
 
             //get page
-            siteHttpsConnection = (HttpsURLConnection)siteURL.openConnection();
-            siteHttpsConnection.setSSLSocketFactory(new TLSSocketFactory());
-            siteHttpsConnection.setConnectTimeout(5000);
-            siteHttpsConnection.setReadTimeout(5000);
-            siteHttpsConnection.setRequestProperty("User-Agent", "Mozilla/5.0");
+            siteRequestBuilder = new Request.Builder().url(siteURL);
+            siteRequestBuilder.addHeader("User-Agent", "Mozilla/5.0");
             if(authToken != null)
             {
-                siteHttpsConnection.setRequestProperty("Ocp-Apim-Subscription-Key", authToken);
-                siteHttpsConnection.setRequestProperty("Content-Type", contentType);
+                siteRequestBuilder.addHeader("Ocp-Apim-Subscription-Key", authToken);
+                siteRequestBuilder.addHeader("Content-Type", contentType);
             }
-            if(outString != null)
+            if(postNames != null && postValues != null && postNames.length > 0 && postNames.length == postValues.length)
             {
-                siteHttpsConnection.setRequestMethod("POST");
-                siteHttpsConnection.setDoOutput(true);
-                siteHttpsConnection.setChunkedStreamingMode(0);
-                outStream = siteHttpsConnection.getOutputStream();
-                outStream.write(outString.getBytes());
-                outStream.flush();
-                outStream.close();
+                postBuilder = new FormBody.Builder();
+                for(index = 0; index < postNames.length; index++)
+                {
+                    postBuilder.add(postNames[index], postValues[index]);
+                }
+                siteRequestBuilder.post(postBuilder.build());
             }
-            responseCode = siteHttpsConnection.getResponseCode();
-            totalBytes = siteHttpsConnection.getContentLength();
+            if(postData != null)
+            {
+                siteRequestBuilder.post(RequestBody.create(MediaType.parse("text/x-markdown"), postData));
+            }
+            siteRequestBuilder.build();
+            clientBuilder = new OkHttpClient.Builder().writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS);
+            if(cookieJar != null)
+            {
+                clientBuilder.cookieJar(cookieJar);
+            }
+            client = clientBuilder.build();
+            siteHttpsConnection = client.newCall(siteRequestBuilder.build()).execute();
+            responseCode = siteHttpsConnection.code();
+            body = siteHttpsConnection.body();
+            if(body == null)
+            {
+                throw(new Exception("No data"));
+            }
+            dataStream = body.byteStream();
+            totalBytes = body.contentLength();
 
             //read web page
-            streamReader = new BufferedReader(new InputStreamReader(siteHttpsConnection.getInputStream()));
+            streamReader = new BufferedReader(new InputStreamReader(dataStream));
             pageString = readWebPage(streamReader, totalBytes, listener);
             streamReader.close();
 
@@ -4288,7 +4322,7 @@ public abstract class Globals
             if(retryCount < maxRetryCount)
             {
                 //try to get web page again
-                return(getWebPage(urlString, outString, authToken, contentType, listener, retryCount + 1, maxRetryCount));
+                return(getWebPage(urlString, postNames, postValues, postData, authToken, cookieJar, contentType, listener, retryCount + 1, maxRetryCount));
             }
             else
             {
@@ -4305,8 +4339,7 @@ public abstract class Globals
                     //try to get error
                     try
                     {
-                        errorReader = new BufferedReader(new InputStreamReader((siteHttpsConnection.getErrorStream())));
-                        pageString = readWebPage(errorReader, 0, null);
+                        pageString = siteHttpsConnection.message();
                     }
                     catch(Exception ex2)
                     {
@@ -4319,14 +4352,24 @@ public abstract class Globals
             }
         }
     }
-    private static WebPageData getWebPage(String urlString, String outString, String authToken, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
+    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String outString, String authToken, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
     {
-        return(getWebPage(urlString, outString, authToken, "text/xml; charset=utf-8", listener, retryCount, maxRetryCount));
+        return(getWebPage(urlString, postNames, postValues, outString, authToken, null, "text/xml; charset=utf-8", listener, retryCount, maxRetryCount));
+    }
+    public static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, CookieJar cookieJar)
+    {
+        //try up to 3 times to get web page
+        return(getWebPage(urlString, postNames, postValues, null, null, cookieJar, "text/xml; charset=utf-8", null, 1, 3));
+    }
+    public static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, Globals.OnProgressChangedListener listener)
+    {
+        //try up to 3 times to get web page
+        return(getWebPage(urlString, postNames, postValues, null, null, listener, 1, 3));
     }
     public static WebPageData getWebPage(String urlString, String outString, Globals.OnProgressChangedListener listener)
     {
         //try up to 3 times to get web page
-        return(getWebPage(urlString, outString, null, listener, 1, 3));
+        return(getWebPage(urlString, null, null, outString, null, listener, 1, 3));
     }
     public static String getWebPage(String urlString, boolean closeConnection, Globals.OnProgressChangedListener listener)
     {
@@ -4334,7 +4377,7 @@ public abstract class Globals
 
         if(closeConnection && webData.connection != null)
         {
-            webData.connection.disconnect();
+            webData.connection.close();
         }
 
         return(webData.pageData);
@@ -4370,11 +4413,11 @@ public abstract class Globals
     //Tries to get a JSON  web page
     public static JSONObject getJSONWebPage(String urlString)
     {
-        WebPageData webData = getWebPage(urlString, null, null, null, 0, 0);
+        WebPageData webData = getWebPage(urlString, null, null, null, null, null, 0, 0);
 
         if(webData.connection != null)
         {
-            webData.connection.disconnect();
+            webData.connection.close();
         }
 
         try
@@ -4388,9 +4431,10 @@ public abstract class Globals
     }
 
     //Tries to login to space-track
-    public static Globals.WebPageData loginSpaceTrack(String user, String pwd)
+    public static Globals.WebPageData loginSpaceTrack(Context context, String user, String pwd)
     {
-        CookieManager manager;
+        //CookieManager manager;
+        CookieJar manager;
 
         //if no user and/or password
         if(user == null || pwd == null || user.trim().length() == 0 || pwd.trim().length() == 0)
@@ -4401,12 +4445,13 @@ public abstract class Globals
         else
         {
             //accept all cookies
-            manager = new CookieManager();
+            manager = new PersistentCookieJar(new SetCookieCache(), new SharedPrefsCookiePersistor(context));
+            /*manager = new CookieManager();
             manager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
-            CookieHandler.setDefault(manager);
+            CookieHandler.setDefault(manager);*/
 
             //login to space track
-            return(Globals.getWebPage("https://www.space-track.org/ajaxauth/login", "identity=" + user + "&password=" + pwd, null));
+            return(Globals.getWebPage("https://www.space-track.org/ajaxauth/login", new String[]{"identity", "password"}, new String[]{user, pwd}, manager));
         }
     }
 
@@ -4443,7 +4488,7 @@ public abstract class Globals
     {
         String data;
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
-        WebPageData translatedData = Globals.getWebPage("https://nikolaiapps.infinityfreeapp.com/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null);
+        WebPageData translatedData = Globals.getWebPage("https://nikolaiapps.infinityfreeapp.com/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, (OnProgressChangedListener)null);
         JSONObject rootNode;
 
         //if got data and valid
@@ -4480,16 +4525,16 @@ public abstract class Globals
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
 
         //try to save without waiting for a response
-        Globals.getWebPage("https://nikolaiapps.infinityfreeapp.com/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, "data=" + text, null);
+        Globals.getWebPage("https://nikolaiapps.infinityfreeapp.com/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, new String[]{"data"}, new String[]{text}, (OnProgressChangedListener)null);
     }
 
     //Tries to logout of space track
     public static void logoutSpaceTrack(Globals.OnProgressChangedListener listener)
     {
-        Globals.WebPageData pageData = Globals.getWebPage("https://www.space-track.org/ajaxauth/logout", null, listener);
+        Globals.WebPageData pageData = Globals.getWebPage("https://www.space-track.org/ajaxauth/logout", null, null, listener);
         if(pageData.connection != null)
         {
-            pageData.connection.disconnect();
+            pageData.connection.close();
             pageData.connection = null;
         }
     }

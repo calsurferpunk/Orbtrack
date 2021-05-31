@@ -4205,9 +4205,8 @@ public abstract class Globals
             }
             if(postData != null)
             {
-                siteRequestBuilder.post(RequestBody.create(MediaType.parse("text/x-markdown"), postData));
+                siteRequestBuilder.post(RequestBody.create(MediaType.parse(contentType), postData));
             }
-            siteRequestBuilder.build();
             clientBuilder = new OkHttpClient.Builder().writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS);
             clientBuilder.cookieJar(cookies);
             client = clientBuilder.build();
@@ -4407,7 +4406,7 @@ public abstract class Globals
     {
         String data;
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
-        WebPageData translatedData = Globals.getWebPage("https://nikolaiapps.infinityfreeapp.com/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
+        WebPageData translatedData = Globals.getWebPage("http://nikolaiapps.infinityfreeapp.com/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
         JSONObject rootNode;
 
         //if got data and valid

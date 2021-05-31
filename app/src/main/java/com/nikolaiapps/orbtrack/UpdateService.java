@@ -1265,7 +1265,7 @@ public class UpdateService extends NotifyService
     }
 
     //Tries to get a space track web page
-    private Globals.WebPageData[] getSpaceTrackWebPages(Context context, String[] urlStrings, String[] sections, String user, String pwd, Globals.OnProgressChangedListener[] listeners)
+    private Globals.WebPageData[] getSpaceTrackWebPages(String[] urlStrings, String[] sections, String user, String pwd, Globals.OnProgressChangedListener[] listeners)
     {
         int index;
         boolean loginFailed;
@@ -1273,7 +1273,7 @@ public class UpdateService extends NotifyService
         Globals.WebPageData[] pages = new Globals.WebPageData[urlStrings.length];
 
         //login to space track
-        loginData = Globals.loginSpaceTrack(context, user, pwd);
+        loginData = Globals.loginSpaceTrack(user, pwd);
         loginFailed = loginData.isDenied() || !loginData.isLoginOkay();
 
         //go through each url while not cancelled
@@ -1614,7 +1614,7 @@ public class UpdateService extends NotifyService
         }
 
         //get pages
-        pages = getSpaceTrackWebPages(this, urls.toArray(new String[0]), sections.toArray(new String[0]), user, password, listeners.toArray(new Globals.OnProgressChangedListener[0]));
+        pages = getSpaceTrackWebPages(urls.toArray(new String[0]), sections.toArray(new String[0]), user, password, listeners.toArray(new Globals.OnProgressChangedListener[0]));
 
         //if logged in
         loginFailed = pages[0].isDenied();
@@ -2946,7 +2946,7 @@ public class UpdateService extends NotifyService
         if(updateSource == Database.UpdateSource.SpaceTrack)
         {
             //login to space track
-            loginData = Globals.loginSpaceTrack(this, user, pwd);
+            loginData = Globals.loginSpaceTrack(user, pwd);
             loginFailed = !loginData.isLoginOkay();
         }
 
@@ -3009,7 +3009,7 @@ public class UpdateService extends NotifyService
                     }
 
                     //try to get html page
-                    tleData = Globals.getWebPage(url.toString(), null, null);
+                    tleData = Globals.getWebPage(url.toString());
                     downloadError = !tleData.isOkay();
                     loginFailed = tleData.isDenied();
                     receivedPage = tleData.pageData;

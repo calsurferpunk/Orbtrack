@@ -81,5 +81,4 @@ dependencies {
 
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'
-    implementation 'com.github.franmontiel:PersistentCookieJar:v1.0.1'
 }

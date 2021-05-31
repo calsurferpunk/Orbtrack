@@ -185,7 +185,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             if(urlString != null)
             {
                 //try to get timezone data
-                tzData = Globals.getWebPage(urlString, null, null);
+                tzData = Globals.getWebPage(urlString);
 
                 //if data was received
                 if(tzData.gotData() && tzData.isOkay())
@@ -348,7 +348,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             if(urlString != null)
             {
                 //try to get altitude data
-                altData = Globals.getWebPage(urlString, null, null);
+                altData = Globals.getWebPage(urlString);
 
                 //if data was received
                 if(altData.gotData() && altData.isOkay())

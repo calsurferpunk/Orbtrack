@@ -96,14 +96,18 @@ public interface CoordinatesFragment
     {
         static class Shared
         {
+            double bearing;
             Database.SatelliteData data;
             Calculations.GeodeticDataType geo;
+            Calculations.GeodeticDataType lastGeo;
             final ArrayList<Coordinate> points;
 
             Shared()
             {
+                bearing = 0;
                 data = null;
                 geo = null;
+                lastGeo = null;
                 points = new ArrayList<>(0);
             }
         }

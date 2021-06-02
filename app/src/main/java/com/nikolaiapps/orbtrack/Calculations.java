@@ -2934,4 +2934,19 @@ public abstract class Calculations
 
         return(EarthRadiusKM * c);
     }
+
+    //Gets the bearing in degrees from 2 geodetic positions
+    public static double getBearing(GeodeticDataType start, GeodeticDataType end)
+    {
+        double startLat = Math.toRadians(start.latitude);
+        double startLon = Math.toRadians(start.longitude);
+        double endLat = Math.toRadians(end.latitude);
+        double endLon = Math.toRadians(end.longitude);
+        double deltaLon = endLon - startLon;
+        double x = Math.cos(endLat) * Math.sin(deltaLon);
+        double y = Math.cos(startLat) * Math.sin(endLat) - Math.sin(startLat) * Math.cos(endLat) * Math.cos(deltaLon);
+        double bearing = Math.atan2(x, y);
+
+        return(Math.toDegrees(bearing));
+    }
 }

@@ -165,6 +165,7 @@ class Whirly
         private double zValue;
         private final BaseController controller;
         private Bitmap boardImage;
+        private Bitmap boardImageOriginal;
         private final Billboard board;
         private final BillboardInfo boardInfo;
         private ScreenObject boardScreen;
@@ -185,6 +186,7 @@ class Whirly
             boardInfo = new BillboardInfo();
             boardScreen = new ScreenObject();
             boardImage = null;
+            boardImageOriginal = null;
             boardTexture = null;
             boardTextureSettings = new BaseController.TextureSettings();
             boardObject = null;
@@ -210,6 +212,7 @@ class Whirly
             this(boardController);
 
             copyFrom.remove();
+            boardImageOriginal = copyFrom.boardImageOriginal;
             board.setCenter(copyFrom.board.getCenter());
         }
 
@@ -219,34 +222,42 @@ class Whirly
             float height;
             float imageWidthScale;
 
-            offsetX *= markerScale;
-            offsetY *= markerScale;
-            baseScale *= markerScale;
-
-            if(boardTexture != null)
+            //if image is set
+            if(image != null)
             {
-                controller.removeTexture(boardTexture, BaseController.ThreadMode.ThreadAny);
-                boardTexture = null;
-            }
+                offsetX *= markerScale;
+                offsetY *= markerScale;
+                baseScale *= markerScale;
 
-            boardImage = image;
-            width = boardImage.getWidth();
-            height = boardImage.getHeight();
-            if(width < 1)
-            {
-                width = 1;
-            }
-            if(height < 1)
-            {
-                height = 1;
-            }
-            imageWidthScale = (width / height);
+                if(boardTexture != null)
+                {
+                    controller.removeTexture(boardTexture, BaseController.ThreadMode.ThreadAny);
+                    boardTexture = null;
+                }
 
-            boardTexture = controller.addTexture(boardImage, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
-            boardScreen = new ScreenObject();
-            boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
-            boardScreen.translateX(offsetX, offsetY);
-            board.setScreenObject(boardScreen);
+                boardImage = image;
+                if(boardImageOriginal == null)
+                {
+                    boardImageOriginal = image;
+                }
+                width = boardImage.getWidth();
+                height = boardImage.getHeight();
+                if(width < 1)
+                {
+                    width = 1;
+                }
+                if(height < 1)
+                {
+                    height = 1;
+                }
+                imageWidthScale = (width / height);
+
+                boardTexture = controller.addTexture(boardImage, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
+                boardScreen = new ScreenObject();
+                boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
+                boardScreen.translateX(offsetX, offsetY);
+                board.setScreenObject(boardScreen);
+            }
         }
         void setImage(Bitmap image, float markerScale)
         {
@@ -315,6 +326,7 @@ class Whirly
         private double flatScale;
         private double zoomScale;
         private double flatRotationRads;
+        private Bitmap originalImage;
         private Sticker flatSticker;
         private final StickerInfo flatInfo;
         private MaplyTexture flatTexture;
@@ -343,12 +355,18 @@ class Whirly
             flatList.add(flatSticker);
             flatScale = zoomScale = 1;
             flatRotationRads = 0;
+            originalImage = null;
 
             setVisible(true);
         }
 
         void setImage(Bitmap image)
         {
+            if(originalImage == null)
+            {
+                originalImage = image;
+            }
+
             if(flatTexture != null)
             {
                 controller.removeTexture(flatTexture, BaseController.ThreadMode.ThreadAny);
@@ -891,6 +909,7 @@ class Whirly
     {
         boolean alwaysShowTitle;
         private final boolean forMap;
+        private final int noradId;
         private boolean showShadow;
         private boolean showBackground;
         private boolean usingInfo;
@@ -898,6 +917,7 @@ class Whirly
         private boolean lastMoveWithinZoom;
         private float markerScale;
         private double lastMoveZoom;
+        private double orbitalRotation;
         private String lastInfo;
         private final Context currentContext;
         private final Shared common;
@@ -912,7 +932,6 @@ class Whirly
         OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
-            int noradId;
             String name;
             Bitmap titleImage;
             Bitmap orbitalImage;
@@ -966,7 +985,9 @@ class Whirly
                 infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
+            common.bearing = (noradId > 0 ? 225 : 0);
             common.geo = new Calculations.GeodeticDataType(0, 0, 0, 0, 0);
+            common.lastGeo = new Calculations.GeodeticDataType(common.geo);
 
             setVisible(false);
             setInfoVisible(false);
@@ -1023,6 +1044,8 @@ class Whirly
         @Override
         void setRotation(double rotationRads)
         {
+            orbitalRotation = Math.toDegrees(rotationRads);
+
             if(!forMap && showShadow && orbitalShadow != null)
             {
                 orbitalShadow.setRotation(rotationRads);
@@ -1252,9 +1275,36 @@ class Whirly
         public void moveLocation(double latitude, double longitude, double altitudeKm)
         {
             boolean withinZoom;
+            boolean updateBearing;
             double currentZoom;
+            double bearing;
+            double bearingDelta;
+            Bitmap bearingImage;
 
+            //remember last and current location
+            common.lastGeo = new Calculations.GeodeticDataType(common.geo);
             common.geo = new Calculations.GeodeticDataType(latitude, longitude, altitudeKm, 0, 0);
+
+            //if can use bearing
+            if(noradId > 0)
+            {
+                //get bearing and delta
+                bearing = Calculations.getBearing(common.lastGeo, common.geo);
+                bearingDelta = Globals.degreeDistance(common.bearing, bearing);
+            }
+            else
+            {
+                //don't use
+                bearing = bearingDelta = 0;
+            }
+
+            //update bearing if enough to see
+            updateBearing = (Math.abs(bearingDelta) >= 2);
+            if(updateBearing)
+            {
+                //update value
+                common.bearing = bearing;
+            }
 
             if(forMap)
             {
@@ -1263,6 +1313,15 @@ class Whirly
             }
             else
             {
+                //if updating bearing and image is set
+                if(updateBearing && orbitalBoard.boardImage != null)
+                {
+                    //rotate image and recreate board
+                    bearingImage = Globals.getBitmapRotated(orbitalBoard.boardImageOriginal, bearing + 135 + orbitalRotation);
+                    orbitalBoard = new Board(controller, orbitalBoard);
+                    orbitalBoard.setImage(bearingImage, 1);
+                }
+
                 //move orbital
                 orbitalBoard.moveLocation(latitude, longitude, altitudeKm, true);
 
@@ -1273,6 +1332,13 @@ class Whirly
                 //if showing shadow
                 if(showShadow && orbitalShadow != null)
                 {
+                    //if updating bearing and image is set
+                    if(updateBearing && orbitalShadow.originalImage != null)
+                    {
+                        //rotate image
+                        orbitalShadow.setImage(Globals.getBitmapRotated(orbitalShadow.originalImage, bearing + 135));
+                    }
+
                     //move shadow
                     orbitalShadow.setZoomScale(currentZoom);
                     orbitalShadow.moveLocation(latitude, longitude);

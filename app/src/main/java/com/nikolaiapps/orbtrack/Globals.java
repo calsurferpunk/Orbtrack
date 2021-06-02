@@ -20,6 +20,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
@@ -2714,6 +2715,14 @@ public abstract class Globals
     public static Bitmap getBitmap(Context context, int resId, boolean useThemeTint)
     {
         return(getBitmap(getDrawable(context, resId, useThemeTint)));
+    }
+
+    //Gets rotated version of given bitmap
+    public static Bitmap getBitmapRotated(Bitmap image, double rotateDegrees)
+    {
+        Matrix rotateMatrix = new Matrix();
+        rotateMatrix.postRotate((float)rotateDegrees);
+        return(image != null ? Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), rotateMatrix, true) : null);
     }
 
     //Gets an orbital icon ID

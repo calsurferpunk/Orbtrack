@@ -1749,7 +1749,6 @@ public abstract class Settings
             case PreferenceName.ShareTranslations:
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
-            case PreferenceName.TLEAutoUpdate:
             case PreferenceName.TranslateInformation:
             case PreferenceName.UseCombinedCurrentLayout:
                 return(true);

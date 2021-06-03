@@ -252,12 +252,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //if showing setup
                         if(showSetup)
                         {
-                            //if TLE auto switch exists and is checked
-                            if(tleAutoSwitch != null && tleAutoSwitch.isChecked())
+                            //if TLE auto switch exists
+                            if(tleAutoSwitch != null)
                             {
-                                //set checked state to reverse then back to apply updates
-                                tleAutoSwitch.setChecked(false);
+                                //set to checked and call change listener
                                 tleAutoSwitch.setChecked(true);
+                                tleAutoSwitch.getOnPreferenceChangeListener().onPreferenceChange(tleAutoSwitch, true);
                             }
                         }
                         break;
@@ -1467,6 +1467,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
                 break;
         }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

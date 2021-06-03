@@ -78,6 +78,7 @@ public interface CoordinatesFragment
 
         abstract int getNoradId();
         abstract void setImage(Bitmap image);
+        abstract void setRotation(double rotation);
         abstract void setTitle(String title);
         abstract void setText(String text);
         abstract void setScale(float markerScaling);

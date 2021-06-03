@@ -710,6 +710,7 @@ class Whirly
                 marker.size = new Point2d(markerBaseSizeValue * markerScale, markerBaseSizeValue * markerScale);
                 marker.userObject = noradId;
                 marker.selectable = true;
+                marker.rotation = Math.toRadians(noradId > 0 && noradId != Universe.IDs.CurrentLocation ? 135 : 0);
                 markerObj = null;
 
                 showInfo = false;
@@ -747,6 +748,12 @@ class Whirly
             markerObj = controller.addScreenMarker(marker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
 
             add();
+        }
+
+        @Override
+        void setRotation(double rotation)
+        {
+            marker.rotation = Math.toRadians(360 - rotation);
         }
 
         @Override
@@ -918,6 +925,7 @@ class Whirly
         private float markerScale;
         private double lastMoveZoom;
         private double orbitalRotation;
+        private double lastOrbitalRotation;
         private String lastInfo;
         private final Context currentContext;
         private final Shared common;
@@ -948,7 +956,7 @@ class Whirly
             showingInfo = false;
             lastMoveWithinZoom = false;
             markerScale = markerScaling;
-            lastMoveZoom = 0;
+            orbitalRotation = lastMoveZoom = lastOrbitalRotation = 0;
             lastInfo = null;
             common.data = newSat;
             orbitalShadow = null;
@@ -1298,8 +1306,8 @@ class Whirly
                 bearing = bearingDelta = 0;
             }
 
-            //update bearing if enough to see
-            updateBearing = (Math.abs(bearingDelta) >= 2);
+            //update bearing if enough to see or rotation changed
+            updateBearing = (Math.abs(bearingDelta) >= 2 || orbitalRotation != lastOrbitalRotation);
             if(updateBearing)
             {
                 //update value
@@ -1309,6 +1317,7 @@ class Whirly
             if(forMap)
             {
                 //move orbital
+                orbitalMarker.setRotation(bearing + 135);
                 orbitalMarker.moveLocation(latitude, longitude, altitudeKm);
             }
             else
@@ -1356,6 +1365,9 @@ class Whirly
                 lastMoveZoom = currentZoom;
                 lastMoveWithinZoom = withinZoom;
             }
+
+            //update last rotation
+            lastOrbitalRotation = orbitalRotation;
         }
 
         @Override

@@ -163,6 +163,7 @@ public interface CoordinatesFragment
         private boolean showShadow;
         private boolean showBackground;
         private boolean showTitlesAlways;
+        private boolean showOrbitalDirection;
         private long lastSelectEventDateMs;
         private float markerScale;
         private OnReadyListener readyListener;
@@ -182,7 +183,7 @@ public interface CoordinatesFragment
         {
             infoLocation = MapMarkerInfoLocation.ScreenBottom;
             showBackground = false;
-            showShadow = showTitlesAlways = true;
+            showShadow = showTitlesAlways = showOrbitalDirection = true;
             lastSelectEventDateMs = 0;
             markerScale = 0.75f;
             readyListener = null;
@@ -368,7 +369,6 @@ public interface CoordinatesFragment
             return(showBackground);
         }
 
-
         void setShowShadow(boolean show)
         {
             showShadow = show;
@@ -384,6 +384,16 @@ public interface CoordinatesFragment
         boolean getShowShadow()
         {
             return(showShadow);
+        }
+
+        void setShowOrbitalDirection(boolean show)
+        {
+            showOrbitalDirection = show;
+        }
+
+        boolean getShowOrbitalDirection()
+        {
+            return(showOrbitalDirection);
         }
 
         void setMarkerScale(float markerScaling)
@@ -759,6 +769,7 @@ public interface CoordinatesFragment
     void setMarkerScale(float markerScaling);
     void setMarkerShowBackground(boolean show);
     void setMarkerShowShadow(boolean show);
+    void setShowOrbitalDirection(boolean show);
     void setShowTitlesAlways(boolean show);
     void setStarsEnabled(boolean enabled);
     void setSensitivityScale(float sensitivityScaling);

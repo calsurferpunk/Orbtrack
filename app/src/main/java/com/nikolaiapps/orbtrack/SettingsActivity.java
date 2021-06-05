@@ -169,6 +169,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
                         SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
                         SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
+                        SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
                         SwitchPreference showSearchSwitch = this.findPreference(Settings.PreferenceName.MapShowSearchList);
                         SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
                         SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
@@ -192,6 +193,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(showCloudsMapSwitch, null);
                         setupSwitch(show3dPathsSwitch, null);
                         setupSwitch(allowRotationSwitch, null);
+                        setupSwitch(showOrbitalDirection, null);
                         setupSwitch(showInformationBackgroundSwitch, null);
                         setupSwitch(showSearchSwitch, null);
                         setupSwitch(showZoomSwitch, null);
@@ -1201,6 +1203,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowSearchList:
                         case Settings.PreferenceName.MapShowZoom:
                         case Settings.PreferenceName.MapShowLabelsAlways:
+                        case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapShowStars:
                         case Settings.PreferenceName.MapShowGrid:

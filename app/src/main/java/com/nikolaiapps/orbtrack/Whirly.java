@@ -921,6 +921,7 @@ class Whirly
         private boolean showBackground;
         private boolean usingInfo;
         private boolean showingInfo;
+        private boolean showingDirection;
         private boolean lastMoveWithinZoom;
         private float markerScale;
         private double lastMoveZoom;
@@ -937,7 +938,7 @@ class Whirly
         private InfoImageCreator infoCreator;
         private final BaseController controller;
 
-        OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
+        OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
             String name;
@@ -951,6 +952,7 @@ class Whirly
             forMap = (controller instanceof MapController);
             showShadow = usingShadow;
             showBackground = usingBackground;
+            showingDirection = usingDirection;
             alwaysShowTitle = startWithTitleShown;
             usingInfo = (infoLocation == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
             showingInfo = false;
@@ -1294,7 +1296,7 @@ class Whirly
             common.geo = new Calculations.GeodeticDataType(latitude, longitude, altitudeKm, 0, 0);
 
             //if can use bearing
-            if(noradId > 0)
+            if(showingDirection && noradId > 0)
             {
                 //get bearing and delta
                 bearing = Calculations.getBearing(common.lastGeo, common.geo);
@@ -1306,8 +1308,8 @@ class Whirly
                 bearing = bearingDelta = 0;
             }
 
-            //update bearing if enough to see or rotation changed
-            updateBearing = (Math.abs(bearingDelta) >= 2 || orbitalRotation != lastOrbitalRotation);
+            //update bearing if using and -enough to see or rotation changed-
+            updateBearing = showingDirection && (Math.abs(bearingDelta) >= 2 || orbitalRotation != lastOrbitalRotation);
             if(updateBearing)
             {
                 //update value
@@ -1316,9 +1318,13 @@ class Whirly
 
             if(forMap)
             {
-                //move orbital
-                orbitalMarker.setRotation(bearing + 135);
-                orbitalMarker.moveLocation(latitude, longitude, altitudeKm);
+                //if updating bearing
+                if(updateBearing)
+                {
+                    //move orbital
+                    orbitalMarker.setRotation(bearing + 135);
+                    orbitalMarker.moveLocation(latitude, longitude, altitudeKm);
+                }
             }
             else
             {
@@ -1550,6 +1556,9 @@ class Whirly
             //set sensitivity and speed scale
             setSensitivityScale(Settings.getMapSensitivityScale(activity, !forMap));
             setSpeedScale(Settings.getMapSpeedScale(activity, !forMap));
+
+            //set if showing orbital direction
+            setShowOrbitalDirection(Settings.getMapShowOrbitalDirection(activity));
 
             //set if tilt allowed
             setRotateAllowed(Settings.getMapRotateAllowed(activity));
@@ -2063,6 +2072,12 @@ class Whirly
         }
 
         @Override
+        public void setShowOrbitalDirection(boolean show)
+        {
+            common.setShowOrbitalDirection(show);
+        }
+
+        @Override
         public void setShowTitlesAlways(boolean show)
         {
             common.setShowTitlesAlways(show);
@@ -2137,7 +2152,7 @@ class Whirly
         @Override
         public OrbitalObject addOrbital(Context context, Database.SatelliteData newSat, Calculations.ObserverType observerLocation)
         {
-            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), newSat, observerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
+            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), newSat, observerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowOrbitalDirection(), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
 
             if(newObject != null)
             {

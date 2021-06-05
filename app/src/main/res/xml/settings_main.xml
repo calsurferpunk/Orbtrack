@@ -218,6 +218,12 @@
                     app:scaleType="Percent"/>
 
                 <SwitchPreference
+                    android:title="@string/title_show_orbital_direction"
+                    android:key="MapShowOrbitalDirection"
+                    android:summary="@string/desc_show_orbital_direction"
+                    android:persistent="false"/>
+
+                <SwitchPreference
                     android:title="@string/title_show_search"
                     android:key="MapShowSearchList"
                     android:summary="@string/desc_show_search"

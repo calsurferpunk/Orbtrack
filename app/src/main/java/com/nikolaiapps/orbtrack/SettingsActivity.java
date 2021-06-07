@@ -166,6 +166,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case ScreenKey.MapView:
                         SwitchPreference showCloudsGlobeSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Globe);
                         SwitchPreference showCloudsMapSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Map);
+                        SwitchPreference showSunlightSwitch = this.findPreference(Settings.PreferenceName.MapShowSunlight);
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
                         SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
                         SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
@@ -192,6 +193,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(showCloudsGlobeSwitch, null);
                         setupSwitch(showCloudsMapSwitch, null);
                         setupSwitch(show3dPathsSwitch, null);
+                        setupSwitch(showSunlightSwitch, null);
                         setupSwitch(allowRotationSwitch, null);
                         setupSwitch(showOrbitalDirection, null);
                         setupSwitch(showInformationBackgroundSwitch, null);
@@ -1206,6 +1208,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapShowStars:
+                        case Settings.PreferenceName.MapShowSunlight:
                         case Settings.PreferenceName.MapShowGrid:
                         case Settings.PreferenceName.MapGridColor:
                         case Settings.PreferenceName.MapMarkerScale:

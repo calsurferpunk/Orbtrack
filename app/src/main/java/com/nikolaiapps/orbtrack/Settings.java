@@ -75,6 +75,7 @@ public abstract class Settings
         static final String MapMarkerInfoLocation = "MapMarkerInfoLocation";
         static final String MapMarkerShowBackground = "MapMarkerShowBackground";
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
+        static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
         static final String MapShowSearchList = "MapShowSearchList";
         static final String UseCombinedCurrentLayout = "UseCombinedCurrentLayout";
@@ -1746,6 +1747,7 @@ public abstract class Settings
             case PreferenceName.MapShowLabelsAlways:
             case PreferenceName.MapShowOrbitalDirection:
             case PreferenceName.MapShowStars:
+            case PreferenceName.MapShowSunlight:
             case PreferenceName.MapShowSearchList:
             case PreferenceName.MetricUnits:
             case PreferenceName.ShareTranslations:
@@ -2347,6 +2349,18 @@ public abstract class Settings
     public static void setMapShowSearchList(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.MapShowSearchList, show);
+    }
+
+    //Returns map showing sunlight
+    public static boolean getMapShowSunlight(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapShowSunlight));
+    }
+
+    //Sets map showing sunlight
+    public static void setMapShowSunlight(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.MapShowSunlight, show);
     }
 
     //Returns map showing orbital direction

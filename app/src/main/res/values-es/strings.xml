@@ -509,6 +509,7 @@
     <string name="title_show_search">Mostrar Búsqueda</string>
     <string name="title_show_shadows">Mostrar Sombras</string>
     <string name="title_show_stars">Mostrar Estrellas</string>
+    <string name="title_show_sunlight">Mostrar Luz Sol</string>
     <string name="title_show_zoom">Mostrar Enfocar</string>
     <string name="title_skip">Omitir</string>
     <string name="title_slow">Lento</string>

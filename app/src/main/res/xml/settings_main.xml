@@ -145,6 +145,11 @@
                     android:persistent="false"/>
 
                 <SwitchPreference
+                    android:title="@string/title_show_sunlight"
+                    android:key="MapShowSunlight"
+                    android:persistent="false"/>
+
+                <SwitchPreference
                     android:title="@string/title_show_3d_paths"
                     android:key="MapShow3dPaths"
                     android:persistent="false"/>

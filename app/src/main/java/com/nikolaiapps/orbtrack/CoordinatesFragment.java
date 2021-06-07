@@ -161,6 +161,7 @@ public interface CoordinatesFragment
     {
         private int infoLocation;
         private boolean showShadow;
+        private boolean showSunlight;
         private boolean showBackground;
         private boolean showTitlesAlways;
         private boolean showOrbitalDirection;
@@ -183,7 +184,7 @@ public interface CoordinatesFragment
         {
             infoLocation = MapMarkerInfoLocation.ScreenBottom;
             showBackground = false;
-            showShadow = showTitlesAlways = showOrbitalDirection = true;
+            showShadow = showSunlight = showTitlesAlways = showOrbitalDirection = true;
             lastSelectEventDateMs = 0;
             markerScale = 0.75f;
             readyListener = null;
@@ -384,6 +385,16 @@ public interface CoordinatesFragment
         boolean getShowShadow()
         {
             return(showShadow);
+        }
+
+        void setShowSunlight(boolean show)
+        {
+            showSunlight = show;
+        }
+
+        boolean getShowSunlight()
+        {
+            return(showSunlight);
         }
 
         void setShowOrbitalDirection(boolean show)
@@ -769,6 +780,7 @@ public interface CoordinatesFragment
     void setMarkerScale(float markerScaling);
     void setMarkerShowBackground(boolean show);
     void setMarkerShowShadow(boolean show);
+    void setShowSunlight(boolean show);
     void setShowOrbitalDirection(boolean show);
     void setShowTitlesAlways(boolean show);
     void setStarsEnabled(boolean enabled);

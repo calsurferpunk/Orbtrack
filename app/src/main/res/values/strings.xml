@@ -509,6 +509,7 @@
     <string name="title_show_search">Show Search</string>
     <string name="title_show_shadows">Show Shadows</string>
     <string name="title_show_stars">Show Stars</string>
+    <string name="title_show_sunlight">Show Sunlight</string>
     <string name="title_show_zoom">Show Zoom</string>
     <string name="title_skip">Skip</string>
     <string name="title_slow">Slow</string>

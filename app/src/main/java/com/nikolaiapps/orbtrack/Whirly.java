@@ -19,6 +19,7 @@ import com.mousebird.maply.BillboardInfo;
 import com.mousebird.maply.ComponentObject;
 import com.mousebird.maply.GlobeController;
 import com.mousebird.maply.GlobeMapFragment;
+import com.mousebird.maply.Light;
 import com.mousebird.maply.MapController;
 import com.mousebird.maply.BaseController;
 import com.mousebird.maply.MaplyStarModel;
@@ -921,7 +922,7 @@ class Whirly
         private boolean showBackground;
         private boolean usingInfo;
         private boolean showingInfo;
-        private boolean showingDirection;
+        private final boolean showingDirection;
         private boolean lastMoveWithinZoom;
         private float markerScale;
         private double lastMoveZoom;
@@ -1504,6 +1505,9 @@ class Whirly
             }
             mapLayerType = args.getInt(ParamTypes.MapLayerType, MapLayerType.Normal);
 
+            //set if showing sunlight
+            setShowSunlight(Settings.getMapShowSunlight(activity));
+
             //get if preview
             switch(mapLayerType)
             {
@@ -1522,7 +1526,7 @@ class Whirly
             }
 
             //setup base layers
-            addLayer(mapLayerType, !forPreview);
+            addLayer(mapLayerType, !forPreview, !forPreview && common.getShowSunlight());
 
             //set control
             if(forMap)
@@ -1732,12 +1736,14 @@ class Whirly
             return(tileParams);
         }
 
-        private void addLayer(int mapLayerType, boolean addAtmosphere)
+        private void addLayer(int mapLayerType, boolean addAtmosphere, boolean addSunlight)
         {
             int index;
             int maxZoom;
             String name;
             Activity activity = this.getActivity();
+            Light sunLight;
+            Point3d sunDirection;
             Atmosphere atmosphere;
             ArrayList<Integer> drawPriorities = new ArrayList<>(0);
             ArrayList<String> cacheDirNames = new ArrayList<>(0);
@@ -1746,14 +1752,34 @@ class Whirly
             //if activity is set
             if(activity != null)
             {
-                //if adding atmosphere and not a map
-                if(addAtmosphere && !isMap() )
+                //if not a map and adding atmosphere or sunlight
+                if(!isMap() && (addAtmosphere || addSunlight))
                 {
-                    //create atmosphere
-                    atmosphere = new Atmosphere(globeControl, BaseController.ThreadMode.ThreadAny);
-                    atmosphere.seteSun(10f);
-                    atmosphere.setWaveLength(0.65f, 0.57f, 0.475f);
-                    atmosphere.setSunPosition((new com.mousebird.maply.Sun(new Date())).getDirection());
+                    //get sun direction
+                    sunDirection = (new com.mousebird.maply.Sun(new Date())).getDirection();
+
+                    //if adding atmosphere
+                    if(addAtmosphere)
+                    {
+                        //create atmosphere
+                        atmosphere = new Atmosphere(globeControl, BaseController.ThreadMode.ThreadAny);
+                        atmosphere.seteSun(10f);
+                        atmosphere.setWaveLength(0.65f, 0.57f, 0.475f);
+                        atmosphere.setSunPosition(sunDirection);
+                    }
+
+                    //if adding sunlight
+                    if(addSunlight)
+                    {
+                        //create sunlight
+                        sunLight = new Light();
+                        sunLight.setPos(new Point3d(sunDirection.getX(), sunDirection.getZ(), sunDirection.getY()));
+                        sunLight.setAmbient(0.4f, 0.4f, 0.4f, 0.7f);
+                        sunLight.setDiffuse(0.8f, 0.8f, 0.8f, 1f);
+                        sunLight.setViewDependent(true);
+                        globeControl.clearLights();
+                        globeControl.addLight(sunLight);
+                    }
                 }
 
                 //get layer
@@ -1877,11 +1903,6 @@ class Whirly
                 }
             }
         }
-
-        /*public void updateAtmosphere(double sunLatitude, double sunLongitude, double sunAltitudeKm)
-        {
-            atmosphere.setSunPosition(new Point3d(Math.toRadians(sunLongitude), Math.toRadians(sunLatitude), sunAltitudeKm * 1000));
-        }*/
 
         @Override
         public void setStarsEnabled(boolean enabled)
@@ -2069,6 +2090,12 @@ class Whirly
         public void setMarkerShowShadow(boolean show)
         {
             common.setShowShadow(show);
+        }
+
+        @Override
+        public void setShowSunlight(boolean show)
+        {
+            common.setShowSunlight(show);
         }
 
         @Override

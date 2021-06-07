@@ -3114,6 +3114,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_mex;
                     break;
 
+                case "mmr":
+                    ids[0] = R.drawable.owner_mmr;
+                    break;
+
                 case "mng":
                     ids[0] = R.drawable.owner_mng;
                     break;
@@ -3183,6 +3187,10 @@ public abstract class Globals
                     ids = new int[2];
                     ids[0] = R.drawable.owner_prc;
                     ids[1] = R.drawable.owner_esa;
+                    break;
+
+                case "pry":
+                    ids[0] = R.drawable.owner_pry;
                     break;
 
                 case "qat":
@@ -3278,6 +3286,10 @@ public abstract class Globals
                     ids = new int[2];
                     ids[0] = R.drawable.owner_tm;
                     ids[1] = R.drawable.owner_mc;
+                    break;
+
+                case "tun":
+                    ids[0] = R.drawable.owner_tun;
                     break;
 
                 case "turk":

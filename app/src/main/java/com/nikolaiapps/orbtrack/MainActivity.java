@@ -2555,12 +2555,13 @@ public class MainActivity extends AppCompatActivity
             protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
             {
                 int page = getMainPage();
+                boolean onOrbitalsSatellites = (mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites);
 
                 //if button exists and --on current- or -on orbitals and satellite page--
-                if(mainFloatingButton != null && (mainGroup == Groups.Current || (mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)))
+                if(mainFloatingButton != null && (mainGroup == Groups.Current || onOrbitalsSatellites))
                 {
                     //update visibility
-                    Globals.setVisible(mainFloatingButton, ended);
+                    Globals.setVisible(mainFloatingButton, ended && onOrbitalsSatellites);
 
                     //if done and -loaded file or running in background-
                     if(ended && (updateType == UpdateService.UpdateType.LoadFile || UpdateService.getNotificationVisible(updateType)))

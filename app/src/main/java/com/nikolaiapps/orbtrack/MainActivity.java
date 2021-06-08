@@ -84,6 +84,7 @@ public class MainActivity extends AppCompatActivity
     private static boolean wasRecreated = false;
     private static boolean runningUserSetup = false;
     private static boolean recreateAfterSetup = false;
+    private static boolean pendingOldSatelliteMessage = false;
     private boolean savedState;
     private boolean finishedSetup;
     private Bundle calculateBundle;
@@ -1353,7 +1354,7 @@ public class MainActivity extends AppCompatActivity
             DatabaseManager.handleUpdates(this);
 
             //load orbitals
-            loadOrbitals(this);
+            loadOrbitals(this, mainDrawerLayout);
 
             //update timer delays
             updateTimerDelays();
@@ -1376,9 +1377,12 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Loads currently selected orbitals
-    public static void loadOrbitals(Context context)
+    public static void loadOrbitals(Context context, View parentView)
     {
         int index;
+        Resources res = (context != null ? context.getResources() : null);
+        StringBuilder oldMessage;
+        ArrayList<String> oldNames = new ArrayList<>(0);
         Database.DatabaseSatellite[] dbSatellites;
 
         //load selected orbitals
@@ -1386,7 +1390,37 @@ public class MainActivity extends AppCompatActivity
         currentSatellites = new Database.SatelliteData[dbSatellites.length];
         for(index = 0; index < dbSatellites.length; index++)
         {
-            currentSatellites[index] = new Database.SatelliteData(dbSatellites[index]);
+            Database.DatabaseSatellite currentSatellite = dbSatellites[index];
+            currentSatellites[index] = new Database.SatelliteData(currentSatellite);
+            if(!currentSatellite.tleIsAccurate)
+            {
+                oldNames.add(currentSatellite.getName());
+            }
+        }
+
+        //if there are old satellites, parent view exists, and resources exist
+        if(oldNames.size() > 0 && parentView != null && res != null)
+        {
+            //set message
+            oldMessage = new StringBuilder();
+            for(String currentName : oldNames)
+            {
+                oldMessage.append(currentName);
+                oldMessage.append("\r\n");
+            }
+            oldMessage.append("\r\n");
+            oldMessage.append(res.getString(R.string.desc_need_updating));
+
+            //show old satellite count
+            pendingOldSatelliteMessage = true;
+            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_old, oldNames.size()), oldMessage.toString(), true, true, new DialogInterface.OnDismissListener()
+            {
+                @Override
+                public void onDismiss(DialogInterface dialog)
+                {
+                    pendingOldSatelliteMessage = false;
+                }
+            });
         }
     }
 
@@ -1434,7 +1468,7 @@ public class MainActivity extends AppCompatActivity
         //if need to reload orbitals
         if(reloadOrbitals)
         {
-            loadOrbitals(this);
+            loadOrbitals(this, mainDrawerLayout);
         }
 
         //update pager
@@ -1630,7 +1664,7 @@ public class MainActivity extends AppCompatActivity
     private void loadObserver(boolean showStatus)
     {
         //load the most recent location and allow an update
-        updateObserver(getSelectedLocation(), true, showStatus);
+        updateObserver(getSelectedLocation(), true, showStatus && !pendingOldSatelliteMessage);
     }
     private void loadObserver()
     {
@@ -1638,7 +1672,7 @@ public class MainActivity extends AppCompatActivity
         boolean haveLocation = selectedLocation.isValid();
 
         //load most recent location and only update/show status if update is needed
-        updateObserver(selectedLocation, !haveLocation, !haveLocation);
+        updateObserver(selectedLocation, !haveLocation, !haveLocation && !pendingOldSatelliteMessage);
     }
 
     //Sets save file data
@@ -2421,7 +2455,7 @@ public class MainActivity extends AppCompatActivity
             protected void onGotLocation(Context context, ObserverType updatedObserver)
             {
                 boolean updated = (updatedObserver != null && (observer == null || observer.notEqual(updatedObserver)));
-                boolean showStatus = (pendingLocationUpdate && updated);
+                boolean showStatus = (pendingLocationUpdate && updated && !pendingOldSatelliteMessage);
                 boolean usingCurrent = (locationSource == Database.LocationType.Current);
 
                 //if pending location update or using current location

@@ -896,7 +896,7 @@ public abstract class Globals
     }
 
     //Shows a snack bar
-    public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView)
+    public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView, DialogInterface.OnDismissListener listener)
     {
         //if parent view is not set
         if(parentView == null)
@@ -937,6 +937,11 @@ public abstract class Globals
                         @Override
                         public void onDismiss(DialogInterface dialogInterface)
                         {
+                            if(listener != null)
+                            {
+                                listener.onDismiss(dialogInterface);
+                            }
+
                             if(!closeOnView)
                             {
                                 snackView.show();
@@ -949,6 +954,10 @@ public abstract class Globals
 
         //show view
         snackView.show();
+    }
+    public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView)
+    {
+        showSnackBar(parentView, message, detailMessage, isError, closeOnView, null);
     }
     public static void showSnackBar(View parentView, String message, boolean isError)
     {

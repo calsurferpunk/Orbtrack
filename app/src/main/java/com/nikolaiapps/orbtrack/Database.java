@@ -581,6 +581,7 @@ public class Database extends SQLiteOpenHelper
         public final long launchDateMs;
         public int pathColor;
         public final byte orbitalType;
+        public final boolean tleIsAccurate;
         public final boolean isSelected;
         public static final Creator<DatabaseSatellite> CREATOR =  new Parcelable.Creator<DatabaseSatellite>()
         {
@@ -633,6 +634,8 @@ public class Database extends SQLiteOpenHelper
             {
                 tleDateMs = Globals.julianDateToCalendar(tle.epochJulian).getTimeInMillis();
             }
+
+            tleIsAccurate = ((System.currentTimeMillis() - tleDateMs) / Calculations.MsPerDay) <= 365;
         }
         public DatabaseSatellite(String nm, int nrd, String ownCd, long launchDate, byte orbType)
         {

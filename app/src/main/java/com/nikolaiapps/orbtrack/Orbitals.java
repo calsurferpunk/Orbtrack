@@ -445,7 +445,7 @@ public abstract class Orbitals
                     Database.saveSatellite(currentContext, item.id, item.isVisible);
 
                     //update current usage
-                    MainActivity.loadOrbitals(currentContext);
+                    MainActivity.loadOrbitals(currentContext, holder.itemView);
                 }
             });
 

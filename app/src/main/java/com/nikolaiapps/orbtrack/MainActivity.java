@@ -1272,6 +1272,26 @@ public class MainActivity extends AppCompatActivity
         return(currentSatellites);
     }
 
+    //Returns current old satellites
+    private static ArrayList<Database.DatabaseSatellite> getOldSatellites()
+    {
+        ArrayList<Database.DatabaseSatellite> oldSatellites = new ArrayList<>(0);
+
+        //go through current satellites
+        for(Database.SatelliteData currentData : currentSatellites)
+        {
+            //if current data TLE is not accurate
+            if(currentData.database != null && !currentData.database.tleIsAccurate)
+            {
+                //add to list
+                oldSatellites.add(currentData.database);
+            }
+        }
+
+        //return list
+        return(oldSatellites);
+    }
+
     //Handles any needed first run
     private void handleFirstRun(Bundle savedInstanceState)
     {
@@ -1347,14 +1367,14 @@ public class MainActivity extends AppCompatActivity
             //setup location retrieving
             locationReceiver = createLocationReceiver(locationReceiver);
 
-            //get observer
-            loadObserver(!savedState);
-
             //handle any updates
             DatabaseManager.handleUpdates(this);
 
             //load orbitals
             loadOrbitals(this, mainDrawerLayout);
+
+            //get observer
+            loadObserver(!savedState);
 
             //update timer delays
             updateTimerDelays();
@@ -1380,9 +1400,10 @@ public class MainActivity extends AppCompatActivity
     public static void loadOrbitals(Context context, View parentView)
     {
         int index;
+        int oldSatelliteCount;
         Resources res = (context != null ? context.getResources() : null);
         StringBuilder oldMessage;
-        ArrayList<String> oldNames = new ArrayList<>(0);
+        ArrayList<Database.DatabaseSatellite> oldSatellites;
         Database.DatabaseSatellite[] dbSatellites;
 
         //load selected orbitals
@@ -1392,20 +1413,20 @@ public class MainActivity extends AppCompatActivity
         {
             Database.DatabaseSatellite currentSatellite = dbSatellites[index];
             currentSatellites[index] = new Database.SatelliteData(currentSatellite);
-            if(!currentSatellite.tleIsAccurate)
-            {
-                oldNames.add(currentSatellite.getName());
-            }
         }
 
+        //get old satellites
+        oldSatellites = getOldSatellites();
+        oldSatelliteCount = oldSatellites.size();
+
         //if there are old satellites, parent view exists, and resources exist
-        if(oldNames.size() > 0 && parentView != null && res != null)
+        if(oldSatelliteCount > 0 && parentView != null && res != null)
         {
             //set message
             oldMessage = new StringBuilder();
-            for(String currentName : oldNames)
+            for(Database.DatabaseSatellite currentSatellite : oldSatellites)
             {
-                oldMessage.append(currentName);
+                oldMessage.append(currentSatellite.getName());
                 oldMessage.append("\r\n");
             }
             oldMessage.append("\r\n");
@@ -1413,7 +1434,14 @@ public class MainActivity extends AppCompatActivity
 
             //show old satellite count
             pendingOldSatelliteMessage = true;
-            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_old, oldNames.size()), oldMessage.toString(), true, true, new DialogInterface.OnDismissListener()
+            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_old, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_later, new DialogInterface.OnClickListener()
+            {
+                @Override
+                public void onClick(DialogInterface dialog, int which)
+                {
+                    updateSatellites(context, oldSatellites);
+                }
+            }, new DialogInterface.OnDismissListener()
             {
                 @Override
                 public void onDismiss(DialogInterface dialog)
@@ -1421,6 +1449,17 @@ public class MainActivity extends AppCompatActivity
                     pendingOldSatelliteMessage = false;
                 }
             });
+        }
+    }
+
+    //Tries to update given satellites
+    private static void updateSatellites(Context context, ArrayList<Database.DatabaseSatellite> satellites)
+    {
+        //if context is set
+        if(context != null)
+        {
+            //update old satellites
+            UpdateService.updateSatellites(context, context.getResources().getQuantityString(R.plurals.title_satellites_updating, satellites.size()), satellites, false);
         }
     }
 
@@ -2181,7 +2220,6 @@ public class MainActivity extends AppCompatActivity
                 case Groups.Orbitals:
                     items.add(new Item(res.getString(R.string.title_add) + " " + res.getQuantityString(R.plurals.title_satellites, 1), Globals.getDrawable(this, R.drawable.ic_add_white, true)));
                     break;
-
             }
 
             //if there are items
@@ -2500,6 +2538,9 @@ public class MainActivity extends AppCompatActivity
     //Creates an update receiver
     private UpdateReceiver createUpdateReceiver(UpdateReceiver oldReceiver)
     {
+        Resources res = this.getResources();
+        MultiProgressDialog taskProgress = Globals.createProgressDialog(this);
+
         //if old receiver is set
         if(oldReceiver != null)
         {
@@ -2560,6 +2601,26 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
+            protected void onProgress(long updateValue, long updateCount)
+            {
+                //if have resources
+                if(res != null)
+                {
+                    //if on the first value
+                    if(updateValue == 1)
+                    {
+                        //start showing progress
+                        Globals.setUpdateDialog(taskProgress, res.getString(R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, (int)updateCount), UpdateService.UpdateType.UpdateSatellites);
+                        taskProgress.show();
+                    }
+
+                    //update progress
+                    taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount);
+                    taskProgress.setProgress(updateValue, updateCount);
+                }
+            }
+
+            @Override
             protected void onGotInformation(Spanned infoText, int index)
             {
                 int page = getMainPage();
@@ -2589,19 +2650,62 @@ public class MainActivity extends AppCompatActivity
             protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
             {
                 int page = getMainPage();
+                boolean loadingFile = (updateType == UpdateService.UpdateType.LoadFile);
+                boolean updatingSatellites = (updateType == UpdateService.UpdateType.UpdateSatellites);
                 boolean onOrbitalsSatellites = (mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites);
 
-                //if button exists and --on current- or -on orbitals and satellite page--
-                if(mainFloatingButton != null && (mainGroup == Groups.Current || onOrbitalsSatellites))
+                //if -on current- or -on orbitals and satellite page-
+                if((mainGroup == Groups.Current || onOrbitalsSatellites))
                 {
-                    //update visibility
-                    Globals.setVisible(mainFloatingButton, ended && onOrbitalsSatellites);
+                    //if button exists
+                    if(mainFloatingButton != null)
+                    {
+                        //update visibility
+                        Globals.setVisible(mainFloatingButton, ended && onOrbitalsSatellites);
+                    }
 
-                    //if done and -loaded file or running in background-
-                    if(ended && (updateType == UpdateService.UpdateType.LoadFile || UpdateService.getNotificationVisible(updateType)))
+                    //if done and -loaded file, updated satellites, or running in background-
+                    if(ended && (loadingFile || updatingSatellites || UpdateService.getNotificationVisible(updateType)))
                     {
                         //update list
                         updateMainPager(true);
+                    }
+                }
+
+                //if updating old satellites
+                if(updatingSatellites)
+                {
+                    //if ended
+                    if(ended)
+                    {
+                        try
+                        {
+                            //try to close progress
+                            taskProgress.dismiss();
+                        }
+                        catch(Exception ex)
+                        {
+                            //do nothing
+                        }
+                    }
+
+                    //if denied
+                    if(progressType == Globals.ProgressType.Denied)
+                    {
+                        //show login
+                        Globals.showAccountLogin(MainActivity.this, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
+                        {
+                            @Override
+                            public void onResult(Globals.WebPageData pageData, boolean success)
+                            {
+                                //if success or attempted to login
+                                if(success || pageData != null)
+                                {
+                                    //try again
+                                    updateSatellites(MainActivity.this, getOldSatellites());
+                                }
+                            }
+                        });
                     }
                 }
 

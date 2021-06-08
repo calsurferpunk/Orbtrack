@@ -896,7 +896,7 @@ public abstract class Globals
     }
 
     //Shows a snack bar
-    public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView, DialogInterface.OnDismissListener listener)
+    public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView, int positiveTextId, int negativeTextId, DialogInterface.OnClickListener positiveListener, DialogInterface.OnDismissListener dismissListener)
     {
         //if parent view is not set
         if(parentView == null)
@@ -932,14 +932,14 @@ public abstract class Globals
                 @Override
                 public void onClick(View view)
                 {
-                    showConfirmDialog(context, icon, message, detailMessage, res.getString(R.string.title_ok), null, true, null, null, new DialogInterface.OnDismissListener()
+                    showConfirmDialog(context, icon, message, detailMessage, res.getString(positiveTextId), (negativeTextId != -1 ? res.getString(negativeTextId) : null), true, positiveListener, null, new DialogInterface.OnDismissListener()
                     {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface)
                         {
-                            if(listener != null)
+                            if(dismissListener != null)
                             {
-                                listener.onDismiss(dialogInterface);
+                                dismissListener.onDismiss(dialogInterface);
                             }
 
                             if(!closeOnView)
@@ -957,7 +957,7 @@ public abstract class Globals
     }
     public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView)
     {
-        showSnackBar(parentView, message, detailMessage, isError, closeOnView, null);
+        showSnackBar(parentView, message, detailMessage, isError, closeOnView, R.string.title_ok, -1, null, null);
     }
     public static void showSnackBar(View parentView, String message, boolean isError)
     {

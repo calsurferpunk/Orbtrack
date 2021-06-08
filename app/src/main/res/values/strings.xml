@@ -363,6 +363,7 @@
     <string name="title_last_2_digits_of_year">Last 2 Digits of Year</string>
     <string name="title_last_plural">Last</string>
     <string name="title_last_quarter">Last Quarter</string>
+    <string name="title_later">Later</string>
     <string name="title_latitude">Latitude</string>
     <string name="title_latitude_north_south">Latitude (N+/S-)</string>
     <string name="title_launch_date">Launch Date</string>

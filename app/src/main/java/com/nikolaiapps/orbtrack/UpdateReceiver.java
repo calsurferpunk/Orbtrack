@@ -43,6 +43,12 @@ public abstract class UpdateReceiver extends BroadcastReceiver
         //needs to be overridden
     }
 
+    //On progress
+    protected void onProgress(long updateValue, long updateCount)
+    {
+        //needs to be overridden
+    }
+
     //On got information
     protected void onGotInformation(Spanned infoText, int index)
     {
@@ -58,13 +64,21 @@ public abstract class UpdateReceiver extends BroadcastReceiver
     //Register receiver
     public void register(Context context)
     {
-        LocalBroadcastManager.getInstance(context).registerReceiver(this, new IntentFilter(UpdateService.UPDATE_FILTER));
+        //if context is set
+        if(context != null)
+        {
+            LocalBroadcastManager.getInstance(context).registerReceiver(this, new IntentFilter(UpdateService.UPDATE_FILTER));
+        }
     }
 
     //Unregister receiver
     public void unregister(Context context)
     {
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+        //if context is set
+        if(context != null)
+        {
+            LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+        }
     }
 
     @Override
@@ -88,6 +102,14 @@ public abstract class UpdateReceiver extends BroadcastReceiver
         switch(progressType)
         {
             case Globals.ProgressType.Started:
+                //if updating satellites and have a valid index/count
+                if(updateType == UpdateService.UpdateType.UpdateSatellites && index >= 0 && index < count)
+                {
+                    //call on progress
+                    onProgress(index + 1, count);
+                }
+                //fall through
+
             case Globals.ProgressType.Finished:
             case Globals.ProgressType.Cancelled:
             case Globals.ProgressType.Denied:
@@ -144,6 +166,7 @@ public abstract class UpdateReceiver extends BroadcastReceiver
 
                         case UpdateService.UpdateType.UpdateSatellites:
                         case UpdateService.UpdateType.GetMasterList:
+                            //call on general update
                             onGeneralUpdate(progressType, updateType, ended);
                             break;
                     }

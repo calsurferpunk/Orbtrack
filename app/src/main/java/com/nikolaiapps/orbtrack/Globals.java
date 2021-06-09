@@ -1921,6 +1921,16 @@ public abstract class Globals
         return(res.getString(R.string.title_time_until));
     }
 
+    //Gets if TLE data is accurate
+    public static boolean getTLEIsAccurate(long tleDateMs)
+    {
+        return(((System.currentTimeMillis() - tleDateMs) / Calculations.MsPerDay) <= 365);
+    }
+    public static boolean getTLEIsAccurate(Calculations.TLEDataType tle)
+    {
+        return(tle != null && getTLEIsAccurate(Globals.julianDateToCalendar(tle.epochJulian).getTimeInMillis()));
+    }
+
     //Gets the language from the given context
     public static String getLanguage(Context context)
     {

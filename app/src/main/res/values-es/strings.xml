@@ -49,9 +49,9 @@
         <item quantity="one">Agregó %d Satélite</item>
         <item quantity="other">Agregaron %d Satélites</item>
     </plurals>
-    <plurals name="title_satellites_old">
-        <item quantity="one">Un Satélite Es Demasiado Antiguo</item>
-        <item quantity="other">%d Satélites Son Demasiado Antiguos</item>
+    <plurals name="title_satellites_outdated">
+        <item quantity="one">Un Satélite Está Desactualizado</item>
+        <item quantity="other">%d Satélites Están Desactualizados</item>
     </plurals>
     <plurals name="title_satellites_saved">
         <item quantity="one">Guardado %d Satélite</item>
@@ -200,6 +200,7 @@
     <string name="text_not_found">Extraviado</string>
     <string name="text_old">viejo</string>
     <string name="text_old_file_delete_failed">Error al borrar el archivo viejo</string>
+    <string name="text_outdated">Anticuado</string>
     <string name="text_please_wait">Por favor espera</string>
     <string name="text_press_back_again_exit">Presione de nuevo para salir</string>
     <string name="text_read_inputs_error">Error al Leer Entradas</string>

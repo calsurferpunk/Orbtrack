@@ -77,6 +77,7 @@ public abstract class Current
         static final String Satellite = "satellite";
         static final String Illumination = "illum";
         static final String PhaseName = "pn";
+        static final String TLEIsAccurate = "tleAc";
     }
 
     public static class Items
@@ -529,6 +530,7 @@ public abstract class Current
         //Item
         public static class Item extends CalculateService.PassData
         {
+            public boolean tleIsAccurate;
             public float azimuth;
             public float elevation;
             public float rangeKm;
@@ -616,11 +618,13 @@ public abstract class Current
                 if(currentSatellite != null)
                 {
                     id = currentSatellite.getSatelliteNum();
-                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, currentSatellite.database.orbitalType);
+                    orbitalType = orbital2Type = (currentSatellite.database != null ? currentSatellite.database.orbitalType : Database.OrbitalType.Satellite);
+                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, orbitalType);
                     name = currentSatellite.getName();
-                    orbitalType = orbital2Type = currentSatellite.database.orbitalType;
                     satellite = currentSatellite.satellite;
                 }
+
+                tleIsAccurate = (currentSatellite != null && currentSatellite.database != null && currentSatellite.database.tleIsAccurate);
             }
 
             public void setLoading(boolean loading)
@@ -660,7 +664,12 @@ public abstract class Current
 
                 if(nameText != null)
                 {
-                    nameText.setText(name);
+                    text = name;
+                    if(!tleIsAccurate)
+                    {
+                        text += (" (" + res.getString(R.string.text_outdated) + ")");
+                    }
+                    nameText.setText(text);
                 }
 
                 if(azImage != null)
@@ -717,7 +726,7 @@ public abstract class Current
 
                 if(startText != null)
                 {
-                    startText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false, true));
+                    startText.setText(inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false, true));
                 }
 
                 if(durationText != null)
@@ -810,7 +819,9 @@ public abstract class Current
             {
                 Item currentItem = combinedItems.getCombinedItem(position);
                 View itemView = holder.itemView;
+                LinearLayout dataLayout;
 
+                dataLayout = itemView.findViewById(R.id.Combined_Item_Data_Layout);
                 currentItem.azImage = itemView.findViewById(R.id.Combined_Item_Az_Image);
                 currentItem.azText = itemView.findViewById(R.id.Combined_Item_Az_Text);
                 currentItem.elText = itemView.findViewById(R.id.Combined_Item_El_Text);
@@ -832,7 +843,11 @@ public abstract class Current
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);
                 currentItem.longitudeText = itemView.findViewById(R.id.Combined_Item_Longitude_Text);
 
-                currentItem.setLoading(!currentItem.passCalculateFinished);
+                if(dataLayout != null)
+                {
+                    dataLayout.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.INVISIBLE);
+                }
+                currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext, currentZone);
             }
 
@@ -840,6 +855,13 @@ public abstract class Current
             protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
             {
                 final Item currentItem = (Item)item;
+
+                //if TLE is not accurate
+                if(!currentItem.tleIsAccurate)
+                {
+                    //stop
+                    return;
+                }
 
                 final TimeZone defaultZone = TimeZone.getDefault();
                 final int mapDisplayType = Settings.getMapDisplayType(currentContext);
@@ -1331,6 +1353,7 @@ public abstract class Current
         public static class Item extends CalculateViewsTask.ViewItemBase
         {
             private String name;
+            public boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
             public Drawable icon;
@@ -1351,7 +1374,7 @@ public abstract class Current
                         bundle = new Bundle();
                     }
 
-                    return(new Item(itemBase.listIndex, itemBase.azimuth, itemBase.elevation, itemBase.rangeKm, bundle.getDouble("jd"), bundle.getString("zone"), bundle.getLong("ms")));
+                    return(new Item(itemBase.listIndex, itemBase.azimuth, itemBase.elevation, itemBase.rangeKm, bundle.getDouble("jd"), bundle.getString("zone"), bundle.getLong("ms"), bundle.getBoolean("tleAc")));
                 }
 
                 @Override
@@ -1391,7 +1414,7 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite)
+            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, boolean tleAccurate)
             {
                 super(index);
                 icon = icn;
@@ -1403,17 +1426,19 @@ public abstract class Current
                 {
                     id = currentSatellite.getSatelliteNum();
                 }
+                tleIsAccurate = tleAccurate;
             }
-            public Item(int index, float az, float el, float range, double jd, String zone, long ms)
+            public Item(int index, float az, float el, float range, double jd, String zone, long ms, boolean tleAccurate)
             {
                 super(index, az, el, range);
                 julianDate = jd;
                 time = Globals.getCalendar(zone, ms);
                 timeText = null;
+                tleIsAccurate = tleAccurate;
             }
             public Item(int index, boolean loading)
             {
-                this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, null, 0);
+                this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, null, 0, false);
                 isLoading = loading;
             }
 
@@ -1428,6 +1453,7 @@ public abstract class Current
                     bundle.putDouble("jd", julianDate);
                     bundle.putString("zone", time.getTimeZone().getID());
                     bundle.putLong("ms", time.getTimeInMillis());
+                    bundle.putBoolean("tleAc", tleIsAccurate);
 
                     dest.writeBundle(bundle);
                 }
@@ -1502,7 +1528,8 @@ public abstract class Current
                 viewItems.set(new Item[satellites.length]);
                 for(index = 0; index < satellites.length; index++)
                 {
-                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), satellites[index].getSatelliteNum(), satellites[index].getOrbitalType()), satellites[index].getName(""), satellites[index].satellite));
+                    Database.SatelliteData currentSatellite = satellites[index];
+                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.satellite, (currentSatellite.database != null && currentSatellite.database.tleIsAccurate)));
                 }
                 viewItems.sort(Settings.getCurrentSortBy(currentContext, PageType.View));
 
@@ -1777,6 +1804,7 @@ public abstract class Current
             private Drawable icon;
 
             public boolean isLoading;
+            public boolean tleIsAccurate;
             public boolean allowDayAbbrev;
             public View timeStartUnder;
             public View elMaxUnder;
@@ -1801,7 +1829,7 @@ public abstract class Current
                         bundle = new Bundle();
                     }
 
-                    return(new Item(bundle.getInt(ParamTypes.ID), bundle.getDouble(ParamTypes.AzimuthStart), bundle.getDouble(ParamTypes.AzimuthEnd), bundle.getDouble(ParamTypes.AzimuthTravel), bundle.getDouble(ParamTypes.ElevationMax), bundle.getDouble(ParamTypes.ClosestAzimuth), bundle.getDouble(ParamTypes.ClosestElevation), bundle.getBoolean(ParamTypes.Calculating), bundle.getBoolean(ParamTypes.FoundPass), bundle.getBoolean(ParamTypes.FinishedCalculating), bundle.getBoolean(ParamTypes.FoundPassStart), bundle.getBoolean(ParamTypes.PathProgress), bundle.getString(ParamTypes.ZoneStart), bundle.getLong(ParamTypes.TimeStart), bundle.getString(ParamTypes.ZoneEnd), bundle.getLong(ParamTypes.TimeEnd), bundle.getString(ParamTypes.Duration), bundle.getParcelableArray(ParamTypes.Views), bundle.getParcelableArray(ParamTypes.Views2), bundle.getParcelable(ParamTypes.Satellite), bundle.getDouble(ParamTypes.Illumination), bundle.getString(ParamTypes.PhaseName)));
+                    return(new Item(bundle.getInt(ParamTypes.ID), bundle.getDouble(ParamTypes.AzimuthStart), bundle.getDouble(ParamTypes.AzimuthEnd), bundle.getDouble(ParamTypes.AzimuthTravel), bundle.getDouble(ParamTypes.ElevationMax), bundle.getDouble(ParamTypes.ClosestAzimuth), bundle.getDouble(ParamTypes.ClosestElevation), bundle.getBoolean(ParamTypes.Calculating), bundle.getBoolean(ParamTypes.FoundPass), bundle.getBoolean(ParamTypes.FinishedCalculating), bundle.getBoolean(ParamTypes.FoundPassStart), bundle.getBoolean(ParamTypes.PathProgress), bundle.getString(ParamTypes.ZoneStart), bundle.getLong(ParamTypes.TimeStart), bundle.getString(ParamTypes.ZoneEnd), bundle.getLong(ParamTypes.TimeEnd), bundle.getString(ParamTypes.Duration), bundle.getParcelableArray(ParamTypes.Views), bundle.getParcelableArray(ParamTypes.Views2), bundle.getParcelable(ParamTypes.Satellite), bundle.getDouble(ParamTypes.Illumination), bundle.getString(ParamTypes.PhaseName), bundle.getBoolean(ParamTypes.TLEIsAccurate)));
                 }
 
                 @Override
@@ -1841,7 +1869,7 @@ public abstract class Current
                 }
             }
 
-            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illum, String pn)
+            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illum, String pn, boolean tleAccurate)
             {
                 super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, sat2, illum, pn);
                 isLoading = false;
@@ -1858,23 +1886,25 @@ public abstract class Current
                 timeDurationText = null;
                 elMaxText = null;
                 elMaxUnder = null;
+                tleIsAccurate = tleAccurate;
             }
-            public Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illum, String pn)
+            public Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illum, String pn, boolean tleAccurate)
             {
-                this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, null, illum, pn);
+                this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, null, illum, pn, tleAccurate);
             }
             public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathProgress, boolean loading)
             {
-                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null);
+                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null, false);
                 isLoading = loading;
 
                 if(currentSatellite != null)
                 {
                     id = currentSatellite.getSatelliteNum();
-                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, currentSatellite.database.orbitalType);
+                    orbitalType = orbital2Type = (currentSatellite.database != null ? currentSatellite.database.orbitalType : Database.OrbitalType.Satellite);
+                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, orbitalType);
                     name = currentSatellite.getName();
-                    orbitalType = orbital2Type = currentSatellite.database.orbitalType;
                     satellite = currentSatellite.satellite;
+                    tleIsAccurate = (currentSatellite.database != null && currentSatellite.database.tleIsAccurate);
                 }
                 if(currentSatellite2 != null)
                 {
@@ -1896,7 +1926,7 @@ public abstract class Current
             }
             public Item(CalculateService.PassData passData)
             {
-                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName);
+                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
                 name = passData.name;
                 orbitalType = passData.orbitalType;
                 orbital2Type = passData.orbital2Type;
@@ -1937,6 +1967,7 @@ public abstract class Current
                 bundle.putParcelable(ParamTypes.Satellite, satellite);
                 bundle.putDouble(ParamTypes.Illumination, illumination);
                 bundle.putString(ParamTypes.PhaseName, phaseName);
+                bundle.putBoolean(ParamTypes.TLEIsAccurate, tleIsAccurate);
 
                 dest.writeBundle(bundle);
             }
@@ -2506,7 +2537,6 @@ public abstract class Current
         private static boolean showTitlesAlways = true;
         private static FloatingActionStateButtonMenu settingsMenu = null;
         private static CoordinatesFragment.OrbitalBase moonMarker = null;
-        //private static NightShadow nightArea;
 
         public static boolean showPaths = false;
         public static TextView mapInfoText;
@@ -2518,6 +2548,7 @@ public abstract class Current
         {
             private String name;
 
+            public boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
             public Drawable icon;
@@ -2539,7 +2570,7 @@ public abstract class Current
                         bundle = new Bundle();
                     }
 
-                    return(new Item(itemBase.listIndex, itemBase.latitude, itemBase.longitude, itemBase.altitudeKm, bundle.getDouble("jd")));
+                    return(new Item(itemBase.listIndex, itemBase.latitude, itemBase.longitude, itemBase.altitudeKm, bundle.getDouble("jd"), bundle.getBoolean("tleAc")));
                 }
 
                 @Override
@@ -2579,7 +2610,7 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite)
+            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, boolean tleAccurate)
             {
                 super(index);
                 icon = icn;
@@ -2592,17 +2623,19 @@ public abstract class Current
                 {
                     id = satellite.getSatelliteNum();
                 }
+                tleIsAccurate = tleAccurate;
             }
-            public Item(int index, float lat, float lon, float alt, double jd)
+            public Item(int index, float lat, float lon, float alt, double jd, boolean tleAccurate)
             {
                 super(index, lat, lon, alt);
                 julianDate = jd;
                 time = Globals.julianDateToCalendar(julianDate);
                 timeText = null;
+                tleIsAccurate = false;
             }
             public Item(int index)
             {
-                this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE);
+                this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, false);
             }
 
             @Override
@@ -2617,6 +2650,7 @@ public abstract class Current
 
                     dest.writeBundle(bundle);
                 }
+                bundle.putBoolean("tleAc", tleIsAccurate);
             }
 
             public boolean haveGeo()
@@ -2699,7 +2733,8 @@ public abstract class Current
                 coordinateItems.set(new Item[satellites.length]);
                 for(index = 0; index < satellites.length; index++)
                 {
-                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, satellites[index].getSatelliteNum(), satellites[index].getOrbitalType()), satellites[index].getName(""), satellites[index].satellite));
+                    Database.SatelliteData currentSatellite = satellites[index];
+                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.satellite, (currentSatellite.database != null && currentSatellite.database.tleIsAccurate)));
                 }
                 coordinateItems.sort(Settings.getCurrentSortBy(currentContext, PageType.Coordinates));
 
@@ -4151,7 +4186,7 @@ public abstract class Current
                     break;
 
                 case PageType.Coordinates:
-                    if(combinedItems != null && coordinateNoradIndex != null)
+                    if(coordinateItems != null && coordinateNoradIndex != null)
                     {
                         Arrays.sort(coordinateItems, new Coordinates.Item.Comparer(sortBy));
 

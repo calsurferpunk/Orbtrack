@@ -1434,7 +1434,7 @@ public class MainActivity extends AppCompatActivity
 
             //show old satellite count
             pendingOldSatelliteMessage = true;
-            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_old, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_later, new DialogInterface.OnClickListener()
+            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_outdated, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_later, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
@@ -3809,92 +3809,210 @@ public class MainActivity extends AppCompatActivity
                     //go through each satellite
                     for(index = 0; index < currentSatellites.length; index++)
                     {
-                        //get current satellite, location, and look angle
-                        boolean changedEnough = false;
-                        double illumination = 0;
-                        String phaseName = null;
-                        SatelliteObjectType currentOrbital = currentSatellites[index].satellite;
-                        currentNoradId = currentOrbital.getSatelliteNum();
-                        currentOrbital = Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
-                        topoData = Calculations.getLookAngles(observer, currentOrbital, true);
+                        //get current orbital data
+                        Database.SatelliteData currentOrbitalData = currentSatellites[index];
 
-                        //if the moon
-                        if(currentNoradId == Universe.IDs.Moon)
+                        //if current orbital has data and TLE is accurate
+                        if(currentOrbitalData.database != null && currentOrbitalData.database.tleIsAccurate)
                         {
-                            //get phase and name
-                            phase = Universe.Moon.getPhase(System.currentTimeMillis());
-                            illumination = Universe.Moon.getIllumination(phase);
-                            phaseName = Universe.Moon.getPhaseName(MainActivity.this, phase);
-                        }
-                        //else if the sun
-                        else if(currentNoradId == Universe.IDs.Sun)
-                        {
-                            //if have last elevation
-                            if(sunLastEl.value != Double.MAX_VALUE)
+                            //get current satellite, location, and look angle
+                            boolean changedEnough = false;
+                            double illumination = 0;
+                            String phaseName = null;
+                            SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
+
+                            currentNoradId = currentOrbital.getSatelliteNum();
+                            currentOrbital = Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
+                            topoData = Calculations.getLookAngles(observer, currentOrbital, true);
+
+                            //if the moon
+                            if(currentNoradId == Universe.IDs.Moon)
                             {
-                                //if changed enough
-                                changedEnough = (Math.abs(topoData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
-                                if(changedEnough)
+                                //get phase and name
+                                phase = Universe.Moon.getPhase(System.currentTimeMillis());
+                                illumination = Universe.Moon.getIllumination(phase);
+                                phaseName = Universe.Moon.getPhaseName(MainActivity.this, phase);
+                            }
+                            //else if the sun
+                            else if(currentNoradId == Universe.IDs.Sun)
+                            {
+                                //if have last elevation
+                                if(sunLastEl.value != Double.MAX_VALUE)
                                 {
-                                    //get phase name
-                                    phaseName = Universe.Sun.getPhaseName(MainActivity.this, topoData.elevation, (topoData.elevation > sunLastEl.value));
+                                    //if changed enough
+                                    changedEnough = (Math.abs(topoData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
+                                    if(changedEnough)
+                                    {
+                                        //get phase name
+                                        phaseName = Universe.Sun.getPhaseName(MainActivity.this, topoData.elevation, (topoData.elevation > sunLastEl.value));
+                                    }
+                                }
+
+                                //if -had no last elevation- or -changed enough-
+                                if(sunLastEl.value == Double.MAX_VALUE || changedEnough)
+                                {
+                                    //update last elevation
+                                    sunLastEl.value = topoData.elevation;
                                 }
                             }
 
-                            //if -had no last elevation- or -changed enough-
-                            if(sunLastEl.value == Double.MAX_VALUE || changedEnough)
+                            //if not a satellite
+                            if(currentNoradId <= 0)
                             {
-                                //update last elevation
-                                sunLastEl.value = topoData.elevation;
-                            }
-                        }
+                                //if first run
+                                if(firstRun.value)
+                                {
+                                    //set saved geo
+                                    currentOrbital.savedGeo = new GeodeticDataType(currentOrbital.geo);
+                                }
 
-                        //if not a satellite
-                        if(currentNoradId <= 0)
-                        {
-                            //if first run
-                            if(firstRun.value)
+                                //if enough time has passed
+                                if(updateElapsed)
+                                {
+                                    //update speed and saved geo
+                                    currentOrbital.geo.speedKmS = Calculations.getDistanceKm(currentOrbital.savedGeo, currentOrbital.geo) / travelSeconds;
+                                    currentOrbital.savedGeo = new GeodeticDataType(currentOrbital.geo);
+                                }
+                            }
+
+                            //if not using all satellites and satellite number matches
+                            if(((onView || onCombined) && !allViewOrbitals && currentNoradId == viewLensNoradID) || (onPasses && !allPassesOrbitals && currentNoradId == passesLensNoradID))
                             {
-                                //set saved geo
-                                currentOrbital.savedGeo = new GeodeticDataType(currentOrbital.geo);
+                                //set array with current satellite
+                                selectedSatellites = new Database.SatelliteData[currentSatellites.length];
+                                selectedSatellites[index] = currentSatellites[index];
+                                selectedLookAngles = new TopographicDataType[currentSatellites.length];
+                                selectedLookAngles[index] = topoData;
                             }
 
-                            //if enough time has passed
-                            if(updateElapsed)
+                            //if not viewing a specific orbital or norad ID matches
+                            if(allViewOrbitals || currentNoradId == viewLensNoradID)
                             {
-                                //update speed and saved geo
-                                currentOrbital.geo.speedKmS = Calculations.getDistanceKm(currentOrbital.savedGeo, currentOrbital.geo) / travelSeconds;
-                                currentOrbital.savedGeo = new GeodeticDataType(currentOrbital.geo);
+                                //remember look angle
+                                lookAngles[index] = topoData;
+
+                                //if status angles list exists and showing list
+                                if(onView && onList && Current.PageAdapter.hasItems(Current.PageType.View))
+                                {
+                                    //get current item
+                                    Current.ViewAngles.Item currentItem = Current.PageAdapter.getViewAngleItemByNorad(currentNoradId);
+                                    if(currentItem != null)
+                                    {
+                                        //update values
+                                        currentItem.azimuth = (float)topoData.azimuth;
+                                        currentItem.elevation = (float)topoData.elevation;
+                                        currentItem.rangeKm = (float)topoData.rangeKm;
+                                        currentItem.illumination = illumination;
+                                        if(phaseName != null)
+                                        {
+                                            currentItem.phaseName = phaseName;
+                                        }
+
+                                        //update list later
+                                        updateList[Current.PageType.View] = true;
+                                    }
+                                }
+
+                                //if combined list exists and showing list
+                                if(onCombined && onList && Current.PageAdapter.hasItems(Current.PageType.Combined))
+                                {
+                                    //get current item
+                                    Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);
+                                    if(currentItem != null)
+                                    {
+                                        //update values
+                                        currentItem.azimuth = (float)topoData.azimuth;
+                                        currentItem.elevation = (float)topoData.elevation;
+                                        currentItem.rangeKm = (float)topoData.rangeKm;
+                                        currentItem.speedKms = (float)currentOrbital.geo.speedKmS;
+                                        currentItem.latitude = (float)currentOrbital.geo.latitude;
+                                        currentItem.longitude = (float)currentOrbital.geo.longitude;
+                                        currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
+
+                                        //update list later
+                                        updateList[Current.PageType.Combined] = true;
+                                    }
+                                }
                             }
-                        }
 
-                        //if not using all satellites and satellite number matches
-                        if(((onView || onCombined) && !allViewOrbitals && currentNoradId == viewLensNoradID) || (onPasses && !allPassesOrbitals && currentNoradId == passesLensNoradID))
-                        {
-                            //set array with current satellite
-                            selectedSatellites = new Database.SatelliteData[currentSatellites.length];
-                            selectedSatellites[index] = currentSatellites[index];
-                            selectedLookAngles = new TopographicDataType[currentSatellites.length];
-                            selectedLookAngles[index] = topoData;
-                        }
-
-                        //if not viewing a specific orbital or norad ID matches
-                        if(allViewOrbitals || currentNoradId == viewLensNoradID)
-                        {
-                            //remember look angle
-                            lookAngles[index] = topoData;
-
-                            //if status angles list exists and showing list
-                            if(onView && onList && Current.PageAdapter.hasItems(Current.PageType.View))
+                            //if on passes list
+                            if(onPasses && Current.PageAdapter.hasItems(Current.PageType.Passes))
                             {
                                 //get current item
-                                Current.ViewAngles.Item currentItem = Current.PageAdapter.getViewAngleItemByNorad(currentNoradId);
+                                Current.Passes.Item currentItem = Current.PageAdapter.getPassItemByNorad(currentNoradId);
+                                if(currentItem != null)
+                                {
+                                    //if lens exists, showing lens, and -not viewing a specific pass or on that pass-
+                                    if(onLens && Current.cameraView != null && (allPassesOrbitals || currentNoradId == passesLensNoradID))
+                                    {
+                                        //set look angles
+                                        Current.cameraView.setTravel(index, currentItem.passViews);
+                                    }
+                                    //else if showing list and pass calculated
+                                    else if(onList && currentItem.passCalculated)
+                                    {
+                                        //update list later
+                                        updateList[Current.PageType.Passes] = true;
+                                    }
+                                }
+                            }
+
+                            //if the orbital markers exist and showing map/globe
+                            if(onMap && Current.Coordinates.mapView != null && Current.Coordinates.mapView.getOrbitalCount() > 0)
+                            {
+                                //get current orbital
+                                final CoordinatesFragment.OrbitalBase currentMarker = Current.Coordinates.mapView.getOrbital(index);
+                                if(currentMarker != null)
+                                {
+                                    //if using all orbitals or norad ID matches
+                                    if(allMapOrbitals || mapViewNoradID == currentNoradId)
+                                    {
+                                        //remember latitude, longitude, and if visible
+                                        double currentLatitude = currentOrbital.geo.latitude;
+                                        double currentLongitude = currentOrbital.geo.longitude;
+                                        double currentAltitudeKm = currentOrbital.geo.altitudeKm;
+
+                                        //if there is a selection and it has not been selected yet
+                                        if(mapViewNoradID == currentNoradId && currentNoradId != lastNoradId)
+                                        {
+                                            //make sure info is displayed
+                                            Current.Coordinates.mapView.selectOrbital(currentNoradId);
+                                            currentMarker.setInfoVisible(true);
+                                        }
+
+                                        //update coordinates display
+                                        if(currentMarker.getInfoVisible())
+                                        {
+                                            //refresh window and follow
+                                            coordinateString = Globals.getCoordinateString(MainActivity.this, currentLatitude, currentLongitude, currentAltitudeKm);
+                                            currentMarker.setText(coordinateString);
+                                            Current.Coordinates.mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !Current.Coordinates.mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm)  : Current.Coordinates.mapView.getCameraZoom()));
+
+                                            //update last
+                                            lastNoradId = currentNoradId;
+                                        }
+                                        currentMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
+                                        currentMarker.setVisible(true);
+                                    }
+                                    else
+                                    {
+                                        currentMarker.setVisible(false);
+                                    }
+                                }
+                            }
+
+                            //if coordinates list exists and showing list
+                            if(onCoordinates && onList && Current.PageAdapter.hasItems(Current.PageType.Coordinates))
+                            {
+                                //get current item
+                                Current.Coordinates.Item currentItem = Current.PageAdapter.getCoordinatesItemByNorad(currentNoradId);
                                 if(currentItem != null)
                                 {
                                     //update values
-                                    currentItem.azimuth = (float)topoData.azimuth;
-                                    currentItem.elevation = (float)topoData.elevation;
-                                    currentItem.rangeKm = (float)topoData.rangeKm;
+                                    currentItem.latitude = (float)currentOrbital.geo.latitude;
+                                    currentItem.longitude = (float)currentOrbital.geo.longitude;
+                                    currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
+                                    currentItem.speedKms = currentOrbital.geo.speedKmS;
                                     currentItem.illumination = illumination;
                                     if(phaseName != null)
                                     {
@@ -3902,118 +4020,8 @@ public class MainActivity extends AppCompatActivity
                                     }
 
                                     //update list later
-                                    updateList[Current.PageType.View] = true;
+                                    updateList[Current.PageType.Coordinates] = true;
                                 }
-                            }
-
-                            //if combined list exists and showing list
-                            if(onCombined && onList && Current.PageAdapter.hasItems(Current.PageType.Combined))
-                            {
-                                //get current item
-                                Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);
-                                if(currentItem != null)
-                                {
-                                    //update values
-                                    currentItem.azimuth = (float)topoData.azimuth;
-                                    currentItem.elevation = (float)topoData.elevation;
-                                    currentItem.rangeKm = (float)topoData.rangeKm;
-                                    currentItem.speedKms = (float)currentOrbital.geo.speedKmS;
-                                    currentItem.latitude = (float)currentOrbital.geo.latitude;
-                                    currentItem.longitude = (float)currentOrbital.geo.longitude;
-                                    currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
-
-                                    //update list later
-                                    updateList[Current.PageType.Combined] = true;
-                                }
-                            }
-                        }
-
-                        //if on passes list
-                        if(onPasses && Current.PageAdapter.hasItems(Current.PageType.Passes))
-                        {
-                            //get current item
-                            Current.Passes.Item currentItem = Current.PageAdapter.getPassItemByNorad(currentNoradId);
-                            if(currentItem != null)
-                            {
-                                //if lens exists, showing lens, and -not viewing a specific pass or on that pass-
-                                if(onLens && Current.cameraView != null && (allPassesOrbitals || currentNoradId == passesLensNoradID))
-                                {
-                                    //set look angles
-                                    Current.cameraView.setTravel(index, currentItem.passViews);
-                                }
-                                //else if showing list and pass calculated
-                                else if(onList && currentItem.passCalculated)
-                                {
-                                    //update list later
-                                    updateList[Current.PageType.Passes] = true;
-                                }
-                            }
-                        }
-
-                        //if the orbital markers exist and showing map/globe
-                        if(onMap && Current.Coordinates.mapView != null && Current.Coordinates.mapView.getOrbitalCount() > 0)
-                        {
-                            //get current orbital
-                            final CoordinatesFragment.OrbitalBase currentMarker = Current.Coordinates.mapView.getOrbital(index);
-                            if(currentMarker != null)
-                            {
-                                //if using all orbitals or norad ID matches
-                                if(allMapOrbitals || mapViewNoradID == currentNoradId)
-                                {
-                                    //remember latitude, longitude, and if visible
-                                    double currentLatitude = currentOrbital.geo.latitude;
-                                    double currentLongitude = currentOrbital.geo.longitude;
-                                    double currentAltitudeKm = currentOrbital.geo.altitudeKm;
-
-                                    //if there is a selection and it has not been selected yet
-                                    if(mapViewNoradID == currentNoradId && currentNoradId != lastNoradId)
-                                    {
-                                        //make sure info is displayed
-                                        Current.Coordinates.mapView.selectOrbital(currentNoradId);
-                                        currentMarker.setInfoVisible(true);
-                                    }
-
-                                    //update coordinates display
-                                    if(currentMarker.getInfoVisible())
-                                    {
-                                        //refresh window and follow
-                                        coordinateString = Globals.getCoordinateString(MainActivity.this, currentLatitude, currentLongitude, currentAltitudeKm);
-                                        currentMarker.setText(coordinateString);
-                                        Current.Coordinates.mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !Current.Coordinates.mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm)  : Current.Coordinates.mapView.getCameraZoom()));
-
-                                        //update last
-                                        lastNoradId = currentNoradId;
-                                    }
-                                    currentMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
-                                    currentMarker.setVisible(true);
-                                }
-                                else
-                                {
-                                    currentMarker.setVisible(false);
-                                }
-                            }
-                        }
-
-                        //if coordinates list exists and showing list
-                        if(onCoordinates && onList && Current.PageAdapter.hasItems(Current.PageType.Coordinates))
-                        {
-                            //get current item
-                            Current.Coordinates.Item currentItem = Current.PageAdapter.getCoordinatesItemByNorad(currentNoradId);
-                            if(currentItem != null)
-                            {
-                                //update values
-                                currentItem.latitude = (float)currentOrbital.geo.latitude;
-                                currentItem.longitude = (float)currentOrbital.geo.longitude;
-                                currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
-                                currentItem.speedKms = currentOrbital.geo.speedKmS;
-                                currentItem.illumination = illumination;
-                                if(phaseName != null)
-                                {
-                                    currentItem.phaseName = phaseName;
-                                }
-
-                                //update list later
-                                updateList[Current.PageType.Coordinates] = true;
                             }
                         }
                     }

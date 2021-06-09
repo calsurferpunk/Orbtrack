@@ -635,7 +635,7 @@ public class Database extends SQLiteOpenHelper
                 tleDateMs = Globals.julianDateToCalendar(tle.epochJulian).getTimeInMillis();
             }
 
-            tleIsAccurate = ((System.currentTimeMillis() - tleDateMs) / Calculations.MsPerDay) <= 365;
+            tleIsAccurate = Globals.getTLEIsAccurate(tleDateMs);
         }
         public DatabaseSatellite(String nm, int nrd, String ownCd, long launchDate, byte orbType)
         {

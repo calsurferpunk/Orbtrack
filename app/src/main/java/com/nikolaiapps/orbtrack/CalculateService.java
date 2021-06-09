@@ -1207,6 +1207,9 @@ public class CalculateService extends NotifyService
         boolean doneWithPath;
         boolean onFirstOrLast;
         boolean extendedSearch = false;
+        boolean tle1IsAccurate;
+        boolean tle2IsAccurate;
+        boolean neededTLEsAccurate;
         boolean adjustLargeTime;
         boolean forIntersection = (calculateType == CalculateType.OrbitalIntersections);
         double azStart;
@@ -1263,6 +1266,9 @@ public class CalculateService extends NotifyService
         isSun = (currentItem.id == Universe.IDs.Sun || (forIntersection && satellite2.getSatelliteNum() == Universe.IDs.Sun));
         isMoon = (currentItem.id == Universe.IDs.Moon || (forIntersection && satellite2.getSatelliteNum() == Universe.IDs.Moon));
         forFullMoon = (isMoon && calculateType == CalculateType.FullMoon);
+        tle1IsAccurate = Globals.getTLEIsAccurate(satellite1.tle);
+        tle2IsAccurate = (satellite2 != null && Globals.getTLEIsAccurate(satellite2.tle));
+        neededTLEsAccurate = (tle1IsAccurate && (!forIntersection || tle2IsAccurate));
 
         //set hour after start
         hourAfterStartGMT.setTimeInMillis(startGMT.getTimeInMillis());
@@ -1282,8 +1288,8 @@ public class CalculateService extends NotifyService
             service.sendLoadRunningMessage(calculateType, section, 10, listIndex, listCount);
         }
 
-        //calculate pass if -not already calculating- or -not calculated yet- or -pass start time is after end time- or -pass end time is before start time-
-        doneWithPath = (currentItem.passCalculating || currentItem.passCalculated || (currentItem.passTimeStart != null && !currentItem.passTimeStart.after(endGMT)) || (currentItem.passTimeEnd != null && !currentItem.passTimeEnd.before(startGMT)));
+        //calculate pass if -needed TLEs are accurate- and --not already calculating- or -not calculated yet- or -pass start time is after end time- or -pass end time is before start time--
+        doneWithPath = (neededTLEsAccurate && (currentItem.passCalculating || currentItem.passCalculated || (currentItem.passTimeStart != null && !currentItem.passTimeStart.after(endGMT)) || (currentItem.passTimeEnd != null && !currentItem.passTimeEnd.before(startGMT))));
         if(!doneWithPath)
         {
             //reset
@@ -1296,8 +1302,8 @@ public class CalculateService extends NotifyService
             currentItem.clearPass();
             currentItem.passCalculating = true;
 
-            //if satellite was set
-            if(currentItem.satellite != null)
+            //if satellite was set and needed TLEs are accurate
+            if(currentItem.satellite != null && neededTLEsAccurate)
             {
                 //while not done and not cancelled
                 while(!doneWithPath && !(usingTask ? task.isCancelled() : cancelIntent[calculateType]))

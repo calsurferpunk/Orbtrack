@@ -29,7 +29,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerTitleStrip;
-import androidx.viewpager.widget.ViewPager;
 import android.text.Spanned;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -109,9 +108,6 @@ public class MainActivity extends AppCompatActivity
     //
     //Current
     private int mainGroup;
-    private int previousGroup;
-    private int previousPage;
-    private int previousSubPage;
     private static int viewLensNoradID = Integer.MAX_VALUE;
     private static int passesLensNoradID = Integer.MAX_VALUE;
     public static int mapViewNoradID = Integer.MAX_VALUE;
@@ -123,7 +119,6 @@ public class MainActivity extends AppCompatActivity
     private long timerDelay;
     private long listTimerDelay;
     private long lensTimerDelay;
-    private boolean wasDraggingPage = false;
     private ThreadTask<Void, Void, Void> timerTask;
     private Runnable timerRunnable;
     private Calendar backPressTime;
@@ -174,7 +169,6 @@ public class MainActivity extends AppCompatActivity
         savedState = savedInstanceState.getBoolean(ParamTypes.SavedState, false);
         savedStateBundle = savedInstanceState;
         mainGroup = savedInstanceState.getInt(ParamTypes.MainGroup, Groups.Current);
-        previousGroup = previousPage = previousSubPage = -1;
         inEditMode = pendingLocationUpdate = false;
         observer = null;
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
@@ -378,7 +372,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
     {
-        int id;
         int subPage;
         int progressType = Globals.ProgressType.Finished;
         long count;
@@ -1208,50 +1201,6 @@ public class MainActivity extends AppCompatActivity
             //call super
             super.onBackPressed();
         }
-    }
-
-    //Returns true if returned to previous page
-    public boolean showPreviousPage()
-    {
-        boolean setPage = false;
-        boolean previousMap;
-        boolean previousLens;
-
-        switch(previousGroup)
-        {
-            case Groups.Current:
-                previousLens = (previousSubPage == Globals.SubPageType.Lens);
-                previousMap = (previousSubPage == Globals.SubPageType.Map || previousSubPage == Globals.SubPageType.Globe);
-
-                switch(previousPage)
-                {
-                    case Current.PageType.View:
-                    case Current.PageType.Passes:
-                        setPage = previousLens;
-                        break;
-
-                    case Current.PageType.Coordinates:
-                        setPage = previousMap;
-                        break;
-
-                    case Current.PageType.Combined:
-                        setPage = (previousLens || previousMap);
-                        break;
-                }
-                break;
-        }
-
-        //if can set page
-        if(setPage)
-        {
-            //set to previous page
-            setMainGroup(previousGroup, true);
-            setMainPage(previousPage);
-            setSubPage(previousGroup, previousPage, previousSubPage);
-        }
-
-        //return if set page
-        return(setPage);
     }
 
     //Returns observer
@@ -2184,7 +2133,7 @@ public class MainActivity extends AppCompatActivity
                     for(index = 0; index < Calculate.PageType.PageCount; index++)
                     {
                         //reset each sub page to input
-                        setSubPage(Groups.Calculate, index, Globals.SubPageType.Input, false);
+                        setSubPage(Groups.Calculate, index, Globals.SubPageType.Input);
                     }
                 }
             }
@@ -2277,16 +2226,8 @@ public class MainActivity extends AppCompatActivity
         //if forced or group is changing
         if(force || groupChanging)
         {
-            //update current group and page
-            if(previousGroup == mainGroup)
-            {
-                previousPage = getMainPage();
-            }
-            previousGroup = mainGroup;
+            //update current group
             mainGroup = group;
-
-            //reset
-            wasDraggingPage = false;
 
             //update pager adapter
             updateMainPagerAdapter(groupChanging, true);
@@ -2313,18 +2254,12 @@ public class MainActivity extends AppCompatActivity
     //Updates main page
     private void setMainPage(int page)
     {
-        //if previous group is the same group
-        if(previousGroup == mainGroup)
+        //if main pager exists
+        if(mainPager != null)
         {
-            //update previous page
-            previousPage = getMainPage();
+            //set page
+            mainPager.setCurrentItem(page);
         }
-
-        //set page
-        mainPager.setCurrentItem(page);
-
-        //reset
-        wasDraggingPage = false;
     }
 
     //Updates running tasks
@@ -3564,30 +3499,10 @@ public class MainActivity extends AppCompatActivity
 
                 //update pager swipe
                 mainPager.setSwipeEnabled(allowSwipe);
-
-                //if user was dragging
-                if(wasDraggingPage)
-                {
-                    //update previous sub page
-                    previousPage = getMainPage();
-                    previousGroup = mainGroup;
-                    setPreviousSubPage();
-
-                    //reset
-                    wasDraggingPage = false;
-                }
             }
 
             @Override
-            public void onPageScrollStateChanged(int state)
-            {
-                //if user is dragging
-                if(state == ViewPager.SCROLL_STATE_DRAGGING)
-                {
-                    //were dragging
-                    wasDraggingPage = true;
-                }
-            }
+            public void onPageScrollStateChanged(int state) {}
         });
     }
 
@@ -3605,6 +3520,7 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
+    //Creates an on update needed listener
     private Selectable.ListFragment.OnUpdateNeededListener createOnUpdateNeededListener()
     {
         return(new Selectable.ListFragment.OnUpdateNeededListener()
@@ -4297,32 +4213,6 @@ public class MainActivity extends AppCompatActivity
         });
     }
 
-    //Sets previous subpage
-    private void setPreviousSubPage()
-    {
-        //if a valid page
-        if(previousPage >= 0)
-        {
-            //handle based on given group
-            switch(previousGroup)
-            {
-                case Groups.Current:
-                    if(previousPage < currentSubPage.length)
-                    {
-                        previousSubPage = currentSubPage[previousPage];
-                    }
-                    break;
-
-                case Groups.Calculate:
-                    if(previousPage < calculateSubPage.length)
-                    {
-                        previousSubPage = calculateSubPage[previousPage];
-                    }
-                    break;
-            }
-        }
-    }
-
     //Returns the current sub page
     private int getSubPage()
     {
@@ -4331,16 +4221,9 @@ public class MainActivity extends AppCompatActivity
     }
 
     //Sets the sub page for the given group
-    private void setSubPage(int group, int page, int subPage, boolean setPrevious)
+    private void setSubPage(int group, int page, int subPage)
     {
         int index;
-
-        //if setting previous and a valid page
-        if(setPrevious)
-        {
-            //set previous sub page
-            setPreviousSubPage();
-        }
 
         //handle based on group
         switch(group)
@@ -4449,10 +4332,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
         }
-    }
-    private void setSubPage(int group, int page, int subPage)
-    {
-        setSubPage(group, page, subPage, true);
     }
 
     //Starts/stops current timer updates

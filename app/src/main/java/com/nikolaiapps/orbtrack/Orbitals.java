@@ -62,13 +62,13 @@ public abstract class Orbitals
 
         public PageListItem(Context context, int index, Database.DatabaseSatellite currentSat, boolean canEd, boolean isSel)
         {
-            super(currentSat.norad, index, canEd, isSel, false, false);
+            super(currentSat.noradId, index, canEd, isSel, false, false);
 
             String localeOwner;
             Drawable[] ownerIcons;
 
-            icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType);
-            ownerIcons = Settings.getOwnerIcons(context, currentSat.norad, currentSat.ownerCode);
+            icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType);
+            ownerIcons = Settings.getOwnerIcons(context, currentSat.noradId, currentSat.ownerCode);
             titleIcon = Globals.getDrawable(context, icon, (ownerIcons.length > 0 ? ownerIcons[0] : null), (ownerIcons.length > 1 ? ownerIcons[1] : null));
             ownerCode = currentSat.ownerCode;
             localeOwner = Database.LocaleOwner.getName(context, ownerCode);
@@ -504,7 +504,7 @@ public abstract class Orbitals
                         for(Database.DatabaseSatellite currentSatellite : satelliteList)
                         {
                             //select it
-                            setItemSelected(getPosition(currentSatellite.norad), true);
+                            setItemSelected(getPosition(currentSatellite.noradId), true);
                         }
 
                         //run with existing
@@ -1455,7 +1455,7 @@ public abstract class Orbitals
                     Database.DatabaseSatellite currentOrbital = orbitals.get(id);
 
                     //save satellite
-                    Database.saveSatellite(context, currentOrbital.name, textValue, currentOrbital.norad, ownerCode, dateValue, currentOrbital.tleLine1, currentOrbital.tleLine2, currentOrbital.tleDateMs, null, currentOrbital.updateDateMs, currentOrbital.pathColor, currentOrbital.orbitalType, true);
+                    Database.saveSatellite(context, currentOrbital.name, textValue, currentOrbital.noradId, ownerCode, dateValue, currentOrbital.tleLine1, currentOrbital.tleLine2, currentOrbital.tleDateMs, null, currentOrbital.updateDateMs, currentOrbital.pathColor, currentOrbital.orbitalType, true);
                 }
                 else
                 {

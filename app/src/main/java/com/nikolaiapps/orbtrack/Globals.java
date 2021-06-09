@@ -2353,14 +2353,16 @@ public abstract class Globals
     }
 
     //Sets update dialog events
-    public static void setUpdateDialog(AlertDialog updateDialog, String title, final BaseInputActivity cancelActivity, final byte updateType, final boolean closeOnBackground)
+    public static void setUpdateDialog(MultiProgressDialog updateDialog, String title, final BaseInputActivity cancelActivity, final byte updateType, final boolean closeOnBackground)
     {
         final boolean haveUpdateType = (updateType != Byte.MAX_VALUE);
         final BoolObject setBackground = new BoolObject(false);
         final Resources res = updateDialog.getContext().getResources();
 
-        updateDialog.setTitle(title);
         updateDialog.setCancelable(true);
+        updateDialog.setMessage(null);
+        updateDialog.setTitle(title);
+        updateDialog.setProgress(0);
         updateDialog.setOnDismissListener(new DialogInterface.OnDismissListener()
         {
             @Override
@@ -2421,7 +2423,7 @@ public abstract class Globals
             }
         });
     }
-    public static void setUpdateDialog(AlertDialog dialog, String title, final byte updateType)
+    public static void setUpdateDialog(MultiProgressDialog dialog, String title, final byte updateType)
     {
         setUpdateDialog(dialog, title, null, updateType, false);
     }

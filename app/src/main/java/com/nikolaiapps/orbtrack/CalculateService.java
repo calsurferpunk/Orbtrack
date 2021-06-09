@@ -779,7 +779,7 @@ public class CalculateService extends NotifyService
                 Calculations.ObserverType setLocation = null;
 
                 //get norad ID
-                noradId = currentOrbital.norad;
+                noradId = currentOrbital.noradId;
 
                 //go through each notify type
                 for(index = 0; index < Globals.NotifyType.NotifyCount; index++)

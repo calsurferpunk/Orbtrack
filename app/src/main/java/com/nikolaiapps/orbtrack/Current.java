@@ -403,6 +403,7 @@ public abstract class Current
     private static class ItemHolderBase extends RecyclerView.ViewHolder
     {
         public boolean movedName;
+        public final View outdatedText;
         public final ViewGroup rootView;
         public final TextView nameText;
         public final TextView dataGroup1Text;
@@ -420,12 +421,13 @@ public abstract class Current
         public final LinearLayout nameGroup;
         public final AppCompatImageView nameImage;
 
-        public ItemHolderBase(View itemView, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroup1TextID, int dataGroupTitle2ID, int dataGroup2TextID, int dataGroupTitle3ID, int dataGroup3TextID, int dataGroupTitle4ID, int dataGroup4TextID, int dataGroupTitle5ID, int dataGroup5TextID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID)
+        public ItemHolderBase(View itemView, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroup1TextID, int dataGroupTitle2ID, int dataGroup2TextID, int dataGroupTitle3ID, int dataGroup3TextID, int dataGroupTitle4ID, int dataGroup4TextID, int dataGroupTitle5ID, int dataGroup5TextID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
         {
             super(itemView);
 
             movedName = false;
             rootView = (ViewGroup)itemView;
+            outdatedText = (outdatedTextID > -1 ? itemView.findViewById(outdatedTextID) : null);
             dataGroup1Text = itemView.findViewById(dataGroup1TextID);
             dataGroup2Text = itemView.findViewById(dataGroup2TextID);
             dataGroup3Text = (dataGroup3TextID > -1 ? (TextView)itemView.findViewById(dataGroup3TextID) : null);
@@ -491,7 +493,6 @@ public abstract class Current
                         itemHolder.nameText.setBackgroundResource(columnBackgroundColorId);
                     }
                     itemHolder.dataGroup.setOrientation(LinearLayout.VERTICAL);
-                    itemHolder.dataGroupTitles.setVisibility(View.VISIBLE);
                     itemHolder.dataGroupTitle1Text.setText(dataGroupTitle1String);
                     itemHolder.dataGroupTitle2Text.setText(dataGroupTitle2String);
                     if(itemHolder.dataGroupTitle3Text != null)
@@ -664,12 +665,7 @@ public abstract class Current
 
                 if(nameText != null)
                 {
-                    text = name;
-                    if(!tleIsAccurate)
-                    {
-                        text += (" (" + res.getString(R.string.text_outdated) + ")");
-                    }
-                    nameText.setText(text);
+                    nameText.setText(name);
                 }
 
                 if(azImage != null)
@@ -819,9 +815,11 @@ public abstract class Current
             {
                 Item currentItem = combinedItems.getCombinedItem(position);
                 View itemView = holder.itemView;
-                LinearLayout dataLayout;
+                View dataLayout;
+                View outdatedText;
 
                 dataLayout = itemView.findViewById(R.id.Combined_Item_Data_Layout);
+                outdatedText = itemView.findViewById(R.id.Combined_Item_Outdated_Text);
                 currentItem.azImage = itemView.findViewById(R.id.Combined_Item_Az_Image);
                 currentItem.azText = itemView.findViewById(R.id.Combined_Item_Az_Text);
                 currentItem.elText = itemView.findViewById(R.id.Combined_Item_El_Text);
@@ -845,7 +843,11 @@ public abstract class Current
 
                 if(dataLayout != null)
                 {
-                    dataLayout.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.INVISIBLE);
+                    dataLayout.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
+                if(outdatedText != null)
+                {
+                    outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
                 currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext, currentZone);
@@ -1484,19 +1486,19 @@ public abstract class Current
             public final TextView timeText;
             public final LinearLayout progressGroup;
 
-            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int timeTextID)
+            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int timeTextID, int outdatedTextID)
             {
-                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, azTextID, dataGroupTitle2ID, elTextID, dataGroupTitle3ID, rangeTextID, dataGroupTitle4ID, phaseTextID, dataGroupTitle5ID, illuminationTextID, dataGroupID, nameGroupID, nameImageID, nameTextID);
+                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, azTextID, dataGroupTitle2ID, elTextID, dataGroupTitle3ID, rangeTextID, dataGroupTitle4ID, phaseTextID, dataGroupTitle5ID, illuminationTextID, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
             }
-            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID)
+            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, -1, -1, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, -1);
+                this(itemView, azTextID, elTextID, rangeTextID, -1, -1, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, -1, outdatedTextID);
             }
             public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int timeTextID)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupTitle5ID, dataGroupID, -1, -1, -1, timeTextID);
+                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupTitle5ID, dataGroupID, -1, -1, -1, timeTextID, -1);
             }
         }
 
@@ -1650,7 +1652,7 @@ public abstract class Current
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Data_Group, R.id.Angles_Name_Group, R.id.Angles_Name_Image, R.id.Angles_Name_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Data_Group, R.id.Angles_Name_Group, R.id.Angles_Name_Image, R.id.Angles_Name_Text, R.id.Angles_Outdated_Text);
                 }
 
                 setViewClickListeners(itemView, itemHolder);
@@ -1683,13 +1685,25 @@ public abstract class Current
                     currentItem.nameText = itemHolder.nameText;
                 }
                 currentItem.progressGroup = itemHolder.progressGroup;
+                if(itemHolder.outdatedText != null)
+                {
+                    itemHolder.outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
                 currentItem.dataGroup = itemHolder.dataGroup;
+                if(currentItem.dataGroup != null)
+                {
+                    currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
+                if(itemHolder.dataGroupTitles != null)
+                {
+                    itemHolder.dataGroupTitles.setVisibility(usingGrid && currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
                 currentItem.azText = itemHolder.dataGroup1Text;
                 currentItem.elText = itemHolder.dataGroup2Text;
                 currentItem.rangeText = itemHolder.dataGroup3Text;
 
                 //update displays
-                currentItem.setLoading(!hasItems);
+                currentItem.setLoading(!hasItems, currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext);
             }
 
@@ -1985,17 +1999,17 @@ public abstract class Current
                 }
             }
 
-            public void setLoading(boolean loading)
+            public void setLoading(boolean loading, boolean tleIsAccurate)
             {
-                isLoading = loading;
+                isLoading = loading && tleIsAccurate;
 
                 if(progressBar != null)
                 {
-                    progressBar.setVisibility(loading ? View.VISIBLE : View.GONE);
+                    progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
                 }
                 if(dataGroup != null)
                 {
-                    dataGroup.setVisibility(loading ? View.GONE : View.VISIBLE);
+                    dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
             }
 
@@ -2099,9 +2113,9 @@ public abstract class Current
             public final View timeStartUnder;
             public final View elMaxUnder;
 
-            public ItemHolder(View itemView, int nameImageID, int nameTextID, int timeStartLayoutID, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxLayoutID, int elMaxTextID, int elMaxUnderID, int nameGroupID, int currentProgressBarID, int currentProgressLoadingBarID, int calculateProgressBarID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID)
+            public ItemHolder(View itemView, int nameImageID, int nameTextID, int timeStartLayoutID, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxLayoutID, int elMaxTextID, int elMaxUnderID, int nameGroupID, int currentProgressBarID, int currentProgressLoadingBarID, int calculateProgressBarID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int outdatedTextID)
             {
-                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, timeStartTextID, dataGroupTitle2ID, timeDurationTextID, dataGroupTitle3ID, timeEndTextID, dataGroupTitle4ID, elMaxTextID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID);
+                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, timeStartTextID, dataGroupTitle2ID, timeDurationTextID, dataGroupTitle3ID, timeEndTextID, dataGroupTitle4ID, elMaxTextID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
                 currentProgressBar = itemView.findViewById(currentProgressBarID);
                 currentProgressLoadingBar = itemView.findViewById(currentProgressLoadingBarID);
                 calculateProgressBar = itemView.findViewById(calculateProgressBarID);
@@ -2236,7 +2250,7 @@ public abstract class Current
             public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Name_Image, R.id.Pass_Name_Text, R.id.Pass_Time_Start_Layout, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Layout, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Name_Group, R.id.Pass_Current_Progress_Bar, R.id.Pass_Current_Progress_Loading_Bar, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group_Titles, R.id.Pass_Time_Start_Title, R.id.Pass_Time_Duration_Title, R.id.Pass_Time_End_Title, R.id.Pass_El_Max_Title, R.id.Pass_Data_Group);
+                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Name_Image, R.id.Pass_Name_Text, R.id.Pass_Time_Start_Layout, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Layout, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Name_Group, R.id.Pass_Current_Progress_Bar, R.id.Pass_Current_Progress_Loading_Bar, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group_Titles, R.id.Pass_Time_Start_Title, R.id.Pass_Time_Duration_Title, R.id.Pass_Time_End_Title, R.id.Pass_El_Max_Title, R.id.Pass_Data_Group, R.id.Pass_Outdated_Text);
 
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
@@ -2265,7 +2279,19 @@ public abstract class Current
                 }
                 currentItem.progressBar = (forCalculation ? itemHolder.calculateProgressBar : itemHolder.currentProgressLoadingBar);
                 currentItem.progressStatusBar = (forCalculation ? null : itemHolder.currentProgressBar);
+                if(itemHolder.outdatedText != null)
+                {
+                    itemHolder.outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
                 currentItem.dataGroup = itemHolder.dataGroup;
+                if(currentItem.dataGroup != null)
+                {
+                    currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
+                if(itemHolder.dataGroupTitles != null)
+                {
+                    itemHolder.dataGroupTitles.setVisibility(usingGrid && currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
                 currentItem.timeStartText = itemHolder.dataGroup1Text;
                 if(!forCalculation && usingGrid)
                 {
@@ -2285,7 +2311,7 @@ public abstract class Current
                 currentItem.elMaxUnder.setVisibility(!forCalculation ? View.VISIBLE : View.GONE);
 
                 //set displays
-                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished);
+                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext, currentZone);
             }
 
@@ -2697,19 +2723,19 @@ public abstract class Current
             public final TextView timeText;
             public final LinearLayout progressGroup;
 
-            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int speedTextID, int timeTextID)
+            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int speedTextID, int timeTextID, int outdatedTextID)
             {
-                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, latTextID, dataGroupTitle2ID, lonTextID, dataGroupTitle3ID, altTextID, dataGroupTitle4ID, speedTextID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID);
+                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, latTextID, dataGroupTitle2ID, lonTextID, dataGroupTitle3ID, altTextID, dataGroupTitle4ID, speedTextID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
             }
-            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID)
+            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int oudatedTextID)
             {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupID, nameGroupID, nameImageID, nameTextID, speedTextID, -1);
+                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupID, nameGroupID, nameImageID, nameTextID, speedTextID, -1, oudatedTextID);
             }
             public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int timeTextID)
             {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, dataGroupID, -1, -1, -1, -1, timeTextID);
+                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, dataGroupID, -1, -1, -1, -1, timeTextID, -1);
             }
         }
 
@@ -2862,7 +2888,7 @@ public abstract class Current
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group_Titles, R.id.Coordinate_Latitude_Title, R.id.Coordinate_Longitude_Title, R.id.Coordinate_Altitude_Title, R.id.Coordinate_Speed_Title, R.id.Coordinate_Data_Group, R.id.Coordinate_Name_Group, R.id.Coordinate_Name_Image, R.id.Coordinate_Name_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group_Titles, R.id.Coordinate_Latitude_Title, R.id.Coordinate_Longitude_Title, R.id.Coordinate_Altitude_Title, R.id.Coordinate_Speed_Title, R.id.Coordinate_Data_Group, R.id.Coordinate_Name_Group, R.id.Coordinate_Name_Image, R.id.Coordinate_Name_Text, R.id.Coordinate_Outdated_Text);
                 }
 
                 setViewClickListeners(itemView, itemHolder);
@@ -2888,7 +2914,19 @@ public abstract class Current
                     currentItem.nameText = itemHolder.nameText;
                 }
                 currentItem.progressGroup = itemHolder.progressGroup;
+                if(itemHolder.outdatedText != null)
+                {
+                    itemHolder.outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
                 currentItem.dataGroup = itemHolder.dataGroup;
+                if(currentItem.dataGroup != null)
+                {
+                    currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
+                if(itemHolder.dataGroupTitles != null)
+                {
+                    itemHolder.dataGroupTitles.setVisibility(usingGrid && currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
                 currentItem.latitudeText = itemHolder.dataGroup1Text;
                 currentItem.longitudeText = itemHolder.dataGroup2Text;
                 currentItem.altitudeText = itemHolder.dataGroup3Text;
@@ -2899,7 +2937,7 @@ public abstract class Current
                 }
 
                 //update displays
-                currentItem.setLoading(!hasItems);
+                currentItem.setLoading(!hasItems, currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentZone);
             }
 
@@ -3831,7 +3869,7 @@ public abstract class Current
             }
 
             //return desired column count
-            return(Settings.getCurrentGridLayout(context) ? (widthDp >=  600 ? (((widthDp - 600) / 200) + 3) : 2) : 1);
+            return(page != PageType.Combined && Settings.getCurrentGridLayout(context) ? (widthDp >=  600 ? (((widthDp - 600) / 200) + 3) : 2) : 1);
         }
 
         @Override

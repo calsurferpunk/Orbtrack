@@ -324,12 +324,13 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         private BorderButton middleColorButton;
         private BorderButton bottomColorButton;
         private BorderButton[] textColorButton;
-        private View globalImagesDidiver;
+        private View globalImagesDivider;
         private View orbitalImageDivider;
         private View settingsImageDivider;
         private View borderDivider;
         private View topDivider;
         private View middleDivider;
+        private View outdatedText;
         private View[] textDivider;
         private ChooseColorDialog colorDialog;
         private LocationReceiver locationReceiver;
@@ -370,6 +371,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     satellites = Database.getOrbitals(context);
                     locations = Database.getLocations(context, "[Type] <> " + Database.LocationType.Current);
 
+                    outdatedText = rootView.findViewById(R.id.Widget_Setup_Outdated_Text);
                     orbitalList = rootView.findViewById(R.id.Widget_Setup_Orbital_List);
                     orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, satellites));
                     orbitalList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
@@ -377,11 +379,17 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         @Override
                         public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                         {
-                            widgetSettings.noradId = satellites[position].norad;
+                            widgetSettings.noradId = satellites[position].noradId;
 
                             //update image tab and preview displays
                             TabAdapter.updatePage(TabPage.Images);
                             onSettingChanged(context, PreferenceName.NoradID, widgetSettings.noradId);
+
+                            //update display
+                            if(outdatedText != null)
+                            {
+                                outdatedText.setVisibility(satellites[position].tleIsAccurate ? View.GONE : View.VISIBLE);
+                            }
                         }
 
                         @Override
@@ -584,7 +592,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             onSettingChanged(context, PreferenceName.GlobalImage, isChecked);
                         }
                     });
-                    globalImagesDidiver = rootView.findViewById(R.id.Widget_Setup_Global_Images_Divider);
+                    globalImagesDivider = rootView.findViewById(R.id.Widget_Setup_Global_Images_Divider);
 
                     globalImageColorButton = rootView.findViewById(R.id.Widget_Setup_Global_Images_Color_Button);
                     globalImageColorButton.setOnClickListener(createOnColorButtonClickListener(globalImageRow));
@@ -925,7 +933,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     globalImageSwitch.setChecked(useGlobalImage);
                     globalImageSwitch.setVisibility(showGlobalImageSwitch ? View. VISIBLE : View.GONE);
                     globalImageColorButton.setBackgroundColor(widgetSettings.globalImageColor);
-                    globalImagesDidiver.setVisibility(showGlobalImageSwitch ? View.VISIBLE : View.GONE);
+                    globalImagesDivider.setVisibility(showGlobalImageSwitch ? View.VISIBLE : View.GONE);
 
                     orbitalImageRow.setVisibility(orbitalImageVisibility);
                     orbitalImageColorButton.setBackgroundColor(widgetSettings.orbitalImageColor);
@@ -1484,6 +1492,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                 }
                 break;
         }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     //Creates an on click listener

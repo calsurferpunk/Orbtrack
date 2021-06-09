@@ -1710,7 +1710,7 @@ public abstract class Calculations
         {
             case Database.OrbitalType.Star:
             case Database.OrbitalType.Planet:
-                return(Calculations.loadNonSatellite(currentSat.norad));
+                return(Calculations.loadNonSatellite(currentSat.noradId));
 
             default:
                 return(Calculations.loadSatellite(currentSat));

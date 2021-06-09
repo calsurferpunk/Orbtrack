@@ -127,17 +127,17 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             return(id == otherItem.id);
         }
 
-        public void setLoading(boolean loading)
+        public void setLoading(boolean loading, boolean tleIsAccurate)
         {
-            isLoading = loading;
+            isLoading = loading && tleIsAccurate;
 
             if(progressGroup != null)
             {
-                progressGroup.setVisibility(loading ? View.VISIBLE : View.GONE);
+                progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
             if(dataGroup != null)
             {
-                dataGroup.setVisibility(loading ? View.GONE : View.VISIBLE);
+                dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
             }
         }
 

@@ -221,12 +221,12 @@ public class IconSpinner extends AppCompatSpinner
             {
                 //remember current satellite and set item
                 Database.DatabaseSatellite currentSat = satellites[index];
-                isLocation = (currentSat.norad == Universe.IDs.CurrentLocation);
-                useIcons = (currentSat.norad != Integer.MAX_VALUE && !isLocation);
+                isLocation = (currentSat.noradId == Universe.IDs.CurrentLocation);
+                useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
                 useIcon1Color = !useIcons;
-                useIcon3Color = (useIcons && currentSat.norad > 0);
-                Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.norad, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
-                items[index] = new Item(ownerIcons[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.norad, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), currentSat.getName(), currentSat.norad);
+                useIcon3Color = (useIcons && currentSat.noradId > 0);
+                Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.noradId, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
+                items[index] = new Item(ownerIcons[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), currentSat.getName(), currentSat.noradId);
             }
 
             BaseConstructor(context);

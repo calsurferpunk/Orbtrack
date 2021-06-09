@@ -96,6 +96,16 @@
                 style="@style/ProgressCircleSmall"/>
         </LinearLayout>
 
+        <TextView
+            android:id="@+id/Coordinate_Outdated_Text"
+            android:layout_width="0dp"
+            android:layout_height="36dp"
+            android:layout_weight="0.55"
+            android:gravity="center"
+            android:text="@string/text_outdated"
+            android:textColor="?attr/defaultTextColor"
+            android:visibility="gone"/>
+
         <LinearLayout
             android:id="@+id/Coordinate_Data_Group"
             android:layout_width="0dp"

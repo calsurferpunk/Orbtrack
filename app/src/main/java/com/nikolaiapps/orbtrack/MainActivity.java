@@ -1434,7 +1434,7 @@ public class MainActivity extends AppCompatActivity
 
             //show old satellite count
             pendingOldSatelliteMessage = true;
-            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_outdated, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_later, new DialogInterface.OnClickListener()
+            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_outdated, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_dismiss, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
@@ -2606,14 +2606,6 @@ public class MainActivity extends AppCompatActivity
                 //if have resources
                 if(res != null)
                 {
-                    //if on the first value
-                    if(updateValue == 1)
-                    {
-                        //start showing progress
-                        Globals.setUpdateDialog(taskProgress, res.getString(R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, (int)updateCount), UpdateService.UpdateType.UpdateSatellites);
-                        taskProgress.show();
-                    }
-
                     //update progress
                     taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount);
                     taskProgress.setProgress(updateValue, updateCount);
@@ -2675,8 +2667,22 @@ public class MainActivity extends AppCompatActivity
                 //if updating old satellites
                 if(updatingSatellites)
                 {
-                    //if ended
-                    if(ended)
+                    //if starting
+                    if(progressType == Globals.ProgressType.Started)
+                    {
+                        try
+                        {
+                            //reset/start showing progress
+                            Globals.setUpdateDialog(taskProgress, res.getString(R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, 2), UpdateService.UpdateType.UpdateSatellites);
+                            taskProgress.show();
+                        }
+                        catch(Exception ex)
+                        {
+                            //do nothing
+                        }
+                    }
+                    //else if ended
+                    else if(ended)
                     {
                         try
                         {
@@ -4684,7 +4690,7 @@ public class MainActivity extends AppCompatActivity
                                     public void run()
                                     {
                                         //update displays
-                                        currentItem.setLoading(false);
+                                        currentItem.setLoading(false, currentItem.tleIsAccurate);
                                         currentItem.updateDisplays(MainActivity.this, observer.timeZone);
 
                                         //set pending sort
@@ -4823,7 +4829,7 @@ public class MainActivity extends AppCompatActivity
             {
                 //if satellite, start, end, or increment changed
                 listSatellite = new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId));
-                if(listSatellite.database != null && (listSatellite.database.norad != satellite.database.norad || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
+                if(listSatellite.database != null && (listSatellite.database.noradId != satellite.database.noradId || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
                 {
                     //ignore saved
                     savedViewItems = null;
@@ -5090,7 +5096,7 @@ public class MainActivity extends AppCompatActivity
             {
                 //if satellite, start, end, or increment changed
                 listSatellite = new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId));
-                if(listSatellite.database != null && (listSatellite.database.norad != satellite.database.norad || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
+                if(listSatellite.database != null && (listSatellite.database.noradId != satellite.database.noradId || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
                 {
                     //ignore saved
                     savedCoordinateItems = null;

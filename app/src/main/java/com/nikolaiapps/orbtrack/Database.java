@@ -569,7 +569,7 @@ public class Database extends SQLiteOpenHelper
     {
         public final String name;
         private final String userName;
-        public final int norad;
+        public final int noradId;
         public String ownerCode;
         public final String ownerName;
         public final String tleLine1;
@@ -608,7 +608,7 @@ public class Database extends SQLiteOpenHelper
         {
             name = nm;
             userName = (uNm != null ? uNm : "");
-            norad = nrd;
+            noradId = nrd;
             ownerCode = ownrCd;
             ownerName = ownrNm;
             tleLine1 = line1;
@@ -692,7 +692,7 @@ public class Database extends SQLiteOpenHelper
 
             bundle.putString(ParamTypes.Name, name);
             bundle.putString(ParamTypes.UserName, userName);
-            bundle.putInt(ParamTypes.Norad, norad);
+            bundle.putInt(ParamTypes.Norad, noradId);
             bundle.putString(ParamTypes.OwnerCode, ownerCode);
             bundle.putString(ParamTypes.OwnerName, ownerName);
             bundle.putLong(ParamTypes.LaunchDate, launchDateMs);
@@ -1288,13 +1288,13 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets all satellite data for the given norad ID
-    public static String[][] getSatelliteData(Context context, int norad)
+    public static String[][] getSatelliteData(Context context, int noradId)
     {
-        return(runQuery(context, "SELECT [Name], [User_Name], [Norad], [Owner_Code], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " WHERE [Norad]=" + norad, null));
+        return(runQuery(context, "SELECT [Name], [User_Name], [Norad], [Owner_Code], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId, null));
     }
 
     //Gets satellite values
-    private static ContentValues getSatelliteValues(String name, String userName, int norad, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDate, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
+    private static ContentValues getSatelliteValues(String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDate, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
     {
         ContentValues satelliteValues = new ContentValues(0);
         if(name != null)
@@ -1313,7 +1313,7 @@ public class Database extends SQLiteOpenHelper
             }
             satelliteValues.put("[User_Name]", userName);
         }
-        satelliteValues.put("[Norad]", norad);
+        satelliteValues.put("[Norad]", noradId);
         if(ownerCode != null)
         {
             satelliteValues.put("[Owner_Code]", ownerCode);
@@ -1448,17 +1448,17 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets a satellite ID by norad
-    private static long getSatelliteID(Context context, int norad)
+    private static long getSatelliteID(Context context, int noradId)
     {
         //run query
-        String[][] queryResult = runQuery(context,"SELECT [ID] FROM " + Tables.Orbital + " WHERE [Norad]=" + norad + " LIMIT 1", null);
+        String[][] queryResult = runQuery(context,"SELECT [ID] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId + " LIMIT 1", null);
         return(queryResult.length > 0 ? Long.parseLong(queryResult[0][0]) : -1);
     }
 
     /*//Gets a satellite TLE by norad
-    public static String[][] getSatelliteTLE(Context context, int norad)
+    public static String[][] getSatelliteTLE(Context context, int noradId)
     {
-        return(runQuery(context, "SELECT [TLE_Line1], [TLE_Line2] FROM " + Tables.Orbital + " WHERE [Norad]=" + norad + " LIMIT 1", null));
+        return(runQuery(context, "SELECT [TLE_Line1], [TLE_Line2] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId + " LIMIT 1", null));
     }*/
 
     //Gets whether a satellite is selected
@@ -1483,35 +1483,42 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Modifies satellite data and returns ID
-    public static long saveSatellite(Context context, String name, String userName, int norad, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
+    public static long saveSatellite(Context context, String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
     {
-        long id = getSatelliteID(context, norad);
-        ContentValues satelliteValues = getSatelliteValues(name, userName, norad, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, pathColor, orbitalType, selected);
-        return(runSave(context, id, Tables.Orbital, satelliteValues));
+        long id = getSatelliteID(context, noradId);
+        long saveId;
+        ContentValues satelliteValues = getSatelliteValues(name, userName, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, pathColor, orbitalType, selected);
+        saveId = runSave(context, id, Tables.Orbital, satelliteValues);
+
+        //update any applicable widget
+        WidgetPassBaseProvider.updateWidget(context, noradId);
+
+        //return save ID
+        return(saveId);
     }
-    public static long saveSatellite(Context context, String name, int norad, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, byte orbitalType)
+    public static long saveSatellite(Context context, String name, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, byte orbitalType)
     {
-        long id = getSatelliteID(context, norad);
-        return(saveSatellite(context, name, null, norad, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Color.DKGRAY, orbitalType, (id < 0 || getSatelliteSelected(context, id))));
+        long id = getSatelliteID(context, noradId);
+        return(saveSatellite(context, name, null, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Color.DKGRAY, orbitalType, (id < 0 || getSatelliteSelected(context, id))));
     }
-    public static void saveSatellite(Context context, int norad, String userName, String ownerCode, long launchDate)
+    public static void saveSatellite(Context context, int noradId, String userName, String ownerCode, long launchDate)
     {
-        long id = getSatelliteID(context, norad);
-        saveSatellite(context, null, userName, norad, ownerCode, launchDate, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, getSatelliteSelected(context, id));
+        long id = getSatelliteID(context, noradId);
+        saveSatellite(context, null, userName, noradId, ownerCode, launchDate, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, getSatelliteSelected(context, id));
     }
-    public static void saveSatellite(Context context, int norad, boolean selected)
+    public static void saveSatellite(Context context, int noradId, boolean selected)
     {
-        saveSatellite(context, null, null, norad, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, selected);
+        saveSatellite(context, null, null, noradId, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, selected);
     }
-    public static void saveSatellite(Context context, int norad, int pathColor)
+    public static void saveSatellite(Context context, int noradId, int pathColor)
     {
-        saveSatellite(context, null, null, norad, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, pathColor, Byte.MAX_VALUE, true);
+        saveSatellite(context, null, null, noradId, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, pathColor, Byte.MAX_VALUE, true);
     }
 
     //Deletes a satellite
-    public static boolean deleteSatellite(Context context, int norad)
+    public static boolean deleteSatellite(Context context, int noradId)
     {
-        return(runDelete(context, Tables.Orbital, "[ID]='" + getSatelliteID(context, norad) + "'"));
+        return(runDelete(context, Tables.Orbital, "[ID]='" + getSatelliteID(context, noradId) + "'"));
     }
 
     //Gets location name values
@@ -1981,12 +1988,12 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets satellite category values
-    private static ContentValues getSatelliteCategoryValues(int norad, int categoryIndex)
+    private static ContentValues getSatelliteCategoryValues(int noradId, int categoryIndex)
     {
         ContentValues satCatValues = new ContentValues(0);
-        if(norad != Integer.MAX_VALUE)
+        if(noradId != Integer.MAX_VALUE)
         {
-            satCatValues.put("[Norad]", norad);
+            satCatValues.put("[Norad]", noradId);
         }
         if(categoryIndex != Integer.MAX_VALUE)
         {
@@ -2067,12 +2074,12 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets information values
-    private static ContentValues getInformationValues(int norad, int updateSource, String language, String info)
+    private static ContentValues getInformationValues(int noradId, int updateSource, String language, String info)
     {
         ContentValues infoValues = new ContentValues(0);
-        if(norad != Integer.MAX_VALUE)
+        if(noradId != Integer.MAX_VALUE)
         {
-            infoValues.put("[Norad]", norad);
+            infoValues.put("[Norad]", noradId);
         }
         if(updateSource != Integer.MAX_VALUE)
         {

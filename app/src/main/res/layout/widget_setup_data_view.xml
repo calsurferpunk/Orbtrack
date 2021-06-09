@@ -20,6 +20,12 @@
                 android:layout_marginStart="5dp"/>
         </TableRow>
 
+        <TextView
+            android:id="@+id/Widget_Setup_Outdated_Text"
+            style="@style/WidgetSetupText"
+            android:text="@string/desc_need_updating"
+            android:visibility="gone"/>
+
         <View style="@style/Divider"/>
 
         <TableRow android:padding="5dp">

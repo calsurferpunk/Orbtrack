@@ -1244,16 +1244,16 @@ public abstract class Settings
                     //go through each orbital
                     for(Database.DatabaseSatellite currentOrbital : orbitals)
                     {
-                        CalculateService.AlarmNotifySettings passStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassStart);
-                        CalculateService.AlarmNotifySettings passEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.PassEnd);
-                        CalculateService.AlarmNotifySettings fullStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonStart);
-                        CalculateService.AlarmNotifySettings fullEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.norad, Globals.NotifyType.FullMoonEnd);
+                        CalculateService.AlarmNotifySettings passStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.noradId, Globals.NotifyType.PassStart);
+                        CalculateService.AlarmNotifySettings passEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.noradId, Globals.NotifyType.PassEnd);
+                        CalculateService.AlarmNotifySettings fullStartSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.noradId, Globals.NotifyType.FullMoonStart);
+                        CalculateService.AlarmNotifySettings fullEndSettings = Settings.getNotifyPassSettings(currentContext, currentOrbital.noradId, Globals.NotifyType.FullMoonEnd);
 
                         //if using start or ending notification for any
                         if(passStartSettings.isEnabled() || passEndSettings.isEnabled() || fullStartSettings.isEnabled() || fullEndSettings.isEnabled())
                         {
                             //add orbital
-                            notifyList.add(new Item(currentOrbital.norad, currentOrbital.getName(), passStartSettings, passEndSettings, fullStartSettings, fullEndSettings));
+                            notifyList.add(new Item(currentOrbital.noradId, currentOrbital.getName(), passStartSettings, passEndSettings, fullStartSettings, fullEndSettings));
                         }
                     }
 
@@ -1434,34 +1434,20 @@ public abstract class Settings
                 int index;
                 int widgetId;
                 Resources res = currentContext.getResources();
-                int[] passTinyWidgetIds = WidgetPassBaseProvider.getWidgetIds(currentContext, WidgetPassTinyProvider.class);
-                int[] passSmallWidgetIds = WidgetPassBaseProvider.getWidgetIds(currentContext, WidgetPassSmallProvider.class);
-                int[] passMediumWidgetIds = WidgetPassBaseProvider.getWidgetIds(currentContext, WidgetPassMediumProvider.class);
-                int tinyOffset = passTinyWidgetIds.length;
-                int smallOffset = passSmallWidgetIds.length;
+                ArrayList<WidgetPassBaseProvider.WidgetData> widgetsData = WidgetPassBaseProvider.getWidgetData(currentContext);
 
                 //setup items
-                widgets = new Item[passTinyWidgetIds.length + passSmallWidgetIds.length + passMediumWidgetIds.length];
+                widgets = new Item[widgetsData.size()];
 
-                //add all tiny widgets
-                for(index = 0; index < passTinyWidgetIds.length; index++)
+                //add all widgets
+                for(index = 0; index < widgets.length; index++)
                 {
-                    widgetId = passTinyWidgetIds[index];
-                    widgets[index] = new Item(widgetId, index, WidgetBaseSetupActivity.getName(currentContext, widgetId), WidgetBaseSetupActivity.getLocationName(currentContext, widgetId), WidgetPassTinyProvider.class);
-                }
+                    //remember current data and ID
+                    WidgetPassBaseProvider.WidgetData currentData = widgetsData.get(index);
+                    widgetId = currentData.widgetId;
 
-                //add all small widgets
-                for(index = 0; index < passSmallWidgetIds.length; index++)
-                {
-                    widgetId = passSmallWidgetIds[index];
-                    widgets[index + tinyOffset] = new Item(widgetId, index + tinyOffset, WidgetBaseSetupActivity.getName(currentContext, widgetId), WidgetBaseSetupActivity.getLocationName(currentContext, widgetId), WidgetPassSmallProvider.class);
-                }
-
-                //add all medium widgets
-                for(index = 0; index < passMediumWidgetIds.length; index++)
-                {
-                    widgetId = passMediumWidgetIds[index];
-                    widgets[index + tinyOffset + smallOffset] = new Item(widgetId, index + tinyOffset + smallOffset, WidgetBaseSetupActivity.getName(currentContext, widgetId), WidgetBaseSetupActivity.getLocationName(currentContext, widgetId), WidgetPassMediumProvider.class);
+                    //add widget
+                    widgets[index] = new Item(widgetId, index, WidgetBaseSetupActivity.getName(currentContext, widgetId), WidgetBaseSetupActivity.getLocationName(currentContext, widgetId), currentData.widgetClass);
                 }
 
                 //if no items

@@ -49,6 +49,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         public double illumination;
         public double speedKms;
         public String phaseName;
+        public View outdatedText;
         public TextView latitudeText;
         public TextView longitudeText;
         public TextView altitudeText;
@@ -127,17 +128,17 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             return(id == otherItem.id);
         }
 
-        public void setLoading(boolean loading)
+        public void setLoading(boolean loading, boolean tleIsAccurate)
         {
-            isLoading = loading;
+            isLoading = loading && tleIsAccurate;
 
             if(progressGroup != null)
             {
-                progressGroup.setVisibility(loading ? View.VISIBLE : View.GONE);
+                progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
             }
             if(dataGroup != null)
             {
-                dataGroup.setVisibility(loading ? View.GONE : View.VISIBLE);
+                dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
             }
         }
 

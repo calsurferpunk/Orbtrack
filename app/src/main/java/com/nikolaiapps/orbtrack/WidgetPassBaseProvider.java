@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -54,6 +55,21 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     private static abstract class ParamTypes
     {
         static final String PassAlarmType = "passAlarmType";
+    }
+
+    //Widget data class
+    public static class WidgetData
+    {
+        public int widgetId;
+        public Class<?> widgetClass;
+        public Class<?> alarmReceiverClass;
+
+        public WidgetData(int widgetId, Class<?> widgetClass, Class<?> alarmReceiverClass)
+        {
+            this.widgetId = widgetId;
+            this.widgetClass = widgetClass;
+            this.alarmReceiverClass = alarmReceiverClass;
+        }
     }
 
     //Receiver to get alarm updates
@@ -450,6 +466,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     break;
 
                 case R.id.Widget_Pass_Bottom_Layout:
+                case R.id.Widget_Pass_Outdated_Text:
                     color = WidgetBaseSetupActivity.getBottomBackgroundColor(context, widgetId);
                     break;
             }
@@ -541,6 +558,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     break;
 
                 case R.id.Widget_Pass_Location_Text:
+                case R.id.Widget_Pass_Outdated_Text:
                     size = WidgetBaseSetupActivity.getLocationTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getLocationTextColor(context, widgetId);
                     weight = WidgetBaseSetupActivity.getLocationTextWeight(context, widgetId);
@@ -666,24 +684,29 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         int settingsImageColor = WidgetBaseSetupActivity.getSettingsImageColor(context, widgetId);
         int locationImageColor = WidgetBaseSetupActivity.getLocationImageColor(context, widgetId);
         byte orbitalType = WidgetBaseSetupActivity.getOrbitalType(context, widgetId);
+        Database.SatelliteData currentSatelliteData = getSatellite(widgetId, context);
+        boolean useParent = (parent != null);
         boolean useGlobalImage = WidgetBaseSetupActivity.getGlobalImage(context, widgetId);
         boolean useNormal = !widgetClass.equals(WidgetPassTinyProvider.class);
         boolean useExtended = widgetClass.equals(WidgetPassMediumProvider.class);
-        boolean useParent = (parent != null);
+        boolean tleIsAccurate = (currentSatelliteData.database == null || currentSatelliteData.database.tleIsAccurate);
         RemoteViews views = (useParent ? null : new RemoteViews(context.getPackageName(), R.layout.widget_pass_view));
         PendingIntent actionIntent = (useParent ? null : getActionIntent(context, widgetClass, ACTION_SETTINGS_CLICK, widgetId));
 
-        //update visibility
+        //get image ID
         itemImageId = (useNormal ? R.id.Widget_Pass_Item_Image : R.id.Widget_Pass_Item_Tiny_Image);
+
+        //update visibility
         setViewVisibility(views, parent, R.id.Widget_Pass_Settings_Button, useNormal);
         setViewVisibility(views, parent, R.id.Widget_Pass_Item_Image, useNormal);
         setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Middle_Layout, !useNormal);
         setViewVisibility(views, parent, R.id.Widget_Pass_Middle_Layout, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Normal_Layout, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Extended_Layout, useExtended);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Image, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Text, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Start_Layout, !useNormal);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Normal_Layout, useNormal && tleIsAccurate);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Extended_Layout, useExtended && tleIsAccurate);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Image, useNormal && tleIsAccurate);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Text, useNormal && tleIsAccurate);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Start_Layout, !useNormal && tleIsAccurate);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Outdated_Text, !tleIsAccurate);
 
         //set border, background, and name
         setBorder(context, widgetId, views, parent, R.id.Widget_Pass_Border);
@@ -691,6 +714,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Tiny_Middle_Layout);
         setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Middle_Layout);
         setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Bottom_Layout);
+        setViewBackground(context, widgetId, views, parent, R.id.Widget_Pass_Outdated_Text);
         setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Name_Text, WidgetBaseSetupActivity.getName(context, widgetId));
 
         //if the moon
@@ -739,6 +763,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Az_End_Text, null);
             setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Duration_Text, null);
         }
+        setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Outdated_Text, context.getString(R.string.text_outdated));
 
         //set settings
         if(!useParent)
@@ -835,6 +860,31 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
         //return IDs
         return(widgetIds);
+    }
+
+    //Gets existing widget data
+    public static ArrayList<WidgetData> getWidgetData(Context context)
+    {
+        int index;
+        ArrayList<WidgetData> widgets = new ArrayList<>(0);
+
+        //go through each widget class
+        for(index = 0; index < widgetClasses.length; index++)
+        {
+            //remember current class
+            Class<?> currentClass = widgetClasses[index];
+
+            //go through all widget IDs for class
+            int[] ids = getWidgetIds(context, currentClass);
+            for(int currentId : ids)
+            {
+                //add widget data
+                widgets.add(new WidgetData(currentId, currentClass, alarmReceiverClasses[index]));
+            }
+        }
+
+        //return widgets
+        return(widgets);
     }
 
     //Sets pass for given widget
@@ -1193,6 +1243,28 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     }
                 });
                 altitudeTask.execute(context);
+            }
+        }
+    }
+    public static void updateWidget(Context context, int noradId)
+    {
+        int widgetId;
+        Class<?> widgetClass;
+        AppWidgetManager manager = AppWidgetManager.getInstance(context);
+        ArrayList<WidgetData> widgetsData = getWidgetData(context);
+
+        //go through each widget
+        for(WidgetData currentData : widgetsData)
+        {
+            //remember widget ID and class
+            widgetId = currentData.widgetId;
+            widgetClass = currentData.widgetClass;
+
+            //if widget matches norad ID
+            if(WidgetBaseSetupActivity.getNoradID(context, widgetId) == noradId)
+            {
+                //update the widget
+                updateWidget(context, widgetClass, currentData.alarmReceiverClass, widgetId, manager, getViews(context, widgetClass, widgetId), true);
             }
         }
     }

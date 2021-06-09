@@ -143,10 +143,10 @@ public class MasterAddListActivity extends BaseInputActivity
                         UpdateService.MasterSatellite newSatellite;
                         Database.DatabaseSatellite currentSatellite = dbSatellites[index];
                         String currentOwner = currentSatellite.ownerCode;
-                        String[][] groups = Database.getSatelliteCategoriesEnglish(context, currentSatellite.norad);
+                        String[][] groups = Database.getSatelliteCategoriesEnglish(context, currentSatellite.noradId);
 
                         //create satellite with categories
-                        newSatellite = new UpdateService.MasterSatellite(currentSatellite.norad, currentSatellite.getName(), currentOwner, currentSatellite.ownerName, currentSatellite.launchDateMs);
+                        newSatellite = new UpdateService.MasterSatellite(currentSatellite.noradId, currentSatellite.getName(), currentOwner, currentSatellite.ownerName, currentSatellite.launchDateMs);
                         for(index2 = 0; index2 < groups.length; index2++)
                         {
                             //add category

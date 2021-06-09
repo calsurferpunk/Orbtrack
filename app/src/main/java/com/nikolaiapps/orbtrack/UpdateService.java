@@ -2991,7 +2991,7 @@ public class UpdateService extends NotifyService
                         }
 
                         //add current norad ID
-                        url.append(satellites[index2].norad);
+                        url.append(satellites[index2].noradId);
                     }
                     if(index2 > index)
                     {
@@ -3018,7 +3018,7 @@ public class UpdateService extends NotifyService
             else
             {
                 //remember current number and if last
-                currentNumber = satellites[index].norad;
+                currentNumber = satellites[index].noradId;
                 isLast = ((index + 1) >= count);
 
                 switch(updateSource)
@@ -3090,7 +3090,7 @@ public class UpdateService extends NotifyService
                     }
 
                     //try to save satellite based on input
-                    saved = (saveSatellite(receivedPage, currentSatellite.getName(), currentSatellite.norad, currentSatellite.ownerCode, currentSatellite.launchDateMs, currentSatellite.orbitalType, null) > 0);
+                    saved = (saveSatellite(receivedPage, currentSatellite.getName(), currentSatellite.noradId, currentSatellite.ownerCode, currentSatellite.launchDateMs, currentSatellite.orbitalType, null) > 0);
 
                     //update progress
                     sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index3, count, (saved ? Globals.ProgressType.Success : Globals.ProgressType.Failed));
@@ -3536,23 +3536,23 @@ public class UpdateService extends NotifyService
                         switch(currentTable)
                         {
                             case Database.Tables.SatelliteCategory:
-                                dataRows = Database.getSatelliteCategoriesEnglish(context, currentSatellite.norad);
+                                dataRows = Database.getSatelliteCategoriesEnglish(context, currentSatellite.noradId);
                                 columns = new String[]{"Norad", "Name"};
                                 break;
 
                             case Database.Tables.Owner:
-                                dataRows = Database.getOwnersEnglish(context, currentSatellite.norad);
+                                dataRows = Database.getOwnersEnglish(context, currentSatellite.noradId);
                                 columns = new String[]{"Code", "Name"};
                                 break;
 
                             case Database.Tables.Information:
-                                dataRows = Database.getInformation(context, currentSatellite.norad);
+                                dataRows = Database.getInformation(context, currentSatellite.noradId);
                                 columns = new String[]{"Norad", "Info", "Language", "Source"};
                                 break;
 
                             default:
                             case Database.Tables.Orbital:
-                                dataRows = Database.getSatelliteData(context, currentSatellite.norad);
+                                dataRows = Database.getSatelliteData(context, currentSatellite.noradId);
                                 columns = new String[]{"Name", "User_Name", "Norad", "Owner_Code", "Launch_Date", "TLE_Line1", "TLE_Line2", "TLE_Date", "GP", "Update_Date", "Path_Color", "Type", "Selected"};
                                 break;
                         }

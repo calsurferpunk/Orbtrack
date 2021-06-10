@@ -163,6 +163,7 @@ class Whirly
     private static class Board
     {
         private boolean isVisible;
+        private final boolean tleIsAccurate;
         private double zValue;
         private final BaseController controller;
         private Bitmap boardImage;
@@ -176,10 +177,11 @@ class Whirly
         private final float[] boardTextureColor;
         final ArrayList<Billboard> billboardList;
 
-        Board(BaseController boardController)
+        Board(BaseController boardController, boolean tleIsAc)
         {
             Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
 
+            tleIsAccurate = tleIsAc;
             zValue = 0;
             controller = boardController;
 
@@ -210,7 +212,7 @@ class Whirly
         }
         Board(BaseController boardController, Board copyFrom)
         {
-            this(boardController);
+            this(boardController, copyFrom.tleIsAccurate);
 
             copyFrom.remove();
             boardImageOriginal = copyFrom.boardImageOriginal;
@@ -305,7 +307,7 @@ class Whirly
 
         private void add()
         {
-            if(boardObject == null)
+            if(tleIsAccurate && boardObject == null)
             {
                 boardObject = controller.addBillboards(billboardList, boardInfo, BaseController.ThreadMode.ThreadAny);
             }
@@ -454,6 +456,7 @@ class Whirly
     {
         private boolean isVisible;
         private final boolean useVectors;
+        private final boolean tleIsAccurate;
         private VectorObject flatPath;
         private ShapeLinear elevatedPath;
         private final VectorInfo flatPathInfo;
@@ -461,9 +464,10 @@ class Whirly
         private ComponentObject pathObject;
         private final BaseController controller;
 
-        Path(BaseController orbitalController, boolean isFlat, int color)
+        Path(BaseController orbitalController, boolean isFlat, boolean tleIsAcc, int color)
         {
             useVectors = isFlat;
+            tleIsAccurate = tleIsAcc;
             controller = orbitalController;
 
             if(useVectors)
@@ -654,7 +658,7 @@ class Whirly
 
         public void add()
         {
-            if(pathObject == null)
+            if(tleIsAccurate && pathObject == null)
             {
                 pathObject = (useVectors ? controller.addVector(flatPath, flatPathInfo, BaseController.ThreadMode.ThreadAny) : controller.addShapes(Collections.singletonList(elevatedPath), elevatedPathInfo, RenderControllerInterface.ThreadMode.ThreadAny));
             }
@@ -692,7 +696,7 @@ class Whirly
         private InfoImageCreator infoCreator;
         private BaseController controller;
 
-        MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, int infoLocation)
+        MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation)
         {
             if(markerController != null)
             {
@@ -700,6 +704,7 @@ class Whirly
 
                 common = new Shared();
                 common.noradId = noradId;
+                common.tleIsAccurate = tleIsAccurate;
 
                 controller = markerController;
                 markerScale = markerScaling;
@@ -876,19 +881,22 @@ class Whirly
 
         public void add()
         {
-            if(markerObj == null)
+            if(common.tleIsAccurate)
             {
-                markerObj = controller.addScreenMarker(marker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
-            }
-            if(infoMarkerObj == null && showInfo)
-            {
-                setInfoLocation();
-                infoMarkerObj = controller.addScreenMarker(infoMarker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
-            }
-            if(titleMarkerObj == null && !showInfo && alwaysShowTitle)
-            {
-                setInfoLocation();
-                titleMarkerObj = controller.addScreenMarker(titleMarker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                if(markerObj == null)
+                {
+                    markerObj = controller.addScreenMarker(marker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                }
+                if(infoMarkerObj == null && showInfo)
+                {
+                    setInfoLocation();
+                    infoMarkerObj = controller.addScreenMarker(infoMarker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                }
+                if(titleMarkerObj == null && !showInfo && alwaysShowTitle)
+                {
+                    setInfoLocation();
+                    titleMarkerObj = controller.addScreenMarker(titleMarker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                }
             }
         }
 
@@ -942,6 +950,7 @@ class Whirly
         OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
+            boolean tleIsAccurate;
             String name;
             Bitmap titleImage;
             Bitmap orbitalImage;
@@ -966,6 +975,7 @@ class Whirly
             noradId = common.data.getSatelliteNum();
 
             iconId = Globals.getOrbitalIconID(noradId, common.data.getOrbitalType());
+            tleIsAccurate = (newSat.database == null || newSat.database.tleIsAccurate);
             orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(currentContext, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(currentContext, iconId, (noradId > 0 ? Color.WHITE : 0)));
             if(noradId > 0)
             {
@@ -973,17 +983,17 @@ class Whirly
                 orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
             }
 
-            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(currentContext), common.data.database.pathColor);
+            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(currentContext), tleIsAccurate, common.data.database.pathColor);
 
             if(forMap)
             {
-                orbitalMarker = new MarkerObject(currentContext, controller, newSat.getSatelliteNum(), observerLocation, markerScale, usingBackground, alwaysShowTitle, infoLocation);
+                orbitalMarker = new MarkerObject(currentContext, controller, newSat.getSatelliteNum(), observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
                 orbitalMarker.setTitle(newSat.getName());
                 orbitalMarker.setImage(orbitalImage);
             }
             else
             {
-                orbitalBoard = new Board(controller);
+                orbitalBoard = new Board(controller, tleIsAccurate);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
                 setShowShadow(showShadow);
@@ -992,7 +1002,7 @@ class Whirly
                 infoCreator = new InfoImageCreator(name, usingInfo, usingBackground);
 
                 titleImage = infoCreator.get(currentContext, null);
-                infoBoard = new Board(controller);
+                infoBoard = new Board(controller, tleIsAccurate);
                 infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
@@ -1322,9 +1332,8 @@ class Whirly
                 //if updating bearing
                 if(updateBearing)
                 {
-                    //move orbital
+                    //rotate marker
                     orbitalMarker.setRotation(bearing + 135);
-
                 }
 
                 //move orbital
@@ -2144,7 +2153,7 @@ class Whirly
         @Override
         public MarkerObject addMarker(Context context, int noradId, Calculations.ObserverType markerLocation)
         {
-            MarkerObject newMarker = (getControl() != null ? new MarkerObject(context, getControl(), noradId, markerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
+            MarkerObject newMarker = (getControl() != null ? new MarkerObject(context, getControl(), noradId, markerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowTitleAlways(), true, common.getInfoLocation()) : null);
 
             if(newMarker != null)
             {

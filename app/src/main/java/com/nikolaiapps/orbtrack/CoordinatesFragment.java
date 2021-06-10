@@ -69,10 +69,12 @@ public interface CoordinatesFragment
         static class Shared
         {
             int noradId;
+            boolean tleIsAccurate;
 
             Shared()
             {
                 noradId = Integer.MIN_VALUE;
+                tleIsAccurate = true;
             }
         }
 

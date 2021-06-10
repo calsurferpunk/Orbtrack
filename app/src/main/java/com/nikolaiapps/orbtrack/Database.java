@@ -93,9 +93,9 @@ public class Database extends SQLiteOpenHelper
 
     private static abstract class TLELines
     {
-        static final String ISSZarya1 = "1 25544U 98067A   21108.42295789  .00000927  00000-0  25054-4 0  9996";
-        static final String ISSZarya2 = "2 25544  51.6449 278.3283 0002643 241.5252 205.0036 15.48895119279331";
-        static final long ISSZaryaDate = 1618765539555L;
+        static final String ISSZarya1 = "1 25544U 98067A   21161.71310111  .00000998  00000-0  26302-4 0  9999";
+        static final String ISSZarya2 = "2 25544  51.6456  14.7466 0003669  84.5683 357.1938 15.48972041287593";
+        static final long ISSZaryaDate = 1623360979879L;
     }
 
     private static final int ISS_ZARYA_NORAD_ID = 25544;
@@ -812,7 +812,7 @@ public class Database extends SQLiteOpenHelper
     private static final int MAX_INFO_LENGTH = 5000;
     private static final int MAX_LANGUAGE_LENGTH = 10;
 
-    private static final int DB_VERSION = 10;
+    private static final int DB_VERSION = 11;
     private static final String DB_NAME = "OrbTrack.DB";
     private static UpdateStatusType updateStatus = null;
 

@@ -1324,8 +1324,11 @@ class Whirly
                 {
                     //move orbital
                     orbitalMarker.setRotation(bearing + 135);
-                    orbitalMarker.moveLocation(latitude, longitude, altitudeKm);
+
                 }
+
+                //move orbital
+                orbitalMarker.moveLocation(latitude, longitude, altitudeKm);
             }
             else
             {

@@ -2,11 +2,9 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -465,8 +463,8 @@ public abstract class Orbitals
         private final boolean simple;
         private final String categoryTitle;
 
-        private BroadcastReceiver updateReceiver;
-        private BroadcastReceiver saveReceiver;
+        private UpdateReceiver updateReceiver;
+        private UpdateReceiver saveReceiver;
         private Globals.PendingFile pendingSaveFile;
 
         public Page(String title, boolean simple)
@@ -721,223 +719,179 @@ public abstract class Orbitals
             setItemClicksEnabled(true);
         }
 
-        //Creates local broadcast receiver
-        private BroadcastReceiver createLocalBroadcastReceiver(BroadcastReceiver oldReceiver, final int page, final MultiProgressDialog taskProgress, final ArrayList<Database.DatabaseSatellite> satellites, final ArrayList<Integer> listIndexes)
+        //Creates an update receiver
+        private UpdateReceiver createLocalUpdateReceiver(UpdateReceiver oldReceiver, byte updateType, final ArrayList<Database.DatabaseSatellite> satellites, final ArrayList<Integer> listIndexes, boolean showProgress)
         {
             Context context = this.getContext();
+            Resources res = this.getResources();
+            MultiProgressDialog taskProgress;
+            boolean savingFile = (updateType == UpdateService.UpdateType.SaveFile);
 
-            //if context and old receiver are set
-            if(context != null && oldReceiver != null)
+            //if old receiver is set
+            if(oldReceiver != null)
             {
-                //remove old receiver
-                LocalBroadcastManager.getInstance(context).unregisterReceiver(oldReceiver);
+                //remove it
+                oldReceiver.unregister(context);
+            }
+
+            //create progress if using
+            taskProgress = (showProgress ? Globals.createProgressDialog(context) : null);
+            if(showProgress)
+            {
+                Globals.setUpdateDialog(taskProgress, res.getString(savingFile ? R.string.title_saving : R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, 2), updateType);
+                taskProgress.show();
             }
 
             //create receiver
-            BroadcastReceiver updateReceiver = new BroadcastReceiver()
+            UpdateReceiver receiver = new UpdateReceiver()
             {
                 @Override
-                public void onReceive(Context context, Intent intent)
+                protected View getParentView()
                 {
-                    int index;
-                    byte messageType = intent.getByteExtra(UpdateService.ParamTypes.MessageType, Byte.MAX_VALUE);
-                    byte updateType = intent.getByteExtra(UpdateService.ParamTypes.UpdateType, Byte.MAX_VALUE);
-                    int progressType = intent.getIntExtra(UpdateService.ParamTypes.ProgressType, Byte.MAX_VALUE);
-                    long updateIndex = intent.getLongExtra(UpdateService.ParamTypes.Index, 0);
-                    long updateCount = intent.getLongExtra(UpdateService.ParamTypes.Count, 0);
-                    long updateValue;
-                    String section = intent.getStringExtra(UpdateService.ParamTypes.Section);
-                    Bundle extraData = intent.getExtras();
-                    Resources res = context.getResources();
-                    boolean useBroadcast = false;
-                    boolean savingFile = (updateType == UpdateService.UpdateType.SaveFile);
+                    return(Page.this.listParentView);
+                }
+
+                @Override
+                protected void onProgress(long updateValue, long updateCount, String section)
+                {
+                    //if progress exists
+                    if(taskProgress != null && (updateValue - 1) < satellites.size())
+                    {
+                        taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount + (savingFile ? "" : (" (" + satellites.get((int)updateValue - 1).getName() + ")")));
+                        taskProgress.setProgress(updateValue, updateCount);
+                    }
+                }
+
+                @Override
+                protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
+                {
                     boolean forDropbox = (section != null && section.equals(Globals.FileLocationType.Dropbox));
                     boolean forGoogleDrive = (section != null && section.equals(Globals.FileLocationType.GoogleDrive));
-                    String errorMessage;
-                    File usedFile;
 
-                    //if extra data not set
-                    if(extraData == null)
+                    //handle based on progress type
+                    switch(progressType)
                     {
-                        //create empty
-                        extraData = new Bundle();
-                    }
+                        case Globals.ProgressType.Finished:
+                        case Globals.ProgressType.Cancelled:
+                        case Globals.ProgressType.Denied:
+                        case Globals.ProgressType.Failed:
+                            //if were saving a file
+                            if(savingFile)
+                            {
+                                //deselect items
+                                setItemsSelected(false);
+                            }
 
-                    //get any used file
-                    usedFile = (File)extraData.getSerializable(UpdateService.ParamTypes.UsedFile);
-
-                    //get if using broadcast
-                    switch(updateType)
-                    {
-                        case UpdateService.UpdateType.UpdateSatellites:
-                        case UpdateService.UpdateType.SaveFile:
-                            useBroadcast = (page == PageType.Satellites);
-                            break;
-                    }
-
-                    //if using broadcast
-                    if(useBroadcast)
-                    {
-                        //get integer of long value
-                        index = (int)updateIndex;
-
-                        //handle based on progress
-                        switch(progressType)
-                        {
-                            //started
-                            case Globals.ProgressType.Started:
-                                //if MessageTypes.General1
-                                if(messageType == UpdateService.MessageTypes.General)
+                            //close progress
+                            if(taskProgress != null)
+                            {
+                                try
                                 {
-                                    //disable orientation changes until done
-                                    lockScreenOrientation(true);
+                                    taskProgress.dismiss();
                                 }
-                                //else if a valid index
-                                else if(taskProgress != null && index < satellites.size() && updateCount > 0)
+                                catch(Exception ex)
                                 {
-                                    //update progress
-                                    updateValue = updateIndex + 1;
-                                    taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount + (savingFile ? "" : (" (" + satellites.get(index).getName() + ")")));
-                                    taskProgress.setProgress(updateValue, updateCount);
+                                    //do nothing
                                 }
-                                break;
+                            }
 
-                            //if success updating
-                            case Globals.ProgressType.Success:
-                                //if not saving a file and a valid index
-                                if(!savingFile && index < listIndexes.size())
-                                {
-                                    //deselect item
-                                    setItemSelected(listIndexes.get(index), false);
-                                }
-                                break;
+                            //show status
+                            switch(progressType)
+                            {
+                                case Globals.ProgressType.Denied:
+                                    //show denied
+                                    Globals.showSnackBar(Page.this.listParentView, res.getString(R.string.text_login_failed), true);
 
-                            //done
-                            case Globals.ProgressType.Finished:
-                            case Globals.ProgressType.Cancelled:
-                            case Globals.ProgressType.Denied:
-                            case Globals.ProgressType.Failed:
-                                //if MessageTypes.General1
-                                if(messageType == UpdateService.MessageTypes.General)
-                                {
-                                    //if were saving a file
-                                    if(savingFile)
+                                    //if try to update satellites
+                                    if(updateType == UpdateService.UpdateType.UpdateSatellites)
                                     {
-                                        //deselect items
-                                        setItemsSelected(false);
-                                    }
-
-                                    //close progress and show count
-                                    if(taskProgress != null)
-                                    {
-                                        try
+                                        //if activity is set
+                                        final Activity currentActivity = Page.this.getActivity();
+                                        if(currentActivity != null)
                                         {
-                                            taskProgress.dismiss();
-                                        }
-                                        catch(Exception ex)
-                                        {
-                                            //do nothing
-                                        }
-                                    }
-
-                                    //show status
-                                    switch(progressType)
-                                    {
-                                        case Globals.ProgressType.Denied:
-                                            //show denied
-                                            Globals.showSnackBar(Page.this.listParentView, res.getString(R.string.text_login_failed), true);
-
-                                            //if try to update satellites
-                                            if(updateType == UpdateService.UpdateType.UpdateSatellites)
+                                            //show login
+                                            Globals.showAccountLogin(currentActivity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
                                             {
-                                                //if activity is set
-                                                final Activity currentActivity = Page.this.getActivity();
-                                                if(currentActivity != null)
+                                                @Override
+                                                public void onResult(Globals.WebPageData pageData, boolean success)
                                                 {
-                                                    //show login
-                                                    Globals.showAccountLogin(currentActivity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
+                                                    //if success or attempted to login
+                                                    if(success || pageData != null)
                                                     {
-                                                        @Override
-                                                        public void onResult(Globals.WebPageData pageData, boolean success)
+                                                        //try again
+                                                        currentActivity.runOnUiThread(new Runnable()
                                                         {
-                                                            //if success or attempted to login
-                                                            if(success || pageData != null)
+                                                            @Override
+                                                            public void run()
                                                             {
-                                                                //try again
-                                                                currentActivity.runOnUiThread(new Runnable()
-                                                                {
-                                                                    @Override
-                                                                    public void run()
-                                                                    {
-                                                                        runTaskSelectedItems(UpdateService.UpdateType.UpdateSatellites);
-                                                                    }
-                                                                });
+                                                                runTaskSelectedItems(UpdateService.UpdateType.UpdateSatellites);
                                                             }
-                                                        }
-                                                    });
+                                                        });
+                                                    }
                                                 }
-                                            }
-                                            break;
+                                            });
+                                        }
+                                    }
+                                    break;
 
-                                        case Globals.ProgressType.Failed:
-                                            //show failed
-                                            errorMessage = UpdateService.getError(updateType);
-                                            Globals.showSnackBar(Page.this.listParentView, res.getString(R.string.title_failed) + " " + res.getString(savingFile ? R.string.title_saving : R.string.title_updating), errorMessage, true, true);
-                                            break;
+                                case Globals.ProgressType.Failed:
+                                    //show failed
+                                    Globals.showSnackBar(Page.this.listParentView, res.getString(R.string.title_failed) + " " + res.getString(savingFile ? R.string.title_saving : R.string.title_updating), UpdateService.getError(updateType), true, true);
+                                    break;
 
-                                        case Globals.ProgressType.Finished:
-                                            //if for Dropbox or Google Drive
-                                            if(forDropbox || forGoogleDrive)
+                                case Globals.ProgressType.Finished:
+                                    //if for Dropbox or Google Drive
+                                    if(forDropbox || forGoogleDrive)
+                                    {
+                                        //if activity exists
+                                        Activity currentActivity = Page.this.getActivity();
+                                        if(currentActivity != null)
+                                        {
+                                            //save file
+                                            if(forGoogleDrive)
                                             {
-                                                //if activity exists
-                                                Activity currentActivity = Page.this.getActivity();
-                                                if(currentActivity != null)
-                                                {
-                                                    //save file
-                                                    if(forGoogleDrive)
-                                                    {
-                                                        GoogleDriveAccess.start(currentActivity, usedFile, index, true);
-                                                    }
-                                                    else
-                                                    {
-                                                        DropboxAccess.start(currentActivity, usedFile, index, true);
-                                                    }
-                                                }
+                                                GoogleDriveAccess.start(currentActivity, usedFile, count, true);
                                             }
                                             else
                                             {
-                                                //show success
-                                                Globals.showSnackBar(Page.this.listParentView, res.getQuantityString(savingFile ? R.plurals.title_satellites_saved : R.plurals.title_satellites_updated, index, index), (index < 1));
+                                                DropboxAccess.start(currentActivity, usedFile, count, true);
                                             }
-                                            break;
+                                        }
                                     }
-
-                                    //unlock orientation
-                                    lockScreenOrientation(false);
-
-                                    //if not saving file and weren't denied
-                                    //note: updating on denied causes wrong page instance on login retry
-                                    if(!savingFile && progressType != Globals.ProgressType.Denied)
+                                    else
                                     {
-                                        //send event
-                                        onUpdateNeeded();
+                                        //show success
+                                        Globals.showSnackBar(Page.this.listParentView, res.getQuantityString(savingFile ? R.plurals.title_satellites_saved : R.plurals.title_satellites_updated, count, count), (count < 1));
                                     }
-                                }
-                                break;
-                        }
+                                    break;
+                            }
+
+                            //if not saving file and weren't denied
+                            //note: updating on denied causes wrong page instance on login retry
+                            if(!savingFile && progressType != Globals.ProgressType.Denied)
+                            {
+                                //send event
+                                onUpdateNeeded();
+                            }
+                            break;
+                    }
+                }
+
+                @Override
+                protected void onDownloadUpdate(int progressType, byte updateType, long updateValue, long updateCount)
+                {
+                    //if success, not saving a file, and a valid index
+                    if(progressType == Globals.ProgressType.Success && updateType != UpdateService.UpdateType.SaveFile && updateValue >= 1)
+                    {
+                        //deselect item
+                        setItemSelected(listIndexes.get((int)updateValue - 1), false);
                     }
                 }
             };
 
-            //if have context
-            if(context != null)
-            {
-                //register receiver
-                LocalBroadcastManager.getInstance(context).registerReceiver(updateReceiver, new IntentFilter(UpdateService.UPDATE_FILTER));
-            }
-
-            //return receiver
-            return(updateReceiver);
+            //register and receiver
+            receiver.register(context);
+            return(receiver);
         }
 
         //Sets save file data
@@ -955,10 +909,8 @@ public abstract class Orbitals
             FragmentActivity activity = this.getActivity();
             boolean showProgress = true;
             boolean needDeselect = false;
-            boolean savingFile = (updateType == UpdateService.UpdateType.SaveFile);
             boolean askInternet = (confirmInternet && Globals.shouldAskInternetConnection(activity));
             Resources res = this.getResources();
-            MultiProgressDialog taskProgress = null;
             ArrayList<Integer> listIndexes = new ArrayList<>(0);
             ArrayList<Database.DatabaseSatellite> satellites = new ArrayList<>(0);
             int[] satelliteIds;
@@ -978,14 +930,12 @@ public abstract class Orbitals
                 //get current item
                 Orbitals.PageListItem currentItem = (Orbitals.PageListItem)selectedItems.get(index);
 
-                //handle based on page
-                switch(pageNum)
+                //if on satellites page
+                if(pageNum == PageType.Satellites)
                 {
-                    case PageType.Satellites:
-                        //add satellite ID and list index
-                        satelliteIds[index] = currentItem.id;
-                        listIndexes.add(currentItem.listIndex);
-                        break;
+                    //add satellite ID and list index
+                    satelliteIds[index] = currentItem.id;
+                    listIndexes.add(currentItem.listIndex);
                 }
             }
 
@@ -1020,15 +970,6 @@ public abstract class Orbitals
                         break;
                 }
 
-                //if showing progress
-                if(showProgress)
-                {
-                    //start showing progress
-                    taskProgress = Globals.createProgressDialog(activity);
-                    Globals.setUpdateDialog(taskProgress, res.getString(savingFile ? R.string.title_saving : R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, count), updateType);
-                    taskProgress.show();
-                }
-
                 //handle task
                 switch(updateType)
                 {
@@ -1041,7 +982,7 @@ public abstract class Orbitals
                                 if(Globals.haveWritePermission(activity))
                                 {
                                     //save file if not already
-                                    saveReceiver = createLocalBroadcastReceiver(saveReceiver, pageNum, taskProgress, satellites, listIndexes);
+                                    saveReceiver = createLocalUpdateReceiver(saveReceiver, updateType, satellites, listIndexes, showProgress);
                                     if(!UpdateService.savingFile() && activity != null)
                                     {
                                        //save satellites
@@ -1086,7 +1027,7 @@ public abstract class Orbitals
                                 else
                                 {
                                     //save file if not already
-                                    saveReceiver = createLocalBroadcastReceiver(saveReceiver, pageNum, taskProgress, satellites, listIndexes);
+                                    saveReceiver = createLocalUpdateReceiver(saveReceiver, updateType, satellites, listIndexes, showProgress);
                                     if(!UpdateService.savingFile() && activity != null)
                                     {
                                         //save satellites
@@ -1115,7 +1056,7 @@ public abstract class Orbitals
                         else
                         {
                             //update satellites
-                            updateReceiver = createLocalBroadcastReceiver(updateReceiver, pageNum, taskProgress, satellites, listIndexes);
+                            updateReceiver = createLocalUpdateReceiver(updateReceiver, updateType, satellites, listIndexes, showProgress);
                             if(!UpdateService.updatingSatellites())
                             {
                                 UpdateService.updateSatellites(activity, res.getQuantityString(R.plurals.title_satellites_updating, count), satellites, false);

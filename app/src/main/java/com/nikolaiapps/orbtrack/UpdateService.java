@@ -805,6 +805,7 @@ public class UpdateService extends NotifyService
         Uri fileUri = intent.getParcelableExtra(ParamTypes.FileUri);
         String user = intent.getStringExtra(ParamTypes.User);
         String pwd = intent.getStringExtra(ParamTypes.Password);
+        String section = intent.getStringExtra(ParamTypes.Section);
         String fileName = intent.getStringExtra(ParamTypes.FileName);
         String fileExt = intent.getStringExtra(ParamTypes.FileExt);
         String notifyTitle = intent.getStringExtra(ParamTypes.NotifyTitle);
@@ -828,6 +829,10 @@ public class UpdateService extends NotifyService
         updateNotification(notifyBuilder, updateType);
 
         //set defaults
+        if(section == null)
+        {
+            section = "";
+        }
         if(fileName == null)
         {
             fileName = "";
@@ -838,14 +843,14 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, updateType, "", Globals.ProgressType.Started);
+        sendMessage(MessageTypes.General, updateType, section, Globals.ProgressType.Started);
 
         //handle based on update type
         switch(updateType)
         {
             case UpdateType.UpdateSatellites:
                 //update satellites
-                updateSatellites(updateSource, user, pwd, satelliteList);
+                updateSatellites(updateSource, section, user, pwd, satelliteList);
                 break;
 
             case UpdateType.GetMasterList:
@@ -875,7 +880,7 @@ public class UpdateService extends NotifyService
 
             default:
                 //nothing to update
-                sendMessage(MessageTypes.General, updateType, "", Globals.ProgressType.Failed);
+                sendMessage(MessageTypes.General, updateType, section, Globals.ProgressType.Failed);
                 break;
         }
 
@@ -2919,7 +2924,7 @@ public class UpdateService extends NotifyService
     }
 
     //Updates satellites
-    private void updateSatellites(int updateSource, String user, String pwd, ArrayList<Database.DatabaseSatellite> satelliteList)
+    private void updateSatellites(int updateSource, String section, String user, String pwd, ArrayList<Database.DatabaseSatellite> satelliteList)
     {
         int index;
         int index2;
@@ -2933,10 +2938,8 @@ public class UpdateService extends NotifyService
         boolean loginFailed = false;
         boolean downloadError = false;
         boolean usingGP = Settings.getSatelliteSourceUseGP(this, updateSource);
-        String section;
         String receivedPage;
         String receivedPageLower;
-        Resources res = this.getResources();
         Database.DatabaseSatellite[] satellites = satelliteList.toArray(new Database.DatabaseSatellite[0]);
         Globals.WebPageData loginData = null;
         Globals.WebPageData tleData;
@@ -2959,7 +2962,7 @@ public class UpdateService extends NotifyService
             index2 = index;
 
             //update progress
-            sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, (index + 1) + res.getString(R.string.text_space_of_space) + count, index, count, Globals.ProgressType.Started);
+            sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index, count, Globals.ProgressType.Started);
 
             //if updating from space track
             if(updateSource == Database.UpdateSource.SpaceTrack)
@@ -3059,7 +3062,6 @@ public class UpdateService extends NotifyService
                     Database.DatabaseSatellite currentSatellite = satellites[index3];
 
                     //update progress
-                    section = (index3 + 1) + res.getString(R.string.text_space_of_space) + count;
                     sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index3, count, Globals.ProgressType.Started);
 
                     //if updated from UpdateSource.N2YO and owner is missing (not on countries page on website), try to find
@@ -3109,7 +3111,7 @@ public class UpdateService extends NotifyService
             else
             {
                 //update progress
-                sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, (index + 1) + res.getString(R.string.text_space_of_space) + count, index, count, Globals.ProgressType.Failed);
+                sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index, count, Globals.ProgressType.Failed);
             }
 
             index = index2;
@@ -3123,7 +3125,7 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, UpdateType.UpdateSatellites, "", index, count, (loginFailed ? Globals.ProgressType.Denied : downloadError ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
+        sendMessage(MessageTypes.General, UpdateType.UpdateSatellites, section, index, count, (loginFailed ? Globals.ProgressType.Denied : downloadError ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
     }
 
     //Loads a database backup file and returns saved satellite count
@@ -3754,7 +3756,7 @@ public class UpdateService extends NotifyService
     }
 
     //Update given satellites
-    public static void updateSatellites(Context context, String notifyTitle, ArrayList<Database.DatabaseSatellite> satellites, boolean runForeground)
+    public static void updateSatellites(Context context, String notifyTitle, ArrayList<Database.DatabaseSatellite> satellites, boolean oldSatellites, boolean runForeground)
     {
         int updateSource = Settings.getSatelliteSource(context);
         Intent updateIntent = createIntent(context, UpdateType.UpdateSatellites, notifyTitle);
@@ -3765,8 +3767,16 @@ public class UpdateService extends NotifyService
         updateIntent.putExtra(ParamTypes.RunForeground, runForeground);
         updateIntent.putExtra(ParamTypes.User, loginData[0]);
         updateIntent.putExtra(ParamTypes.Password, loginData[1]);
+        if(oldSatellites)
+        {
+            updateIntent.putExtra(ParamTypes.Section, "Old");
+        }
 
         Globals.startService(context, updateIntent, runForeground);
+    }
+    public static void updateSatellites(Context context, String notifyTitle, ArrayList<Database.DatabaseSatellite> satellites, boolean runForeground)
+    {
+        updateSatellites(context, notifyTitle, satellites, false, runForeground);
     }
 
     //Loads a file

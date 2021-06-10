@@ -12,6 +12,7 @@ import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
+import java.io.File;
 import java.util.ArrayList;
 
 
@@ -44,7 +45,7 @@ public abstract class UpdateReceiver extends BroadcastReceiver
     }
 
     //On progress
-    protected void onProgress(long updateValue, long updateCount)
+    protected void onProgress(long updateValue, long updateCount, String section)
     {
         //needs to be overridden
     }
@@ -56,7 +57,13 @@ public abstract class UpdateReceiver extends BroadcastReceiver
     }
 
     //On general update
-    protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
+    protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
+    {
+        //needs to be overridden
+    }
+
+    //On download update
+    protected void onDownloadUpdate(int progressType, byte updateType, long updateValue, long updateCount)
     {
         //needs to be overridden
     }
@@ -98,15 +105,22 @@ public abstract class UpdateReceiver extends BroadcastReceiver
         Spanned infoText;
         Resources res = context.getResources();
 
+        //if extra data not set
+        if(extraData == null)
+        {
+            //create empty
+            extraData = new Bundle();
+        }
+
         //handle based on progress type
         switch(progressType)
         {
             case Globals.ProgressType.Started:
                 //if updating satellites and have a valid index/count
-                if(updateType == UpdateService.UpdateType.UpdateSatellites && index >= 0 && index < count)
+                if(index >= 0 && index < count)
                 {
                     //call on progress
-                    onProgress(index + 1, count);
+                    onProgress(index + 1, count, (section == null ? "" : section));
                 }
                 //fall through
 
@@ -116,13 +130,6 @@ public abstract class UpdateReceiver extends BroadcastReceiver
             case Globals.ProgressType.Failed:
                 //ending if not starting
                 ended = (progressType != Globals.ProgressType.Started);
-
-                //if extra data not set and might use
-                if(extraData == null && ended)
-                {
-                    //create empty
-                    extraData = new Bundle();
-                }
 
                 //if MessageType.General
                 if(isGeneral)
@@ -166,8 +173,9 @@ public abstract class UpdateReceiver extends BroadcastReceiver
 
                         case UpdateService.UpdateType.UpdateSatellites:
                         case UpdateService.UpdateType.GetMasterList:
+                        case UpdateService.UpdateType.SaveFile:
                             //call on general update
-                            onGeneralUpdate(progressType, updateType, ended);
+                            onGeneralUpdate(progressType, updateType, ended, (section == null ? "" : section), (int)count, (File)extraData.getSerializable(UpdateService.ParamTypes.UsedFile));
                             break;
                     }
                 }
@@ -218,6 +226,13 @@ public abstract class UpdateReceiver extends BroadcastReceiver
                         break;
                 }
                 break;
+        }
+
+        //if a download message
+        if(messageType == NotifyService.MessageTypes.Download)
+        {
+            //call on download update
+            onDownloadUpdate(progressType, updateType, index + 1, count);
         }
     }
 }

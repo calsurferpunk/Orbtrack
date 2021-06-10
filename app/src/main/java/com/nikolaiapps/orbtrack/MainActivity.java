@@ -1388,7 +1388,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
-                    updateSatellites(context, oldSatellites);
+                    updateOldSatellites(context, oldSatellites);
                 }
             }, new DialogInterface.OnDismissListener()
             {
@@ -1401,14 +1401,14 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    //Tries to update given satellites
-    private static void updateSatellites(Context context, ArrayList<Database.DatabaseSatellite> satellites)
+    //Tries to update given old satellites
+    private static void updateOldSatellites(Context context, ArrayList<Database.DatabaseSatellite> oldSatellites)
     {
         //if context is set
         if(context != null)
         {
             //update old satellites
-            UpdateService.updateSatellites(context, context.getResources().getQuantityString(R.plurals.title_satellites_updating, satellites.size()), satellites, false);
+            UpdateService.updateSatellites(context, context.getResources().getQuantityString(R.plurals.title_satellites_updating, oldSatellites.size()), oldSatellites, true, false);
         }
     }
 
@@ -2536,10 +2536,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            protected void onProgress(long updateValue, long updateCount)
+            protected void onProgress(long updateValue, long updateCount, String section)
             {
-                //if have resources
-                if(res != null)
+                //if have resources and updating old satellites
+                if(res != null && "Old".equals(section))
                 {
                     //update progress
                     taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount);
@@ -2574,9 +2574,10 @@ public class MainActivity extends AppCompatActivity
             }
 
             @Override
-            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
+            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
             {
                 int page = getMainPage();
+                boolean oldSatellites = "Old".equals(section);
                 boolean loadingFile = (updateType == UpdateService.UpdateType.LoadFile);
                 boolean updatingSatellites = (updateType == UpdateService.UpdateType.UpdateSatellites);
                 boolean onOrbitalsSatellites = (mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites);
@@ -2591,8 +2592,8 @@ public class MainActivity extends AppCompatActivity
                         Globals.setVisible(mainFloatingButton, ended && onOrbitalsSatellites);
                     }
 
-                    //if done and -loaded file, updated satellites, or running in background-
-                    if(ended && (loadingFile || updatingSatellites || UpdateService.getNotificationVisible(updateType)))
+                    //if done and -loaded file, -updated satellites and not on orbitals page or updating old satellites-, or running in background-
+                    if(ended && (loadingFile || (updatingSatellites && (!onOrbitalsSatellites || oldSatellites)) || UpdateService.getNotificationVisible(updateType)))
                     {
                         //update list
                         updateMainPager(true);
@@ -2600,7 +2601,7 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 //if updating old satellites
-                if(updatingSatellites)
+                if(updatingSatellites && oldSatellites)
                 {
                     //if starting
                     if(progressType == Globals.ProgressType.Started)
@@ -2643,7 +2644,7 @@ public class MainActivity extends AppCompatActivity
                                 if(success || pageData != null)
                                 {
                                     //try again
-                                    updateSatellites(MainActivity.this, getOldSatellites());
+                                    updateOldSatellites(MainActivity.this, getOldSatellites());
                                 }
                             }
                         });

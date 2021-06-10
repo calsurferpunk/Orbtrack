@@ -43,6 +43,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -1753,7 +1754,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
 
             @Override
-            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended)
+            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
             {
                 //if button and pager exist and on satellites
                 if(floatingButton != null && setupPager != null && setupPager.getCurrentItem() == SetupPageType.Satellites)

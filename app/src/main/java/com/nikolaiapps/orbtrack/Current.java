@@ -3049,45 +3049,6 @@ public abstract class Current
             }
         }
 
-        /*public static class NightShadow
-        {
-            private static final double SHADOW_RADIUS = (Calculations.EARTH_RADIUS_KM * 1000)  * Math.PI * 0.5;
-            private static final double TWILIGHT_BASE = ((Calculations.EARTH_RADIUS_KM * 1000) * Math.PI * 2) / 360.0;
-
-            private static Circle civilTwilight;
-            private static Circle nauticalTwilight;
-            private static Circle astronomicalTwilight;
-            private static Circle night;
-
-            public NightShadow(GoogleMap map)
-            {
-                civilTwilight = addShadow(map, 0.56666);
-                nauticalTwilight = addShadow(map, 6);
-                astronomicalTwilight = addShadow(map, 12);
-                night = addShadow(map, 18);
-            }
-
-            private Circle addShadow(GoogleMap map, double angle)
-            {
-                return(map.addCircle(new CircleOptions().center(new LatLng(0, 0)).radius(getShadowRadiusAngle(angle)).strokeColor(0x0A000000).fillColor(0x0A000000).strokeWidth(5).clickable(false)));
-            }
-
-            private double getShadowRadiusAngle(double angle)
-            {
-                return(SHADOW_RADIUS - (TWILIGHT_BASE * angle));
-            }
-
-            public void setCenter(double sunLatitude, double sunLongitude)
-            {
-                LatLng shadowCenter = new LatLng(-sunLatitude, sunLongitude + 180);
-
-                civilTwilight.setCenter(shadowCenter);
-                nauticalTwilight.setCenter(shadowCenter);
-                astronomicalTwilight.setCenter(shadowCenter);
-                night.setCenter(shadowCenter);
-            }
-        }*/
-
         //Task to calculate path/coordinate information
         public static class CalculatePathTask extends ThreadTask<Object, Integer, Integer[]>
         {

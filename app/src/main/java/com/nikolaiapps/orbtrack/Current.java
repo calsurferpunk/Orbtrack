@@ -1687,7 +1687,7 @@ public abstract class Current
                 currentItem.progressGroup = itemHolder.progressGroup;
                 if(itemHolder.outdatedText != null)
                 {
-                    itemHolder.outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                    itemHolder.outdatedText.setVisibility(forCalculation || currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -1703,7 +1703,7 @@ public abstract class Current
                 currentItem.rangeText = itemHolder.dataGroup3Text;
 
                 //update displays
-                currentItem.setLoading(!hasItems, currentItem.tleIsAccurate);
+                currentItem.setLoading(!hasItems, forCalculation || currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext);
             }
 
@@ -2281,7 +2281,7 @@ public abstract class Current
                 currentItem.progressStatusBar = (forCalculation ? null : itemHolder.currentProgressBar);
                 if(itemHolder.outdatedText != null)
                 {
-                    itemHolder.outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                    itemHolder.outdatedText.setVisibility(forCalculation || currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -2311,7 +2311,7 @@ public abstract class Current
                 currentItem.elMaxUnder.setVisibility(!forCalculation ? View.VISIBLE : View.GONE);
 
                 //set displays
-                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, currentItem.tleIsAccurate);
+                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, forCalculation || currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext, currentZone);
             }
 
@@ -2916,7 +2916,7 @@ public abstract class Current
                 currentItem.progressGroup = itemHolder.progressGroup;
                 if(itemHolder.outdatedText != null)
                 {
-                    itemHolder.outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                    itemHolder.outdatedText.setVisibility(forCalculation || currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -2937,7 +2937,7 @@ public abstract class Current
                 }
 
                 //update displays
-                currentItem.setLoading(!hasItems, currentItem.tleIsAccurate);
+                currentItem.setLoading(!hasItems, forCalculation || currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentZone);
             }
 

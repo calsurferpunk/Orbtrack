@@ -3,6 +3,7 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="true">tile.stamen.com</domain>
         <domain includeSubdomains="true">nikolaiapps.heliohost.us</domain>
+        <domain includeSubdomains="true">nikolaiapps.infinityfreeapp.com</domain>
         <trust-anchors>
             <certificates src="system"/>
         </trust-anchors>

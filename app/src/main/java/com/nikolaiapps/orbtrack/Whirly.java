@@ -67,7 +67,7 @@ class Whirly
     {
         private static final int BoardEye           = 50000000;
         private static final int BoardFlat          = 25000000;
-        private static final int Path               = 200000;
+        private static final int Path               = 400000;
         private static final int Layer              = 10000;
         private static final int LayerLatLon        = 12500;
         private static final int LayerHybridLines   = 15000;

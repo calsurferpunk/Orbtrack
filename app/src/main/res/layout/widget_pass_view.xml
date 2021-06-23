@@ -186,7 +186,8 @@
             android:id="@+id/Widget_Pass_Outdated_Text"
             style="@style/WidgetBarText"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/text_outdated"/>
+            android:layout_weight="0"
+            android:text="@string/text_outdated"
+            android:visibility="gone"/>
     </LinearLayout>
 </FrameLayout>

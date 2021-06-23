@@ -1056,68 +1056,85 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             @Override
             public void onCalculated(int progressType, final CalculateService.PassData pass)
             {
-                long midPassMs = (pass != null ? pass.getMidPass() : System.currentTimeMillis());
+                boolean havePass = (pass != null);
+                long midPassMs = (havePass ? pass.getMidPass() : System.currentTimeMillis());
                 final byte locationSource = WidgetBaseSetupActivity.getLocationSource(context, widgetId);
                 final AppWidgetManager manager = AppWidgetManager.getInstance(context);
                 final Calculations.ObserverType location = WidgetBaseSetupActivity.getLocation(context, widgetId);
                 final RemoteViews views = getViews(context, widgetClass, widgetId, midPassMs);
 
-                //if got pass
-                if(pass != null)
+                //if for current location
+                if(locationSource == Database.LocationType.Current)
                 {
-                    //if for current location
-                    if(locationSource == Database.LocationType.Current)
+                    //if have pass
+                    if(havePass)
                     {
                         //update pass
                         updatePass(context, widgetClass, alarmReceiverClass,  widgetId, manager, views, pass, TimeZone.getDefault());
+                    }
 
-                        //get resolved location
-                        AddressUpdateService.getResolvedLocation(context, location.geo.latitude, location.geo.longitude, new AddressUpdateService.OnLocationResolvedListener()
+                    //get resolved location
+                    AddressUpdateService.getResolvedLocation(context, location.geo.latitude, location.geo.longitude, new AddressUpdateService.OnLocationResolvedListener()
+                    {
+                        @Override
+                        public void onLocationResolved(String locationString, int resultCode)
                         {
-                            @Override
-                            public void onLocationResolved(String locationString, int resultCode)
+                            String unknown = Globals.getUnknownString(context);
+                            String locationName = (locationString == null || locationString.equals("") ? unknown : locationString);
+
+                            //if a known location
+                            if(!locationName.equals(unknown))
                             {
-                                String unknown = Globals.getUnknownString(context);
-                                String locationName = (locationString == null || locationString.equals("") ? unknown : locationString);
-
-                                //if a known location
-                                if(!locationName.equals(unknown))
+                                //update settings
+                                WidgetBaseSetupActivity.setLocationName(context, widgetId, locationName);
+                                if(!WidgetBaseSetupActivity.getLocationFollow(context, widgetId) && !WidgetBaseSetupActivity.getLocationInterval(context, widgetId))        //if not following or on an interval
                                 {
-                                    //update settings
-                                    WidgetBaseSetupActivity.setLocationName(context, widgetId, locationName);
-                                    if(!WidgetBaseSetupActivity.getLocationFollow(context, widgetId) && !WidgetBaseSetupActivity.getLocationInterval(context, widgetId))        //if not following or on an interval
-                                    {
-                                        //set to online source to prevent future updates
-                                        WidgetBaseSetupActivity.setLocationSource(context, widgetId, Database.LocationType.Online);
-                                    }
+                                    //set to online source to prevent future updates
+                                    WidgetBaseSetupActivity.setLocationSource(context, widgetId, Database.LocationType.Online);
                                 }
+                            }
 
-                                //set location text and next alarm
-                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, locationName);
-                                updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+                            //set location text
+                            setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, locationName);
+                            updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+
+                            //if have pass
+                            if(havePass)
+                            {
+                                //set next alarm
                                 updatePassAlarm(context, alarmReceiverClass, widgetId, pass.passTimeStart, pass.passTimeEnd, true);
                             }
-                        }, true);
-                    }
-                    else
+                        }
+                    }, true);
+                }
+                else
+                {
+                    //get timezone
+                    LocationService.GetTimezoneTask timezoneTask = new LocationService.GetTimezoneTask(location.geo.latitude, location.geo.longitude, new LocationService.GetTimezoneTask.OnGotTimezoneListener()
                     {
-                        //get timezone
-                        LocationService.GetTimezoneTask timezoneTask = new LocationService.GetTimezoneTask(location.geo.latitude, location.geo.longitude, new LocationService.GetTimezoneTask.OnGotTimezoneListener()
+                        @Override
+                        public void onGotTimeZone(String zoneId)
                         {
-                            @Override
-                            public void onGotTimeZone(String zoneId)
+                            //if have pass
+                            if(havePass)
                             {
                                 //update pass
                                 updatePass(context, widgetClass, alarmReceiverClass, widgetId, manager, views, pass, TimeZone.getTimeZone(zoneId));
+                            }
 
-                                //set location text
-                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
-                                updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+                            //set location text
+                            setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
+                            updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+
+                            //if have pass
+                            if(havePass)
+                            {
+                                //set next alarm
                                 updatePassAlarm(context, alarmReceiverClass, widgetId, pass.passTimeStart, pass.passTimeEnd, true);
                             }
-                        });
-                        timezoneTask.execute(context);
-                    }
+                        }
+                    });
+                    timezoneTask.execute(context);
                 }
             }
         });

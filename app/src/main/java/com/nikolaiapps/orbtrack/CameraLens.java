@@ -113,12 +113,47 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
 
         public final int id;
-        Bitmap image;
+        public Bitmap image;
+        private double lastAzimuth;
+        private double lastElevation;
+        public double angleDirection;
 
         public IconImage(int id, Bitmap image)
         {
             this.id = id;
             this.image = image;
+
+            angleDirection = 0;
+            lastAzimuth = Double.MAX_VALUE;
+            lastElevation = Double.MAX_VALUE;
+        }
+
+        public double getAngleDirection(double azimuth, double elevation)
+        {
+            //if a used ID
+            if(id >= 0)
+            {
+                //if angles changed
+                if(lastAzimuth != Double.MAX_VALUE && lastElevation != Double.MAX_VALUE && azimuth != Double.MAX_VALUE && elevation != Double.MAX_VALUE && (lastAzimuth != azimuth || lastElevation != elevation))
+                {
+                    //get angle direction
+                    angleDirection = 180 - Math.toDegrees(Math.atan2(lastElevation - elevation, lastAzimuth - azimuth));
+                }
+
+                //update last angles
+                lastAzimuth = azimuth;
+                lastElevation = elevation;
+            }
+
+            //return angle direction
+            return(angleDirection);
+        }
+
+        public void copyData(IconImage copyFrom)
+        {
+            lastAzimuth = copyFrom.lastAzimuth;
+            lastElevation = copyFrom.lastElevation;
+            angleDirection = copyFrom.angleDirection;
         }
     }
 
@@ -1000,7 +1035,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
 
                         //draw orbital
-                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], azCenterPx, elCenterPx, indicatorPxRadius, width, height, outsideArea);
+                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], azCenterPx, elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, outsideArea);
                     }
                 }
             }
@@ -1035,7 +1070,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     }
 
                     //show offset orbital position
-                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, indicatorPxRadius, width, height, false);
+                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, false);
                 }
                 else
                 {
@@ -1076,7 +1111,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     //Draws orbital at the given position
-    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
+    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, double azimuth, double elevation, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
     {
         float drawPxRadius = indicatorPxRadius / (outsideArea ? 2 : 1);
 
@@ -1119,8 +1154,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //if already in the list
                     if(indexes[0] >= 0)
                     {
-                        //use image
-                        indicatorIcon.image = orbitalIcons.get(indexes[0]).image;
+                        //remember current icon in list
+                        IconImage currentOrbitalIcon = orbitalIcons.get(indexes[0]);
+
+                        //use center and image
+                        indicatorIcon.copyData(currentOrbitalIcon);
+                        indicatorIcon.image = Globals.getBitmapRotated(currentOrbitalIcon.image, indicatorIcon.getAngleDirection(azimuth, elevation) - 135);
+                        currentOrbitalIcon.copyData(indicatorIcon);
                     }
                     else
                     {

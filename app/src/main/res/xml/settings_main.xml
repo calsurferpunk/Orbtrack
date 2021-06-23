@@ -39,6 +39,13 @@
                     android:key="LensIndicator"
                     android:summary="@string/desc_orbital_icon"/>
 
+                <SwitchPreference
+                    android:title="@string/title_show_orbital_direction"
+                    android:key="LensIndicatorIconShowDirection"
+                    android:summary="@string/desc_show_orbital_direction"
+                    android:persistent="false"
+                    app:isPreferenceVisible="false"/>
+
                 <com.nikolaiapps.orbtrack.SwitchButtonPreference
                     app:titleText="@string/title_show_horizon"
                     android:key="LensUseHorizon"

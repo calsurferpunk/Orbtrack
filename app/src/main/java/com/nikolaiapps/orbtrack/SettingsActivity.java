@@ -126,6 +126,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case ScreenKey.LensView:
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
+                        SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
                         SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
                         SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
@@ -141,11 +142,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(useCameraSwitch, null);
                         setupSwitch(rotateSwitch, null);
+                        setupSwitch(lensShowIconDirection, null);
                         setupSwitchButton(lensUseHorizonSwitch);
                         setupSwitchText(lensWidthSwitch);
                         setupSwitchText(lensHeightSwitch);
                         setupSwitchText(lensAzimuthOffsetSwitch);
-                        setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, null);
+                        setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, lensShowIconDirection);
                         setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
                         break;
@@ -322,6 +324,24 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.LensIndicator:
                             currentValue = Settings.getIndicator(context);
+
+                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            {
+                                @Override
+                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                {
+                                    int indicatorType = (int)newValue;
+
+                                    //if child preference exists
+                                    if(childPreference != null)
+                                    {
+                                        childPreference.setVisible(indicatorType == Settings.Options.LensView.IndicatorType.Icon);
+                                    }
+
+                                    //allow change
+                                    return(true);
+                                }
+                            });
                             break;
 
                         case Settings.PreferenceName.LensUpdateDelay:
@@ -1187,6 +1207,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             break;
 
                         case Settings.PreferenceName.LensIndicator:
+                        case Settings.PreferenceName.LensIndicatorIconShowDirection:
                         case Settings.PreferenceName.LensHorizonColor:
                         case Settings.PreferenceName.LensUseHorizon:
                         case Settings.PreferenceName.LensUseCamera:

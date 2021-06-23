@@ -591,6 +591,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int selectedOrbitalIndex;
     private boolean compassBad;
     private boolean compassHadBad;
+    private boolean showIconIndicatorDirection;
     private final float textSize;
     private final float textOffset;
     private final float textPadding;
@@ -651,6 +652,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         horizonColor = Globals.getColor(horizonLineColor, 70);
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
+        showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 8, metrics);
         textOffset = textSize / 1.5f;
         textPadding = (textSize * 0.15f);
@@ -1159,7 +1161,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
                         //use center and image
                         indicatorIcon.copyData(currentOrbitalIcon);
-                        indicatorIcon.image = Globals.getBitmapRotated(currentOrbitalIcon.image, indicatorIcon.getAngleDirection(azimuth, elevation) - 135);
+                        indicatorIcon.image = (showIconIndicatorDirection && noradId > 0 ? Globals.getBitmapRotated(currentOrbitalIcon.image, indicatorIcon.getAngleDirection(azimuth, elevation) - 135) : currentOrbitalIcon.image);
                         currentOrbitalIcon.copyData(indicatorIcon);
                     }
                     else

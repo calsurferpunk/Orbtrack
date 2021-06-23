@@ -90,6 +90,7 @@ public abstract class Settings
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
         static final String LensIndicator = "LensIndicator";
+        static final String LensIndicatorIconShowDirection = "LensIndicatorIconShowDirection";
         static final String LensHorizonColor = "LensHorizonColor";
         static final String LensUseHorizon = "LensUseHorizon";
         static final String LensUseCamera = "LensUseCamera";
@@ -1726,6 +1727,7 @@ public abstract class Settings
             case PreferenceName.FirstRun:
             case PreferenceName.LensFirstRun:
             case PreferenceName.LensUseCamera:
+            case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.MapMarkerShowShadow:
             case PreferenceName.MapRotateAllowed:
@@ -2008,6 +2010,18 @@ public abstract class Settings
     {
         setPreferenceInt(context, PreferenceName.LensIndicator, indicatorType);
     }
+
+    //Returns lens icon indicator showing direction
+    public static boolean getIndicatorIconShowDirection(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensIndicatorIconShowDirection));
+    }
+
+    /*//Sets lens icon indicator showing direction
+    public static void setIndicatorIconShowDirection(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.LensIndicatorIconShowDirection, show);
+    }*/
 
     //Gets lens average count
     public static int getLensAverageCount(Context context)

@@ -437,10 +437,25 @@ public abstract class Orbitals
                 @Override
                 public void onClick(View v)
                 {
+                    int noradId = item.id;
+                    Database.DatabaseSatellite currentOrbital;
+
                     //update visibility and save orbital in database
                     item.isVisible = !item.isVisible;
                     itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
-                    Database.saveSatellite(currentContext, item.id, item.isVisible);
+                    Database.saveSatellite(currentContext, noradId, item.isVisible);
+
+                    //if item is visible again
+                    if(item.isVisible)
+                    {
+                        //if not a valid TLE
+                        currentOrbital = Database.getOrbital(currentContext, noradId);
+                        if(currentOrbital != null && !currentOrbital.tleIsAccurate)
+                        {
+                            //make sure not in excluded old norad IDs
+                            MainActivity.updateExcludedOldNoradIds(noradId, false);
+                        }
+                    }
 
                     //update current usage
                     MainActivity.loadOrbitals(currentContext, holder.itemView);

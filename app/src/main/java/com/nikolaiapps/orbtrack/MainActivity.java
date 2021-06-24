@@ -83,6 +83,7 @@ public class MainActivity extends AppCompatActivity
     private static boolean wasRecreated = false;
     private static boolean runningUserSetup = false;
     private static boolean recreateAfterSetup = false;
+    private static boolean ranOldSatelliteUpdate = false;
     private static boolean pendingOldSatelliteMessage = false;
     private boolean savedState;
     private boolean finishedSetup;
@@ -130,6 +131,7 @@ public class MainActivity extends AppCompatActivity
     private CalculateService.CalculatePathsTask calculatePassesTask;
     private CalculateService.CalculatePathsTask calculateIntersectionsTask;
     private Current.Coordinates.CalculatePathTask currentCoordinatesTask;
+    private static ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
     private static Database.SatelliteData[] currentSatellites = new Database.SatelliteData[0];
     //
     //Location
@@ -1229,8 +1231,8 @@ public class MainActivity extends AppCompatActivity
         //go through current satellites
         for(Database.SatelliteData currentData : currentSatellites)
         {
-            //if current data TLE is not accurate
-            if(currentData.database != null && !currentData.database.tleIsAccurate)
+            //if current data TLE is not accurate and not in exclude list
+            if(currentData.database != null && !currentData.database.tleIsAccurate && !excludeOldNoradIds.contains(currentData.getSatelliteNum()))
             {
                 //add to list
                 oldSatellites.add(currentData.database);
@@ -1345,6 +1347,33 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    //Updates excluded old norad IDs
+    public static void updateExcludedOldNoradIds(int noradId, boolean add)
+    {
+        boolean inList = excludeOldNoradIds.contains(noradId);
+
+        //if adding
+        if(add)
+        {
+            //if not already in list
+            if(!inList)
+            {
+                //add it
+                excludeOldNoradIds.add(noradId);
+            }
+        }
+        //else removing
+        else
+        {
+            //if in the list
+            if(inList)
+            {
+                //remove it
+                excludeOldNoradIds.remove((Object)noradId);
+            }
+        }
+    }
+
     //Loads currently selected orbitals
     public static void loadOrbitals(Context context, View parentView)
     {
@@ -1382,12 +1411,15 @@ public class MainActivity extends AppCompatActivity
             oldMessage.append(res.getString(R.string.desc_need_updating));
 
             //show old satellite count
+            ranOldSatelliteUpdate = false;
             pendingOldSatelliteMessage = true;
             Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_outdated, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_dismiss, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
+                    //try to update old satellites
+                    ranOldSatelliteUpdate = true;
                     updateOldSatellites(context, oldSatellites);
                 }
             }, new DialogInterface.OnDismissListener()
@@ -1395,6 +1427,22 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onDismiss(DialogInterface dialog)
                 {
+                    int oldNoradId;
+                    ArrayList<Database.DatabaseSatellite> remainingOldSatellites;
+
+                    //if didn't just run old satellite update
+                    if(!ranOldSatelliteUpdate)
+                    {
+                        //add any remaining to the excluded list
+                        remainingOldSatellites = getOldSatellites();
+                        for(Database.DatabaseSatellite currentSatellite : remainingOldSatellites)
+                        {
+                            //add to list if not in already
+                            updateExcludedOldNoradIds(currentSatellite.noradId, true);
+                        }
+                    }
+
+                    //done with message
                     pendingOldSatelliteMessage = false;
                 }
             });

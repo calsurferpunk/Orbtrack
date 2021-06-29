@@ -156,15 +156,15 @@
                 <TextView
                     android:id="@+id/Widget_Pass_Start_Direction_Text"
                     style="@style/WidgetDetailText"
-                    android:layout_width="0dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.2"
+                    android:layout_weight="0"
                     android:gravity="center"/>
 
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.8"
+                    android:layout_weight="1"
                     android:layout_gravity="center"
                     android:orientation="vertical">
                     <TextView

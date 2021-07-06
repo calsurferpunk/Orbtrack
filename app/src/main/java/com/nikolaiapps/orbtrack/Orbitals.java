@@ -327,7 +327,8 @@ public abstract class Orbitals
                 launchDateText.setText(String.valueOf(currentTLE.launchYear));
                 launchNumberText.setText(String.valueOf(currentTLE.launchNum));
             }
-            else
+            //else if info button exists
+            else if(infoButton != null)
             {
                 //show info display
                 infoButton.performClick();

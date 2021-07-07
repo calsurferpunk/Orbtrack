@@ -3143,6 +3143,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_mng;
                     break;
 
+                case "mus":
+                    ids[0] = R.drawable.owner_mus;
+                    break;
+
                 case "nato":
                     ids[0] = R.drawable.owner_nato;
                     break;

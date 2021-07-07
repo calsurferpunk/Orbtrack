@@ -84,7 +84,7 @@
                 <LinearLayout
                     android:id="@+id/Widget_Pass_Normal_Layout"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="0.4"
                     android:layout_gravity="center"
                     android:gravity="center"
@@ -105,7 +105,7 @@
                 <LinearLayout
                     android:id="@+id/Widget_Pass_Extended_Layout"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="wrap_content"
                     android:layout_weight="0.4"
                     android:layout_gravity="center"
                     android:gravity="center"
@@ -161,24 +161,13 @@
                     android:layout_weight="0"
                     android:gravity="center"/>
 
-                <LinearLayout
+                <TextView
+                    android:id="@+id/Widget_Pass_Start_Time_Text"
+                    style="@style/WidgetDetailText"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:layout_gravity="center"
-                    android:orientation="vertical">
-                    <TextView
-                        android:id="@+id/Widget_Pass_Start_Date_Text"
-                        style="@style/WidgetDetailText"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"/>
-
-                    <TextView
-                        android:id="@+id/Widget_Pass_Start_Time_Text"
-                        style="@style/WidgetDetailText"
-                        android:layout_height="wrap_content"
-                        android:gravity="center"/>
-                </LinearLayout>
+                    android:gravity="center"/>
             </LinearLayout>
         </LinearLayout>
 

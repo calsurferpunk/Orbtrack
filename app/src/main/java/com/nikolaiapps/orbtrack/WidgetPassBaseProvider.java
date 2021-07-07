@@ -21,7 +21,6 @@ import android.widget.ImageView;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -83,7 +82,6 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             int widgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
             //byte passAlarmType = intent.getByteExtra(ParamTypes.PassAlarmType, PassAlarmType.None);
             String action = intent.getAction();
-            //String debugName = context.getPackageName();
             Class<?> alarmReceiverClass = getClass();
             Class<?> widgetClass = getWidgetClass();
             ArrayList<Integer> ids;
@@ -91,9 +89,6 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //if action is set
             if(action != null)
             {
-                //show log
-                //Log.d(debugName, "onReceive " + widgetClass.getName() + " " + action);
-
                 //handle based on action
                 switch(action)
                 {
@@ -126,10 +121,6 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     case ACTION_UPDATE_WIDGETS_ALARM:
                         //get IDs
                         ids = getWidgetIdList(context, widgetClass);
-
-                        //show log
-                        //Log.d(debugName, "onReceive " + widgetClass.getName() + " updating " + ids.size() + " widgets");
-
 
                         //update all widgets
                         for(int currentId : ids)
@@ -170,13 +161,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         int noradId;
         Class<?> widgetClass = getClass();
         Class<?> alarmReceiverClass = getAlarmReceiverClass();
-        //String debugName = context.getPackageName();
 
         //update display DPI
         dpWidth = Globals.getDeviceDp(context);
-
-        //show log
-        //Log.d(debugName, "onUpdate " + widgetClass.getName() + " (" + (widgetIds != null ? widgetIds.length : 0) + ")");
 
         //if IDs are set
         if(widgetIds != null)
@@ -189,7 +176,6 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 {
                     //update widget
                     noradId = WidgetBaseSetupActivity.getNoradID(context, widgetId);
-                    //Log.d(debugName, "updateWidget " + noradId);
                     updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, getViews(context, widgetClass, widgetId), (isFirstUpdate() && noradId != Universe.IDs.Invalid));
                 }
             }
@@ -520,7 +506,6 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
                 case R.id.Widget_Pass_Start_Text:
                 case R.id.Widget_Pass_Start_Direction_Text:
-                case R.id.Widget_Pass_Start_Date_Text:
                 case R.id.Widget_Pass_Start_Time_Text:
                     size = WidgetBaseSetupActivity.getPassStartTextSize(context, widgetClass, widgetId);
                     color = WidgetBaseSetupActivity.getPassStartTextColor(context, widgetId);
@@ -754,7 +739,6 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         else
         {
             setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Date_Text, null);
             setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, null);
         }
         if(useExtended)
@@ -941,12 +925,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 sameDay = (displayLocalTime != null && currentLocalTime != null && displayLocalTime.get(Calendar.DAY_OF_YEAR) == currentLocalTime.get(Calendar.DAY_OF_YEAR));
 
                 setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, (useStart ? Globals.Symbols.Up : Globals.Symbols.Down));
-                setViewVisibility(views, parent, R.id.Widget_Pass_Start_Date_Text, !sameDay);
-                if(!sameDay)
-                {
-                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Date_Text, Globals.getLocalDayString(context, displayTime, zone));
-                }
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, Globals.getDateString(context, displayTime, zone, false, false, false, true));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, (!sameDay ? (Globals.getLocalDayString(context, displayTime, zone) + " ") : "") + Globals.getDateString(context, displayTime, zone, false, false, false, true).replace(" ", "&nbsp;"));
             }
             if(useExtended)
             {
@@ -1097,7 +1076,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
                             //set location text
                             setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, locationName);
-                            updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+                            manager.partiallyUpdateAppWidget(widgetId, views);
 
                             //if have pass
                             if(havePass)
@@ -1128,7 +1107,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                             {
                                 //set location text
                                 setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
-                                updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+                                manager.partiallyUpdateAppWidget(widgetId, views);
                             }
 
                             //if have pass

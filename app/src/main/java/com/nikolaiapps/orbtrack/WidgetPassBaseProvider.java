@@ -1057,6 +1057,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             public void onCalculated(int progressType, final CalculateService.PassData pass)
             {
                 boolean havePass = (pass != null);
+                boolean useNormal = !widgetClass.equals(WidgetPassTinyProvider.class);
                 long midPassMs = (havePass ? pass.getMidPass() : System.currentTimeMillis());
                 final byte locationSource = WidgetBaseSetupActivity.getLocationSource(context, widgetId);
                 final AppWidgetManager manager = AppWidgetManager.getInstance(context);
@@ -1122,9 +1123,13 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                                 updatePass(context, widgetClass, alarmReceiverClass, widgetId, manager, views, pass, TimeZone.getTimeZone(zoneId));
                             }
 
-                            //set location text
-                            setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
-                            updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+                            //if displaying location
+                            if(useNormal)
+                            {
+                                //set location text
+                                setViewText(context, widgetClass, widgetId, views, null, R.id.Widget_Pass_Location_Text, WidgetBaseSetupActivity.getLocationName(context, widgetId));
+                                updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
+                            }
 
                             //if have pass
                             if(havePass)

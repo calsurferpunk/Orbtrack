@@ -1350,12 +1350,17 @@ class Whirly
                     orbitalBoard.setImage(bearingImage, 1);
                 }
 
-                //move orbital
-                orbitalBoard.moveLocation(latitude, longitude, altitudeKm, true);
-
                 //get current zoom and if orbital within zoom
                 currentZoom = getCurrentZoom();
                 withinZoom = (((currentZoom * ZoomToZValue) - orbitalBoard.zValue) > 0);
+
+                //if -there is a last zoom- and -showing shadow- and --within zoom changed- or -not within zoom and zoom changed--
+                if(lastMoveZoom != 0 && showShadow && ((withinZoom != lastMoveWithinZoom) || (!withinZoom && currentZoom != lastMoveZoom)))
+                {
+                    //update info size
+                    setText(showingInfo ? lastInfo : null);
+                }
+                infoBoard.moveLocation(latitude, longitude, (withinZoom || !showShadow ? altitudeKm : 0.5), withinZoom || !showShadow);
 
                 //if showing shadow
                 if(showShadow && orbitalShadow != null)
@@ -1372,13 +1377,8 @@ class Whirly
                     orbitalShadow.moveLocation(latitude, longitude);
                 }
 
-                //if -there is a last zoom- and -showing shadow- and --within zoom changed- or -not within zoom and zoom changed--
-                if(lastMoveZoom != 0 && showShadow && ((withinZoom != lastMoveWithinZoom) || (!withinZoom && currentZoom != lastMoveZoom)))
-                {
-                    //update info size
-                    setText(showingInfo ? lastInfo : null);
-                }
-                infoBoard.moveLocation(latitude, longitude, (withinZoom || !showShadow ? altitudeKm : 0.5), withinZoom || !showShadow);
+                //move orbital
+                orbitalBoard.moveLocation(latitude, longitude, altitudeKm, true);
 
                 //update last move status
                 lastMoveZoom = currentZoom;

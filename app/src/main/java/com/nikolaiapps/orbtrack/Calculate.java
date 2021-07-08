@@ -193,7 +193,7 @@ public abstract class Calculate
                             switch(subPage)
                             {
                                 case Globals.SubPageType.List:
-                                    listAdapter = new Current.Passes.ItemListAdapter(context, page, savedItems, null, MainActivity.getTimeZone(), true);
+                                    listAdapter = new Current.Passes.ItemListAdapter(context, page, savedItems, null, true);
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;

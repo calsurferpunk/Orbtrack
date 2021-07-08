@@ -769,17 +769,15 @@ public abstract class Current
         //Item list adapter
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
-            private final TimeZone currentZone;
             private final Items combinedItems;
 
-            public ItemListAdapter(Context context, Combined.Item[] savedItems, Database.SatelliteData[] orbitals, TimeZone zone)
+            public ItemListAdapter(Context context, Combined.Item[] savedItems, Database.SatelliteData[] orbitals)
             {
                 super(context);
 
                 int index;
                 boolean usePathProgress = Settings.getListPathProgress(context);
 
-                currentZone = zone;
                 combinedItems = new Items(MainActivity.Groups.Current, PageType.Combined);
 
                 //if there are saved items
@@ -850,7 +848,7 @@ public abstract class Current
                     outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
                 currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
-                currentItem.updateDisplays(currentContext, currentZone);
+                currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
             }
 
             @Override
@@ -866,6 +864,7 @@ public abstract class Current
                 }
 
                 final TimeZone defaultZone = TimeZone.getDefault();
+                final TimeZone currentZone = MainActivity.getTimeZone();
                 final int mapDisplayType = Settings.getMapDisplayType(currentContext);
                 final long currentTimeMs = System.currentTimeMillis();
                 final long passDurationMs = currentItem.getPassDurationMs();
@@ -1898,10 +1897,9 @@ public abstract class Current
         //Item list adapter
         public static class ItemListAdapter extends ItemListAdapterBase
         {
-            private final TimeZone currentZone;
             private final Items pathItems;
 
-            public ItemListAdapter(Context context, int page, Item[] savedItems, Database.SatelliteData[] satellites, TimeZone zone, boolean forCalc)
+            public ItemListAdapter(Context context, int page, Item[] savedItems, Database.SatelliteData[] satellites, boolean forCalc)
             {
                 super(context, page);
 
@@ -1909,7 +1907,6 @@ public abstract class Current
                 boolean usePathProgress = (!forCalculation && Settings.getListPathProgress(context));
 
                 forCalculation = forCalc;
-                currentZone = zone;
                 pathItems = new Items((forCalculation ? MainActivity.Groups.Calculate : MainActivity.Groups.Current), page);
 
                 //if there are saved items
@@ -2081,7 +2078,7 @@ public abstract class Current
 
                 //set displays
                 currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, forCalculation || currentItem.tleIsAccurate);
-                currentItem.updateDisplays(currentContext, currentZone);
+                currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
             }
 
             @Override
@@ -2093,6 +2090,7 @@ public abstract class Current
                 if(currentItem.passCalculated)
                 {
                     final TimeZone defaultZone = TimeZone.getDefault();
+                    final TimeZone currentZone = MainActivity.getTimeZone();
                     final long midPassTimeMs = currentItem.getMidPass();
                     final long currentTimeMs = System.currentTimeMillis();
                     final long passDurationMs = (currentItem.passTimeStart != null && currentItem.passTimeEnd != null ? (currentItem.passTimeEnd.getTimeInMillis() - currentItem.passTimeStart.getTimeInMillis()) : 0);
@@ -3630,7 +3628,7 @@ public abstract class Current
                     {
                         case PageType.Passes:
                             Passes.Item[] savedItems = (Passes.Item[])Current.PageAdapter.getSavedItems(page);
-                            listAdapter = new Passes.ItemListAdapter(context, page, savedItems, MainActivity.getSatellites(), MainActivity.getTimeZone(), false);
+                            listAdapter = new Passes.ItemListAdapter(context, page, savedItems, MainActivity.getSatellites(), false);
 
                             if(subPage == Globals.SubPageType.Lens)
                             {
@@ -3658,7 +3656,7 @@ public abstract class Current
 
                 case PageType.Combined:
                     Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems(page);
-                    listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites(), MainActivity.getTimeZone());
+                    listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites());
 
                     //set if need to create lens/map view
                     createLens = (subPage == Globals.SubPageType.Lens);

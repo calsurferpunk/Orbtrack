@@ -34,6 +34,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
+import android.widget.TextView;
 import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -3699,6 +3700,7 @@ public class MainActivity extends AppCompatActivity
                 double phase;
                 double julianDate = Calculations.julianDateCalendar(Globals.getGMTTime());
                 String coordinateString = null;
+                TextView mapInfoText = Current.Coordinates.getMapInfoText();
                 TopographicDataType topoData;
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 TopographicDataType[] selectedLookAngles = null;
@@ -3951,7 +3953,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     //if on map, map info text exists, and using marker bottom info
-                    if(onMap && Current.Coordinates.mapInfoText != null && Settings.usingMapMarkerInfoBottom())
+                    if(onMap && mapInfoText != null && Settings.usingMapMarkerInfoBottom())
                     {
                         final String infoString = coordinateString;
                         MainActivity.this.runOnUiThread(new Runnable()
@@ -3963,13 +3965,13 @@ public class MainActivity extends AppCompatActivity
                                 if(infoString != null)
                                 {
                                     //update and show coordinates
-                                    Current.Coordinates.mapInfoText.setText(infoString.replace("\n", Globals.COORDINATE_SEPARATOR));
-                                    Current.Coordinates.mapInfoText.setVisibility(View.VISIBLE);
+                                    mapInfoText.setText(infoString.replace("\n", Globals.COORDINATE_SEPARATOR));
+                                    mapInfoText.setVisibility(View.VISIBLE);
                                 }
                                 else
                                 {
                                     //hide coordinates
-                                    Current.Coordinates.mapInfoText.setVisibility(View.GONE);
+                                    mapInfoText.setVisibility(View.GONE);
                                 }
                             }
                         });

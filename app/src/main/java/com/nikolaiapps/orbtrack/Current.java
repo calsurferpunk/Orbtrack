@@ -32,6 +32,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.nikolaiapps.orbtrack.Calculations.*;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -2332,7 +2333,7 @@ public abstract class Current
         private static CoordinatesFragment.OrbitalBase moonMarker = null;
 
         public static boolean showPaths = false;
-        public static TextView mapInfoText;
+        public static WeakReference<TextView> mapInfoTextReference;
         public static CoordinatesFragment mapView;
         public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
 
@@ -3009,6 +3010,12 @@ public abstract class Current
             }
         }
 
+        //Gets map information text
+        public static TextView getMapInfoText()
+        {
+            return(mapInfoTextReference != null ? mapInfoTextReference.get() : null);
+        }
+
         //Setup zoom buttons
         private static void setupZoomButtons(final Context context, final FloatingActionStateButton showZoomButton, final View zoomLayout, FloatingActionButton zoomInButton, FloatingActionButton zoomOutButton)
         {
@@ -3221,6 +3228,7 @@ public abstract class Current
                         Item nextItem;
                         Item currentItem = playbackItems[progressValue];
                         Calendar playTime = Globals.getGMTTime();
+                        TextView mapInfoText = getMapInfoText();
 
                         //set play time
                         playTime.setTimeInMillis(currentItem.time.getTimeInMillis());
@@ -3298,8 +3306,9 @@ public abstract class Current
             final FloatingActionButton zoomOutButton = zoomLayout.findViewById(R.id.Map_Zoom_Out_Button);
 
             //get displays
+            final TextView mapInfoText = rootView.findViewById(R.id.Coordinate_Info_Text);
+            mapInfoTextReference = new WeakReference<>(mapInfoText);
             args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
-            mapInfoText = rootView.findViewById(R.id.Coordinate_Info_Text);
             mapView = (forGlobe ? new Whirly.GlobeFragment() : new Whirly.MapFragment());
             mapView.setArguments(args);
             searchList = (allMapOrbitals && !useSavedPath ? (IconSpinner)rootView.findViewById(R.id.Map_Search_List) : null);

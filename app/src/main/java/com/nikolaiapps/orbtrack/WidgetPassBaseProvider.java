@@ -59,9 +59,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     //Widget data class
     public static class WidgetData
     {
-        public int widgetId;
-        public Class<?> widgetClass;
-        public Class<?> alarmReceiverClass;
+        public final int widgetId;
+        public final Class<?> widgetClass;
+        public final Class<?> alarmReceiverClass;
 
         public WidgetData(int widgetId, Class<?> widgetClass, Class<?> alarmReceiverClass)
         {

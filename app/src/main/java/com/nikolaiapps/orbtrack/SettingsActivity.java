@@ -728,9 +728,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         @Override
-        protected void onActionModeEdit() {}
-
-        @Override
         protected void onActionModeDelete() {}
 
         @Override

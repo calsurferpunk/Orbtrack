@@ -817,25 +817,17 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     }
 
     @Override
-    public void onLocationChanged(Location location)
+    public void onLocationChanged(@NonNull Location location)
     {
-        //if location exists
-        if(location != null || currentLocation != null)
-        {
-            //stop timer and any running task
-            stopTimeoutTimer(this);
+        //stop timer and any running task
+        stopTimeoutTimer(this);
 
-            //if location was just updated
-            if(location != null)
-            {
-                //set current location and remember it
-                currentLocation = location;
-                Settings.setLastLocation(LocationService.this, currentLocation);
-            }
+        //set current location and remember it
+        currentLocation = location;
+        Settings.setLastLocation(LocationService.this, currentLocation);
 
-            //try to send existing/last location
-            sendLocation();
-        }
+        //try to send existing/last location
+        sendLocation();
     }
 
     //Gets a new start intent
@@ -1058,7 +1050,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                 locationListener = new LocationCallback()
                 {
                     @Override
-                    public void onLocationResult(LocationResult locationResult)
+                    public void onLocationResult(@NonNull LocationResult locationResult)
                     {
                         super.onLocationResult(locationResult);
                         LocationService.this.onLocationChanged(locationResult.getLastLocation());

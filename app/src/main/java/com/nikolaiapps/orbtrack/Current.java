@@ -531,7 +531,7 @@ public abstract class Current
         //Item
         public static class Item extends CalculateService.PassData
         {
-            public boolean tleIsAccurate;
+            public final boolean tleIsAccurate;
             public float azimuth;
             public float elevation;
             public float rangeKm;
@@ -1355,7 +1355,7 @@ public abstract class Current
         public static class Item extends CalculateViewsTask.ViewItemBase
         {
             private String name;
-            public boolean tleIsAccurate;
+            public final boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
             public Drawable icon;
@@ -2574,7 +2574,7 @@ public abstract class Current
         {
             private String name;
 
-            public boolean tleIsAccurate;
+            public final boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
             public Drawable icon;
@@ -2657,7 +2657,7 @@ public abstract class Current
                 julianDate = jd;
                 time = Globals.julianDateToCalendar(julianDate);
                 timeText = null;
-                tleIsAccurate = false;
+                tleIsAccurate = tleAccurate;
             }
             public Item(int index)
             {
@@ -3939,9 +3939,6 @@ public abstract class Current
         }
 
         @Override
-        protected void onActionModeEdit() {}
-
-        @Override
         protected void onActionModeDelete() {}
 
         @Override
@@ -4524,9 +4521,9 @@ public abstract class Current
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
-        final Passes.Item currentSavedPathIem = (useSavedPassPath ? savedPassItems[passIndex] : null);
-        final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath ? currentSavedPathIem.passViews : null);
-        final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathIem.id)) : null);
+        final Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
+        final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath ? currentSavedPathItem.passViews : null);
+        final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem.id)) : null);
         final FloatingActionStateButton showCalibrationButton;
         final FloatingActionStateButton showHorizonButton;
         final FloatingActionStateButton showPathButton;
@@ -4755,7 +4752,7 @@ public abstract class Current
             TextView header = (TextView)Globals.replaceView(R.id.Lens_Header, R.layout.header_text_view, inflater, rootView);
             Calendar startTime = (useSavedViewPath ? savedViewItems[0].time : passViews[0].gmtTime);
             Calendar endTime = (useSavedViewPath ? savedViewItems[savedViewItems.length - 1].time : passViews[passViews.length - 1].gmtTime);
-            header.setText(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathIem != null ? currentSavedPathIem.name : currentSatellite.getName()), startTime, endTime));
+            header.setText(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathItem != null ? currentSavedPathItem.name : currentSatellite.getName()), startTime, endTime));
             header.setVisibility(View.VISIBLE);
 
             //setup play bar

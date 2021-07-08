@@ -591,7 +591,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int selectedOrbitalIndex;
     private boolean compassBad;
     private boolean compassHadBad;
-    private boolean showIconIndicatorDirection;
+    private final boolean showIconIndicatorDirection;
     private final float textSize;
     private final float textOffset;
     private final float textPadding;

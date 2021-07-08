@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -90,6 +91,7 @@ class Whirly
             snippetLayout = null;
         }
 
+        @SuppressLint("InflateParams")
         public Bitmap get(Context context, String text)
         {
             int width;

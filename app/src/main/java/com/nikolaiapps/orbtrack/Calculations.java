@@ -1858,13 +1858,13 @@ public abstract class Calculations
         double sel, sil, sll;
         double alfdp, betdp, dalf, dbet;
         double sinis, cosis, sinzf, sinok, cosok;
-        double sghs = 0.0;
-        double shs  = 0.0;
-        double sh1  = 0.0;
-        double pe   = 0.0;
-        double pinc = 0.0;
-        double pl   = 0.0;
-        double sghl = 0.0;
+        double sghs;
+        double shs;
+        double sh1;
+        double pe;
+        double pinc;
+        double pl;
+        double sghl;
         Sdp4PeriodicsDataType sdp4PeriodicsData = new Sdp4PeriodicsDataType();
 
         noradData._em = e;

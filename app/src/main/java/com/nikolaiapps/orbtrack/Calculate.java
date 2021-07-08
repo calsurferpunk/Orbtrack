@@ -265,9 +265,6 @@ public abstract class Calculate
         }
 
         @Override
-        protected void onActionModeEdit() {}
-
-        @Override
         protected void onActionModeDelete() {}
 
         @Override
@@ -494,16 +491,14 @@ public abstract class Calculate
                         ((TextView)listAdapter.headerView).setText(text);
                     }
 
-                    switch(page)
+                    if(page == PageType.View)
                     {
-                        case PageType.View:
-                            rootView = Page.this.getView();
-                            if(rootView != null)
-                            {
-                                listAdapter.dataID = id;
-                                listAdapter.setColumnTitles(rootView.findViewById(listAdapter.itemsRootViewID), null, page);
-                            }
-                            break;
+                        rootView = Page.this.getView();
+                        if(rootView != null)
+                        {
+                            listAdapter.dataID = id;
+                            listAdapter.setColumnTitles(rootView.findViewById(listAdapter.itemsRootViewID), null, page);
+                        }
                     }
                 }
             });
@@ -587,23 +582,19 @@ public abstract class Calculate
                     if(pageNum >= 0 && pageNum < savedInputs.length)
                     {
                         //handle based on sub page
-                        switch(subPageNum)
+                        if(subPageNum == Globals.SubPageType.Input)
                         {
-                            case Globals.SubPageType.Input:
-                                //save inputs
-                                savedInputs[pageNum] = ((Page)page).getInputValues();
-                                break;
+                            //save inputs
+                            savedInputs[pageNum] = ((Page)page).getInputValues();
                         }
                     }
                 }
             });
 
             //get saved params
-            switch(subPageNum)
+            if(subPageNum == Globals.SubPageType.Input)
             {
-                case Globals.SubPageType.Input:
-                    savedParams = savedInputs[position];
-                    break;
+                savedParams = savedInputs[position];
             }
 
             //set params

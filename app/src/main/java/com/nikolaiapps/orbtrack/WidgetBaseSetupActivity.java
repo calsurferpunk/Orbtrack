@@ -833,9 +833,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         }
 
         @Override
-        protected void onActionModeEdit() {}
-
-        @Override
         protected void onActionModeDelete() {}
 
         @Override

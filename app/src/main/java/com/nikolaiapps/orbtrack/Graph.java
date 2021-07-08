@@ -13,7 +13,6 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -414,7 +413,7 @@ public class Graph extends View
                         //if allow scrolling
                         if(allowScroll)
                         {
-                            maxScroll = ((width - screenWidth) - (Math.max(xValueWidth, xAxisDivisionImageTitleWidest) / 2)) + (Build.VERSION.SDK_INT >= 17 ? getPaddingStart() : getPaddingLeft());
+                            maxScroll = ((width - screenWidth) - (Math.max(xValueWidth, xAxisDivisionImageTitleWidest) / 2)) + getPaddingStart();
 
                             if(maxScroll >= 0)
                             {

@@ -103,7 +103,6 @@ public interface CoordinatesFragment
             Database.SatelliteData data;
             Calculations.GeodeticDataType geo;
             Calculations.GeodeticDataType lastGeo;
-            final ArrayList<Coordinate> points;
 
             Shared()
             {
@@ -111,7 +110,6 @@ public interface CoordinatesFragment
                 data = null;
                 geo = null;
                 lastGeo = null;
-                points = new ArrayList<>(0);
             }
         }
 

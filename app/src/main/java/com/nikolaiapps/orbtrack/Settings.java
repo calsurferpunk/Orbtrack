@@ -1524,9 +1524,6 @@ public abstract class Settings
         }
 
         @Override
-        protected void onActionModeEdit() {}
-
-        @Override
         protected void onActionModeDelete()
         {
             //show deletion dialog
@@ -1747,12 +1744,7 @@ public abstract class Settings
 
         }
 
-        if(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartNextOnly, PreferenceName.NotifyFullMoonEndNextOnly, PreferenceName.NotifyPassStartNextOnly, PreferenceName.NotifyPassEndNextOnly))
-        {
-            return(true);
-        }
-
-        return(false);
+        return(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartNextOnly, PreferenceName.NotifyFullMoonEndNextOnly, PreferenceName.NotifyPassStartNextOnly, PreferenceName.NotifyPassEndNextOnly));
     }
 
     //Gets given boolean preference

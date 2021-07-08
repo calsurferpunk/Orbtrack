@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -40,7 +41,7 @@ public class MultiProgressDialog extends AlertDialog
         super(context, cancelable, cancelListener);
     }
 
-    @Override
+    @Override @SuppressLint("InflateParams")
     protected void onCreate(Bundle savedInstanceState)
     {
         View view = LayoutInflater.from(getContext()).inflate(R.layout.multi_progress_dialog, null);

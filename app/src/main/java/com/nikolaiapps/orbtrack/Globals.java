@@ -115,7 +115,7 @@ public abstract class Globals
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
-    static CookieManager cookies = new CookieManager("space-track.org");
+    static final CookieManager cookies = new CookieManager("space-track.org");
 
     //Progress types
     public static abstract class ProgressType
@@ -324,7 +324,6 @@ public abstract class Globals
     //Pending file
     public static class PendingFile
     {
-        public int page;
         public final int type;
         public final int fileSourceType;
         public String name;
@@ -333,7 +332,6 @@ public abstract class Globals
 
         public PendingFile(Uri out, String nm, String ext, int typ, int flSrcType)
         {
-            page = -1;
             outUri = out;
             name = nm;
             extension = ext;
@@ -4212,7 +4210,7 @@ public abstract class Globals
         OkHttpClient.Builder clientBuilder;
         InputStream dataStream;
         FormBody.Builder postBuilder;
-        BufferedReader streamReader = null;
+        BufferedReader streamReader;
         Request.Builder siteRequestBuilder;
         Response siteHttpsConnection = null;
 
@@ -4321,9 +4319,9 @@ public abstract class Globals
             }
         }
     }
-    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String outString, String authToken, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
+    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String outString, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
     {
-        return(getWebPage(urlString, postNames, postValues, outString, authToken, "text/xml; charset=utf-8", listener, retryCount, maxRetryCount));
+        return(getWebPage(urlString, postNames, postValues, outString, null, "text/xml; charset=utf-8", listener, retryCount, maxRetryCount));
     }
     public static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues)
     {
@@ -4333,12 +4331,12 @@ public abstract class Globals
     public static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, Globals.OnProgressChangedListener listener)
     {
         //try up to 3 times to get web page
-        return(getWebPage(urlString, postNames, postValues, null, null, listener, 1, 3));
+        return(getWebPage(urlString, postNames, postValues, null, listener, 1, 3));
     }
     public static WebPageData getWebPage(String urlString, String outString, Globals.OnProgressChangedListener listener)
     {
         //try up to 3 times to get web page
-        return(getWebPage(urlString, null, null, outString, null, listener, 1, 3));
+        return(getWebPage(urlString, null, null, outString, listener, 1, 3));
     }
     public static String getWebPage(String urlString, boolean closeConnection, Globals.OnProgressChangedListener listener)
     {
@@ -4386,7 +4384,7 @@ public abstract class Globals
     //Tries to get a JSON  web page
     public static JSONObject getJSONWebPage(String urlString)
     {
-        WebPageData webData = getWebPage(urlString, null, null, null, null, null, 0, 0);
+        WebPageData webData = getWebPage(urlString, null, null, null, null, 0, 0);
 
         if(webData.connection != null)
         {

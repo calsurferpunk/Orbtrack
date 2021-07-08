@@ -3728,14 +3728,7 @@ public class UpdateService extends NotifyService
     //Returns account type for given update source
     private static int getAccountType(int updateSource)
     {
-        switch(updateSource)
-        {
-            case Database.UpdateSource.SpaceTrack:
-                return(Globals.AccountType.SpaceTrack);
-
-            default:
-                return(Globals.AccountType.None);
-        }
+        return(updateSource == Database.UpdateSource.SpaceTrack ? Globals.AccountType.SpaceTrack : Globals.AccountType.None);
     }
 
     //Update master list

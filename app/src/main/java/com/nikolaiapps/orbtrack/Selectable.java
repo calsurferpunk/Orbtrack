@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -193,6 +194,7 @@ public abstract class Selectable
         }
 
         //Item detail dialog
+        @SuppressLint("InflateParams")
         public class ItemDetailDialog
         {
             private boolean canShow;
@@ -1311,9 +1313,6 @@ public abstract class Selectable
         //Sets action mode item properties
         protected abstract boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync);
 
-        //Handles on action mode edit
-        protected abstract void onActionModeEdit();
-
         //Handles action mode delete
         protected abstract void onActionModeDelete();
         protected abstract int onActionModeConfirmDelete();
@@ -1592,10 +1591,6 @@ public abstract class Selectable
             //handle item
             switch(id)
             {
-                case R.id.menu_edit:
-                    onActionModeEdit();
-                    break;
-
                 case R.id.menu_delete:
                     onActionModeDelete();
                     break;

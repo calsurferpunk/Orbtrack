@@ -106,19 +106,6 @@
                 android:resource="@xml/widget_pass_medium"/>
         </receiver>
 
-        <!--receiver
-            android:name=".WidgetPassCustomProvider"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
-                <action android:name="android.appwidget.action.APPWIDGET_APPWIDGET_DELETED"/>
-                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_SETTINGS_CLICK"/>
-            </intent-filter>
-            <meta-data
-                android:name="android.appwidget.provider"
-                android:resource="@xml/widget_pass_custom"/>
-        </receiver-->
-
         <receiver
             android:name=".WidgetPassTinyProvider$AlarmReceiver"
             android:exported="false">
@@ -148,16 +135,6 @@
                 <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_LOCATION_ALARM"/>
             </intent-filter>
         </receiver>
-
-        <!--receiver
-            android:name=".WidgetPassCustomProvider$AlarmReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
-                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_PASS_ALARM"/>
-                <action android:name="com.nikolaiapps.orbtrack.WidgetPassBaseProvider.ACTION_UPDATE_LOCATION_ALARM"/>
-            </intent-filter>
-        </receiver-->
 
         <activity
             android:name=".MainActivity"

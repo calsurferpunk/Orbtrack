@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity
     private CalculateService.CalculatePathsTask calculatePassesTask;
     private CalculateService.CalculatePathsTask calculateIntersectionsTask;
     private Current.Coordinates.CalculatePathTask currentCoordinatesTask;
-    private static ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
+    private static final ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
     private static Database.SatelliteData[] currentSatellites = new Database.SatelliteData[0];
     //
     //Location
@@ -778,20 +778,13 @@ public class MainActivity extends AppCompatActivity
         int page = getMainPage();
         boolean show = false;
 
-        switch(mainGroup)
+        if(mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)
         {
-            case Groups.Orbitals:
-                switch(page)
-                {
-                    case Orbitals.PageType.Satellites:
-                        show = !UpdateService.modifyingSatellites();
-                        if(inEditMode)
-                        {
-                            imageID = R.drawable.ic_mode_edit_white;
-                        }
-                        break;
-                }
-                break;
+            show = !UpdateService.modifyingSatellites();
+            if(inEditMode)
+            {
+                imageID = R.drawable.ic_mode_edit_white;
+            }
         }
 
         //update visibility
@@ -828,15 +821,13 @@ public class MainActivity extends AppCompatActivity
         }
 
         //get status based on group
-        switch(mainGroup)
+        if(mainGroup == Groups.Current)
         {
-            case Groups.Current:
-                //if not combined
-                if(page != Current.PageType.Combined)
-                {
-                    usingGrid = Settings.getUsingCurrentGridLayout(page);
-                }
-                break;
+            //if not combined
+            if(page != Current.PageType.Combined)
+            {
+                usingGrid = Settings.getUsingCurrentGridLayout(page);
+            }
         }
 
         //handle item
@@ -987,58 +978,46 @@ public class MainActivity extends AppCompatActivity
                 break;
 
             case R.id.menu_filter:
-                switch(mainGroup)
+                if(mainGroup == Groups.Current)
                 {
-                    case Groups.Current:
-                        showFilterDialog();
-                        break;
+                    showFilterDialog();
                 }
                 break;
 
             case R.id.menu_settings:
-                switch(mainGroup)
+                if(mainGroup == Groups.Current)
                 {
-                    case Groups.Current:
-                        showSettingsDialog();
-                        break;
+                    showSettingsDialog();
                 }
+                break;
 
             case R.id.menu_update:
-                switch(mainGroup)
+                if(mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)
                 {
-                    case Groups.Orbitals:
-                        switch(page)
-                        {
-                            case Orbitals.PageType.Satellites:
-                                showConfirmUpdateDialog();
-                                break;
-                        }
-                        break;
+                    showConfirmUpdateDialog();
                 }
                 break;
 
             case R.id.menu_edit:
-                switch(mainGroup)
+                if(mainGroup == Groups.Calculate)
                 {
-                    case Groups.Calculate:
-                        switch(page)
-                        {
-                            case Calculate.PageType.View:
-                            case Calculate.PageType.Passes:
-                            case Calculate.PageType.Coordinates:
-                            case Calculate.PageType.Intersection:
-                                //stop any running task on page
-                                stopPageTask();
+                    switch(page)
+                    {
+                        case Calculate.PageType.View:
+                        case Calculate.PageType.Passes:
+                        case Calculate.PageType.Coordinates:
+                        case Calculate.PageType.Intersection:
+                            //stop any running task on page
+                            stopPageTask();
 
-                                //update sub page
-                                setSubPage(Groups.Calculate, page, Globals.SubPageType.Input);
+                            //update sub page
+                            setSubPage(Groups.Calculate, page, Globals.SubPageType.Input);
 
-                                //update display
-                                updateMainPager(false);
-                                updateOptionsMenu();
-                                break;
-                        }
-                        break;
+                            //update display
+                            updateMainPager(false);
+                            updateOptionsMenu();
+                            break;
+                    }
                 }
                 break;
 
@@ -1427,7 +1406,6 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onDismiss(DialogInterface dialog)
                 {
-                    int oldNoradId;
                     ArrayList<Database.DatabaseSatellite> remainingOldSatellites;
 
                     //if didn't just run old satellite update
@@ -1957,7 +1935,6 @@ public class MainActivity extends AppCompatActivity
 
         //remember pending save file
         setSaveFileData(outUri, fileName, extension, -1, fileSourceType);
-        pendingSaveFile.page = page;
 
         //handle based on file source
         switch(fileSourceType)
@@ -2392,28 +2369,26 @@ public class MainActivity extends AppCompatActivity
         int page = getMainPage();
 
         //handle based on page
-        switch(mainGroup)
+        if(mainGroup == Groups.Calculate)
         {
-            case Groups.Calculate:
-                switch(page)
-                {
-                    case Calculate.PageType.View:
-                        setCalculateViewCalculations(false, null, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-                        break;
+            switch(page)
+            {
+                case Calculate.PageType.View:
+                    setCalculateViewCalculations(false, null, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+                    break;
 
-                    case Calculate.PageType.Passes:
-                        setCalculatePassCalculations(false, null, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
-                        break;
+                case Calculate.PageType.Passes:
+                    setCalculatePassCalculations(false, null, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE);
+                    break;
 
-                    case Calculate.PageType.Coordinates:
-                        setCalculateCoordinateCalculations(false, null, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
-                        break;
+                case Calculate.PageType.Coordinates:
+                    setCalculateCoordinateCalculations(false, null, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE);
+                    break;
 
-                    case Calculate.PageType.Intersection:
-                        setCalculateIntersectionCalculations(false, null, null, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
-                        break;
-                }
-                break;
+                case Calculate.PageType.Intersection:
+                    setCalculateIntersectionCalculations(false, null, null, Double.MAX_VALUE, Double.MAX_VALUE, -Double.MAX_VALUE, -Double.MAX_VALUE);
+                    break;
+            }
         }
     }
 
@@ -2984,21 +2959,17 @@ public class MainActivity extends AppCompatActivity
     //Handles main floating button click
     private void handleMainFloatingButtonClick(boolean isLong)
     {
-        int page = getMainPage();
-
         //handle based on group
-        switch(mainGroup)
+        if(mainGroup == Groups.Orbitals)
         {
-            case Groups.Orbitals:
-                if(inEditMode)
-                {
-                    Orbitals.showEditDialog(this, mainPager, orbitalPageAdapter);
-                }
-                else
-                {
-                    Orbitals.showAddDialog(this, mainDrawerLayout, isLong);
-                }
-                break;
+            if(inEditMode)
+            {
+                Orbitals.showEditDialog(this, mainPager, orbitalPageAdapter);
+            }
+            else
+            {
+                Orbitals.showAddDialog(this, mainDrawerLayout, isLong);
+            }
         }
     }
 
@@ -3062,20 +3033,18 @@ public class MainActivity extends AppCompatActivity
 
                     case Selectable.ListBaseAdapter.DetailButtonType.MapView:
                     case Selectable.ListBaseAdapter.DetailButtonType.GlobeView:
-                        switch(group)
+                        if(group == Groups.Current)
                         {
-                            case Groups.Current:
-                                switch(pageType)
-                                {
-                                    case Current.PageType.Coordinates:
-                                    case Current.PageType.Combined:
-                                        //update sub page and norad ID
-                                        setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
-                                        mapViewNoradID = itemID;
-                                        setMainGroup(mainGroup, true);
-                                        break;
-                                }
-                                break;
+                            switch(pageType)
+                            {
+                                case Current.PageType.Coordinates:
+                                case Current.PageType.Combined:
+                                    //update sub page and norad ID
+                                    setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
+                                    mapViewNoradID = itemID;
+                                    setMainGroup(mainGroup, true);
+                                    break;
+                            }
                         }
                         break;
 
@@ -3339,48 +3308,32 @@ public class MainActivity extends AppCompatActivity
                     updateMainPager(false);
                     updateOptionsMenu();
 
-                    //calculation based on page
-                    switch(page)
+                    //if on sub list
+                    if(subPage == Globals.SubPageType.List)
                     {
-                        case Calculate.PageType.View:
-                            switch(subPage)
-                            {
-                                case Globals.SubPageType.List:
-                                    //start calculating
-                                    setCalculateViewCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
-                                    break;
-                            }
-                            break;
+                        //calculation based on page
+                        switch(page)
+                        {
+                            case Calculate.PageType.View:
+                                //start calculating
+                                setCalculateViewCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
+                                break;
 
-                        case Calculate.PageType.Passes:
-                            switch(subPage)
-                            {
-                                case Globals.SubPageType.List:
-                                    //reset last inputs and start calculating
-                                    setCalculatePassCalculations(true, satellite, julianDateStart, julianDateEnd, elevationMin);
-                                    break;
-                            }
-                            break;
+                            case Calculate.PageType.Passes:
+                                //reset last inputs and start calculating
+                                setCalculatePassCalculations(true, satellite, julianDateStart, julianDateEnd, elevationMin);
+                                break;
 
-                        case Calculate.PageType.Coordinates:
-                            switch(subPage)
-                            {
-                                case Globals.SubPageType.List:
-                                    //start calculating
-                                    setCalculateCoordinateCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
-                                    break;
-                            }
-                            break;
+                            case Calculate.PageType.Coordinates:
+                                //start calculating
+                                setCalculateCoordinateCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
+                                break;
 
-                        case Calculate.PageType.Intersection:
-                            switch(subPage)
-                            {
-                                case Globals.SubPageType.List:
-                                    //reset last inputs and start calculating
-                                    setCalculateIntersectionCalculations(true, satellite, satellite2, julianDateStart, julianDateEnd, intersection, elevationMin);
-                                    break;
-                            }
-                            break;
+                            case Calculate.PageType.Intersection:
+                                //reset last inputs and start calculating
+                                setCalculateIntersectionCalculations(true, satellite, satellite2, julianDateStart, julianDateEnd, intersection, elevationMin);
+                                break;
+                        }
                     }
                 }
                 else

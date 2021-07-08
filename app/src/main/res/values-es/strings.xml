@@ -333,7 +333,7 @@
     <string name="title_g">G</string>
     <string name="title_getting">Consiguiendo</string>
     <string name="title_globe">Globo</string>
-    <string name="title_globe_type">Tipo de Globo</string>
+    <!--string name="title_globe_type">Tipo de Globo</string-->
     <string name="title_globe_view">Vista Globo</string>
     <string name="title_golden_hour">Hora Dorada</string>
     <string name="title_green">Verde</string>
@@ -395,7 +395,7 @@
     <string name="title_low">Bajo</string>
     <string name="title_manual">Manual</string>
     <string name="title_map">Mapa</string>
-    <string name="title_map_type">Tipo de Mapa</string>
+    <!--string name="title_map_type">Tipo de Mapa</string-->
     <string name="title_map_view">Vista Mapa</string>
     <string name="title_mars">Marte</string>
     <string name="title_max">Max</string>
@@ -507,7 +507,7 @@
     <string name="title_show_clouds">Mostrar Nubes</string>
     <string name="title_show_grid">Mostrar Cuadrícula</string>
     <string name="title_show_horizon">Mostrar Horizonte</string>
-    <string name="title_show_label_background">Mostrar Fondo Etiqueta</string>
+    <!--string name="title_show_label_background">Mostrar Fondo Etiqueta</string-->
     <string name="title_show_labels_always">Mostrar Etiquetas Siempre</string>
     <string name="title_show_latitude_longitude">Mostrar Latitud/Longitud</string>
     <string name="title_show_orbital_direction">Mostrar Dirección Orbital</string>

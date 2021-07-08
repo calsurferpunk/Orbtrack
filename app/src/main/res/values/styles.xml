@@ -345,15 +345,6 @@
         <item name="android:background">?attr/dividerColor</item>
     </style>
 
-    <style name="DividerText">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:background">?attr/dividerTextBackground</item>
-        <item name="android:paddingTop">2dp</item>
-        <item name="android:paddingBottom">2dp</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
     <style name="DividerCategory" parent="Preference.Category">
         <item name="layout">@layout/divider_view</item>
     </style>
@@ -582,52 +573,6 @@
         <item name="android:paddingRight">8dp</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
-    <!--Settings-->
-    <style name="SettingsItem">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center_vertical</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:background">?attr/itemSelect</item>
-        <item name="android:drawablePadding">5dp</item>
-        <item name="android:clickable">true</item>
-        <item name="android:focusable">true</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
-    <style name="SettingsSwitch">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
-    <style name="SettingsSubSwitch">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">36dp</item>
-        <item name="android:layout_marginRight">36dp</item>
-        <item name="android:gravity">start|center_vertical</item>
-        <item name="android:padding">10dp</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
-    <style name="SettingsDescriptionText">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">36dp</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
-    <style name="SettingsDescriptionSwitch" parent="SettingsDescriptionText">
-        <item name="android:paddingRight">10dp</item>
-        <item name="android:paddingBottom">10dp</item>
     </style>
 
     <!--Notify settings-->

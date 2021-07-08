@@ -3754,7 +3754,7 @@ public class MainActivity extends AppCompatActivity
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
 
                             currentNoradId = currentOrbital.getSatelliteNum();
-                            currentOrbital = Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
+                            Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
                             topoData = Calculations.getLookAngles(observer, currentOrbital, true);
 
                             //if the moon

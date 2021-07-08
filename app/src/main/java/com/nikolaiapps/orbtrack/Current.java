@@ -2878,7 +2878,7 @@ public abstract class Current
                         for(pathJulianDate = pathJulianDateStart; pathJulianDate < pathJulianDateEnd && !this.isCancelled(); pathJulianDate += (0.01 / 24))        //note: incrementing in fractions of a day
                         {
                             //get next position
-                            pathSatellite = Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, true);
+                            Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, true);
 
                             //add position to list
                             pathPoints.add(new CoordinatesFragment.Coordinate(pathSatellite.geo.latitude, pathSatellite.geo.longitude, pathSatellite.geo.altitudeKm));

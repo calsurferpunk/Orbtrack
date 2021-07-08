@@ -546,19 +546,17 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         public float az;
         public float el;
         public float orbitalAz;
-        public float orbitalEl;
 
         public AlignmentAngle()
         {
-            az = el = orbitalAz = orbitalEl = Float.MAX_VALUE;
+            az = el = orbitalAz = Float.MAX_VALUE;
         }
 
-        public void set(float currentAz, float currentEl, float orbAz, float orbEl)
+        public void set(float currentAz, float currentEl, float orbAz)
         {
             az = currentAz;
             el = currentEl;
             orbitalAz = orbAz;
-            orbitalEl = orbEl;
         }
 
         public boolean isSet()
@@ -1424,21 +1422,21 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public void setAlignmentCenter()
     {
         Calculations.TopographicDataType currentAngles = currentLookAngles[selectedOrbitalIndex];
-        alignCenter.set(getAzDeg(), getElDeg(), (float)currentAngles.azimuth, (float)currentAngles.elevation);
+        alignCenter.set(getAzDeg(), getElDeg(), (float)currentAngles.azimuth);
     }
 
     //Sets bottom left alignment
     public void setAlignmentBottomLeft()
     {
         Calculations.TopographicDataType currentAngles = currentLookAngles[selectedOrbitalIndex];
-        alignBottomLeft.set(getAzDeg(), getElDeg(), (float)currentAngles.azimuth, (float)currentAngles.elevation);
+        alignBottomLeft.set(getAzDeg(), getElDeg(), (float)currentAngles.azimuth);
     }
 
     //Sets top right alignment
     public void setAlignmentTopRight()
     {
         Calculations.TopographicDataType currentAngles = currentLookAngles[selectedOrbitalIndex];
-        alignTopRight.set(getAzDeg(), getElDeg(), (float)currentAngles.azimuth, (float)currentAngles.elevation);
+        alignTopRight.set(getAzDeg(), getElDeg(), (float)currentAngles.azimuth);
     }
 
     //Tries to update user azimuth offset

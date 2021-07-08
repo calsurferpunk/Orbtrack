@@ -1073,7 +1073,7 @@ public class CalculateService extends NotifyService
     {
         //get position for the current time
         //note: not updating GEO location
-        currentSatellite = Calculations.updateOrbitalPosition(currentSatellite, observer, gmtTime);
+        Calculations.updateOrbitalPosition(currentSatellite, observer, gmtTime);
         return(Calculations.getLookAngles(observer, currentSatellite, applyRefraction));
     }
 
@@ -1568,11 +1568,11 @@ public class CalculateService extends NotifyService
                             }
 
                             //update view(s) and add to list
-                            satellite1 = Calculations.updateOrbitalPosition(satellite1, observer, pathJulianDate, false);
+                            Calculations.updateOrbitalPosition(satellite1, observer, pathJulianDate, false);
                             pathViewsList.add(new CalculateViewsTask.OrbitalView(context, Calculations.getLookAngles(observer, satellite1, true), pathJulianDate, zoneId, onFirstOrLast));
                             if(forIntersection)
                             {
-                                satellite2 = Calculations.updateOrbitalPosition(satellite2, observer, pathJulianDate, false);
+                                Calculations.updateOrbitalPosition(satellite2, observer, pathJulianDate, false);
                                 pathViewsList2.add(new CalculateViewsTask.OrbitalView(context, Calculations.getLookAngles(observer, satellite2, true), pathJulianDate, zoneId, onFirstOrLast));
                             }
 

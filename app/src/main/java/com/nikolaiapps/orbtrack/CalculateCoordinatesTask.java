@@ -49,7 +49,6 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         public double illumination;
         public double speedKms;
         public String phaseName;
-        public View outdatedText;
         public TextView latitudeText;
         public TextView longitudeText;
         public TextView altitudeText;
@@ -236,7 +235,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             else
             {
                 //calculate next position
-                coordinateSatellite = Calculations.updateOrbitalPosition(coordinateSatellite, observer, coordinateJulianDate, true);
+                Calculations.updateOrbitalPosition(coordinateSatellite, observer, coordinateJulianDate, true);
                 geoData.latitude = coordinateSatellite.geo.latitude;
                 geoData.longitude = coordinateSatellite.geo.longitude;
                 geoData.altitudeKm = coordinateSatellite.geo.altitudeKm;
@@ -256,7 +255,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
                     currentTopoData = Calculations.getLookAngles(observer, coordinateSatellite, true);
 
                     //get old angles
-                    coordinateSatellite = Calculations.updateOrbitalPosition(coordinateSatellite, observer, coordinateJulianDate - beforeDayIncrement, false);
+                    Calculations.updateOrbitalPosition(coordinateSatellite, observer, coordinateJulianDate - beforeDayIncrement, false);
                     oldTopoData = Calculations.getLookAngles(observer, coordinateSatellite, true);
 
                     //get phase name

@@ -337,7 +337,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
                 }
 
                 //calculate position
-                pathSatellite = Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, false);
+                Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, false);
                 topoData = Calculations.getLookAngles(observer, pathSatellite, true);
 
                 //if moon
@@ -352,7 +352,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
                 else if(isSun)
                 {
                     //get old angles
-                    pathSatellite = Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate - beforeDayIncrement, false);
+                    Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate - beforeDayIncrement, false);
                     oldTopoData = Calculations.getLookAngles(observer, pathSatellite, true);
 
                     //get phase name

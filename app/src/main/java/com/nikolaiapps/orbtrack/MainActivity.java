@@ -322,6 +322,7 @@ public class MainActivity extends AppCompatActivity
         boolean restartCamera = false;
         int index;
         int page = getMainPage();
+        CameraLens cameraView = Current.getCameraView();
 
         //update drawer
         mainDrawerToggle.onConfigurationChanged(newConfig);
@@ -364,11 +365,11 @@ public class MainActivity extends AppCompatActivity
         }
 
         //if need to restart camera and it is set
-        if(restartCamera && Current.cameraView != null)
+        if(restartCamera && cameraView != null)
         {
             //update orientation and restart
-            Current.cameraView.updateOrientation();
-            Current.cameraView.startCamera();
+            cameraView.updateOrientation();
+            cameraView.startCamera();
         }
     }
 
@@ -570,6 +571,7 @@ public class MainActivity extends AppCompatActivity
     {
         boolean granted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
         boolean retrying = false;
+        CameraLens cameraView = Current.getCameraView();
 
         //check if retrying
         switch(requestCode)
@@ -608,13 +610,13 @@ public class MainActivity extends AppCompatActivity
                     case Groups.Current:
                     case Groups.Calculate:
                         //if view exists
-                        if(Current.cameraView != null)
+                        if(cameraView != null)
                         {
                             //if granted
                             if(granted)
                             {
                                 //try to start camera
-                                Current.cameraView.startCamera();
+                                cameraView.startCamera();
                             }
                             //else if not retrying
                             else if(!retrying)
@@ -626,7 +628,7 @@ public class MainActivity extends AppCompatActivity
                                     public void OnDeny(byte resultCode)
                                     {
                                         //try to start camera without all permissions
-                                        Current.cameraView.startCamera();
+                                        cameraView.startCamera();
                                     }
                                 });
                             }
@@ -1068,6 +1070,7 @@ public class MainActivity extends AppCompatActivity
         int page = getMainPage();
         int desiredSubPage;
         Calendar currentTime = Globals.getGMTTime();
+        CameraLens cameraView = Current.getCameraView();
         Resources res = this.getResources();
 
         //if drawer is open
@@ -1086,7 +1089,7 @@ public class MainActivity extends AppCompatActivity
                 {
                     case Globals.SubPageType.Lens:
                         //if camera view exists
-                        if(Current.cameraView != null)
+                        if(cameraView != null)
                         {
                             //if calibrating
                             if(Current.showCalibration)
@@ -1095,7 +1098,7 @@ public class MainActivity extends AppCompatActivity
                                 break;
                             }
                             //else if able to close settings menu
-                            else if(Current.cameraView.closeSettingsMenu())
+                            else if(cameraView.closeSettingsMenu())
                             {
                                 closedSettings = true;
                                 break;
@@ -1167,7 +1170,7 @@ public class MainActivity extends AppCompatActivity
         else if(cancelCalibration)
         {
             //stop calibration
-            Current.cameraView.stopCalibration();
+            cameraView.stopCalibration();
         }
         //else if more than 3 seconds between presses
         else if(!closedSettings && currentTime.getTimeInMillis() - backPressTime.getTimeInMillis() > 3000)
@@ -1574,13 +1577,14 @@ public class MainActivity extends AppCompatActivity
     {
         boolean usingCombined;
         boolean usingCurrent = (locationSource == Database.LocationType.Current);
+        CameraLens cameraView = Current.getCameraView();
 
         //update displays and calculations
         Current.Coordinates.setCurrentLocation(this, observer);
-        if(Current.cameraView != null)
+        if(cameraView != null)
         {
             //update camera view
-            Current.cameraView.updateAzDeclination(observer);
+            cameraView.updateAzDeclination(observer);
         }
         if(mainGroup == Groups.Current)
         {
@@ -3387,6 +3391,7 @@ public class MainActivity extends AppCompatActivity
                 boolean stopCamera = false;
                 boolean startCamera = false;
                 boolean allowSwipe = true;
+                CameraLens cameraView = Current.getCameraView();
 
                 cancelEditMode(mainPager);
                 updateOptionsMenu();
@@ -3480,20 +3485,20 @@ public class MainActivity extends AppCompatActivity
                 }
 
                 //if need to stop or start camera and camera exists
-                if((stopCamera || startCamera) && Current.cameraView != null)
+                if((stopCamera || startCamera) && cameraView != null)
                 {
                     //if need to stop camera
                     if(stopCamera)
                     {
                         //stop camera
-                        Current.cameraView.stopCamera(true);
+                        cameraView.stopCamera(true);
                     }
 
                     //if need to start camera
                     if(startCamera)
                     {
                         //start camera
-                        Current.cameraView.startCamera();
+                        cameraView.startCamera();
                     }
                 }
 
@@ -3701,6 +3706,7 @@ public class MainActivity extends AppCompatActivity
                 double julianDate = Calculations.julianDateCalendar(Globals.getGMTTime());
                 String coordinateString = null;
                 TextView mapInfoText = Current.Coordinates.getMapInfoText();
+                CameraLens cameraView = Current.getCameraView();
                 TopographicDataType topoData;
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 TopographicDataType[] selectedLookAngles = null;
@@ -3869,10 +3875,10 @@ public class MainActivity extends AppCompatActivity
                                 if(currentItem != null)
                                 {
                                     //if lens exists, showing lens, and -not viewing a specific pass or on that pass-
-                                    if(onLens && Current.cameraView != null && (allPassesOrbitals || currentNoradId == passesLensNoradID))
+                                    if(onLens && cameraView != null && (allPassesOrbitals || currentNoradId == passesLensNoradID))
                                     {
                                         //set look angles
-                                        Current.cameraView.setTravel(index, currentItem.passViews);
+                                        cameraView.setTravel(index, currentItem.passViews);
                                     }
                                     //else if showing list and pass calculated
                                     else if(onList && currentItem.passCalculated)
@@ -3998,10 +4004,10 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     //update camera view
-                    if(onLens && Current.cameraView != null && (onView || onPasses || onCombined))
+                    if(onLens && cameraView != null && (onView || onPasses || onCombined))
                     {
                         //update positions
-                        Current.cameraView.updatePositions((selectedSatellites != null ? selectedSatellites : currentSatellites), (selectedLookAngles != null ? selectedLookAngles : lookAngles), true);
+                        cameraView.updatePositions((selectedSatellites != null ? selectedSatellites : currentSatellites), (selectedLookAngles != null ? selectedLookAngles : lookAngles), true);
 
                         //set to lens delay
                         timerDelay = lensTimerDelay;
@@ -4013,7 +4019,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     //if trying to show view path and not calculated yet
-                    if(Current.cameraView != null && Current.cameraView.showPaths && (currentViewAnglesTask == null || (currentViewAnglesTask.needViews && !currentViewAnglesTask.isRunning())))
+                    if(cameraView != null && cameraView.showPaths && (currentViewAnglesTask == null || (currentViewAnglesTask.needViews && !currentViewAnglesTask.isRunning())))
                     {
                         //start calculating views
                         setCurrentViewCalculations(true, julianDate);
@@ -4053,6 +4059,7 @@ public class MainActivity extends AppCompatActivity
                 double subProgressPercent;
                 Bundle params;
                 Context context = MainActivity.this;
+                CameraLens cameraView = Current.getCameraView();
                 Database.SatelliteData currentSatellite1 = null;
                 Database.SatelliteData currentSatellite2 = null;
                 Database.SatelliteData[] currentSatellites = null;
@@ -4066,7 +4073,7 @@ public class MainActivity extends AppCompatActivity
                 Current.ViewAngles.Item[] angleItems;
 
                 //if lens exists
-                if(Current.cameraView != null)
+                if(cameraView != null)
                 {
                     //if using lens and angles list exists
                     if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
@@ -4151,11 +4158,11 @@ public class MainActivity extends AppCompatActivity
                     }
 
                     //if satellites, views, and bar are set
-                    if(currentSatellites != null && Current.cameraView.playBar != null)
+                    if(currentSatellites != null && cameraView.playBar != null)
                     {
                         //get play index and progress and set topographic data
-                        playIndex = Current.cameraView.playBar.getValue();
-                        subProgressPercent = Current.cameraView.playBar.getSubProgressPercent();
+                        playIndex = cameraView.playBar.getValue();
+                        subProgressPercent = cameraView.playBar.getSubProgressPercent();
                         currentPlayTopoDatas = new TopographicDataType[currentViews.length];
 
                         //go through each view set
@@ -4202,11 +4209,11 @@ public class MainActivity extends AppCompatActivity
                         }
 
                         //show paths and update positions/travel
-                        Current.cameraView.showPaths = true;
-                        Current.cameraView.updatePositions(currentSatellites, currentPlayTopoDatas, false);
+                        cameraView.showPaths = true;
+                        cameraView.updatePositions(currentSatellites, currentPlayTopoDatas, false);
                         for(index = 0; index < currentViews.length; index++)
                         {
-                            Current.cameraView.setTravel(index, currentViews[index]);
+                            cameraView.setTravel(index, currentViews[index]);
                         }
 
                         //update delay
@@ -4485,13 +4492,14 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public synchronized void run()
                                 {
+                                    CameraLens cameraView = Current.getCameraView();
                                     CalculateViewsTask.OrbitalView[] views = pathPoints.toArray(new CalculateViewsTask.OrbitalView[0]);
 
                                     //if camera view still exists
-                                    if(Current.cameraView != null)
+                                    if(cameraView != null)
                                     {
                                         //set camera travel points
-                                        Current.cameraView.setTravel(index, views);
+                                        cameraView.setTravel(index, views);
                                     }
                                 }
                             };

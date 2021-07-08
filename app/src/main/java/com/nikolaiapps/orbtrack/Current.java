@@ -4245,8 +4245,14 @@ public abstract class Current
     public static boolean showPaths = false;
     private static boolean showHorizon = false;
     public static boolean showCalibration = false;
-    public static CameraLens cameraView;
+    public static WeakReference<CameraLens> cameraViewReference;
     public static CalculateViewsTask.OrbitalPathBase[] orbitalViews = new CalculateViewsTask.OrbitalPathBase[0];
+
+    //Gets camera view
+    public static CameraLens getCameraView()
+    {
+        return(cameraViewReference != null ? cameraViewReference.get() : null);
+    }
 
     //Begin calculating view information
     public static CalculateViewsTask calculateViews(Context context, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
@@ -4297,6 +4303,7 @@ public abstract class Current
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
+        final CameraLens cameraView;
         final Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath ? currentSavedPathItem.passViews : null);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem.id)) : null);
@@ -4308,15 +4315,9 @@ public abstract class Current
         final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
         final MaterialButton cancelButton = rootView.findViewById(R.id.Lens_Cancel_Button);
 
-        //if camera is already set
-        if(cameraView != null)
-        {
-            //clear it
-            cameraView = null;
-        }
-
         //create camera
         cameraView = new CameraLens(context);
+        cameraViewReference = new WeakReference<>(cameraView);
         cameraView.updateAzDeclination(MainActivity.getObserver());
         cameraView.pathDivisions = pathDivisions;
         cameraView.showPaths = (showPaths || useSaved);       //if showing paths or using a saved path
@@ -4344,80 +4345,76 @@ public abstract class Current
                     showCalibration = !showCalibration;
                     showCalibrationButton.setChecked(showCalibration);
 
-                    //if camera is set
-                    if(cameraView != null)
+                    //update display
+                    cameraView.showCalibration = showCalibration;
+                    if(!showCalibration)
                     {
-                        //update display
-                        cameraView.showCalibration = showCalibration;
-                        if(!showCalibration)
-                        {
-                            cameraView.resetAlignmentStatus();
-                        }
-                        buttonLayout.setVisibility(showCalibration ? View.VISIBLE : View.GONE);
-                        selectButton.setText(R.string.title_select);
-                        resetButton.setVisibility(View.VISIBLE);
-                        cameraView.helpText.setVisibility(showCalibration || cameraView.hasCompassError() ? View.VISIBLE : View.GONE);
-                        cameraView.helpText.setText(R.string.title_select_orbital);
-                        cancelButton.setText(R.string.title_cancel);
+                        cameraView.resetAlignmentStatus();
+                    }
+                    buttonLayout.setVisibility(showCalibration ? View.VISIBLE : View.GONE);
+                    selectButton.setText(R.string.title_select);
+                    resetButton.setVisibility(View.VISIBLE);
+                    cameraView.helpText.setVisibility(showCalibration || cameraView.hasCompassError() ? View.VISIBLE : View.GONE);
+                    cameraView.helpText.setText(R.string.title_select_orbital);
+                    cancelButton.setText(R.string.title_cancel);
 
-                        //update event
-                        selectButton.setOnClickListener(new View.OnClickListener()
+                    //update event
+                    selectButton.setOnClickListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View v)
                         {
-                            @Override
-                            public void onClick(View v)
+                            //if no orbital selected yet
+                            if(!cameraView.haveSelectedOrbital())
                             {
-                                //if no orbital selected yet
-                                if(!cameraView.haveSelectedOrbital())
+                                //try to select nearest
+                                if(cameraView.selectNearest())
                                 {
-                                    //try to select nearest
-                                    if(cameraView.selectNearest())
-                                    {
-                                        //update display
-                                        selectButton.setText(R.string.title_align);
-                                        resetButton.setVisibility(View.GONE);
-                                        cameraView.helpText.setText(R.string.title_set_actual_position);
-                                    }
-                                }
-                                else if(cameraView.needAlignmentCenter())
-                                {
-                                    //update status
-                                    cameraView.setAlignmentCenter();
-
-                                    //adjust offset
-                                    cameraView.updateUserAzimuthOffset();
-
                                     //update display
-                                    cameraView.helpText.setText(R.string.title_align_bottom_left);
-                                    cancelButton.setText(R.string.title_skip);
-                                }
-                                else if(cameraView.needAlignmentBottomLeft())
-                                {
-                                    //update status
-                                    cameraView.setAlignmentBottomLeft();
-
-                                    //update display
-                                    cameraView.helpText.setText(R.string.title_align_top_right);
-                                }
-                                else if(cameraView.needAlignmentTopRight())
-                                {
-                                    //update status
-                                    cameraView.setAlignmentTopRight();
-
-                                    //set alignment
-                                    cameraView.setCalculatedAlignment();
-
-                                    //stop calibration
-                                    showCalibrationButton.performClick();
+                                    selectButton.setText(R.string.title_align);
+                                    resetButton.setVisibility(View.GONE);
+                                    cameraView.helpText.setText(R.string.title_set_actual_position);
                                 }
                             }
-                        });
+                            else if(cameraView.needAlignmentCenter())
+                            {
+                                //update status
+                                cameraView.setAlignmentCenter();
 
-                        //if not showing calibration but have compass error
-                        if(!showCalibration && cameraView.hasCompassError())
-                        {
-                            //set text for compass error
-                            cameraView.helpText.setText(R.string.title_compass_inaccurate_fix);
+                                //adjust offset
+                                cameraView.updateUserAzimuthOffset();
+
+                                //update display
+                                cameraView.helpText.setText(R.string.title_align_bottom_left);
+                                cancelButton.setText(R.string.title_skip);
+                            }
+                            else if(cameraView.needAlignmentBottomLeft())
+                            {
+                                //update status
+                                cameraView.setAlignmentBottomLeft();
+
+                                //update display
+                                cameraView.helpText.setText(R.string.title_align_top_right);
+                            }
+                            else if(cameraView.needAlignmentTopRight())
+                            {
+                                //update status
+                                cameraView.setAlignmentTopRight();
+
+                                //set alignment
+                                cameraView.setCalculatedAlignment();
+
+                                //stop calibration
+                                showCalibrationButton.performClick();
+                            }
                         }
+                    });
+
+                    //if not showing calibration but have compass error
+                    if(!showCalibration && cameraView.hasCompassError())
+                    {
+                        //set text for compass error
+                        cameraView.helpText.setText(R.string.title_compass_inaccurate_fix);
                     }
                 }
             });
@@ -4477,12 +4474,8 @@ public abstract class Current
                 showHorizonButton.setChecked(showHorizon);
                 Settings.setLensShowHorizon(context, showHorizon);
 
-                //if camera is set
-                if(cameraView != null)
-                {
-                    //update display
-                    cameraView.showHorizon = showHorizon;
-                }
+                //update display
+                cameraView.showHorizon = showHorizon;
             }
         });
 
@@ -4572,12 +4565,8 @@ public abstract class Current
                         showPaths = !showPaths;
                         showPathButton.setChecked(showPaths);
 
-                        //if camera is set
-                        if(cameraView != null)
-                        {
-                            //update display
-                            cameraView.showPaths = showPaths;
-                        }
+                        //update display
+                        cameraView.showPaths = showPaths;
                     }
                 });
                 showPathButton.setChecked(showPaths);

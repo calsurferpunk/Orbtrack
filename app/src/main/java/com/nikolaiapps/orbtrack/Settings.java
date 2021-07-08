@@ -2543,9 +2543,12 @@ public abstract class Settings
     {
         SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
-        writeSettings.putFloat(PreferenceName.LocationLastLatitude, (float)lastLocation.getLatitude());
-        writeSettings.putFloat(PreferenceName.LocationLastLongitude, (float)lastLocation.getLongitude());
-        writeSettings.putFloat(PreferenceName.LocationLastAltitude, (float)lastLocation.getAltitude());
+        if(lastLocation != null)
+        {
+            writeSettings.putFloat(PreferenceName.LocationLastLatitude, (float)lastLocation.getLatitude());
+            writeSettings.putFloat(PreferenceName.LocationLastLongitude, (float)lastLocation.getLongitude());
+            writeSettings.putFloat(PreferenceName.LocationLastAltitude, (float)lastLocation.getAltitude());
+        }
         writeSettings.apply();
     }
 

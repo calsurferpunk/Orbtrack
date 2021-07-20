@@ -1534,7 +1534,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         //add fragment
-        fragment.setTargetFragment(caller, 0);
         manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, fragment, (isPage ? currentPageKey : null)).addToBackStack(null).commit();
 
         return(true);

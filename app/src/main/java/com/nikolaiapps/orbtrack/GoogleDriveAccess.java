@@ -9,6 +9,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.TextView;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -34,7 +37,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class GoogleDriveAccess extends AppCompatActivity
+public class GoogleDriveAccess extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
 {
     private static abstract class MimeTypes
     {
@@ -81,6 +84,12 @@ public class GoogleDriveAccess extends AppCompatActivity
 
         @Override
         public String getName()
+        {
+            return(name);
+        }
+
+        @Override
+        public String getFullName()
         {
             return(name);
         }
@@ -500,11 +509,11 @@ public class GoogleDriveAccess extends AppCompatActivity
 
     private static Drive client = null;
 
-    //private boolean showList;
     private boolean selectFolder;
-    //private boolean loginOnly;
     private int itemCount;
+    private byte requestCode;
     private java.io.File saveFile;
+    private ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -524,38 +533,46 @@ public class GoogleDriveAccess extends AppCompatActivity
         selectFolder = intent.getBooleanExtra(FileBrowserBaseActivity.ParamTypes.SelectFolder, false);
         saveFile = (java.io.File)intent.getSerializableExtra(FileBrowserBaseActivity.ParamTypes.FileName);
         itemCount = intent.getIntExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, 0);
-        //loginOnly = intent.getBooleanExtra(ParamTypes.LoginOnly, false);
+        requestCode = BaseInputActivity.getRequestCode(intent);
 
-        /*//want to show list if not logging in only
-        showList = !loginOnly;*/
+        //create receiver
+        resultLauncher = Globals.createActivityLauncher(this, this);
 
-        /*//if -logging in only- or -client not set-
-        if(loginOnly || client == null)
-        {*/
-            //get permission
-            getPermission();
-        //}
+        //get permission
+        getPermission();
     }
 
-    /*@Override
-    protected void onResume()
-    {
-        super.onResume();
-    }*/
-
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(ActivityResult result)
     {
+        int resultCode = result.getResultCode();
+        byte localRequestCode;
         boolean isOkay = (resultCode == RESULT_OK);
         boolean finished = false;
         String folderName;
         ArrayList<String> fileIds;
         ArrayList<String> fileNames;
+        Intent data = result.getData();
         final Intent resultData = new Intent();
 
-        switch(requestCode)
+        //if no data
+        if(data == null)
         {
+            //set to empty
+            data = new Intent();
+        }
+
+        //get local request code
+        localRequestCode = BaseInputActivity.getRequestCode(data);
+
+        //set defaults
+        BaseInputActivity.setRequestCode(resultData, requestCode);
+
+        switch(localRequestCode)
+        {
+            case BaseInputActivity.RequestCode.None:
             case BaseInputActivity.RequestCode.GoogleDriveSignIn:
+                //if set
                 if(isOkay)
                 {
                     //try to get account
@@ -584,7 +601,7 @@ public class GoogleDriveAccess extends AppCompatActivity
                     final Resources res = this.getResources();
 
                     //if getting folder
-                    if(requestCode == BaseInputActivity.RequestCode.GoogleDriveOpenFolder)
+                    if(localRequestCode == BaseInputActivity.RequestCode.GoogleDriveOpenFolder)
                     {
                         //get folder and save file
                         folderName = data.getStringExtra(FileBrowserBaseActivity.ParamTypes.FolderName);
@@ -650,13 +667,13 @@ public class GoogleDriveAccess extends AppCompatActivity
                 break;
         }
 
+        //if finished
         if(finished)
         {
-            setResult(resultCode);
+            //pass information back to caller
+            setResult(resultCode, resultData);
             this.finish();
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -681,11 +698,11 @@ public class GoogleDriveAccess extends AppCompatActivity
                         intent.putExtra(BrowserActivity.ParamTypes.SelectFolder, selectFolder);
 
                         client = drive;
-                        GoogleDriveAccess.this.startActivityForResult(intent, (selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
+                        Globals.startActivityForResult(resultLauncher, intent, (selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
                         break;
 
                     case FileBrowserBaseActivity.ResultCode.LoginFailed:
-                        Globals.askGoogleDriveAccount(GoogleDriveAccess.this, BaseInputActivity.RequestCode.GoogleDriveSignIn);
+                        Globals.askGoogleDriveAccount(GoogleDriveAccess.this, resultLauncher, BaseInputActivity.RequestCode.GoogleDriveSignIn);
                         break;
                 }
             }
@@ -716,7 +733,7 @@ public class GoogleDriveAccess extends AppCompatActivity
     }
 
     //Starts an instance
-    public static void start(Activity activity, java.io.File fileName, int count, boolean selectFolder)
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, java.io.File fileName, int count, boolean selectFolder)
     {
         boolean useFile = (fileName != null);
         Intent intent = new Intent(activity, GoogleDriveAccess.class);
@@ -727,17 +744,10 @@ public class GoogleDriveAccess extends AppCompatActivity
             intent.putExtra(FileBrowserBaseActivity.ParamTypes.FileName, fileName);
         }
         intent.putExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, count);
-        activity.startActivityForResult(intent, (useFile ? BaseInputActivity.RequestCode.GoogleDriveSave : selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
+        Globals.startActivityForResult(launcher, intent, (useFile ? BaseInputActivity.RequestCode.GoogleDriveSave : selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
     }
-    public static void start(Activity activity, boolean selectFolder)
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, boolean selectFolder)
     {
-        start(activity, null, 1, selectFolder);
-    }
-    public static void start(Activity activity)
-    {
-        Intent intent = new Intent(activity, GoogleDriveAccess.class);
-
-        intent.putExtra(FileBrowserBaseActivity.ParamTypes.LoginOnly, true);
-        activity.startActivityForResult(intent, BaseInputActivity.RequestCode.GoogleDriveAddAccount);
+        start(activity, launcher, null, 1, selectFolder);
     }
 }

@@ -36,6 +36,12 @@ public class SDCardBrowserActivity extends FileBrowserBaseActivity
         }
 
         @Override
+        public String getFullName()
+        {
+            return(item.getPath());
+        }
+
+        @Override
         public String getPath()
         {
             return(item.getPath());

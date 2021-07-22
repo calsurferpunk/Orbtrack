@@ -620,15 +620,12 @@ public abstract class Calculate
             switch(position)
             {
                 case PageType.View:
+                case PageType.Coordinates:
                     //do nothing
                     break;
 
                 case PageType.Passes:
                     params.putInt(MainActivity.ParamTypes.PassIndex, savedSubInputs[PageType.Passes].getInt(MainActivity.ParamTypes.PassIndex, Integer.MAX_VALUE));
-                    break;
-
-                case PageType.Coordinates:
-                    //do nothing
                     break;
 
                 case PageType.Intersection:

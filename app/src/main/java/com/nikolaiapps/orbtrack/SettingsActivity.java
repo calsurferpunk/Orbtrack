@@ -24,6 +24,9 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
@@ -50,7 +53,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback
+public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, ActivityResultCallback<ActivityResult>
 {
     static
     {
@@ -844,6 +847,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private AlertDialog addCurrentLocationDialog;
     private LocationReceiver locationReceiver;
     private UpdateReceiver localUpdateReceiver;
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private ActivityResultLauncher<Intent> otherOpenLauncher;
     private Orbitals.PageAdapter orbitalsPageAdapter;
     private Settings.PageAdapter settingsPageAdapter;
     private Settings.Locations.ItemListAdapter settingsLocationsListAdapter;
@@ -931,6 +936,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         settingsLocationsListAdapter = null;
         accountsListAdapter = null;
         informationChangedListener = null;
+        BaseInputActivity.setRequestCode(resultIntent, BaseInputActivity.getRequestCode(startIntent));
 
         //set view
         this.setContentView(showSetup ? R.layout.setup_layout : R.layout.settings_layout);
@@ -1166,6 +1172,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         locationReceiver.register(this);
         localUpdateReceiver = createUpdateReceiver();
         localUpdateReceiver.register(this);
+        resultLauncher = Globals.createActivityLauncher(this, this);
+        otherOpenLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersOpenItem);
         preferences = Settings.getReadSettings(this);
         preferenceChangeListener = new SharedPreferences.OnSharedPreferenceChangeListener()
         {
@@ -1344,11 +1352,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(ActivityResult result)
     {
+        int resultCode = result.getResultCode();
         boolean isOkay = (resultCode == RESULT_OK);
         int id;
         int progressType = Globals.ProgressType.Unknown;
+        byte requestCode;
+        Intent data = result.getData();
         Resources res = this.getResources();
 
         //if no data
@@ -1357,6 +1368,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             //set to empty
             data = new Intent();
         }
+
+        //get status
+        requestCode = BaseInputActivity.getRequestCode(data);
 
         //handle response
         switch(requestCode)
@@ -1425,7 +1439,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             case BaseInputActivity.RequestCode.GoogleDriveSignIn:
                 //handle Google Drive open file browser request
-                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, settingsLayout, data, isOkay);
+                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, resultLauncher, settingsLayout, data, isOkay);
                 break;
 
             case BaseInputActivity.RequestCode.GoogleDriveOpenFile:
@@ -1439,8 +1453,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
                 break;
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -1482,7 +1494,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 //if granted
                 if(granted)
                 {
-                    Orbitals.showSDCardFileBrowser(this, settingsLayout);
+                    Orbitals.showSDCardFileBrowser(this, resultLauncher, settingsLayout);
                 }
                 //else if not retrying
                 else if(!retrying)
@@ -1606,7 +1618,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(showSetup && setupPager.getCurrentItem() == SetupPageType.Satellites)
         {
             //show add satellite dialog
-            Orbitals.showAddDialog(this, settingsLayout, isLong);
+            Orbitals.showAddDialog(this, resultLauncher, otherOpenLauncher, settingsLayout, isLong);
             return;
         }
 
@@ -1639,13 +1651,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
                 else
                 {
-                    showAddLocationDialog();
+                    showAddLocationDialog(resultLauncher);
                 }
                 break;
 
             case Settings.PageType.Notifications:
                 Database.DatabaseLocation currentLocation = Database.getSelectedLocation(this);
-                NotifySettingsActivity.show(this, new Calculations.ObserverType(currentLocation.zoneId, new Calculations.GeodeticDataType(currentLocation.latitude, currentLocation.longitude, currentLocation.altitudeKM, 0, 0)));
+                NotifySettingsActivity.show(this, resultLauncher, new Calculations.ObserverType(currentLocation.zoneId, new Calculations.GeodeticDataType(currentLocation.latitude, currentLocation.longitude, currentLocation.altitudeKM, 0, 0)));
                 break;
         }
     }
@@ -2086,6 +2098,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
     }
 
+    //Returns result launcher
+    public ActivityResultLauncher<Intent> getResultLauncher(byte requestCode)
+    {
+        return(requestCode == BaseInputActivity.RequestCode.OthersOpenItem ? otherOpenLauncher : resultLauncher);
+    }
+    public ActivityResultLauncher<Intent> getResultLauncher()
+    {
+        return(getResultLauncher(BaseInputActivity.RequestCode.None));
+    }
+
     //Update loading status
     private void setLoading(boolean loading)
     {
@@ -2361,11 +2383,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     switch(which)
                     {
                         case Globals.AccountType.GoogleDrive:
-                            Globals.askGoogleDriveAccount(SettingsActivity.this, BaseInputActivity.RequestCode.GoogleDriveAddAccount);
+                            Globals.askGoogleDriveAccount(SettingsActivity.this, resultLauncher, BaseInputActivity.RequestCode.GoogleDriveAddAccount);
                             break;
 
                         case Globals.AccountType.Dropbox:
-                            DropboxAccess.start(SettingsActivity.this);
+                            DropboxAccess.start(SettingsActivity.this, resultLauncher);
                             break;
 
                         case Globals.AccountType.SpaceTrack:
@@ -2512,7 +2534,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     //Shows an add location dialog
-    private void showAddLocationDialog()
+    private void showAddLocationDialog(ActivityResultLauncher<Intent> launcher)
     {
         Resources res = this.getResources();
 
@@ -2533,7 +2555,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case AddSelectListAdapter.LocationSourceType.Custom:
                     case AddSelectListAdapter.LocationSourceType.Search:
                         //show map and wait for update
-                        MapLocationInputActivity.show(SettingsActivity.this, which == AddSelectListAdapter.LocationSourceType.Search);
+                        MapLocationInputActivity.show(SettingsActivity.this, launcher, which == AddSelectListAdapter.LocationSourceType.Search);
                         break;
                 }
             }

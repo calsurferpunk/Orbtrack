@@ -1161,7 +1161,7 @@ public abstract class Settings
                 if(noradId != Integer.MIN_VALUE)
                 {
                     //start edit activity
-                    NotifySettingsActivity.show(currentContext, noradId, MainActivity.getObserver());
+                    NotifySettingsActivity.show(currentContext, (currentContext instanceof SettingsActivity ? ((SettingsActivity) currentContext).getResultLauncher() : null), noradId, MainActivity.getObserver());
                 }
             }
 

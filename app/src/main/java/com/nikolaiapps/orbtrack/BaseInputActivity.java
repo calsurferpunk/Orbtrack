@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.OpenableColumns;
 import android.view.View;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.ActionBar;
@@ -30,6 +31,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
     //Activity result codes
     public static abstract class RequestCode
     {
+        static final byte None = 0;
         static final byte Setup = 1;
         static final byte OrbitalViewList = 2;
         static final byte MasterAddList = 3;
@@ -51,6 +53,8 @@ public abstract class BaseInputActivity extends AppCompatActivity
         static final byte OthersSave = 19;
         static final byte Settings = 20;
     }
+
+    public static final String EXTRA_REQUEST_CODE = "RequestCode";
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -82,6 +86,31 @@ public abstract class BaseInputActivity extends AppCompatActivity
     public void lockScreenOrientation(boolean lock)
     {
         Globals.lockScreenOrientation(this, lock);
+    }
+
+    //Gets request code from given intent
+    public static byte getRequestCode(Intent intent)
+    {
+        //get request code, using RequestCode.None as default
+        return(intent == null ? RequestCode.None : intent.getByteExtra(EXTRA_REQUEST_CODE, RequestCode.None));
+    }
+
+    //Sets request code to the given intent
+    public static void setRequestCode(Intent intent, byte requestCode)
+    {
+        //if request code is set
+        if(requestCode != RequestCode.None)
+        {
+            //if intent is not set
+            if(intent == null)
+            {
+                //create it
+                intent = new Intent();
+            }
+
+            //set request code
+            intent.putExtra(EXTRA_REQUEST_CODE, requestCode);
+        }
     }
 
     //Handles activity master add list result and returns progress type
@@ -287,7 +316,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
     }
 
     //Handles activity Google Drive file browser request
-    public static void handleActivityGoogleDriveOpenFileBrowserRequest(Activity activity, View parentView, Intent data, boolean isOkay)
+    public static void handleActivityGoogleDriveOpenFileBrowserRequest(Activity activity, ActivityResultLauncher<Intent> launcher, View parentView, Intent data, boolean isOkay)
     {
         boolean isError = true;
 
@@ -303,7 +332,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
                 //note: don't confirm internet since would have done already to get past sign in
 
                 //show google drive file browser
-                Orbitals.showGoogleDriveFileBrowser(activity, false);
+                Orbitals.showGoogleDriveFileBrowser(activity, launcher, false);
 
                 //no error
                 isError = false;

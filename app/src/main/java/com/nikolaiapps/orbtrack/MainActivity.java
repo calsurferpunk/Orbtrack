@@ -10,6 +10,9 @@ import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.fragment.app.FragmentManager;
@@ -47,7 +50,7 @@ import com.nikolaiapps.orbtrack.SideMenuListAdapter.*;
 import com.nikolaiapps.orbtrack.Calculations.*;
 
 
-public class MainActivity extends AppCompatActivity
+public class MainActivity extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
 {
     static
     {
@@ -147,6 +150,9 @@ public class MainActivity extends AppCompatActivity
     //Receivers
     private LocationReceiver locationReceiver;
     private UpdateReceiver localUpdateReceiver;
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private ActivityResultLauncher<Intent> otherOpenLauncher;
+    private ActivityResultLauncher<Intent> otherSaveLauncher;
     //
 
     @Override
@@ -206,6 +212,9 @@ public class MainActivity extends AppCompatActivity
         //create receivers
         startCalculationListener = createOnStartCalculationListener();
         localUpdateReceiver = createUpdateReceiver(localUpdateReceiver);
+        resultLauncher = Globals.createActivityLauncher(this, this);
+        otherOpenLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersOpenItem);
+        otherSaveLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersSave);
 
         //if privacy policy has been accepted
         stateCopy = savedInstanceState;
@@ -374,22 +383,18 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(ActivityResult result)
     {
         int subPage;
+        int resultCode = result.getResultCode();
         int progressType = Globals.ProgressType.Finished;
+        byte requestCode;
         long count;
         boolean isOkay = (resultCode == RESULT_OK);
-        boolean handle = (requestCode == BaseInputActivity.RequestCode.Setup || finishedSetup);
+        boolean handle;
         boolean needRecreate;
+        Intent data = result.getData();
         Resources res = this.getResources();
-
-        //if not handling
-        if(!handle)
-        {
-            //stop
-            return;
-        }
 
         //if no data
         if(data == null)
@@ -399,7 +404,16 @@ public class MainActivity extends AppCompatActivity
         }
 
         //get status
+        requestCode = BaseInputActivity.getRequestCode(data);
+        handle = (requestCode == BaseInputActivity.RequestCode.Setup || finishedSetup);
         needRecreate = data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false);
+
+        //if not handling
+        if(!handle)
+        {
+            //stop
+            return;
+        }
 
         //handle based on request code
         switch(requestCode)
@@ -501,7 +515,7 @@ public class MainActivity extends AppCompatActivity
 
             case BaseInputActivity.RequestCode.GoogleDriveSignIn:
                 //handle Google Drive open file browser request
-                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, mainDrawerLayout, data, isOkay);
+                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, resultLauncher, mainDrawerLayout, data, isOkay);
                 break;
 
             case BaseInputActivity.RequestCode.GoogleDriveOpenFolder:
@@ -562,8 +576,6 @@ public class MainActivity extends AppCompatActivity
                 }
                 break;
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -642,7 +654,7 @@ public class MainActivity extends AppCompatActivity
                 //if granted
                 if(granted)
                 {
-                    Orbitals.showSDCardFileBrowser(this, mainDrawerLayout);
+                    Orbitals.showSDCardFileBrowser(this, resultLauncher, mainDrawerLayout);
                 }
                 //else if not retrying
                 else if(!retrying)
@@ -1186,6 +1198,26 @@ public class MainActivity extends AppCompatActivity
             //call super
             super.onBackPressed();
         }
+    }
+
+    //Returns result launcher
+    public ActivityResultLauncher<Intent> getResultLauncher(byte requestCode)
+    {
+        switch(requestCode)
+        {
+            case BaseInputActivity.RequestCode.OthersOpenItem:
+                return(otherOpenLauncher);
+
+            case BaseInputActivity.RequestCode.OthersSave:
+                return(otherSaveLauncher);
+
+            default:
+                return(resultLauncher);
+        }
+    }
+    public ActivityResultLauncher<Intent> getResultLauncher()
+    {
+        return(getResultLauncher(BaseInputActivity.RequestCode.None));
     }
 
     //Returns observer
@@ -2007,11 +2039,11 @@ public class MainActivity extends AppCompatActivity
                         switch(fileSourceType)
                         {
                             case Globals.FileSource.GoogleDrive:
-                                GoogleDriveAccess.start(this, saveFile, 1, true);
+                                GoogleDriveAccess.start(this, resultLauncher, saveFile, 1, true);
                                 break;
 
                             case Globals.FileSource.Dropbox:
-                                DropboxAccess.start(this, saveFile, 1, true);
+                                DropboxAccess.start(this, resultLauncher, saveFile, 1, true);
                                 break;
                         }
                     }
@@ -2222,7 +2254,7 @@ public class MainActivity extends AppCompatActivity
                                     //add satellite
                                     case 0:
                                         //show dialog and close menu
-                                        Orbitals.showAddDialog(MainActivity.this, mainDrawerLayout, false);
+                                        Orbitals.showAddDialog(MainActivity.this, resultLauncher, otherOpenLauncher, mainDrawerLayout, false);
                                         mainDrawerLayout.closeDrawers();
                                         break;
                                 }
@@ -2697,7 +2729,7 @@ public class MainActivity extends AppCompatActivity
         runningUserSetup = true;
         finishedSetup = false;
         setupIntent.putExtra(SettingsActivity.EXTRA_SHOW_SETUP, true);
-        this.startActivityForResult(setupIntent, BaseInputActivity.RequestCode.Setup);
+        Globals.startActivityForResult(resultLauncher, setupIntent, BaseInputActivity.RequestCode.Setup);
     }
 
     //Shows/dismisses database progress dialog
@@ -2723,7 +2755,7 @@ public class MainActivity extends AppCompatActivity
     {
         Intent intent = new Intent(this, MasterAddListActivity.class);
         intent.putExtra(MasterAddListActivity.ParamTypes.ListType, MasterAddListActivity.ListType.VisibleList);
-        this.startActivityForResult(intent, BaseInputActivity.RequestCode.OrbitalViewList);
+        Globals.startActivityForResult(resultLauncher, intent, BaseInputActivity.RequestCode.OrbitalViewList);
     }
 
     //Shows a filter dialog
@@ -2799,7 +2831,7 @@ public class MainActivity extends AppCompatActivity
 
                         //start settings activity
                         startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
-                        activity.startActivityForResult(startIntent, BaseInputActivity.RequestCode.Settings);
+                        Globals.startActivityForResult(resultLauncher, startIntent, BaseInputActivity.RequestCode.Settings);
                         break;
 
                     case AddSelectListAdapter.SettingsType.Visibility:
@@ -2874,7 +2906,7 @@ public class MainActivity extends AppCompatActivity
                             setSaveFileData(null, textValue, listValue, which, fileSourceType);
 
                             //get folder
-                            Globals.showOthersFolderSelect(MainActivity.this);
+                            Globals.showOthersFolderSelect(otherSaveLauncher);
                         }
                         else
                         {
@@ -2949,7 +2981,7 @@ public class MainActivity extends AppCompatActivity
                             setSaveFileData(null, textValue, listValue, -1, fileSourceType);
 
                             //get folder
-                            Globals.showOthersFolderSelect(MainActivity.this);
+                            Globals.showOthersFolderSelect(otherSaveLauncher);
                         }
                         else
                         {
@@ -2973,7 +3005,7 @@ public class MainActivity extends AppCompatActivity
             }
             else
             {
-                Orbitals.showAddDialog(this, mainDrawerLayout, isLong);
+                Orbitals.showAddDialog(this, resultLauncher, otherOpenLauncher, mainDrawerLayout, isLong);
             }
         }
     }
@@ -3055,7 +3087,7 @@ public class MainActivity extends AppCompatActivity
 
                     case Selectable.ListBaseAdapter.DetailButtonType.Notify:
                         //show pass notification settings
-                        NotifySettingsActivity.show(activity, itemID, observer);
+                        NotifySettingsActivity.show(activity, resultLauncher, itemID, observer);
                         break;
 
                     case Selectable.ListBaseAdapter.DetailButtonType.Graph:
@@ -3612,7 +3644,7 @@ public class MainActivity extends AppCompatActivity
 
                     //start settings activity
                     startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
-                    MainActivity.this.startActivityForResult(startIntent, BaseInputActivity.RequestCode.Settings);
+                    Globals.startActivityForResult(resultLauncher, startIntent, BaseInputActivity.RequestCode.Settings);
                 }
                 else
                 {

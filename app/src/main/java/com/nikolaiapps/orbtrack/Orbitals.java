@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -668,15 +669,21 @@ public abstract class Orbitals
                                 //if for others
                                 if(fileSourceType == AddSelectListAdapter.FileSourceType.Others)
                                 {
+                                    ActivityResultLauncher<Intent> otherSaveLauncher = null;
+
                                     //if the main activity
                                     if(activity instanceof MainActivity)
                                     {
-                                        //set pending file in activity
-                                        ((MainActivity)activity).setSaveFileData(null, textValue, listValue, which, fileSourceType);
+                                        //remember main activity
+                                        MainActivity mainActivity = (MainActivity)activity;
+
+                                        //get launcher and set pending file in activity
+                                        otherSaveLauncher = mainActivity.getResultLauncher(BaseInputActivity.RequestCode.OthersSave);
+                                        mainActivity.setSaveFileData(null, textValue, listValue, which, fileSourceType);
                                     }
 
                                     //get folder
-                                    Globals.showOthersFolderSelect(activity);
+                                    Globals.showOthersFolderSelect(otherSaveLauncher);
 
                                     //don't call on dismiss listener (prevent deselecting items too soon)
                                     dialog.setOnDismissListener(null);
@@ -859,16 +866,19 @@ public abstract class Orbitals
                                     {
                                         //if activity exists
                                         Activity currentActivity = Page.this.getActivity();
-                                        if(currentActivity != null)
+                                        if(currentActivity instanceof MainActivity)
                                         {
+                                            //get result launcher
+                                            ActivityResultLauncher<Intent> launcher = ((MainActivity)currentActivity).getResultLauncher();
+
                                             //save file
                                             if(forGoogleDrive)
                                             {
-                                                GoogleDriveAccess.start(currentActivity, usedFile, count, true);
+                                                GoogleDriveAccess.start(currentActivity, launcher, usedFile, count, true);
                                             }
                                             else
                                             {
-                                                DropboxAccess.start(currentActivity, usedFile, count, true);
+                                                DropboxAccess.start(currentActivity, launcher, usedFile, count, true);
                                             }
                                         }
                                     }
@@ -1207,7 +1217,7 @@ public abstract class Orbitals
     }
 
     //Shows SD card file browser
-    public static void showSDCardFileBrowser(Activity context, View parentView)
+    public static void showSDCardFileBrowser(Activity context, ActivityResultLauncher<Intent> launcher, View parentView)
     {
         Resources res = context.getResources();
 
@@ -1216,7 +1226,7 @@ public abstract class Orbitals
         {
             //show file browser
             Intent intent = new Intent(context, SDCardBrowserActivity.class);
-            context.startActivityForResult(intent, BaseInputActivity.RequestCode.SDCardOpenItem);
+            Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.SDCardOpenItem);
         }
         //else if don't have permission but can ask
         else if(Globals.askReadPermission)
@@ -1232,7 +1242,7 @@ public abstract class Orbitals
     }
 
     //Shows google drive file browser
-    public static void showGoogleDriveFileBrowser(final Activity context, boolean confirmInternet)
+    public static void showGoogleDriveFileBrowser(final Activity context, ActivityResultLauncher<Intent> launcher, boolean confirmInternet)
     {
         //if confirm internet and should ask
         if(confirmInternet && Globals.shouldAskInternetConnection(context))
@@ -1244,18 +1254,18 @@ public abstract class Orbitals
                 public void onClick(DialogInterface dialog, int which)
                 {
                     //don't ask this time
-                    showGoogleDriveFileBrowser(context, false);
+                    showGoogleDriveFileBrowser(context, launcher, false);
                 }
             });
         }
         else
         {
-            GoogleDriveAccess.start(context, false);
+            GoogleDriveAccess.start(context, launcher, false);
         }
     }
 
     //Shows Dropbox browser
-    private static void showDropboxBrowser(final Activity context, boolean confirmInternet)
+    private static void showDropboxBrowser(final Activity context, ActivityResultLauncher<Intent> launcher, boolean confirmInternet)
     {
         //if confirm internet and should ask
         if(confirmInternet && Globals.shouldAskInternetConnection(context))
@@ -1267,28 +1277,28 @@ public abstract class Orbitals
                 public void onClick(DialogInterface dialog, int which)
                 {
                     //don't ask this time
-                    showDropboxBrowser(context, false);
+                    showDropboxBrowser(context, launcher, false);
                 }
             });
         }
         else
         {
-            DropboxAccess.start(context, false);
+            DropboxAccess.start(context, launcher, false);
         }
     }
 
     //Shows other file browsers
-    public static void showOthersFileBrowser(Activity context)
+    public static void showOthersFileBrowser(Activity context, ActivityResultLauncher<Intent> launcher)
     {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
         intent.setType("*/*");
         intent = Intent.createChooser(intent, context.getString(R.string.title_select_file_or_files));
-        context.startActivityForResult(intent, BaseInputActivity.RequestCode.OthersOpenItem);
+        Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.OthersOpenItem);
     }
 
     //Shows an add dialog
-    public static void showAddDialog(final Activity context, final View parentView, final boolean askForce)
+    public static void showAddDialog(final Activity context, ActivityResultLauncher<Intent> resultLauncher, ActivityResultLauncher<Intent> otherOpenLauncher, final View parentView, final boolean askForce)
     {
         final Resources res = context.getResources();
 
@@ -1301,7 +1311,7 @@ public abstract class Orbitals
                 switch(which)
                 {
                     case AddSelectListAdapter.SatelliteSourceType.Online:
-                        MasterAddListActivity.showList(context, askForce, true);
+                        MasterAddListActivity.showList(context, resultLauncher, askForce, true);
                         break;
 
                     case AddSelectListAdapter.SatelliteSourceType.File:
@@ -1314,19 +1324,19 @@ public abstract class Orbitals
                                 switch(which)
                                 {
                                     case AddSelectListAdapter.FileSourceType.SDCard:
-                                        showSDCardFileBrowser(context, parentView);
+                                        showSDCardFileBrowser(context, resultLauncher, parentView);
                                         break;
 
                                     case AddSelectListAdapter.FileSourceType.Dropbox:
-                                        showDropboxBrowser(context, true);
+                                        showDropboxBrowser(context, resultLauncher, true);
                                         break;
 
                                     case AddSelectListAdapter.FileSourceType.GoogleDrive:
-                                        showGoogleDriveFileBrowser(context, true);
+                                        showGoogleDriveFileBrowser(context, resultLauncher, true);
                                         break;
 
                                     case AddSelectListAdapter.FileSourceType.Others:
-                                        showOthersFileBrowser(context);
+                                        showOthersFileBrowser(context, otherOpenLauncher);
                                         break;
                                 }
                             }
@@ -1334,7 +1344,7 @@ public abstract class Orbitals
                         break;
 
                     case AddSelectListAdapter.SatelliteSourceType.Manual:
-                        MasterAddListActivity.showManual(context);
+                        MasterAddListActivity.showManual(context, resultLauncher);
                         break;
                 }
             }

@@ -9,6 +9,9 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.widget.TextView;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import com.dropbox.core.DbxDownloader;
@@ -31,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class DropboxAccess extends AppCompatActivity
+public class DropboxAccess extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
 {
     private static final String DROPBOX_SETTINGS = "dropboxSettings";
 
@@ -74,6 +77,12 @@ public class DropboxAccess extends AppCompatActivity
 
         @Override
         public String getName()
+        {
+            return(name);
+        }
+
+        @Override
+        public String getFullName()
         {
             return(name);
         }
@@ -429,7 +438,9 @@ public class DropboxAccess extends AppCompatActivity
     private boolean selectFolder;
     private boolean loginOnly;
     private int itemCount;
+    private byte requestCode;
     private File saveFile;
+    private ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -455,9 +466,13 @@ public class DropboxAccess extends AppCompatActivity
         saveFile = (File)intent.getSerializableExtra(FileBrowserBaseActivity.ParamTypes.FileName);
         itemCount = intent.getIntExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, 0);
         loginOnly = intent.getBooleanExtra(FileBrowserBaseActivity.ParamTypes.LoginOnly, false);
+        requestCode = BaseInputActivity.getRequestCode(intent);
 
         //want to show list if not logging in only
         showList = !loginOnly;
+
+        //create receiver
+        resultLauncher = Globals.createActivityLauncher(this, this);
 
         //if -logging in only- or -token or user ID not set-
         if(loginOnly || accessToken == null || userId == null)
@@ -475,6 +490,10 @@ public class DropboxAccess extends AppCompatActivity
         String userId;
         String accessToken = getAccessToken();
         GetEmailTask emailTask;
+        Intent resultData = new Intent();
+
+        //set defaults
+        BaseInputActivity.setRequestCode(resultData, requestCode);
 
         //if no token
         if(accessToken == null)
@@ -530,7 +549,7 @@ public class DropboxAccess extends AppCompatActivity
                         if(loginOnly)
                         {
                             //finish
-                            setResult(email != null ? RESULT_OK : RESULT_CANCELED);
+                            setResult(email != null ? RESULT_OK : RESULT_CANCELED, resultData);
                             DropboxAccess.this.finish();
                         }
                     }
@@ -541,7 +560,7 @@ public class DropboxAccess extends AppCompatActivity
             else if(loginOnly)
             {
                 //finish
-                setResult(RESULT_CANCELED);
+                setResult(RESULT_CANCELED, resultData);
                 DropboxAccess.this.finish();
             }
         }
@@ -564,14 +583,30 @@ public class DropboxAccess extends AppCompatActivity
     }
 
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    public void onActivityResult(ActivityResult result)
     {
+        int resultCode = result.getResultCode();
+        byte localRequestCode;
         boolean isOkay = (resultCode == RESULT_OK);
         String folderName;
         ArrayList<String> fileIds;
+        Intent data = result.getData();
         final Intent resultData = new Intent();
 
-        switch(requestCode)
+        //if no data
+        if(data == null)
+        {
+            //set to empty
+            data = new Intent();
+        }
+
+        //get local request code
+        localRequestCode = BaseInputActivity.getRequestCode(data);
+
+        //set defaults
+        BaseInputActivity.setRequestCode(resultData, requestCode);
+
+        switch(localRequestCode)
         {
             case BaseInputActivity.RequestCode.DropboxOpenFolder:
             case BaseInputActivity.RequestCode.DropboxOpenFile:
@@ -587,7 +622,7 @@ public class DropboxAccess extends AppCompatActivity
                     showList = false;
 
                     //if getting folder
-                    if(requestCode == BaseInputActivity.RequestCode.DropboxOpenFolder)
+                    if(localRequestCode == BaseInputActivity.RequestCode.DropboxOpenFolder)
                     {
                         //get folder and save file
                         folderName = data.getStringExtra(FileBrowserBaseActivity.ParamTypes.FolderName);
@@ -648,13 +683,11 @@ public class DropboxAccess extends AppCompatActivity
                 else
                 {
                     //pass information back to caller
-                    setResult(resultCode);
-                    DropboxAccess.this.finish();
+                    setResult(resultCode, resultData);
+                    this.finish();
                 }
                 break;
         }
-
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override
@@ -766,7 +799,7 @@ public class DropboxAccess extends AppCompatActivity
                         Intent intent = new Intent(DropboxAccess.this, BrowserActivity.class);
                         intent.putExtra(BrowserActivity.ParamTypes.RootFolder, "");
                         intent.putExtra(BrowserActivity.ParamTypes.SelectFolder, selectFolder);
-                        DropboxAccess.this.startActivityForResult(intent, (selectFolder ? BaseInputActivity.RequestCode.DropboxOpenFolder : BaseInputActivity.RequestCode.DropboxOpenFile));
+                        Globals.startActivityForResult(resultLauncher, intent, (selectFolder ? BaseInputActivity.RequestCode.DropboxOpenFolder : BaseInputActivity.RequestCode.DropboxOpenFile));
                         break;
 
                     case FileBrowserBaseActivity.ResultCode.LoginFailed:
@@ -798,7 +831,7 @@ public class DropboxAccess extends AppCompatActivity
     }
 
     //Starts an instance
-    public static void start(Activity activity, File fileName, int count, boolean selectFolder)
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, File fileName, int count, boolean selectFolder)
     {
         boolean useFile = (fileName != null);
         Intent intent = new Intent(activity, DropboxAccess.class);
@@ -809,17 +842,17 @@ public class DropboxAccess extends AppCompatActivity
             intent.putExtra(FileBrowserBaseActivity.ParamTypes.FileName, fileName);
         }
         intent.putExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, count);
-        activity.startActivityForResult(intent, (useFile ? BaseInputActivity.RequestCode.DropboxSave : selectFolder ? BaseInputActivity.RequestCode.DropboxOpenFolder : BaseInputActivity.RequestCode.DropboxOpenFile));
+        Globals.startActivityForResult(launcher, intent, (useFile ? BaseInputActivity.RequestCode.DropboxSave : selectFolder ? BaseInputActivity.RequestCode.DropboxOpenFolder : BaseInputActivity.RequestCode.DropboxOpenFile));
     }
-    public static void start(Activity activity, boolean selectFolder)
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, boolean selectFolder)
     {
-        start(activity, null, 1, selectFolder);
+        start(activity, launcher, null, 1, selectFolder);
     }
-    public static void start(Activity activity)
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher)
     {
         Intent intent = new Intent(activity, DropboxAccess.class);
 
         intent.putExtra(FileBrowserBaseActivity.ParamTypes.LoginOnly, true);
-        activity.startActivityForResult(intent, BaseInputActivity.RequestCode.DropboxAddAccount);
+        Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.DropboxAddAccount);
     }
 }

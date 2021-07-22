@@ -76,6 +76,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         public abstract boolean isDirectory();
         public abstract String getId();
         public abstract String getName();
+        public abstract String getFullName();
         public abstract String getPath();
         public abstract String getPathId();
         public abstract String getAbsolutePath();
@@ -308,17 +309,17 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             return(idList);
         }
 
-        //Gets selected file names
-        private ArrayList<String> getSelectedFileNames()
+        //Gets selected full file names
+        private ArrayList<String> getSelectedFileFullNames()
         {
-            ArrayList<String> idList = new ArrayList<>(selectedFiles.size());
+            ArrayList<String> nameList = new ArrayList<>(selectedFiles.size());
 
             for(ItemBase currentFile : selectedFiles)
             {
-                idList.add(currentFile.getName());
+                nameList.add(currentFile.getFullName());
             }
 
-            return(idList);
+            return(nameList);
         }
 
         //Sets selected status of given file
@@ -452,7 +453,8 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
     {
         super.onCreate(savedInstanceState);
 
-        Intent intent = getIntent();
+        final byte requestCode;
+        Intent intent = this.getIntent();
         RecyclerView browseListView;
 
         //if intent is not set
@@ -461,6 +463,9 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             //create empty
             intent = new Intent();
         }
+
+        //setup request code and cancel intent
+        requestCode = BaseInputActivity.getRequestCode(intent);
 
         //get params
         selectFolder = intent.getBooleanExtra(ParamTypes.SelectFolder, false);
@@ -487,7 +492,11 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             @Override
             public void onClick(View v)
             {
-                setResult(RESULT_CANCELED);
+                Intent cancelIntent = new Intent();
+
+                //set result
+                BaseInputActivity.setRequestCode(cancelIntent, requestCode);
+                setResult(RESULT_CANCELED, cancelIntent);
                 FileBrowserBaseActivity.this.finish();
             }
         });
@@ -508,10 +517,11 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                 {
                     //add files
                     data.putStringArrayListExtra(ParamTypes.FileIds, filesAdapter.getSelectedFileIds());
-                    data.putStringArrayListExtra(ParamTypes.FileNames, filesAdapter.getSelectedFileNames());
+                    data.putStringArrayListExtra(ParamTypes.FileNames, filesAdapter.getSelectedFileFullNames());
                 }
 
                 //set result
+                BaseInputActivity.setRequestCode(data, requestCode);
                 setResult(RESULT_OK, data);
                 FileBrowserBaseActivity.this.finish();
             }

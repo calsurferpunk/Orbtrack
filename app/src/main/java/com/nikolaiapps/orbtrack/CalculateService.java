@@ -400,7 +400,7 @@ public class CalculateService extends NotifyService
             if(noradId != Integer.MIN_VALUE)
             {
                 //start settings activity
-                NotifySettingsActivity.show(context, noradId, new Calculations.ObserverType(zoneId, new Calculations.GeodeticDataType(latitude, longitude, altitude, 0, 0)));
+                NotifySettingsActivity.show(context, null, noradId, new Calculations.ObserverType(zoneId, new Calculations.GeodeticDataType(latitude, longitude, altitude, 0, 0)));
             }
         }
 

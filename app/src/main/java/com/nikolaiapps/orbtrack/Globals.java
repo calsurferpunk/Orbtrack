@@ -32,6 +32,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
+import androidx.activity.ComponentActivity;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import com.google.android.gms.security.ProviderInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
@@ -694,12 +699,12 @@ public abstract class Globals
     }
 
     //Show others folder browser
-    public static void showOthersFolderSelect(Activity activity)
+    public static void showOthersFolderSelect(ActivityResultLauncher<Intent> launcher)
     {
         if(Build.VERSION.SDK_INT >= 21)
         {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            activity.startActivityForResult(intent, BaseInputActivity.RequestCode.OthersSave);
+            Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.OthersSave);
         }
     }
 
@@ -1102,13 +1107,13 @@ public abstract class Globals
     }
 
     //Ask for google drive account
-    public static void askGoogleDriveAccount(Activity context, int requestCode)
+    public static void askGoogleDriveAccount(Activity context, ActivityResultLauncher<Intent> launcher, byte requestCode)
     {
         //if context is set
         if(context != null)
         {
             //ask for user account
-            context.startActivityForResult(getGoogleDriveSignInClient(context).getSignInIntent(), requestCode);
+            Globals.startActivityForResult(launcher, getGoogleDriveSignInClient(context).getSignInIntent(), requestCode);
         }
     }
 
@@ -1208,6 +1213,61 @@ public abstract class Globals
     public static void showDenied(View parentView, String denyMessage)
     {
         showSnackBar(parentView, denyMessage, true);
+    }
+
+    //Creates an activity launcher
+    public static ActivityResultLauncher<Intent> createActivityLauncher(ComponentActivity activity, ActivityResultCallback<ActivityResult> callback, byte requestCode)
+    {
+        return(activity != null ? activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (requestCode != BaseInputActivity.RequestCode.None ? new ActivityResultCallback<ActivityResult>()
+        {
+            @Override
+            public void onActivityResult(ActivityResult result)
+            {
+                Intent data;
+
+                //if callback is set
+                if(callback != null)
+                {
+                    //get data
+                    data = result.getData();
+
+                    //if no data yet
+                    if(data == null)
+                    {
+                        //create it
+                        data = new Intent();
+                    }
+
+                    //add request code
+                    data.putExtra(BaseInputActivity.EXTRA_REQUEST_CODE, requestCode);
+
+                    //call callback
+                    callback.onActivityResult(result);
+                }
+            }
+        } : callback)) : null);
+    }
+    public static ActivityResultLauncher<Intent> createActivityLauncher(ComponentActivity activity, ActivityResultCallback<ActivityResult> callback)
+    {
+        return(createActivityLauncher(activity, callback, BaseInputActivity.RequestCode.None));
+    }
+
+    //Starts an activity with the given launcher
+    public static void startActivityForResult(ActivityResultLauncher<Intent> launcher, Intent intent, byte requestCode)
+    {
+        //if launcher and intent exist
+        if(launcher != null && intent != null)
+        {
+            //add any request code
+            BaseInputActivity.setRequestCode(intent, requestCode);
+
+            //launch activity
+            launcher.launch(intent);
+        }
+    }
+    public static void startActivity(ActivityResultLauncher<Intent> launcher, Intent intent)
+    {
+        startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.None);
     }
 
     //Starts a service

@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,11 +32,15 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         setContentView(R.layout.manual_object_input_layout);
 
         int index;
+        final Intent resultIntent = new Intent();
         final LinearLayout manualLayout = this.findViewById(R.id.Manual_Layout);
         ArrayList<UpdateService.MasterOwner> owners = Database.getOwners(this);
         ArrayList<IconSpinner.Item> ownerItems = new ArrayList<>(0);
         ArrayList<UpdateService.MasterCategory> categories = Database.getCategories(this);
         ArrayList<IconSpinner.Item> categoryItems = new ArrayList<>(0);
+
+        //setup result intent
+        BaseInputActivity.setRequestCode(resultIntent, BaseInputActivity.getRequestCode(this.getIntent()));
 
         //get displays
         nameText = this.findViewById(R.id.Manual_Object_Name);
@@ -136,7 +141,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                     {
                         Database.saveSatellite(ManualOrbitalInputActivity.this, name, currentSat.getSatelliteNum(), (String)ownerList.getSelectedValue(""), launchDate.getDate().getTimeInMillis(), line1, line2, Calculations.epochToGMTCalendar(currentSat.tle.epochYear, currentSat.tle.epochDay).getTimeInMillis(), null, Globals.getGMTTime().getTimeInMillis(), Database.OrbitalType.Satellite);
 
-                        setResult(RESULT_OK);
+                        setResult(RESULT_OK, resultIntent);
                         ManualOrbitalInputActivity.this.finish();
                     }
                     else
@@ -155,7 +160,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
             @Override
             public void onClick(View v)
             {
-                setResult(RESULT_CANCELED);
+                setResult(RESULT_CANCELED, resultIntent);
                 ManualOrbitalInputActivity.this.finish();
             }
         });

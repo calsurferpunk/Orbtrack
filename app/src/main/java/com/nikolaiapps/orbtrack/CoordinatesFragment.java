@@ -565,7 +565,7 @@ public interface CoordinatesFragment
                 selectOrbital.setInfoVisible(visible);
             }
             //else if none selected and there are markers
-            else if(selectedOrbitalIndex == -1 && markerObjects != null)
+            else if(selectedOrbitalIndex == -1 && markerObjects.size() > 0)
             {
                 //if able to get marker
                 selectMarker = getMarker(noradId);

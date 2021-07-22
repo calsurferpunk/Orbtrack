@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
@@ -66,6 +67,7 @@ public class MapLocationInputActivity extends BaseInputActivity
         }
     }
 
+    private Intent resultData;
     private LocationReceiver locationReceiver;
 
     @Override
@@ -77,8 +79,8 @@ public class MapLocationInputActivity extends BaseInputActivity
         //get displays and task
         String text;
         Bundle args = new Bundle();
-        Intent currentIntent = this.getIntent();
-        final boolean forSearch = currentIntent.getBooleanExtra(ParamTypes.ForSearch, false);
+        Intent intent = this.getIntent();
+        final boolean forSearch = intent.getBooleanExtra(ParamTypes.ForSearch, false);
         final int poweredByVisible = (forSearch ? View.VISIBLE : View.GONE);
         final int coordInputVisible = (forSearch ? View.GONE : View.VISIBLE);
         final MapLocation currentLocation = new MapLocation();
@@ -106,6 +108,10 @@ public class MapLocationInputActivity extends BaseInputActivity
         final AppCompatImageButton timeZoneButton = this.findViewById(R.id.Location_Time_Zone_Button);
         final MaterialButton cancelButton = this.findViewById(R.id.Location_Cancel_Button);
         final MaterialButton addButton = this.findViewById(R.id.Location_Add_Button);
+
+        //set defaults
+        resultData = new Intent();
+        BaseInputActivity.setRequestCode(resultData, BaseInputActivity.getRequestCode(intent));
 
         //replace view
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(this, false));
@@ -463,7 +469,7 @@ public class MapLocationInputActivity extends BaseInputActivity
             public void onClick(View v)
             {
                 //close activity
-                setResult(RESULT_CANCELED);
+                setResult(RESULT_CANCELED, resultData);
                 MapLocationInputActivity.this.finish();
             }
         });
@@ -540,17 +546,17 @@ public class MapLocationInputActivity extends BaseInputActivity
     {
         //save location and set result
         Database.saveLocation(context, name, latitude, longitude, altitudeM, zoneId, Database.LocationType.Saved, true);
-        setResult(RESULT_OK);
+        setResult(RESULT_OK, resultData);
 
         //close activity
         MapLocationInputActivity.this.finish();
     }
 
     //Shows activity
-    public static void show(Activity context, boolean forSearch)
+    public static void show(Activity context, ActivityResultLauncher<Intent> launcher, boolean forSearch)
     {
         Intent intent = new Intent(context, MapLocationInputActivity.class);
         intent.putExtra(ParamTypes.ForSearch, forSearch);
-        context.startActivityForResult(intent, BaseInputActivity.RequestCode.MapLocationInput);
+        Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.MapLocationInput);
     }
 }

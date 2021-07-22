@@ -5,6 +5,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
@@ -45,6 +47,7 @@ public class NotifySettingsActivity extends BaseInputActivity
         final boolean useList;
         String text;
         Intent intent = this.getIntent();
+        Intent resultData = new Intent();
         Database.DatabaseSatellite currentOrbital;
         final Calculations.ObserverType location;
         final View divider = this.findViewById(R.id.Notify_Settings_Divider);
@@ -93,6 +96,9 @@ public class NotifySettingsActivity extends BaseInputActivity
         useList = (noradId == Universe.IDs.Invalid);
         currentOrbital = (useList ? null : Database.getOrbital(this, noradId));
 
+        //set defaults
+        BaseInputActivity.setRequestCode(resultData, BaseInputActivity.getRequestCode(intent));
+
         //if -found orbital or using list- and -valid location-
         if((useList || currentOrbital != null) && location != null)
         {
@@ -121,7 +127,7 @@ public class NotifySettingsActivity extends BaseInputActivity
 
                     //update settings
                     Settings.setNotify(NotifySettingsActivity.this, id, location, notifyUsing, notifyNextChecked);
-                    setResult(RESULT_OK);
+                    setResult(RESULT_OK, resultData);
                     NotifySettingsActivity.this.finish();
                 }
             });
@@ -131,7 +137,7 @@ public class NotifySettingsActivity extends BaseInputActivity
                 public void onClick(View v)
                 {
                     //stop
-                    setResult(RESULT_CANCELED);
+                    setResult(RESULT_CANCELED, resultData);
                     NotifySettingsActivity.this.finish();
                 }
             });
@@ -214,7 +220,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     }
 
     //Shows the dialog
-    public static void show(Context context, int noradId, Calculations.ObserverType location)
+    public static void show(Context context, ActivityResultLauncher<Intent> launcher, int noradId, Calculations.ObserverType location)
     {
         Intent notifyIntent = new Intent(context, NotifySettingsActivity.class);
         if(noradId != Integer.MIN_VALUE)
@@ -222,9 +228,9 @@ public class NotifySettingsActivity extends BaseInputActivity
             notifyIntent.putExtra(NotifySettingsActivity.ParamTypes.NoradID, noradId);
         }
         notifyIntent.putExtra(NotifySettingsActivity.ParamTypes.Location, location);
-        if(context instanceof Activity)
+        if(context instanceof Activity && launcher != null)
         {
-            ((Activity)context).startActivityForResult(notifyIntent, RequestCode.EditNotify);
+            Globals.startActivityForResult(launcher, notifyIntent, RequestCode.EditNotify);
         }
         else
         {
@@ -232,8 +238,8 @@ public class NotifySettingsActivity extends BaseInputActivity
             context.startActivity(notifyIntent);
         }
     }
-    public static void show(Activity context, Calculations.ObserverType location)
+    public static void show(Activity context, ActivityResultLauncher<Intent> launcher, Calculations.ObserverType location)
     {
-        show(context, Integer.MIN_VALUE, location);
+        show(context, launcher, Integer.MIN_VALUE, location);
     }
 }

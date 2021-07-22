@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.widget.AppCompatImageButton;
@@ -500,6 +501,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private static int lastNeedUpdateYear = -1;
 
     //Data
+    private byte requestCode;
     private BroadcastReceiver updateReceiver;
     private BroadcastReceiver listReceiver;
 
@@ -989,6 +991,9 @@ public class MasterAddListActivity extends BaseInputActivity
         downloadProgress = Globals.createProgressDialog(this);
         addProgress = Globals.createProgressDialog(this);
 
+        //get request code
+        requestCode = BaseInputActivity.getRequestCode(addIntent);
+
         //get display
         masterLayout = this.findViewById(R.id.Master_Layout);
 
@@ -1026,7 +1031,7 @@ public class MasterAddListActivity extends BaseInputActivity
             public void onClick(View v)
             {
                 //close
-                setResult(RESULT_CANCELED);
+                MasterAddListActivity.this.sendResult(RESULT_CANCELED);
                 MasterAddListActivity.this.finish();
             }
         });
@@ -1067,7 +1072,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
                     }
 
-                    setResult(RESULT_OK);
+                    MasterAddListActivity.this.sendResult(RESULT_OK);
                     MasterAddListActivity.this.finish();
                 }
             });
@@ -1294,6 +1299,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private void sendResult(Intent data, long updateIndex, long updateCount, int progressType)
     {
         //set result
+        BaseInputActivity.setRequestCode(data, requestCode);
         if(updateIndex >= 0)
         {
             data.putExtra(ParamTypes.SuccessCount, updateIndex);
@@ -1303,16 +1309,26 @@ public class MasterAddListActivity extends BaseInputActivity
             data.putExtra(ParamTypes.TotalCount, updateCount);
         }
         data.putExtra(ParamTypes.ProgressType, progressType);
-        MasterAddListActivity.this.setResult((progressType == Globals.ProgressType.Finished ? RESULT_OK : RESULT_CANCELED), data);
-        MasterAddListActivity.this.finish();
+        this.setResult((progressType == Globals.ProgressType.Finished ? RESULT_OK : RESULT_CANCELED), data);
+        this.finish();
     }
     private void sendResult(Intent data, int progressType)
     {
         sendResult(data, -1, -1, progressType);
     }
+    private void sendResult(int resultCode)
+    {
+        Intent data = new Intent();
+
+        //add any request code
+        BaseInputActivity.setRequestCode(data, requestCode);
+
+        //set result
+        this.setResult(resultCode, data);
+    }
 
     //Shows add list
-    public static void showList(final Activity context, final boolean askUpdate, boolean confirmInternet)
+    public static void showList(final Activity context, ActivityResultLauncher<Intent> launcher, final boolean askUpdate, boolean confirmInternet)
     {
         //if confirm internet and should ask
         if(confirmInternet && Globals.shouldAskInternetConnection(context))
@@ -1324,7 +1340,7 @@ public class MasterAddListActivity extends BaseInputActivity
                 public void onClick(DialogInterface dialog, int which)
                 {
                     //don't ask this time
-                    showList(context, askUpdate, false);
+                    showList(context, launcher, askUpdate, false);
                 }
             });
         }
@@ -1334,14 +1350,14 @@ public class MasterAddListActivity extends BaseInputActivity
             intent.putExtra(ParamTypes.ListType, ListType.MasterList);
             intent.putExtra(ParamTypes.AskUpdate, askUpdate);
             intent.putExtra(Settings.PreferenceName.SatelliteSource, Settings.getSatelliteSource(context));
-            context.startActivityForResult(intent, BaseInputActivity.RequestCode.MasterAddList);
+            Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.MasterAddList);
         }
     }
 
     //Shows manual orbital input
-    public static void showManual(Activity context)
+    public static void showManual(Activity context, ActivityResultLauncher<Intent> launcher)
     {
         Intent intent = new Intent(context, ManualOrbitalInputActivity.class);
-        context.startActivityForResult(intent, BaseInputActivity.RequestCode.ManualOrbitalInput);
+        Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.ManualOrbitalInput);
     }
 }

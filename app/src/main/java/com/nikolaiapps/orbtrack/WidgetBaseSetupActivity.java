@@ -1341,6 +1341,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
     public abstract Class<?> getAlarmReceiverClass();
 
     //variables
+    private byte requestCode;
     private View parentView;
     private View widgetPreview;
     private MaterialButton okButton;
@@ -1360,23 +1361,39 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         final TabLayout setupTabs = this.findViewById(R.id.Widget_Setup_Tab_Layout);
         final SwipeStateViewPager setupPager = this.findViewById(R.id.Widget_Setup_Pager);
         int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
-        Bundle extras = this.getIntent().getExtras();
+        Intent intent = this.getIntent();
+        Bundle extras;
         MaterialButton cancelButton;
         ViewGroup.LayoutParams previewParams;
         float[] dps;
 
+        //if intent is not set
+        if(intent == null)
+        {
+            //create it
+            intent = new Intent();
+        }
+
+        //get params
+        requestCode = BaseInputActivity.getRequestCode(intent);
+
         //if extras are set
+        extras = intent.getExtras();
         if(extras != null)
         {
             //get widget ID and settings
             widgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID);
+            requestCode = BaseInputActivity.getRequestCode(intent);
         }
 
         //if invalid widget ID
         if(widgetId == AppWidgetManager.INVALID_APPWIDGET_ID)
         {
+            Intent resultIntent = new Intent();
+
             //cancel and stop
-            setResult(RESULT_CANCELED);
+            BaseInputActivity.setRequestCode(resultIntent, requestCode);
+            setResult(RESULT_CANCELED, resultIntent);
             this.finish();
         }
 
@@ -1515,7 +1532,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                 Intent resultIntent = new Intent();
                 Calculations.ObserverType usedObserver;
 
-                //add widget ID to results
+                //add request code and widget ID to results
+                BaseInputActivity.setRequestCode(resultIntent, requestCode);
                 resultIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
 
                 //if for okay button

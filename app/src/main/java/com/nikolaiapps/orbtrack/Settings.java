@@ -1407,7 +1407,10 @@ public abstract class Settings
                     editIntent = new Intent(currentContext, (widgetClass.equals(WidgetPassMediumProvider.class) ? WidgetPassMediumProvider.SetupActivity.class : widgetClass.equals(WidgetPassSmallProvider.class) ? WidgetPassSmallProvider.SetupActivity.class : WidgetPassTinyProvider.SetupActivity.class));
                     extras.putInt(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
                     editIntent.putExtras(extras);
-                    ((Activity)currentContext).startActivityForResult(editIntent, BaseInputActivity.RequestCode.EditWidget);
+                    if(currentContext instanceof SettingsActivity)
+                    {
+                        Globals.startActivityForResult(((SettingsActivity)currentContext).getResultLauncher(), editIntent, BaseInputActivity.RequestCode.EditWidget);
+                    }
                 }
             }
 

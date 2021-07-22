@@ -1199,12 +1199,15 @@ public abstract class Settings
                     {
                         itemHolder.notifyImage.clearColorFilter();
                     }
+                    itemHolder.notifyImage.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    itemHolder.notifyImage.setVisibility(View.INVISIBLE);
                 }
                 itemHolder.nameText.setText(currentItem.name);
                 if(usePassStart || usePassEnd)
                 {
-                    itemHolder.passText.setVisibility(View.VISIBLE);
-
                     if(usePassStart)
                     {
                         setNotifyText(itemHolder.passStartText, true, currentItem.passStartSettings.nextOnly);
@@ -1213,11 +1216,17 @@ public abstract class Settings
                     {
                         setNotifyText(itemHolder.passEndText, false, currentItem.passEndSettings.nextOnly);
                     }
+
+                    itemHolder.passText.setVisibility(View.VISIBLE);
                 }
+                else
+                {
+                    itemHolder.passText.setVisibility(View.INVISIBLE);
+                }
+                itemHolder.passStartText.setVisibility(usePassStart ? View.VISIBLE : View.INVISIBLE);
+                itemHolder.passEndText.setVisibility(usePassEnd ? View.VISIBLE : View.INVISIBLE);
                 if(useFullStart || useFullEnd)
                 {
-                    itemHolder.fullText.setVisibility(View.VISIBLE);
-
                     if(useFullStart)
                     {
                         setNotifyText(itemHolder.fullStartText, true, currentItem.fullStartSettings.nextOnly);
@@ -1226,7 +1235,15 @@ public abstract class Settings
                     {
                         setNotifyText(itemHolder.fullEndText, false, currentItem.fullEndSettings.nextOnly);
                     }
+
+                    itemHolder.fullText.setVisibility(View.VISIBLE);
                 }
+                else
+                {
+                    itemHolder.fullText.setVisibility(View.INVISIBLE);
+                }
+                itemHolder.fullStartText.setVisibility(useFullStart ? View.VISIBLE : View.INVISIBLE);
+                itemHolder.fullEndText.setVisibility(useFullEnd ? View.VISIBLE : View.INVISIBLE);
 
                 //set background
                 setItemBackground(itemHolder.itemView, false);

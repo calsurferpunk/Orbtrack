@@ -70,6 +70,7 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -750,17 +751,21 @@ public abstract class Globals
     public static void showConfirmDialog(Context context, String titleText, CharSequence messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
     {
         int padding = (int)Globals.dpToPixels(context, 15);
+        ScrollView messageScroll = new ScrollView(context);
         TextView messageView = new TextView(context);
-        ViewGroup.LayoutParams layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        ViewGroup.LayoutParams messageParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
-        messageView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageBackground));
-        messageView.setLayoutParams(layoutParams);
-        messageView.setMovementMethod(new LinkMovementMethod());
+        messageView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
+        messageView.setLayoutParams(messageParams);
         messageView.setPadding(padding, padding, padding, padding);
+        messageView.setMovementMethod(LinkMovementMethod.getInstance());
         messageView.setText(messageText);
         messageView.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));
 
-        showConfirmDialog(context, null, messageView, titleText, null, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, null);
+        messageScroll.setScrollbarFadingEnabled(false);
+        messageScroll.addView(messageView);
+
+        showConfirmDialog(context, null, messageScroll, titleText, null, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, null);
     }
     public static void showConfirmDialog(Context context, String titleText, String messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnDismissListener dismissListener)
     {

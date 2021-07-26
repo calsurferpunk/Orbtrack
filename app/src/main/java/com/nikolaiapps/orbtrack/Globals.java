@@ -4515,7 +4515,7 @@ public abstract class Globals
     {
         String data;
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
-        WebPageData translatedData = Globals.getWebPage("http://nikolaiapps.heliohost.us/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
+        WebPageData translatedData = Globals.getWebPage("http://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
         JSONObject rootNode;
 
         //if got data and valid
@@ -4552,7 +4552,7 @@ public abstract class Globals
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
 
         //try to save without waiting for a response
-        Globals.getWebPage("http://nikolaiapps.heliohost.us/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, new String[]{"data"}, new String[]{text}, null);
+        Globals.getWebPage("http://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, new String[]{"data"}, new String[]{text}, null);
     }
 
     //Tries to logout of space track

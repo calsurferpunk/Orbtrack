@@ -1290,75 +1290,73 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Loads start data and updates display
     private void loadStartData(Bundle savedInstanceState)
     {
+        //get displays
+        optionsMenu = null;
+        sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
+        sideActionMenu = this.findViewById(R.id.Side_Action_Menu);
+        sideMenu = this.findViewById(R.id.Side_Menu);
+        mainFloatingButton = this.findViewById(R.id.Main_Floating_Button);
+        mainFloatingButton.setOnClickListener(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                handleMainFloatingButtonClick(false);
+            }
+        });
+        mainFloatingButton.setOnLongClickListener(new View.OnLongClickListener()
+        {
+            @Override
+            public boolean onLongClick(View view)
+            {
+                handleMainFloatingButtonClick(true);
+                return(true);
+            }
+        });
+
+        //set mode changed listener
+        editModeChangedListener = createOnEditModeChangedListener();
+
+        //setup drawer menu
+        BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
+        updateSideMenu();
+
+        //setup location retrieving
+        locationReceiver = createLocationReceiver(locationReceiver);
+
+        //handle any updates
+        DatabaseManager.handleUpdates(this);
+
+        //load orbitals
+        loadOrbitals(this, mainDrawerLayout);
+
+        //get observer
+        loadObserver(!savedState);
+
+        //update timer delays
+        updateTimerDelays();
+
+        //set tasks
+        timerTask = null;
+        timerRunnable = null;
+        timerDelay = listTimerDelay;
+        calculateCoordinatesTask = null;
+
+        //setup pager
+        mainPager.addOnPageChangeListener(createOnPageChangedListener());
+
+        //update display
+        setMainGroup(mainGroup, true);
+
+        //force refresh first time
+        setMainPage(savedInstanceState.getInt(ParamTypes.MainPagerItem, 0));
+
         //if need to recreate after setup
         if(recreateAfterSetup)
         {
             //handle recreating
             recreateAfterSetup = false;
             updateTheme();
-        }
-        else
-        {
-            //get displays
-            optionsMenu = null;
-            sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
-            sideActionMenu = this.findViewById(R.id.Side_Action_Menu);
-            sideMenu = this.findViewById(R.id.Side_Menu);
-            mainFloatingButton = this.findViewById(R.id.Main_Floating_Button);
-            mainFloatingButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View view)
-                {
-                    handleMainFloatingButtonClick(false);
-                }
-            });
-            mainFloatingButton.setOnLongClickListener(new View.OnLongClickListener()
-            {
-                @Override
-                public boolean onLongClick(View view)
-                {
-                    handleMainFloatingButtonClick(true);
-                    return(true);
-                }
-            });
-
-            //set mode changed listener
-            editModeChangedListener = createOnEditModeChangedListener();
-
-            //setup drawer menu
-            BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
-            updateSideMenu();
-
-            //setup location retrieving
-            locationReceiver = createLocationReceiver(locationReceiver);
-
-            //handle any updates
-            DatabaseManager.handleUpdates(this);
-
-            //load orbitals
-            loadOrbitals(this, mainDrawerLayout);
-
-            //get observer
-            loadObserver(!savedState);
-
-            //update timer delays
-            updateTimerDelays();
-
-            //set tasks
-            timerTask = null;
-            timerRunnable = null;
-            timerDelay = listTimerDelay;
-            calculateCoordinatesTask = null;
-
-            //setup pager
-            mainPager.addOnPageChangeListener(createOnPageChangedListener());
-
-            //update display
-            setMainGroup(mainGroup, true);
-
-            //force refresh first time
-            setMainPage(savedInstanceState.getInt(ParamTypes.MainPagerItem, 0));
         }
     }
 

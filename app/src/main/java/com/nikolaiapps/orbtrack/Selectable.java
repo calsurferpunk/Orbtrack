@@ -150,7 +150,7 @@ public abstract class Selectable
     //Select list view holder
     protected static class ListItemHolder extends RecyclerView.ViewHolder
     {
-        public CheckBox checkBoxView;
+        public final CheckBox checkBoxView;
 
         public ListItemHolder(View itemView, int checkBoxID)
         {

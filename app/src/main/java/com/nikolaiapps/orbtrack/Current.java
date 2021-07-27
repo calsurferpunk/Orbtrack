@@ -54,6 +54,7 @@ public abstract class Current
         static final int PageCount = 4;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class ParamTypes
     {
         static final String ID = "id";

@@ -3522,6 +3522,7 @@ public class UpdateService extends NotifyService
                         {
                             //save name, TLE line 1, and TLE line 2
                             line = currentSatellite.getName() + "\r\n" + rowData[0] + "\r\n" + rowData[1] + "\r\n";
+                            //noinspection CharsetObjectCanBeUsed
                             outStream.write(line.getBytes(Globals.Encoding.UTF16));
                         }
                         break;
@@ -3609,6 +3610,7 @@ public class UpdateService extends NotifyService
             }
 
             //write root node to file
+            //noinspection CharsetObjectCanBeUsed
             outStream.write(rootNode.toString().getBytes(Globals.Encoding.UTF16));
         }
 

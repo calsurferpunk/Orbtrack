@@ -354,11 +354,11 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         return(alarmPendingIntent);
     }
 
-    //Gets an intent with action
-    private static PendingIntent getActionIntent(Context context, Class<?> widgetClass, String action, int widgetId)
+    //Gets an intent with action settings click
+    private static PendingIntent getActionSettingsClickIntent(Context context, Class<?> widgetClass, int widgetId)
     {
         Intent intent = new Intent(context, widgetClass);
-        intent.setAction(action);
+        intent.setAction(ACTION_SETTINGS_CLICK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         intent.putExtra(EXTRA_WIDGET_CLASS, widgetClass);
         return(PendingIntent.getBroadcast(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT));
@@ -676,7 +676,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         boolean useExtended = widgetClass.equals(WidgetPassMediumProvider.class);
         boolean tleIsAccurate = (currentSatelliteData.database == null || currentSatelliteData.database.tleIsAccurate);
         RemoteViews views = (useParent ? null : new RemoteViews(context.getPackageName(), R.layout.widget_pass_view));
-        PendingIntent actionIntent = (useParent ? null : getActionIntent(context, widgetClass, ACTION_SETTINGS_CLICK, widgetId));
+        PendingIntent clickIntent = (useParent ? null : getActionSettingsClickIntent(context, widgetClass, widgetId));
 
         //get image ID
         itemImageId = (useNormal ? R.id.Widget_Pass_Item_Image : R.id.Widget_Pass_Item_Tiny_Image);
@@ -752,10 +752,10 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         //set settings
         if(!useParent)
         {
-            views.setOnClickPendingIntent(R.id.Widget_Pass_Name_Text, actionIntent);
+            views.setOnClickPendingIntent(R.id.Widget_Pass_Name_Text, clickIntent);
             if(useNormal)
             {
-                views.setOnClickPendingIntent(R.id.Widget_Pass_Settings_Button, actionIntent);
+                views.setOnClickPendingIntent(R.id.Widget_Pass_Settings_Button, clickIntent);
             }
         }
         setImageViewBitmap(views, parent, R.id.Widget_Pass_Settings_Button, Globals.getBitmap(context, R.drawable.ic_settings_black, (useGlobalImage ? globalImageColor : settingsImageColor)));

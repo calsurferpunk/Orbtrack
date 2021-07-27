@@ -1758,6 +1758,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
             //write column headers
             line = res.getString(R.string.title_time) + separator + res.getString(R.string.title_azimuth) + separator + res.getString(R.string.title_elevation) + separator + res.getString(R.string.title_range) + " (" + Globals.getKmLabel(res) + ")" + (isMoon ? (separator + res.getString(R.string.title_illumination)) : "") + (isSun || isMoon ? (separator + res.getString(R.string.title_phase)) : "") + "\r\n";
+            //noinspection CharsetObjectCanBeUsed
             outStream.write(line.getBytes(Globals.Encoding.UTF16));
 
             //go through each item
@@ -1768,6 +1769,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                 //save item to file
                 line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.azimuth) + separator + Globals.getNumberString(currentItem.elevation) + separator + String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.rangeKm)) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
         }
@@ -1809,6 +1811,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
             //write column headers
             line = timeString + " " + startString + separator + timeString + " " + endString + separator + res.getString(R.string.title_duration) + separator + azString + " " + startString + separator + azString + " " + endString + separator + azString + " " + res.getString(R.string.title_travel) + separator + res.getString(R.string.abbrev_elevation) + " " + res.getString(R.string.title_max) + (isMoon ? (separator + res.getString(R.string.title_illumination)) : "") + (isSun || isMoon ? (separator + res.getString(R.string.title_phase)) : "") + "\r\n";
+            //noinspection CharsetObjectCanBeUsed
             outStream.write(line.getBytes(Globals.Encoding.UTF16));
 
             //go through each item
@@ -1819,6 +1822,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                 //save item to file
                 line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart) + separator + Globals.getNumberString(currentItem.passAzEnd) + separator + Globals.getNumberString(currentItem.passAzTravel) + separator + Globals.getNumberString(currentItem.passElMax) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
         }
@@ -1856,6 +1860,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
             //write column headers
             line = res.getString(R.string.title_time) + separator + res.getString(R.string.title_latitude) + separator + res.getString(R.string.title_longitude) + separator + res.getString(R.string.abbrev_altitude) + " (" + Globals.getKmLabel(res) + ")" + (isMoon ? (separator + res.getString(R.string.title_illumination)) : "") + (isSun || isMoon ? (separator + res.getString(R.string.title_phase)) : "") + "\r\n";
+            //noinspection CharsetObjectCanBeUsed
             outStream.write(line.getBytes(Globals.Encoding.UTF16));
 
             //go through each item
@@ -1866,6 +1871,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                 //save item to file
                 line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.latitude) + separator + Globals.getNumberString(currentItem.longitude) + separator + (currentItem.altitudeKm > 0 && currentItem.altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.altitudeKm)) : "-") + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
         }
@@ -1911,6 +1917,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
             //write column headers
             line = timeString + " " + startString + separator + timeString + " " + endString + separator + res.getString(R.string.title_duration) + separator + azString + " " + startString + separator + azString + " " + endString + separator + azString + " " + res.getString(R.string.title_travel) + separator + elString + " " + res.getString(R.string.title_max) + separator + azString + " " + closestIntersectionString + separator + elString + " " + closestIntersectionString + (isMoon ? (separator + res.getString(R.string.title_illumination)) : "") + (isSun || isMoon ? (separator + res.getString(R.string.title_phase)) : "") + "\r\n";
+            //noinspection CharsetObjectCanBeUsed
             outStream.write(line.getBytes(Globals.Encoding.UTF16));
 
             //go through each item
@@ -1921,6 +1928,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                 //save item to file
                 line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart) + separator + Globals.getNumberString(currentItem.passAzEnd) + separator + Globals.getNumberString(currentItem.passAzTravel) + separator + Globals.getNumberString(currentItem.passElMax) + separator + Globals.getNumberString(currentItem.passClosestAz) + separator + Globals.getNumberString(currentItem.passClosestEl) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
         }

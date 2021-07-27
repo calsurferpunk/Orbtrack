@@ -16,6 +16,7 @@ import java.util.Calendar;
 //Task to calculate coordinate information
 public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Integer[]>
 {
+    @SuppressWarnings("SpellCheckingInspection")
     private static abstract class ParamTypes
     {
         static final String Index = "index";

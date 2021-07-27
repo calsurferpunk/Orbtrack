@@ -734,6 +734,7 @@ public class ChooseColorDialog
     }
 
     //updates cursors
+    @SuppressWarnings("SpellCheckingInspection")
     private void updateCursors(boolean force, boolean updateImage)
     {
         int[] coords = getCoordinates(Color.rgb((int) rgbBase[0], (int) rgbBase[1], (int) rgbBase[2]), imageWidth, imageHeight);

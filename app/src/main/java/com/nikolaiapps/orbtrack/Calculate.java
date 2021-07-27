@@ -31,6 +31,7 @@ public abstract class Calculate
         static final int PageCount = 4;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class ParamTypes
     {
         static final String NoradId = "id";

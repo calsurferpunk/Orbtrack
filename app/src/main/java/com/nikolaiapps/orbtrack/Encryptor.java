@@ -24,6 +24,7 @@ public abstract class Encryptor
     }
 
     //Constants
+    @SuppressWarnings("SpellCheckingInspection")
     private static final String RandomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890[]'<>/?!@#$%^&*()+-";
     private static final int RandomCharsLength = RandomChars.length();
 
@@ -68,6 +69,7 @@ public abstract class Encryptor
 
         try
         {
+            //noinspection CharsetObjectCanBeUsed
             storedKeyArray = storedKey.getBytes(Globals.Encoding.UTF8);
         }
         catch(Exception ex)
@@ -181,6 +183,7 @@ public abstract class Encryptor
             }
 
             //return result
+            //noinspection CharsetObjectCanBeUsed
             return(header + arrayToString64(cipher.doFinal(value.getBytes(Globals.Encoding.UTF8))));
         }
         catch(Exception ex)
@@ -224,6 +227,7 @@ public abstract class Encryptor
             }
 
             //return result
+            //noinspection CharsetObjectCanBeUsed
             return(new String(cipher.doFinal(string64ToArray(value)), Globals.Encoding.UTF8));
         }
         catch(Exception ex)

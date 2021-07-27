@@ -91,6 +91,7 @@ public class Database extends SQLiteOpenHelper
         static final byte LanguageCount = 2;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     private static abstract class TLELines
     {
         static final String ISSZarya1 = "1 25544U 98067A   21188.62787601  .00000229  00000-0  12373-4 0  9990";
@@ -351,6 +352,7 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class LocaleCategory
     {
         //Gets category locale

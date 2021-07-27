@@ -1518,6 +1518,7 @@ public abstract class Globals
     }*/
 
     //Julian date to calendar
+    @SuppressWarnings("SpellCheckingInspection")
     public static Calendar julianDateToCalendar(double julianDate)
     {
         double tmp;
@@ -2909,6 +2910,7 @@ public abstract class Globals
     }
 
     //Gets owner icon IDs
+    @SuppressWarnings("SpellCheckingInspection")
     public static int[] getOwnerIconIDs(String ownerCode)
     {
         int[] ids = new int[]{R.drawable.ic_launcher_clear};
@@ -3431,6 +3433,7 @@ public abstract class Globals
     }
 
     //Normalizes owner code
+    @SuppressWarnings("SpellCheckingInspection")
     public static String normalizeOwnerCode(String code)
     {
         //if not set
@@ -3741,6 +3744,7 @@ public abstract class Globals
     }
 
     //Compares 2 longs
+    @SuppressWarnings("UseCompareMethod")
     public static int longCompare(long value1, long value2)
     {
         if(Build.VERSION.SDK_INT >= 19)
@@ -3754,6 +3758,7 @@ public abstract class Globals
     }
 
     //Compares 2 integers
+    @SuppressWarnings("UseCompareMethod")
     public static int intCompare(int value1, int value2)
     {
         if(Build.VERSION.SDK_INT >= 19)
@@ -4096,10 +4101,10 @@ public abstract class Globals
         if(haveFilter)
         {
             //create filter list
-            for(String currentExtenstion : extensionFilter)
+            for(String currentExtension : extensionFilter)
             {
                 //add lower case extension
-                filterList.add(currentExtenstion.toLowerCase());
+                filterList.add(currentExtension.toLowerCase());
             }
         }
 

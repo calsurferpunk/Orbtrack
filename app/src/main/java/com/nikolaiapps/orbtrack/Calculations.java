@@ -35,6 +35,7 @@ public abstract class Calculations
     }
 
     //TLE line 2 indexes
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class TLE2Index
     {
         static final byte Inclin = 8;
@@ -47,6 +48,7 @@ public abstract class Calculations
     }
 
     //GP Params
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class GPParams
     {
         static final String Name = "OBJECT_NAME";
@@ -128,7 +130,7 @@ public abstract class Calculations
     private static final SimpleDateFormat epochParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS", Locale.US);
 
     //Functions/conversions
-    private static double MinsToDays(double minutes)		            { return((minutes) / MinutesPerDay); }								//converts minutes to days
+    private static double MinutesToDays(double minutes)		            { return((minutes) / MinutesPerDay); }								//converts minutes to days
     private static double DaysPassed(double julStart, double julEnd)    { return ((julEnd) - (julStart)) * MinutesPerDay; }			            //number of days passed from Julian start and end dates
     private static double Square(double num)					        { return(Math.pow(num, 2)); }										//number squared
     private static final double XKE							            = Math.sqrt(3600.0 * EarthGravity / Math.pow(EarthRadiusKM, 3));
@@ -300,6 +302,7 @@ public abstract class Calculations
     }
 
     //TLE data
+    @SuppressWarnings("SpellCheckingInspection")
     public static class TLEDataType implements Parcelable
     {
         //line 1
@@ -460,6 +463,7 @@ public abstract class Calculations
     }
 
     //Norad data
+    @SuppressWarnings("SpellCheckingInspection")
     static class NoradDataType
     {
         //All prediction vars
@@ -757,7 +761,7 @@ public abstract class Calculations
     //
 
     //Returns the ArcTangent of Math.sin(x) / Math.cos(x) with the correct quadrant of the angle.
-    private static double arctan(double sinX, double cosX)
+    private static double arcTan(double sinX, double cosX)
     {
         double ret;
 
@@ -779,15 +783,15 @@ public abstract class Calculations
         return(ret);
     }
 
-    //Retuns the positive modulus of arg with TwoPI
+    //Returns the positive modulus of arg with TwoPI
     private static double fmod2P(double arg)
     {
-        double modu = Math.IEEEremainder(arg, TwoPI);
+        double mod = Math.IEEEremainder(arg, TwoPI);
 
-        if (modu < 0.0)
-        modu += TwoPI;
+        if (mod < 0.0)
+        mod += TwoPI;
 
-        return(modu);
+        return(mod);
     }
 
     //Returns the Julian date for the given Julian day (0 - 365) and year (1582 - ?)
@@ -866,6 +870,7 @@ public abstract class Calculations
     }
 
     //Returns the Greenwich Mean Sidereal Time (GMST) in radians (ThetaG) from the given julian date
+    @SuppressWarnings("SpellCheckingInspection")
     private static double julianDateToGMST(double julianDate)
     {
         double gmst;
@@ -884,6 +889,7 @@ public abstract class Calculations
     }
 
     //Returns the Local Mean Sidereal Time (LMST) in radians from the given julian date and longitude
+    @SuppressWarnings("SpellCheckingInspection")
     private static double julianDateToLMST(double julianDate, double longitude)
     {
         return(Math.IEEEremainder(julianDateToGMST(julianDate) + longitude, TwoPI));
@@ -897,7 +903,7 @@ public abstract class Calculations
         double julianC;
         double lstDeg;
 
-        ut = 0; //Math.IEEEremainder(julianDate + 0.5, 1.0);        //note: might want to use this, have to check
+        ut = 0;
         julianRel = julianDate - JanFirst2000JD - ut;
         julianRelInt = Math.floor(julianRel);
         julianC = julianRel / JulianCentury;
@@ -970,7 +976,7 @@ public abstract class Calculations
     //Returns eccentricity of earth orbit
     public static double calcEccentricityEarthOrbit(double t)
     {
-        return(0.016708634 - t * (0.000042037 + 0.0000001267 * t));		// unitless
+        return(0.016708634 - t * (0.000042037 + 0.0000001267 * t));		// unit-less
     }
 
     //Returns sun equation of center
@@ -1086,7 +1092,8 @@ public abstract class Calculations
         double longitude, latitude, altitude;
         GeodeticDataType geoData = new GeodeticDataType();
 
-        theta = arctan(eciData.positionY, eciData.positionX);
+        //noinspection SuspiciousNameCombination
+        theta = arcTan(eciData.positionY, eciData.positionX);
         longitude = Math.IEEEremainder(theta - julianDateToGMST(eciData.julianDate), TwoPI);
 
         //wrap negative modulo
@@ -1095,14 +1102,14 @@ public abstract class Calculations
 
         r = Math.sqrt(Square(eciData.positionX) + Square(eciData.positionY));
         e2  = EarthFlattening * (2.0 - EarthFlattening);
-        latitude = arctan(eciData.positionZ, r);
+        latitude = arcTan(eciData.positionZ, r);
 
         delta = 1.0e-07;
         do
         {
             phi = latitude;
             c = 1.0 / Math.sqrt(1.0 - e2 * Square(Math.sin(phi)));
-            latitude = arctan(eciData.positionZ + EarthRadiusKM * c * e2 * Math.sin(phi), r);
+            latitude = arcTan(eciData.positionZ + EarthRadiusKM * c * e2 * Math.sin(phi), r);
         }
         while(Math.abs(latitude - phi) > delta);
 
@@ -1529,7 +1536,8 @@ public abstract class Calculations
         return(orbit_data);
     }
 
-    //Loads Norad data for use in position predicition
+    //Loads Norad data for use in position prediction
+    @SuppressWarnings("SpellCheckingInspection")
     private static NoradDataType loadNorad(OrbitDataType orbitData, TLEDataType tleData)
     {
         double pinvsq;
@@ -1668,22 +1676,23 @@ public abstract class Calculations
     }
 
     //Loads satellite objects
+    @SuppressWarnings("SpellCheckingInspection")
     public static SatelliteObjectType[] loadSatellites(JSONObject[] data)
     {
         int index;
-        SatelliteObjectType[] satObjs;
+        SatelliteObjectType[] satObjects;
         TLEDataType[] tles = loadTLEs(data);
 
         //go through each TLE
-        satObjs = new SatelliteObjectType[tles.length];
+        satObjects = new SatelliteObjectType[tles.length];
         for(index = 0; index < tles.length; index++)
         {
             //set current satellite
-            satObjs[index] = (tles[index] != null ? loadSatellite(tles[index]) : null);
+            satObjects[index] = (tles[index] != null ? loadSatellite(tles[index]) : null);
         }
 
         //return satellites
-        return(satObjs.length > 0 ? satObjs : null);
+        return(satObjects.length > 0 ? satObjects : null);
     }
 
     //Loads the sun
@@ -1727,6 +1736,7 @@ public abstract class Calculations
     }
 
     //Sets the eci position for the given data
+    @SuppressWarnings("SpellCheckingInspection")
     private static EciDataType finalPosition(EciDataType eciData, NoradDataType noradData, double inclination, double omega, double e, double a, double xl, double xNode, double epochJulian, double daysAfterEpoch)
     {
         int i;
@@ -1802,7 +1812,7 @@ public abstract class Calculations
         temp3 = 1.0 / (1.0 + betal);
         cosu = temp2 * (cosepw - axn + ayn * esine * temp3);
         sinu = temp2 * (sinepw - ayn - axn * esine * temp3);
-        u = arctan(sinu, cosu);
+        u = arcTan(sinu, cosu);
         sin2u = 2.0 * sinu * cosu;
         cos2u = 2.0 * cosu * cosu - 1.0;
 
@@ -1835,17 +1845,20 @@ public abstract class Calculations
         eciData.positionZ = rk * uz * (EarthRadiusKM / AE);
 
         //time
-        eciData.julianDate = epochJulian + MinsToDays(daysAfterEpoch);
+        eciData.julianDate = epochJulian + MinutesToDays(daysAfterEpoch);
 
         return(eciData);
     }
 
     //SDP4 periodics
+    @SuppressWarnings("SpellCheckingInspection")
     public static class Sdp4PeriodicsDataType
     {
         NoradDataType norad_data;
         double e; double xincc; double omgadf; double xnode; double xmam;
     }
+
+    @SuppressWarnings("SpellCheckingInspection")
     private static Sdp4PeriodicsDataType sdp4Periodics(NoradDataType noradData, double e, double xincc, double omgadf, double xnode, double xmam)
     {
         double zm, zf;
@@ -1933,7 +1946,7 @@ public abstract class Calculations
             dls = pl + pgh - pinc * noradData.xnodes * sinis;
 
             xls = xls + dls;
-            noradData.xnodes = arctan(alfdp, betdp);
+            noradData.xnodes = arcTan(alfdp, betdp);
             noradData.xll = noradData.xll + pl;
             noradData.omgasm = xls - noradData.xll - Math.cos(noradData.xinc) * noradData.xnodes;
         }
@@ -1954,10 +1967,13 @@ public abstract class Calculations
     }
 
     //SDP4 calculate dot terms
+    @SuppressWarnings("SpellCheckingInspection")
     public static class Sdp4CalcdottermsDataType
     {
         double pxndot; double pxnddt; double pxldot;
     }
+
+    @SuppressWarnings("SpellCheckingInspection")
     private static Sdp4CalcdottermsDataType sdp4CalcDotTerms(NoradDataType noradData)
     {
         double pxndot, pxnddt, pxldot;
@@ -2016,6 +2032,7 @@ public abstract class Calculations
     }
 
     //SDP4 calculation integrator
+    @SuppressWarnings("SpellCheckingInspection")
     private static void sdp4CalcIntegrator(NoradDataType noradData, double delta)
     {
         double pxndot, pxnddt, pxldot;
@@ -2032,6 +2049,7 @@ public abstract class Calculations
     }
 
     //SDP4 initialization
+    @SuppressWarnings("SpellCheckingInspection")
     private static void sdp4Init(NoradDataType noradData, TLEDataType tleData)
     {
         int pass;
@@ -2098,7 +2116,7 @@ public abstract class Calculations
         noradData.dp_zmol = fmod2P(noradData.dpi_c - noradData.dpi_gam);
         noradData.dpi_zx = 0.39785416 * noradData.dpi_stem / noradData.dpi_zsinil;
         noradData.dpi_zy = noradData.dpi_zcoshl * noradData.dpi_ctem + 0.91744867 * noradData.dpi_zsinhl * noradData.dpi_stem;
-        noradData.dpi_zx = arctan(noradData.dpi_zx, noradData.dpi_zy) + noradData.dpi_gam - noradData.dpi_xnodce;
+        noradData.dpi_zx = arcTan(noradData.dpi_zx, noradData.dpi_zy) + noradData.dpi_gam - noradData.dpi_xnodce;
         noradData.dpi_zcosgl = Math.cos(noradData.dpi_zx);
         noradData.dpi_zsingl = Math.sin(noradData.dpi_zx);
         noradData.dp_zmos = 6.2565837 + 0.017201977 * day;
@@ -2360,14 +2378,17 @@ public abstract class Calculations
     }
 
     //SDP4 secular
+    @SuppressWarnings("SpellCheckingInspection")
     public static class Sdp4SecularDataType
     {
         NoradDataType norad_data;
         double xmdf; double omgadf; double xnode; double emm; double xincc; double xnn; double days_after_epoch;
     }
+
+    @SuppressWarnings("SpellCheckingInspection")
     private static Sdp4SecularDataType sdp4Secular(NoradDataType noradData, TLEDataType tleData, double xmdf, double omgadf, double xnode, double xnn, double daysAfterEpoch)
     {
-        boolean f_done = false;
+        boolean fDone = false;
         double xl, temp;
         double emm;
         double xincc;
@@ -2401,7 +2422,7 @@ public abstract class Calculations
 
         if(noradData.gp_reso)
         {
-            while(!f_done)
+            while(!fDone)
             {
                 if((noradData.dp_atime == 0.0) || ((noradData.timeSince >= 0.0) && (noradData.dp_atime <  0.0)) || ((noradData.timeSince <  0.0) && (noradData.dp_atime >= 0.0)))
                 {
@@ -2415,7 +2436,7 @@ public abstract class Calculations
                     noradData.dp_xni = noradData.mean_motion;
                     noradData.dp_xli = noradData.dp_xlamo;
 
-                    f_done = true;
+                    fDone = true;
                 }
                 else
                 {
@@ -2435,7 +2456,7 @@ public abstract class Calculations
                         if(noradData.timeSince > 0.0)
                             delt = noradData.dp_stepp;
 
-                        f_done = true;
+                        fDone = true;
                     }
                 }
             }
@@ -2482,7 +2503,8 @@ public abstract class Calculations
         return(sdp4SecularData);
     }
 
-    //Gets the ECI position for the SGP4 predicition model (near earth)
+    //Gets the ECI position for the SGP4 prediction model (near earth)
+    @SuppressWarnings("SpellCheckingInspection")
     private static EciDataType getSGP4Position(EciDataType eciData, TLEDataType tleData, NoradDataType noradData, double daysAfterEpoch)
     {
         boolean isimp = false;
@@ -2569,12 +2591,14 @@ public abstract class Calculations
         return(eciData);
     }
 
-    //Gets the ECI position for the SDP4 predicition model (deep space)
+    //Gets the ECI position for the SDP4 prediction model (deep space)
     public static class EciNoradDataType
     {
         public EciDataType eciData;
         public NoradDataType noradData;
     }
+
+    @SuppressWarnings("SpellCheckingInspection")
     private static EciNoradDataType getSDP4Position(EciDataType eciData, TLEDataType tleData, NoradDataType noradData, double daysAfterEpoch)
     {
         double xl;
@@ -2633,21 +2657,21 @@ public abstract class Calculations
     //Gets the ECI position for the given satellite at the given time
     private static EciNoradDataType getECIPosition(SatelliteObjectType satObj, double daysAfterEpoch)
     {
-        EciNoradDataType eci_norad_data = new EciNoradDataType();
+        EciNoradDataType eciNoradData = new EciNoradDataType();
 
         switch(satObj.orbit.predictionModel)
         {
             case SgpModelType.Sgp4Model:
-                eci_norad_data.eciData = getSGP4Position(satObj.eci, satObj.tle, satObj.norad, daysAfterEpoch);
-                eci_norad_data.noradData = satObj.norad;
+                eciNoradData.eciData = getSGP4Position(satObj.eci, satObj.tle, satObj.norad, daysAfterEpoch);
+                eciNoradData.noradData = satObj.norad;
                 break;
 
             case SgpModelType.Sdp4Model:
-                eci_norad_data = getSDP4Position(satObj.eci, satObj.tle, satObj.norad, daysAfterEpoch);
+                eciNoradData = getSDP4Position(satObj.eci, satObj.tle, satObj.norad, daysAfterEpoch);
                 break;
         }
 
-        return(eci_norad_data);
+        return(eciNoradData);
     }
 
     //Updates the given satellite position and geodetic location if desired
@@ -2679,6 +2703,7 @@ public abstract class Calculations
     }
 
     //Updates the given orbital position
+    @SuppressWarnings("SpellCheckingInspection")
     public static void updateOrbitalPosition(SatelliteObjectType orbital, ObserverType observer, double julianDate, boolean updateGeo)
     {
         double satLon;
@@ -2723,6 +2748,7 @@ public abstract class Calculations
     }
 
     //Applies atmospheric refraction to elevation angles
+    @SuppressWarnings("SpellCheckingInspection")
     private static void applyAtmosphericRefraction(TopographicDataType pointData)
     {
         //equation 15.4 from Meeus’s astronomical algorithms
@@ -2739,6 +2765,7 @@ public abstract class Calculations
     }
 
     //Gets the data needed to point towards an object
+    @SuppressWarnings("SpellCheckingInspection")
     public static TopographicDataType getLookAngles(ObserverType observer, SatelliteObjectType satObj, boolean applyRefraction)
     {
         double declRad;

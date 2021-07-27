@@ -155,10 +155,7 @@ public abstract class Selectable
         public ListItemHolder(View itemView, int checkBoxID)
         {
             super(itemView);
-            if(checkBoxID != -1)
-            {
-                checkBoxView = itemView.findViewById(checkBoxID);
-            }
+            checkBoxView = (checkBoxID != -1 ? itemView.findViewById(checkBoxID) : null);
         }
     }
 
@@ -1873,7 +1870,7 @@ public abstract class Selectable
                     if(currentItem != null)
                     {
                         //if not in edit mode and item can be checked
-                        if(!inEditMode && currentItem.canCheck && !currentItem.isChecked)
+                        if(!inEditMode && currentItem.canCheck && currentItem.checkBoxView != null && !currentItem.isChecked)
                         {
                             //set item checked
                             setItemChecked(position);

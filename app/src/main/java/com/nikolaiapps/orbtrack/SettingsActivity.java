@@ -1957,27 +1957,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 //if a settings page
                 if(page instanceof Settings.Page)
                 {
-                    //get adapter
-                    Selectable.ListBaseAdapter listAdapter = page.getAdapter();
-
-                    //if adapter is the locations list
-                    if(listAdapter instanceof Settings.Locations.ItemListAdapter)
-                    {
-                        //reload locations list
-                        ((Settings.Locations.ItemListAdapter)listAdapter).reload();
-                    }
-                    //else if adapter is the notifications list
-                    else if(listAdapter instanceof Settings.Notifications.ItemListAdapter)
-                    {
-                        //reload notification list
-                        ((Settings.Notifications.ItemListAdapter)listAdapter).reload();
-                    }
-                    //else if adapter is the widget list
-                    else if(listAdapter instanceof Settings.Widgets.ItemListAdapter)
-                    {
-                        //reload widget list
-                        ((Settings.Widgets.ItemListAdapter)listAdapter).reload();
-                    }
+                    //reload list
+                    ((Settings.Page)page).reload();
                 }
             }
         });
@@ -2247,6 +2228,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     currentTransaction.setReorderingAllowed(false);
                 }
                 currentTransaction.detach(currentFragment).attach(currentFragment).commit();
+
+                //if a settings page
+                if(currentFragment instanceof Settings.Page)
+                {
+                    //reload list
+                    ((Settings.Page)currentFragment).reload();
+                }
             }
             catch(Exception ex)
             {

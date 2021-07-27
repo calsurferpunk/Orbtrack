@@ -1191,7 +1191,7 @@ public abstract class Settings
                 if(currentOrbital != null)
                 {
                     itemHolder.notifyImage.setImageDrawable(noradId != Integer.MIN_VALUE ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, currentOrbital.orbitalType) : Globals.getDrawable(currentContext, R.drawable.ic_notifications_white, true));
-                    if(noradId < 0)
+                    if(noradId < 0 && noradId != Universe.IDs.Invalid)
                     {
                         itemHolder.notifyImage.setColorFilter(Color.TRANSPARENT);
                     }
@@ -1434,7 +1434,7 @@ public abstract class Settings
 
                 //set displays
                 itemHolder.widgetImage.setImageDrawable(widgetId != 0 ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), noradId, WidgetBaseSetupActivity.getOrbitalType(currentContext, currentItem.id)) : Globals.getDrawable(currentContext, R.drawable.ic_widgets_black, true));
-                if(noradId < 0 && widgetId != 0)
+                if(noradId < 0 && noradId != Universe.IDs.Invalid && widgetId != 0)
                 {
                     itemHolder.widgetImage.setColorFilter(Color.TRANSPARENT);
                 }
@@ -1656,6 +1656,32 @@ public abstract class Settings
         private boolean isOnAccounts()
         {
             return(pageNum == PageType.Accounts);
+        }
+
+        //Tries to reload the page
+        public void reload()
+        {
+            //get adapter
+            Selectable.ListBaseAdapter listAdapter = getAdapter();
+
+            //if adapter is the locations list
+            if(listAdapter instanceof Settings.Locations.ItemListAdapter)
+            {
+                //reload locations list
+                ((Settings.Locations.ItemListAdapter)listAdapter).reload();
+            }
+            //else if adapter is the notifications list
+            else if(listAdapter instanceof Settings.Notifications.ItemListAdapter)
+            {
+                //reload notification list
+                ((Settings.Notifications.ItemListAdapter)listAdapter).reload();
+            }
+            //else if adapter is the widget list
+            else if(listAdapter instanceof Settings.Widgets.ItemListAdapter)
+            {
+                //reload widget list
+                ((Settings.Widgets.ItemListAdapter)listAdapter).reload();
+            }
         }
     }
 

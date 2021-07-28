@@ -491,6 +491,12 @@ public abstract class Orbitals
             this.simple = simple;
             this.categoryTitle = title;
         }
+        public Page()
+        {
+            super();
+            this.simple = false;
+            this.categoryTitle = null;
+        }
 
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -1115,7 +1121,7 @@ public abstract class Orbitals
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, -1, new Page(null, false)));
+            return(this.getItem(group, position, -1, new Page()));
         }
 
         @Override

@@ -1494,6 +1494,11 @@ public abstract class Settings
             super();
             categoryTitle = title;
         }
+        public Page()
+        {
+            super();
+            categoryTitle = null;
+        }
 
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
@@ -1696,7 +1701,7 @@ public abstract class Settings
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, subPage[position], new Page(null)));
+            return(this.getItem(group, position, subPage[position], new Page()));
         }
 
         @Override

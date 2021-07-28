@@ -1994,7 +1994,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private Settings.Page getSettingsPage(String fragmentName)
     {
         Fragment page = manager.findFragmentByTag(fragmentName);
-        return(page != null ? (Settings.Page)page : new Settings.Page(null));
+        return(page != null ? (Settings.Page)page : new Settings.Page());
     }
 
     //Gets the desired fragment
@@ -2023,7 +2023,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         //not found
         //note: Settings.Page chosen for convenience, but should be any Selectable.ListFragment
-        return(new Settings.Page(null));
+        return(new Settings.Page());
     }
 
     //Moves setup page forward/back

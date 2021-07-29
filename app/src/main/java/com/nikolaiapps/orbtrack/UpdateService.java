@@ -3101,6 +3101,7 @@ public class UpdateService extends NotifyService
                 //prevent overloading website
                 try
                 {
+                    //noinspection BusyWait
                     Thread.sleep(50);
                 }
                 catch (InterruptedException ex)

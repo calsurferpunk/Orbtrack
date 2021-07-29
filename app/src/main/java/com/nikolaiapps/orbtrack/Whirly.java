@@ -1907,6 +1907,7 @@ class Whirly
 
                     //setup cache
                     cacheDir = new File(activity.getCacheDir(), cacheDirNames.get(index));
+                    //noinspection ResultOfMethodCallIgnored
                     cacheDir.mkdir();
 
                     //setup layer

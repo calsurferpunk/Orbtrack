@@ -249,6 +249,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         {
             this(context, topoData.azimuth, topoData.elevation, topoData.rangeKm, jd, zoneId, 0, null, null, showSeconds);
         }
+        @SuppressWarnings("CopyConstructorMissesField")
         public OrbitalView(OrbitalView copyFrom)
         {
             this(null, copyFrom.azimuth, copyFrom.elevation, copyFrom.rangeKm, copyFrom.julianDate, copyFrom.timeZoneId, 0, null, copyFrom.timeString, false);

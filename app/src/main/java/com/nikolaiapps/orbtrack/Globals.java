@@ -4132,6 +4132,7 @@ public abstract class Globals
         byte[] fileBuffer = new byte[1024];
 
         //make sure cache exists
+        //noinspection ResultOfMethodCallIgnored
         cacheDir.mkdir();
 
         //if there is a filter

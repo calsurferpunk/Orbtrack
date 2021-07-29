@@ -65,6 +65,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //prevent running too quickly
                 try
                 {
+                    //noinspection BusyWait
                     sleep(20);
                 }
                 catch(Exception ex)

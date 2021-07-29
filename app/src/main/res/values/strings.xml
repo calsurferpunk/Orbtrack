@@ -137,7 +137,7 @@
     <string name="desc_orbital_icon">Icon to show orbital position</string>
     <string name="desc_permission_camera">Camera is needed to visualize object locations.</string>
     <string name="desc_permission_camera_deny">Camera permission denied</string>
-    <string name="desc_permission_location">Rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
+    <string name="desc_permission_location">At least rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
     <string name="desc_permission_location_deny">Location permission denied</string>
     <string name="desc_permission_read_external_storage">Need access to external storage to read files.</string>
     <string name="desc_permission_read_external_storage_deny">Read from external storage denied</string>

@@ -994,12 +994,14 @@ public abstract class Globals
     }
 
     //Asks for permission
-    private static void askPermission(final Context context, ActivityResultLauncher<Intent> launcher, final String permission, final String title, final String reason, final byte resultCode, final OnDenyListener denyRetryListener)
+    private static void askPermission(final Context context, ActivityResultLauncher<Intent> launcher, final String[] permissions, final String title, final String reason, final byte resultCode, final OnDenyListener denyRetryListener)
     {
         final boolean isRetry;
         final boolean isExactAlarm;
+        boolean createDialog;
         final AppCompatActivity currentActivity = (AppCompatActivity)context;
 
+        //get properties
         switch(resultCode)
         {
             case PermissionType.CameraRetry:
@@ -1022,23 +1024,34 @@ public abstract class Globals
                 break;
         }
 
-        if(isExactAlarm || ActivityCompat.shouldShowRequestPermissionRationale(currentActivity, permission))
+        //determine if need to create dialog
+        createDialog = isExactAlarm;
+        for(String currentPermission : permissions)
+        {
+            //create dialog if need to already or current permission should
+            createDialog = createDialog || ActivityCompat.shouldShowRequestPermissionRationale(currentActivity, currentPermission);
+        }
+        if(createDialog)
         {
             Resources res = currentActivity.getResources();
 
+            //show dialog
             showConfirmDialog(currentActivity, title + " " + res.getString(R.string.title_permission), reason, res.getString(isRetry ? R.string.title_retry : isExactAlarm ? R.string.title_open_settings : R.string.title_ok), (isRetry ? res.getString(R.string.title_deny) : isExactAlarm ? res.getString(R.string.title_ignore) : null), false, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
+                    //if an exact alarm and being used
                     if(isExactAlarm && Build.VERSION.SDK_INT >= 31)
                     {
+                        //show exact alarm settings toggle
                         Intent settingsIntent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
                         startActivityForResult(launcher, settingsIntent, resultCode);
                     }
                     else
                     {
-                        ActivityCompat.requestPermissions(currentActivity, new String[]{permission}, resultCode);
+                        //request permission
+                        ActivityCompat.requestPermissions(currentActivity, permissions, resultCode);
                     }
                 }
             },
@@ -1083,12 +1096,13 @@ public abstract class Globals
         }
         else
         {
-            ActivityCompat.requestPermissions(currentActivity, new String[]{permission}, resultCode);
+            //request permission
+            ActivityCompat.requestPermissions(currentActivity, permissions, resultCode);
         }
     }
     private static void askPermission(final Context context, final String permission, final String title, final String reason, final byte resultCode, final OnDenyListener denyRetryListener)
     {
-        askPermission(context, null, permission, title, reason, resultCode, denyRetryListener);
+        askPermission(context, null, new String[]{permission}, title, reason, resultCode, denyRetryListener);
     }
 
     //Ask for camera permission
@@ -1118,7 +1132,7 @@ public abstract class Globals
     public static void askLocationPermission(Context context, boolean retrying)
     {
         Resources res = context.getResources();
-        askPermission(context, getLocationManifestPermission(context), res.getString(R.string.title_location), res.getString(R.string.desc_permission_location), (retrying ? PermissionType.LocationRetry : PermissionType.Location), null);
+        askPermission(context, null, getLocationManifestPermissions(context), res.getString(R.string.title_location), res.getString(R.string.desc_permission_location), (retrying ? PermissionType.LocationRetry : PermissionType.Location), null);
     }
 
     //Ask for write permission
@@ -1141,7 +1155,7 @@ public abstract class Globals
         if(Build.VERSION.SDK_INT >= 31)
         {
             Resources res = context.getResources();
-            askPermission(context, launcher, Manifest.permission.SCHEDULE_EXACT_ALARM, res.getString(R.string.title_set_exact_alarm), res.getString(R.string.desc_permission_set_exact_alarm), (retrying ? PermissionType.ExactAlarmRetry : PermissionType.ExactAlarm), listener);
+            askPermission(context, launcher, new String[]{Manifest.permission.SCHEDULE_EXACT_ALARM}, res.getString(R.string.title_set_exact_alarm), res.getString(R.string.desc_permission_set_exact_alarm), (retrying ? PermissionType.ExactAlarmRetry : PermissionType.ExactAlarm), listener);
         }
     }
 
@@ -1199,18 +1213,36 @@ public abstract class Globals
         }
     }
 
-    private static String getLocationManifestPermission(Context context)
+    private static String[] getLocationManifestPermissions(Context context)
     {
-        LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-        List<String> providers = (manager != null ? manager.getProviders(true) : null);
+        if(Build.VERSION.SDK_INT >= 31)
+        {
+            return(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
+        }
+        else
+        {
+            LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
+            List<String> providers = (manager != null ? manager.getProviders(true) : null);
 
-        return(providers != null && providers.size() > 0 && providers.contains(LocationManager.GPS_PROVIDER) ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION);
+            return(new String[]{providers != null && providers.size() > 0 && providers.contains(LocationManager.GPS_PROVIDER) ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION});
+        }
     }
 
     //Check if have location permission
     public static boolean haveLocationPermission(Context context)
     {
-        return(havePermission(context, getLocationManifestPermission(context)));
+        boolean have = false;
+        String[] permissions = getLocationManifestPermissions(context);
+
+        //go through each permission
+        for(String currentPermission : permissions)
+        {
+            //have if already have or do for current permission
+            have = have || havePermission(context, currentPermission);
+        }
+
+        //return status
+        return(have);
     }
 
     //Check if have write permission

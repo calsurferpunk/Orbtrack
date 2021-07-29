@@ -137,7 +137,7 @@
     <string name="desc_orbital_icon">Icono para mostrar la posición orbital</string>
     <string name="desc_permission_camera">La cámara es necesaria para visualizar ubicaciones de objetos.</string>
     <string name="desc_permission_camera_deny">Permiso de cámara rechazado</string>
-    <string name="desc_permission_location">Se necesita una ubicación aproximada para calcular los ángulos de visión para su ubicación. Si no se permite, solo se usarán las ubicaciones manuales / guardadas.</string>
+    <string name="desc_permission_location">Se necesita al menos una ubicación aproximada para calcular los ángulos de visión de su ubicación. Si no está permitido, solo se utilizarán las ubicaciones manuales/guardadas.</string>
     <string name="desc_permission_location_deny">Permiso de ubicación negado</string>
     <string name="desc_permission_read_external_storage">Necesita acceso a almacenamiento externo para leer archivos.</string>
     <string name="desc_permission_read_external_storage_deny">Lectura del almacenamiento externo denegado</string>

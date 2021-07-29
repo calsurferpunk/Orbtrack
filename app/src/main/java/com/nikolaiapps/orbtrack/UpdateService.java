@@ -1328,7 +1328,7 @@ public class UpdateService extends NotifyService
             try
             {
                 currentCode = dataItem.getString(SpaceTrackCountry.Constants.OwnerCode);
-                if(!currentCode.toLowerCase().equals("all"))
+                if(!currentCode.equalsIgnoreCase("all"))
                 {
                     owners.add(new MasterOwner(currentCode, dataItem.getString(SpaceTrackCountry.Constants.Owner)));
                 }
@@ -2338,7 +2338,7 @@ public class UpdateService extends NotifyService
                                                                     else
                                                                     {
                                                                         //if a valid name
-                                                                        if(!currentValue.equals("") && !currentValue.toUpperCase().equals("UNKNOWN"))
+                                                                        if(!currentValue.equals("") && !currentValue.equalsIgnoreCase("UNKNOWN"))
                                                                         {
                                                                             //create satellite
                                                                             MasterSatellite newSatellite = new MasterSatellite(noradId, currentValue, "", "", Globals.UNKNOWN_DATE_MS);

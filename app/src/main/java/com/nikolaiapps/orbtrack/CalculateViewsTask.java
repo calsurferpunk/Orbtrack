@@ -17,6 +17,7 @@ import java.util.TimeZone;
 //Task to calculate view path information
 public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
 {
+    @SuppressWarnings("SpellCheckingInspection")
     private static abstract class ParamTypes
     {
         static final String Index = "index";

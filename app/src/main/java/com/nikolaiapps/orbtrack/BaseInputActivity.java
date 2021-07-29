@@ -194,7 +194,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
                         try
                         {
                             //if a .zip
-                            if(currentExtension.toLowerCase().equals(".zip"))
+                            if(currentExtension.equalsIgnoreCase(".zip"))
                             {
                                 //get all usable files in the .zip file
                                 InputStream[] zipFileStreams = Globals.readZipFile(activity, "files", new ByteArrayInputStream(currentData), Globals.fileDataExtensions);
@@ -267,7 +267,8 @@ public abstract class BaseInputActivity extends AppCompatActivity
                                     if(currentCursor.moveToFirst())
                                     {
                                         //if able to get display name
-                                        String cursorResult = currentCursor.getString(currentCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME));
+                                        int nameIndex = currentCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                                        String cursorResult = (nameIndex >= 0 ? currentCursor.getString(nameIndex) : null);
                                         if(cursorResult != null)
                                         {
                                             //update path and extension

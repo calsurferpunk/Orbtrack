@@ -21,6 +21,7 @@ import java.util.TimeZone;
 public class CalculateService extends NotifyService
 {
     //Param Types
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class ParamTypes extends NotifyService.ParamTypes
     {
         static final String CalculateType = "calculateType";

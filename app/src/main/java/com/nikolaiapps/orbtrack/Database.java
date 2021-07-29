@@ -328,12 +328,6 @@ public class Database extends SQLiteOpenHelper
                 }
             }
 
-            /*if(name == null)
-            {
-                int i = 0;
-                i++;
-            }*/
-
             //if name set but unknown
             if(name != null && name.equals("?"))
             {
@@ -1456,12 +1450,6 @@ public class Database extends SQLiteOpenHelper
         String[][] queryResult = runQuery(context,"SELECT [ID] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId + " LIMIT 1", null);
         return(queryResult.length > 0 ? Long.parseLong(queryResult[0][0]) : -1);
     }
-
-    /*//Gets a satellite TLE by norad
-    public static String[][] getSatelliteTLE(Context context, int noradId)
-    {
-        return(runQuery(context, "SELECT [TLE_Line1], [TLE_Line2] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId + " LIMIT 1", null));
-    }*/
 
     //Gets whether a satellite is selected
     private static boolean getSatelliteSelected(Context context, long id)

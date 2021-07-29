@@ -393,7 +393,7 @@ public class MapLocationInputActivity extends BaseInputActivity
                 LocationService.GetAltitudeTask altitudeTask;
 
                 //check for invalid values
-                if(name.equals("") || name.toLowerCase().equals("current"))
+                if(name.equals("") || name.equalsIgnoreCase("current"))
                 {
                     currentError = invalidString + " " + res.getString(R.string.title_name);
                     nameText.setError(currentError);

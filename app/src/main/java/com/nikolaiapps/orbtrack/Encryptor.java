@@ -40,6 +40,7 @@ public abstract class Encryptor
     }
 
     //Gets an AES key
+    @SuppressWarnings("SpellCheckingInspection")
     private static SecretKey getAESKey(String storedKey)
     {
         int keyLength = 256;

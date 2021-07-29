@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -411,7 +412,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                     //update list
                     currentContext.runOnUiThread(new Runnable()
                     {
-                        @Override
+                        @Override @SuppressLint("NotifyDataSetChanged")
                         public void run()
                         {
                             FileListAdapterBase.this.notifyDataSetChanged();

@@ -138,33 +138,6 @@ public class SensorUpdate implements SensorEventListener
         return(result);
     }
 
-    /*private void saveLog(String text)
-    {
-        File log = new File("sdcard/temp.txt");
-        if(!log.exists())
-        {
-            try
-            {
-                log.createNewFile();
-            }
-            catch(Exception ex)
-            {
-
-            }
-        }
-        try
-        {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(log, true));
-            writer.append(text);
-            writer.newLine();
-            writer.close();
-        }
-        catch(Exception ex)
-        {
-
-        }
-    }*/
-
     @Override
     public void onSensorChanged(SensorEvent event)
     {

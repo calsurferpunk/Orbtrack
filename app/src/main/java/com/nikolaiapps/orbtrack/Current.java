@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -3753,7 +3754,7 @@ public abstract class Current
             {
                 PageAdapter.setItemChangedListener(page, new OnItemsChangedListener()
                 {
-                    @Override
+                    @Override @SuppressLint("NotifyDataSetChanged")
                     public void itemsChanged()
                     {
                         FragmentActivity activity = Page.this.getActivity();

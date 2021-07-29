@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -1697,7 +1698,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             }
 
-            @Override
+            @Override @SuppressLint("NotifyDataSetChanged")
             protected void onGotLocation(Context context, Calculations.ObserverType observer)
             {
                 //if need to save current location
@@ -2474,7 +2475,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }, new EditValuesDialog.OnDismissListener()
         {
-            @Override
+            @Override @SuppressLint("NotifyDataSetChanged")
             public void onDismiss(EditValuesDialog dialog, int saveCount)
             {
                 //if any were saved

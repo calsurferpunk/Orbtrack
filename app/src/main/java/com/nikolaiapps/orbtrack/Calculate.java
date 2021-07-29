@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -461,7 +462,7 @@ public abstract class Calculate
             });
             PageAdapter.setItemChangedListener(page, new OnItemsChangedListener()
             {
-                @Override
+                @Override @SuppressLint("NotifyDataSetChanged")
                 public void itemsChanged()
                 {
                     //update displays

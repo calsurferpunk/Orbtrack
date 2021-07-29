@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -329,7 +330,7 @@ public class MasterAddListActivity extends BaseInputActivity
             //load items
             LoadItemsTask loadItems = new LoadItemsTask(listener, new OnLoadItemsListener()
             {
-                @Override
+                @Override @SuppressLint("NotifyDataSetChanged")
                 public void onLoaded(ArrayList<ListItem> items, boolean foundLaunchDate)
                 {
                     displayedItems = items;
@@ -430,6 +431,7 @@ public class MasterAddListActivity extends BaseInputActivity
         }
 
         //Sets visibility of views by group
+        @SuppressLint("NotifyDataSetChanged")
         public void showViews(String ownerCode, String categoryName, long currentMs, int ageValue, String searchString)
         {
             int index;

@@ -202,7 +202,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                                 id = parsedData.getString("timeZoneId");
 
                                 //if valid
-                                if(status.toLowerCase().equals("ok"))
+                                if(status.equalsIgnoreCase("ok"))
                                 {
                                     //set timezone
                                     zoneId = id;
@@ -366,7 +366,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                                 altitudeM = results.getJSONObject(0).getDouble("elevation");
 
                                 //if valid
-                                if(status.toLowerCase().equals("ok"))
+                                if(status.equalsIgnoreCase("ok"))
                                 {
                                     //set altitude
                                     altitudeLocation.setAltitude(altitudeM);

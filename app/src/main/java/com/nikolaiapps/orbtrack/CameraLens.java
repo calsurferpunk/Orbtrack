@@ -372,100 +372,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
             //start animation in both directions
             animX.start();
-
-            /*int radius;
-            int centerX;
-            int centerY;
-
-            //stop any animation
-            stopAnimation();
-
-            //update size
-            w -= phoneWidth;
-            h -= phoneHeight;
-            centerX = w / 2;
-            centerY = h / 2;
-            if(w > h)
-            {
-                w = h;
-            }
-            radius = w / 2;
-
-            //reset
-            currentX = w / 2;
-            currentY = h / 2;
-            this.postInvalidate();
-
-            //setup horizontal figure 8 motion
-            animX = ValueAnimator.ofInt(centerX - radius, centerX + radius);
-            animX.setRepeatCount(ValueAnimator.INFINITE);
-            animX.setRepeatMode(ValueAnimator.REVERSE);
-            animX.setDuration(1500);
-            animX.setCurrentPlayTime(750);
-            animX.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
-            {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation)
-                {
-                    currentX = (int)animation.getAnimatedValue();
-                }
-            });
-
-            //setup vertical figure 8 motion
-            animY = ValueAnimator.ofInt(centerY - radius, centerY + radius);
-            animY.setRepeatCount(ValueAnimator.INFINITE);
-            animY.setRepeatMode(ValueAnimator.REVERSE);
-            animY.setDuration(750);
-            animY.setCurrentPlayTime(375);
-            animY.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
-            {
-                private boolean reachedMiddle = false;
-
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation)
-                {
-                    float currentXFraction = animX.getAnimatedFraction();
-                    float currentYFraction = animY.getAnimatedFraction();
-
-                    currentY = (int)animation.getAnimatedValue();
-
-                    //if just passing middle, going forward
-                    if(!reachedMiddle && currentXFraction >= 0.5 && currentYFraction >= 0.5)
-                    {
-                        //restart points and update status
-                        pathPoints.clear();
-                        reachedMiddle = true;
-                    }
-                    //else if just passing middle, going reverse
-                    else if(reachedMiddle && currentXFraction < 0.5 && currentYFraction < 0.5)
-                    {
-                        //update status
-                        reachedMiddle = false;
-                    }
-
-
-                    //if last points are set
-                    if(lastX != Float.MAX_VALUE && lastY != Float.MAX_VALUE)
-                    {
-                        //add last and current points from image center
-                        pathPoints.add(lastX + (int)(phoneWidth / 2f));
-                        pathPoints.add(lastY + (int)(phoneHeight / 2f));
-                        pathPoints.add(currentX + (int)(phoneWidth / 2f));
-                        pathPoints.add(currentY + (int)(phoneHeight / 2f));
-                    }
-
-                    //update last points
-                    lastX = currentX;
-                    lastY = currentY;
-
-                    //update display
-                    CompassCalibrateView.this.postInvalidate();
-                }
-            });
-
-            //start animation in both directions
-            animX.start();
-            animY.start();*/
         }
 
         @Override
@@ -524,20 +430,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //reset
             pathPoints.clear();
             lastX = lastY = Float.MAX_VALUE;
-
-            //stop animation
-            /*if(animX != null)
-            {
-                animX.cancel();
-            }
-            if(animY != null)
-            {
-                animY.cancel();
-            }
-
-            //reset
-            pathPoints.clear();
-            lastX = lastY = Float.MAX_VALUE;*/
         }
     }
 

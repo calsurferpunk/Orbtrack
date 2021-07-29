@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
@@ -432,6 +433,7 @@ public abstract class Settings
                 }
 
                 //Reloads items
+                @SuppressLint("NotifyDataSetChanged")
                 public void reloadItems()
                 {
                     initItems();
@@ -1018,6 +1020,7 @@ public abstract class Settings
             }
 
             //Reloads items
+            @SuppressLint("NotifyDataSetChanged")
             public void reload()
             {
                 int index;
@@ -1250,6 +1253,7 @@ public abstract class Settings
             }
 
             //Reloads items
+            @SuppressLint("NotifyDataSetChanged")
             public void reload()
             {
                 Resources res = (currentContext != null ? currentContext.getResources() : null);
@@ -1450,6 +1454,7 @@ public abstract class Settings
             }
 
             //Reloads items
+            @SuppressLint("NotifyDataSetChanged")
             public void reload()
             {
                 int index;

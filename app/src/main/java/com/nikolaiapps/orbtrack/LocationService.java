@@ -620,7 +620,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                     dismissIntent = new Intent(this, NotifyReceiver.class);
                     dismissIntent.setAction(NotifyReceiver.DismissAction);
                     dismissIntent.putExtra(ParamTypes.ForceClose, true);
-                    notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_stop), PendingIntent.getBroadcast(this, NotifyReceiver.StopID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                    notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_stop), Globals.getPendingBroadcastIntent(this, NotifyReceiver.StopID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
 
                     //if getting location
                     if(gettingLocation)
@@ -636,7 +636,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                                 Intent retryIntent = new Intent(LocationService.this, NotifyReceiver.class);
                                 retryIntent.setAction(NotifyReceiver.RetryAction);
                                 notifyBuilder.setContentText(res.getString(R.string.text_location_failed));
-                                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), PendingIntent.getBroadcast(LocationService.this, NotifyReceiver.RetryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), Globals.getPendingBroadcastIntent(LocationService.this, NotifyReceiver.RetryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                                 notifyManager.notify(Globals.ChannelIds.Location, notifyBuilder.build());
                             }
                         };

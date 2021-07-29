@@ -692,7 +692,7 @@ public class UpdateService extends NotifyService
 
             //create and return intent
             alarmIntent.putExtra(ParamTypes.UpdateType, updateType);
-            alarmPendingIntent = PendingIntent.getBroadcast(context, getUpdateID(updateType), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            alarmPendingIntent = Globals.getPendingBroadcastIntent(context, getUpdateID(updateType), alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             return(alarmPendingIntent);
         }
 

@@ -52,6 +52,8 @@ public abstract class BaseInputActivity extends AppCompatActivity
         static final byte OthersOpenItem = 18;
         static final byte OthersSave = 19;
         static final byte Settings = 20;
+        static final byte ExactAlarm = 21;
+        static final byte ExactAlarmRetry = 22;
     }
 
     public static final String EXTRA_REQUEST_CODE = "RequestCode";

@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
 
     <uses-feature android:glEsVersion="0x00020000" android:required="true"/>
     <uses-feature android:name="android.hardware.location" android:required="false" />
@@ -27,8 +28,9 @@
         android:networkSecurityConfig="@xml/network_security_config"
         tools:ignore="UnusedAttribute">
 
-        <uses-library android:name="org.apache.http.legacy"
-            android:required="false" />
+        <uses-library
+            android:name="org.apache.http.legacy"
+            android:required="false"/>
 
         <service
             android:name=".CalculateService"
@@ -141,7 +143,8 @@
             android:label="@string/app_name"
             android:theme="@style/SplashScreen"
             android:windowSoftInputMode="stateAlwaysHidden"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
                 <action android:name="android.intent.action.MAIN"/>
@@ -153,24 +156,35 @@
             android:name=".SettingsActivity"
             android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
+            android:exported="false"
             tools:ignore="LockedOrientationActivity" />
 
-        <activity android:name=".NotifySettingsActivity"/>
+        <activity
+            android:name=".NotifySettingsActivity"
+            android:exported="false"/>
 
-        <activity android:name=".MasterAddListActivity"/>
+        <activity
+            android:name=".MasterAddListActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".MapLocationInputActivity"
-            android:windowSoftInputMode="adjustResize"/>
+            android:windowSoftInputMode="adjustResize"
+            android:exported="false"/>
 
-        <activity android:name=".SDCardBrowserActivity"/>
+        <activity
+            android:name=".SDCardBrowserActivity"
+            android:exported="false"/>
 
-        <activity android:name=".ManualOrbitalInputActivity"/>
+        <activity
+            android:name=".ManualOrbitalInputActivity"
+            android:exported="false"/>
 
         <activity
             android:name="com.dropbox.core.android.AuthActivity"
             android:configChanges="orientation|keyboard"
-            android:launchMode="singleTask">
+            android:launchMode="singleTask"
+            android:exported="true">
             <intent-filter>
                 <data android:scheme="db-oznnt8byoj4us2b" />
                 <action android:name="android.intent.action.VIEW" />
@@ -181,19 +195,26 @@
 
         <activity
             android:name=".DropboxAccess"
-            android:theme="@style/DropboxSplashScreen"/>
+            android:theme="@style/DropboxSplashScreen"
+            android:exported="false"/>
 
-        <activity android:name=".DropboxAccess$BrowserActivity"/>
+        <activity
+            android:name=".DropboxAccess$BrowserActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".GoogleDriveAccess"
-            android:theme="@style/GoogleDriveSplashScreen"/>
+            android:theme="@style/GoogleDriveSplashScreen"
+            android:exported="false"/>
 
-        <activity android:name=".GoogleDriveAccess$BrowserActivity"/>
+        <activity
+            android:name=".GoogleDriveAccess$BrowserActivity"
+            android:exported="false"/>
 
         <activity
             android:name=".WidgetPassTinyProvider$SetupActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
@@ -203,6 +224,7 @@
         <activity
             android:name=".WidgetPassSmallProvider$SetupActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
@@ -212,6 +234,7 @@
         <activity
             android:name=".WidgetPassMediumProvider$SetupActivity"
             android:configChanges="orientation|screenSize"
+            android:exported="true"
             android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>

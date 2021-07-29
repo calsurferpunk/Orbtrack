@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.SwitchCompat;
@@ -31,6 +33,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     private IconSpinner orbitalList;
     private LinearLayout fullMoonStartLayout;
     private LinearLayout fullMoonEndLayout;
+    private ActivityResultLauncher<Intent> resultLauncher;
     private RadioGroup[] notifyGroup;
     private SwitchCompat[] notifySwitch;
     private AppCompatRadioButton[] notifyNext;
@@ -112,23 +115,8 @@ public class NotifySettingsActivity extends BaseInputActivity
                 @Override
                 public void onClick(View v)
                 {
-                    byte index;
-                    int id = (useList ? (int)orbitalList.getSelectedValue(Universe.IDs.Invalid) : noradId);
-                    boolean[] notifyUsing = new boolean[Globals.NotifyType.NotifyCount];
-                    boolean[] notifyNextChecked = new boolean[Globals.NotifyType.NotifyCount];
-
-                    //go through each notify type
-                    for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
-                    {
-                        //update status
-                        notifyUsing[index] = notifySwitch[index].isChecked();
-                        notifyNextChecked[index] = notifyNext[index].isChecked();
-                    }
-
-                    //update settings
-                    Settings.setNotify(NotifySettingsActivity.this, id, location, notifyUsing, notifyNextChecked);
-                    setResult(RESULT_OK, resultData);
-                    NotifySettingsActivity.this.finish();
+                    //handle setting notifications
+                    handleSettingNotifications(noradId, location, useList, false, resultData);
                 }
             });
             cancelButton.setOnClickListener(new View.OnClickListener()
@@ -152,6 +140,15 @@ public class NotifySettingsActivity extends BaseInputActivity
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {}
             });
+            resultLauncher = Globals.createActivityLauncher(this, new ActivityResultCallback<ActivityResult>()
+            {
+                @Override
+                public void onActivityResult(ActivityResult result)
+                {
+                    //handle setting notifications
+                    handleSettingNotifications(noradId, location, useList, true, resultData);
+                }
+            });
 
             //update displays
             orbitalGroup.setVisibility(useList ? View.VISIBLE : View.GONE);
@@ -174,6 +171,58 @@ public class NotifySettingsActivity extends BaseInputActivity
         {
             //stop
             this.finish();
+        }
+    }
+
+    //Sets notifications
+    private void setNotifications(int noradId, Calculations.ObserverType location, boolean useList)
+    {
+        byte index;
+        int id = (useList ? (int)orbitalList.getSelectedValue(Universe.IDs.Invalid) : noradId);
+        boolean[] notifyUsing = new boolean[Globals.NotifyType.NotifyCount];
+        boolean[] notifyNextChecked = new boolean[Globals.NotifyType.NotifyCount];
+
+        //go through each notify type
+        for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
+        {
+            //update status
+            notifyUsing[index] = notifySwitch[index].isChecked();
+            notifyNextChecked[index] = notifyNext[index].isChecked();
+        }
+
+        //set notifications
+        Settings.setNotify(this, id, location, notifyUsing, notifyNextChecked);
+    }
+
+    //Handles settings notifications
+    private void handleSettingNotifications(int noradId, Calculations.ObserverType location, boolean useList, boolean retrying, Intent resultData)
+    {
+        //done if -have permission to set exact timer- or -can't ask-
+        if(Globals.haveExactAlarmPermission(NotifySettingsActivity.this) || !Globals.askExactAlarmPermission)
+        {
+            //set notifications
+            setNotifications(noradId, location, useList);
+
+            //set result
+            setResult(RESULT_OK, resultData);
+            NotifySettingsActivity.this.finish();
+        }
+        else
+        {
+            //ask permission
+            Globals.askExactAlarmPermission(NotifySettingsActivity.this, resultLauncher, retrying, new Globals.OnDenyListener()
+            {
+                @Override
+                public void OnDeny(byte resultCode)
+                {
+                    //set notifications with denial
+                    setNotifications(noradId, location, useList);
+
+                    //set result
+                    setResult(RESULT_OK, resultData);
+                    NotifySettingsActivity.this.finish();
+                }
+            });
         }
     }
 

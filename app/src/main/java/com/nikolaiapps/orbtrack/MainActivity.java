@@ -592,6 +592,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             case Globals.PermissionType.CameraRetry:
             case Globals.PermissionType.ReadExternalStorageRetry:
             case Globals.PermissionType.WriteExternalStorageRetry:
+            case Globals.PermissionType.ExactAlarmRetry:
                 retrying = true;
                 break;
         }

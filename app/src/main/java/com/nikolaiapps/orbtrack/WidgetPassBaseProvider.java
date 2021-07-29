@@ -326,7 +326,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         alarmIntent.setAction(ACTION_UPDATE_PASS_ALARM);
         alarmIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         alarmIntent.putExtra(ParamTypes.PassAlarmType, passAlarmType);
-        alarmPendingIntent = PendingIntent.getBroadcast(context, (widgetId * 10) + passAlarmType, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmPendingIntent = Globals.getPendingBroadcastIntent(context, (widgetId * 10) + passAlarmType, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         return(alarmPendingIntent);
     }
 
@@ -338,7 +338,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
         //create and return intent
         alarmIntent.setAction(ACTION_UPDATE_WIDGETS_ALARM);
-        alaramPendingIntent = PendingIntent.getBroadcast(context, 9999, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alaramPendingIntent = Globals.getPendingBroadcastIntent(context, 9999, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         return(alaramPendingIntent);
     }
 
@@ -350,7 +350,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
         //create and return intent
         alarmIntent.setAction(ACTION_UPDATE_LOCATION_ALARM);
-        alarmPendingIntent = PendingIntent.getBroadcast(context, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmPendingIntent = Globals.getPendingBroadcastIntent(context, 0, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         return(alarmPendingIntent);
     }
 
@@ -361,7 +361,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         intent.setAction(ACTION_SETTINGS_CLICK);
         intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId);
         intent.putExtra(EXTRA_WIDGET_CLASS, widgetClass);
-        return(PendingIntent.getBroadcast(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT));
+        return(Globals.getPendingBroadcastIntent(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 
     //Sets border
@@ -969,7 +969,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     if(startTimeMs > System.currentTimeMillis())
                     {
                         //set alarm to 4 seconds after pass starting time
-                        Globals.setAlarm(manager, startTimeMs + 4000, getPassAlarmIntent(context, alarmReceiverClass, widgetId, PassAlarmType.Start), false);
+                        Globals.setAlarm(context, manager, startTimeMs + 4000, getPassAlarmIntent(context, alarmReceiverClass, widgetId, PassAlarmType.Start), false);
                         alarmSet = true;
                     }
                 }
@@ -978,7 +978,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 if(passTimeEnd != null && !alarmSet)
                 {
                     //set alarm to 4 seconds after pass ending time
-                    Globals.setAlarm(manager, passTimeEnd.getTimeInMillis() + 4000, getPassAlarmIntent(context, alarmReceiverClass, widgetId, PassAlarmType.End), false);
+                    Globals.setAlarm(context, manager, passTimeEnd.getTimeInMillis() + 4000, getPassAlarmIntent(context, alarmReceiverClass, widgetId, PassAlarmType.End), false);
                 }
             }
             else

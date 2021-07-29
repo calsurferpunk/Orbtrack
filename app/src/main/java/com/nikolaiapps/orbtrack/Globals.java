@@ -148,6 +148,8 @@ public abstract class Globals
         static final byte ReadExternalStorageRetry = 6;
         static final byte WriteExternalStorage = 7;
         static final byte WriteExternalStorageRetry = 8;
+        static final byte ExactAlarm = 9;
+        static final byte ExactAlarmRetry = 10;
     }
 
     //Symbols
@@ -612,7 +614,7 @@ public abstract class Globals
             boolean success = false;
             boolean allowInformationTranslate = Settings.getTranslateInformation(context);
             String resultString = null;
-            String toLanguage = Globals.getLanguage(context);
+            String toLanguage = getLanguage(context);
             String fromString = (String)objects[1];
             String encodedFromString = TextUtils.htmlEncode(fromString);
             Resources res = context.getResources();
@@ -685,6 +687,7 @@ public abstract class Globals
     public static boolean askCameraPermission = true;
     public static boolean askWritePermission = true;
     public static boolean askReadPermission = true;
+    public static boolean askExactAlarmPermission = true;
 
     //Gets unknown string
     public static String getUnknownString(Context context)
@@ -705,7 +708,7 @@ public abstract class Globals
         if(Build.VERSION.SDK_INT >= 21)
         {
             Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.OthersSave);
+            startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.OthersSave);
         }
     }
 
@@ -750,17 +753,17 @@ public abstract class Globals
     }
     public static void showConfirmDialog(Context context, String titleText, CharSequence messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
     {
-        int padding = (int)Globals.dpToPixels(context, 15);
+        int padding = (int)dpToPixels(context, 15);
         ScrollView messageScroll = new ScrollView(context);
         TextView messageView = new TextView(context);
         ViewGroup.LayoutParams messageParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
-        messageView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
+        messageView.setBackgroundColor(resolveColorID(context, R.attr.pageHighlightBackground));
         messageView.setLayoutParams(messageParams);
         messageView.setPadding(padding, padding, padding, padding);
         messageView.setMovementMethod(LinkMovementMethod.getInstance());
         messageView.setText(messageText);
-        messageView.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));
+        messageView.setTextColor(resolveColorID(context, R.attr.defaultTextColor));
 
         messageScroll.setScrollbarFadingEnabled(false);
         messageScroll.addView(messageView);
@@ -888,7 +891,7 @@ public abstract class Globals
         View snackParentView = snackView.getView();
         TextView snackText = snackParentView.findViewById(com.google.android.material.R.id.snackbar_text);
         ViewGroup snackGroup = (ViewGroup)snackText.getParent();
-        float[] sizes = Globals.dpsToPixels(context, 200, 48);
+        float[] sizes = dpsToPixels(context, 200, 48);
         LinearLayout.LayoutParams params = new LinearLayout.LayoutParams((int)sizes[0], (int)sizes[1]);
 
         snackText.setTextColor(Color.DKGRAY);
@@ -916,7 +919,7 @@ public abstract class Globals
         final Context context = parentView.getContext();
         boolean usingDetail = (detailMessage != null);
         int resId = (isError ? R.drawable.ic_error_black : R.drawable.ic_check_circle_black);
-        int textColorId = Globals.resolveColorID(context, R.attr.pageTitleTextColor);
+        int textColorId = resolveColorID(context, R.attr.pageTitleTextColor);
         final Drawable icon = getDrawable(context, resId, R.color.white);
         final Drawable smallIcon = getDrawable(context, resId, 16, 16, R.color.white, true);
         final Snackbar snackView = Snackbar.make(parentView, message, usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
@@ -925,10 +928,10 @@ public abstract class Globals
         final Resources res = context.getResources();
 
         //setup views
-        snackParentView.setBackgroundResource(Globals.resolveAttributeID(context, R.attr.pageTitleBackground));
+        snackParentView.setBackgroundResource(resolveAttributeID(context, R.attr.pageTitleBackground));
         snackText.setTextColor(textColorId);
         snackView.setActionTextColor(textColorId);
-        snackText.setCompoundDrawablePadding((int)Globals.dpToPixels(context, 3));
+        snackText.setCompoundDrawablePadding((int)dpToPixels(context, 3));
         snackText.setCompoundDrawablesWithIntrinsicBounds(smallIcon, null, null, null);
 
         //if using detail message
@@ -979,13 +982,22 @@ public abstract class Globals
     //Checks if permission is granted
     private static boolean havePermission(Context context, String permission)
     {
-        return(ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED);
+        if(Build.VERSION.SDK_INT >= 31 && permission.equals(Manifest.permission.SCHEDULE_EXACT_ALARM))
+        {
+            AlarmManager manager = (AlarmManager)context.getSystemService(Context.ALARM_SERVICE);
+            return(manager != null && manager.canScheduleExactAlarms());
+        }
+        else
+        {
+            return(ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED);
+        }
     }
 
     //Asks for permission
-    private static void askPermission(final Context context, final String permission, final String title, final String reason, final byte resultCode, final OnDenyListener denyRetryListener)
+    private static void askPermission(final Context context, ActivityResultLauncher<Intent> launcher, final String permission, final String title, final String reason, final byte resultCode, final OnDenyListener denyRetryListener)
     {
         final boolean isRetry;
+        final boolean isExactAlarm;
         final AppCompatActivity currentActivity = (AppCompatActivity)context;
 
         switch(resultCode)
@@ -995,23 +1007,39 @@ public abstract class Globals
             case PermissionType.ReadExternalStorageRetry:
             case PermissionType.WriteExternalStorageRetry:
                 isRetry = true;
+                isExactAlarm = false;
+                break;
+
+            case PermissionType.ExactAlarm:
+            case PermissionType.ExactAlarmRetry:
+                isRetry = (resultCode == PermissionType.ExactAlarmRetry);
+                isExactAlarm = true;
                 break;
 
             default:
                 isRetry = false;
+                isExactAlarm = false;
                 break;
         }
 
-        if(ActivityCompat.shouldShowRequestPermissionRationale(currentActivity, permission))
+        if(isExactAlarm || ActivityCompat.shouldShowRequestPermissionRationale(currentActivity, permission))
         {
             Resources res = currentActivity.getResources();
 
-            showConfirmDialog(currentActivity, title + " " + res.getString(R.string.title_permission), reason, (isRetry ? res.getString(R.string.title_retry) : res.getString(R.string.title_ok)), (isRetry ? res.getString(R.string.title_deny) : null), false, new DialogInterface.OnClickListener()
+            showConfirmDialog(currentActivity, title + " " + res.getString(R.string.title_permission), reason, res.getString(isRetry ? R.string.title_retry : isExactAlarm ? R.string.title_open_settings : R.string.title_ok), (isRetry ? res.getString(R.string.title_deny) : isExactAlarm ? res.getString(R.string.title_ignore) : null), false, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
-                    ActivityCompat.requestPermissions(currentActivity, new String[]{permission}, resultCode);
+                    if(isExactAlarm && Build.VERSION.SDK_INT >= 31)
+                    {
+                        Intent settingsIntent = new Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM);
+                        startActivityForResult(launcher, settingsIntent, resultCode);
+                    }
+                    else
+                    {
+                        ActivityCompat.requestPermissions(currentActivity, new String[]{permission}, resultCode);
+                    }
                 }
             },
             new DialogInterface.OnClickListener()
@@ -1037,6 +1065,10 @@ public abstract class Globals
                         case PermissionType.WriteExternalStorageRetry:
                             askWritePermission = false;
                             break;
+
+                        case PermissionType.ExactAlarmRetry:
+                            askExactAlarmPermission = false;
+                            break;
                     }
 
                     // if deny retry listener is set
@@ -1054,12 +1086,16 @@ public abstract class Globals
             ActivityCompat.requestPermissions(currentActivity, new String[]{permission}, resultCode);
         }
     }
+    private static void askPermission(final Context context, final String permission, final String title, final String reason, final byte resultCode, final OnDenyListener denyRetryListener)
+    {
+        askPermission(context, null, permission, title, reason, resultCode, denyRetryListener);
+    }
 
     //Ask for camera permission
     public static void askCameraPermission(Context context, boolean retrying, OnDenyListener listener)
     {
         Resources res = context.getResources();
-        askPermission(context, Manifest.permission.CAMERA, res.getString(R.string.title_camera), res.getString(R.string.desc_permission_camera), (retrying ? Globals.PermissionType.CameraRetry : Globals.PermissionType.Camera), listener);
+        askPermission(context, Manifest.permission.CAMERA, res.getString(R.string.title_camera), res.getString(R.string.desc_permission_camera), (retrying ? PermissionType.CameraRetry : PermissionType.Camera), listener);
     }
 
     //Ask for location enable
@@ -1082,21 +1118,31 @@ public abstract class Globals
     public static void askLocationPermission(Context context, boolean retrying)
     {
         Resources res = context.getResources();
-        askPermission(context, getLocationManifestPermission(context), res.getString(R.string.title_location), res.getString(R.string.desc_permission_location), (retrying ? Globals.PermissionType.LocationRetry : Globals.PermissionType.Location), null);
+        askPermission(context, getLocationManifestPermission(context), res.getString(R.string.title_location), res.getString(R.string.desc_permission_location), (retrying ? PermissionType.LocationRetry : PermissionType.Location), null);
     }
 
     //Ask for write permission
     public static void askWritePermission(Context context, boolean retrying)
     {
         Resources res = context.getResources();
-        askPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE, res.getString(R.string.title_write_external_storage), res.getString(R.string.desc_permission_write_external_storage), (retrying ? Globals.PermissionType.WriteExternalStorageRetry : Globals.PermissionType.WriteExternalStorage), null);
+        askPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE, res.getString(R.string.title_write_external_storage), res.getString(R.string.desc_permission_write_external_storage), (retrying ? PermissionType.WriteExternalStorageRetry : PermissionType.WriteExternalStorage), null);
     }
 
     //Ask for read permission
     public static void askReadPermission(Context context, boolean retrying)
     {
         Resources res = context.getResources();
-        askPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE, res.getString(R.string.title_read_external_storage), res.getString(R.string.desc_permission_read_external_storage), (retrying ? Globals.PermissionType.ReadExternalStorageRetry : Globals.PermissionType.ReadExternalStorage), null);
+        askPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE, res.getString(R.string.title_read_external_storage), res.getString(R.string.desc_permission_read_external_storage), (retrying ? PermissionType.ReadExternalStorageRetry : PermissionType.ReadExternalStorage), null);
+    }
+
+    //Ask for exact alarm permission
+    public static void askExactAlarmPermission(Context context, ActivityResultLauncher<Intent> launcher, boolean retrying, OnDenyListener listener)
+    {
+        if(Build.VERSION.SDK_INT >= 31)
+        {
+            Resources res = context.getResources();
+            askPermission(context, launcher, Manifest.permission.SCHEDULE_EXACT_ALARM, res.getString(R.string.title_set_exact_alarm), res.getString(R.string.desc_permission_set_exact_alarm), (retrying ? PermissionType.ExactAlarmRetry : PermissionType.ExactAlarm), listener);
+        }
     }
 
     //Get google drive sign in client
@@ -1118,7 +1164,7 @@ public abstract class Globals
         if(context != null)
         {
             //ask for user account
-            Globals.startActivityForResult(launcher, getGoogleDriveSignInClient(context).getSignInIntent(), requestCode);
+            startActivityForResult(launcher, getGoogleDriveSignInClient(context).getSignInIntent(), requestCode);
         }
     }
 
@@ -1179,6 +1225,12 @@ public abstract class Globals
         return(havePermission(context, Manifest.permission.READ_EXTERNAL_STORAGE));
     }
 
+    //Check if have set exact alarm permission
+    public static boolean haveExactAlarmPermission(Context context)
+    {
+        return(Build.VERSION.SDK_INT < 31 || havePermission(context, Manifest.permission.SCHEDULE_EXACT_ALARM));
+    }
+
     //Check if have internet connection
     private static boolean haveInternetConnection(Context context)
     {
@@ -1201,7 +1253,7 @@ public abstract class Globals
     public static boolean shouldAskInternetConnection(Context context)
     {
         //should ask if don't have connection and can ask
-        return(context != null && !Globals.haveInternetConnection(context) && Settings.getAskInternet(context));
+        return(context != null && !haveInternetConnection(context) && Settings.getAskInternet(context));
     }
 
     //Get google drive account if valid
@@ -1334,11 +1386,11 @@ public abstract class Globals
     }
 
     //Sets an exact alarm
-    public static void setAlarm(AlarmManager manager, long timeMs, PendingIntent intent, boolean wakeup)
+    public static void setAlarm(Context context, AlarmManager manager, long timeMs, PendingIntent intent, boolean wakeup)
     {
         int alarmType = (wakeup ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC);
 
-        if(Build.VERSION.SDK_INT >= 19)
+        if(Build.VERSION.SDK_INT >= 19 && haveExactAlarmPermission(context))
         {
             manager.setExact(alarmType, timeMs, intent);
         }
@@ -1392,7 +1444,7 @@ public abstract class Globals
     //Gets file source
     public static int getFileSource(Context context, String location)
     {
-        int index = (location != null ? Arrays.asList(Globals.getFileLocations(context)).indexOf(location) : -1);
+        int index = (location != null ? Arrays.asList(getFileLocations(context)).indexOf(location) : -1);
 
         //if a valid index
         if(index >= 0 && index < fileSources.length)
@@ -1442,6 +1494,17 @@ public abstract class Globals
         return(channelId + " Service");
     }
 
+    //Gets a pending broadcast intent
+    public static PendingIntent getPendingBroadcastIntent(Context context, int requestCode, Intent intent, int flags)
+    {
+        if(Build.VERSION.SDK_INT >= 31)
+        {
+            flags |= PendingIntent.FLAG_IMMUTABLE;
+        }
+
+        return(PendingIntent.getBroadcast(context, requestCode, intent, flags));
+    }
+
     //Gets a byte string
     public static String getByteString(Resources res, long bytes)
     {
@@ -1464,66 +1527,13 @@ public abstract class Globals
         }
     }
 
-    /*//Gets percent string
-    public static String getPercentString(long current, long total)
-    {
-        int percent;
-        String value = null;
-
-        //if valid total bytes
-        if(total > 0)
-        {
-            //get percent
-            percent = (int)((current / (float)total) * 100);
-            if(percent > 100)
-            {
-                percent = 100;
-            }
-
-            //if a valid percent
-            if(percent >= 0)
-            {
-                //get percent
-                value = String.format(Locale.US, "%1d%%", percent);
-            }
-        }
-
-        //return value
-        return(value);
-    }*/
-
-    /*//Gets a byte percent string
-    public static String getBytePercentString(Resources res, long bytesReceived, long totalBytes)
-    {
-        String byteValue = "";
-        String percentValue;
-
-        //if bytes were received
-        if(bytesReceived > 0)
-        {
-            //get percent value
-            percentValue = getPercentString(bytesReceived, totalBytes);
-
-            //get byte value
-            byteValue = getByteString(res, bytesReceived);
-            if(percentValue != null)
-            {
-                //show percent first
-                byteValue = percentValue + " (" + byteValue + ")";
-            }
-        }
-
-        //return byte value
-        return(byteValue);
-    }*/
-
     //Julian date to calendar
     @SuppressWarnings("SpellCheckingInspection")
     public static Calendar julianDateToCalendar(double julianDate)
     {
         double tmp;
         double	j1, j2, j3, j4, j5;			//scratch
-        Calendar result = Globals.getGMTTime();
+        Calendar result = getGMTTime();
 
         //get the date from the Julian day number
         double intgr   = Math.floor(julianDate);
@@ -1738,7 +1748,7 @@ public abstract class Globals
     }
     private static String getDateTimeString(double julianDate, TimeZone zone)
     {
-        return(getDateTimeString(Globals.julianDateToCalendar(julianDate), zone));
+        return(getDateTimeString(julianDateToCalendar(julianDate), zone));
     }
 
     //Gets formatted date with year
@@ -1868,7 +1878,7 @@ public abstract class Globals
         //if either calendar is not set
         if(date1 == null || date2 == null)
         {
-            return(Globals.getUnknownString(context));
+            return(getUnknownString(context));
         }
 
         //get total milliseconds
@@ -1992,7 +2002,7 @@ public abstract class Globals
     }
     public static boolean getTLEIsAccurate(Calculations.TLEDataType tle)
     {
-        return(tle != null && getTLEIsAccurate(Globals.julianDateToCalendar(tle.epochJulian).getTimeInMillis()));
+        return(tle != null && getTLEIsAccurate(julianDateToCalendar(tle.epochJulian).getTimeInMillis()));
     }
 
     //Gets the language from the given context
@@ -2059,7 +2069,7 @@ public abstract class Globals
     //Gets latitude direction string
     public static String getLatitudeDirectionString(Resources res, double latitude, int decimals)
     {
-        return(Globals.getDegreeString(Math.abs(latitude), decimals) + " " + getLatitudeDirection(res, latitude));
+        return(getDegreeString(Math.abs(latitude), decimals) + " " + getLatitudeDirection(res, latitude));
     }
 
     //Gets longitude compass direction
@@ -2071,14 +2081,14 @@ public abstract class Globals
     //Gets longitude direction string
     public static String getLongitudeDirectionString(Resources res, double longitude, int decimals)
     {
-        return(Globals.getDegreeString(Math.abs(longitude), decimals) + " " + getLongitudeDirection(res, longitude));
+        return(getDegreeString(Math.abs(longitude), decimals) + " " + getLongitudeDirection(res, longitude));
     }
 
     //Gets coordinate string
     public static String getCoordinateString(Context context, double latitude, double longitude, double altitude)
     {
         Resources res = (context != null ? context.getResources() : null);
-        return(res != null ? res.getString(R.string.abbrev_latitude) + ": " + getLatitudeDirectionString(res, latitude, 3) + "\n" + res.getString(R.string.abbrev_longitude) + ": " + getLongitudeDirectionString(res, longitude, 3) + "\n" + res.getString(R.string.abbrev_altitude) + ": " + getNumberString(Globals.getKmUnitValue(altitude)) + " " + Globals.getKmLabel(res) : "");
+        return(res != null ? res.getString(R.string.abbrev_latitude) + ": " + getLatitudeDirectionString(res, latitude, 3) + "\n" + res.getString(R.string.abbrev_longitude) + ": " + getLongitudeDirectionString(res, longitude, 3) + "\n" + res.getString(R.string.abbrev_altitude) + ": " + getNumberString(getKmUnitValue(altitude)) + " " + getKmLabel(res) : "");
     }
 
     //Gets azimuth compass direction
@@ -2166,7 +2176,7 @@ public abstract class Globals
     public static String getHeaderText(Context context, String satelliteName, double julianDateStart, double julianDateEnd, double intersection)
     {
         TimeZone zone = MainActivity.getTimeZone();
-        return(context != null ? (satelliteName + "\n" + Globals.getDateTimeString(julianDateStart, zone) + " " + context.getString(R.string.text_to) + " " + Globals.getDateTimeString(julianDateEnd, zone) + (intersection > -Double.MAX_VALUE ? ("\n" + context.getString(R.string.title_within) + " " + Globals.getDegreeString(intersection)) : "")) : "");
+        return(context != null ? (satelliteName + "\n" + getDateTimeString(julianDateStart, zone) + " " + context.getString(R.string.text_to) + " " + getDateTimeString(julianDateEnd, zone) + (intersection > -Double.MAX_VALUE ? ("\n" + context.getString(R.string.title_within) + " " + getDegreeString(intersection)) : "")) : "");
     }
     public static String getHeaderText(Context context, String satelliteName, double julianDateStart, double julianDateEnd)
     {
@@ -2175,7 +2185,7 @@ public abstract class Globals
     public static String getHeaderText(Context context, String satelliteName, Calendar startGMT, Calendar endGMT)
     {
         TimeZone zone = MainActivity.getTimeZone();
-        return(context != null ? (satelliteName + "\n" + Globals.getDateTimeString(startGMT, zone) + " " + context.getString(R.string.text_to) + " " + Globals.getDateTimeString(endGMT, zone)) : "");
+        return(context != null ? (satelliteName + "\n" + getDateTimeString(startGMT, zone) + " " + context.getString(R.string.text_to) + " " + getDateTimeString(endGMT, zone)) : "");
     }
 
     //Resolves attribute IDs
@@ -2401,7 +2411,7 @@ public abstract class Globals
     {
         LinearLayout progressLayout = new LinearLayout(context);
         CircularProgressIndicator progressView = new CircularProgressIndicator(context);
-        AlertDialog.Builder addCurrentLocationDialogBuilder = new AlertDialog.Builder(context, Globals.getDialogThemeID(context));
+        AlertDialog.Builder addCurrentLocationDialogBuilder = new AlertDialog.Builder(context, getDialogThemeID(context));
 
         progressView.setIndeterminate(true);
         progressLayout.setGravity(Gravity.CENTER);
@@ -2600,7 +2610,7 @@ public abstract class Globals
     }
     public static Drawable getDrawable(Context context, int resId, int width, int height, int tintColor, boolean dpSize)
     {
-        float[] dpPixels = (dpSize ? Globals.dpsToPixels(context, width, height) : null);
+        float[] dpPixels = (dpSize ? dpsToPixels(context, width, height) : null);
         int widthPixels = (dpSize ? (int)dpPixels[0] : width);
         int heightPixels = (dpSize ? (int)dpPixels[1] : height);
         int[] imageSize;
@@ -2749,8 +2759,8 @@ public abstract class Globals
         textPaint.setTypeface(Typeface.SANS_SERIF);
         textPaint.setTextSize(context.getResources().getDisplayMetrics().density * textSize);
 
-        textWidth = Globals.getTextWidth(textPaint, text);
-        textHeight = Globals.getTextHeight(textPaint, text);
+        textWidth = getTextWidth(textPaint, text);
+        textHeight = getTextHeight(textPaint, text);
 
         textImage = Bitmap.createBitmap(textWidth, textHeight, Bitmap.Config.ARGB_8888);
         textCanvas = new Canvas(textImage);
@@ -3422,12 +3432,6 @@ public abstract class Globals
             }
         }
 
-        /*if(ids[0] == R.drawable.ic_launcher_clear)
-        {
-            int i = 0;
-            i++;
-        }*/
-
         //return IDs
         return(ids);
     }
@@ -3472,6 +3476,7 @@ public abstract class Globals
     }
 
     //Normalizes owner name
+    @SuppressWarnings("SpellCheckingInspection")
     public static String normalizeOwnerName(String name)
     {
         //if set
@@ -3657,7 +3662,7 @@ public abstract class Globals
     //Normalizes a pass time for use in comparison
     private static Calendar normalizePassStartCompare(Calendar timeStart, Calendar timeEnd)
     {
-        Calendar timeNow = Globals.getGMTTime();
+        Calendar timeNow = getGMTTime();
 
         //if start time is set
         if(timeStart != null)
@@ -4232,7 +4237,7 @@ public abstract class Globals
     }
 
     //Reads web page from stream
-    private static String readWebPage(BufferedReader streamReader, long totalBytes, Globals.OnProgressChangedListener listener) throws Exception
+    private static String readWebPage(BufferedReader streamReader, long totalBytes, OnProgressChangedListener listener) throws Exception
     {
         int readCount;
         long bytesReceived = 0;
@@ -4250,7 +4255,7 @@ public abstract class Globals
                 bytesReceived += readCount;
                 if(listener != null)
                 {
-                    listener.onProgressChanged(Globals.ProgressType.Success, null, bytesReceived, totalBytes);
+                    listener.onProgressChanged(ProgressType.Success, null, bytesReceived, totalBytes);
                 }
             }
         }
@@ -4259,7 +4264,7 @@ public abstract class Globals
         if(listener != null)
         {
             //update progress
-            listener.onProgressChanged(Globals.ProgressType.Finished, null, bytesReceived, totalBytes);
+            listener.onProgressChanged(ProgressType.Finished, null, bytesReceived, totalBytes);
         }
 
         //return data
@@ -4267,7 +4272,7 @@ public abstract class Globals
     }
 
     //Tries to get a web page
-    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String postData, String authToken, String contentType, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
+    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String postData, String authToken, String contentType, OnProgressChangedListener listener, int retryCount, int maxRetryCount)
     {
         int index;
         int responseCode = -1;
@@ -4288,7 +4293,7 @@ public abstract class Globals
         if(listener != null)
         {
             //update progress
-            listener.onProgressChanged(Globals.ProgressType.Started, null, 0, 0);
+            listener.onProgressChanged(ProgressType.Started, null, 0, 0);
         }
 
         try
@@ -4305,6 +4310,7 @@ public abstract class Globals
             siteRequestBuilder.addHeader("User-Agent", "Mozilla/5.0");
             if(authToken != null)
             {
+                //noinspection SpellCheckingInspection
                 siteRequestBuilder.addHeader("Ocp-Apim-Subscription-Key", authToken);
                 siteRequestBuilder.addHeader("Content-Type", contentType);
             }
@@ -4367,7 +4373,7 @@ public abstract class Globals
                 if(listener != null)
                 {
                     //update progress
-                    listener.onProgressChanged(Globals.ProgressType.Failed, null, -1, -1);
+                    listener.onProgressChanged(ProgressType.Failed, null, -1, -1);
                 }
 
                 //if connection exists
@@ -4389,7 +4395,7 @@ public abstract class Globals
             }
         }
     }
-    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String outString, Globals.OnProgressChangedListener listener, int retryCount, int maxRetryCount)
+    private static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, String outString, OnProgressChangedListener listener, int retryCount, int maxRetryCount)
     {
         return(getWebPage(urlString, postNames, postValues, outString, null, "text/xml; charset=utf-8", listener, retryCount, maxRetryCount));
     }
@@ -4398,17 +4404,17 @@ public abstract class Globals
         //try up to 3 times to get web page
         return(getWebPage(urlString, postNames, postValues, null, null, "text/xml; charset=utf-8", null, 1, 3));
     }
-    public static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, Globals.OnProgressChangedListener listener)
+    public static WebPageData getWebPage(String urlString, String[] postNames, String[] postValues, OnProgressChangedListener listener)
     {
         //try up to 3 times to get web page
         return(getWebPage(urlString, postNames, postValues, null, listener, 1, 3));
     }
-    public static WebPageData getWebPage(String urlString, String outString, Globals.OnProgressChangedListener listener)
+    public static WebPageData getWebPage(String urlString, String outString, OnProgressChangedListener listener)
     {
         //try up to 3 times to get web page
         return(getWebPage(urlString, null, null, outString, listener, 1, 3));
     }
-    public static String getWebPage(String urlString, boolean closeConnection, Globals.OnProgressChangedListener listener)
+    public static String getWebPage(String urlString, boolean closeConnection, OnProgressChangedListener listener)
     {
         WebPageData webData = getWebPage(urlString, null, listener);
 
@@ -4472,7 +4478,7 @@ public abstract class Globals
     }
 
     //Tries to login to space-track
-    public static Globals.WebPageData loginSpaceTrack(String user, String pwd)
+    public static WebPageData loginSpaceTrack(String user, String pwd)
     {
         //if no user and/or password
         if(user == null || pwd == null || user.trim().length() == 0 || pwd.trim().length() == 0)
@@ -4483,7 +4489,7 @@ public abstract class Globals
         else
         {
             //login to space track
-            return(Globals.getWebPage("https://www.space-track.org/ajaxauth/login", new String[]{"identity", "password"}, new String[]{user, pwd}));
+            return(getWebPage("https://www.space-track.org/ajaxauth/login", new String[]{"identity", "password"}, new String[]{user, pwd}));
         }
     }
 
@@ -4520,7 +4526,7 @@ public abstract class Globals
     {
         String data;
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
-        WebPageData translatedData = Globals.getWebPage("http://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
+        WebPageData translatedData = getWebPage("http://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
         JSONObject rootNode;
 
         //if got data and valid
@@ -4557,13 +4563,13 @@ public abstract class Globals
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
 
         //try to save without waiting for a response
-        Globals.getWebPage("https://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, new String[]{"data"}, new String[]{text}, null);
+        getWebPage("https://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, new String[]{"data"}, new String[]{text}, null);
     }
 
     //Tries to logout of space track
-    public static void logoutSpaceTrack(Globals.OnProgressChangedListener listener)
+    public static void logoutSpaceTrack(OnProgressChangedListener listener)
     {
-        Globals.WebPageData pageData = Globals.getWebPage("https://www.space-track.org/ajaxauth/logout", null, null, listener);
+        WebPageData pageData = getWebPage("https://www.space-track.org/ajaxauth/logout", null, null, listener);
         if(pageData.connection != null)
         {
             pageData.connection.close();

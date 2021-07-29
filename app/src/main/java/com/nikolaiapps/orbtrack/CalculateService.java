@@ -485,8 +485,8 @@ public class CalculateService extends NotifyService
                 Globals.createNotifyChannel(context, notifyChannelId);
                 notifyBuilder = Globals.createNotifyBuilder(context, notifyChannelId, Globals.getOrbitalIconID(noradId, orbital.orbitalType));
                 notifyBuilder.setContentTitle(notifyTitle).setContentText(notifyMessage).setStyle(new NotificationCompat.BigTextStyle().bigText(notifyDetails));
-                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_settings), PendingIntent.getBroadcast(context, getSettingsID(noradId), settingsIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
-                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), PendingIntent.getBroadcast(context, getDismissID(noradId, notifyType), dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_settings), Globals.getPendingBroadcastIntent(context, getSettingsID(noradId), settingsIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(context, getDismissID(noradId, notifyType), dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                 notifyManager.notify(getNotifyID(noradId, notifyType), notifyBuilder.build());
 
                 //if for this pass only
@@ -609,7 +609,7 @@ public class CalculateService extends NotifyService
                 }
                 notifyIntent.putExtra(ParamTypes.ElevationMax, pass.passElMax);
             }
-            notifyPendingIntent = PendingIntent.getBroadcast(context, getNotifyID(noradId, notifyType), notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+            notifyPendingIntent = Globals.getPendingBroadcastIntent(context, getNotifyID(noradId, notifyType), notifyIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             return(notifyPendingIntent);
         }
 
@@ -743,7 +743,7 @@ public class CalculateService extends NotifyService
                     {
                         //set notify alarm
                         notifyPendingIntent = getNotifyPendingIntent(context, noradId, location.timeZone, pass, notifyType);
-                        Globals.setAlarm(manager, passTimeMs, notifyPendingIntent, true);
+                        Globals.setAlarm(context, manager, passTimeMs, notifyPendingIntent, true);
                     }
                     //else if pass end time is known
                     else if(pass.passTimeEnd != null)

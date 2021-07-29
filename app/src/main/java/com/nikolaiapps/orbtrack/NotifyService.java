@@ -293,11 +293,11 @@ public abstract class NotifyService extends IntentService
                             retryIntent.putExtra(serviceParam, serviceIndex);
 
                             //add retry button
-                            notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), PendingIntent.getBroadcast(this, retryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                            notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), Globals.getPendingBroadcastIntent(this, retryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                         }
 
                         //add dismiss button
-                        notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), PendingIntent.getBroadcast(this, dismissID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                        notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(this, dismissID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                         break;
                     }
                 }

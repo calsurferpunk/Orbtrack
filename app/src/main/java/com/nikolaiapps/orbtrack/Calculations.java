@@ -693,7 +693,7 @@ public abstract class Calculations
 
         public int getSatelliteNum()
         {
-            return(tle != null ? tle.satelliteNum : Integer.MAX_VALUE);
+            return(tle != null ? tle.satelliteNum : Universe.IDs.None);
         }
     }
 

@@ -137,7 +137,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                 if(currentError.equals(""))
                 {
                     currentSat = Calculations.loadSatellite(line1, line2);
-                    if(currentSat.getSatelliteNum() != Integer.MAX_VALUE && currentSat.tle.launchYear != Integer.MAX_VALUE)
+                    if(currentSat.getSatelliteNum() != Universe.IDs.None && currentSat.tle.launchYear != Integer.MAX_VALUE)
                     {
                         Database.saveSatellite(ManualOrbitalInputActivity.this, name, currentSat.getSatelliteNum(), (String)ownerList.getSelectedValue(""), launchDate.getDate().getTimeInMillis(), line1, line2, Calculations.epochToGMTCalendar(currentSat.tle.epochYear, currentSat.tle.epochDay).getTimeInMillis(), null, Globals.getGMTTime().getTimeInMillis(), Database.OrbitalType.Satellite);
 

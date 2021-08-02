@@ -722,7 +722,7 @@ public class Database extends SQLiteOpenHelper
 
         public int getSatelliteNum()
         {
-            return(satellite != null ? satellite.getSatelliteNum() : Integer.MAX_VALUE);
+            return(satellite != null ? satellite.getSatelliteNum() : Universe.IDs.None);
         }
 
         public String getName(String defaultVal)

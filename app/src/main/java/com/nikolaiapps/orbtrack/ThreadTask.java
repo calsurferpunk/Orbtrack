@@ -20,7 +20,7 @@ public class ThreadTask<Params, Progress, Result>
 
     public ThreadTask()
     {
-        running = false;
+        running = cancelled = false;
         runRepeatMs = 0;
         runTask = null;
         taskThread = null;

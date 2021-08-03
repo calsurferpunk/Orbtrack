@@ -2468,6 +2468,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //create receiver
         LocationReceiver receiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | LocationService.FLAG_START_HIGH_POWER_ONCE)
         {
+            private boolean firstLocation = true;
+
             @Override
             protected Activity getActivity()
             {
@@ -2494,7 +2496,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             @Override
             protected void onGotLocation(Context context, ObserverType updatedObserver)
             {
-                boolean updated = (updatedObserver != null && (observer == null || observer.notEqual(updatedObserver)));
+                boolean updated = (updatedObserver != null && (firstLocation || observer == null || observer.notEqual(updatedObserver)));
                 boolean showStatus = (pendingLocationUpdate && updated && !pendingOldSatelliteMessage);
                 boolean usingCurrent = (locationSource == Database.LocationType.Current);
 
@@ -2518,6 +2520,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_location_success));
                 }
+
+                //update status
+                firstLocation = false;
             }
 
             @Override

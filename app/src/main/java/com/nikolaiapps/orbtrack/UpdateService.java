@@ -297,6 +297,7 @@ public class UpdateService extends NotifyService
     //Master list type
     public static class MasterListType
     {
+        public boolean justUpdated;
         public ArrayList<MasterSatellite> satellites;
         private ArrayList<MasterCategory> categories;
         private final ArrayList<MasterCategory> categoriesByIndex;
@@ -310,6 +311,7 @@ public class UpdateService extends NotifyService
 
         public MasterListType()
         {
+            justUpdated = false;
             satellites = new ArrayList<>(0);
             categories = new ArrayList<>(0);
             categoriesByIndex = new ArrayList<>(0);
@@ -855,7 +857,7 @@ public class UpdateService extends NotifyService
 
             case UpdateType.GetMasterList:
                 //get master list
-                getMasterList(updateType, updateSource, user, pwd, getUpdate, checkUpdate);
+                getMasterList(updateSource, user, pwd, getUpdate, checkUpdate);
                 break;
 
             case UpdateType.LoadFile:
@@ -924,7 +926,7 @@ public class UpdateService extends NotifyService
     }
 
     //Sends a message
-    private void sendMessage(byte messageType, byte updateType, String section, long index, long count, int progressType, Object data)
+    private void sendMessage(byte messageType, byte updateType, String section, long index, long count, long overall, int progressType, Object data)
     {
         int updateID = NotifyReceiver.getUpdateID(updateType);
         int dismissID = (updateType == UpdateType.GetMasterList ? NotifyReceiver.DismissListID : NotifyReceiver.DismissSatelliteID);
@@ -975,15 +977,23 @@ public class UpdateService extends NotifyService
             }
         }
 
-        sendMessage(messageType, updateType, ParamTypes.UpdateType, Integer.MAX_VALUE, titleDesc, section, UPDATE_FILTER, NotifyReceiver.class, 0, 0, index, count, progressType, updateID, dismissID, retryID, showNotification[updateType], extraData);
+        sendMessage(messageType, updateType, ParamTypes.UpdateType, Integer.MAX_VALUE, titleDesc, section, UPDATE_FILTER, NotifyReceiver.class, overall, 0, index, count, progressType, updateID, dismissID, retryID, showNotification[updateType], extraData);
+    }
+    private void sendMessage(byte messageType, byte updateType, String section, long index, long count, int progressType, Object data)
+    {
+        sendMessage(messageType, updateType, section, index, count, -1, progressType, data);
+    }
+    private void sendMessage(byte messageType, byte updateType, String section, long index, long count, long overall, int progressType)
+    {
+        sendMessage(messageType, updateType, section, index, count, overall, progressType, null);
     }
     private void sendMessage(byte messageType, byte updateType, String section, long index, long count, int progressType)
     {
-        sendMessage(messageType, updateType, section, index, count, progressType, null);
+        sendMessage(messageType, updateType, section, index, count, -1, progressType, null);
     }
     private void sendMessage(byte messageType, byte updateType, String section, int progressType)
     {
-        sendMessage(messageType, updateType, section, 0, 0, progressType, null);
+        sendMessage(messageType, updateType, section, 0, 0, -1, progressType, null);
     }
 
     //Gets current intent
@@ -1006,21 +1016,15 @@ public class UpdateService extends NotifyService
         return(context.getSharedPreferences("Update", Context.MODE_PRIVATE));
     }
 
-    //Sends a master list parse message
-    private void sendMasterParseMessage(String displaySection, long updateValue, long updateCount)
-    {
-        UpdateService.this.sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, displaySection + " " + this.getString(R.string.title_parsing), updateValue, updateCount, Globals.ProgressType.Success);
-    }
-
     //Creates a new master list progress listener
-    private Globals.OnProgressChangedListener createMasterListProgressListener(final byte messageType, final String displaySection)
+    private Globals.OnProgressChangedListener createMasterListProgressListener(final byte messageType, final String displaySection, long overall)
     {
         return(new Globals.OnProgressChangedListener()
         {
             @Override
             public void onProgressChanged(int progressType, String section, final long updateIndex, final long updateCount)
             {
-                UpdateService.this.sendMessage(messageType, UpdateType.GetMasterList, displaySection, updateIndex, updateCount, progressType);
+                UpdateService.this.sendMessage(messageType, UpdateType.GetMasterList, displaySection, updateIndex, updateCount, overall, progressType);
             }
         });
     }
@@ -1601,13 +1605,13 @@ public class UpdateService extends NotifyService
         urls.add("https://www.space-track.org/basicspacedata/query/class/boxscore/orderby/COUNTRY%20asc/metadata/false");
         section = res.getString(R.string.title_owners);
         sections.add(section);
-        listeners.add(createMasterListProgressListener(MessageTypes.Download, section));
+        listeners.add(createMasterListProgressListener(MessageTypes.Download, section, 10));
 
         //add catalog urls and listeners
         urls.add("https://www.space-track.org/basicspacedata/query/class/satcat/DECAY/null-val/" + (!loadDebris ? "OBJECT_TYPE/%3C%3EDEBRIS/" : "") + "orderby/NORAD_CAT_ID%20asc/metadata/false");
         section = res.getString(R.string.title_satellites);
         sections.add(section);
-        listeners.add(createMasterListProgressListener(MessageTypes.Download, section));
+        listeners.add(createMasterListProgressListener(MessageTypes.Download, section, 20));
 
         //add category urls and listeners
         for(index = 0; index < SpaceTrackCategory.urls.length; index++)
@@ -1615,7 +1619,7 @@ public class UpdateService extends NotifyService
             urls.add("https://www.space-track.org/basicspacedata/query/class/satcat/CURRENT/Y/favorites/" + SpaceTrackCategory.urls[index] + "/orderby/NORAD_CAT_ID/format/csv/emptyresult/show");
             localeNames[index] = Database.LocaleCategory.getCategory(res, SpaceTrackCategory.nameValues[index]);
             sections.add(SpaceTrackCategory.nameValues[index]);
-            listeners.add(createMasterListProgressListener(MessageTypes.Download, localeNames[index]));
+            listeners.add(createMasterListProgressListener(MessageTypes.Download, localeNames[index], 30));
         }
 
         //get pages
@@ -1726,7 +1730,7 @@ public class UpdateService extends NotifyService
     }
 
     //Tries to get the master list
-    private void getMasterList(final byte updateType, final int updateSource, final String user, final String pwd, boolean getUpdate, boolean checkUpdate)
+    private void getMasterList(final int updateSource, final String user, final String pwd, boolean getUpdate, boolean checkUpdate)
     {
         boolean ranUpdate = false;
         int status = Globals.ProgressType.Finished;
@@ -1742,7 +1746,7 @@ public class UpdateService extends NotifyService
         if(getUpdate || (checkUpdate && getMasterListNeedUpdate(this, updateSource)))
         {
             //get updated list
-            status = getMasterList(updateSource, UpdateSubSource.Satellites, 0, user, pwd, null);
+            status = getMasterList(updateSource, UpdateSubSource.Satellites, 0, 0, user, pwd, null);
             ranUpdate = (status == Globals.ProgressType.Finished);
         }
 
@@ -1750,13 +1754,16 @@ public class UpdateService extends NotifyService
         if(masterList.satellites.size() > 0)
         {
             //if ran update and it was a success
-            if(ranUpdate && !cancelIntent[updateType])
+            if(ranUpdate && !cancelIntent[UpdateType.GetMasterList])
             {
                 //load categories
                 loadCategories();
 
                 //save updates
                 saveMasterList(updateSource);
+
+                //update status
+                masterList.justUpdated = true;
             }
 
             //get used owners and categories
@@ -1809,11 +1816,11 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, updateType, "", (status == Globals.ProgressType.Denied ? Globals.ProgressType.Denied : status == Globals.ProgressType.Finished && masterList.satellites.size() > 0 && !cancelIntent[updateType] ? Globals.ProgressType.Finished : ranUpdate ? Globals.ProgressType.Failed : Globals.ProgressType.Cancelled));
+        sendMessage(MessageTypes.General, UpdateType.GetMasterList, "", (status == Globals.ProgressType.Denied ? Globals.ProgressType.Denied : status == Globals.ProgressType.Finished && masterList.satellites.size() > 0 && !cancelIntent[UpdateType.GetMasterList] ? Globals.ProgressType.Finished : ranUpdate ? Globals.ProgressType.Failed : Globals.ProgressType.Cancelled));
     }
 
     //Gets master list and returns progress status
-    private int getMasterList(int updateSource, int updateSubSource, int linkIndex, String user, String pwd, MasterLink[] urls)
+    private int getMasterList(int updateSource, int updateSubSource, int linkIndex, int overall, String user, String pwd, MasterLink[] urls)
     {
         int index;
         int index2;
@@ -1839,6 +1846,7 @@ public class UpdateService extends NotifyService
         boolean addLineEnds = false;
         boolean loadDebris = Settings.getCatalogDebris(this);
         boolean loadRocketBodies = Settings.getCatalogRocketBodies(this);
+        Resources res = this.getResources();
         String urlBase;
         String urlMasterBase = "";
         String section = null;
@@ -1854,7 +1862,7 @@ public class UpdateService extends NotifyService
         String currentName;
         String currentStatus;
         String currentCode = null;
-        Resources res = this.getResources();
+        String parsingString = res.getString(R.string.title_parsing);
         SpaceTrackList spaceTrackData;
         ArrayList<MasterLink> urlList = new ArrayList<>(0);
         ArrayList<MasterSatellite> oldSatellites = new ArrayList<>(0);
@@ -2081,7 +2089,7 @@ public class UpdateService extends NotifyService
             sendMessage(MessageTypes.Download, UpdateType.GetMasterList, section, Globals.ProgressType.Started);
 
             //get page
-            receivedPage = Globals.getWebPage(urlMasterBase, true, createMasterListProgressListener(MessageTypes.Download, section));
+            receivedPage = Globals.getWebPage(urlMasterBase, true, createMasterListProgressListener(MessageTypes.Download, section, overall));
             receivedPageLength = (receivedPage != null ? receivedPage.length() : 0);
             receivedPageLower = (receivedPage != null ? receivedPage.toLowerCase() : null);
             if(receivedPageLength > 0)
@@ -2089,8 +2097,8 @@ public class UpdateService extends NotifyService
                 //go through page while not cancelled
                 do
                 {
-                    //update progress message
-                    sendMasterParseMessage(section, pageOffset, receivedPageLength);
+                    //update progress message (overall - overall +25%)
+                    sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (updateSource == Database.UpdateSource.Celestrak ? (overall + (int)((pageOffset / (float)receivedPageLength) * 25)) : 0), Globals.ProgressType.Success);
 
                     //find next txt file row start while not cancelled
                     rowStart = (rowStartText != null ? receivedPageLower.indexOf(rowStartText, pageOffset) : pageOffset);
@@ -2472,15 +2480,15 @@ public class UpdateService extends NotifyService
                                 //get categories while not cancelled
                                 for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                                 {
-                                    //get satellites from categories
-                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.Category, index, null, null, urls);
+                                    //get satellites from categories (0 - 35%)
+                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.Category, index, (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
                                 }
 
                                 //if not cancelled and got categories
                                 if(!cancelIntent[updateType] && status == Globals.ProgressType.Finished)
                                 {
-                                    //get owners
-                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.Owners, 0, null, null, null);
+                                    //get owners (40%)
+                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.Owners, 0, 40, null, null, null);
                                 }
                                 break;
 
@@ -2488,15 +2496,15 @@ public class UpdateService extends NotifyService
                                 //if not cancelled
                                 if(!cancelIntent[updateType])
                                 {
-                                    //get owners
-                                    status = getMasterList(Database.UpdateSource.Celestrak, UpdateSubSource.Owners, 0, null, null, null);
+                                    //get owners (25 - 50%)
+                                    status = getMasterList(Database.UpdateSource.Celestrak, UpdateSubSource.Owners, 0, 25, null, null, null);
                                 }
 
                                 //if not cancelled and got owners
                                 if(!cancelIntent[updateType] && status == Globals.ProgressType.Finished)
                                 {
-                                    //get satellite owners
-                                    status = getMasterList(Database.UpdateSource.Celestrak, UpdateSubSource.SatelliteOwners, 0, null, null, null);
+                                    //get satellite owners (50 - 75%)
+                                    status = getMasterList(Database.UpdateSource.Celestrak, UpdateSubSource.SatelliteOwners, 0, 50, null, null, null);
                                 }
                                 break;
                         }
@@ -2510,10 +2518,10 @@ public class UpdateService extends NotifyService
                                 //remember urls
                                 urls = urlList.toArray(new MasterLink[0]);
 
-                                //get satellite owners while not cancelled
+                                //get satellite owners while not cancelled (40 - 75%)
                                 for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                                 {
-                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.SatelliteOwners, index, null, null, urls);
+                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.SatelliteOwners, index, overall + (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
                                 }
                                 break;
                         }
@@ -3348,8 +3356,8 @@ public class UpdateService extends NotifyService
                 currentSatellite.addCategory(currentCategories[index2][1], Integer.parseInt(currentCategories[index2][2]));
             }
 
-            //update status
-            sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, index + 1, satelliteCount, Globals.ProgressType.Success);
+            //update status (75 - 85%)
+            sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, index + 1, satelliteCount, 75 + (int)(((index +1) / (float)satelliteCount) * 10), Globals.ProgressType.Success);
         }
 
         //update status
@@ -3401,7 +3409,7 @@ public class UpdateService extends NotifyService
                 {
                     String section = null;
 
-                    //get section and create listener
+                    //get section and create listener (85 - 90%)
                     switch(index)
                     {
                         case 0:
@@ -3420,7 +3428,7 @@ public class UpdateService extends NotifyService
                             section = res.getString(R.string.abbrev_satellite) + " " + res.getString(R.string.title_categories);
                             break;
                     }
-                    saveListener = createMasterListProgressListener(MessageTypes.Save, section);
+                    saveListener = createMasterListProgressListener(MessageTypes.Save, section, 85 + (int)(((index + 1) / 4f) * 5));
 
                     //update status
                     sendMessage(MessageTypes.Save, UpdateType.GetMasterList, section, Globals.ProgressType.Started);

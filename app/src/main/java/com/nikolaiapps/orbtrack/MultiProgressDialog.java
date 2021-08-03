@@ -90,6 +90,7 @@ public class MultiProgressDialog extends AlertDialog
         if(msgTxt != null)
         {
             msgTxt.setText(message);
+            msgTxt.setVisibility(View.VISIBLE);
         }
         if(lyt != null)
         {
@@ -103,7 +104,7 @@ public class MultiProgressDialog extends AlertDialog
     }
     public void setProgress(long value, long total)
     {
-        setProgress((int)((value / (float)total) * 100));
+        setProgress(total != 0 ? (int)((value / (float)total) * 100) : 0);
     }
 
     public void setProgress2(int percent)
@@ -112,7 +113,7 @@ public class MultiProgressDialog extends AlertDialog
     }
     public void setProgress2(long value, long total)
     {
-        setProgress2((int)((value / (float)total) * 100));
+        setProgress2(total != 0 ? (int)((value / (float)total) * 100) : 0);
     }
 
     public void setMessage(CharSequence message)

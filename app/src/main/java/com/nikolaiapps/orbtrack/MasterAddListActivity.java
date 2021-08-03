@@ -565,6 +565,13 @@ public class MasterAddListActivity extends BaseInputActivity
     //Creates local broadcast receiver
     private BroadcastReceiver createLocalBroadcastReceiver(BroadcastReceiver oldReceiver, final MultiProgressDialog taskProgress, final MasterListAdapter.ListItem[] selectedItems)
     {
+        final Resources res = this.getResources();
+        final String overallString = res.getString(R.string.title_overall);
+        final String savingString = res.getString(R.string.title_saving);
+        final String loadingString = res.getString(R.string.title_loading);
+        final String gettingString = res.getString(R.string.title_getting);
+        final String spaceOfSpaceString = res.getString(R.string.text_space_of_space);
+
         //if old receiver is set
         if(oldReceiver != null)
         {
@@ -584,8 +591,8 @@ public class MasterAddListActivity extends BaseInputActivity
                 final int progressType = intent.getIntExtra(UpdateService.ParamTypes.ProgressType, Byte.MAX_VALUE);
                 final long updateIndex = intent.getLongExtra(UpdateService.ParamTypes.Index, 0);
                 final long updateCount = intent.getLongExtra(UpdateService.ParamTypes.Count, 0);
+                final int overall = (int)intent.getLongExtra(UpdateService.ParamTypes.SubIndex, -1);
                 long updateValue = -1;
-                final Resources res = MasterAddListActivity.this.getResources();
                 String section = intent.getStringExtra(UpdateService.ParamTypes.Section);
                 String message = "";
                 boolean isDownload = (messageType == NotifyService.MessageTypes.Download);
@@ -612,7 +619,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                 {
                                     //update progress
                                     updateValue = updateIndex + 1;
-                                    taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount + " (" + selectedItems[(int)updateIndex].satellite.name + ")");
+                                    taskProgress.setMessage(updateValue + spaceOfSpaceString + updateCount + " (" + selectedItems[(int)updateIndex].satellite.name + ")");
                                     taskProgress.setProgress(updateValue, updateCount);
                                 }
                                 break;
@@ -685,7 +692,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                 if(section != null)
                                 {
                                     //update progress
-                                    taskProgress.setMessage((messageType == UpdateService.MessageTypes.Save ? (res.getString(R.string.title_saving) + " ") : messageType == UpdateService.MessageTypes.Load ? (res.getString(R.string.title_loading) + " ") :  !isDownload ? (res.getString(R.string.title_getting) + " ") : "") + section);
+                                    taskProgress.setMessage((messageType == UpdateService.MessageTypes.Save ? (savingString + " ") : messageType == UpdateService.MessageTypes.Load ? (loadingString + " ") :  !isDownload ? (gettingString + " ") : "") + section);
                                 }
                                 break;
 
@@ -699,7 +706,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                         case UpdateService.MessageTypes.Save:
                                         case UpdateService.MessageTypes.Load:
                                             updateValue = updateIndex + 1;
-                                            message = (updateValue + res.getString(R.string.text_space_of_space) + updateCount);
+                                            message = (updateValue + spaceOfSpaceString + updateCount);
                                             break;
 
                                         case NotifyService.MessageTypes.LoadPercent:
@@ -737,6 +744,11 @@ public class MasterAddListActivity extends BaseInputActivity
                                 {
                                     taskProgress.setProgress(updateValue, updateCount);
                                 }
+                                if(overall >= 0)
+                                {
+                                    taskProgress.setMessage2(overallString);
+                                    taskProgress.setProgress2(overall);
+                                }
                                 break;
 
                             case Globals.ProgressType.Finished:
@@ -746,8 +758,8 @@ public class MasterAddListActivity extends BaseInputActivity
                                 {
                                     //get master list
                                     masterList = UpdateService.getMasterList();
+                                    final boolean ranUpdate = masterList.justUpdated;
                                     final String title = res.getQuantityString(R.plurals.title_satellites, 2);
-                                    final String separator = res.getString(R.string.text_space_of_space);
                                     final ArrayList<String> usedCategories = masterList.usedCategories;
                                     final ArrayList<UpdateService.MasterOwner> usedOwners = masterList.usedOwners;
 
@@ -769,8 +781,17 @@ public class MasterAddListActivity extends BaseInputActivity
                                                             @Override
                                                             public void run()
                                                             {
-                                                                taskProgress.setMessage(title + " (" + (updateIndex + 1) + separator + updateCount + ")");
+                                                                //update progress
+                                                                taskProgress.setMessage(title + " (" + (updateIndex + 1) + spaceOfSpaceString + updateCount + ")");
                                                                 taskProgress.setProgress(updateIndex + 1, updateCount);
+
+                                                                //if ran update
+                                                                if(ranUpdate)
+                                                                {
+                                                                    //update progress (90 - 100%)
+                                                                    taskProgress.setMessage2(overallString);
+                                                                    taskProgress.setProgress2(90 + (int)((updateIndex + 1) / (float)updateCount) * 10);
+                                                                }
                                                             }
                                                         });
                                                     }

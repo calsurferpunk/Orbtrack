@@ -473,7 +473,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             //get account and credential
             GoogleSignInAccount driveAccount = Globals.getGoogleDriveAccount(currentContext);
             Account googleAccount = (driveAccount != null ? driveAccount.getAccount() : null);
-            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(currentContext, Arrays.asList(DriveScopes.DRIVE_READONLY, DriveScopes.DRIVE_FILE));
+            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(currentContext, Arrays.asList(/*DriveScopes.DRIVE_READONLY,*/ DriveScopes.DRIVE_FILE));
 
             //if account is set
             if(googleAccount != null)

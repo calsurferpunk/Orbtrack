@@ -1292,7 +1292,7 @@ public abstract class Globals
     public static GoogleSignInAccount getGoogleDriveAccount(Context context)
     {
         GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(context);
-        List<Scope> requiredScopes = Arrays.asList(new Scope(DriveScopes.DRIVE_READONLY), new Scope(DriveScopes.DRIVE_FILE));
+        List<Scope> requiredScopes = Arrays.asList(/*new Scope(DriveScopes.DRIVE_READONLY),*/ new Scope(DriveScopes.DRIVE_FILE));
 
         //have access if account is set and have permissions
         return((signInAccount != null && signInAccount.getGrantedScopes().containsAll(requiredScopes)) ? signInAccount : null);

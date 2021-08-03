@@ -1605,13 +1605,13 @@ public class UpdateService extends NotifyService
         urls.add("https://www.space-track.org/basicspacedata/query/class/boxscore/orderby/COUNTRY%20asc/metadata/false");
         section = res.getString(R.string.title_owners);
         sections.add(section);
-        listeners.add(createMasterListProgressListener(MessageTypes.Download, section, 10));
+        listeners.add(createMasterListProgressListener(MessageTypes.Download, section, 10));        //10%
 
         //add catalog urls and listeners
         urls.add("https://www.space-track.org/basicspacedata/query/class/satcat/DECAY/null-val/" + (!loadDebris ? "OBJECT_TYPE/%3C%3EDEBRIS/" : "") + "orderby/NORAD_CAT_ID%20asc/metadata/false");
         section = res.getString(R.string.title_satellites);
         sections.add(section);
-        listeners.add(createMasterListProgressListener(MessageTypes.Download, section, 20));
+        listeners.add(createMasterListProgressListener(MessageTypes.Download, section, 20));        //20%
 
         //add category urls and listeners
         for(index = 0; index < SpaceTrackCategory.urls.length; index++)
@@ -1619,7 +1619,7 @@ public class UpdateService extends NotifyService
             urls.add("https://www.space-track.org/basicspacedata/query/class/satcat/CURRENT/Y/favorites/" + SpaceTrackCategory.urls[index] + "/orderby/NORAD_CAT_ID/format/csv/emptyresult/show");
             localeNames[index] = Database.LocaleCategory.getCategory(res, SpaceTrackCategory.nameValues[index]);
             sections.add(SpaceTrackCategory.nameValues[index]);
-            listeners.add(createMasterListProgressListener(MessageTypes.Download, localeNames[index], 30));
+            listeners.add(createMasterListProgressListener(MessageTypes.Download, localeNames[index], 30 + (int)(((index + 1) / (float)SpaceTrackCategory.urls.length) * 35)));     //30 - 65%
         }
 
         //get pages
@@ -1678,8 +1678,8 @@ public class UpdateService extends NotifyService
                     }
                 }
 
-                //update status
-                sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, sections.get(index), index, pages.length, Globals.ProgressType.Success);
+                //update status (65 - 75%)
+                sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, sections.get(index), index, pages.length, 65 + (int)((index + 1) / (float)pages.length * 10), Globals.ProgressType.Success);
             }
         }
 
@@ -2097,7 +2097,7 @@ public class UpdateService extends NotifyService
                 //go through page while not cancelled
                 do
                 {
-                    //update progress message (overall - overall +25%)
+                    //update celestrak progress message (overall - overall +25%)
                     sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (updateSource == Database.UpdateSource.Celestrak ? (overall + (int)((pageOffset / (float)receivedPageLength) * 25)) : 0), Globals.ProgressType.Success);
 
                     //find next txt file row start while not cancelled

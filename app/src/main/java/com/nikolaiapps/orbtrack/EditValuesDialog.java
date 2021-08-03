@@ -436,32 +436,28 @@ public class EditValuesDialog
                         currentStringId = (list2SubValues != null && index < list2SubValues.length ? Integer.parseInt(list2SubValues[index]) : -1);
                         if(currentId == R.drawable.ic_launcher && currentStringId != -1)
                         {
-                            switch(currentStringId)
+                            if(currentStringId == R.string.title_name)
                             {
-                                case R.string.title_name:
-                                    currentText = " abc ";
-                                    break;
-
-                                case R.string.title_pass_start:
-                                    currentText = Globals.Symbols.Up;
-                                    break;
-
-                                case R.string.title_pass_elevation:
-                                case R.string.title_altitude:
-                                    currentText = Globals.Symbols.Elevating;
-                                    break;
+                                currentText = " abc ";
                             }
+                            else if(currentStringId == R.string.title_pass_start)
+                            {
+                                currentText = Globals.Symbols.Up;
+                            }
+                            else if(currentStringId == R.string.title_pass_elevation || currentStringId == R.string.title_altitude)
+                            {
+                                currentText = Globals.Symbols.Elevating;
+                            }
+
                             currentIcon = Globals.getDrawable(currentContext, currentText, 16, (darkTheme ? Color.WHITE : Color.BLACK), Color.TRANSPARENT);
                         }
                         else
                         {
-                            switch(currentStringId)
+                            if(currentStringId == R.string.title_elevation || currentStringId == R.string.title_latitude)
                             {
-                                case R.string.title_elevation:
-                                case R.string.title_latitude:
-                                    rotate = 90;
-                                    break;
+                                rotate = 90;
                             }
+
                             currentIcon = Globals.getDrawable(currentContext, currentId, (!isLogin && currentId != R.drawable.org_gdrive && currentId != R.drawable.org_dbox));
                         }
 

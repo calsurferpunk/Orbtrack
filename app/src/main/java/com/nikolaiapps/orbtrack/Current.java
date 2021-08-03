@@ -356,30 +356,29 @@ public abstract class Current
 
         public static int getSortByImageId(int stringId)
         {
-            switch(stringId)
+            if(stringId == R.string.title_azimuth)
             {
-                case R.string.title_azimuth:
-                    return(R.drawable.compass_black_white);
-
-                case R.string.title_elevation:
-                    return(R.drawable.ic_arrow_back_white);
-
-                case R.string.title_range:
-                    return(R.drawable.distance);
-
-                case R.string.title_pass_duration:
-                    return(R.drawable.ic_timer_black);
-
-                case R.string.title_latitude:
-                case R.string.title_longitude:
-                    return(R.drawable.earth_vertical_lines);
-
-                default:
-                case R.string.title_name:
-                case R.string.title_pass_elevation:
-                case R.string.title_pass_start:
-                case R.string.title_altitude:
-                    return(R.drawable.ic_launcher);
+                return(R.drawable.compass_black_white);
+            }
+            else if(stringId == R.string.title_elevation)
+            {
+                return(R.drawable.ic_arrow_back_white);
+            }
+            else if(stringId == R.string.title_range)
+            {
+                return(R.drawable.distance);
+            }
+            else if(stringId == R.string.title_pass_duration)
+            {
+                return(R.drawable.ic_timer_black);
+            }
+            else if(stringId == R.string.title_latitude || stringId == R.string.title_longitude)
+            {
+                return(R.drawable.earth_vertical_lines);
+            }
+            else    //R.string.title_name, R.string.title_pass_elevation, R.string.title_pass_start, or R.string.title_altitude
+            {
+                return(R.drawable.ic_launcher);
             }
         }
 

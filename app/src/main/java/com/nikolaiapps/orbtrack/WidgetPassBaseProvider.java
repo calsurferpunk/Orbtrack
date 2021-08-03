@@ -382,16 +382,12 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             borderType = WidgetBaseSetupActivity.getBorderType(context, widgetId);
             argbColor = WidgetBaseSetupActivity.getGlobalBackgroundColor(context, widgetId);
         }
-        else
+        //else if widget pass border
+        else if(viewId == R.id.Widget_Pass_Border)
         {
-            //handle based on view
-            switch(viewId)
-            {
-                case R.id.Widget_Pass_Border:
-                    borderType = WidgetBaseSetupActivity.getBorderType(context, widgetId);
-                    argbColor = WidgetBaseSetupActivity.getBorderColor(context, widgetId);
-                    break;
-            }
+            //get pass border and color
+            borderType = WidgetBaseSetupActivity.getBorderType(context, widgetId);
+            argbColor = WidgetBaseSetupActivity.getBorderColor(context, widgetId);
         }
 
         //get border color and opacity
@@ -437,25 +433,23 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //get global background color
             color = WidgetBaseSetupActivity.getGlobalBackgroundColor(context, widgetId);
         }
-        else
+        //else if pass top layout
+        else if(viewId == R.id.Widget_Pass_Top_Layout)
         {
-            //handle base on view
-            switch(viewId)
-            {
-                case R.id.Widget_Pass_Top_Layout:
-                    color = WidgetBaseSetupActivity.getTopBackgroundColor(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Tiny_Middle_Layout:
-                case R.id.Widget_Pass_Middle_Layout:
-                    color = WidgetBaseSetupActivity.getMiddleBackgroundColor(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Bottom_Layout:
-                case R.id.Widget_Pass_Outdated_Text:
-                    color = WidgetBaseSetupActivity.getBottomBackgroundColor(context, widgetId);
-                    break;
-            }
+            //get top color
+            color = WidgetBaseSetupActivity.getTopBackgroundColor(context, widgetId);
+        }
+        //else if pass middle layout
+        else if(viewId == R.id.Widget_Pass_Tiny_Middle_Layout || viewId == R.id.Widget_Pass_Middle_Layout)
+        {
+            //get middle color
+            color = WidgetBaseSetupActivity.getMiddleBackgroundColor(context, widgetId);
+        }
+        //else if pass bottom layout
+        else if(viewId == R.id.Widget_Pass_Bottom_Layout || viewId == R.id.Widget_Pass_Outdated_Text)
+        {
+            //get bottom color
+            color = WidgetBaseSetupActivity.getBottomBackgroundColor(context, widgetId);
         }
 
         //set background color
@@ -496,58 +490,53 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         else
         {
             //handle based on view
-            switch(viewId)
+            if(viewId == R.id.Widget_Pass_Name_Text)
             {
-                case R.id.Widget_Pass_Name_Text:
-                    size = WidgetBaseSetupActivity.getOrbitalTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getOrbitalTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getOrbitalTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Start_Text:
-                case R.id.Widget_Pass_Start_Direction_Text:
-                case R.id.Widget_Pass_Start_Time_Text:
-                    size = WidgetBaseSetupActivity.getPassStartTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getPassStartTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getPassStartTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_End_Text:
-                    size = WidgetBaseSetupActivity.getPassEndTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getPassEndTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getPassEndTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_El_Max_Text:
-                    size = WidgetBaseSetupActivity.getPassElevationTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getPassElevationTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getPassElevationTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Az_Start_Text:
-                    size = WidgetBaseSetupActivity.getPassAzimuthStartTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getPassAzimuthStartTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getPassAzimuthStartTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Az_End_Text:
-                    size = WidgetBaseSetupActivity.getPassAzimuthEndTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getPassAzimuthEndTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getPassAzimuthEndTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Duration_Text:
-                    size = WidgetBaseSetupActivity.getPassDurationTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getPassDurationTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getPassDurationTextWeight(context, widgetId);
-                    break;
-
-                case R.id.Widget_Pass_Location_Text:
-                case R.id.Widget_Pass_Outdated_Text:
-                    size = WidgetBaseSetupActivity.getLocationTextSize(context, widgetClass, widgetId);
-                    color = WidgetBaseSetupActivity.getLocationTextColor(context, widgetId);
-                    weight = WidgetBaseSetupActivity.getLocationTextWeight(context, widgetId);
-                    break;
+                size = WidgetBaseSetupActivity.getOrbitalTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getOrbitalTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getOrbitalTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_Start_Text || viewId == R.id.Widget_Pass_Start_Direction_Text || viewId == R.id.Widget_Pass_Start_Time_Text)
+            {
+                size = WidgetBaseSetupActivity.getPassStartTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getPassStartTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getPassStartTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_End_Text)
+            {
+                size = WidgetBaseSetupActivity.getPassEndTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getPassEndTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getPassEndTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_El_Max_Text)
+            {
+                size = WidgetBaseSetupActivity.getPassElevationTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getPassElevationTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getPassElevationTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_Az_Start_Text)
+            {
+                size = WidgetBaseSetupActivity.getPassAzimuthStartTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getPassAzimuthStartTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getPassAzimuthStartTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_Az_End_Text)
+            {
+                size = WidgetBaseSetupActivity.getPassAzimuthEndTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getPassAzimuthEndTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getPassAzimuthEndTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_Duration_Text)
+            {
+                size = WidgetBaseSetupActivity.getPassDurationTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getPassDurationTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getPassDurationTextWeight(context, widgetId);
+            }
+            else if(viewId == R.id.Widget_Pass_Location_Text || viewId == R.id.Widget_Pass_Outdated_Text)
+            {
+                size = WidgetBaseSetupActivity.getLocationTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getLocationTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getLocationTextWeight(context, widgetId);
             }
         }
 

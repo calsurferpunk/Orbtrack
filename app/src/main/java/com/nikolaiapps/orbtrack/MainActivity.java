@@ -847,10 +847,113 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //handle item
-        switch(id)
+        if(id == R.id.menu_list || id == R.id.menu_grid)
         {
-            case R.id.menu_list:
-            case R.id.menu_grid:
+            switch(mainGroup)
+            {
+                case Groups.Current:
+                    switch(page)
+                    {
+                        case Current.PageType.View:
+                        case Current.PageType.Passes:
+                        case Current.PageType.Coordinates:
+                        case Current.PageType.Combined:
+                            //if --using grid and list menu or- -not using grid and grid menu-- and on list
+                            if(((usingGrid && id == R.id.menu_list) || (!usingGrid && id == R.id.menu_grid)) && currentSubPage[page] == Globals.SubPageType.List)
+                            {
+                                //stop using grid
+                                Settings.setUsingCurrentGridLayout(this, (id == R.id.menu_grid));
+                            }
+                            else
+                            {
+                                //set sub page
+                                setSubPage(Groups.Current, page, Globals.SubPageType.List);
+                            }
+
+                            //update display
+                            setDisplayGroup = true;
+                            break;
+                    }
+                    break;
+
+                case Groups.Calculate:
+                    switch(page)
+                    {
+                        case Calculate.PageType.View:
+                        case Calculate.PageType.Passes:
+                        case Calculate.PageType.Coordinates:
+                        case Calculate.PageType.Intersection:
+                            setSubPage(Groups.Calculate, page, Globals.SubPageType.List);
+                            setDisplayGroup = true;
+                            break;
+                    }
+                    break;
+            }
+        }
+        else if(id == R.id.menu_map || id == R.id.menu_globe)
+        {
+            //if not waiting on a location update
+            if(!pendingLocationUpdate)
+            {
+                usingGlobe = (id == R.id.menu_globe);
+
+                switch(mainGroup)
+                {
+                    case Groups.Current:
+                        switch(page)
+                        {
+                            case Current.PageType.Coordinates:
+                            case Current.PageType.Combined:
+                                //remember previous ID and page
+                                previousId = mapViewNoradID;
+                                previousSubPage = currentSubPage[page];
+
+                                //update sub page
+                                setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
+                                selectedSubPage = currentSubPage[page];
+
+                                //if switching between globe/map
+                                if((previousSubPage == Globals.SubPageType.Map && selectedSubPage == Globals.SubPageType.Globe) || (previousSubPage == Globals.SubPageType.Globe && selectedSubPage == Globals.SubPageType.Map))
+                                {
+                                    //restore ID
+                                    mapViewNoradID = previousId;
+                                }
+
+                                //update default display
+                                Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
+
+                                //continue updating
+                                setDisplayGroup = true;
+                                break;
+                        }
+                        break;
+
+                    case Groups.Calculate:
+                        if(page == Current.PageType.Coordinates)
+                        {
+                            //update sub page
+                            setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
+
+                            //update default display
+                            Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
+
+                            //continue updating
+                            setDisplayGroup = true;
+                        }
+                        break;
+                }
+            }
+            else
+            {
+                //show pending location display
+                showLocationGettingDisplay();
+            }
+        }
+        else if(id == R.id.menu_lens)
+        {
+            //if not waiting on a location update
+            if(!pendingLocationUpdate)
+            {
                 switch(mainGroup)
                 {
                     case Groups.Current:
@@ -858,21 +961,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             case Current.PageType.View:
                             case Current.PageType.Passes:
-                            case Current.PageType.Coordinates:
                             case Current.PageType.Combined:
-                                //if --using grid and list menu or- -not using grid and grid menu-- and on list
-                                if(((usingGrid && id == R.id.menu_list) || (!usingGrid && id == R.id.menu_grid)) && currentSubPage[page] == Globals.SubPageType.List)
-                                {
-                                    //stop using grid
-                                    Settings.setUsingCurrentGridLayout(this, (id == R.id.menu_grid));
-                                }
-                                else
-                                {
-                                    //set sub page
-                                    setSubPage(Groups.Current, page, Globals.SubPageType.List);
-                                }
-
-                                //update display
+                                setSubPage(mainGroup, page, Globals.SubPageType.Lens);
                                 setDisplayGroup = true;
                                 break;
                         }
@@ -883,185 +973,87 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             case Calculate.PageType.View:
                             case Calculate.PageType.Passes:
-                            case Calculate.PageType.Coordinates:
                             case Calculate.PageType.Intersection:
-                                setSubPage(Groups.Calculate, page, Globals.SubPageType.List);
+                                setSubPage(mainGroup, page, Globals.SubPageType.Lens);
                                 setDisplayGroup = true;
                                 break;
                         }
                         break;
                 }
-                break;
-
-            case R.id.menu_map:
-            case R.id.menu_globe:
-                //if not waiting on a location update
-                if(!pendingLocationUpdate)
+            }
+            else
+            {
+                //show pending location display
+                showLocationGettingDisplay();
+            }
+        }
+        else if(id == R.id.menu_filter)
+        {
+            if(mainGroup == Groups.Current)
+            {
+                showFilterDialog();
+            }
+        }
+        else if(id == R.id.menu_settings)
+        {
+            if(mainGroup == Groups.Current)
+            {
+                showSettingsDialog();
+            }
+        }
+        else if(id == R.id.menu_update)
+        {
+            if(mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)
+            {
+                showConfirmUpdateDialog();
+            }
+        }
+        else if(id == R.id.menu_edit)
+        {
+            if(mainGroup == Groups.Calculate)
+            {
+                switch(page)
                 {
-                    usingGlobe = (id == R.id.menu_globe);
+                    case Calculate.PageType.View:
+                    case Calculate.PageType.Passes:
+                    case Calculate.PageType.Coordinates:
+                    case Calculate.PageType.Intersection:
+                        //stop any running task on page
+                        stopPageTask();
 
-                    switch(mainGroup)
-                    {
-                        case Groups.Current:
-                            switch(page)
-                            {
-                                case Current.PageType.Coordinates:
-                                case Current.PageType.Combined:
-                                    //remember previous ID and page
-                                    previousId = mapViewNoradID;
-                                    previousSubPage = currentSubPage[page];
+                        //update sub page
+                        setSubPage(Groups.Calculate, page, Globals.SubPageType.Input);
 
-                                    //update sub page
-                                    setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
-                                    selectedSubPage = currentSubPage[page];
-
-                                    //if switching between globe/map
-                                    if((previousSubPage == Globals.SubPageType.Map && selectedSubPage == Globals.SubPageType.Globe) || (previousSubPage == Globals.SubPageType.Globe && selectedSubPage == Globals.SubPageType.Map))
-                                    {
-                                        //restore ID
-                                        mapViewNoradID = previousId;
-                                    }
-
-                                    //update default display
-                                    Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
-
-                                    //continue updating
-                                    setDisplayGroup = true;
-                                    break;
-                            }
-                            break;
-
-                        case Groups.Calculate:
-                            switch(page)
-                            {
-                                case Current.PageType.Coordinates:
-                                    //update sub page
-                                    setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
-
-                                    //update default display
-                                    Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
-
-                                    //continue updating
-                                    setDisplayGroup = true;
-                                    break;
-                            }
-                            break;
-                    }
+                        //update display
+                        updateMainPager(false);
+                        updateOptionsMenu();
+                        break;
                 }
-                else
-                {
-                    //show pending location display
-                    showLocationGettingDisplay();
-                }
-                break;
-
-            case R.id.menu_lens:
-                //if not waiting on a location update
-                if(!pendingLocationUpdate)
-                {
-                    switch(mainGroup)
-                    {
-                        case Groups.Current:
-                            switch(page)
-                            {
-                                case Current.PageType.View:
-                                case Current.PageType.Passes:
-                                case Current.PageType.Combined:
-                                    setSubPage(mainGroup, page, Globals.SubPageType.Lens);
-                                    setDisplayGroup = true;
-                                    break;
-                            }
-                            break;
-
-                        case Groups.Calculate:
-                            switch(page)
-                            {
-                                case Calculate.PageType.View:
-                                case Calculate.PageType.Passes:
-                                case Calculate.PageType.Intersection:
-                                    setSubPage(mainGroup, page, Globals.SubPageType.Lens);
-                                    setDisplayGroup = true;
-                                    break;
-                            }
-                            break;
-                    }
-                }
-                else
-                {
-                    //show pending location display
-                    showLocationGettingDisplay();
-                }
-                break;
-
-            case R.id.menu_filter:
-                if(mainGroup == Groups.Current)
-                {
-                    showFilterDialog();
-                }
-                break;
-
-            case R.id.menu_settings:
-                if(mainGroup == Groups.Current)
-                {
-                    showSettingsDialog();
-                }
-                break;
-
-            case R.id.menu_update:
-                if(mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites)
-                {
-                    showConfirmUpdateDialog();
-                }
-                break;
-
-            case R.id.menu_edit:
-                if(mainGroup == Groups.Calculate)
-                {
+            }
+        }
+        else if(id == R.id.menu_save)
+        {
+            switch(mainGroup)
+            {
+                case Groups.Calculate:
                     switch(page)
                     {
                         case Calculate.PageType.View:
                         case Calculate.PageType.Passes:
                         case Calculate.PageType.Coordinates:
                         case Calculate.PageType.Intersection:
-                            //stop any running task on page
-                            stopPageTask();
-
-                            //update sub page
-                            setSubPage(Groups.Calculate, page, Globals.SubPageType.Input);
-
-                            //update display
-                            updateMainPager(false);
-                            updateOptionsMenu();
+                            showSaveCalculatePageFileDialog(page);
                             break;
                     }
-                }
-                break;
+                    break;
 
-            case R.id.menu_save:
-                switch(mainGroup)
-                {
-                    case Groups.Calculate:
-                        switch(page)
-                        {
-                            case Calculate.PageType.View:
-                            case Calculate.PageType.Passes:
-                            case Calculate.PageType.Coordinates:
-                            case Calculate.PageType.Intersection:
-                                showSaveCalculatePageFileDialog(page);
-                                break;
-                        }
-                        break;
-
-                    case Groups.Orbitals:
-                        switch(page)
-                        {
-                            case Orbitals.PageType.Satellites:
-                                showSaveSatellitesFileDialog();
-                                break;
-                        }
-                        break;
-                }
-                break;
+                case Groups.Orbitals:
+                    if(page == Orbitals.PageType.Satellites)
+                    {
+                        showSaveSatellitesFileDialog();
+                    }
+                    break;
+            }
         }
 
         //if setting display group

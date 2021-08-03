@@ -1586,19 +1586,17 @@ public abstract class Selectable
             int id = item.getItemId();
 
             //handle item
-            switch(id)
+            if(id == R.id.menu_delete)
             {
-                case R.id.menu_delete:
-                    onActionModeDelete();
-                    break;
-
-                case R.id.menu_save:
-                    onActionModeSave();
-                    break;
-
-                case R.id.menu_update:
-                    onActionModeSync();
-                    break;
+                onActionModeDelete();
+            }
+            else if(id == R.id.menu_save)
+            {
+                onActionModeSave();
+            }
+            else if(id == R.id.menu_update)
+            {
+                onActionModeSync();
             }
 
             return(true);

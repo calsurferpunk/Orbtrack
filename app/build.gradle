@@ -27,6 +27,12 @@ android {
             renderscriptDebuggable false
         }
     }
+    configurations {
+        all {
+            exclude module: 'commons-logging'
+            exclude module: 'httpclient'
+        }
+    }
     productFlavors {
     }
 

@@ -1,15 +1,6 @@
 apply plugin: 'com.android.application'
 
 android {
-    signingConfigs {
-        config {
-            keyAlias 'key0'
-            keyPassword 'foofoo'
-            storeFile file('/home/james/.android/foo.keystore')
-            storePassword 'foofoo'
-        }
-    }
-
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
@@ -28,12 +19,12 @@ android {
     }
     buildTypes {
         debug {
-            signingConfig signingConfigs.config
             jniDebuggable true
             renderscriptDebuggable true
         }
         release {
-            signingConfig signingConfigs.config
+            jniDebuggable false
+            renderscriptDebuggable false
         }
     }
     productFlavors {

@@ -19,6 +19,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.googleapis.media.MediaHttpDownloader;
 import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
@@ -473,14 +474,14 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             //get account and credential
             GoogleSignInAccount driveAccount = Globals.getGoogleDriveAccount(currentContext);
             Account googleAccount = (driveAccount != null ? driveAccount.getAccount() : null);
-            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(currentContext, Arrays.asList(/*DriveScopes.DRIVE_READONLY,*/ DriveScopes.DRIVE_FILE));
+            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(currentContext, Arrays.asList(DriveScopes.DRIVE_READONLY, DriveScopes.DRIVE_FILE));
 
             //if account is set
             if(googleAccount != null)
             {
                 //setup service
                 credential.setSelectedAccount(googleAccount);
-                driveClient = new Drive.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), credential).build();
+                driveClient = new Drive.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), credential).setApplicationName("com.nikolaiapps.orbtrack").build();
 
                 try
                 {
@@ -488,10 +489,24 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                     driveClient.files().get("root").setFields("id").execute();
                     taskResult = FileBrowserBaseActivity.ResultCode.Success;
                 }
+                catch(UserRecoverableAuthIOException authEx)
+                {
+                    //retry login later
+                    driveClient = null;
+                }
                 catch(Exception ex)
                 {
-                    //retry later
-                    driveClient = null;
+                    try
+                    {
+                        //test for a basic file listing
+                        driveClient.files().list();
+                        taskResult = FileBrowserBaseActivity.ResultCode.Success;
+                    }
+                    catch(Exception subEx)
+                    {
+                        //retry later
+                        driveClient = null;
+                    }
                 }
             }
 

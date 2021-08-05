@@ -344,6 +344,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     case Current.PageType.View:
                     case Current.PageType.Passes:
+                    case Current.PageType.Combined:
                         restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
                         break;
                 }

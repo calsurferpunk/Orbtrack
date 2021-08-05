@@ -150,6 +150,7 @@ public class AddressUpdateService extends NotifyService
             try
             {
                 //get results
+                //noinspection SpellCheckingInspection
                 resultsObject = Globals.getJSONWebPage("https://maps.googleapis.com/maps/api/geocode/json?key=" + res.getString(R.string.google_geocoding_api_web_key) + "&latlng=" + latitude + "," + longitude);
                 if(resultsObject != null)
                 {

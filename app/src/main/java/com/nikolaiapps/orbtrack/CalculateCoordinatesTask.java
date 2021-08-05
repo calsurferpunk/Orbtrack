@@ -3,9 +3,6 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.content.res.Resources;
-import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -16,18 +13,6 @@ import java.util.Calendar;
 //Task to calculate coordinate information
 public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Integer[]>
 {
-    @SuppressWarnings("SpellCheckingInspection")
-    private static abstract class ParamTypes
-    {
-        static final String Index = "index";
-        static final String Latitude = "lat";
-        static final String Longitude = "lon";
-        static final String Altitude = "alt";
-        static final String Illumination = "illum";
-        static final String SpeedKms = "speedKms";
-        static final String PhaseName = "pn";
-    }
-
     public static class CoordinateBase
     {
         public final Calculations.SatelliteObjectType satellite;
@@ -41,7 +26,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         }
     }
 
-    public static class CoordinateItemBase extends Selectable.ListItem implements Parcelable
+    public static class CoordinateItemBase extends Selectable.ListItem
     {
         public boolean isLoading;
         public float latitude;
@@ -55,42 +40,22 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         public TextView altitudeText;
         public LinearLayout progressGroup;
         public LinearLayout dataGroup;
-        public static final Creator<CoordinateItemBase> CREATOR =  new Parcelable.Creator<CoordinateItemBase>()
-        {
-            @Override
-            public CoordinateItemBase createFromParcel(Parcel source)
-            {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
 
-                return(new CoordinateItemBase(bundle.getInt(ParamTypes.Index), bundle.getFloat(ParamTypes.Latitude), bundle.getFloat(ParamTypes.Longitude), bundle.getFloat(ParamTypes.Altitude), bundle.getDouble(ParamTypes.Illumination), bundle.getDouble(ParamTypes.SpeedKms), bundle.getString(ParamTypes.PhaseName)));
-            }
-
-            @Override
-            public CoordinateItemBase[] newArray(int size)
-            {
-                return(new CoordinateItemBase[size]);
-            }
-        };
-
-        private CoordinateItemBase(int index, float lat, float lon, float altKm, double illum, double spdKms, String pn)
+        private CoordinateItemBase(int index, float latitude, float longitude, float altitudeKm, double illumination, double speedKms, String phaseName)
         {
             super(Integer.MAX_VALUE, index, false, false, false, false);
-            isLoading = false;
-            latitude = lat;
-            longitude = lon;
-            altitudeKm = altKm;
-            illumination = illum;
-            speedKms = spdKms;
-            phaseName = pn;
-            latitudeText = null;
-            longitudeText = null;
-            altitudeText = null;
-            progressGroup = null;
-            dataGroup = null;
+            this.isLoading = false;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.altitudeKm = altitudeKm;
+            this.illumination = illumination;
+            this.speedKms = speedKms;
+            this.phaseName = phaseName;
+            this.latitudeText = null;
+            this.longitudeText = null;
+            this.altitudeText = null;
+            this.progressGroup = null;
+            this.dataGroup = null;
         }
         public CoordinateItemBase(int index, float lat, float lon, float alt)
         {
@@ -99,28 +64,6 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         public CoordinateItemBase(int index)
         {
             this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 0, Double.MAX_VALUE, null);
-        }
-
-        @Override
-        public int describeContents()
-        {
-            return(0);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags)
-        {
-            Bundle bundle = new Bundle();
-
-            bundle.putInt(ParamTypes.Index, listIndex);
-            bundle.putFloat(ParamTypes.Latitude, latitude);
-            bundle.putFloat(ParamTypes.Longitude, longitude);
-            bundle.putFloat(ParamTypes.Altitude, altitudeKm);
-            bundle.putDouble(ParamTypes.Illumination, illumination);
-            bundle.putDouble(ParamTypes.SpeedKms, speedKms);
-            bundle.putString(ParamTypes.PhaseName, phaseName);
-
-            dest.writeBundle(bundle);
         }
 
         public boolean equals(CoordinateItemBase otherItem)
@@ -168,7 +111,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
     //Progress listener
     public interface OnProgressChangedListener
     {
-        void onProgressChanged(int index, int progressType, ArrayList<OrbitalCoordinate> coordinates);
+        void onProgressChanged(int progressType, ArrayList<OrbitalCoordinate> coordinates);
     }
 
     //Coordinate information at time
@@ -179,15 +122,15 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         public final Calendar time;
         public final String phaseName;
 
-        public OrbitalCoordinate(Calculations.GeodeticDataType geoData, double jd, double illum, String pn)
+        public OrbitalCoordinate(Calculations.GeodeticDataType geoData, double julianDate, double illumination, String phaseName)
         {
-            latitude = geoData.latitude;
-            longitude = geoData.longitude;
-            altitudeKm = geoData.altitudeKm;
-            julianDate = jd;
-            illumination = illum;
-            phaseName = pn;
-            time = Globals.julianDateToCalendar(julianDate);
+            this.latitude = geoData.latitude;
+            this.longitude = geoData.longitude;
+            this.altitudeKm = geoData.altitudeKm;
+            this.julianDate = julianDate;
+            this.illumination = illumination;
+            this.phaseName = phaseName;
+            this.time = Globals.julianDateToCalendar(this.julianDate);
         }
     }
 
@@ -209,8 +152,8 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         final boolean isMoon = (currentPath.satellite.getSatelliteNum() == Universe.IDs.Moon);
         String phaseName = null;
         Calculations.GeodeticDataType geoData;
-        Calculations.TopographicDataType oldTopoData;
-        Calculations.TopographicDataType currentTopoData;
+        Calculations.TopographicDataType oldTopographicData;
+        Calculations.TopographicDataType currentTopographicData;
         Calculations.SatelliteObjectType coordinateSatellite = new Calculations.SatelliteObjectType(currentPath.satellite);
         ArrayList<OrbitalCoordinate> coordinates = new ArrayList<>(0);
 
@@ -253,14 +196,14 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
                 else if(isSun)
                 {
                     //get current angles
-                    currentTopoData = Calculations.getLookAngles(observer, coordinateSatellite, true);
+                    currentTopographicData = Calculations.getLookAngles(observer, coordinateSatellite, true);
 
                     //get old angles
                     Calculations.updateOrbitalPosition(coordinateSatellite, observer, coordinateJulianDate - beforeDayIncrement, false);
-                    oldTopoData = Calculations.getLookAngles(observer, coordinateSatellite, true);
+                    oldTopographicData = Calculations.getLookAngles(observer, coordinateSatellite, true);
 
                     //get phase name
-                    phaseName = Universe.Sun.getPhaseName(context, currentTopoData.elevation, (currentTopoData.elevation > oldTopoData.elevation));
+                    phaseName = Universe.Sun.getPhaseName(context, currentTopographicData.elevation, (currentTopographicData.elevation > oldTopographicData.elevation));
                 }
 
             }
@@ -297,7 +240,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         Current.Coordinates.Item[] savedCoordinateItems = (Current.Coordinates.Item[])params[2];
 
         //update progress
-        onProgressChanged(0, Globals.ProgressType.Started, null);
+        onProgressChanged(Globals.ProgressType.Started, null);
 
         //go through each orbital while not cancelled
         for(index = 0; index < orbitalCoordinates.length && !this.isCancelled(); index++)
@@ -317,7 +260,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             coordinates = getCoordinates(context, currentPath, savedCoordinateItems, observer, dayIncrement);
 
             //update progress
-            onProgressChanged(index, (!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), coordinates);
+            onProgressChanged((!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), coordinates);
         }
 
         //update status
@@ -328,12 +271,12 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
     }
 
     //Calls on progress changed listener
-    private void onProgressChanged(int index, int progressType, ArrayList<OrbitalCoordinate> coordinates)
+    private void onProgressChanged(int progressType, ArrayList<OrbitalCoordinate> coordinates)
     {
         //if there is a listener
         if(progressChangedListener != null)
         {
-            progressChangedListener.onProgressChanged(index, progressType, coordinates);
+            progressChangedListener.onProgressChanged(progressType, coordinates);
         }
     }
 
@@ -341,13 +284,13 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
     protected  void onPostExecute(Integer[] result)
     {
         //finished
-        onProgressChanged(0, result[0], null);
+        onProgressChanged(result[0], null);
     }
 
     @Override
     protected void onCancelled(Integer[] result)
     {
         //cancelled
-        onProgressChanged(0, (result != null ? result[0] : Globals.ProgressType.Cancelled), null);
+        onProgressChanged((result != null ? result[0] : Globals.ProgressType.Cancelled), null);
     }
 }

@@ -334,12 +334,12 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     private static PendingIntent getUpdateWidgetsIntent(Context context, Class<?> alarmReceiverClass)
     {
         Intent alarmIntent = new Intent(context, alarmReceiverClass);
-        PendingIntent alaramPendingIntent;
+        PendingIntent alarmPendingIntent;
 
         //create and return intent
         alarmIntent.setAction(ACTION_UPDATE_WIDGETS_ALARM);
-        alaramPendingIntent = Globals.getPendingBroadcastIntent(context, 9999, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-        return(alaramPendingIntent);
+        alarmPendingIntent = Globals.getPendingBroadcastIntent(context, 9999, alarmIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        return(alarmPendingIntent);
     }
 
     //Gets an intent for the location interval updates alarm

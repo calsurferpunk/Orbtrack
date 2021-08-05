@@ -99,6 +99,7 @@ public class Database extends SQLiteOpenHelper
         static final long ISSZaryaDate = 1625689224996L;
     }
 
+    @SuppressWarnings("SpellCheckingInspection")
     private static final int ISS_ZARYA_NORAD_ID = 25544;
 
     private static final int INFO_FILE_COLUMNS = 2;
@@ -600,38 +601,38 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String nm, String uNm, int nrd, String ownrCd, String ownrNm, long launchDate, String line1, String line2, long tleDtMs, String gpData, long updateDtMs, int pthClr, byte orbType, boolean selected)
+        public DatabaseSatellite(String nm, String uNm, int nrd, String ownerCode, String ownerName, long launchDate, String line1, String line2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbType, boolean selected)
         {
-            name = nm;
-            userName = (uNm != null ? uNm : "");
-            noradId = nrd;
-            ownerCode = ownrCd;
-            ownerName = ownrNm;
-            tleLine1 = line1;
-            tleLine2 = line2;
-            gp = gpData;
-            tle = null;
-            if(gp != null && !gp.equals(""))
+            this.name = nm;
+            this.userName = (uNm != null ? uNm : "");
+            this.noradId = nrd;
+            this.ownerCode = ownerCode;
+            this.ownerName = ownerName;
+            this.tleLine1 = line1;
+            this.tleLine2 = line2;
+            this.gp = gp;
+            this.tle = null;
+            if(this.gp != null && !this.gp.equals(""))
             {
-                tle = Calculations.loadTLE(gp);
+                this.tle = Calculations.loadTLE(this.gp);
             }
-            if(tle == null)
+            if(this.tle == null)
             {
-                tle = Calculations.loadTLE(line1, line2);
+                this.tle = Calculations.loadTLE(line1, line2);
             }
-            tleDateMs = tleDtMs;
-            updateDateMs = updateDtMs;
-            pathColor = pthClr;
-            orbitalType = orbType;
-            isSelected = selected;
-            launchDateMs = launchDate;
+            this.tleDateMs = tleDateMs;
+            this.updateDateMs = updateDateMs;
+            this.pathColor = pathColor;
+            this.orbitalType = orbType;
+            this.isSelected = selected;
+            this.launchDateMs = launchDate;
 
-            if((tleDateMs == Globals.INVALID_DATE_MS || tleDateMs == Globals.UNKNOWN_DATE_MS) && tle.satelliteNum != Universe.IDs.Invalid)
+            if((this.tleDateMs == Globals.INVALID_DATE_MS || this.tleDateMs == Globals.UNKNOWN_DATE_MS) && this.tle.satelliteNum != Universe.IDs.Invalid)
             {
-                tleDateMs = Globals.julianDateToCalendar(tle.epochJulian).getTimeInMillis();
+                this.tleDateMs = Globals.julianDateToCalendar(this.tle.epochJulian).getTimeInMillis();
             }
 
-            tleIsAccurate = Globals.getTLEIsAccurate(tleDateMs);
+            this.tleIsAccurate = Globals.getTLEIsAccurate(this.tleDateMs);
         }
         public DatabaseSatellite(String nm, int nrd, String ownCd, long launchDate, byte orbType)
         {
@@ -767,16 +768,16 @@ public class Database extends SQLiteOpenHelper
         public final byte locationType;
         public final boolean isChecked;
 
-        public DatabaseLocation(int locID, String nm, double lat, double lon, double altKm, String znId, byte ltype, boolean checked)
+        public DatabaseLocation(int locationId, String name, double latitude, double longitude, double altitudeKm, String zoneId, byte locationType, boolean checked)
         {
-            id = locID;
-            name = nm;
-            latitude = lat;
-            longitude = lon;
-            altitudeKM = altKm;
-            zoneId = znId;
-            locationType = ltype;
-            isChecked = checked;
+            this.id = locationId;
+            this.name = name;
+            this.latitude = latitude;
+            this.longitude = longitude;
+            this.altitudeKM = altitudeKm;
+            this.zoneId = zoneId;
+            this.locationType = locationType;
+            this.isChecked = checked;
         }
 
         public boolean isValid()
@@ -926,6 +927,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Sets up database with initial data
+    @SuppressWarnings("SpellCheckingInspection")
     private void initData(Context context, SQLiteDatabase db)
     {
         Resources res = (context != null ? context.getResources() : null);
@@ -1048,6 +1050,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Handles any needed updates
+    @SuppressWarnings("SpellCheckingInspection")
     public static void handleUpdates(Context context)
     {
         SQLiteDatabase db;
@@ -1893,6 +1896,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets category values
+    @SuppressWarnings("SpellCheckingInspection")
     private static ContentValues getCategoryValues(String name, int index)
     {
         ContentValues ownerValues = new ContentValues(0);
@@ -1909,6 +1913,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets desired categories from the database
+    @SuppressWarnings("SpellCheckingInspection")
     public static ArrayList<UpdateService.MasterCategory> getCategories(Context context)
     {
         int index;
@@ -1934,6 +1939,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Saves given categories
+    @SuppressWarnings("SpellCheckingInspection")
     public static void saveCategories(Context context, ArrayList<UpdateService.MasterCategory> categories, Globals.OnProgressChangedListener listener)
     {
         int index;
@@ -1994,6 +2000,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets master satellite categories from the database in English
+    @SuppressWarnings("SpellCheckingInspection")
     public static String[][] getSatelliteCategoriesEnglish(Context context, int noradId, boolean getIndex)
     {
         return(runQuery(context, "SELECT DISTINCT '" + noradId + "', [Name]" + (getIndex ? ", [Indx]" : "") + " FROM " + Tables.Category + " JOIN " + Tables.SatelliteCategory + " ON " + Tables.Category + ".[Indx]=" + Tables.SatelliteCategory + ".[Category_Index] WHERE " + Tables.SatelliteCategory + ".[Norad]=" + noradId, null));
@@ -2151,6 +2158,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets master satellites from the database
+    @SuppressWarnings("SpellCheckingInspection")
     public static ArrayList<UpdateService.MasterSatellite> getMasterSatellites(Context context)
     {
         int index;

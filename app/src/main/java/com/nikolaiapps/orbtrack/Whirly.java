@@ -1919,7 +1919,7 @@ class Whirly
             }
         }
 
-        @Override
+        @Override @SuppressWarnings("SpellCheckingInspection")
         public void setStarsEnabled(boolean enabled)
         {
             Activity activity;
@@ -2019,7 +2019,7 @@ class Whirly
         }
 
         @Override
-        public void setHeading(double degs)
+        public void setHeading(double degrees)
         {
             double rads;
             Point3d geo;
@@ -2028,7 +2028,7 @@ class Whirly
             if(getControl() != null)
             {
                 //get heading in radians and remember value
-                rads = Math.toRadians(Globals.normalizeAngle(degs));
+                rads = Math.toRadians(Globals.normalizeAngle(degrees));
                 lastRotationRads = rads;
 
                 //if for map
@@ -2250,10 +2250,10 @@ class Whirly
         }
 
         @Override
-        public void userDidSelect(MapController mapControl, SelectedObject[] selObjs, Point2d loc, Point2d screenLoc)
+        public void userDidSelect(MapController mapControl, SelectedObject[] selectedObjects, Point2d loc, Point2d screenLoc)
         {
             //go through selected objects
-            for(SelectedObject currentObject : selObjs)
+            for(SelectedObject currentObject : selectedObjects)
             {
                 //if a screen marker
                 if(currentObject.selObj instanceof ScreenMarker)

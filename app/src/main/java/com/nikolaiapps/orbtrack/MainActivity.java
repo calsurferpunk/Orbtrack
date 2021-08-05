@@ -3744,7 +3744,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 String coordinateString = null;
                 TextView mapInfoText = Current.Coordinates.getMapInfoText();
                 CameraLens cameraView = Current.getCameraView();
-                TopographicDataType topoData;
+                TopographicDataType topographicData;
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 TopographicDataType[] selectedLookAngles = null;
                 Database.SatelliteData[] selectedSatellites = null;
@@ -3792,7 +3792,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                             currentNoradId = currentOrbital.getSatelliteNum();
                             Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
-                            topoData = Calculations.getLookAngles(observer, currentOrbital, true);
+                            topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
 
                             //if the moon
                             if(currentNoradId == Universe.IDs.Moon)
@@ -3809,11 +3809,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(sunLastEl.value != Double.MAX_VALUE)
                                 {
                                     //if changed enough
-                                    changedEnough = (Math.abs(topoData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
+                                    changedEnough = (Math.abs(topographicData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
                                     if(changedEnough)
                                     {
                                         //get phase name
-                                        phaseName = Universe.Sun.getPhaseName(MainActivity.this, topoData.elevation, (topoData.elevation > sunLastEl.value));
+                                        phaseName = Universe.Sun.getPhaseName(MainActivity.this, topographicData.elevation, (topographicData.elevation > sunLastEl.value));
                                     }
                                 }
 
@@ -3821,7 +3821,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(sunLastEl.value == Double.MAX_VALUE || changedEnough)
                                 {
                                     //update last elevation
-                                    sunLastEl.value = topoData.elevation;
+                                    sunLastEl.value = topographicData.elevation;
                                 }
                             }
 
@@ -3851,14 +3851,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 selectedSatellites = new Database.SatelliteData[currentSatellites.length];
                                 selectedSatellites[index] = currentSatellites[index];
                                 selectedLookAngles = new TopographicDataType[currentSatellites.length];
-                                selectedLookAngles[index] = topoData;
+                                selectedLookAngles[index] = topographicData;
                             }
 
                             //if not viewing a specific orbital or norad ID matches
                             if(allViewOrbitals || currentNoradId == viewLensNoradID)
                             {
                                 //remember look angle
-                                lookAngles[index] = topoData;
+                                lookAngles[index] = topographicData;
 
                                 //if status angles list exists and showing list
                                 if(onView && onList && Current.PageAdapter.hasItems(Current.PageType.View))
@@ -3868,9 +3868,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     if(currentItem != null)
                                     {
                                         //update values
-                                        currentItem.azimuth = (float)topoData.azimuth;
-                                        currentItem.elevation = (float)topoData.elevation;
-                                        currentItem.rangeKm = (float)topoData.rangeKm;
+                                        currentItem.azimuth = (float)topographicData.azimuth;
+                                        currentItem.elevation = (float)topographicData.elevation;
+                                        currentItem.rangeKm = (float)topographicData.rangeKm;
                                         currentItem.illumination = illumination;
                                         if(phaseName != null)
                                         {
@@ -3890,9 +3890,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     if(currentItem != null)
                                     {
                                         //update values
-                                        currentItem.azimuth = (float)topoData.azimuth;
-                                        currentItem.elevation = (float)topoData.elevation;
-                                        currentItem.rangeKm = (float)topoData.rangeKm;
+                                        currentItem.azimuth = (float)topographicData.azimuth;
+                                        currentItem.elevation = (float)topographicData.elevation;
+                                        currentItem.rangeKm = (float)topographicData.rangeKm;
                                         currentItem.speedKms = (float)currentOrbital.geo.speedKmS;
                                         currentItem.latitude = (float)currentOrbital.geo.latitude;
                                         currentItem.longitude = (float)currentOrbital.geo.longitude;
@@ -4100,7 +4100,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Database.SatelliteData currentSatellite1 = null;
                 Database.SatelliteData currentSatellite2 = null;
                 Database.SatelliteData[] currentSatellites = null;
-                TopographicDataType[] currentPlayTopoDatas;
+                TopographicDataType[] currentPlayTopographicDatas;
                 CalculateViewsTask.OrbitalView currentView;
                 CalculateViewsTask.OrbitalView nextView;
                 CalculateViewsTask.OrbitalView[] views = null;
@@ -4200,14 +4200,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //get play index and progress and set topographic data
                         playIndex = cameraView.playBar.getValue();
                         subProgressPercent = cameraView.playBar.getSubProgressPercent();
-                        currentPlayTopoDatas = new TopographicDataType[currentViews.length];
+                        currentPlayTopographicDatas = new TopographicDataType[currentViews.length];
 
                         //go through each view set
                         for(index = 0; index < currentViews.length; index++)
                         {
                             //remember current satellite views
                             CalculateViewsTask.OrbitalView[] currentSatelliteViews = currentViews[index];
-                            TopographicDataType currentTopoData = null;
+                            TopographicDataType currentTopographicData = null;
 
                             //if a valid play index
                             if(playIndex < currentSatelliteViews.length)
@@ -4220,34 +4220,34 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 {
                                     //get add distance index percentage to current view
                                     nextView = currentSatelliteViews[playIndex + 1];
-                                    currentTopoData = new TopographicDataType();
-                                    currentTopoData.azimuth = Globals.normalizeAngle(currentView.azimuth + (Globals.degreeDistance(currentView.azimuth, nextView.azimuth) * subProgressPercent));
-                                    currentTopoData.elevation = Globals.normalizeAngle(currentView.elevation + (Globals.degreeDistance(currentView.elevation, nextView.elevation) * subProgressPercent));
-                                    currentTopoData.rangeKm = (currentView.rangeKm + nextView.rangeKm) / 2;
+                                    currentTopographicData = new TopographicDataType();
+                                    currentTopographicData.azimuth = Globals.normalizeAngle(currentView.azimuth + (Globals.degreeDistance(currentView.azimuth, nextView.azimuth) * subProgressPercent));
+                                    currentTopographicData.elevation = Globals.normalizeAngle(currentView.elevation + (Globals.degreeDistance(currentView.elevation, nextView.elevation) * subProgressPercent));
+                                    currentTopographicData.rangeKm = (currentView.rangeKm + nextView.rangeKm) / 2;
                                 }
                                 else
                                 {
                                     //set look angles
-                                    currentTopoData = new TopographicDataType(currentView.azimuth, currentView.elevation, currentView.rangeKm);
+                                    currentTopographicData = new TopographicDataType(currentView.azimuth, currentView.elevation, currentView.rangeKm);
                                 }
                             }
-                            currentPlayTopoDatas[index] = currentTopoData;
+                            currentPlayTopographicDatas[index] = currentTopographicData;
                         }
 
                         //go through topographic data
-                        for(index = 0; index < currentPlayTopoDatas.length; index++)
+                        for(index = 0; index < currentPlayTopographicDatas.length; index++)
                         {
                             //if not set
-                            if(currentPlayTopoDatas[index] == null)
+                            if(currentPlayTopographicDatas[index] == null)
                             {
                                 //clear all data
-                                currentPlayTopoDatas = new TopographicDataType[0];
+                                currentPlayTopographicDatas = new TopographicDataType[0];
                             }
                         }
 
                         //show paths and update positions/travel
                         cameraView.showPaths = true;
-                        cameraView.updatePositions(currentSatellites, currentPlayTopoDatas, false);
+                        cameraView.updatePositions(currentSatellites, currentPlayTopographicDatas, false);
                         for(index = 0; index < currentViews.length; index++)
                         {
                             cameraView.setTravel(index, currentViews[index]);
@@ -5035,7 +5035,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             calculateCoordinatesTask = Calculate.calculateCoordinates(this, satellite, savedCoordinateItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateCoordinatesTask.OnProgressChangedListener()
             {
                 @Override
-                public void onProgressChanged(int index, int progressType, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
+                public void onProgressChanged(int progressType, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
                 {
                     Runnable passAction = null;
 

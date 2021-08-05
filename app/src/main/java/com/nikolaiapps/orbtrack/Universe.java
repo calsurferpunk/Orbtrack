@@ -208,7 +208,7 @@ public abstract class Universe
             double sumTerm1 = 0;
             double sumTerm2 = 0;
             double e = 1.0 - 0.002516 * julianCenturies - 0.0000074 * julianCenturies * julianCenturies;
-            double[] coords = new double[calcLat ? 1 : 2];
+            double[] coordinates = new double[calcLat ? 1 : 2];
             Universe.LatLonRadData[] terms = (calcLat ? LatTerms : LonRadTerms);
 
             lp = calculateFundamental(Fundamentals.lps, julianCenturies);
@@ -256,28 +256,28 @@ public abstract class Universe
             {
                 sumTerm1 += (-2235.0 * Math.sin(lp) + 382.0 * Math.sin(a3) + 175.0 * Math.sin(a1 - f) + 175.0 * Math.sin(a1 + f) + 127.0 * Math.sin(lp - mp) - 115.0 * Math.sin(lp + mp));
 
-                coords[0] = sumTerm1 * 1.0e-6;                                              //latitude
+                coordinates[0] = sumTerm1 * 1.0e-6;                                              //latitude
             }
             else
             {
                 sumTerm1 += (3958.0 * Math.sin(a1) + 1962.0 * Math.sin(lp - f) + 318.0 * Math.sin(a2));
 
-                coords[0] = Calculations.ReduceAngle((lp * 180.0 / Math.PI) + sumTerm1 * 1.0e-6);       //longitude
-                coords[1] = (385000.56 + sumTerm2 / 1000.0) / Calculations.AU;                           //radius
+                coordinates[0] = Calculations.ReduceAngle((lp * 180.0 / Math.PI) + sumTerm1 * 1.0e-6);       //longitude
+                coordinates[1] = (385000.56 + sumTerm2 / 1000.0) / Calculations.AU;                           //radius
             }
 
-            return(coords);
+            return(coordinates);
         }
 
         public static Calculations.GeodeticDataType getPolarLocation(double julianCenturies)
         {
-            double[] coords;
+            double[] coordinates;
             Calculations.GeodeticDataType polarLocation = new Calculations.GeodeticDataType();
 
             polarLocation.latitude = Math.toRadians(getPolarCoordinate(true, julianCenturies)[0]);
-            coords = getPolarCoordinate(false, julianCenturies);
-            polarLocation.longitude = Math.toRadians(coords[0]);
-            polarLocation.radius = coords[1];
+            coordinates = getPolarCoordinate(false, julianCenturies);
+            polarLocation.longitude = Math.toRadians(coordinates[0]);
+            polarLocation.radius = coordinates[1];
 
             return(polarLocation);
         }
@@ -1596,12 +1596,12 @@ public abstract class Universe
             double radSum = 0;
             double jupMeanLon = 34.35 + 3034.9057 * julianCenturies;
             double satMeanLon = 50.08 + 1222.1138 * julianCenturies;
-            double plutMeanLon = 238.96 + 144.96 * julianCenturies;
+            double plutoMeanLon = 238.96 + 144.96 * julianCenturies;
             Calculations.GeodeticDataType location = new Calculations.GeodeticDataType();
 
             for(index = 0; index < termsLength; index++)
             {
-                arg = ArgTerms[index][0] * jupMeanLon + ArgTerms[index][1] * satMeanLon + ArgTerms[index][2] * plutMeanLon;
+                arg = ArgTerms[index][0] * jupMeanLon + ArgTerms[index][1] * satMeanLon + ArgTerms[index][2] * plutoMeanLon;
                 argRad = Math.toRadians(arg);
                 sinArg = Math.sin(argRad);
                 cosArg = Math.cos(argRad);
@@ -1772,8 +1772,8 @@ public abstract class Universe
         int index2;
         double sum;
         double jMPower = 1.0;
-        double jMilen = julianCenturies / 10.0;
-        double coord = 0;
+        double julianMillennium = julianCenturies / 10.0;
+        double coordinate = 0;
         VSOPData[][] terms;
 
         switch(planetNumber)
@@ -1822,32 +1822,32 @@ public abstract class Universe
             sum = 0;
             for(index2 = 0; index2 < terms[index].length; index2++)
             {
-                sum += (terms[index][index2].a * Math.cos(terms[index][index2].b + terms[index][index2].c * jMilen));
+                sum += (terms[index][index2].a * Math.cos(terms[index][index2].b + terms[index][index2].c * julianMillennium));
             }
 
-            coord += (sum * jMPower);
-            jMPower *= jMilen;
+            coordinate += (sum * jMPower);
+            jMPower *= julianMillennium;
         }
 
-        coord *= 1.0e-8;
+        coordinate *= 1.0e-8;
         if(calcLon)
         {
-            coord = Calculations.ReduceRadians(coord);
+            coordinate = Calculations.ReduceRadians(coordinate);
         }
 
         if(planetNumber == IDs.Sun)
         {
             if(calcLat)
             {
-                coord *= -1;
+                coordinate *= -1;
             }
             else if(calcLon)
             {
-                coord += Math.PI;
+                coordinate += Math.PI;
             }
         }
 
-        return(coord);
+        return(coordinate);
     }
 
     public static Calculations.GeodeticDataType getPolarLocation(int planetNumber, double julianCenturies)

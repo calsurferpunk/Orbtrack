@@ -141,39 +141,39 @@ public class CalculateService extends NotifyService
             }
         };
 
-        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illum, String pn)
+        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
         {
             super((sat != null ? sat.getSatelliteNum() : Universe.IDs.None), index, false, false, false, false);
-            satellite = (sat != null ? new Calculations.SatelliteObjectType(sat) : null);
-            satellite2 = (sat2 != null ? new Calculations.SatelliteObjectType(sat2) : null);
-            passAzStart = azStart;
-            passAzEnd = azEnd;
-            passAzTravel = azTravel;
-            passElMax = elMax;
-            passClosestAz = closestAz;
-            passClosestEl = closestEl;
-            passStartFound = foundPassStart;
-            passCalculating = calculating;
-            passCalculated = foundPass;
-            passCalculateFinished = finishedCalculating;
-            showPathProgress = usePathProgress;
-            passTimeStart = startTime;
-            passTimeEnd = endTime;
-            passDuration = duration;
-            illumination = illum;
-            name = "";
-            orbitalType = orbital2Type = Database.OrbitalType.Satellite;
-            phaseName = pn;
-            passViews = copyViewArray(views);
-            passViews2 = copyViewArray(views2);
+            this.satellite = (sat != null ? new Calculations.SatelliteObjectType(sat) : null);
+            this.satellite2 = (sat2 != null ? new Calculations.SatelliteObjectType(sat2) : null);
+            this.passAzStart = azStart;
+            this.passAzEnd = azEnd;
+            this.passAzTravel = azTravel;
+            this.passElMax = elMax;
+            this.passClosestAz = closestAz;
+            this.passClosestEl = closestEl;
+            this.passStartFound = foundPassStart;
+            this.passCalculating = calculating;
+            this.passCalculated = foundPass;
+            this.passCalculateFinished = finishedCalculating;
+            this.showPathProgress = usePathProgress;
+            this.passTimeStart = startTime;
+            this.passTimeEnd = endTime;
+            this.passDuration = duration;
+            this.illumination = illumination;
+            this.name = "";
+            this.orbitalType = this.orbital2Type = Database.OrbitalType.Satellite;
+            this.phaseName = phaseName;
+            this.passViews = copyViewArray(views);
+            this.passViews2 = copyViewArray(views2);
         }
-        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illum, String pn)
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, null, illum, pn);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, null, illumination, phaseName);
         }
-        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean useListPathProgress, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illum, String pn)
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean useListPathProgress, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, useListPathProgress, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illum, pn);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, useListPathProgress, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
         }
         public PassData(int index, Database.SatelliteData currentSatellite)
         {
@@ -960,15 +960,7 @@ public class CalculateService extends NotifyService
     }
 
     @Override
-    protected void onClearIntent(byte index)
-    {
-        /*//if a valid index
-        if(index < currentIntent.length)
-        {
-            //clear intent
-            currentIntent[index] = null;
-        }*/
-    }
+    protected void onClearIntent(byte index) {}
 
     @Override
     protected void onRunIntent(Intent intent)

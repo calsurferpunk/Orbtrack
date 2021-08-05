@@ -317,9 +317,9 @@ public abstract class Globals
             return(responseCode >= 400 && responseCode <= 499);
         }
 
-        public boolean isLoginOkay()
+        public boolean isLoginError()
         {
-            return(isOkay() && pageData != null && !pageData.contains("\"Login\":\"Failed\""));
+            return(!isOkay() || isDenied() || pageData == null || pageData.contains("\"Login\":\"Failed\""));
         }
 
         public boolean gotData()
@@ -405,7 +405,7 @@ public abstract class Globals
             canceled = false;
 
             //if always showing or login failed
-            if(alwaysShow || loginData == null || !loginData.isLoginOkay())
+            if(alwaysShow || loginData == null || loginData.isLoginError())
             {
                 //run on activity thread
                 context.runOnUiThread(new Runnable()
@@ -1352,10 +1352,6 @@ public abstract class Globals
             //launch activity
             launcher.launch(intent);
         }
-    }
-    public static void startActivity(ActivityResultLauncher<Intent> launcher, Intent intent)
-    {
-        startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.None);
     }
 
     //Starts a service

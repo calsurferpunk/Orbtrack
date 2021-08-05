@@ -141,6 +141,7 @@ public class AutoPlacesAdapter extends ArrayAdapter<AutoPlacesAdapter.Item> impl
             try
             {
                 //get predictions
+                //noinspection SpellCheckingInspection
                 resultsObject = Globals.getJSONWebPage("https://maps.googleapis.com/maps/api/place/autocomplete/json?key=" + getContext().getResources().getString(R.string.google_places_api_web_key) + "&sessiontoken=" + uuid + "&input=" + URLEncoder.encode(text.toString(), Globals.Encoding.UTF8));
                 if(resultsObject != null)
                 {

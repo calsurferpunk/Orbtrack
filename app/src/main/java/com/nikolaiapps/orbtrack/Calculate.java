@@ -1173,7 +1173,7 @@ public abstract class Calculate
     {
         int incrementUnit = 10;
         double elMin = 0.0;
-        double intersectionDegs = 0.2;
+        double intersectionDegrees = 0.2;
         final int pageNumber = saveInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
         int orbitalId = Integer.MAX_VALUE;
         int orbitalId2 = Universe.IDs.Invalid;
@@ -1220,7 +1220,7 @@ public abstract class Calculate
             incrementUnit = saveInstanceState.getInt(ParamTypes.IncrementUnit);
             incrementType = saveInstanceState.getInt(ParamTypes.IncrementType);
             elMin = saveInstanceState.getDouble(ParamTypes.ElevationMinDegs, elMin);
-            intersectionDegs = saveInstanceState.getDouble(ParamTypes.IntersectionDegs, intersectionDegs);
+            intersectionDegrees = saveInstanceState.getDouble(ParamTypes.IntersectionDegs, intersectionDegrees);
         }
         catch(Exception ex)
         {
@@ -1298,7 +1298,7 @@ public abstract class Calculate
             case PageType.Intersection:
                 //set unit display
                 page.elevationMinUnitText.setText(String.valueOf(elMin));
-                page.intersectionUnitText.setText(String.valueOf(intersectionDegs));
+                page.intersectionUnitText.setText(String.valueOf(intersectionDegrees));
 
                 //set visibility
                 viewRowVisibility = View.GONE;

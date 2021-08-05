@@ -82,7 +82,7 @@ public class MapLocationInputActivity extends BaseInputActivity
         Intent intent = this.getIntent();
         final boolean forSearch = intent.getBooleanExtra(ParamTypes.ForSearch, false);
         final int poweredByVisible = (forSearch ? View.VISIBLE : View.GONE);
-        final int coordInputVisible = (forSearch ? View.GONE : View.VISIBLE);
+        final int coordinateInputVisible = (forSearch ? View.GONE : View.VISIBLE);
         final MapLocation currentLocation = new MapLocation();
         final CoordinatesFragment mapInputView = new Whirly.MapFragment();
         final FloatingActionButton zoomInButton = this.findViewById(R.id.Location_Zoom_In_Button);
@@ -128,18 +128,18 @@ public class MapLocationInputActivity extends BaseInputActivity
         poweredGoogleLbl.setVisibility(poweredByVisible);
         poweredGoogleImage.setVisibility(poweredByVisible);
         poweredGoogleImage.setImageResource(Settings.getDarkTheme(this) ? R.drawable.powered_by_google_on_non_white : R.drawable.powered_by_google_on_white);
-        latitudeLbl.setVisibility(coordInputVisible);
-        latitudeText.setVisibility(coordInputVisible);
-        longitudeLbl.setVisibility(coordInputVisible);
-        longitudeText.setVisibility(coordInputVisible);
+        latitudeLbl.setVisibility(coordinateInputVisible);
+        latitudeText.setVisibility(coordinateInputVisible);
+        longitudeLbl.setVisibility(coordinateInputVisible);
+        longitudeText.setVisibility(coordinateInputVisible);
         text = altitudeString + " (" + Globals.getMetersLabel(res) + ")";
         altitudeLbl.setText(text);
-        altitudeLbl.setVisibility(coordInputVisible);
-        altitudeText.setVisibility(coordInputVisible);
-        altitudeButton.setVisibility(coordInputVisible);
-        timeZoneLbl.setVisibility(coordInputVisible);
-        timeZoneList.setVisibility(coordInputVisible);
-        timeZoneButton.setVisibility(coordInputVisible);
+        altitudeLbl.setVisibility(coordinateInputVisible);
+        altitudeText.setVisibility(coordinateInputVisible);
+        altitudeButton.setVisibility(coordinateInputVisible);
+        timeZoneLbl.setVisibility(coordinateInputVisible);
+        timeZoneList.setVisibility(coordinateInputVisible);
+        timeZoneButton.setVisibility(coordinateInputVisible);
         if(forSearch)
         {
             altitudeText.setText(R.string.text_0);

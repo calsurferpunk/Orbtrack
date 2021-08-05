@@ -95,29 +95,29 @@ public class UpdateService extends NotifyService
         ArrayList<Integer> categoryIndexes;
         final ArrayList<String> categories;
 
-        public MasterSatellite(int nID, String nm, String ownrCd, String ownrNm, long launchMs)
+        public MasterSatellite(int noradId, String name, String ownerCode, String ownerName, long launchDateMs)
         {
-            String lowerName = nm.toLowerCase();
+            String lowerName = name.toLowerCase();
 
-            noradId = nID;
-            launchDateMs = launchMs;
-            name = nm;
-            ownerCode = Globals.normalizeOwnerCode(ownrCd);
-            ownerName = Globals.normalizeOwnerName(ownrNm);
+            this.noradId = noradId;
+            this.launchDateMs = launchDateMs;
+            this.name = name;
+            this.ownerCode = Globals.normalizeOwnerCode(ownerCode);
+            this.ownerName = Globals.normalizeOwnerName(ownerName);
             if(lowerName.contains("r/b"))
             {
-                orbitalType = Database.OrbitalType.RocketBody;
+                this.orbitalType = Database.OrbitalType.RocketBody;
             }
             else if(isDebris(lowerName))
             {
-                orbitalType = Database.OrbitalType.Debris;
+                this.orbitalType = Database.OrbitalType.Debris;
             }
             else
             {
-                orbitalType = Database.OrbitalType.Satellite;
+                this.orbitalType = Database.OrbitalType.Satellite;
             }
-            categoryIndexes = new ArrayList<>(0);
-            categories = new ArrayList<>(0);
+            this.categoryIndexes = new ArrayList<>(0);
+            this.categories = new ArrayList<>(0);
         }
 
         public void addCategory(String catName, int catIndex)
@@ -440,6 +440,7 @@ public class UpdateService extends NotifyService
     //Space track country
     private static abstract class SpaceTrackCountry
     {
+        @SuppressWarnings("SpellCheckingInspection")
         public static abstract class Constants
         {
             static final String Owner = "COUNTRY";
@@ -450,6 +451,7 @@ public class UpdateService extends NotifyService
     //Space track satellite
     public static class SpaceTrackSatellite
     {
+        @SuppressWarnings("SpellCheckingInspection")
         public static abstract class Constants
         {
             static final String InternationalCode = "INTLDES";
@@ -542,11 +544,11 @@ public class UpdateService extends NotifyService
         public final SpaceTrackSatellite[] satellites;
         public final MasterOwner[] owners;
 
-        public SpaceTrackList(SpaceTrackSatellite[] sats, MasterOwner[] owrs, boolean loggedIn)
+        public SpaceTrackList(SpaceTrackSatellite[] satellites, MasterOwner[] owners, boolean loggedIn)
         {
-            satellites = sats;
-            owners = owrs;
-            loginFailed = !loggedIn;
+            this.satellites = satellites;
+            this.owners = owners;
+            this.loginFailed = !loggedIn;
         }
     }
 
@@ -557,11 +559,11 @@ public class UpdateService extends NotifyService
         public final String ownerCode;
         public final Calendar launchDate;
 
-        public OwnerItem(int nrID, String ownrCd, Calendar lnchDt)
+        public OwnerItem(int nrID, String ownerCode, Calendar launchDate)
         {
-            noradId = nrID;
-            ownerCode = Globals.normalizeOwnerCode(ownrCd);
-            launchDate = lnchDt;
+            this.noradId = nrID;
+            this.ownerCode = Globals.normalizeOwnerCode(ownerCode);
+            this.launchDate = launchDate;
         }
     }
 
@@ -588,6 +590,7 @@ public class UpdateService extends NotifyService
     }
 
     //Space track category
+    @SuppressWarnings("SpellCheckingInspection")
     private static abstract class SpaceTrackCategory
     {
         private static final String[] urls = new String[]{"Amateur", "analyst_satellites", "brightgeo", "Geosynchronous", "Globalstar", "Human_Spaceflight", "Inmarsat", "Intelsat", "Iridium" ,"Navigation", "Orbcomm", "Special_Interest", "Visible", "Weather"};
@@ -1283,7 +1286,7 @@ public class UpdateService extends NotifyService
 
         //login to space track
         loginData = Globals.loginSpaceTrack(user, pwd);
-        loginFailed = loginData.isDenied() || !loginData.isLoginOkay();
+        loginFailed = (loginData.isDenied() || loginData.isLoginError());
 
         //go through each url while not cancelled
         for(index = 0; index < urlStrings.length && !loginFailed && !cancelIntent[UpdateType.GetMasterList]; index++)
@@ -1584,6 +1587,7 @@ public class UpdateService extends NotifyService
     }
 
     //Gets master list data from space-track
+    @SuppressWarnings("SpellCheckingInspection")
     private SpaceTrackList getSpaceTrackList(String user, String password)
     {
         int index;
@@ -1820,6 +1824,7 @@ public class UpdateService extends NotifyService
     }
 
     //Gets master list and returns progress status
+    @SuppressWarnings("SpellCheckingInspection")
     private int getMasterList(int updateSource, int updateSubSource, int linkIndex, int overall, String user, String pwd, MasterLink[] urls)
     {
         int index;
@@ -2663,7 +2668,7 @@ public class UpdateService extends NotifyService
         boolean isGpData = inputString.contains(Calculations.GPParams.Name);
         String currentNumString;
         Calendar defaultLaunchDate = Calendar.getInstance();
-        ArrayList<Integer> satelliteNums = new ArrayList<>(0);
+        ArrayList<Integer> satelliteNumbers = new ArrayList<>(0);
         ArrayList<String> satelliteNames = new ArrayList<>(0);
         ArrayList<String> satelliteOwnerCodes = new ArrayList<>(0);
         ArrayList<Long> satelliteLaunchDates = new ArrayList<>(0);
@@ -2699,12 +2704,12 @@ public class UpdateService extends NotifyService
                     try
                     {
                         //try to get number
-                        satelliteNums.add(dataItem.getInt(Calculations.GPParams.SatNum));
+                        satelliteNumbers.add(dataItem.getInt(Calculations.GPParams.SatNum));
                     }
                     catch(Exception ex)
                     {
                         //add as unknown
-                        satelliteNums.add(Universe.IDs.Invalid);
+                        satelliteNumbers.add(Universe.IDs.Invalid);
                     }
 
                     try
@@ -2775,7 +2780,7 @@ public class UpdateService extends NotifyService
                                 if(currentNum < Integer.MAX_VALUE)
                                 {
                                     //add satellite number to list
-                                    satelliteNums.add(currentNum);
+                                    satelliteNumbers.add(currentNum);
 
                                     //try to get name
                                     satelliteName = Globals.getUnknownString(this);
@@ -2830,18 +2835,18 @@ public class UpdateService extends NotifyService
         else
         {
             //add satellite number and name
-            satelliteNums.add(satelliteNum);
+            satelliteNumbers.add(satelliteNum);
             satelliteNames.add(satelliteName);
         }
 
         //go through each satellite number
-        for(index = 0; index < satelliteNums.size(); index++)
+        for(index = 0; index < satelliteNumbers.size(); index++)
         {
             String gpString = null;
             Calculations.SatelliteObjectType currentSatellite = null;
 
             //remember current satellite number, name, and get data
-            satelliteNum = satelliteNums.get(index);
+            satelliteNum = satelliteNumbers.get(index);
             satelliteName = satelliteNames.get(index);
 
             //if started with unknown satellite
@@ -2855,7 +2860,7 @@ public class UpdateService extends NotifyService
             //if new satellites are set
             if(gpData != null && newSatellites != null && gpData.length > 0 && gpData.length == newSatellites.length)
             {
-                //go through each new satellite oject while current not found
+                //go through each new satellite object while current not found
                 for(index2 = 0; index2 < newSatellites.length && currentSatellite == null; index2++)
                 {
                     //remember current satellite object
@@ -2932,6 +2937,7 @@ public class UpdateService extends NotifyService
     }
 
     //Updates satellites
+    @SuppressWarnings("SpellCheckingInspection")
     private void updateSatellites(int updateSource, String section, String user, String pwd, ArrayList<Database.DatabaseSatellite> satelliteList)
     {
         int index;
@@ -2958,7 +2964,7 @@ public class UpdateService extends NotifyService
         {
             //login to space track
             loginData = Globals.loginSpaceTrack(user, pwd);
-            loginFailed = !loginData.isLoginOkay();
+            loginFailed = loginData.isLoginError();
         }
 
         //go through each satellite while not cancelled
@@ -3237,7 +3243,7 @@ public class UpdateService extends NotifyService
                 else
                 {
                     //read file data
-                    fileStream = new FileInputStream(new File(fileNames.get(index)));
+                    fileStream = new FileInputStream(fileNames.get(index));
                     readString = Globals.readTextFile(this, fileStream);
                     fileStream.close();
                 }

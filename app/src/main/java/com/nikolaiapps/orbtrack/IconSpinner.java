@@ -78,15 +78,15 @@ public class IconSpinner extends AppCompatSpinner
             this(icn3, txt, val);
             subText = sbTxt;
         }
-        public Item(Drawable icn1, int icn1Clr, int icn1SlctdClr, Drawable icn2, Drawable icn3, int icn3Clr, int icn3SlctClr, String txt, Object val)
+        public Item(Drawable icn1, int icon1Color, int icon1SelectedColor, Drawable icon2, Drawable icon3, int icon3Color, int icon3SelectedColor, String txt, Object val)
         {
-            this(icn3, txt, val);
-            icon1 = icn1;
-            icon2 = icn2;
-            icon1Color = icn1Clr;
-            icon1SelectedColor = icn1SlctdClr;
-            icon3Color = icn3Clr;
-            icon3SelectedColor = icn3SlctClr;
+            this(icon3, txt, val);
+            this.icon1 = icn1;
+            this.icon2 = icon2;
+            this.icon1Color = icon1Color;
+            this.icon1SelectedColor = icon1SelectedColor;
+            this.icon3Color = icon3Color;
+            this.icon3SelectedColor = icon3SelectedColor;
         }
         public Item(Drawable icn1, Drawable icn2, Drawable icn3, String txt, Object val)
         {
@@ -138,61 +138,61 @@ public class IconSpinner extends AppCompatSpinner
             updateUsingIcons();
         }
 
-        public CustomAdapter(Context context, Item[] itms)
+        public CustomAdapter(Context context, Item[] items)
         {
             ArrayList<Item> usedItems = new ArrayList<>(0);
 
-            for(Item currentItem : itms)
+            for(Item currentItem : items)
             {
                 if(currentItem != null)
                 {
                     usedItems.add(currentItem);
                 }
             }
-            items = usedItems.toArray(new Item[0]);
+            this.items = usedItems.toArray(new Item[0]);
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Object[] itms)
+        public CustomAdapter(Context context, Object[] items)
         {
             int index;
-            boolean useFloat = (itms.length > 0 && itms[0] instanceof Float);
+            boolean useFloat = (items.length > 0 && items[0] instanceof Float);
 
-            items = new Item[itms.length];
-            for(index = 0; index < items.length; index++)
+            this.items = new Item[items.length];
+            for(index = 0; index < this.items.length; index++)
             {
-                items[index] = new Item((useFloat ? Globals.getNumberString((Float)itms[index], 0) : itms[index].toString()), itms[index]);
+                this.items[index] = new Item((useFloat ? Globals.getNumberString((Float)items[index], 0) : items[index].toString()), items[index]);
             }
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Object[] itms, int[] itmImgIds)
+        public CustomAdapter(Context context, Object[] items, int[] itmImgIds)
         {
             int index;
 
-            items = new Item[itms.length];
-            for(index = 0; index < items.length; index++)
+            this.items = new Item[items.length];
+            for(index = 0; index < this.items.length; index++)
             {
-                items[index] = new Item(Globals.getDrawable(context, itmImgIds[index], false), itms[index].toString(), itms[index]);
+                this.items[index] = new Item(Globals.getDrawable(context, itmImgIds[index], false), items[index].toString(), items[index]);
             }
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Object[] itms, Object[] vals, int[] itmImgIds, String[] sbTxts)
+        public CustomAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
         {
             int index;
 
-            items = new Item[itms.length];
-            for(index = 0; index < items.length; index++)
+            this.items = new Item[items.length];
+            for(index = 0; index < this.items.length; index++)
             {
-                items[index] = new Item((itmImgIds != null ? Globals.getDrawable(context, itmImgIds[index], false) : null), itms[index].toString(), vals[index], (sbTxts != null ? sbTxts[index] : null));
+                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawable(context, itemImageIds[index], false) : null), items[index].toString(), values[index], (subTexts != null ? subTexts[index] : null));
             }
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Object[] itms, int[] itmImgIds, String[] sbTxts)
+        public CustomAdapter(Context context, Object[] items, int[] itemImageIds, String[] subTexts)
         {
-            this(context, itms, itms, itmImgIds, sbTxts);
+            this(context, items, items, itemImageIds, subTexts);
         }
         public CustomAdapter(Context context, ArrayList<TimeZone> zones)
         {

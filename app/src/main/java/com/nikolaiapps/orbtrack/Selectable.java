@@ -12,8 +12,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Parcel;
-import android.os.Parcelable;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -60,16 +58,10 @@ public abstract class Selectable
         static final String Group = "group";
         static final String PageNumber = "page";
         static final String SubPageNumber = "subPage";
-        static final String Id = "id";
-        static final String ListIndex = "listIndex";
-        static final String CanEdit = "canEdit";
-        static final String IsSelected = "isSelected";
-        static final String CanCheck = "canCheck";
-        static final String IsChecked = "isChecked";
     }
 
     //Select list item
-    protected static class ListItem implements Parcelable
+    protected static class ListItem
     {
         public int id;
         public int listIndex;
@@ -78,26 +70,6 @@ public abstract class Selectable
         public final boolean canCheck;
         public boolean isChecked;
         public CheckBox checkBoxView;
-        public static final Creator<ListItem> CREATOR =  new Parcelable.Creator<ListItem>()
-        {
-            @Override
-            public ListItem createFromParcel(Parcel source)
-            {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
-
-                return(new ListItem(bundle.getInt(ParamTypes.Id, Integer.MAX_VALUE), bundle.getInt(ParamTypes.ListIndex, -1), bundle.getBoolean(ParamTypes.CanEdit, false), bundle.getBoolean(ParamTypes.IsSelected, false), bundle.getBoolean(ParamTypes.CanCheck, false),  bundle.getBoolean(ParamTypes.IsChecked, false)));
-            }
-
-            @Override
-            public ListItem[] newArray(int size)
-            {
-                return(new ListItem[size]);
-            }
-        };
 
         public ListItem(int idNum, int index, boolean canEd, boolean isSel, boolean canCh, boolean isCh)
         {
@@ -107,27 +79,6 @@ public abstract class Selectable
             isSelected = isSel;
             canCheck = canCh;
             isChecked = isCh;
-        }
-
-        @Override
-        public int describeContents()
-        {
-            return(0);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags)
-        {
-            Bundle bundle = new Bundle();
-
-            bundle.putInt(ParamTypes.Id, id);
-            bundle.putInt(ParamTypes.ListIndex, listIndex);
-            bundle.putBoolean(ParamTypes.CanEdit, canEdit);
-            bundle.putBoolean(ParamTypes.IsSelected, isSelected);
-            bundle.putBoolean(ParamTypes.CanCheck, canCheck);
-            bundle.putBoolean(ParamTypes.IsChecked, isChecked);
-
-            dest.writeBundle(bundle);
         }
 
         public void setChecked(boolean checked)
@@ -1141,13 +1092,6 @@ public abstract class Selectable
 
         //Gets an item
         protected ListItem getItem(int position)
-        {
-            //needs to be overridden
-            return(null);
-        }
-
-        //Gets all items
-        protected ListItem[] getItems()
         {
             //needs to be overridden
             return(null);
@@ -2235,10 +2179,10 @@ public abstract class Selectable
             pageResumeListener = resumeListener;
         }
 
-        @Override
+        @Override @NonNull
         public Fragment getItem(int position)
         {
-            return(null);
+            return(new Fragment());
         }
         protected Fragment getItem(int group, int position, int subPosition, ListFragment newPage)
         {
@@ -2283,11 +2227,6 @@ public abstract class Selectable
             //note: allows for notifyDataSetChanged() to refresh list
             return(POSITION_NONE);
         }
-
-        /*public Bundle getParams()
-        {
-            return(currentParams);
-        }*/
 
         //Returns the given page
         public ListFragment getPage(ViewGroup container, int pageNum)

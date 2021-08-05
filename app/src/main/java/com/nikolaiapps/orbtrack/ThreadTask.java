@@ -43,7 +43,7 @@ public class ThreadTask<Params, Progress, Result>
         return(null);
     }
 
-    @SafeVarargs
+    @SafeVarargs @SuppressWarnings({"EmptyMethod", "unused"})
     protected final void publishProgress(Progress... values)
     {
         //needs to be overridden

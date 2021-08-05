@@ -1127,6 +1127,7 @@ public abstract class Calculations
     }
 
     //Converts the given geodetic coordinates to an ECI position
+    @SuppressWarnings("SpellCheckingInspection")
     private static EciDataType geoToECI(GeodeticDataType geoData, double julianDate)
     {
         double theta, c, s, achcp;

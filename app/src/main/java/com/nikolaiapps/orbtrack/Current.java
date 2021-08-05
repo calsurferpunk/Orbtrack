@@ -9,7 +9,6 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -53,34 +52,6 @@ public abstract class Current
         static final int Coordinates = 2;
         static final int Combined = 3;
         static final int PageCount = 4;
-    }
-
-    @SuppressWarnings("SpellCheckingInspection")
-    public static abstract class ParamTypes
-    {
-        static final String ID = "id";
-        static final String AzimuthStart = "azStart";
-        static final String AzimuthEnd = "azEnd";
-        static final String AzimuthTravel = "azTravel";
-        static final String ElevationMax = "elMax";
-        static final String ClosestAzimuth = "closestAz";
-        static final String ClosestElevation = "closestEl";
-        static final String Calculating = "calculating";
-        static final String FoundPass = "foundPass";
-        static final String FinishedCalculating = "finishedCalc";
-        static final String FoundPassStart = "foundPassStart";
-        static final String PathProgress = "pathProgress";
-        static final String ZoneStart = "zoneStart";
-        static final String TimeStart = "timeStart";
-        static final String ZoneEnd = "zoneEnd";
-        static final String TimeEnd = "timeEnd";
-        static final String Duration = "duration";
-        static final String Views = "views";
-        static final String Views2 = "views2";
-        static final String Satellite = "satellite";
-        static final String Illumination = "illum";
-        static final String PhaseName = "pn";
-        static final String TLEIsAccurate = "tleAc";
     }
 
     public static class Items
@@ -1105,12 +1076,6 @@ public abstract class Current
             }
 
             @Override
-            protected Item[] getItems()
-            {
-                return((Item[])combinedItems.get());
-            }
-
-            @Override
             public long getItemId(int position)
             {
                 return(-1);
@@ -1133,28 +1098,6 @@ public abstract class Current
             public TextView nameText;
             public TextView timeText;
             public Calculations.SatelliteObjectType satellite;
-            public static final Parcelable.Creator<Item> CREATOR =  new Parcelable.Creator<Item>()
-            {
-                @Override
-                public Item createFromParcel(Parcel source)
-                {
-                    Bundle bundle = source.readBundle(getClass().getClassLoader());
-                    CalculateViewsTask.ViewItemBase itemBase = CalculateViewsTask.ViewItemBase.CREATOR.createFromParcel(source);
-
-                    if(bundle == null)
-                    {
-                        bundle = new Bundle();
-                    }
-
-                    return(new Item(itemBase.listIndex, itemBase.azimuth, itemBase.elevation, itemBase.rangeKm, bundle.getDouble("jd"), bundle.getString("zone"), bundle.getLong("ms"), bundle.getBoolean("tleAc")));
-                }
-
-                @Override
-                public Item[] newArray(int size)
-                {
-                    return(new Item[size]);
-                }
-            };
 
             public static class Comparer implements Comparator<Item>
             {
@@ -1212,23 +1155,6 @@ public abstract class Current
             {
                 this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, null, 0, false);
                 isLoading = loading;
-            }
-
-            @Override
-            public void writeToParcel(Parcel dest, int flags)
-            {
-                super.writeToParcel(dest, flags);
-                Bundle bundle = new Bundle();
-
-                if(time != null)
-                {
-                    bundle.putDouble("jd", julianDate);
-                    bundle.putString("zone", time.getTimeZone().getID());
-                    bundle.putLong("ms", time.getTimeInMillis());
-                    bundle.putBoolean("tleAc", tleIsAccurate);
-
-                    dest.writeBundle(bundle);
-                }
             }
 
             public void updateDisplays(Context context)
@@ -1341,12 +1267,6 @@ public abstract class Current
             public Item getItem(int position)
             {
                 return(position >= 0 && position < viewItems.getCount() ? viewItems.getViewItem(position) : null);
-            }
-
-            @Override
-            protected Item[] getItems()
-            {
-                return((Item[])viewItems.get());
             }
 
             @Override
@@ -1583,7 +1503,7 @@ public abstract class Current
     public static abstract class Passes
     {
         //Item
-        public static class Item extends CalculateService.PassData implements Parcelable
+        public static class Item extends CalculateService.PassData
         {
             private Drawable icon;
 
@@ -1602,26 +1522,6 @@ public abstract class Current
             public LinearProgressIndicator progressBar;
             public LinearProgressIndicator progressStatusBar;
             public LinearLayout dataGroup;
-            public static final Creator<Item> CREATOR = new Parcelable.Creator<Item>()
-            {
-                @Override
-                public Item createFromParcel(Parcel source)
-                {
-                    Bundle bundle = source.readBundle(getClass().getClassLoader());
-                    if(bundle == null)
-                    {
-                        bundle = new Bundle();
-                    }
-
-                    return(new Item(bundle.getInt(ParamTypes.ID), bundle.getDouble(ParamTypes.AzimuthStart), bundle.getDouble(ParamTypes.AzimuthEnd), bundle.getDouble(ParamTypes.AzimuthTravel), bundle.getDouble(ParamTypes.ElevationMax), bundle.getDouble(ParamTypes.ClosestAzimuth), bundle.getDouble(ParamTypes.ClosestElevation), bundle.getBoolean(ParamTypes.Calculating), bundle.getBoolean(ParamTypes.FoundPass), bundle.getBoolean(ParamTypes.FinishedCalculating), bundle.getBoolean(ParamTypes.FoundPassStart), bundle.getBoolean(ParamTypes.PathProgress), bundle.getString(ParamTypes.ZoneStart), bundle.getLong(ParamTypes.TimeStart), bundle.getString(ParamTypes.ZoneEnd), bundle.getLong(ParamTypes.TimeEnd), bundle.getString(ParamTypes.Duration), bundle.getParcelableArray(ParamTypes.Views), bundle.getParcelableArray(ParamTypes.Views2), bundle.getParcelable(ParamTypes.Satellite), bundle.getDouble(ParamTypes.Illumination), bundle.getString(ParamTypes.PhaseName), bundle.getBoolean(ParamTypes.TLEIsAccurate)));
-                }
-
-                @Override
-                public Item[] newArray(int size)
-                {
-                    return(new Item[size]);
-                }
-            };
 
             public static class Comparer implements Comparator<Item>
             {
@@ -1653,28 +1553,24 @@ public abstract class Current
                 }
             }
 
-            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illum, String pn, boolean tleAccurate)
+            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
             {
-                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, sat2, illum, pn);
-                isLoading = false;
-                icon = null;
-                nameImage = null;
-                nameText = null;
-                progressBar = null;
-                progressStatusBar = null;
-                dataGroup = null;
-                timeStartText = null;
-                timeStartUnder = null;
-                timeStartTitleText = null;
-                timeEndText = null;
-                timeDurationText = null;
-                elMaxText = null;
-                elMaxUnder = null;
-                tleIsAccurate = tleAccurate;
-            }
-            public Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illum, String pn, boolean tleAccurate)
-            {
-                this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, null, illum, pn, tleAccurate);
+                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
+                this.isLoading = false;
+                this.icon = null;
+                this.nameImage = null;
+                this.nameText = null;
+                this.progressBar = null;
+                this.progressStatusBar = null;
+                this.dataGroup = null;
+                this.timeStartText = null;
+                this.timeStartUnder = null;
+                this.timeStartTitleText = null;
+                this.timeEndText = null;
+                this.timeDurationText = null;
+                this.elMaxText = null;
+                this.elMaxUnder = null;
+                this.tleIsAccurate = tleAccurate;
             }
             public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathProgress, boolean loading)
             {
@@ -1716,44 +1612,6 @@ public abstract class Current
                 orbital2Type = passData.orbital2Type;
                 illumination = passData.illumination;
                 phaseName = passData.phaseName;
-            }
-
-            @Override
-            public int describeContents()
-            {
-                return(0);
-            }
-
-            @Override
-            public void writeToParcel(Parcel dest, int flags)
-            {
-                Bundle bundle = new Bundle();
-
-                bundle.putInt(ParamTypes.ID, id);
-                bundle.putDouble(ParamTypes.AzimuthStart, passAzStart);
-                bundle.putDouble(ParamTypes.AzimuthEnd, passAzEnd);
-                bundle.putDouble(ParamTypes.AzimuthTravel, passAzTravel);
-                bundle.putDouble(ParamTypes.ElevationMax, passElMax);
-                bundle.putDouble(ParamTypes.ClosestAzimuth, passClosestAz);
-                bundle.putDouble(ParamTypes.ClosestElevation, passClosestEl);
-                bundle.putBoolean(ParamTypes.Calculating, passCalculating);
-                bundle.putBoolean(ParamTypes.FoundPass, passCalculated);
-                bundle.putBoolean(ParamTypes.FinishedCalculating, passCalculateFinished);
-                bundle.putBoolean(ParamTypes.FoundPassStart, passStartFound);
-                bundle.putBoolean(ParamTypes.PathProgress, showPathProgress);
-                bundle.putString(ParamTypes.ZoneStart, passTimeStart != null ? passTimeStart.getTimeZone().getID() : "");
-                bundle.putLong(ParamTypes.TimeStart, passTimeStart != null ? passTimeStart.getTimeInMillis() : 0);
-                bundle.putString(ParamTypes.ZoneEnd, passTimeEnd != null ? passTimeEnd.getTimeZone().getID() : "");
-                bundle.putLong(ParamTypes.TimeEnd, passTimeEnd != null ? passTimeEnd.getTimeInMillis() : 0);
-                bundle.putString(ParamTypes.Duration, passDuration);
-                bundle.putParcelableArray(ParamTypes.Views, passViews);
-                bundle.putParcelableArray(ParamTypes.Views2, passViews2);
-                bundle.putParcelable(ParamTypes.Satellite, satellite);
-                bundle.putDouble(ParamTypes.Illumination, illumination);
-                bundle.putString(ParamTypes.PhaseName, phaseName);
-                bundle.putBoolean(ParamTypes.TLEIsAccurate, tleIsAccurate);
-
-                dest.writeBundle(bundle);
             }
 
             public boolean equals(Item otherItem)
@@ -1958,12 +1816,6 @@ public abstract class Current
             public Item getItem(int position)
             {
                 return(pathItems.getPassItem(position));
-            }
-
-            @Override
-            protected Item[] getItems()
-            {
-                return((Item[]) pathItems.get());
             }
 
             @Override
@@ -2352,28 +2204,6 @@ public abstract class Current
             public TextView speedText;
             public TextView timeText;
             public Calculations.SatelliteObjectType satellite;
-            public static final Parcelable.Creator<Item> CREATOR =  new Parcelable.Creator<Item>()
-            {
-                @Override
-                public Item createFromParcel(Parcel source)
-                {
-                    Bundle bundle = source.readBundle(getClass().getClassLoader());
-                    CalculateCoordinatesTask.CoordinateItemBase itemBase = com.nikolaiapps.orbtrack.CalculateCoordinatesTask.CoordinateItemBase.CREATOR.createFromParcel(source);
-
-                    if(bundle == null)
-                    {
-                        bundle = new Bundle();
-                    }
-
-                    return(new Item(itemBase.listIndex, itemBase.latitude, itemBase.longitude, itemBase.altitudeKm, bundle.getDouble("jd"), bundle.getBoolean("tleAc")));
-                }
-
-                @Override
-                public Item[] newArray(int size)
-                {
-                    return(new Item[size]);
-                }
-            };
 
             public static class Comparer implements Comparator<Item>
             {
@@ -2433,21 +2263,6 @@ public abstract class Current
                 this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, false);
             }
 
-            @Override
-            public void writeToParcel(Parcel dest, int flags)
-            {
-                super.writeToParcel(dest, flags);
-                Bundle bundle = new Bundle();
-
-                if(time != null)
-                {
-                    bundle.putDouble("jd", julianDate);
-
-                    dest.writeBundle(bundle);
-                }
-                bundle.putBoolean("tleAc", tleIsAccurate);
-            }
-
             public boolean haveGeo()
             {
                 return((latitude != 0 || longitude != 0 || altitudeKm != 0) && (latitude != Float.MAX_VALUE && longitude != Float.MAX_VALUE && altitudeKm != Float.MAX_VALUE));
@@ -2498,9 +2313,9 @@ public abstract class Current
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
             }
-            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int oudatedTextID)
+            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
             {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupID, nameGroupID, nameImageID, nameTextID, speedTextID, -1, oudatedTextID);
+                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupID, nameGroupID, nameImageID, nameTextID, speedTextID, -1, outdatedTextID);
             }
             public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int timeTextID)
             {
@@ -2579,12 +2394,6 @@ public abstract class Current
             public Item getItem(int position)
             {
                 return(position >= 0 ? PageAdapter.getCoordinatesItem(position) : null);
-            }
-
-            @Override
-            protected Item[] getItems()
-            {
-                return((Item[])coordinateItems.get());
             }
 
             @Override

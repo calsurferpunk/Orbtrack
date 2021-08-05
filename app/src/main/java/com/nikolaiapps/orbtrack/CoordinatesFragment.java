@@ -788,7 +788,7 @@ public interface CoordinatesFragment
     void setSpeedScale(float speedScaling);
     void setRotateAllowed(boolean enabled);
     void setLatitudeLongitudeGridEnabled(boolean enabled);
-    void setHeading(double degs);
+    void setHeading(double degrees);
     double getHeading();
     void zoom(boolean in);
 

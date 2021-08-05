@@ -20,7 +20,6 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
     @SuppressWarnings("SpellCheckingInspection")
     private static abstract class ParamTypes
     {
-        static final String Index = "index";
         static final String Azimuth = "az";
         static final String Elevation = "el";
         static final String Range = "range";
@@ -40,7 +39,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         }
     }
 
-    public static class ViewItemBase extends Selectable.ListItem implements Parcelable
+    public static class ViewItemBase extends Selectable.ListItem
     {
         public boolean isLoading;
         public float azimuth;
@@ -55,43 +54,23 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         public TextView illuminationText;
         public LinearLayout progressGroup;
         public LinearLayout dataGroup;
-        public static final Creator<ViewItemBase> CREATOR =  new Parcelable.Creator<ViewItemBase>()
-        {
-            @Override
-            public ViewItemBase createFromParcel(Parcel source)
-            {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
 
-                return(new ViewItemBase(bundle.getInt(ParamTypes.Index), bundle.getFloat(ParamTypes.Azimuth), bundle.getFloat(ParamTypes.Elevation), bundle.getFloat(ParamTypes.Range), bundle.getDouble(ParamTypes.Illumination), bundle.getString(ParamTypes.PhaseName)));
-            }
-
-            @Override
-            public ViewItemBase[] newArray(int size)
-            {
-                return(new ViewItemBase[size]);
-            }
-        };
-
-        public ViewItemBase(int index, float az, float el, float range, double illum, String pn)
+        public ViewItemBase(int index, float az, float el, float range, double illumination, String phaseName)
         {
             super(Integer.MAX_VALUE, index, false, false, false, false);
-            isLoading = false;
-            azimuth = az;
-            elevation = el;
-            rangeKm = range;
-            azText = null;
-            elText = null;
-            rangeText = null;
-            phaseText = null;
-            illuminationText = null;
-            progressGroup = null;
-            dataGroup = null;
-            illumination = illum;
-            phaseName = pn;
+            this.isLoading = false;
+            this.azimuth = az;
+            this.elevation = el;
+            this.rangeKm = range;
+            this.azText = null;
+            this.elText = null;
+            this.rangeText = null;
+            this.phaseText = null;
+            this.illuminationText = null;
+            this.progressGroup = null;
+            this.dataGroup = null;
+            this.illumination = illumination;
+            this.phaseName = phaseName;
         }
         public ViewItemBase(int index, float az, float el, float range)
         {
@@ -100,27 +79,6 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         public ViewItemBase(int index)
         {
             this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 0, null);
-        }
-
-        @Override
-        public int describeContents()
-        {
-            return(0);
-        }
-
-        @Override
-        public void writeToParcel(Parcel dest, int flags)
-        {
-            Bundle bundle = new Bundle();
-
-            bundle.putInt(ParamTypes.Index, listIndex);
-            bundle.putFloat(ParamTypes.Azimuth, azimuth);
-            bundle.putFloat(ParamTypes.Elevation, elevation);
-            bundle.putFloat(ParamTypes.Range, rangeKm);
-            bundle.putDouble(ParamTypes.Illumination, illumination);
-            bundle.putString(ParamTypes.PhaseName, phaseName);
-
-            dest.writeBundle(bundle);
         }
 
         public boolean equals(ViewItemBase otherItem)
@@ -211,43 +169,43 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             }
         };
 
-        private OrbitalView(Context context, double az, double el, double rKm, double jd, String zoneId, double illum, String pn, String tmStrng, boolean showSeconds)
+        private OrbitalView(Context context, double az, double el, double rangeKm, double julianDate, String zoneId, double illumination, String phaseName, String timeString, boolean showSeconds)
         {
             if(zoneId == null)
             {
                 zoneId = TimeZone.getDefault().getID();
             }
 
-            azimuth = az;
-            elevation = el;
-            rangeKm = rKm;
-            julianDate = jd;
-            gmtTime = Globals.julianDateToCalendar(julianDate);
-            timeZoneId = zoneId;
-            if(tmStrng != null)
+            this.azimuth = az;
+            this.elevation = el;
+            this.rangeKm = rangeKm;
+            this.julianDate = julianDate;
+            this.gmtTime = Globals.julianDateToCalendar(this.julianDate);
+            this.timeZoneId = zoneId;
+            if(timeString != null)
             {
-                timeString = tmStrng;
+                this.timeString = timeString;
             }
             else
             {
-                timeString = Globals.getDateTimeString(context, Globals.getCalendar(zoneId, gmtTime.getTimeInMillis()), showSeconds, false, true);
+                this.timeString = Globals.getDateTimeString(context, Globals.getCalendar(zoneId, gmtTime.getTimeInMillis()), showSeconds, false, true);
             }
-            timeArea = new Rect(0, 0, 0, 0);
-            timeArea.setEmpty();
-            illumination = illum;
-            phaseName = pn;
+            this.timeArea = new Rect(0, 0, 0, 0);
+            this.timeArea.setEmpty();
+            this.illumination = illumination;
+            this.phaseName = phaseName;
         }
-        public OrbitalView(Context context, double az, double el, double rKm, double jd, String zoneId, double illum, String pn)
+        public OrbitalView(Context context, double az, double el, double rangeKm, double julianDate, String zoneId, double illumination, String phaseName)
         {
-            this(context, az, el, rKm, jd, zoneId, illum, pn, null, false);
+            this(context, az, el, rangeKm, julianDate, zoneId, illumination, phaseName, null, false);
         }
-        public OrbitalView(Context context, Calculations.TopographicDataType topoData, double jd, String zoneId, double illum, String pn)
+        public OrbitalView(Context context, Calculations.TopographicDataType topographicData, double julianDate, String zoneId, double illumination, String pn)
         {
-            this(context, topoData.azimuth, topoData.elevation, topoData.rangeKm, jd, zoneId, illum, pn, null, false);
+            this(context, topographicData.azimuth, topographicData.elevation, topographicData.rangeKm, julianDate, zoneId, illumination, pn, null, false);
         }
-        public OrbitalView(Context context, Calculations.TopographicDataType topoData, double jd, String zoneId, boolean showSeconds)
+        public OrbitalView(Context context, Calculations.TopographicDataType topographicData, double julianDate, String zoneId, boolean showSeconds)
         {
-            this(context, topoData.azimuth, topoData.elevation, topoData.rangeKm, jd, zoneId, 0, null, null, showSeconds);
+            this(context, topographicData.azimuth, topographicData.elevation, topographicData.rangeKm, julianDate, zoneId, 0, null, null, showSeconds);
         }
         @SuppressWarnings("CopyConstructorMissesField")
         public OrbitalView(OrbitalView copyFrom)
@@ -299,8 +257,8 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         final boolean isSun = (currentPath.satellite.getSatelliteNum() == Universe.IDs.Sun);
         final boolean isMoon = (currentPath.satellite.getSatelliteNum() == Universe.IDs.Moon);
         String phaseName = null;
-        Calculations.TopographicDataType topoData;
-        Calculations.TopographicDataType oldTopoData;
+        Calculations.TopographicDataType topographicData;
+        Calculations.TopographicDataType oldTopographicData;
         Calculations.SatelliteObjectType pathSatellite = new Calculations.SatelliteObjectType(currentPath.satellite);
         ArrayList<OrbitalView> pathViews = new ArrayList<>(0);
 
@@ -325,7 +283,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
                 Current.ViewAngles.Item currentItem = savedViewItems[index];
 
                 //set position
-                topoData = new Calculations.TopographicDataType(currentItem.azimuth, currentItem.elevation, currentItem.rangeKm);
+                topographicData = new Calculations.TopographicDataType(currentItem.azimuth, currentItem.elevation, currentItem.rangeKm);
                 illumination = currentItem.illumination;
                 phaseName = currentItem.phaseName;
             }
@@ -340,7 +298,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
 
                 //calculate position
                 Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, false);
-                topoData = Calculations.getLookAngles(observer, pathSatellite, true);
+                topographicData = Calculations.getLookAngles(observer, pathSatellite, true);
 
                 //if moon
                 if(isMoon)
@@ -355,23 +313,23 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
                 {
                     //get old angles
                     Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate - beforeDayIncrement, false);
-                    oldTopoData = Calculations.getLookAngles(observer, pathSatellite, true);
+                    oldTopographicData = Calculations.getLookAngles(observer, pathSatellite, true);
 
                     //get phase name
-                    phaseName = Universe.Sun.getPhaseName(context, topoData.elevation, (topoData.elevation > oldTopoData.elevation));
+                    phaseName = Universe.Sun.getPhaseName(context, topographicData.elevation, (topographicData.elevation > oldTopographicData.elevation));
                 }
             }
             index++;
 
             //add view to list
-            pathViews.add(new OrbitalView(context, topoData, pathJulianDate, observer.timeZone.getID(), illumination, phaseName));
+            pathViews.add(new OrbitalView(context, topographicData, pathJulianDate, observer.timeZone.getID(), illumination, phaseName));
 
             //update azimuth travel
             if(lastAz != Double.MAX_VALUE)
             {
-                azTravel += Math.abs(Globals.degreeDistance(lastAz, topoData.azimuth));
+                azTravel += Math.abs(Globals.degreeDistance(lastAz, topographicData.azimuth));
             }
-            lastAz = topoData.azimuth;
+            lastAz = topographicData.azimuth;
 
             //if date is before end date and next date would be after
             if(pathJulianDate < pathJulianDateEnd && (pathJulianDate + dayIncrement) > pathJulianDateEnd)

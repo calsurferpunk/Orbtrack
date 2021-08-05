@@ -452,9 +452,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             orbitalAz = orbAz;
         }
 
-        public boolean isSet()
+        public boolean isEmpty()
         {
-            return(az != Float.MAX_VALUE && el != Float.MAX_VALUE);
+            return(az == Float.MAX_VALUE || el == Float.MAX_VALUE);
         }
     }
 
@@ -1296,19 +1296,19 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     //Returns if need alignment for center
     public boolean needAlignmentCenter()
     {
-        return(!alignCenter.isSet());
+        return(alignCenter.isEmpty());
     }
 
     //Returns if need bottom left alignment
     public boolean needAlignmentBottomLeft()
     {
-        return(!alignBottomLeft.isSet());
+        return(alignBottomLeft.isEmpty());
     }
 
     //Returns if need top right alignment
     public boolean needAlignmentTopRight()
     {
-        return(!alignTopRight.isSet());
+        return(alignTopRight.isEmpty());
     }
 
     //Sets center alignment

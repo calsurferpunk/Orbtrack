@@ -897,17 +897,17 @@ public class ChooseColorDialog
         int largestIndex = 0;
         int largestValue = 0;
         int[] rgb = new int[]{Color.red(color), Color.green(color), Color.blue(color)};
-        int[] coords = new int[]{0, 0, 255};
+        int[] coordinates = new int[]{0, 0, 255};
         float widthDivide = width / 6f;
 
         //set brightness offset
-        coords[2] = calculateOffset();
+        coordinates[2] = calculateOffset();
 
         //go through each color component
         for(index = 0; index < rgb.length; index++)
         {
             //subtract brightness from color component
-            rgb[index] -= coords[2];
+            rgb[index] -= coordinates[2];
 
             //if the largest component so far
             if(rgb[index] > largestValue)
@@ -953,10 +953,10 @@ public class ChooseColorDialog
         {
             rgb[subIndex] = 255 - rgb[subIndex];
         }
-        coords[0] = (int)(((rgb[subIndex] / 255f) * widthDivide) + (widthDivide * section));
-        coords[1] = (int)((delta / 255f) * height);
+        coordinates[0] = (int)(((rgb[subIndex] / 255f) * widthDivide) + (widthDivide * section));
+        coordinates[1] = (int)((delta / 255f) * height);
 
-        return(coords);
+        return(coordinates);
     }
 
     //gets color components

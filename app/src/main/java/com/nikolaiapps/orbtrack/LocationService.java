@@ -110,7 +110,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
 
     private static class GetPlaceIdCoordinatesTask extends ThreadTask<Object, Void, Void>
     {
-        @Override
+        @Override @SuppressWarnings("SpellCheckingInspection")
         protected Void doInBackground(Object... objects)
         {
             Context context = (Context)objects[0];

@@ -1061,14 +1061,14 @@ public abstract class Settings
             public final CalculateService.AlarmNotifySettings fullStartSettings;
             public final CalculateService.AlarmNotifySettings fullEndSettings;
 
-            public Item(int id, String nm, CalculateService.AlarmNotifySettings pssStrtSttngs, CalculateService.AlarmNotifySettings pssEndSttngs, CalculateService.AlarmNotifySettings fllStrtSttngs, CalculateService.AlarmNotifySettings fllEndSttngs)
+            public Item(int id, String nm, CalculateService.AlarmNotifySettings passStartSettings, CalculateService.AlarmNotifySettings passEndSettings, CalculateService.AlarmNotifySettings fullStartSettings, CalculateService.AlarmNotifySettings fullEndSettings)
             {
                 super(id, -1, true, false, true, false);
-                name = nm;
-                passStartSettings = pssStrtSttngs;
-                passEndSettings = pssEndSttngs;
-                fullStartSettings = fllStrtSttngs;
-                fullEndSettings = fllEndSttngs;
+                this.name = nm;
+                this.passStartSettings = passStartSettings;
+                this.passEndSettings = passEndSettings;
+                this.fullStartSettings = fullStartSettings;
+                this.fullEndSettings = fullEndSettings;
             }
         }
 

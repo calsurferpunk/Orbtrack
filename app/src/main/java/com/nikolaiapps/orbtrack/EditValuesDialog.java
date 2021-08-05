@@ -536,9 +536,6 @@ public class EditValuesDialog
                     //send event
                     dismissListener.onDismiss(EditValuesDialog.this, savedCount);
                 }
-
-                //allow rotation
-                Globals.lockScreenOrientation(currentContext, false);
             }
         });
         editDialog.setOnCancelListener(new DialogInterface.OnCancelListener()
@@ -571,9 +568,6 @@ public class EditValuesDialog
             editDialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(createOnClickListener(DialogInterface.BUTTON_NEUTRAL));
         }
         editDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener(createOnClickListener(DialogInterface.BUTTON_NEGATIVE));
-
-        //prevent rotation until done
-        Globals.lockScreenOrientation(currentContext, true);
     }
     public void getLocation(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String[] numberTitles, double[] numberValues, double[] number2Values, double[] number3Values, String list2Title, String[] list2Values, String[] defaultList2Value)
     {

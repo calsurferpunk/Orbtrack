@@ -605,8 +605,6 @@ public class MasterAddListActivity extends BaseInputActivity
                         switch(progressType)
                         {
                             case Globals.ProgressType.Started:
-                                lockScreenOrientation(true);
-
                                 //if add button exists
                                 if(addButton != null)
                                 {
@@ -640,9 +638,6 @@ public class MasterAddListActivity extends BaseInputActivity
                                     //close it
                                     taskProgress.dismiss();
                                 }
-
-                                //unlock rotation
-                                lockScreenOrientation(false);
 
                                 //if denied
                                 if(progressType == Globals.ProgressType.Denied)

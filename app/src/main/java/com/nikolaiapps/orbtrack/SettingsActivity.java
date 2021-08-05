@@ -1118,7 +1118,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 //cancel
                 needSaveCurrentLocation = false;
-                lockScreenOrientation(false);
             }
         }, new DialogInterface.OnCancelListener()
         {
@@ -1127,7 +1126,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 //cancel
                 needSaveCurrentLocation = false;
-                lockScreenOrientation(false);
             }
         });
 
@@ -2335,12 +2333,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         resultIntent.putExtra(EXTRA_UPDATE_COMBINED_LAYOUT, true);
     }
 
-    //Locks screen orientation
-    private void lockScreenOrientation(boolean lock)
-    {
-        Globals.lockScreenOrientation(this, lock);
-    }
-
     //Shows an add account dialog
     private void showAddAccountDialog(ArrayList<Integer> usedAccounts)
     {
@@ -2506,7 +2498,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         //update status
         needSaveCurrentLocation = show;
-        lockScreenOrientation(show);
 
         //if showing
         if(show)

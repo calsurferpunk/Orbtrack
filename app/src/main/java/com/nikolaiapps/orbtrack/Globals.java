@@ -11,7 +11,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -2276,39 +2275,6 @@ public abstract class Globals
 
         //error
         return(Integer.MAX_VALUE);
-    }
-
-    //Locks screen orientation
-    public static void lockScreenOrientation(Activity activity, boolean lock)
-    {
-        int rotation;
-
-        if(lock)
-        {
-            rotation = getScreenOrientation(activity);
-            switch(rotation)
-            {
-                case Surface.ROTATION_90:
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                    break;
-
-                case Surface.ROTATION_180:
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_PORTRAIT);
-                    break;
-
-                case Surface.ROTATION_270:
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-                    break;
-
-                case Surface.ROTATION_0:
-                    activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                    break;
-            }
-        }
-        else
-        {
-            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER);
-        }
     }
 
     //Gets text width

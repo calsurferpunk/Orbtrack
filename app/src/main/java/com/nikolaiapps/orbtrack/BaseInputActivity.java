@@ -84,12 +84,6 @@ public abstract class BaseInputActivity extends AppCompatActivity
         }
     }
 
-    //Locks screen orientation
-    public void lockScreenOrientation(boolean lock)
-    {
-        Globals.lockScreenOrientation(this, lock);
-    }
-
     //Gets request code from given intent
     public static byte getRequestCode(Intent intent)
     {

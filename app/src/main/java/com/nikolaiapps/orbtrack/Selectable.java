@@ -1642,9 +1642,6 @@ public abstract class Selectable
                     actionModeMenu.finish();
                 }
             }
-
-            //prevent rotation until done
-            lockScreenOrientation(show);
         }
 
         //Sets the parent view
@@ -2204,12 +2201,6 @@ public abstract class Selectable
         public void setOnSetAdapterListener(OnAdapterSetListener adapter)
         {
             adapterSetListener = adapter;
-        }
-
-        //Locks screen orientation
-        public void lockScreenOrientation(boolean lock)
-        {
-            Globals.lockScreenOrientation(this.getActivity(), lock);
         }
     }
 

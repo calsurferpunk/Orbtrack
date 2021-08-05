@@ -154,10 +154,8 @@
 
         <activity
             android:name=".SettingsActivity"
-            android:screenOrientation="portrait"
             android:configChanges="orientation|screenSize"
-            android:exported="false"
-            tools:ignore="LockedOrientationActivity" />
+            android:exported="false"/>
 
         <activity
             android:name=".NotifySettingsActivity"

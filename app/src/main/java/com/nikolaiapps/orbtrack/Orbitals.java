@@ -1020,7 +1020,7 @@ public abstract class Orbitals
                                     }
                                 }
                                 //else if don't have permission but can ask
-                                else if(Globals.askWritePermission)
+                                else if(Globals.canAskWritePermission)
                                 {
                                     //if activity is set
                                     if(activity != null)
@@ -1033,7 +1033,7 @@ public abstract class Orbitals
                                 {
                                     //show denied and don't ask again
                                     Globals.showDenied(listParentView, res.getString(R.string.desc_permission_write_external_storage_deny));
-                                    Globals.askWritePermission = false;
+                                    Globals.canAskWritePermission = false;
                                 }
                                 break;
 
@@ -1235,7 +1235,7 @@ public abstract class Orbitals
             Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.SDCardOpenItem);
         }
         //else if don't have permission but can ask
-        else if(Globals.askReadPermission)
+        else if(Globals.canAskReadPermission)
         {
             Globals.askReadPermission(context, false);
         }
@@ -1243,7 +1243,7 @@ public abstract class Orbitals
         {
             //show denied and don't ask again
             Globals.showDenied(parentView, res.getString(R.string.desc_permission_read_external_storage_deny));
-            Globals.askReadPermission = false;
+            Globals.canAskReadPermission = false;
         }
     }
 

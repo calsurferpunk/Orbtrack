@@ -682,11 +682,11 @@ public abstract class Globals
     public static final String[] fileDataExtensions = new String[]{".tle", ".json", ".txt"};
 
     //Variables
-    public static boolean askLocationPermission = true;
-    public static boolean askCameraPermission = true;
-    public static boolean askWritePermission = true;
-    public static boolean askReadPermission = true;
-    public static boolean askExactAlarmPermission = true;
+    public static boolean canAskLocationPermission = true;
+    public static boolean canAskCameraPermission = true;
+    public static boolean canAskWritePermission = true;
+    public static boolean canAskReadPermission = true;
+    public static boolean canAskExactAlarmPermission = true;
 
     //Gets unknown string
     public static String getUnknownString(Context context)
@@ -1063,23 +1063,23 @@ public abstract class Globals
                     switch(resultCode)
                     {
                         case PermissionType.CameraRetry:
-                            askCameraPermission = false;
+                            canAskCameraPermission = false;
                             break;
 
                         case PermissionType.LocationRetry:
-                            askLocationPermission = false;
+                            canAskLocationPermission = false;
                             break;
 
                         case PermissionType.ReadExternalStorageRetry:
-                            askReadPermission = false;
+                            canAskReadPermission = false;
                             break;
 
                         case PermissionType.WriteExternalStorageRetry:
-                            askWritePermission = false;
+                            canAskWritePermission = false;
                             break;
 
                         case PermissionType.ExactAlarmRetry:
-                            askExactAlarmPermission = false;
+                            canAskExactAlarmPermission = false;
                             break;
                     }
 

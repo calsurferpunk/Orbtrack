@@ -646,7 +646,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
 
         //start camera
-        startCamera(currentHolder);
+        startCamera(currentHolder, false);
     }
 
     @Override
@@ -1480,7 +1480,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     //Starts the camera
-    private void startCamera(SurfaceHolder holder)
+    private void startCamera(SurfaceHolder holder, boolean retrying)
     {
         int cameraOrientation;
         boolean inPortrait = inOrientationPortrait();
@@ -1499,21 +1499,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //get orientation
         cameraOrientation = (cameraRotate ? ((orientation + 180) % 360) : orientation);
 
-        //if -not using camera- or -don't have permission and can't ask-
-        if(!useCamera || (!havePermission && !Globals.askCameraPermission))
-        {
-            //stop camera if previously open
-            stopCamera(false);
-
-            //set desired camera degree view
-            cameraDegWidth = userDegWidth;
-            cameraDegHeight = userDegHeight;
-
-            //start sensors
-            startSensors = true;
-        }
-        //else if have permission
-        else if(havePermission)
+        //if using camera and have permission
+        if(useCamera && havePermission)
         {
             //stop camera if previously open
             stopCamera(false);
@@ -1555,17 +1542,51 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 Globals.showSnackBar(this, res.getString(R.string.text_camera_error), ex.getMessage(), true, true);
             }
         }
-        //else if can ask for permission
-        else if(Globals.askCameraPermission)
+        //else if using camera, don't have permission, but can ask
+        else if(useCamera && Globals.canAskCameraPermission)
         {
             //ask for permission
-            Globals.askCameraPermission(context, false, null);
+            Globals.askCameraPermission(context, retrying, new Globals.OnDenyListener()
+            {
+                @Override
+                public void OnDeny(byte resultCode)
+                {
+                    //if were retrying
+                    if(retrying)
+                    {
+                        //use without camera
+                        startCamera(holder, true);
+                    }
+                }
+            });
+            if(retrying)
+            {
+                //don't ask again
+                Globals.canAskCameraPermission = false;
+            }
         }
+        //else not using camera or can't get permission
         else
         {
-            //show denied and don't ask again
-            Globals.showDenied(this, res.getString(R.string.desc_permission_camera_deny));
-            Globals.askCameraPermission = false;
+            //if using camera but can't get permission
+            if(useCamera)
+            {
+                //show denied and don't ask again
+                Globals.showDenied(this, res.getString(R.string.desc_permission_camera_deny));
+                Globals.canAskCameraPermission = false;
+            }
+            else
+            {
+                //stop camera if previously open
+                stopCamera(false);
+            }
+
+            //set desired camera degree view
+            cameraDegWidth = userDegWidth;
+            cameraDegHeight = userDegHeight;
+
+            //start sensors
+            startSensors = true;
         }
 
         //if starting sensors
@@ -1592,15 +1613,19 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             updateThread = new UpdateThread();
         }
 
-        //start update thread
-        updateThread.setRunning(true);
+        //start/stop update thread
+        updateThread.setRunning(startSensors);
     }
-    public void startCamera()
+    public void startCamera(boolean retrying)
     {
         if(currentHolder != null)
         {
-            startCamera(currentHolder);
+            startCamera(currentHolder, retrying);
         }
+    }
+    public void startCamera()
+    {
+        startCamera(false);
     }
 
     @Override

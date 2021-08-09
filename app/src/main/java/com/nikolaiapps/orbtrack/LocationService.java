@@ -662,7 +662,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                     if(!Globals.haveLocationPermission(this))
                     {
                         //if can ask
-                        if(Globals.askLocationPermission)
+                        if(Globals.canAskLocationPermission)
                         {
                             //send need permission broadcast
                             sendNeedPermission();
@@ -1254,7 +1254,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
     {
         //show denied and don't ask again
         Globals.showDenied(parentView, context.getResources().getString(R.string.desc_permission_location_deny));
-        Globals.askLocationPermission = false;
+        Globals.canAskLocationPermission = false;
     }
 
     //Sets an autocomplete text to resolved locations

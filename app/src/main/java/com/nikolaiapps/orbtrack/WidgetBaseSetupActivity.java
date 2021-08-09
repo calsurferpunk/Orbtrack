@@ -1547,7 +1547,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         if(widgetSettings.location.source == Database.LocationType.Current && !Globals.haveLocationPermission(context))
                         {
                             //if can ask for permission
-                            if(Globals.askLocationPermission)
+                            if(Globals.canAskLocationPermission)
                             {
                                 //get permission
                                 Globals.askLocationPermission(context, false);

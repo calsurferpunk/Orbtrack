@@ -198,7 +198,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     private void handleSettingNotifications(int noradId, Calculations.ObserverType location, boolean useList, boolean retrying, Intent resultData)
     {
         //done if -have permission to set exact timer- or -can't ask-
-        if(Globals.haveExactAlarmPermission(NotifySettingsActivity.this) || !Globals.askExactAlarmPermission)
+        if(Globals.haveExactAlarmPermission(NotifySettingsActivity.this) || !Globals.canAskExactAlarmPermission)
         {
             //set notifications
             setNotifications(noradId, location, useList);

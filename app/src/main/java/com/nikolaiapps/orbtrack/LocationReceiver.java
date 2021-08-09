@@ -154,7 +154,7 @@ public abstract class LocationReceiver extends BroadcastReceiver
                 activity = getActivity();
 
                 //if activity is set and can ask for permission
-                if(activity != null && Globals.askLocationPermission)
+                if(activity != null && Globals.canAskLocationPermission)
                 {
                     if(messageType == LocationService.MessageTypes.NeedEnable)
                     {

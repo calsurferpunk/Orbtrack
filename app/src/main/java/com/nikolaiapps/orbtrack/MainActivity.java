@@ -626,26 +626,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //if view exists
                         if(cameraView != null)
                         {
-                            //if granted
-                            if(granted)
-                            {
-                                //try to start camera
-                                cameraView.startCamera();
-                            }
-                            //else if not retrying
-                            else if(!retrying)
-                            {
-                                //ask permission again
-                                Globals.askCameraPermission(this, true, new Globals.OnDenyListener()
-                                {
-                                    @Override
-                                    public void OnDeny(byte resultCode)
-                                    {
-                                        //try to start camera without all permissions
-                                        cameraView.startCamera();
-                                    }
-                                });
-                            }
+                            //try to start the camera again
+                            cameraView.startCamera(!granted);
                         }
                         break;
                 }
@@ -1997,7 +1979,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
                 }
                 //else if don't have permission but can ask
-                else if(Globals.askWritePermission)
+                else if(Globals.canAskWritePermission)
                 {
                     Globals.askWritePermission(this, false);
                 }
@@ -2005,7 +1987,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     //show denied and don't ask again
                     Globals.showDenied(mainDrawerLayout, res.getString(R.string.desc_permission_write_external_storage_deny));
-                    Globals.askWritePermission = false;
+                    Globals.canAskWritePermission = false;
                 }
                 break;
 

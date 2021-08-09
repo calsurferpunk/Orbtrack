@@ -952,69 +952,6 @@ public abstract class Calculations
         return(gmt_cal);
     }
 
-    /*//Returns geometric mean longitude of sun
-    public static double calcGeomMeanLongSun(double t)
-    {
-        double L0 = 280.46646 + t * (36000.76983 + t*(0.0003032));
-        while(L0 > 360.0)
-        {
-            L0 -= 360.0;
-        }
-        while(L0 < 0.0)
-        {
-            L0 += 360.0;
-        }
-        return(L0);		// in degrees
-    }
-
-    //Returns geometric mean anomaly of sun
-    public static double calcGeomMeanAnomalySun(double t)
-    {
-        return(357.52911 + t * (35999.05029 - 0.0001537 * t));
-    }
-
-    //Returns eccentricity of earth orbit
-    public static double calcEccentricityEarthOrbit(double t)
-    {
-        return(0.016708634 - t * (0.000042037 + 0.0000001267 * t));		// unit-less
-    }
-
-    //Returns sun equation of center
-    public static double calcSunEqOfCenter(double t)
-    {
-        double m, mrad, sinm, sin2m, sin3m, C;
-
-        m = calcGeomMeanAnomalySun(t);
-        mrad = Math.toRadians(m);
-        sinm = Math.sin(mrad);
-        sin2m = Math.sin(mrad + mrad);
-        sin3m = Math.sin(mrad + mrad + mrad);
-        C = sinm * (1.914602 - t * (0.004817 + 0.000014 * t)) + sin2m * (0.019993 - 0.000101 * t) + sin3m * 0.000289;
-        return(C);		// in degrees
-    }
-
-    //Returns sun true longitude
-    public static double calcSunTrueLong(double t)
-    {
-        double l0, c, O;
-
-        l0 = calcGeomMeanLongSun(t);
-        c = calcSunEqOfCenter(t);
-        O = l0 + c;
-        return(O);		// in degrees
-    }
-
-    //Returns sun apparent longitude
-    public static double calcSunApparentLong(double t)
-    {
-        double o, omega, lambda;
-
-        o = calcSunTrueLong(t);
-        omega = 125.04 - 1934.136 * t;
-        lambda = o - 0.00569 - 0.00478 * Math.sin(Math.toRadians(omega));
-        return(lambda);		// in degrees
-    }*/
-
     //Returns mean obliquity of ecliptic
     private static double calcMeanObliquityOfEcliptic(double t)
     {
@@ -1035,53 +972,6 @@ public abstract class Calculations
         e = e0 + 0.00256 * Math.cos(Math.toRadians(omega));
         return(e);		// in degrees
     }
-
-    /*//Returns sun declination
-    public static double calcSunDeclination(double oblC, double lambda)
-    {
-        double sint, theta;
-
-        sint = Math.sin(Math.toRadians(oblC)) * Math.sin(Math.toRadians(lambda));
-        theta = Math.toDegrees(Math.asin(sint));
-        return(theta);		// in degrees
-    }
-
-    //Returns calculation of time
-    public static double calcEquationOfTime(double time, double oblC)
-    {
-        double l0, e, m, y, sin2l0, sinm, cos2l0, sin4l0, sin2m, Etime;
-
-        l0 = calcGeomMeanLongSun(time);
-        e = calcEccentricityEarthOrbit(time);
-        m = calcGeomMeanAnomalySun(time);
-
-        y = Math.tan(Math.toRadians(oblC) / 2.0);
-        y *= y;
-
-        sin2l0 = Math.sin(2.0 * Math.toRadians(l0));
-        sinm   = Math.sin(Math.toRadians(m));
-        cos2l0 = Math.cos(2.0 * Math.toRadians(l0));
-        sin4l0 = Math.sin(4.0 * Math.toRadians(l0));
-        sin2m  = Math.sin(2.0 * Math.toRadians(m));
-
-        Etime = y * sin2l0 - 2.0 * e * sinm + 4.0 * e * y * sinm * cos2l0 - 0.5 * y * y * sin4l0 - 1.25 * e * e * sin2m;
-        return(Math.toDegrees(Etime) * 4.0);	// in minutes of time
-    }
-
-    //Returns distance between earth and the sun for the given time
-    public static double sunDistanceKM(double julianDate)
-    {
-        double C, T, M, M_rad, e, f, au;
-
-        T = calcTimeJulianCent(julianDate);
-        M = 357.52910 + 35999.05030 * T - 0.0001559 * T * T - 0.00000048 * T * T * T;
-        M_rad = Math.toRadians(M);
-        e = 0.016708617 - 0.000042037 * T - 0.0000001236 * T * T;
-        C = (1.914600 - 0.004817 * T - 0.000014 * T * T) * Math.sin(M_rad) + (0.019993-0.000101 * T ) * Math.sin(2.0 * M_rad) + 0.000290 * Math.sin(3.0 * M_rad);
-        f = M_rad + Math.toRadians(C);
-        au = 1.000001018 * (1.0 - e * e) / (1.0 + e * Math.cos(f));
-        return(au * AU);		//convert AU to km
-    }*/
 
     //Converts the given ECI position at the given Julian date to geodetic coordinates
     private static GeodeticDataType eciToGeo(EciDataType eciData)
@@ -1165,18 +1055,6 @@ public abstract class Calculations
 
         return(cart_data);
     }
-
-    /*//Converts form cartesian to polar coordinates
-    public static GeodeticDataType cartesianToPolar(GeodeticDataType cart_data)
-    {
-        GeodeticDataType polar_data = new GeodeticDataType();
-
-        polar_data.longitude = Math.atan2(cart_data.longitude, cart_data.latitude);
-        polar_data.latitude = Math.atan2(cart_data.radius, Math.sqrt(cart_data.latitude * cart_data.latitude + cart_data.longitude * cart_data.longitude));
-        polar_data.radius = Math.sqrt(cart_data.latitude * cart_data.latitude + cart_data.longitude * cart_data.longitude + cart_data.radius * cart_data.radius);
-
-        return(polar_data);
-    }*/
 
     //Rotates
     private static GeodeticDataType rotateLocation(GeodeticDataType location, double radDeg, int axis)

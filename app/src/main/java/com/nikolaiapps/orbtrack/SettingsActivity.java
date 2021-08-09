@@ -563,7 +563,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
                 }
 
-                //if range is valid
+                //if range has been set
                 if(min >= 0)
                 {
                     //set range
@@ -1797,54 +1797,52 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     updateList();
                 }
 
-                //handle based on update type
-                switch(updateType)
+                //if updating satellites
+                if(updateType == UpdateService.UpdateType.UpdateSatellites)
                 {
-                    case UpdateService.UpdateType.UpdateSatellites:
-                        //handle based on progress type
-                        switch(progressType)
-                        {
-                            case Globals.ProgressType.Denied:
-                                //show login
-                                Globals.showAccountLogin(activity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
+                    //handle based on progress type
+                    switch(progressType)
+                    {
+                        case Globals.ProgressType.Denied:
+                            //show login
+                            Globals.showAccountLogin(activity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
+                            {
+                                @Override
+                                public void onResult(Globals.WebPageData pageData, boolean success)
                                 {
-                                    @Override
-                                    public void onResult(Globals.WebPageData pageData, boolean success)
+                                    //if success or attempted to login
+                                    if(success || pageData != null)
                                     {
-                                        //if success or attempted to login
-                                        if(success || pageData != null)
-                                        {
-                                            //try again
-                                            updateSatellites(false);
-                                        }
-                                        else
-                                        {
-                                            //allow inputs
-                                            setLoading(false);
-                                        }
+                                        //try again
+                                        updateSatellites(false);
                                     }
-                                });
-                                break;
-
-                            case Globals.ProgressType.Finished:
-                                //if pager exists
-                                if(setupPager != null)
-                                {
-                                    //done with update
-                                    updateNow = false;
-
-                                    //go to next page
-                                    setupPager.setCurrentItem(setupPager.getCurrentItem() + 1);
+                                    else
+                                    {
+                                        //allow inputs
+                                        setLoading(false);
+                                    }
                                 }
-                                //fall through
+                            });
+                            break;
 
-                            default:
-                                //allow inputs if ended
-                                setLoading(!ended);
-                                break;
+                        case Globals.ProgressType.Finished:
+                            //if pager exists
+                            if(setupPager != null)
+                            {
+                                //done with update
+                                updateNow = false;
 
-                        }
-                        break;
+                                //go to next page
+                                setupPager.setCurrentItem(setupPager.getCurrentItem() + 1);
+                            }
+                            //fall through
+
+                        default:
+                            //allow inputs if ended
+                            setLoading(!ended);
+                            break;
+
+                    }
                 }
             }
         });

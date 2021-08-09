@@ -298,6 +298,7 @@ public class IconSpinner extends AppCompatSpinner
             return(values);
         }
 
+        @SuppressWarnings("unused")
         public Object getItemValue(int position)
         {
             return(items[position].value);

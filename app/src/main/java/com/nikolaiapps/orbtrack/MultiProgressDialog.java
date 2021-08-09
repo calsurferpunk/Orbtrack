@@ -111,6 +111,7 @@ public class MultiProgressDialog extends AlertDialog
     {
         setProgressDisplays(barLayout2, bar2, percentText2, percent);
     }
+    @SuppressWarnings("unused")
     public void setProgress2(long value, long total)
     {
         setProgress2(total != 0 ? (int)((value / (float)total) * 100) : 0);

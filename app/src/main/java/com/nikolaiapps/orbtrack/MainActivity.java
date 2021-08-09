@@ -2231,14 +2231,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             case Groups.Current:
                             case Groups.Orbitals:
-                                switch(position)
+                                //add satellite
+                                if(position == 0)
                                 {
-                                    //add satellite
-                                    case 0:
-                                        //show dialog and close menu
-                                        Orbitals.showAddDialog(MainActivity.this, resultLauncher, otherOpenLauncher, mainDrawerLayout, false);
-                                        mainDrawerLayout.closeDrawers();
-                                        break;
+                                    //show dialog and close menu
+                                    Orbitals.showAddDialog(MainActivity.this, resultLauncher, otherOpenLauncher, mainDrawerLayout, false);
+                                    mainDrawerLayout.closeDrawers();
                                 }
                                 break;
                         }

@@ -27,6 +27,7 @@ import java.util.TimeZone;
 
 public class Graph extends View
 {
+    @SuppressWarnings("unused")
     static abstract class UnitType
     {
         static final byte Number = 1;
@@ -1287,6 +1288,7 @@ public class Graph extends View
         this.refresh();
     }
 
+    @SuppressWarnings("unused")
     public void setDeltaYScrollScale(float percentValue)
     {
         deltaYScrollPercent = percentValue;
@@ -1314,6 +1316,7 @@ public class Graph extends View
         this.refresh();
     }
 
+    @SuppressWarnings("unused")
     public void setValueDecimals(int decimalPlaces)
     {
         valueDecimalPlaces = decimalPlaces;
@@ -1474,6 +1477,7 @@ public class Graph extends View
     {
         setData(x1, y1, null, y2, zone);
     }
+    @SuppressWarnings("unused")
     public void setData(List<Double> x, List<Double> yTop, List<Double> yBottom)
     {
         setData(x, yTop, yBottom, null, null);
@@ -1483,6 +1487,7 @@ public class Graph extends View
         setData(x, y, null, null, zone);
     }
 
+    @SuppressWarnings("unused")
     public void setDataImages(List<Bitmap> yImages)
     {
         int index;
@@ -1507,17 +1512,20 @@ public class Graph extends View
         showDataTitlesMinYValue = minYValue;
         this.refresh();
     }
+    @SuppressWarnings("unused")
     public void setDataTitlesVisible(boolean showTitles)
     {
         setDataTitlesVisible(showDataTitlesMinYValue, showTitles);
     }
 
+    @SuppressWarnings("unused")
     public void setBorderVisible(boolean showBorder)
     {
         showGraphBorder = showBorder;
         this.refresh();
     }
 
+    @SuppressWarnings("unused")
     public void setDivisionLinesVisible(boolean showXLines, boolean showYLines)
     {
         xAxisDivisionLinesVisible = showXLines;
@@ -1525,6 +1533,7 @@ public class Graph extends View
         this.refresh();
     }
 
+    @SuppressWarnings("unused")
     public void setDivisorTitlesYVisible(boolean show)
     {
         yDivisorTitlesVisible = show;
@@ -1715,6 +1724,7 @@ public class Graph extends View
         userSelectedImage2 = image;
     }
 
+    @SuppressWarnings("unused")
     public void setAllowParentTouch(boolean allow)
     {
         allowParentTouch = allow;
@@ -1725,11 +1735,13 @@ public class Graph extends View
         }
     }
 
+    @SuppressWarnings("unused")
     public void setAllowUpdate(boolean allow)
     {
         allowUpdate = allow;
     }
 
+    @SuppressWarnings("unused")
     public void setScrollable(boolean canScroll)
     {
         //update status
@@ -1841,10 +1853,12 @@ public class Graph extends View
 
         this.refresh();
     }
+    @SuppressWarnings("unused")
     public void setDivisorsXTitles(String imagesTitle, String subImages)
     {
         setDivisorsXTitles(imagesTitle, subImages, null);
     }
+    @SuppressWarnings("unused")
     public void setDivisorsXTitles(String imagesTitle)
     {
         setDivisorsXTitles(imagesTitle, null, null);
@@ -1931,6 +1945,7 @@ public class Graph extends View
         this.refresh();
     }
 
+    @SuppressWarnings("unused")
     public void setAxisDivisionImageOffsets(int xTopOffset, int xBottomOffset)
     {
         xAxisDivisionImageTopOffset = xTopOffset;
@@ -1938,6 +1953,7 @@ public class Graph extends View
         this.refresh();
     }
 
+    @SuppressWarnings("unused")
     public void setAsPreview(final Graph parent)
     {
         isPreview = true;

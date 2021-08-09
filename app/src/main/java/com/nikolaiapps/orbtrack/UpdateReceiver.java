@@ -182,48 +182,44 @@ public abstract class UpdateReceiver extends BroadcastReceiver
                 else
                 {
                     //handle based on update type
-                    switch(updateType)
+                    if(updateType == UpdateService.UpdateType.GetInformation)
                     {
-                        case UpdateService.UpdateType.GetInformation:
-                            //if ended
-                            if(ended)
+                        //if ended
+                        if(ended)
+                        {
+                            //get information
+                            infoString = (String)extraData.getSerializable(UpdateService.ParamTypes.Information);
+                            if(infoString != null)
                             {
-                                //get information
-                                infoString = (String)extraData.getSerializable(UpdateService.ParamTypes.Information);
-                                if(infoString != null)
-                                {
-                                    infoText = (Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT) : Html.fromHtml(infoString));
-                                }
-                                else
-                                {
-                                    infoText = null;
-                                }
-
-                                //call on got information
-                                onGotInformation(infoText, index);
+                                infoText = (Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT) : Html.fromHtml(infoString));
                             }
-                            break;
+                            else
+                            {
+                                infoText = null;
+                            }
+
+                            //call on got information
+                            onGotInformation(infoText, index);
+                        }
                     }
                 }
                 break;
 
             case Globals.ProgressType.Running:
                 //handle based on update type
-                switch(updateType)
+                if(updateType == UpdateService.UpdateType.BuildDatabase)
                 {
-                    case UpdateService.UpdateType.BuildDatabase:
-                        //get dialog
-                        MultiProgressDialog databaseProgress = getDatabaseProgressDialog();
+                    //get dialog
+                    MultiProgressDialog databaseProgress = getDatabaseProgressDialog();
 
-                        //if progress display still exists and section is set
-                        if(databaseProgress != null && section != null)
-                        {
-                            //update display
-                            countValue = index + 1;
-                            databaseProgress.setMessage(section + " (" + (index + 1) + res.getString(R.string.text_space_of_space) + count + ")");
-                            databaseProgress.setProgress(countValue, count);
-                        }
-                        break;
+                    //if progress display still exists and section is set
+                    if(databaseProgress != null && section != null)
+                    {
+                        //update display
+                        countValue = index + 1;
+                        databaseProgress.setMessage(section + " (" + (index + 1) + res.getString(R.string.text_space_of_space) + count + ")");
+                        databaseProgress.setProgress(countValue, count);
+                    }
                 }
                 break;
         }

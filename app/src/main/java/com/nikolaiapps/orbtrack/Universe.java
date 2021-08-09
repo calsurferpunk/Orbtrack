@@ -381,13 +381,9 @@ public abstract class Universe
             {
                 return(false);
             }
-            else if(phase >= (0.5 - PHASE_NAME_TOLERANCE))      //0.5
+            else      //0.5 true, 0 - 0.5 false
             {
-                return(true);
-            }
-            else                                                //0 - 0.5
-            {
-                return(false);
+                return(phase >= (0.5 - PHASE_NAME_TOLERANCE));
             }
         }
 

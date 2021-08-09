@@ -131,7 +131,6 @@ public abstract class Calculate
             int subPage = this.getSubPageParam();
             View newView = null;
             Bundle params = this.getArguments();
-            //String itemsParamName;
             Context context = this.getContext();
             Selectable.ListBaseAdapter listAdapter;
 

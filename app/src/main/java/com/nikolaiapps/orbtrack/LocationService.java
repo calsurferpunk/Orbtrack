@@ -303,6 +303,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         private final Location altitudeLocation;
         private final GetAltitudeTask.OnGotAltitudeListener gotAltitudeListener;
 
+        @SuppressWarnings("unused")
         GetAltitudeTask(Location location, GetAltitudeTask.OnGotAltitudeListener listener)
         {
             altitudeLocation = location;
@@ -1092,13 +1093,13 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
             if(locationClient != null)
             {
                 //try to send last location
-                locationClient.getLastLocation().addOnCompleteListener(new OnCompleteListener<Location>()
+                locationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>()
                 {
                     @Override
-                    public void onComplete(@NonNull Task<Location> task)
+                    public void onSuccess(Location location)
                     {
                         //update with last known location
-                        LocationService.this.onLocationChanged(task.getResult());
+                        LocationService.this.onLocationChanged(location);
                     }
                 });
             }

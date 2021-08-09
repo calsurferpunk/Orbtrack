@@ -154,32 +154,29 @@ public class AddSelectListAdapter extends BaseAdapter
             selectionIds = itemIds;
             selections = new String[selectionIds.length];
 
-            //handle based on selection type
-            switch(selectType)
+            //if adding an account
+            if(selectType == SelectType.AddAccount)
             {
-                default:
-                case SelectType.AddAccount:
-                    //go through each account
-                    for(index = 0; index < selectionIds.length; index++)
+                //go through each account
+                for(index = 0; index < selectionIds.length; index++)
+                {
+                    //set selection based on account
+                    switch(selectionIds[index])
                     {
-                        //set selection based on account
-                        switch(selectionIds[index])
-                        {
-                            case Globals.AccountType.GoogleDrive:
-                                selections[index] = Globals.FileLocationType.GoogleDrive;
-                                break;
+                        case Globals.AccountType.GoogleDrive:
+                            selections[index] = Globals.FileLocationType.GoogleDrive;
+                            break;
 
-                            case Globals.AccountType.Dropbox:
-                                selections[index] = Globals.FileLocationType.Dropbox;
-                                break;
+                        case Globals.AccountType.Dropbox:
+                            selections[index] = Globals.FileLocationType.Dropbox;
+                            break;
 
-                            default:
-                            case Globals.AccountType.SpaceTrack:
-                                selections[index] = Globals.Strings.SpaceTrack;
-                                break;
-                        }
+                        default:
+                        case Globals.AccountType.SpaceTrack:
+                            selections[index] = Globals.Strings.SpaceTrack;
+                            break;
                     }
-                    break;
+                }
             }
         }
     }

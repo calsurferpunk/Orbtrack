@@ -40,16 +40,6 @@ public class FloatingActionStateButtonMenu extends LinearLayout
         menuImageId = -1;
         init(attrs);
     }
-
-    /*public FloatingActionStateButtonMenu(Context context, @Nullable AttributeSet attrs, int imageId, int setMenuLevel)
-    {
-        super(context, attrs);
-
-        menuLevel = setMenuLevel;
-        menuImageId = imageId;
-        init(attrs);
-    }*/
-
     public FloatingActionStateButtonMenu(Context context, @Nullable AttributeSet attrs, int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
@@ -191,20 +181,6 @@ public class FloatingActionStateButtonMenu extends LinearLayout
         mainMenu.show();
     }
 
-    /*public FloatingActionStateButtonMenu addMenu(int imageId)
-    {
-        FloatingActionStateButtonMenu menu = new FloatingActionStateButtonMenu(getContext(), usedAttrs, imageId, menuLevel + 1);
-
-        menu.setVisibility(View.GONE);
-        menu.setOrientation(getOrientation() == LinearLayout.VERTICAL ? LinearLayout.HORIZONTAL : LinearLayout.VERTICAL);
-        if(subMenus.add(menu))
-        {
-            addView(menu, defaultLayoutParams);
-        }
-
-        return(menu);
-    }*/
-
     public FloatingActionStateButton addMenuItem(int imageId, int stringId)
     {
         Context context = getContext();
@@ -252,14 +228,6 @@ public class FloatingActionStateButtonMenu extends LinearLayout
 
         return(menuItem);
     }
-    /*public void addMenuItem(View view)
-    {
-        view.setVisible(View.GONE);
-        if(subMenus.add(view))
-        {
-            addView(view, defaultLayoutParams);
-        }
-    }*/
 
     public boolean close()
     {

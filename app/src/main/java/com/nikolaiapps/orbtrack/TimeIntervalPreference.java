@@ -223,6 +223,7 @@ public class TimeIntervalPreference extends Preference
     }
 
     //Sets interval value
+    @SuppressWarnings("unused")
     public void setIntervalMs(long timeMs)
     {
         //if a valid index

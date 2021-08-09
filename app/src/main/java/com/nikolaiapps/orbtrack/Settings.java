@@ -2065,12 +2065,6 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.LensIndicatorIconShowDirection));
     }
 
-    /*//Sets lens icon indicator showing direction
-    public static void setIndicatorIconShowDirection(Context context, boolean show)
-    {
-        setPreferenceBoolean(context, PreferenceName.LensIndicatorIconShowDirection, show);
-    }*/
-
     //Gets lens average count
     public static int getLensAverageCount(Context context)
     {
@@ -2247,28 +2241,6 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.ShowSatelliteClouds + (forMap ? SubPreferenceName.Map : SubPreferenceName.Globe)));
     }
 
-    /*//Returns google map type
-    public static int getGoogleMapType(Context context)
-    {
-        int mapLayerType = getMapLayerType(context, false);
-
-        switch(mapLayerType)
-        {
-            case CoordinatesFragment.MapLayerType.Satellite:
-                return(GoogleMap.MAP_TYPE_SATELLITE);
-
-            case CoordinatesFragment.MapLayerType.Terrain:
-                return(GoogleMap.MAP_TYPE_TERRAIN);
-
-            case CoordinatesFragment.MapLayerType.Hybrid:
-                return(GoogleMap.MAP_TYPE_HYBRID);
-
-            default:
-            case CoordinatesFragment.MapLayerType.Normal:
-                return(GoogleMap.MAP_TYPE_NORMAL);
-        }
-    }*/
-
     //Sets map display type
     public static void setMapDisplayType(Context context, int mapDisplayType)
     {
@@ -2317,32 +2289,10 @@ public abstract class Settings
         return(getPreferenceFloat(context, PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map)));
     }
 
-    //Sets map speed scale
-    public static void setMapSpeedScale(Context context, float scale, boolean forGlobe)
-    {
-        //if a valid scale
-        if(scale >= (SpeedScaleMin / 100.0f) && scale <= (SpeedScaleMax / 100.0f))
-        {
-            //set scale
-            setPreferenceFloat(context, PreferenceName.MapSpeedScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale);
-        }
-    }
-
     //Gets map sensitivity scale
     public static float getMapSensitivityScale(Context context, boolean forGlobe)
     {
         return(getPreferenceFloat(context, PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map)));
-    }
-
-    //Sets map sensitivity scale
-    public static void setMapSensitivityScale(Context context, float scale, boolean forGlobe)
-    {
-        //if a valid scale
-        if(scale >= (SensitivityScaleMin / 100.0f) && scale <= (SensitivityScaleMax / 100.0f))
-        {
-            //set scale
-            setPreferenceFloat(context, PreferenceName.MapSensitivityScale + (forGlobe ? SubPreferenceName.Globe : SubPreferenceName.Map), scale);
-        }
     }
 
     //Returns map rotate allowed
@@ -2405,22 +2355,10 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.MapShowSunlight));
     }
 
-    //Sets map showing sunlight
-    public static void setMapShowSunlight(Context context, boolean show)
-    {
-        setPreferenceBoolean(context, PreferenceName.MapShowSunlight, show);
-    }
-
     //Returns map showing orbital direction
     public static boolean getMapShowOrbitalDirection(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirection));
-    }
-
-    //Sets map showing orbital direction
-    public static void setMapShowOrbitalDirection(Context context, boolean show)
-    {
-        setPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirection, show);
     }
 
     //Returns map marker info location

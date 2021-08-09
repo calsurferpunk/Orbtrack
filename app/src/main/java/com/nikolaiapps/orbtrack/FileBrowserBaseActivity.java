@@ -326,14 +326,16 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         //Sets selected status of given file
         private void setFileSelected(ItemBase fileName, boolean add)
         {
+            boolean fileIsSelected = selectedFiles.contains(fileName);
+
             //if adding and file is not in the list
-            if(add && !selectedFiles.contains(fileName))
+            if(add && !fileIsSelected)
             {
                 //add file
                 selectedFiles.add(fileName);
             }
             //else if removing and file is in the list
-            else if(!add && selectedFiles.contains(fileName))
+            else if(!add && fileIsSelected)
             {
                 //remove file
                 selectedFiles.remove(fileName);

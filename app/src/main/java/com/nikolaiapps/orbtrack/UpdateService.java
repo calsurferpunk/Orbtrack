@@ -986,6 +986,7 @@ public class UpdateService extends NotifyService
     {
         sendMessage(messageType, updateType, section, index, count, -1, progressType, data);
     }
+    @SuppressWarnings("SameParameterValue")
     private void sendMessage(byte messageType, byte updateType, String section, long index, long count, long overall, int progressType)
     {
         sendMessage(messageType, updateType, section, index, count, overall, progressType, null);
@@ -1436,6 +1437,7 @@ public class UpdateService extends NotifyService
     }
 
     //Returns if string contains any of the given values
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     private static boolean containsAny(String inputString, String[] values)
     {
         int index;
@@ -1443,7 +1445,7 @@ public class UpdateService extends NotifyService
         //go through each value
         for(index = 0; index < values.length; index++)
         {
-            //check for invalid characters in the line
+            //check for value in the line
             if(inputString.contains(values[index]))
             {
                 //found value
@@ -1459,21 +1461,31 @@ public class UpdateService extends NotifyService
     private static String[] parseTLEData(String htmlPage, int satelliteNum)
     {
         int index = 0;
+        int htmlPageLength = (htmlPage != null ? htmlPage.length() : 0);
         boolean validTle = false;
         String tleLine1 = "";
-        String tleLine2;
+        String tleLine2 = "";
         String satelliteNumberString = String.format(Locale.US, "%05d", satelliteNum);
+        String line1Start = "1 " + satelliteNumberString;
+        String line2Start = "2 " + satelliteNumberString;
         String[] errorResult = new String[]{"", ""};
         String[] invalidChars = new String[]{"<", ">", "/", "\\", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "{", "}", "[", "]", "\"", "?", "\"", "`", "~"};
+
+        //if no page
+        if(htmlPageLength == 0)
+        {
+            //return error
+            return(errorResult);
+        }
 
         //search for the start of TLE line 1 while not found
         while(!validTle)
         {
             //find the next possible starting index
-            index = htmlPage.indexOf("1 " + satelliteNumberString, index);
+            index = htmlPage.indexOf(line1Start, index);
 
             //if the index was found and is long enough
-            if(index >= 0 && (index + TLE_LINE_LENGTH) <= htmlPage.length())
+            if(index >= 0 && (index + TLE_LINE_LENGTH) <= htmlPageLength)
             {
                 //get TLE line 1
                 tleLine1 = htmlPage.substring(index, index + TLE_LINE_LENGTH);
@@ -1484,10 +1496,11 @@ public class UpdateService extends NotifyService
                     //done searching
                     validTle = true;
                 }
-                //else keep searching
-
-                //jump ahead to next
-                index++;
+                else
+                {
+                    //jump ahead to next
+                    index += 2;
+                }
             }
             //else no index found or too short
             else
@@ -1501,10 +1514,10 @@ public class UpdateService extends NotifyService
         while(!validTle)
         {
             //find the next possible starting index
-            index = htmlPage.indexOf("2 " + satelliteNumberString, index);
+            index = htmlPage.indexOf(line2Start, index);
 
             //if the index was found and is long enough
-            if(index >= 0 && (index + TLE_LINE_LENGTH) <= htmlPage.length())
+            if(index >= 0 && (index + TLE_LINE_LENGTH) <= htmlPageLength)
             {
                 //get TLE line 2
                 tleLine2 = htmlPage.substring(index, index + TLE_LINE_LENGTH);
@@ -1512,14 +1525,14 @@ public class UpdateService extends NotifyService
                 //if no invalid chars are found in the line
                 if(!containsAny(tleLine2, invalidChars))
                 {
-                    //both lines found, done searching
+                    //done searching
                     validTle = true;
-                    return(new String[]{tleLine1, tleLine2});
                 }
-                //else keep searching
-
-                //jump ahead to next
-                index++;
+                else
+                {
+                    //jump ahead to next
+                    index += 2;
+                }
             }
             //else no index found or too short
             else
@@ -1528,8 +1541,8 @@ public class UpdateService extends NotifyService
             }
         }
 
-        //no valid TLE data found
-        return(errorResult);
+        //return TLE lines
+        return(new String[]{tleLine1, tleLine2});
     }
 
     //Removes HTML tags
@@ -2102,8 +2115,12 @@ public class UpdateService extends NotifyService
                 //go through page while not cancelled
                 do
                 {
-                    //update celestrak progress message (overall - overall +25%)
-                    sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (updateSource == Database.UpdateSource.Celestrak ? (overall + (int)((pageOffset / (float)receivedPageLength) * 25)) : 0), Globals.ProgressType.Success);
+                    //if updating celestrak
+                    if(updateSource == Database.UpdateSource.Celestrak)
+                    {
+                        //update status (overall - overall +25%)
+                        sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (overall + (int)((pageOffset / (float)receivedPageLength) * 25)), Globals.ProgressType.Success);
+                    }
 
                     //find next txt file row start while not cancelled
                     rowStart = (rowStartText != null ? receivedPageLower.indexOf(rowStartText, pageOffset) : pageOffset);
@@ -2517,18 +2534,16 @@ public class UpdateService extends NotifyService
 
                     //getting owners
                     case UpdateSubSource.Owners:
-                        switch(updateSource)
+                        if(updateSource == Database.UpdateSource.N2YO)
                         {
-                            case Database.UpdateSource.N2YO:
-                                //remember urls
-                                urls = urlList.toArray(new MasterLink[0]);
+                            //remember urls
+                            urls = urlList.toArray(new MasterLink[0]);
 
-                                //get satellite owners while not cancelled (40 - 75%)
-                                for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
-                                {
-                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.SatelliteOwners, index, overall + (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
-                                }
-                                break;
+                            //get satellite owners while not cancelled (40 - 75%)
+                            for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
+                            {
+                                status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.SatelliteOwners, index, overall + (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
+                            }
                         }
                         break;
 
@@ -3322,6 +3337,7 @@ public class UpdateService extends NotifyService
     }
 
     //Returns if modifying any satellites
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean modifyingSatellites()
     {
         return(isRunning(UpdateType.GetMasterList) || isRunning(UpdateType.UpdateSatellites) || isRunning(UpdateType.LoadFile));

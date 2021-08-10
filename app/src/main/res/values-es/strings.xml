@@ -128,6 +128,7 @@
     <string name="desc_compass_error">Calibre la brújula moviendo su dispositivo en un patrón de figura 8, o aléjese de la interferencia.</string>
     <string name="desc_finished_setup">¡Todo listo! Si desea cambiar algo más tarde, busque en la configuración en el menú principal.</string>
     <string name="desc_force_rotate">Forzar la rotación de la cámara si la vista aparece al revés</string>
+    <string name="desc_google_play_services_fail">Lo siento. Hay un problema desconocido con los servicios de Google Play.</string>
     <string name="desc_imperial">Imperial (mi/pies)</string>
     <string name="desc_information_source">Descripciones y detalles de satélites.</string>
     <string name="desc_location_disable">Los servicios de ubicación están deshabilitados. ¿Desea cambiar la configuración?</string>

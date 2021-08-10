@@ -537,41 +537,14 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
                 //testing
                 testingAPI = true;
 
-                GoogleApiClient testClient = createLocationClient(new GoogleApiClient.ConnectionCallbacks()
-                {
-                    @Override
-                    public void onConnected(@Nullable Bundle bundle)
-                    {
-                        //don't use legacy
-                        useLegacy = false;
+                //get if using legacy
+                useLegacy = !Globals.getUseGooglePlayServices(this);
 
-                        //done testing
-                        needTestAPI = testingAPI = false;
+                //done testing
+                needTestAPI = testingAPI = false;
 
-                        //continue
-                        onStartCommand(intent, flags, startId);
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int i) {}
-                }, new GoogleApiClient.OnConnectionFailedListener()
-                {
-                    @Override
-                    public void onConnectionFailed(@NonNull ConnectionResult connectionResult)
-                    {
-                        int errorCode = connectionResult.getErrorCode();
-
-                        //fall back to legacy if service is invalid, unavailable, or outdated
-                        useLegacy = (errorCode == ConnectionResult.SERVICE_INVALID || errorCode == ConnectionResult.API_UNAVAILABLE || errorCode == ConnectionResult.SERVICE_VERSION_UPDATE_REQUIRED);
-
-                        //done testing
-                        needTestAPI = testingAPI = false;
-
-                        //continue
-                        onStartCommand(intent, flags, startId);
-                    }
-                });
-                testClient.connect();
+                //restart
+                return(onStartCommand(intent, flags, startId));
             }
         }
         else

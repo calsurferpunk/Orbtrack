@@ -753,13 +753,18 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
         boolean useFile = (fileName != null);
         Intent intent = new Intent(activity, GoogleDriveAccess.class);
 
-        intent.putExtra(FileBrowserBaseActivity.ParamTypes.SelectFolder, selectFolder);
-        if(useFile)
+        //if can use google play services
+        if(Globals.getUseGooglePlayServices(activity, true))
         {
-            intent.putExtra(FileBrowserBaseActivity.ParamTypes.FileName, fileName);
+            //setup and start google drive access
+            intent.putExtra(FileBrowserBaseActivity.ParamTypes.SelectFolder, selectFolder);
+            if(useFile)
+            {
+                intent.putExtra(FileBrowserBaseActivity.ParamTypes.FileName, fileName);
+            }
+            intent.putExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, count);
+            Globals.startActivityForResult(launcher, intent, (useFile ? BaseInputActivity.RequestCode.GoogleDriveSave : selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
         }
-        intent.putExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, count);
-        Globals.startActivityForResult(launcher, intent, (useFile ? BaseInputActivity.RequestCode.GoogleDriveSave : selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
     }
     public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, boolean selectFolder)
     {

@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -37,6 +38,8 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.security.ProviderInstaller;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -1158,6 +1161,73 @@ public abstract class Globals
         }
     }
 
+    //Gets if google play services are available
+    public static boolean getUseGooglePlayServices(Context context, boolean showError)
+    {
+        int result;
+        boolean errorShown = false;
+        Resources res;
+        Dialog errorDialog;
+        GoogleApiAvailability api;
+
+        //if context exists
+        if(context != null)
+        {
+            //check for API availability
+            api = GoogleApiAvailability.getInstance();
+            result = api.isGooglePlayServicesAvailable(context);
+
+            //if available
+            if(result == ConnectionResult.SUCCESS)
+            {
+                //available
+                return(true);
+            }
+            //else if showing errors
+            else if(showError)
+            {
+                //if can show user a dialog
+                if(context instanceof Activity && api.isUserResolvableError(result))
+                {
+                    //try to show dialog
+                    try
+                    {
+                        errorDialog = api.getErrorDialog((Activity)context, result, 10000);
+                        if(errorDialog != null)
+                        {
+                            errorDialog.show();
+                            errorShown = true;
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        //do nothing
+                    }
+                }
+
+                //if no error shown yet
+                if(!errorShown)
+                {
+                    //show error now
+                    res = context.getResources();
+                    showConfirmDialog(context, res.getString(R.string.title_failed), res.getString(R.string.desc_google_play_services_fail) + "(" + result + ")", res.getString(R.string.title_ok), null, true, null, null);
+                }
+            }
+
+            //not available
+            return(false);
+        }
+        else
+        {
+            //unknown
+            return(false);
+        }
+    }
+    public static boolean getUseGooglePlayServices(Context context)
+    {
+        return(getUseGooglePlayServices(context, false));
+    }
+
     //Get google drive sign in client
     public static GoogleSignInClient getGoogleDriveSignInClient(Activity context)
     {
@@ -1171,13 +1241,13 @@ public abstract class Globals
     }
 
     //Ask for google drive account
-    public static void askGoogleDriveAccount(Activity context, ActivityResultLauncher<Intent> launcher, byte requestCode)
+    public static void askGoogleDriveAccount(Activity activity, ActivityResultLauncher<Intent> launcher, byte requestCode)
     {
-        //if context is set
-        if(context != null)
+        //if activity is set
+        if(activity != null)
         {
             //ask for user account
-            startActivityForResult(launcher, getGoogleDriveSignInClient(context).getSignInIntent(), requestCode);
+            startActivityForResult(launcher, getGoogleDriveSignInClient(activity).getSignInIntent(), requestCode);
         }
     }
 

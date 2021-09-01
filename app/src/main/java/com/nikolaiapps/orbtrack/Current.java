@@ -695,7 +695,7 @@ public abstract class Current
 
                 if(startText != null)
                 {
-                    startText.setText(inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false, true));
+                    startText.setText(inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
                 }
 
                 if(durationText != null)
@@ -706,6 +706,7 @@ public abstract class Current
                 if(elMaxTitle != null)
                 {
                     elMaxTitle.setText(Globals.Symbols.Elevating);
+                    elMaxTitle.setVisibility(isKnownPassElevationMax() ? View.VISIBLE : View.INVISIBLE);
                 }
 
                 if(elMaxText != null)
@@ -715,7 +716,7 @@ public abstract class Current
 
                 if(elMaxUnder != null)
                 {
-                    elMaxUnder.setBackgroundColor(passElMax == Double.MAX_VALUE ? Color.TRANSPARENT : passElMax >= 60 ? Color.GREEN : passElMax >= 30 ? Color.YELLOW : Color.RED);
+                    elMaxUnder.setBackgroundColor(!isKnownPassElevationMax() ? Color.TRANSPARENT : passElMax >= 60 ? Color.GREEN : passElMax >= 30 ? Color.YELLOW : Color.RED);
                 }
 
                 if(passProgress != null)
@@ -963,19 +964,19 @@ public abstract class Current
 
                                         case 9:
                                             title = startString;
-                                            text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, currentZone, true, false));
+                                            text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, currentZone, false));
                                             break;
 
                                         case 10:
                                             title = endString;
-                                            text = Globals.getDateString(currentContext, currentItem.passTimeEnd, currentZone, true, false);
+                                            text = Globals.getDateString(currentContext, currentItem.passTimeEnd, currentZone, false);
                                             break;
 
                                         case 11:
                                             if(useLocalZone)
                                             {
                                                 title = localString + " " + startString;
-                                                text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, defaultZone, true, false));
+                                                text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, defaultZone, false));
                                             }
                                             break;
 
@@ -983,7 +984,7 @@ public abstract class Current
                                             if(useLocalZone)
                                             {
                                                 title = localString + " " + endString;
-                                                text = Globals.getDateString(currentContext, currentItem.passTimeEnd, defaultZone, true, false);
+                                                text = Globals.getDateString(currentContext, currentItem.passTimeEnd, defaultZone, false);
                                             }
                                             break;
 
@@ -1171,7 +1172,7 @@ public abstract class Current
                 }
                 if(timeText != null && time != null && context != null)
                 {
-                    timeText.setText(Globals.getDateTimeString(context, Globals.getLocalTime(time, time.getTimeZone()), true, true));
+                    timeText.setText(Globals.getDateTimeString(context, Globals.getLocalTime(time, time.getTimeZone()), true, true, false));
                 }
             }
         }
@@ -1666,7 +1667,7 @@ public abstract class Current
 
                     if(timeStartText != null)
                     {
-                        timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false, allowDayAbbrev));
+                        timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, allowDayAbbrev, false));
 
                         if(timeStartTitleText != null)
                         {
@@ -1699,7 +1700,7 @@ public abstract class Current
 
                     if(timeEndText != null)
                     {
-                        timeEndText.setText(!passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeEnd, zone, true, false, true));
+                        timeEndText.setText(!passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeEnd, zone, true, false));
                     }
 
                     if(timeDurationText != null)
@@ -2044,19 +2045,19 @@ public abstract class Current
 
                                             case 2:
                                                 title = startString;
-                                                text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, currentZone, true, false));
+                                                text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, currentZone, false));
                                                 break;
 
                                             case 3:
                                                 title = endString;
-                                                text = Globals.getDateString(currentContext, currentItem.passTimeEnd, currentZone, true, false);
+                                                text = Globals.getDateString(currentContext, currentItem.passTimeEnd, currentZone, false);
                                                 break;
 
                                             case 4:
                                                 if(useLocalZone)
                                                 {
                                                     title = localString + " " + startString;
-                                                    text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, defaultZone, true, false));
+                                                    text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, defaultZone, false));
                                                 }
                                                 break;
 
@@ -2064,7 +2065,7 @@ public abstract class Current
                                                 if(useLocalZone)
                                                 {
                                                     title = localString + " " + endString;
-                                                    text = Globals.getDateString(currentContext, currentItem.passTimeEnd, defaultZone, true, false);
+                                                    text = Globals.getDateString(currentContext, currentItem.passTimeEnd, defaultZone, false);
                                                 }
                                                 break;
 
@@ -2295,7 +2296,7 @@ public abstract class Current
                     }
                     else if(time != null)
                     {
-                        timeText.setText(Globals.getDateString(timeText.getContext(), time, zone, true, true));
+                        timeText.setText(Globals.getDateString(timeText.getContext(), time, zone, true));
                     }
                 }
             }

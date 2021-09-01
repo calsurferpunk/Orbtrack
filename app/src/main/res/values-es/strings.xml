@@ -425,6 +425,7 @@
     <string name="title_notifications">Notificaciones</string>
     <string name="title_now">Ahora</string>
     <string name="title_number">Número</string>
+    <string name="title_numbers_have_commas">Números Tienen Comas</string>
     <string name="title_o">O</string>
     <string name="title_ok">OK</string>
     <string name="title_open_settings">Configuración Abierta</string>

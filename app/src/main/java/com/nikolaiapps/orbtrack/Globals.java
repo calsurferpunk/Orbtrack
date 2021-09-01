@@ -1705,9 +1705,10 @@ public abstract class Globals
         Formatter dayFormatter = new Formatter(Locale.getDefault());
         String valueString =  (context != null && timeMs != 0 ? (DateUtils.formatDateRange(context, dayFormatter, timeMs, timeMs, DateUtils.FORMAT_NUMERIC_DATE | (showYear ? DateUtils.FORMAT_SHOW_YEAR : DateUtils.FORMAT_NO_YEAR) | (showDayAbbrev ? (DateUtils.FORMAT_ABBREV_WEEKDAY | DateUtils.FORMAT_SHOW_WEEKDAY) : 0), zone.getID())).toString() : "");
 
-        //if year was still added (bug on older APIs)
+        //if don't want to show year
         if(!showYear)
         {
+            //if year was still added (bug on older APIs)
             index = valueString.lastIndexOf("/");
             if(index >= 0 && index + 3 < valueString.length())
             {
@@ -1729,7 +1730,7 @@ public abstract class Globals
     }
 
     //Gets formatted date
-    public static synchronized String getDateString(Context context, Calendar date, TimeZone zone, boolean showSeconds, boolean showDay, boolean allowSimpleDay, boolean allowForceShowDayYear, boolean shortUnknown)
+    private static synchronized String getDateString(Context context, Calendar date, TimeZone zone, boolean showSeconds, boolean showDay, boolean allowSimpleDay, boolean allowForceShowDayYear, boolean shortUnknown, boolean dayLineBreak)
     {
         boolean showDayAbbrev = false;
         boolean showSimpleDay = false;
@@ -1798,36 +1799,32 @@ public abstract class Globals
             //return for desired zone
             shortTimeFormatter.setTimeZone(zone);
             mediumTimeFormatter.setTimeZone(zone);
-            return(showSimpleDay ? (context != null ? context.getResources().getQuantityString(R.plurals.title_days_ago, daysAgo, daysAgo) : "") : (showDay && context != null ? (getLocalDayString(context, localDate, zone, showDayAbbrev, showYear) + (showSeconds ? "\r\n" : ", ")) : "") + (localDate != null ? (showSeconds ? mediumTimeFormatter.format(localDate.getTime()) : shortTimeFormatter.format(localDate.getTime())) : ""));
+            return(showSimpleDay ? (context != null ? context.getResources().getQuantityString(R.plurals.title_days_ago, daysAgo, daysAgo) : "") : (showDay && context != null ? (getLocalDayString(context, localDate, zone, showDayAbbrev, showYear) + (dayLineBreak ? "\r\n" : ", ")) : "") + (localDate != null ? (showSeconds ? mediumTimeFormatter.format(localDate.getTime()) : shortTimeFormatter.format(localDate.getTime())) : ""));
         }
-    }
-    public static synchronized String getDateString(Context context, Calendar date, TimeZone zone, boolean showSeconds, boolean showDay, boolean allowForceShowDayYear, boolean shortUnknown)
-    {
-        return(getDateString(context, date, zone, showSeconds, showDay, false, allowForceShowDayYear, shortUnknown));
     }
     public static String getDateString(Context context, Calendar date, TimeZone zone, boolean showSeconds, boolean alwaysShowDay, boolean allowSimpleDay)
     {
-        return(getDateString(context, date, zone, showSeconds, alwaysShowDay, allowSimpleDay, true, false));
+        return(getDateString(context, date, zone, showSeconds, alwaysShowDay, allowSimpleDay, true, false, showSeconds));
     }
-    public static String getDateString(Context context, Calendar date, TimeZone zone, boolean showSeconds, boolean showDay)
+    public static String getDateString(Context context, Calendar date, TimeZone zone, boolean allowSimpleDay, boolean dayLineBreak)
     {
-        return(getDateString(context, date, zone, showSeconds, showDay, false, true, false));
+        return(getDateString(context, date, zone, true, false, allowSimpleDay, true, false, dayLineBreak));
+    }
+    public static String getDateString(Context context, Calendar date, TimeZone zone, boolean showDay)
+    {
+        return(getDateString(context, date, zone, true, showDay, false, true, false, true));
     }
 
     //Gets time string
-    public static String getTimeString(Context context, Calendar date, TimeZone zone)
+    public static String getTimeString(Context context, Calendar date, TimeZone zone, boolean shortUnknown)
     {
-        return(getDateString(context, date, zone, false, false, false, false));
+        return(getDateString(context, date, zone, false, false, false, false, shortUnknown, false));
     }
 
     //Gets formatted date and time
     public static String getDateTimeString(Context context, Calendar date, boolean showSeconds, boolean showDay, boolean allowSimpleDay)
     {
-        return(getDateString(context, date, date.getTimeZone(), showSeconds, showDay, allowSimpleDay, true, false));
-    }
-    public static String getDateTimeString(Context context, Calendar date, boolean showSeconds, boolean showDay)
-    {
-        return(getDateString(context, date, date.getTimeZone(), showSeconds, showDay, false, true, false));
+        return(getDateString(context, date, date.getTimeZone(), showSeconds, showDay, allowSimpleDay, true, false, showSeconds));
     }
 
     //Gets formatted date and time
@@ -2123,7 +2120,15 @@ public abstract class Globals
     public static String getNumberString(double number, int decimalPlaces)
     {
         boolean veryLarge = (number >= 1.0E10);
-        return(String.format(Locale.US, "%3." + (veryLarge && decimalPlaces < 3 ? 3 : decimalPlaces) + (veryLarge ? "e" : "f"), number));
+
+        if(decimalPlaces == 0 && Settings.getUsingNumberCommas() && number < 10000000000.0)
+        {
+            return(String.format(Locale.US, "%,3d", (long)number));
+        }
+        else
+        {
+            return(String.format(Locale.US, "%3." + (veryLarge && decimalPlaces < 3 ? 3 : decimalPlaces) + (veryLarge ? "e" : "f"), number));
+        }
     }
     public static String getNumberString(double number)
     {

@@ -914,7 +914,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 sameDay = (displayLocalTime != null && currentLocalTime != null && displayLocalTime.get(Calendar.DAY_OF_YEAR) == currentLocalTime.get(Calendar.DAY_OF_YEAR));
 
                 setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, (useStart ? Globals.Symbols.Up : Globals.Symbols.Down));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, (!sameDay ? (Globals.getLocalDayString(context, displayTime, zone) + " ") : "") + Globals.getDateString(context, displayTime, zone, false, false, false, true).replace(" ", "&nbsp;"));
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, (!sameDay ? (Globals.getLocalDayString(context, displayTime, zone) + " ") : "") + Globals.getTimeString(context, displayTime, zone, true).replace(" ", "&nbsp;"));
             }
             if(useExtended)
             {

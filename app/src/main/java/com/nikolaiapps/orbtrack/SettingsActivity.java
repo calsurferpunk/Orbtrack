@@ -117,6 +117,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     case ScreenKey.Display:
                         SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
+                        SwitchPreference allowNumberCommasSwitch = this.findPreference(Settings.PreferenceName.AllowNumberCommas);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
 
                         //initialize values
@@ -124,6 +125,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(darkThemeSwitch, null);
+                        setupSwitch(allowNumberCommasSwitch, null);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
                         break;
 
@@ -1198,6 +1200,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.MetricUnits:
+                        case Settings.PreferenceName.AllowNumberCommas:
                             //recreate activity
                             setRecreateNeeded();
 

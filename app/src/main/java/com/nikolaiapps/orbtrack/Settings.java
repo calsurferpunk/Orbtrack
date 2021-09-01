@@ -60,6 +60,7 @@ public abstract class Settings
         static final String DarkTheme = "DarkTheme";
         static final String ColorTheme = "ColorTheme";
         static final String MetricUnits = "MetricUnits";
+        static final String AllowNumberCommas = "AllowNumberCommas";
         static final String MapLayerType = "MapLayerType";
         static final String MapShow3dPaths = "MapShow3dPaths";
         static final String ShowSatelliteClouds = "ShowSatelliteClouds";
@@ -1745,6 +1746,7 @@ public abstract class Settings
 
     //Status of using metric units, grid, and map marker bottom info
     private static boolean usingMetric = true;
+    private static boolean allowNumberCommas = true;
     private static boolean usingCurrentGridLayout = false;
     private static boolean mapMarkerInfoBottom = true;
 
@@ -1791,6 +1793,7 @@ public abstract class Settings
             case PreferenceName.MapShowSunlight:
             case PreferenceName.MapShowSearchList:
             case PreferenceName.MetricUnits:
+            case PreferenceName.AllowNumberCommas:
             case PreferenceName.ShareTranslations:
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
@@ -2101,6 +2104,26 @@ public abstract class Settings
     public static boolean getUsingMetric()
     {
         return(usingMetric);
+    }
+
+    //Gets allowing number commas
+    public static boolean getAllowNumberCommas(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.AllowNumberCommas));
+    }
+
+    //Sets allowing number commas
+    public static void setAllowNumberCommas(Context context, boolean allow)
+    {
+        setPreferenceBoolean(context, PreferenceName.AllowNumberCommas, allow);
+        allowNumberCommas = allow;
+    }
+
+    //Returns if allowing/using number commas
+    //note: faster than getting through preferences since called a lot
+    public static boolean getUsingNumberCommas()
+    {
+        return(allowNumberCommas);
     }
 
     //Get lens first run

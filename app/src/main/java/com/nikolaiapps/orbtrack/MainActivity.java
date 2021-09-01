@@ -181,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         inEditMode = pendingLocationUpdate = false;
         observer = null;
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
+        Settings.setAllowNumberCommas(this, Settings.getAllowNumberCommas(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
         Settings.setUsingCurrentGridLayout(this, Settings.getCurrentGridLayout(this));
         setSaveFileData(null, "", "", -1, -1);

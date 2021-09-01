@@ -26,6 +26,11 @@
                     app:itemTexts="@array/display_distance_units_texts"
                     app:itemValues="@array/display_distance_units_values"
                     app:valueType="Boolean"/>
+
+                <SwitchPreference
+                    android:title="@string/title_numbers_have_commas"
+                    android:key="AllowNumberCommas"
+                    android:persistent="false"/>
             </PreferenceCategory>
         </PreferenceScreen>
 

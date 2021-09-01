@@ -200,7 +200,8 @@ public abstract class Selectable
                 //setup and show dialog
                 if(title != null)
                 {
-                    itemDetailDialog.setIcon(icon);
+                    //note: makes icon copy so that original is not altered
+                    itemDetailDialog.setIcon(icon.getConstantState().newDrawable().mutate());
                     itemDetailDialog.setTitle(title);
                 }
                 itemDetailDialog.setView(itemDetailsGroup);

@@ -106,6 +106,7 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import javax.net.ssl.X509TrustManager;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -4399,6 +4400,17 @@ public abstract class Globals
             }
             clientBuilder = new OkHttpClient.Builder().writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS);
             clientBuilder.cookieJar(cookies);
+            if(Build.VERSION.SDK_INT <= 20)
+            {
+                //create TLS backwards compatibility
+                TLSSocketFactory socketFactory = new TLSSocketFactory();
+                X509TrustManager manager = socketFactory.getTrustManager();
+
+                if(manager != null)
+                {
+                    clientBuilder.sslSocketFactory(socketFactory, manager);
+                }
+            }
             client = clientBuilder.build();
             siteHttpsConnection = client.newCall(siteRequestBuilder.build()).execute();
             responseCode = siteHttpsConnection.code();

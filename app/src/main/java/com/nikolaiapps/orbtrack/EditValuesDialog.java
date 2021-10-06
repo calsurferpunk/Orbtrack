@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.text.Editable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +20,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TableRow;
 import android.widget.TextView;
+import com.google.android.material.textfield.TextInputEditText;
 import java.util.Calendar;
 
 
@@ -68,7 +70,7 @@ public class EditValuesDialog
     private TextView editNumber3Title;
     private TextView editDateTitle;
     private EditText editValueText;
-    private EditText editValue2Text;
+    private TextInputEditText editValue2Text;
     private EditText editNumberText;
     private EditText editNumber2Text;
     private EditText editNumber3Text;
@@ -133,6 +135,7 @@ public class EditValuesDialog
                 String textValue;
                 String text2Value;
                 String list2Value = (isLogin ? (String)editValueList2.getSelectedValue("") : "");
+                Editable text;
                 boolean ignoreClick = false;
                 boolean isSpaceTrack = (isLogin && (list2Value == null || list2Value.equals(Settings.Options.Sources.SpaceTrack)));
                 boolean usingNumberValues = (itemNumberValues != null);
@@ -146,7 +149,8 @@ public class EditValuesDialog
                     case DialogInterface.BUTTON_POSITIVE:
                         //get values
                         textValue = editValueText.getText().toString().trim();
-                        text2Value = editValue2Text.getText().toString().trim();
+                        text = editValue2Text.getText();
+                        text2Value = (text != null ? text.toString().trim() : "");
 
                         //if -sort by- or -text exists and -not login or not space-track or text 2 exists--
                         if(isSortBy || ((!textValue.equals("") || (isLogin && !isSpaceTrack)) && (!isLogin || !isSpaceTrack || !text2Value.equals(""))))

@@ -755,8 +755,10 @@ public interface CoordinatesFragment
     double DefaultNearZoom = 1.25;
     double DefaultFarZoom = 4.25;
     double MaxDrawDistanceKm = (WhirlyEarthRadiusKm * 16);
-    double MinDrawDistanceZ = 500000;
-    double MaxDrawDistanceZ = (MaxDrawDistanceKm * 200.0);
+    double MinDrawDistanceMeters = 500000;
+    double MaxDrawDistanceMeters = (MaxDrawDistanceKm * 200.0);
+    double MinDrawDistanceEarthRadiusPercent = (MinDrawDistanceMeters / (WhirlyEarthRadiusKm * 1000));
+    double MaxDrawDistanceEarthRadiusPercent = (MaxDrawDistanceMeters / (WhirlyEarthRadiusKm * 1000));
 
     void setOnReadyListener(OnReadyListener listener);
     void setOnMovedListener(OnMovedListener listener);

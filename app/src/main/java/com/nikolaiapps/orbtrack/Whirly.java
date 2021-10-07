@@ -282,6 +282,7 @@ class Whirly
 
         void moveLocation(double latitude, double longitude, double altitudeKm, boolean limitAltitude)
         {
+            //get initial z value in scaled meters
             double z = (altitudeKm * 1000 * CoordinatesFragment.WhirlyZScale);
 
             remove();
@@ -291,13 +292,13 @@ class Whirly
             longitude = Globals.normalizeLongitude(longitude);
             if(limitAltitude)
             {
-                if(z < CoordinatesFragment.MinDrawDistanceZ)
+                if(z < CoordinatesFragment.MinDrawDistanceMeters)
                 {
-                    z = CoordinatesFragment.MinDrawDistanceZ;
+                    z = CoordinatesFragment.MinDrawDistanceMeters;
                 }
-                else if(z > CoordinatesFragment.MaxDrawDistanceZ)
+                else if(z > CoordinatesFragment.MaxDrawDistanceMeters)
                 {
-                    z = CoordinatesFragment.MaxDrawDistanceZ;
+                    z = CoordinatesFragment.MaxDrawDistanceMeters;
                 }
             }
 
@@ -531,7 +532,6 @@ class Whirly
             {
                 CoordinatesFragment.Coordinate currentPoint = points.get(index);
                 CoordinatesFragment.Coordinate nextPoint = (index + 1 < pointsLength ? points.get(index + 1) : null);
-                Point3d elevatedPoint;
                 Point2d[] flatSplitPoints = null;
 
                 //remember current location
@@ -600,26 +600,21 @@ class Whirly
                 }
                 else
                 {
-                    //get initial z value
-                    z = currentAltKm * CoordinatesFragment.WhirlyZScale;
+                    //get initial z value in scaled earth radius percent
+                    z = (currentAltKm * CoordinatesFragment.WhirlyZScale) / CoordinatesFragment.WhirlyEarthRadiusKm;
 
                     //keep inside of bounds
-                    if(z < CoordinatesFragment.MinDrawDistanceZ / 1000)
+                    if(z < CoordinatesFragment.MinDrawDistanceEarthRadiusPercent)
                     {
-                        z = CoordinatesFragment.MinDrawDistanceZ / 1000;
+                        z = CoordinatesFragment.MinDrawDistanceEarthRadiusPercent;
                     }
-                    else if(z > CoordinatesFragment.MaxDrawDistanceZ / 1000)
+                    else if(z > CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent)
                     {
-                        z = CoordinatesFragment.MaxDrawDistanceZ / 1000;
+                        z = CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent;
                     }
 
-                    //if able to get point
-                    elevatedPoint = controller.displayPointFromGeo(new Point3d(Point2d.FromDegrees(currentLon, currentLat), z));
-                    if(elevatedPoint != null)
-                    {
-                        //add point
-                        setElevatedPoints.add(elevatedPoint.multiplyBy((z / CoordinatesFragment.WhirlyEarthRadiusKm) + 1.0));
-                    }
+                    //add point
+                    setElevatedPoints.add(new Point3d(Point2d.FromDegrees(currentLon, currentLat), z));
                 }
             }
 

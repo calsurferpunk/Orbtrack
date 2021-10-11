@@ -1214,15 +1214,10 @@ public abstract class Globals
                     showConfirmDialog(context, res.getString(R.string.title_failed), res.getString(R.string.desc_google_play_services_fail) + "(" + result + ")", res.getString(R.string.title_ok), null, true, null, null);
                 }
             }
+        }
 
-            //not available
-            return(false);
-        }
-        else
-        {
-            //unknown
-            return(false);
-        }
+        //unknown/not available
+        return(false);
     }
     public static boolean getUseGooglePlayServices(Context context)
     {

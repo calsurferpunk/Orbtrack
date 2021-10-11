@@ -210,47 +210,6 @@ public abstract class Current
             }
         }
 
-        public Object[] get()
-        {
-            switch(group)
-            {
-                case MainActivity.Groups.Current:
-                    switch(page)
-                    {
-                        case PageType.View:
-                            return(PageAdapter.getViewAngleItems());
-
-                        case PageType.Passes:
-                            return(PageAdapter.getPassItems());
-
-                        case PageType.Coordinates:
-                            return(PageAdapter.getCoordinatesItems());
-
-                        case PageType.Combined:
-                            return(PageAdapter.getCombinedItems());
-                    }
-                    break;
-
-                case MainActivity.Groups.Calculate:
-                    switch(page)
-                    {
-                        case Calculate.PageType.View:
-                            return(Calculate.PageAdapter.getViewAngleItems());
-
-                        case Calculate.PageType.Passes:
-                            return(Calculate.PageAdapter.getPassItems());
-
-                        case Calculate.PageType.Coordinates:
-                            return(Calculate.PageAdapter.getCoordinatesItems());
-
-                        case Calculate.PageType.Intersection:
-                            return(Calculate.PageAdapter.getIntersectionItems());
-                    }
-                    break;
-            }
-
-            return(null);
-        }
         private Object get(int index)
         {
             switch(group)

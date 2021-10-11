@@ -454,7 +454,6 @@ public class UpdateService extends NotifyService
         @SuppressWarnings("SpellCheckingInspection")
         public static abstract class Constants
         {
-            static final String InternationalCode = "INTLDES";
             static final String NoradID = "NORAD_CAT_ID";
             static final String Name = "SATNAME";
             static final String CountryCode = "COUNTRY";
@@ -463,7 +462,6 @@ public class UpdateService extends NotifyService
         }
 
         public int noradId;
-        public String internationalCode;
         public String name;
         public String ownerCode;
         public byte orbitalType;
@@ -473,7 +471,7 @@ public class UpdateService extends NotifyService
         public SpaceTrackSatellite()
         {
             noradId = Integer.MAX_VALUE;
-            internationalCode = name = ownerCode = null;
+            name = ownerCode = null;
             orbitalType = Database.OrbitalType.Satellite;
             launchDate = null;
             categories = new ArrayList<>(10);
@@ -1366,7 +1364,6 @@ public class UpdateService extends NotifyService
 
             try
             {
-                currentSatellite.internationalCode = dataItem.getString(SpaceTrackSatellite.Constants.InternationalCode);
                 currentSatellite.noradId = Globals.tryParseInt(dataItem.getString(SpaceTrackSatellite.Constants.NoradID));
                 currentSatellite.ownerCode = Globals.normalizeOwnerCode(dataItem.getString(SpaceTrackSatellite.Constants.CountryCode));
                 currentSatellite.name = dataItem.getString(SpaceTrackSatellite.Constants.Name);

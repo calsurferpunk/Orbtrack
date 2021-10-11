@@ -735,9 +735,19 @@ public class Database extends SQLiteOpenHelper
             return(getName("?"));
         }
 
+        public String getOwnerCode()
+        {
+            return(database != null ? database.ownerCode : null);
+        }
+
         public byte getOrbitalType()
         {
             return(database != null ? database.orbitalType : OrbitalType.Satellite);
+        }
+
+        public boolean getTLEIsAccurate()
+        {
+            return(database != null && database.tleIsAccurate);
         }
 
         public boolean equals(SatelliteData other)

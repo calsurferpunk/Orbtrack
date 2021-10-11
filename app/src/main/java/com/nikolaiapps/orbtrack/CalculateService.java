@@ -115,6 +115,7 @@ public class CalculateService extends NotifyService
         public Calendar passTimeEnd;
         public String passDuration;
         public String name;
+        public String ownerCode;
         public String phaseName;
         public byte orbitalType;
         public byte orbital2Type;
@@ -162,6 +163,7 @@ public class CalculateService extends NotifyService
             this.passDuration = duration;
             this.illumination = illumination;
             this.name = "";
+            this.ownerCode = null;
             this.orbitalType = this.orbital2Type = Database.OrbitalType.Satellite;
             this.phaseName = phaseName;
             this.passViews = copyViewArray(views);
@@ -183,6 +185,7 @@ public class CalculateService extends NotifyService
             {
                 id = currentSatellite.getSatelliteNum();
                 name = currentSatellite.getName();
+                ownerCode = currentSatellite.getOwnerCode();
                 orbitalType = orbital2Type = currentSatellite.getOrbitalType();
                 satellite = currentSatellite.satellite;
             }
@@ -197,6 +200,7 @@ public class CalculateService extends NotifyService
             this(copyFrom.listIndex, copyFrom.passAzStart, copyFrom.passAzEnd, copyFrom.passAzTravel, copyFrom.passElMax, copyFrom.passClosestAz, copyFrom.passClosestEl, copyFrom.passCalculating, copyFrom.passCalculated, copyFrom.passCalculateFinished, copyFrom.passStartFound, copyFrom.showPathProgress, copyFrom.passTimeStart, copyFrom.passTimeEnd, copyFrom.passDuration, copyFrom.passViews, copyFrom.passViews2, copyFrom.satellite, copyFrom.satellite2, copyFrom.illumination, copyFrom.phaseName);
             id = copyFrom.id;
             name = copyFrom.name;
+            ownerCode = copyFrom.ownerCode;
             orbitalType = copyFrom.orbitalType;
             orbital2Type = copyFrom.orbital2Type;
         }
@@ -1702,6 +1706,7 @@ public class CalculateService extends NotifyService
                             section += (" " + res.getString(haveSatellite2 ? R.string.title_intersection : R.string.title_pass) + " " + (pathCount + 1));
                             newPass.id = currentItem.id;
                             newPass.name = section;
+                            newPass.ownerCode = currentItem.ownerCode;
                             newPass.orbitalType = currentSatellite1.getOrbitalType();
                             newPass.orbital2Type = (haveSatellite2 ? currentSatellite2.getOrbitalType() : newPass.orbitalType);
                             newPass.listIndex = pathCount;

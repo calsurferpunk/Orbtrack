@@ -159,7 +159,7 @@ public abstract class Selectable
             private final ArrayList<AppCompatImageButton> detailButtons = new ArrayList<>();
             private ArrayList<DialogInterface.OnDismissListener> dismissListeners;
 
-            public ItemDetailDialog(Context context, LayoutInflater inflater, int id, String title, Drawable icon, OnItemDetailButtonClickListener listener)
+            public ItemDetailDialog(Context context, LayoutInflater inflater, int id, String title, String ownerCode, Drawable icon, OnItemDetailButtonClickListener listener)
             {
                 final TableLayout itemDetailTable;
                 final FrameLayout itemDetail3dFrame;
@@ -200,8 +200,10 @@ public abstract class Selectable
                 //setup and show dialog
                 if(title != null)
                 {
-                    //note: makes icon copy so that original is not altered
-                    itemDetailDialog.setIcon(icon.getConstantState().newDrawable().mutate());
+                    Drawable[] ownerIcons = Settings.getOwnerIcons(context, noradId, ownerCode);
+                    Drawable titleIcon = Globals.getDrawable(context, icon.getConstantState().newDrawable().mutate(), (ownerIcons.length > 0 ? ownerIcons[0] : null), (ownerIcons.length > 1 ? ownerIcons[1] : null));      //note: makes icon copy so that original is not altered
+
+                    itemDetailDialog.setIcon(titleIcon);
                     itemDetailDialog.setTitle(title);
                 }
                 itemDetailDialog.setView(itemDetailsGroup);

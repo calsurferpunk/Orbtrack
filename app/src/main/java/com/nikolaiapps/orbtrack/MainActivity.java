@@ -3762,8 +3762,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //get current orbital data
                         Database.SatelliteData currentOrbitalData = currentSatellites[index];
 
-                        //if current orbital has data and TLE is accurate
-                        if(currentOrbitalData.database != null && currentOrbitalData.database.tleIsAccurate)
+                        //if current orbital TLE is accurate
+                        if(currentOrbitalData.getTLEIsAccurate())
                         {
                             //get current satellite, location, and look angle
                             boolean changedEnough = false;

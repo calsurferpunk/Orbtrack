@@ -472,6 +472,7 @@ public abstract class Current
             public float longitude;
             public float altitudeKm;
             private String name;
+            private String ownerCode;
             private Drawable icon;
             private View elMaxUnder;
             private TextView azText;
@@ -551,13 +552,14 @@ public abstract class Current
                 if(currentSatellite != null)
                 {
                     id = currentSatellite.getSatelliteNum();
-                    orbitalType = orbital2Type = (currentSatellite.database != null ? currentSatellite.database.orbitalType : Database.OrbitalType.Satellite);
+                    orbitalType = orbital2Type = currentSatellite.getOrbitalType();
                     icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, orbitalType);
                     name = currentSatellite.getName();
+                    ownerCode = currentSatellite.getOwnerCode();
                     satellite = currentSatellite.satellite;
                 }
 
-                tleIsAccurate = (currentSatellite != null && currentSatellite.database != null && currentSatellite.database.tleIsAccurate);
+                tleIsAccurate = (currentSatellite != null && currentSatellite.getTLEIsAccurate());
             }
 
             public void setLoading(boolean loading)
@@ -817,7 +819,7 @@ public abstract class Current
                 final TextView[] detailTitles;
 
                 //create dialog
-                final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.icon, itemDetailButtonClickListener);
+                final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
                 final View passProgressLayout = detailDialog.findViewById(R.id.Item_Detail_Progress_Layout);
                 final LinearProgressIndicator passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
                 final TextView passProgressText = detailDialog.findViewById(R.id.Item_Detail_Progress_Text);
@@ -1050,6 +1052,7 @@ public abstract class Current
         public static class Item extends CalculateViewsTask.ViewItemBase
         {
             private String name;
+            private String ownerCode;
             public final boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
@@ -1089,11 +1092,12 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, boolean tleAccurate)
+            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, boolean tleAccurate)
             {
                 super(index);
                 icon = icn;
                 name = nm;
+                ownerCode = ownCd;
                 nameImage = null;
                 nameText = null;
                 satellite = currentSatellite;
@@ -1103,17 +1107,13 @@ public abstract class Current
                 }
                 tleIsAccurate = tleAccurate;
             }
-            public Item(int index, float az, float el, float range, double jd, String zone, long ms, boolean tleAccurate)
-            {
-                super(index, az, el, range);
-                julianDate = jd;
-                time = Globals.getCalendar(zone, ms);
-                timeText = null;
-                tleIsAccurate = tleAccurate;
-            }
             public Item(int index, boolean loading)
             {
-                this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, null, 0, false);
+                super(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+                julianDate = Double.MAX_VALUE;
+                time = Globals.getCalendar(null, 0);
+                timeText = null;
+                tleIsAccurate = false;
                 isLoading = loading;
             }
 
@@ -1187,7 +1187,7 @@ public abstract class Current
                 for(index = 0; index < satellites.length; index++)
                 {
                     Database.SatelliteData currentSatellite = satellites[index];
-                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.satellite, (currentSatellite.database != null && currentSatellite.database.tleIsAccurate)));
+                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, currentSatellite.getTLEIsAccurate()));
                 }
                 viewItems.sort(Settings.getCurrentSortBy(currentContext, PageType.View));
 
@@ -1371,7 +1371,7 @@ public abstract class Current
                     final TextView[] detailTexts;
 
                     //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.icon, itemDetailButtonClickListener);
+                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
                     detailDialog.addGroup(R.string.title_location, R.string.title_azimuth, R.string.title_elevation, R.string.title_range);
                     if(isSun || isMoon)
                     {
@@ -1540,11 +1540,12 @@ public abstract class Current
                 if(currentSatellite != null)
                 {
                     id = currentSatellite.getSatelliteNum();
-                    orbitalType = orbital2Type = (currentSatellite.database != null ? currentSatellite.database.orbitalType : Database.OrbitalType.Satellite);
+                    orbitalType = orbital2Type = currentSatellite.getOrbitalType();
                     icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, orbitalType);
                     name = currentSatellite.getName();
+                    ownerCode = currentSatellite.getOwnerCode();
                     satellite = currentSatellite.satellite;
-                    tleIsAccurate = (currentSatellite.database != null && currentSatellite.database.tleIsAccurate);
+                    tleIsAccurate = currentSatellite.getTLEIsAccurate();
                 }
                 if(currentSatellite2 != null)
                 {
@@ -1927,7 +1928,7 @@ public abstract class Current
                     final TextView[] detailTitles;
 
                     //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, Globals.getDrawable(currentContext, orbital1Icon, orbital2Icon), itemDetailButtonClickListener);
+                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, Globals.getDrawable(currentContext, orbital1Icon, orbital2Icon), itemDetailButtonClickListener);
                     final View passProgressLayout = detailDialog.findViewById(R.id.Item_Detail_Progress_Layout);
                     final LinearProgressIndicator passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
                     final TextView passProgressText = detailDialog.findViewById(R.id.Item_Detail_Progress_Text);
@@ -2154,6 +2155,7 @@ public abstract class Current
         public static class Item extends CalculateCoordinatesTask.CoordinateItemBase
         {
             private String name;
+            private String ownerCode;
 
             public final boolean tleIsAccurate;
             public double julianDate;
@@ -2195,11 +2197,12 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, boolean tleAccurate)
+            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, boolean tleAccurate)
             {
                 super(index);
                 icon = icn;
                 name = nm;
+                ownerCode = ownCd;
                 nameImage = null;
                 nameText = null;
                 speedText = null;
@@ -2210,17 +2213,13 @@ public abstract class Current
                 }
                 tleIsAccurate = tleAccurate;
             }
-            public Item(int index, float lat, float lon, float alt, double jd, boolean tleAccurate)
-            {
-                super(index, lat, lon, alt);
-                julianDate = jd;
-                time = Globals.julianDateToCalendar(julianDate);
-                timeText = null;
-                tleIsAccurate = tleAccurate;
-            }
             public Item(int index)
             {
-                this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, Double.MAX_VALUE, false);
+                super(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
+                julianDate = Double.MAX_VALUE;
+                time = Globals.julianDateToCalendar(julianDate);
+                timeText = null;
+                tleIsAccurate = false;
             }
 
             public boolean haveGeo()
@@ -2304,7 +2303,7 @@ public abstract class Current
                 for(index = 0; index < satellites.length; index++)
                 {
                     Database.SatelliteData currentSatellite = satellites[index];
-                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.satellite, (currentSatellite.database != null && currentSatellite.database.tleIsAccurate)));
+                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, currentSatellite.getTLEIsAccurate()));
                 }
                 coordinateItems.sort(Settings.getCurrentSortBy(currentContext, PageType.Coordinates));
 
@@ -2494,7 +2493,7 @@ public abstract class Current
                     final TextView[] detailTexts;
 
                     //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.icon, itemDetailButtonClickListener);
+                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
                     detailDialog.addGroup(R.string.title_coordinates, R.string.title_latitude, R.string.title_longitude, R.string.title_altitude, R.string.abbrev_velocity);
                     if(isSun || isMoon)
                     {

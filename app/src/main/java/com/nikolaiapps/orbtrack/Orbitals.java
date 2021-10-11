@@ -49,7 +49,6 @@ public abstract class Orbitals
     public static class PageListItem extends Selectable.ListItem
     {
         public final Drawable icon;
-        public final Drawable titleIcon;
         public int color;
         public boolean isVisible;
         public final String text;
@@ -64,11 +63,8 @@ public abstract class Orbitals
             super(currentSat.noradId, index, canEd, isSel, false, false);
 
             String localeOwner;
-            Drawable[] ownerIcons;
 
             icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType);
-            ownerIcons = Settings.getOwnerIcons(context, currentSat.noradId, currentSat.ownerCode);
-            titleIcon = Globals.getDrawable(context, icon, (ownerIcons.length > 0 ? ownerIcons[0] : null), (ownerIcons.length > 1 ? ownerIcons[1] : null));
             ownerCode = currentSat.ownerCode;
             localeOwner = Database.LocaleOwner.getName(context, ownerCode);
             owner = (localeOwner != null ? localeOwner : currentSat.ownerName);
@@ -234,7 +230,7 @@ public abstract class Orbitals
             final AppCompatImageButton infoButton;
             final boolean onSatellite = (currentItem.id > 0);
             final boolean use3dPreview = have3dPreview(currentItem.id);
-            final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.titleIcon, itemDetailButtonClickListener);
+            final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
             final Resources res = (currentContext != null ? currentContext.getResources() : null);
             final TextView[] titles;
             final TextView[] texts;

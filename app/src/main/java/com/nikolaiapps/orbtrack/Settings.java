@@ -910,7 +910,7 @@ public abstract class Settings
                 if(haveContext && ((latitude != 0 && latitude >= -90 && latitude <= 90) || (longitude != 0 && longitude >= -180 && longitude <= 180) || (altitudeM != 0 && altitudeM != Double.MAX_VALUE)))
                 {
                     //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, Universe.IDs.None, currentItem.name, Globals.getDrawable(currentContext, Globals.getLocationIcon(currentItem.locationType), true), itemDetailButtonClickListener);
+                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, Universe.IDs.None, currentItem.name, null, Globals.getDrawable(currentContext, Globals.getLocationIcon(currentItem.locationType), true), itemDetailButtonClickListener);
 
                     //get displays
                     titles = detailDialog.getItemDetailTitles();

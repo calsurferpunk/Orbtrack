@@ -3,15 +3,17 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.CompoundButton;
-import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import androidx.appcompat.widget.AppCompatRadioButton;
+import androidx.core.widget.CompoundButtonCompat;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
@@ -34,7 +36,7 @@ public class RadioGroupPreference extends Preference
     private String pendingSetValue;
     private String[] itemTexts;
     private String[] itemValues;
-    private RadioButton[] radioButtons;
+    private AppCompatRadioButton[] radioButtons;
 
     public RadioGroupPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
@@ -50,7 +52,7 @@ public class RadioGroupPreference extends Preference
         //set defaults
         valueType = String.class;
         pendingSetValue = null;
-        radioButtons = new RadioButton[0];
+        radioButtons = new AppCompatRadioButton[0];
 
         //if there are attributes, retrieve them
         if(attrs != null)
@@ -125,15 +127,17 @@ public class RadioGroupPreference extends Preference
             if(radioButtons.length == 0 || radioButtons.length != count)
             {
                 //set to shortest
-                radioButtons = new RadioButton[count];
+                radioButtons = new AppCompatRadioButton[count];
             }
 
             //go through texts/values
             for(index = 0; index < count; index++)
             {
                 //create and add radio button
-                RadioButton currentRadioButton = new RadioButton(new ContextThemeWrapper(context, R.style.RadioButton), null);
+                int accentColor = Globals.resolveColorID(context, R.attr.colorAccent);
                 String currentValue = itemValues[index];
+                AppCompatRadioButton currentRadioButton = new AppCompatRadioButton(new ContextThemeWrapper(context, R.style.RadioButton), null);
+                CompoundButtonCompat.setButtonTintList(currentRadioButton, new ColorStateList(new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}}, new int[]{accentColor, accentColor}));
                 currentRadioButton.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));      //note: needed because bug setting color from R.style.RadioButton on dark/light theme switch
                 currentRadioButton.setText(itemTexts[index]);
                 currentRadioButton.setTag(currentValue);
@@ -147,7 +151,7 @@ public class RadioGroupPreference extends Preference
                         if(isChecked)
                         {
                             //go through all radio buttons
-                            for(RadioButton currentRadioButton : radioButtons)
+                            for(AppCompatRadioButton currentRadioButton : radioButtons)
                             {
                                 //if not the checked radio button
                                 if(!buttonView.equals(currentRadioButton))
@@ -278,7 +282,7 @@ public class RadioGroupPreference extends Preference
             for(index = 0; index < radioButtons.length; index++)
             {
                 //remember current radio button
-                RadioButton currentRadioButton = radioButtons[index];
+                AppCompatRadioButton currentRadioButton = radioButtons[index];
 
                 //checked if value matches
                 currentRadioButton.setChecked(currentRadioButton.getTag().equals(value));

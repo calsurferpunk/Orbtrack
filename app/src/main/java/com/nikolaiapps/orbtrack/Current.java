@@ -149,6 +149,7 @@ public abstract class Current
 
                         case Calculate.PageType.Intersection:
                             Calculate.PageAdapter.setIntersectionItems((Passes.Item[])items);
+                            break;
                     }
                     break;
             }
@@ -3791,7 +3792,6 @@ public abstract class Current
                 default:
                 case PageType.Combined:
                     return(combinedItems == null ? 0 : combinedItems.length);
-
             }
         }
 
@@ -3817,10 +3817,6 @@ public abstract class Current
         }
 
         //Get view angle item(s)
-        public static ViewAngles.Item[] getViewAngleItems()
-        {
-            return(viewItems);
-        }
         public static ViewAngles.Item getViewAngleItem(int index)
         {
             return(viewItems != null && index >= 0 && index < viewItems.length ? viewItems[index] : null);

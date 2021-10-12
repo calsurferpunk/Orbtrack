@@ -41,29 +41,25 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         public LinearLayout progressGroup;
         public LinearLayout dataGroup;
 
-        private CoordinateItemBase(int index, float latitude, float longitude, float altitudeKm, double illumination, double speedKms, String phaseName)
+        public CoordinateItemBase(int index, float latitude, float longitude, float altitudeKm)
         {
             super(Integer.MAX_VALUE, index, false, false, false, false);
             this.isLoading = false;
             this.latitude = latitude;
             this.longitude = longitude;
             this.altitudeKm = altitudeKm;
-            this.illumination = illumination;
-            this.speedKms = speedKms;
-            this.phaseName = phaseName;
+            this.illumination = 0;
+            this.speedKms = Double.MAX_VALUE;
+            this.phaseName = null;
             this.latitudeText = null;
             this.longitudeText = null;
             this.altitudeText = null;
             this.progressGroup = null;
             this.dataGroup = null;
         }
-        public CoordinateItemBase(int index, float lat, float lon, float alt)
-        {
-            this(index, lat, lon, alt, 0, Double.MAX_VALUE, null);
-        }
         public CoordinateItemBase(int index)
         {
-            this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE, 0, Double.MAX_VALUE, null);
+            this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
         }
 
         public boolean equals(CoordinateItemBase otherItem)

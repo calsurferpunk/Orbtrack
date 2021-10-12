@@ -97,6 +97,7 @@ public class CalculateService extends NotifyService
     //Item
     public static class PassData extends Selectable.ListItem implements Parcelable
     {
+        public int id2;
         public Calculations.SatelliteObjectType satellite;
         public Calculations.SatelliteObjectType satellite2;
         public boolean passStartFound;
@@ -116,6 +117,7 @@ public class CalculateService extends NotifyService
         public String passDuration;
         public String name;
         public String ownerCode;
+        public String owner2Code;
         public String phaseName;
         public byte orbitalType;
         public byte orbital2Type;
@@ -147,6 +149,7 @@ public class CalculateService extends NotifyService
             super((sat != null ? sat.getSatelliteNum() : Universe.IDs.None), index, false, false, false, false);
             this.satellite = (sat != null ? new Calculations.SatelliteObjectType(sat) : null);
             this.satellite2 = (sat2 != null ? new Calculations.SatelliteObjectType(sat2) : null);
+            this.id2 = (sat2 != null ? sat2.getSatelliteNum() : Universe.IDs.Invalid);
             this.passAzStart = azStart;
             this.passAzEnd = azEnd;
             this.passAzTravel = azTravel;
@@ -164,6 +167,7 @@ public class CalculateService extends NotifyService
             this.illumination = illumination;
             this.name = "";
             this.ownerCode = null;
+            this.owner2Code = null;
             this.orbitalType = this.orbital2Type = Database.OrbitalType.Satellite;
             this.phaseName = phaseName;
             this.passViews = copyViewArray(views);
@@ -193,14 +197,23 @@ public class CalculateService extends NotifyService
         public PassData(int index, Database.SatelliteData satellite1, Database.SatelliteData satellite2)
         {
             this(index, satellite1);
-            this.satellite2 = (satellite2 != null ? new Calculations.SatelliteObjectType(satellite2.satellite) : null);
+
+            boolean haveSatellite2 = (satellite2 != null);
+            this.satellite2 = (haveSatellite2 ? new Calculations.SatelliteObjectType(satellite2.satellite) : null);
+            if(haveSatellite2)
+            {
+                id2 = satellite2.getSatelliteNum();
+                owner2Code = satellite2.getOwnerCode();
+            }
         }
         public PassData(PassData copyFrom)
         {
             this(copyFrom.listIndex, copyFrom.passAzStart, copyFrom.passAzEnd, copyFrom.passAzTravel, copyFrom.passElMax, copyFrom.passClosestAz, copyFrom.passClosestEl, copyFrom.passCalculating, copyFrom.passCalculated, copyFrom.passCalculateFinished, copyFrom.passStartFound, copyFrom.showPathProgress, copyFrom.passTimeStart, copyFrom.passTimeEnd, copyFrom.passDuration, copyFrom.passViews, copyFrom.passViews2, copyFrom.satellite, copyFrom.satellite2, copyFrom.illumination, copyFrom.phaseName);
             id = copyFrom.id;
+            id2 = copyFrom.id2;
             name = copyFrom.name;
             ownerCode = copyFrom.ownerCode;
+            owner2Code = copyFrom.owner2Code;
             orbitalType = copyFrom.orbitalType;
             orbital2Type = copyFrom.orbital2Type;
         }

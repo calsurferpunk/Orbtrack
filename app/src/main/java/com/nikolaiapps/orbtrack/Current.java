@@ -1569,6 +1569,8 @@ public abstract class Current
             {
                 this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
                 name = passData.name;
+                ownerCode = passData.ownerCode;
+                owner2Code = passData.owner2Code;
                 orbitalType = passData.orbitalType;
                 orbital2Type = passData.orbital2Type;
                 illumination = passData.illumination;
@@ -1928,7 +1930,7 @@ public abstract class Current
                     final TextView[] detailTitles;
 
                     //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, Globals.getDrawable(currentContext, orbital1Icon, orbital2Icon), itemDetailButtonClickListener);
+                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, new int[]{currentItem.id, currentItem.id2}, currentItem.name, new String[]{currentItem.ownerCode, currentItem.owner2Code}, new Drawable[]{orbital1Icon, orbital2Icon}, itemDetailButtonClickListener);
                     final View passProgressLayout = detailDialog.findViewById(R.id.Item_Detail_Progress_Layout);
                     final LinearProgressIndicator passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
                     final TextView passProgressText = detailDialog.findViewById(R.id.Item_Detail_Progress_Text);

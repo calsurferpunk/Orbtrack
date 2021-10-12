@@ -146,7 +146,7 @@ public abstract class Selectable
         public class ItemDetailDialog
         {
             private boolean canShow;
-            private final int noradId;
+            private final int[] noradIds;
             private final long timerDelay;
             private final Context currentContext;
             private ViewGroup itemDetailsGroup;
@@ -159,7 +159,7 @@ public abstract class Selectable
             private final ArrayList<AppCompatImageButton> detailButtons = new ArrayList<>();
             private ArrayList<DialogInterface.OnDismissListener> dismissListeners;
 
-            public ItemDetailDialog(Context context, LayoutInflater inflater, int id, String title, String ownerCode, Drawable icon, OnItemDetailButtonClickListener listener)
+            public ItemDetailDialog(Context context, LayoutInflater inflater, int[] ids, String title, String[] ownerCodes, Drawable[] icons, OnItemDetailButtonClickListener listener)
             {
                 final TableLayout itemDetailTable;
                 final FrameLayout itemDetail3dFrame;
@@ -173,7 +173,7 @@ public abstract class Selectable
 
                 canShow = true;
                 currentContext = context;
-                noradId = id;
+                noradIds = ids;
                 timerDelay = Settings.getListUpdateDelay(currentContext);
 
                 try
@@ -200,10 +200,31 @@ public abstract class Selectable
                 //setup and show dialog
                 if(title != null)
                 {
-                    Drawable[] ownerIcons = Settings.getOwnerIcons(context, noradId, ownerCode);
-                    Drawable titleIcon = Globals.getDrawable(context, icon.getConstantState().newDrawable().mutate(), (ownerIcons.length > 0 ? ownerIcons[0] : null), (ownerIcons.length > 1 ? ownerIcons[1] : null));      //note: makes icon copy so that original is not altered
+                    int index;
+                    boolean haveOwnerCode;
+                    ArrayList<Drawable> resultIcons = new ArrayList<>(0);
 
-                    itemDetailDialog.setIcon(titleIcon);
+                    //if same number of ids, owner codes, and icons
+                    if(ids.length == ownerCodes.length && ownerCodes.length == icons.length)
+                    {
+                        //go through owner codes and icons
+                        for(index = 0; index < ownerCodes.length; index++)
+                        {
+                            //if icon is set
+                            if(icons[index] != null)
+                            {
+                                //add combination of owner and icon
+                                haveOwnerCode = (ownerCodes[index] != null);
+                                Drawable[] ownerIcons = (haveOwnerCode ? Settings.getOwnerIcons(context, noradIds[index], ownerCodes[index]) : null);
+                                resultIcons.add(Globals.getDrawable(context, icons[index].getConstantState().newDrawable().mutate(), (haveOwnerCode && ownerIcons.length > 0 ? ownerIcons[0] : null), (haveOwnerCode && ownerIcons.length > 1 ? ownerIcons[1] : null)));      //note: makes icon copy so that original is not altered
+                            }
+                        }
+
+                        //set icon to combination of all previous
+                        itemDetailDialog.setIcon(Globals.getDrawable(context, resultIcons.toArray(new Drawable[0])));
+                    }
+
+                    //set title
                     itemDetailDialog.setTitle(title);
                 }
                 itemDetailDialog.setView(itemDetailsGroup);
@@ -292,6 +313,10 @@ public abstract class Selectable
                     //set item detail 3d preview
                     itemDetail3dView = (Whirly.PreviewFragment)fm.findFragmentByTag("itemDetail3dView");
                 }
+            }
+            public ItemDetailDialog(Context context, LayoutInflater inflater, int id, String title, String ownerCode, Drawable icon, OnItemDetailButtonClickListener listener)
+            {
+                this(context, inflater, new int[]{id}, title, new String[]{ownerCode}, new Drawable[]{icon}, listener);
             }
 
             private void addDivider(ViewGroup view, int index, boolean vertical)
@@ -507,7 +532,7 @@ public abstract class Selectable
 
             public void setupItemDetailButton(AppCompatImageButton button, final ListBaseAdapter listAdapter, final int pageType, final int itemID, final ListItem item, final int buttonNum)
             {
-                int mapLayerType = ListBaseAdapter.getMapLayerType(noradId);
+                int mapLayerType = ListBaseAdapter.getMapLayerType(noradIds.length > 0 ? noradIds[0] : Universe.IDs.Invalid);
 
                 //if button does not exist
                 if(button == null)

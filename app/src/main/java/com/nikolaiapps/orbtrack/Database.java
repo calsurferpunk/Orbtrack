@@ -1589,10 +1589,10 @@ public class Database extends SQLiteOpenHelper
         double closestDelta = Double.MAX_VALUE;
         String closestData = null;
         String currentData;
-        String minLat = Globals.getNumberString(latitude - absDelta, 5);
-        String maxLat = Globals.getNumberString(latitude + absDelta, 5);
-        String minLon = Globals.getNumberString(longitude - delta, 5);
-        String maxLon = Globals.getNumberString(longitude + delta, 5);
+        String minLat = Globals.getNumberString(latitude - absDelta, 5, false);
+        String maxLat = Globals.getNumberString(latitude + absDelta, 5, false);
+        String minLon = Globals.getNumberString(longitude - delta, 5, false);
+        String maxLon = Globals.getNumberString(longitude + delta, 5, false);
         String[][] queryResult = runQuery(context, "SELECT [Latitude], [Longitude], " + column + " FROM " + table + " WHERE([Latitude] >= " + minLat + " AND [Latitude] <= " + maxLat + " AND [Longitude] >= " + minLon + " AND [Longitude] <= " + maxLon + ") ORDER BY [Latitude], [Longitude] ASC", null);
 
         //if there are results

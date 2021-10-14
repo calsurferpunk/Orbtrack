@@ -2120,22 +2120,37 @@ public abstract class Globals
     }
 
     //Gets a number as a string
-    public static String getNumberString(double number, int decimalPlaces)
+    public static String getNumberString(double number, int decimalPlaces, boolean allowCommas)
     {
-        boolean veryLarge = (number >= 1.0E10);
+        String separator = (allowCommas && Settings.getUsingNumberCommas() ? "," : "");
 
-        if(decimalPlaces == 0 && Settings.getUsingNumberCommas() && number < 10000000000.0)
+        if(number < 1.0E10)
         {
-            return(String.format(Locale.US, "%,3d", (long)number));
+            if(decimalPlaces == 0)
+            {
+                return(String.format(Locale.US, "%" + separator + "3d", (long)number));
+            }
+            else
+            {
+                return(String.format(Locale.US, "%" + separator + "3." + decimalPlaces + "f", number));
+            }
         }
         else
         {
-            return(String.format(Locale.US, "%3." + (veryLarge && decimalPlaces < 3 ? 3 : decimalPlaces) + (veryLarge ? "e" : "f"), number));
+            return(String.format(Locale.US, "%3." + Math.max(3, decimalPlaces) + "e", number));
         }
+    }
+    public static String getNumberString(double number, int decimalPlaces)
+    {
+        return(getNumberString(number, decimalPlaces, true));
+    }
+    public static String getNumberString(double number, boolean allowCommas)
+    {
+        return(getNumberString(number, 2, allowCommas));
     }
     public static String getNumberString(double number)
     {
-        return(getNumberString(number, 2));
+        return(getNumberString(number, true));
     }
 
     //Gets GMT offset string

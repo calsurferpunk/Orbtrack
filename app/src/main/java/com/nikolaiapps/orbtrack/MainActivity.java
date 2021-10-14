@@ -1745,7 +1745,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.ViewAngles.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.azimuth) + separator + Globals.getNumberString(currentItem.elevation) + separator + String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.rangeKm)) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.azimuth, false) + separator + Globals.getNumberString(currentItem.elevation, false) + separator + String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.rangeKm)) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
@@ -1798,7 +1798,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Passes.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart) + separator + Globals.getNumberString(currentItem.passAzEnd) + separator + Globals.getNumberString(currentItem.passAzTravel) + separator + Globals.getNumberString(currentItem.passElMax) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
@@ -1847,7 +1847,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Coordinates.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.latitude) + separator + Globals.getNumberString(currentItem.longitude) + separator + (currentItem.altitudeKm > 0 && currentItem.altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.altitudeKm)) : "-") + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.latitude, false) + separator + Globals.getNumberString(currentItem.longitude, false) + separator + (currentItem.altitudeKm > 0 && currentItem.altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.altitudeKm)) : "-") + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
@@ -1904,7 +1904,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Passes.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart) + separator + Globals.getNumberString(currentItem.passAzEnd) + separator + Globals.getNumberString(currentItem.passAzTravel) + separator + Globals.getNumberString(currentItem.passElMax) + separator + Globals.getNumberString(currentItem.passClosestAz) + separator + Globals.getNumberString(currentItem.passClosestEl) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + separator + Globals.getNumberString(currentItem.passClosestAz, false) + separator + Globals.getNumberString(currentItem.passClosestEl, false) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }

@@ -2643,10 +2643,14 @@ public abstract class Globals
             size[0] = currentImage.getIntrinsicWidth();
             size[1] = currentImage.getIntrinsicHeight();
         }
-        else
+        else if(image != null)
         {
             size[0] = image.getIntrinsicWidth();
             size[1] = image.getIntrinsicHeight();
+        }
+        else
+        {
+            size[0] = size[1] = 1;
         }
 
         //return width and height
@@ -2667,7 +2671,7 @@ public abstract class Globals
             }
             catch(Exception ex)
             {
-                return(ContextCompat.getDrawable(context, R.drawable.ic_launcher_clear));
+                return(context != null ? ContextCompat.getDrawable(context, R.drawable.ic_launcher_clear) : null);
             }
         }
     }
@@ -2750,6 +2754,11 @@ public abstract class Globals
             {
                 //get sizes
                 sizes[index] = getImageWidthHeight(images[index]);
+                if(sizes[index][0] == 1 && sizes[index][1] == 1)
+                {
+                    //not really any size
+                    sizes[index][0] = sizes[index][1] = 0;
+                }
 
                 //update width
                 if(stacked)
@@ -2822,7 +2831,7 @@ public abstract class Globals
             }
 
             //return combined image
-            return(new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(imageBitmap, totalWidth, height, true)));
+            return(context != null ? new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(imageBitmap, totalWidth, height, true)) : null);
         }
         else
         {
@@ -2840,6 +2849,11 @@ public abstract class Globals
         Bitmap textImage;
         Canvas textCanvas;
         Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+
+        if(context == null)
+        {
+            return(null);
+        }
 
         textPaint.setStrokeWidth(2);
         textPaint.setStyle(Paint.Style.FILL);
@@ -2881,8 +2895,11 @@ public abstract class Globals
         Bitmap bitmapImage = Bitmap.createBitmap(size[0], size[1], Bitmap.Config.ARGB_8888);
         Canvas imageCanvas = new Canvas(bitmapImage);
 
-        image.setBounds(0, 0, imageCanvas.getWidth(), imageCanvas.getHeight());
-        image.draw(imageCanvas);
+        if(image != null)
+        {
+            image.setBounds(0, 0, imageCanvas.getWidth(), imageCanvas.getHeight());
+            image.draw(imageCanvas);
+        }
 
         return(bitmapImage);
     }
@@ -2984,7 +3001,11 @@ public abstract class Globals
         int iconID = getOrbitalIconID(satelliteNum, orbitalType);
         boolean allowIconColor = (iconID == R.drawable.orbital_satellite || iconID == R.drawable.orbital_rocket || iconID == R.drawable.orbital_debris);
 
-        if(satelliteNum == Universe.IDs.Moon)
+        if(context == null)
+        {
+            return(null);
+        }
+        else if(satelliteNum == Universe.IDs.Moon)
         {
             return(new BitmapDrawable(context.getResources(), Universe.Moon.getPhaseImage(context, location, timeMs)));
         }
@@ -3586,14 +3607,20 @@ public abstract class Globals
 
     public static void drawBitmap(Canvas canvas, Bitmap image, float centerX, float centerY, float rotateDegrees, Paint paint)
     {
-        int width = image.getWidth();
-        int height = image.getHeight();
+        int width;
+        int height;
 
-        canvas.save();
-        canvas.translate(centerX, centerY);
-        canvas.rotate(rotateDegrees);
-        canvas.drawBitmap(image, width / -2f, height / -2f, paint);
-        canvas.restore();
+        if(canvas != null && image != null)
+        {
+            width = image.getWidth();
+            height = image.getHeight();
+
+            canvas.save();
+            canvas.translate(centerX, centerY);
+            canvas.rotate(rotateDegrees);
+            canvas.drawBitmap(image, width / -2f, height / -2f, paint);
+            canvas.restore();
+        }
     }
 
     //Gets location icon

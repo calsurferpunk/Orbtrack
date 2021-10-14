@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -390,13 +391,14 @@ public abstract class Universe
         public static Bitmap getPhaseImage(Context context, Calculations.ObserverType location, long gmtMs)
         {
             Bitmap phaseImage = Globals.getBitmap(context, R.drawable.orbital_moon, 0);
-            Canvas phaseCanvas = new Canvas(phaseImage);
-            int imageWidth = phaseCanvas.getWidth();
-            int imageHeight = phaseCanvas.getHeight();
+            boolean havePhaseImage = (phaseImage != null);
+            Canvas phaseCanvas;
+            int imageWidth;
+            int imageHeight;
             int imageHalfWidth;
-            int leftOffset = (int)(imageWidth * 0.05f);
-            int rightOffset = (int)(imageWidth * 0.04f);
-            int bottomOffset = (int)(imageHeight * 0.09f);
+            int leftOffset;
+            int rightOffset;
+            int bottomOffset;
             int centerX;
             int centerY;
             int radius;
@@ -405,11 +407,26 @@ public abstract class Universe
             Paint brush = new Paint(Paint.ANTI_ALIAS_FLAG);
             Path ovalPath;
 
-            imageWidth = imageWidth - leftOffset - rightOffset;
-            imageHeight = imageHeight - bottomOffset;
+            if(!havePhaseImage)
+            {
+                phaseImage = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
+            }
+            phaseCanvas = new Canvas(phaseImage);
+            imageWidth = phaseCanvas.getWidth();
+            imageHeight = phaseCanvas.getHeight();
+            leftOffset = (int)(imageWidth * 0.05f);
+            rightOffset = (int)(imageWidth * 0.04f);
+            bottomOffset = (int)(imageHeight * 0.09f);
+            imageWidth -= (leftOffset + rightOffset);
+            imageHeight -= bottomOffset;
             imageHalfWidth = imageWidth / 2;
             centerX = imageHalfWidth + leftOffset;
             centerY = (imageHeight / 2) + 1;
+            if(!havePhaseImage)
+            {
+                brush.setColor(Color.GRAY);
+                phaseCanvas.drawCircle(centerX, centerY, imageHalfWidth, brush);
+            }
             brush.setColor(0x5F000000);
             if(geoLocation.latitude < 0)
             {

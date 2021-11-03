@@ -1470,7 +1470,6 @@ public abstract class Current
 
             public boolean isLoading;
             public boolean tleIsAccurate;
-            public boolean allowDayAbbrev;
             public View timeStartUnder;
             public View elMaxUnder;
             public AppCompatImageView nameImage;
@@ -1630,7 +1629,7 @@ public abstract class Current
 
                     if(timeStartText != null)
                     {
-                        timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, allowDayAbbrev, false));
+                        timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
 
                         if(timeStartTitleText != null)
                         {
@@ -1846,9 +1845,6 @@ public abstract class Current
                 boolean showEnd = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 Item currentItem = pathItems.getPassItem(position);
                 ItemHolder itemHolder = (ItemHolder)holder;
-
-                //set properties
-                currentItem.allowDayAbbrev = !forCalculation;
 
                 //get displays
                 currentItem.nameImage = itemHolder.nameImage;

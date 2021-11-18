@@ -922,13 +922,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         showSetup = startIntent.getBooleanExtra(EXTRA_SHOW_SETUP, false);
         startScreenKey = startIntent.getStringExtra(EXTRA_START_SCREEN);
 
-        //if result intent does not exist yet
-        if(resultIntent == null)
-        {
-            //create intent
-            resultIntent = new Intent();
-        }
-
         //set defaults
         currentPage = -1;
         currentPageKey = startScreenKey;
@@ -939,6 +932,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         settingsLocationsListAdapter = null;
         accountsListAdapter = null;
         informationChangedListener = null;
+        createResultIntent();
         BaseInputActivity.setRequestCode(resultIntent, BaseInputActivity.getRequestCode(startIntent));
 
         //set view
@@ -1664,6 +1658,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
     }
 
+    //Creates result intent if it does not exist yet
+    private void createResultIntent()
+    {
+        //if result intent does not exist yet
+        if(resultIntent == null)
+        {
+            //create intent
+            resultIntent = new Intent();
+        }
+    }
+
     //Creates a location receiver
     private LocationReceiver createLocationReceiver()
     {
@@ -2307,30 +2312,35 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     //Sets recreate needed
     private void setRecreateNeeded()
     {
+        createResultIntent();
         resultIntent.putExtra(EXTRA_RECREATE, true);
     }
 
     //Sets lens recreate needed
     private void setLensRecreateNeed()
     {
+        createResultIntent();
         resultIntent.putExtra(EXTRA_RECREATE_LENS, true);
     }
 
     //Sets map recreate needed
     private void setMapRecreateNeeded()
     {
+        createResultIntent();
         resultIntent.putExtra(EXTRA_RECREATE_MAP, true);
     }
 
     //Sets reload location needed
     private void setReloadLocationNeeded()
     {
+        createResultIntent();
         resultIntent.putExtra(EXTRA_RELOAD_LOCATION, true);
     }
 
     //Sets update combined layout needed
     private void setUpdateCombinedLayoutNeeded()
     {
+        createResultIntent();
         resultIntent.putExtra(EXTRA_UPDATE_COMBINED_LAYOUT, true);
     }
 

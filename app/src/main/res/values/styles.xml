@@ -66,7 +66,7 @@
         <item name="pageBackground">@color/white</item>
         <item name="pageHighlightBackground">@color/very_light_gray</item>
         <item name="viewPagerBackground">@color/very_light_gray</item>
-        <item name="dividerColor">@color/light_gray</item>
+        <item name="dividerLineColor">@color/light_gray</item>
         <item name="dividerTextBackground">#F9F9F9</item>
         <item name="dialogStyle">@style/LightDialog</item>
         <item name="colorPrimary">@color/very_dark_gray</item>
@@ -85,7 +85,7 @@
         <item name="pageBackground">@color/very_dark_gray</item>
         <item name="pageHighlightBackground">@color/very_very_dark_gray</item>
         <item name="viewPagerBackground">@color/black</item>
-        <item name="dividerColor">@color/dark_gray</item>
+        <item name="dividerLineColor">@color/dark_gray</item>
         <item name="dividerTextBackground">#2A2A2A</item>
         <item name="dialogStyle">@style/DarkDialog</item>
         <item name="colorPrimary">@color/very_light_gray</item>
@@ -342,7 +342,7 @@
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">2dp</item>
-        <item name="android:background">?attr/dividerColor</item>
+        <item name="android:background">?attr/dividerLineColor</item>
     </style>
 
     <style name="DividerCategory" parent="Preference.Category">
@@ -392,7 +392,7 @@
         <item name="android:layout_marginLeft">1dp</item>
         <item name="android:layout_marginRight">1dp</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:background">?attr/dividerColor</item>
+        <item name="android:background">?attr/dividerLineColor</item>
     </style>
 
     <!--Edit Dialog -->

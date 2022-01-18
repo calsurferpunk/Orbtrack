@@ -11,7 +11,7 @@
     <attr name="columnTitleTextColor" format="reference"/>
     <attr name="columnTitleTextSelectColor" format="reference"/>
     <attr name="columnBackground" format="reference"/>
-    <attr name="dividerColor" format="reference"/>
+    <attr name="dividerLineColor" format="reference"/>
     <attr name="dividerTextBackground" format="color"/>
     <attr name="dialogStyle" format="reference"/>
     <attr name="itemSelect" format="reference"/>

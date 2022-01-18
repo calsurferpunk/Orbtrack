@@ -906,11 +906,13 @@ public abstract class Orbitals
                 @Override
                 protected void onDownloadUpdate(int progressType, byte updateType, long updateValue, long updateCount)
                 {
+                    long updateIndex = updateValue - 1;
+
                     //if success, not saving a file, and a valid index
-                    if(progressType == Globals.ProgressType.Success && updateType != UpdateService.UpdateType.SaveFile && updateValue >= 1)
+                    if(progressType == Globals.ProgressType.Success && updateType != UpdateService.UpdateType.SaveFile && updateIndex >= 0 && updateIndex < listIndexes.size())
                     {
                         //deselect item
-                        setItemSelected(listIndexes.get((int)updateValue - 1), false);
+                        setItemSelected(listIndexes.get((int)updateIndex), false);
                     }
                 }
             };

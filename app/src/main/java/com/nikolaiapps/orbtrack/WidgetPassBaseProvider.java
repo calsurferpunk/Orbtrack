@@ -1240,21 +1240,25 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     {
         int widgetId;
         Class<?> widgetClass;
-        AppWidgetManager manager = AppWidgetManager.getInstance(context);
-        ArrayList<WidgetData> widgetsData = getWidgetData(context);
 
-        //go through each widget
-        for(WidgetData currentData : widgetsData)
+        if(context != null)
         {
-            //remember widget ID and class
-            widgetId = currentData.widgetId;
-            widgetClass = currentData.widgetClass;
+            AppWidgetManager manager = AppWidgetManager.getInstance(context);
+            ArrayList<WidgetData> widgetsData = getWidgetData(context);
 
-            //if widget matches norad ID
-            if(WidgetBaseSetupActivity.getNoradID(context, widgetId) == noradId)
+            //go through each widget
+            for(WidgetData currentData : widgetsData)
             {
-                //update the widget
-                updateWidget(context, widgetClass, currentData.alarmReceiverClass, widgetId, manager, getViews(context, widgetClass, widgetId), true);
+                //remember widget ID and class
+                widgetId = currentData.widgetId;
+                widgetClass = currentData.widgetClass;
+
+                //if widget matches norad ID
+                if(WidgetBaseSetupActivity.getNoradID(context, widgetId) == noradId)
+                {
+                    //update the widget
+                    updateWidget(context, widgetClass, currentData.alarmReceiverClass, widgetId, manager, getViews(context, widgetClass, widgetId), true);
+                }
             }
         }
     }

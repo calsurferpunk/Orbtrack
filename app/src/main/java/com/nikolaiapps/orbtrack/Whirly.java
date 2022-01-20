@@ -1294,9 +1294,11 @@ class Whirly
         {
             boolean withinZoom;
             boolean updateBearing;
+            boolean usedBearing = false;
             double currentZoom;
             double bearing;
             double bearingDelta;
+            double orbitalRotationDelta;
             Bitmap bearingImage;
 
             //remember last and current location
@@ -1309,15 +1311,16 @@ class Whirly
                 //get bearing and delta
                 bearing = Calculations.getBearing(common.lastGeo, common.geo);
                 bearingDelta = Globals.degreeDistance(common.bearing, bearing);
+                orbitalRotationDelta = Globals.degreeDistance(orbitalRotation, lastOrbitalRotation);
             }
             else
             {
                 //don't use
-                bearing = bearingDelta = 0;
+                bearing = bearingDelta = orbitalRotationDelta = 0;
             }
 
             //update bearing if using and -enough to see or rotation changed-
-            updateBearing = showingDirection && (Math.abs(bearingDelta) >= 2 || orbitalRotation != lastOrbitalRotation);
+            updateBearing = showingDirection && (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2);
             if(updateBearing)
             {
                 //update value
@@ -1331,6 +1334,7 @@ class Whirly
                 {
                     //rotate marker
                     orbitalMarker.setRotation(bearing + 135);
+                    usedBearing = true;
                 }
 
                 //move orbital
@@ -1345,6 +1349,7 @@ class Whirly
                     bearingImage = Globals.getBitmapRotated(orbitalBoard.boardImageOriginal, bearing + 135 + orbitalRotation);
                     orbitalBoard = new Board(controller, orbitalBoard);
                     orbitalBoard.setImage(bearingImage, 1);
+                    usedBearing = true;
                 }
 
                 //get current zoom and if orbital within zoom
@@ -1360,18 +1365,26 @@ class Whirly
                 infoBoard.moveLocation(latitude, longitude, (withinZoom || !showShadow ? altitudeKm : 0.5), withinZoom || !showShadow);
 
                 //if showing shadow
-                if(showShadow && orbitalShadow != null)
+                if(showShadow)
                 {
-                    //if updating bearing and image is set
-                    if(updateBearing && orbitalShadow.originalImage != null)
-                    {
-                        //rotate image
-                        orbitalShadow.setImage(Globals.getBitmapRotated(orbitalShadow.originalImage, bearing + 135));
-                    }
+                    //reset
+                    usedBearing = false;
 
-                    //move shadow
-                    orbitalShadow.setZoomScale(currentZoom);
-                    orbitalShadow.moveLocation(latitude, longitude);
+                    //if shadow exists
+                    if(orbitalShadow != null)
+                    {
+                        //if updating bearing and image is set
+                        if(updateBearing && orbitalShadow.originalImage != null)
+                        {
+                            //rotate image
+                            orbitalShadow.setImage(Globals.getBitmapRotated(orbitalShadow.originalImage, bearing + 135));
+                            usedBearing = true;
+                        }
+
+                        //move shadow
+                        orbitalShadow.setZoomScale(currentZoom);
+                        orbitalShadow.moveLocation(latitude, longitude);
+                    }
                 }
 
                 //move orbital
@@ -1382,8 +1395,12 @@ class Whirly
                 lastMoveWithinZoom = withinZoom;
             }
 
-            //update last rotation
-            lastOrbitalRotation = orbitalRotation;
+            //if updated bearing
+            if(usedBearing)
+            {
+                //update last rotation
+                lastOrbitalRotation = orbitalRotation;
+            }
         }
 
         @Override

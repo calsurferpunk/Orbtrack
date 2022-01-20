@@ -2916,12 +2916,19 @@ public abstract class Globals
         return(getBitmap(getDrawable(context, resId, useThemeTint)));
     }
 
-    //Gets rotated version of given bitmap
+    //Gets rotated version of given bitmap without changing size
     public static Bitmap getBitmapRotated(Bitmap image, double rotateDegrees)
     {
+        boolean haveImage = (image != null);
+        int width = (haveImage ? image.getWidth() : 0);
+        int height = (haveImage ? image.getHeight() : 0);
+        Bitmap rotatedImage;
         Matrix rotateMatrix = new Matrix();
+
         rotateMatrix.postRotate((float)rotateDegrees);
-        return(image != null ? Bitmap.createBitmap(image, 0, 0, image.getWidth(), image.getHeight(), rotateMatrix, true) : null);
+        rotatedImage = (haveImage ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
+
+        return(rotatedImage != null ? Bitmap.createBitmap(rotatedImage, (rotatedImage.getWidth() - width) / 2, (rotatedImage.getHeight() - height) / 2, width, height) : null);
     }
 
     //Gets an orbital icon ID

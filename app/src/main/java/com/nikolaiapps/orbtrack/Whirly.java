@@ -32,6 +32,7 @@ import com.mousebird.maply.Shader;
 import com.mousebird.maply.MarkerInfo;
 import com.mousebird.maply.Point2d;
 import com.mousebird.maply.Point3d;
+import com.mousebird.maply.RenderGPUType;
 import com.mousebird.maply.RemoteTileInfoNew;
 import com.mousebird.maply.ScreenMarker;
 import com.mousebird.maply.ScreenObject;
@@ -1521,8 +1522,10 @@ class Whirly
         {
             final Activity activity = this.getActivity();
             int mapLayerType;
+            byte gpuType;
             boolean forMap = isMap();
             boolean forPreview = false;
+            boolean allowOrbitalDirection = true;
             Bundle args = this.getArguments();
 
             if(args == null)
@@ -1588,7 +1591,15 @@ class Whirly
             setSpeedScale(Settings.getMapSpeedScale(activity, !forMap));
 
             //set if showing orbital direction
-            setShowOrbitalDirection(Settings.getMapShowOrbitalDirection(activity));
+            gpuType = getControl().getRenderGpuType();
+            switch(gpuType)
+            {
+                case RenderGPUType.Mali:
+                case RenderGPUType.PowerVr:
+                    allowOrbitalDirection = false;
+                    break;
+            }
+            setShowOrbitalDirection(allowOrbitalDirection && Settings.getMapShowOrbitalDirection(activity));
 
             //set if tilt allowed
             setRotateAllowed(Settings.getMapRotateAllowed(activity));

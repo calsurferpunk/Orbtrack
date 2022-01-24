@@ -3293,6 +3293,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_ken;
                     break;
 
+                case "kwt":
+                    ids[0] = R.drawable.owner_kwt;
+                    break;
+
                 case "laos":
                     ids[0] = R.drawable.owner_laos;
                     break;

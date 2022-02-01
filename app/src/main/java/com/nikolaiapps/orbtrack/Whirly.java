@@ -180,7 +180,7 @@ class Whirly
         private final float[] boardTextureColor;
         final ArrayList<Billboard> billboardList;
 
-        Board(BaseController boardController, boolean tleIsAc)
+        Board(BaseController boardController, boolean tleIsAc, boolean visible)
         {
             Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
 
@@ -211,11 +211,11 @@ class Whirly
             board.setSelectable(false);
             billboardList.add(board);
 
-            setVisible(true);
+            setVisible(visible);
         }
-        Board(BaseController boardController, Board copyFrom)
+        Board(BaseController boardController, Board copyFrom, boolean visible)
         {
-            this(boardController, copyFrom.tleIsAccurate);
+            this(boardController, copyFrom.tleIsAccurate, visible);
 
             copyFrom.remove();
             boardImageOriginal = copyFrom.boardImageOriginal;
@@ -991,7 +991,7 @@ class Whirly
             }
             else
             {
-                orbitalBoard = new Board(controller, tleIsAccurate);
+                orbitalBoard = new Board(controller, tleIsAccurate, true);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
                 setShowShadow(showShadow);
@@ -1000,7 +1000,7 @@ class Whirly
                 infoCreator = new InfoImageCreator(name, usingInfo, usingBackground);
 
                 titleImage = infoCreator.get(currentContext, null);
-                infoBoard = new Board(controller, tleIsAccurate);
+                infoBoard = new Board(controller, tleIsAccurate, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
@@ -1116,7 +1116,7 @@ class Whirly
                 }
 
                 //recreate board
-                infoBoard = new Board(controller, infoBoard);
+                infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
 
                 //set image
                 infoImage = infoCreator.get(currentContext, (usingInfo && showingInfo ? text : null));
@@ -1140,7 +1140,7 @@ class Whirly
             {
                 //recreate orbital
                 orbitalImage = orbitalBoard.boardImage.copy(orbitalBoard.boardImage.getConfig(), true);
-                orbitalBoard = new Board(controller, orbitalBoard);
+                orbitalBoard = new Board(controller, orbitalBoard, true);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
                 //if showing shadow
@@ -1152,7 +1152,7 @@ class Whirly
 
                 //recreate info
                 infoImage = infoCreator.get(currentContext, (usingInfo && showingInfo ? lastInfo : null));
-                infoBoard = new Board(controller, infoBoard);
+                infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
             }
         }
@@ -1243,7 +1243,7 @@ class Whirly
                 }
 
                 //update visibility
-                orbitalMarker.setInfoVisible(visible);
+                orbitalMarker.setInfoVisible(showingInfo);
             }
             else
             {
@@ -1348,8 +1348,8 @@ class Whirly
                 {
                     //rotate image and recreate board
                     bearingImage = Globals.getBitmapRotated(orbitalBoard.boardImageOriginal, bearing + 135 + orbitalRotation);
-                    orbitalBoard = new Board(controller, orbitalBoard);
-                    orbitalBoard.setImage(bearingImage, 1);
+                    orbitalBoard = new Board(controller, orbitalBoard, true);
+                    orbitalBoard.setImage(bearingImage, markerScale);
                     usedBearing = true;
                 }
 

@@ -22,6 +22,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -59,9 +61,15 @@ public class MasterAddListActivity extends BaseInputActivity
     private static class MasterListAdapter extends Selectable.ListBaseAdapter
     {
         //On load items listener
-        private interface OnLoadItemsListener
+        public interface OnLoadItemsListener
         {
             void onLoaded(ArrayList<ListItem> items, boolean foundLaunchDate);
+        }
+
+        //On item check changed listener
+        public interface OnItemCheckChangedListener
+        {
+            void onCheckChanged(ListItem item);
         }
 
         //Load items task
@@ -313,10 +321,11 @@ public class MasterAddListActivity extends BaseInputActivity
 
         private boolean loadingItems;
         private boolean foundLaunchDate;
+        private final OnItemCheckChangedListener itemCheckChangedListener;
         private ArrayList<ListItem> displayedItems;
         private ListItem[] allItems;
 
-        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, Globals.OnProgressChangedListener listener)
+        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, Globals.OnProgressChangedListener progressChangedListener, OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
         {
             super(context);
 
@@ -327,8 +336,11 @@ public class MasterAddListActivity extends BaseInputActivity
             allItems = new ListItem[0];
             this.itemsRefID = R.layout.image_checked_item;
 
+            //set check changed listener
+            itemCheckChangedListener = checkChangedListener;
+
             //load items
-            LoadItemsTask loadItems = new LoadItemsTask(listener, new OnLoadItemsListener()
+            LoadItemsTask loadItems = new LoadItemsTask(progressChangedListener, new OnLoadItemsListener()
             {
                 @Override @SuppressLint("NotifyDataSetChanged")
                 public void onLoaded(ArrayList<ListItem> items, boolean foundLaunchDate)
@@ -348,13 +360,17 @@ public class MasterAddListActivity extends BaseInputActivity
                             }
                         });
                     }
+                    if(loadItemsListener != null)
+                    {
+                        loadItemsListener.onLoaded(items, foundLaunchDate);
+                    }
                 }
             });
             loadItems.execute(context, masterList);
         }
-        public MasterListAdapter(Context context)
+        public MasterListAdapter(Context context, OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
         {
-            this(context, null, null);
+            this(context, null, null, loadItemsListener, checkChangedListener);
         }
 
         @Override
@@ -424,7 +440,15 @@ public class MasterAddListActivity extends BaseInputActivity
                     @Override
                     public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
                     {
+                        //update checked state
                         currentItem.isChecked = checked;
+
+                        //if listener is set
+                        if(itemCheckChangedListener != null)
+                        {
+                            //call it
+                            itemCheckChangedListener.onCheckChanged(currentItem);
+                        }
                     }
                 });
             }
@@ -491,6 +515,12 @@ public class MasterAddListActivity extends BaseInputActivity
             return(selectedItems.toArray(new ListItem[0]));
         }
 
+        //Gets displayed items
+        public ListItem[] getDisplayedItems()
+        {
+            return(displayedItems != null ? displayedItems.toArray(new ListItem[0]) : new ListItem[0]);
+        }
+
         //Returns if a launch date was found
         public boolean hasLaunchDates()
         {
@@ -513,6 +543,8 @@ public class MasterAddListActivity extends BaseInputActivity
     private int listTextColor;
     private int listBgSelectedColor;
     private int listTextSelectedColor;
+    private int itemSelectedCount;
+    private String startTitle;
     private LinearLayout masterLayout;
     private RecyclerView addList;
     private MasterListAdapter addAdapter;
@@ -524,6 +556,9 @@ public class MasterAddListActivity extends BaseInputActivity
     private MaterialButton addButton;
     private MultiProgressDialog downloadProgress;
     private MultiProgressDialog addProgress;
+
+    //Listeners
+    private MasterListAdapter.OnItemCheckChangedListener checkChangedListener;
 
     //Creates an on item selected listener
     private AdapterView.OnItemSelectedListener createOnItemSelectedListener(final MasterListAdapter listAdapter, final IconSpinner ownerList, final IconSpinner groupList, final IconSpinner ageList, final EditText masterSearchText)
@@ -795,24 +830,30 @@ public class MasterAddListActivity extends BaseInputActivity
                                                 case Globals.ProgressType.Finished:
                                                     //hide display
                                                     taskProgress.dismiss();
-
-                                                    //setup inputs
-                                                    MasterAddListActivity.this.runOnUiThread(new Runnable()
-                                                    {
-                                                        @Override
-                                                        public void run()
-                                                        {
-                                                            //setup inputs
-                                                            setupInputs(usedOwners, usedCategories);
-
-                                                            //focus on search text
-                                                            searchText.requestFocus();
-                                                        }
-                                                    });
                                                     break;
                                             }
                                         }
-                                    });
+                                    }, new MasterListAdapter.OnLoadItemsListener()
+                                    {
+                                        @Override
+                                        public void onLoaded(ArrayList<MasterListAdapter.ListItem> items, boolean foundLaunchDate)
+                                        {
+                                            //setup inputs
+                                            MasterAddListActivity.this.runOnUiThread(new Runnable()
+                                            {
+                                                @Override
+                                                public void run()
+                                                {
+                                                    //setup inputs
+                                                    setupInputs(usedOwners, usedCategories);
+
+                                                    //focus on search text
+                                                    searchText.requestFocus();
+                                                }
+                                            });
+                                        }
+                                    }, checkChangedListener);
+                                    addList.setAdapter(addAdapter);
 
                                     //don't dismiss
                                     allowDismiss = false;
@@ -973,8 +1014,10 @@ public class MasterAddListActivity extends BaseInputActivity
         searchText.addTextChangedListener(createTextChangedListener(addAdapter, ownerList, groupList, ageList));
         searchText.setEnabled(true);
 
+        //update title
+        updateTitleCount();
+
         //update displays
-        addList.setAdapter(addAdapter);
         addButton.setEnabled(true);
     }
 
@@ -1021,7 +1064,9 @@ public class MasterAddListActivity extends BaseInputActivity
         addList.setLayoutManager(new LinearLayoutManager(this));
 
         //setup title
-        this.setTitle(isFilterList ? R.string.title_set_visible_orbitals : R.string.title_select_satellites);
+        itemSelectedCount = 0;
+        startTitle = this.getString(isFilterList ? R.string.title_select_visible : R.string.title_select_satellites);
+        this.setTitle(startTitle);
 
         //setup show button
         showButton.setOnClickListener(new View.OnClickListener()
@@ -1054,18 +1099,98 @@ public class MasterAddListActivity extends BaseInputActivity
             }
         });
 
+        //setup check changed listener
+        checkChangedListener = new MasterListAdapter.OnItemCheckChangedListener()
+        {
+            @Override
+            public void onCheckChanged(MasterListAdapter.ListItem item)
+            {
+                //if now checked
+                if(item.isChecked)
+                {
+                    //add to count
+                    itemSelectedCount++;
+                }
+                //else if unchecked and at least 1 selected
+                else if(itemSelectedCount > 0)
+                {
+                    //remove from count
+                    itemSelectedCount--;
+                }
+
+                //update title
+                updateTitleCount(itemSelectedCount);
+            }
+        };
+
         //if for visible list
         if(isFilterList)
         {
-            int index;
-            int index2;
-            MasterListAdapter.ListItem[] allItems;
-            ArrayList<String> usedCategories = new ArrayList<>(0);
-            ArrayList<String> usedOwnerCodes = new ArrayList<>(0);
-            ArrayList<UpdateService.MasterOwner> usedOwners = new ArrayList<>(0);
-
             //create adapter
-            addAdapter = new MasterListAdapter(this);
+            addAdapter = new MasterListAdapter(this, new MasterListAdapter.OnLoadItemsListener()
+            {
+                @Override
+                public void onLoaded(ArrayList<MasterListAdapter.ListItem> items, boolean foundLaunchDate)
+                {
+                    int index;
+                    int index2;
+                    MasterListAdapter.ListItem[] allItems;
+                    ArrayList<String> usedCategories = new ArrayList<>(0);
+                    ArrayList<String> usedOwnerCodes = new ArrayList<>(0);
+                    ArrayList<UpdateService.MasterOwner> usedOwners = new ArrayList<>(0);
+
+                    //get owners and categories
+                    allItems = addAdapter.getAllItems();
+                    for(index = 0; index < allItems.length; index++)
+                    {
+                        //remember current item, owner, and code
+                        MasterListAdapter.ListItem currentItem = allItems[index];
+                        UpdateService.MasterOwner currentOwner = new UpdateService.MasterOwner(currentItem.satellite.ownerCode, currentItem.satellite.ownerName);
+                        String ownerCode = currentOwner.code;
+
+                        //if owner is not in the list
+                        if(ownerCode != null && !usedOwnerCodes.contains(ownerCode))
+                        {
+                            //add it
+                            usedOwners.add(currentOwner);
+                            usedOwnerCodes.add(ownerCode);
+                        }
+
+                        //go through each category
+                        for(index2 = 0; index2 < currentItem.categories.size(); index2++)
+                        {
+                            //remember current category
+                            String currentCategory = currentItem.categories.get(index2);
+
+                            //if group is not in the list
+                            if(!usedCategories.contains(currentCategory))
+                            {
+                                //add it
+                                usedCategories.add(currentCategory);
+                            }
+                        }
+                    }
+
+                    //sort owners and categories
+                    Collections.sort(usedOwners);
+                    Collections.sort(usedCategories);
+
+                    //setup inputs
+                    MasterAddListActivity.this.runOnUiThread(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            //setup inputs
+                            setupInputs(usedOwners, usedCategories);
+
+                            //hide search by default
+                            showButton.performClick();
+                        }
+                    });
+                }
+            }, checkChangedListener);
+            addList.setAdapter(addAdapter);
 
             //setup add button
             addButton.setOnClickListener(new View.OnClickListener()
@@ -1095,48 +1220,6 @@ public class MasterAddListActivity extends BaseInputActivity
                 }
             });
             addButton.setText(R.string.title_set);
-
-            //get owners and categories
-            allItems = addAdapter.getAllItems();
-            for(index = 0; index < allItems.length; index++)
-            {
-                //remember current item, owner, and code
-                MasterListAdapter.ListItem currentItem = allItems[index];
-                UpdateService.MasterOwner currentOwner = new UpdateService.MasterOwner(currentItem.satellite.ownerCode, currentItem.satellite.ownerName);
-                String ownerCode = currentOwner.code;
-
-                //if owner is not in the list
-                if(ownerCode != null && !usedOwnerCodes.contains(ownerCode))
-                {
-                    //add it
-                    usedOwners.add(currentOwner);
-                    usedOwnerCodes.add(ownerCode);
-                }
-
-                //go through each category
-                for(index2 = 0; index2 < currentItem.categories.size(); index2++)
-                {
-                    //remember current category
-                    String currentCategory = currentItem.categories.get(index2);
-
-                    //if group is not in the list
-                    if(!usedCategories.contains(currentCategory))
-                    {
-                        //add it
-                        usedCategories.add(currentCategory);
-                    }
-                }
-            }
-
-            //sort owners and categories
-            Collections.sort(usedOwners);
-            Collections.sort(usedCategories);
-
-            //setup inputs
-            setupInputs(usedOwners, usedCategories);
-
-            //hide search by default
-            showButton.performClick();
         }
         else
         {
@@ -1210,6 +1293,44 @@ public class MasterAddListActivity extends BaseInputActivity
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu)
+    {
+        //create options menu
+        getMenuInflater().inflate(R.menu.menu_master_layout, menu);
+        return(super.onCreateOptionsMenu(menu));
+    }
+
+    @Override @SuppressLint("NotifyDataSetChanged")
+    public boolean onOptionsItemSelected(final MenuItem item)
+    {
+        int id = item.getItemId();
+        boolean isAll = (id == R.id.menu_all);
+        boolean isNone = (id == R.id.menu_none);
+
+        //if -list exists- and -for all or none-
+        if(addAdapter != null && (isAll || isNone))
+        {
+            //get current items to change
+            MasterListAdapter.ListItem[] currentItems = addAdapter.getDisplayedItems();
+
+            //go through each item
+            for(MasterListAdapter.ListItem currentItem : currentItems)
+            {
+                //update checked state
+                currentItem.setChecked(isAll);
+            }
+
+            //update title
+            updateTitleCount();
+
+            //update display
+            addAdapter.notifyDataSetChanged();
+        }
+
+        return(true);
+    }
+
     //Update satellites
     private void updateSatellites(final MasterListAdapter.ListItem[] selectedItems)
     {
@@ -1272,6 +1393,23 @@ public class MasterAddListActivity extends BaseInputActivity
         {
             //hide notification
             UpdateService.setNotificationVisible(UpdateService.UpdateType.GetMasterList, false);
+        }
+    }
+
+    //Updates title count
+    private void updateTitleCount(int count)
+    {
+        //add count to title for any selected
+        this.setTitle(startTitle + (count > 0 ? (" (" + count + ")") : ""));
+    }
+    private void updateTitleCount()
+    {
+        //if adapter exists
+        if(addAdapter != null)
+        {
+            //update title
+            itemSelectedCount = addAdapter.getSelectedItems().length;
+            updateTitleCount(itemSelectedCount);
         }
     }
 

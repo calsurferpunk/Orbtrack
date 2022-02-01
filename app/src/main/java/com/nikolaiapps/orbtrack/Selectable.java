@@ -1520,7 +1520,7 @@ public abstract class Selectable
         public boolean onCreateActionMode(ActionMode mode, Menu menu)
         {
             //create action menu
-            mode.getMenuInflater().inflate(R.menu.menu_action_layout, menu);
+            mode.getMenuInflater().inflate(R.menu.menu_action_selectable_layout, menu);
             actionMenu = menu;
             actionModeMenu = mode;
             return(true);

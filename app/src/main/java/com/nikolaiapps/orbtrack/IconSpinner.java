@@ -332,7 +332,7 @@ public class IconSpinner extends AppCompatSpinner
             AppCompatImageView itemImage3;
             TextView itemText;
             TextView itemSubText;
-            Item currentItem = items[position];
+            Item currentItem = (items != null && position >= 0 && position < items.length ? items[position] : new Item("", ""));
 
             //set view
             if(convertView == null)

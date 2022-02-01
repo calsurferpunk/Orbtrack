@@ -497,6 +497,7 @@
     <string name="title_select_orbital">Select Orbital</string>
     <string name="title_select_satellites">Select Satellites</string>
     <string name="title_select_source">Select Source</string>
+    <string name="title_select_visible">Select Visible</string>
     <string name="title_selected_delete">Delete Selected</string>
     <string name="title_semi_major_axis">Semi Major Axis</string>
     <string name="title_sensitivity">Sensitivity</string>
@@ -505,7 +506,6 @@
     <string name="title_set_actual_position">Set Actual Position</string>
     <string name="title_set_exact_alarm">Set Exact Alarm</string>
     <string name="title_set_icon_scale">Set Icon Scale</string>
-    <string name="title_set_visible_orbitals">Set Visible Orbitals</string>
     <string name="title_settings">Settings</string>
     <string name="title_shared">Shared</string>
     <string name="title_share_translations_online">Share Translations Online</string>

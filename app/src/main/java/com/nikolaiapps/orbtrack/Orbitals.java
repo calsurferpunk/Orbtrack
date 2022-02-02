@@ -515,19 +515,17 @@ public abstract class Orbitals
                 if(serviceIntent != null)
                 {
                     //set selected items
-                    satelliteList = serviceIntent.getParcelableArrayListExtra(UpdateService.ParamTypes.Satellites);
-                    if(satelliteList != null)
-                    {
-                        //go through each satellite
-                        for(Database.DatabaseSatellite currentSatellite : satelliteList)
-                        {
-                            //select it
-                            setItemSelected(getPosition(currentSatellite.noradId), true);
-                        }
+                    satelliteList = Database.getSatelliteCacheData(Page.this.getContext());
 
-                        //run with existing
-                        runTaskSelectedItems(UpdateService.UpdateType.UpdateSatellites, false);
+                    //go through each satellite
+                    for(Database.DatabaseSatellite currentSatellite : satelliteList)
+                    {
+                        //select it
+                        setItemSelected(getPosition(currentSatellite.noradId), true);
                     }
+
+                    //run with existing
+                    runTaskSelectedItems(UpdateService.UpdateType.UpdateSatellites, false);
                 }
             }
 

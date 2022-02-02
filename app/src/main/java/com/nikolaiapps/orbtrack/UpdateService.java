@@ -12,6 +12,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -40,7 +41,7 @@ public class UpdateService extends NotifyService
         static final String CheckUpdate = "checkUpdate";
         static final String User = "user";
         static final String Password = "pwd";
-        static final String Satellites = "satellites";
+        static final String SatellitesCache = "satellitesCache";
         static final String FileNames = "fileNames";
         static final String FileName = "fileName";
         static final String FilesData = "fileData";
@@ -801,6 +802,7 @@ public class UpdateService extends NotifyService
         boolean getUpdate = intent.getBooleanExtra(ParamTypes.GetUpdate, false);
         boolean checkUpdate = intent.getBooleanExtra(ParamTypes.CheckUpdate, false);
         boolean runForeground = intent.getBooleanExtra(ParamTypes.RunForeground, false);
+        boolean satellitesCache = intent.getBooleanExtra(ParamTypes.SatellitesCache, false);
         int index = intent.getIntExtra(ParamTypes.Index, 0);
         int updateSource = intent.getIntExtra(ParamTypes.UpdateSource, Database.UpdateSource.SpaceTrack);
         int fileType = intent.getIntExtra(ParamTypes.FileType, Integer.MAX_VALUE);
@@ -816,7 +818,14 @@ public class UpdateService extends NotifyService
         NotificationCompat.Builder notifyBuilder = Globals.createNotifyBuilder(this, notifyChannelId);
         ArrayList<String> fileNames = intent.getStringArrayListExtra(ParamTypes.FileNames);
         ArrayList<String> filesData = intent.getStringArrayListExtra(ParamTypes.FilesData);
-        ArrayList<Database.DatabaseSatellite> satelliteList = intent.getParcelableArrayListExtra(ParamTypes.Satellites);
+        ArrayList<Database.DatabaseSatellite> satelliteList = new ArrayList<>(0);
+
+        //if using satellites cache
+        if(satellitesCache)
+        {
+            //get satellites cache
+            satelliteList = Database.getSatelliteCacheData(this);
+        }
 
         //handle if need to start in foreground
         Globals.startForeground(this, Globals.ChannelIds.Update, notifyBuilder, runForeground);
@@ -839,10 +848,6 @@ public class UpdateService extends NotifyService
         if(fileName == null)
         {
             fileName = "";
-        }
-        if(satelliteList == null)
-        {
-            satelliteList = new ArrayList<>(0);
         }
 
         //update progress
@@ -3786,7 +3791,8 @@ public class UpdateService extends NotifyService
         String[] loginData = Settings.getLogin(context, getAccountType(updateSource));
 
         updateIntent.putExtra(ParamTypes.UpdateSource, updateSource);
-        updateIntent.putParcelableArrayListExtra(ParamTypes.Satellites, satellites);
+        updateIntent.putExtra(ParamTypes.SatellitesCache, true);
+        Database.createSatelliteCacheFile(context, satellites);
         updateIntent.putExtra(ParamTypes.RunForeground, runForeground);
         updateIntent.putExtra(ParamTypes.User, loginData[0]);
         updateIntent.putExtra(ParamTypes.Password, loginData[1]);
@@ -3834,7 +3840,8 @@ public class UpdateService extends NotifyService
         Resources res = activity.getResources();
         Intent saveIntent = createIntent(activity, UpdateType.SaveFile, res.getString(R.string.title_saving));
 
-        saveIntent.putParcelableArrayListExtra(ParamTypes.Satellites, satellites);
+        saveIntent.putExtra(ParamTypes.SatellitesCache, true);
+        Database.createSatelliteCacheFile(activity, satellites);
         saveIntent.putExtra(ParamTypes.FileName, pendingFile.name);
         saveIntent.putExtra(ParamTypes.FileExt, pendingFile.extension);
         saveIntent.putExtra(ParamTypes.FileType, pendingFile.type);
@@ -3861,7 +3868,7 @@ public class UpdateService extends NotifyService
 
         infoIntent.putExtra(ParamTypes.Index, group);
         infoIntent.putExtra(ParamTypes.UpdateSource, updateSource);
-        infoIntent.putExtra(ParamTypes.TLEData, tleData);
+        infoIntent.putExtra(ParamTypes.TLEData, (Parcelable)tleData);
 
         Globals.startService(activity, infoIntent, false);
     }

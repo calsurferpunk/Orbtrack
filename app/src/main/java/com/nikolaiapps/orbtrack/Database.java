@@ -18,9 +18,17 @@ import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import android.widget.Toast;
 import java.io.BufferedReader;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -562,7 +570,7 @@ public class Database extends SQLiteOpenHelper
     private static final int TIME_ZONE_ROWS = 23427;
     private static final String TIME_ZONE_FILE_SEPARATOR = "\t";
 
-    public static class DatabaseSatellite implements Parcelable
+    public static class DatabaseSatellite implements Parcelable, Serializable
     {
         public final String name;
         private final String userName;
@@ -1361,6 +1369,92 @@ public class Database extends SQLiteOpenHelper
         }
         satelliteValues.put("[Selected]", (selected ? 1 : 0));
         return(satelliteValues);
+    }
+
+    //Creates satellite cache file
+    public static boolean createSatelliteCacheFile(Context context, ArrayList<Database.DatabaseSatellite> satellites)
+    {
+        File satCache;
+        FileOutputStream outputStream;
+        ObjectOutputStream objectOutputStream;
+
+        //if context is set
+        if(context != null)
+        {
+            //set file
+            satCache = new File(context.getCacheDir(), "satCache.txt");
+
+            try
+            {
+                //create file write each satellite
+                satCache.createNewFile();
+                outputStream = new FileOutputStream(satCache);
+                objectOutputStream = new ObjectOutputStream(outputStream);
+                for(Database.DatabaseSatellite currentSatellite : satellites)
+                {
+                    //write satellite
+                    objectOutputStream.writeObject(currentSatellite);
+                }
+                objectOutputStream.close();
+                outputStream.close();
+            }
+            catch(Exception ex)
+            {
+                //failed
+                return(false);
+            }
+        }
+        else
+        {
+            //failed
+            return(false);
+        }
+
+        //success
+        return(true);
+    }
+
+    //Reads satellite data from cache file
+    public static ArrayList<Database.DatabaseSatellite> getSatelliteCacheData(Context context)
+    {
+        Object currentObject;
+        File satCache;
+        FileInputStream inputStream;
+        ObjectInputStream objectInputStream;
+        ArrayList<DatabaseSatellite> satellites = new ArrayList<>(0);
+
+        //if context is set
+        if(context != null)
+        {
+            //get file
+            satCache = new File(context.getCacheDir(), "satCache.txt");
+
+            try
+            {
+                //read each satellite from file
+                inputStream = new FileInputStream(satCache);
+                objectInputStream = new ObjectInputStream(inputStream);
+                while((currentObject = objectInputStream.readObject()) != null)
+                {
+                    //add satellite to list
+                    satellites.add((DatabaseSatellite)currentObject);
+                }
+                objectInputStream.close();
+                inputStream.close();
+            }
+            catch(EOFException eofEx)
+            {
+                //do nothing
+            }
+            catch(Exception ex)
+            {
+                //clear list
+                satellites.clear();
+            }
+        }
+
+        //return list
+        return(satellites);
     }
 
     //Gets desired orbitals from the database

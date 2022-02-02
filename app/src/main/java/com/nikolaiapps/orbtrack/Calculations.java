@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import org.json.JSONObject;
+
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -303,7 +305,7 @@ public abstract class Calculations
 
     //TLE data
     @SuppressWarnings("SpellCheckingInspection")
-    public static class TLEDataType implements Parcelable
+    public static class TLEDataType implements Parcelable, Serializable
     {
         //line 1
         public int satelliteNum;

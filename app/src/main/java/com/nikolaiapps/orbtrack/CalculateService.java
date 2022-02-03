@@ -871,11 +871,26 @@ public class CalculateService extends NotifyService
                 //listen for location updates
                 locationReceiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | LocationService.FLAG_START_RUN_FOREGROUND)
                 {
+                    private boolean firstLocation = true;
+                    private Calculations.ObserverType observer = null;
+
                     @Override
                     protected void onGotLocation(Context context, Calculations.ObserverType updatedObserver)
                     {
-                        //update notifications
-                        updateNotify(context, updatedObserver, false);
+                        boolean updated = (updatedObserver != null && (firstLocation || observer == null || observer.notEqual(updatedObserver)));
+
+                        //if updated location
+                        if(updated)
+                        {
+                            //update observer
+                            observer = updatedObserver;
+
+                            //update notifications
+                            updateNotify(context, updatedObserver, false);
+                        }
+
+                        //update status
+                        firstLocation = false;
                     }
                 };
                 locationReceiver.register(context);

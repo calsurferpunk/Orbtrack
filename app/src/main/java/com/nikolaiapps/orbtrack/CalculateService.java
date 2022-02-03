@@ -788,52 +788,56 @@ public class CalculateService extends NotifyService
             boolean usingLocation = (location != null);
             boolean[] notifyUsing = new boolean[Globals.NotifyType.NotifyCount];
             AlarmNotifySettings[] notifySettings = new AlarmNotifySettings[Globals.NotifyType.NotifyCount];
-            Database.DatabaseSatellite[] orbitals = Database.getOrbitals(context);
+            AlarmNotifySettings[][] allNotifySettings = Settings.getNotifyPassSettings(context);
 
-            //go through each orbital
-            for(Database.DatabaseSatellite currentOrbital : orbitals)
+            //go through each settings group
+            for(AlarmNotifySettings[] currentGroupSettings : allNotifySettings)
             {
-                boolean setNotify = false;
-                Calculations.ObserverType setLocation = null;
-
                 //get norad ID
-                noradId = currentOrbital.noradId;
+                noradId = (currentGroupSettings.length == Globals.NotifyType.NotifyCount ? currentGroupSettings[0].noradId : Universe.IDs.Invalid);
 
-                //go through each notify type
-                for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
+                //if a valid norad ID
+                if(noradId != Universe.IDs.Invalid)
                 {
-                    //remember current settings and location
-                    AlarmNotifySettings currentSettings = Settings.getNotifyPassSettings(context, noradId, index);
-                    Calculations.ObserverType currentLocation = (usingLocation ? location : currentSettings.location);
+                    boolean setNotify = false;
+                    Calculations.ObserverType setLocation = null;
 
-                    //update status
-                    notifySettings[index] = currentSettings;
-                    notifyUsing[index] = currentSettings.isEnabled();
-
-                    //if -using- and --on first update- or -location changed enough---
-                    if(notifyUsing[index] && (firstUpdate || Math.abs(Globals.latitudeDistance(currentSettings.location.geo.latitude, currentLocation.geo.latitude)) >= 0.2 || Math.abs(Globals.longitudeDistance(currentSettings.location.geo.longitude, currentLocation.geo.longitude)) >= 0.2))
+                    //go through each notify type
+                    for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
                     {
-                        //if using location, save now since not updated until notify time
-                        if(usingLocation)
-                        {
-                            //update location
-                            Settings.setNotifyPassNext(context, noradId, location, currentSettings.nextOnly, currentSettings.timeMs, index);
-                        }
+                        //remember current settings and location
+                        AlarmNotifySettings currentSettings = currentGroupSettings[index];
+                        Calculations.ObserverType currentLocation = (usingLocation ? location : currentSettings.location);
 
-                        //need to set states
-                        if(setLocation == null)
+                        //update status
+                        notifySettings[index] = currentSettings;
+                        notifyUsing[index] = currentSettings.isEnabled();
+
+                        //if -using- and --on first update- or -location changed enough---
+                        if(notifyUsing[index] && (firstUpdate || Math.abs(Globals.latitudeDistance(currentSettings.location.geo.latitude, currentLocation.geo.latitude)) >= 0.2 || Math.abs(Globals.longitudeDistance(currentSettings.location.geo.longitude, currentLocation.geo.longitude)) >= 0.2))
                         {
-                            setLocation = currentLocation;
+                            //if using location, save now since not updated until notify time
+                            if(usingLocation)
+                            {
+                                //update location
+                                Settings.setNotifyPassNext(context, noradId, location, currentSettings.nextOnly, currentSettings.timeMs, index);
+                            }
+
+                            //need to set states
+                            if(setLocation == null)
+                            {
+                                setLocation = currentLocation;
+                            }
+                            setNotify = true;
                         }
-                        setNotify = true;
                     }
-                }
 
-                //if need to set notify
-                if(setNotify)
-                {
-                    //set notify
-                    setNotifyStates(context, setLocation, notifySettings, notifyUsing, firstUpdate || allowPast);
+                    //if need to set notify
+                    if(setNotify)
+                    {
+                        //set notify
+                        setNotifyStates(context, setLocation, notifySettings, notifyUsing, firstUpdate || allowPast);
+                    }
                 }
             }
 

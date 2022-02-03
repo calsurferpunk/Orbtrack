@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.widget.TableRow;
 import android.widget.TextView;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TimeZone;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -2897,6 +2898,57 @@ public abstract class Settings
         settings.location.geo.altitudeKm = Settings.getPreferenceFloat(context, getNotifyPassAltitudeKey(noradId, notifyType));
 
         return(settings);
+    }
+    public static CalculateService.AlarmNotifySettings[][] getNotifyPassSettings(Context context)
+    {
+        int noradId;
+        byte index;
+        Map<String, ?> allSettings;
+        ArrayList<Integer> usedIds = new ArrayList<>(0);
+        ArrayList<CalculateService.AlarmNotifySettings[]> notifySettings = new ArrayList<>(0);
+
+        //if context is set
+        if(context != null)
+        {
+            //get all settings
+            allSettings = getReadSettings(context).getAll();
+            if(allSettings != null)
+            {
+                //go through each key
+                for(Map.Entry<String, ?> currentSetting : allSettings.entrySet())
+                {
+                    //get current key
+                    String currentKey = currentSetting.getKey();
+
+                    //if a notify key
+                    if(currentKey.startsWith("Notify"))
+                    {
+                        ArrayList<CalculateService.AlarmNotifySettings> settings = new ArrayList<>(0);
+
+                        //get norad ID
+                        noradId = Globals.tryParseInt(currentKey.replaceAll("[a-zA-Z]", ""));
+
+                        //if valid norad ID and not in list
+                        if(noradId != Integer.MAX_VALUE && !usedIds.contains(noradId))
+                        {
+                            //go through each notify type
+                            for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
+                            {
+                                //add notify setting to list
+                                settings.add(getNotifyPassSettings(context, noradId, index));
+                            }
+
+                            //add to notify settings and used IDs
+                            notifySettings.add(settings.toArray(new CalculateService.AlarmNotifySettings[0]));
+                            usedIds.add(noradId);
+                        }
+                    }
+                }
+            }
+        }
+
+        //return settings
+        return(notifySettings.toArray(new CalculateService.AlarmNotifySettings[0][]));
     }
 
     //Sets notify

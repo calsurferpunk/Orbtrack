@@ -2707,16 +2707,34 @@ public abstract class Current
         }
 
         //setup search
-        private static void setupSearch(final Context context, final FloatingActionStateButton showSearchButton, final IconSpinner searchList, final View searchListLayout)
+        private static void setupSearch(final Context context, final FloatingActionStateButton showSearchButton, final IconSpinner searchList, final View searchListLayout, Database.SatelliteData[] selectedOrbitals)
         {
             //if show search button exists
             if(showSearchButton != null)
             {
                 int textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
                 int textSelectedColor = Globals.resolveColorID(context, R.attr.columnTitleTextColor);
+                Database.DatabaseSatellite[] otherOrbitals = (selectedOrbitals != null ? Database.getNoneAndLocation(context) : null);
+                ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
+
+                //setup selection list
+                if(otherOrbitals != null && otherOrbitals.length > 0)
+                {
+                    //add all other orbitals (none and location)
+                    selectedOrbitalList.addAll(Arrays.asList(otherOrbitals));
+                }
+                if(selectedOrbitals != null)
+                {
+                    //go through each selected orbital
+                    for(Database.SatelliteData currentData : selectedOrbitals)
+                    {
+                        //add current orbital to list
+                        selectedOrbitalList.add(currentData.database);
+                    }
+                }
 
                 //setup search list
-                searchList.setAdapter(new IconSpinner.CustomAdapter(context, Database.getSelectedOrbitals(context,  true, true), textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+                searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
                 searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
                 searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
@@ -3043,7 +3061,7 @@ public abstract class Current
         }
 
         //Creates a map view
-        public static View onCreateMapView(final Selectable.ListFragment page, LayoutInflater inflater, ViewGroup container, boolean forGlobe, final Bundle savedInstanceState)
+        public static View onCreateMapView(final Selectable.ListFragment page, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, boolean forGlobe, final Bundle savedInstanceState)
         {
             final Context context = page.getContext();
             final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.coordinates_map_layout, container, false);
@@ -3084,10 +3102,11 @@ public abstract class Current
             page.scaleBar = rootView.findViewById(R.id.Coordinate_Scale_Bar);
             page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
 
-            //setup search
-            if(searchList != null)
+            //if list and selected orbitals exist
+            if(searchList != null && selectedOrbitals != null)
             {
-                setupSearch(context, showSearchButton, searchList, searchListLayout);
+                //setup search
+                setupSearch(context, showSearchButton, searchList, searchListLayout, selectedOrbitals);
             }
 
             //if map info text exists and not using background
@@ -3459,7 +3478,7 @@ public abstract class Current
             {
                 //create view
                 savedInstanceState.putInt(MainActivity.ParamTypes.CoordinateNoradId, MainActivity.mapViewNoradID);
-                newView = Coordinates.onCreateMapView(this, inflater, container, (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                newView = Coordinates.onCreateMapView(this, inflater, container, MainActivity.getSatellites(), (subPage == Globals.SubPageType.Globe), savedInstanceState);
             }
 
             //if view is not set yet

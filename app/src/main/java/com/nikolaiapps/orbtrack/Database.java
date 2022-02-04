@@ -28,7 +28,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -1462,10 +1461,11 @@ public class Database extends SQLiteOpenHelper
     {
         int index;
         int noradId;
+        boolean skipQuery = (sqlConditions != null && sqlConditions.equals("skip"));
         String name;
         String ownerCode;
         String localOwnerName;
-        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], [Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
+        String[][] queryResult = (!skipQuery ? runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], [Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null) : null);
         ArrayList<DatabaseSatellite> list = new ArrayList<>(0);
 
         //if adding none
@@ -1482,19 +1482,23 @@ public class Database extends SQLiteOpenHelper
             list.add(new DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, OrbitalType.Planet));
         }
 
-        //go through each satellite
-        for(index = 0; index < queryResult.length; index++)
+        //if not skipping query
+        if(!skipQuery)
         {
-            //get ID and name
-            noradId = Integer.parseInt(queryResult[index][2]);
-            name = (noradId < 0 ? Universe.getName(context, noradId) : queryResult[index][0]);
+            //go through each satellite
+            for(index = 0; index < queryResult.length; index++)
+            {
+                //get ID and name
+                noradId = Integer.parseInt(queryResult[index][2]);
+                name = (noradId < 0 ? Universe.getName(context, noradId) : queryResult[index][0]);
 
-            //get owner code and name
-            ownerCode = queryResult[index][3];
-            localOwnerName = LocaleOwner.getName(context, ownerCode);
+                //get owner code and name
+                ownerCode = queryResult[index][3];
+                localOwnerName = LocaleOwner.getName(context, ownerCode);
 
-            //add to list
-            list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Integer.parseInt(queryResult[index][11]), Byte.parseByte(queryResult[index][12]), queryResult[index][13].equals("1")));
+                //add to list
+                list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Integer.parseInt(queryResult[index][11]), Byte.parseByte(queryResult[index][12]), queryResult[index][13].equals("1")));
+            }
         }
 
         //return list as array
@@ -1529,6 +1533,12 @@ public class Database extends SQLiteOpenHelper
     public static DatabaseSatellite[] getOrbitals(Context context)
     {
         return(getOrbitals(context, null, false, false));
+    }
+
+    //Get none and location selection items
+    public static DatabaseSatellite[] getNoneAndLocation(Context context)
+    {
+        return(getOrbitals(context, "skip", true, true));
     }
 
     //Returns sql conditions to get satellites from orbitals

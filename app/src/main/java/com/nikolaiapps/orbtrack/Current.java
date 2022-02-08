@@ -2714,17 +2714,15 @@ public abstract class Current
             {
                 int textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
                 int textSelectedColor = Globals.resolveColorID(context, R.attr.columnTitleTextColor);
-                Database.DatabaseSatellite[] otherOrbitals = (selectedOrbitals != null ? Database.getNoneAndLocation(context) : null);
                 ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
 
                 //setup selection list
-                if(otherOrbitals != null && otherOrbitals.length > 0)
-                {
-                    //add all other orbitals (none and location)
-                    selectedOrbitalList.addAll(Arrays.asList(otherOrbitals));
-                }
                 if(selectedOrbitals != null)
                 {
+                    //add none and location
+                    selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_none), Universe.IDs.None, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
+                    selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
+
                     //go through each selected orbital
                     for(Database.SatelliteData currentData : selectedOrbitals)
                     {

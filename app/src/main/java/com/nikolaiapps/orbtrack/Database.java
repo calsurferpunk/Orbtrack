@@ -565,6 +565,125 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
+    private static abstract class OrbitalsBuffer
+    {
+        private static boolean needReload = false;
+        private static DatabaseSatellite[] bufferAll = null;
+        private static DatabaseSatellite[] bufferSelected = null;
+
+        //Load orbitals from database into buffers
+        private static void load(Context context)
+        {
+            ArrayList<DatabaseSatellite> selectedOrbitals;
+
+            //get all orbitals
+            bufferAll = getOrbitals(context, (String)null);
+
+            //get selected orbitals
+            selectedOrbitals = new ArrayList<>(bufferAll.length);
+            for(DatabaseSatellite currentOrbital : bufferAll)
+            {
+                if(currentOrbital.isSelected)
+                {
+                    selectedOrbitals.add(currentOrbital);
+                }
+            }
+            bufferSelected = selectedOrbitals.toArray(new DatabaseSatellite[0]);
+
+            //reset status
+            needReload = false;
+        }
+
+        //Sets that orbitals need to be reloaded
+        public static void setNeedReload()
+        {
+            //reload on next use
+            needReload = true;
+        }
+
+        //Handles load if needed
+        private static void handleLoad(Context context, boolean needAll, boolean needSelected)
+        {
+            //if need to load orbitals
+            if(needReload || (needAll && bufferAll == null) || (needSelected && bufferSelected == null))
+            {
+                //load orbitals
+                load(context);
+            }
+        }
+
+        //Get all orbitals
+        public static DatabaseSatellite[] getAll(Context context)
+        {
+            //load if needed
+            handleLoad(context, true, false);
+
+            //return all orbitals
+            return(bufferAll);
+        }
+
+        //Get selected orbitals
+        public static DatabaseSatellite[] getSelected(Context context)
+        {
+            //load if needed
+            handleLoad(context, false, true);
+
+            //return selected orbitals
+            return(bufferSelected);
+        }
+
+        //Get orbital with given norad ID
+        public static DatabaseSatellite getOrbital(Context context, int noradId, boolean allowLoad)
+        {
+            //if allow loading
+            if(allowLoad)
+            {
+                //load if needed
+                handleLoad(context, true, false);
+            }
+
+            //if buffered all exists
+            if(bufferAll != null)
+            {
+                //go through each orbital
+                for(DatabaseSatellite currentOrbital : bufferAll)
+                {
+                    //if norad ID matches
+                    if(currentOrbital.noradId == noradId)
+                    {
+                        //return it
+                        return(currentOrbital);
+                    }
+                }
+            }
+
+            //not found
+            return(null);
+        }
+        public static DatabaseSatellite getOrbital(Context context, int noradId)
+        {
+            return(getOrbital(context, noradId, true));
+        }
+
+        //Gets if orbital is selected with option to allow loading
+        //note: load not allowed when used during orbital updates
+        public static boolean getOrbitalSelected(Context context, int noradId, boolean allowLoad)
+        {
+            //try to get orbital
+            DatabaseSatellite orbital = getOrbital(context, noradId, allowLoad);
+
+            //if orbital exists
+            if(orbital != null)
+            {
+                //return if selected
+                return(orbital.isSelected);
+            }
+
+            //unknown
+            return(false);
+        }
+    }
+
     private static final int TIME_ZONE_COLUMNS = 3;
     private static final int TIME_ZONE_ROWS = 23427;
     private static final String TIME_ZONE_FILE_SEPARATOR = "\t";
@@ -943,6 +1062,26 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
+    //Adds indexing to tables
+    private static void initIndexing(SQLiteDatabase db)
+    {
+        String[] tables = new String[]{Tables.Orbital, Tables.Location, Tables.LocationName, Tables.TimeZone, Tables.Altitude, Tables.MasterSatellite, Tables.Owner, Tables.Category, Tables.SatelliteCategory, Tables.Information};
+
+        //go through each table
+        for(String currentTable : tables)
+        {
+            try
+            {
+                //add index to table
+                db.execSQL("CREATE INDEX [" + currentTable.replace("[", "").replace("]", "") + "_Index] ON " + currentTable + "([ID])");
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
+        }
+    }
+
     //Sets up database with initial data
     @SuppressWarnings("SpellCheckingInspection")
     private void initData(Context context, SQLiteDatabase db)
@@ -970,6 +1109,9 @@ public class Database extends SQLiteOpenHelper
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Category + " ([ID] INTEGER PRIMARY KEY, [Name] TEXT(" + MAX_CATEGORY_NAME_LENGTH + ") UNIQUE, [Indx] INTEGER)");
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.SatelliteCategory + " ([ID] INTEGER PRIMARY KEY, [Norad] INTEGER, [Category_Index] INTEGER)");
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Information + "([ID] INTEGER PRIMARY KEY, [Norad] INTEGER, [Source] INTEGER, [Language] TEXT(" + MAX_LANGUAGE_LENGTH + "), [Info] TEXT(" + MAX_INFO_LENGTH + "))");
+
+        //add indexing
+        initIndexing(db);
 
         //if there are no orbitals
         if(runQuery(context, "SELECT [Name] FROM " + Tables.Orbital + " WHERE [Type]=" + OrbitalType.Star + " LIMIT 1", null).length == 0)
@@ -1070,7 +1212,7 @@ public class Database extends SQLiteOpenHelper
     @SuppressWarnings("SpellCheckingInspection")
     public static void handleUpdates(Context context)
     {
-        SQLiteDatabase db;
+        SQLiteDatabase db = null;
         DatabaseSatellite issZarya;
 
         //if update status is set
@@ -1107,6 +1249,17 @@ public class Database extends SQLiteOpenHelper
                 {
                     //default to lens icon indicators
                     Settings.setIndicator(context, Settings.Options.LensView.IndicatorType.Icon);
+                }
+
+                //if previous version if before table indexing
+                if(updateStatus.previousVersion < 19)
+                {
+                    //add indexing
+                    if(db == null)
+                    {
+                        db = DatabaseManager.get(context, true);
+                    }
+                    Database.initIndexing(db);
                 }
 
                 //show any notice
@@ -1457,56 +1610,33 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets desired orbitals from the database
-    private static DatabaseSatellite[] getOrbitals(Context context, String sqlConditions, boolean addLocation, boolean addNone)
+    public static DatabaseSatellite[] getOrbitals(Context context, String sqlConditions)
     {
         int index;
         int noradId;
-        boolean skipQuery = (sqlConditions != null && sqlConditions.equals("skip"));
         String name;
         String ownerCode;
         String localOwnerName;
-        String[][] queryResult = (!skipQuery ? runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], [Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null) : null);
+        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], [Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
         ArrayList<DatabaseSatellite> list = new ArrayList<>(0);
 
-        //if adding none
-        if(addNone)
+        //go through each satellite
+        for(index = 0; index < queryResult.length; index++)
         {
-            //add none to list
-            list.add(new DatabaseSatellite(context.getResources().getString(R.string.title_none), Universe.IDs.None, null, Globals.UNKNOWN_DATE_MS, OrbitalType.Planet));
-        }
+            //get ID and name
+            noradId = Integer.parseInt(queryResult[index][2]);
+            name = (noradId < 0 ? Universe.getName(context, noradId) : queryResult[index][0]);
 
-        //if adding location
-        if(addLocation)
-        {
-            //add location to list
-            list.add(new DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, OrbitalType.Planet));
-        }
+            //get owner code and name
+            ownerCode = queryResult[index][3];
+            localOwnerName = LocaleOwner.getName(context, ownerCode);
 
-        //if not skipping query
-        if(!skipQuery)
-        {
-            //go through each satellite
-            for(index = 0; index < queryResult.length; index++)
-            {
-                //get ID and name
-                noradId = Integer.parseInt(queryResult[index][2]);
-                name = (noradId < 0 ? Universe.getName(context, noradId) : queryResult[index][0]);
-
-                //get owner code and name
-                ownerCode = queryResult[index][3];
-                localOwnerName = LocaleOwner.getName(context, ownerCode);
-
-                //add to list
-                list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Integer.parseInt(queryResult[index][11]), Byte.parseByte(queryResult[index][12]), queryResult[index][13].equals("1")));
-            }
+            //add to list
+            list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Integer.parseInt(queryResult[index][11]), Byte.parseByte(queryResult[index][12]), queryResult[index][13].equals("1")));
         }
 
         //return list as array
         return(list.toArray(new DatabaseSatellite[0]));
-    }
-    public static DatabaseSatellite[] getOrbitals(Context context, String sqlConditions)
-    {
-        return(getOrbitals(context, sqlConditions, false, false));
     }
     public static DatabaseSatellite[] getOrbitals(Context context, int[] noradIds)
     {
@@ -1528,17 +1658,11 @@ public class Database extends SQLiteOpenHelper
         }
 
         //return satellites
-        return(getOrbitals(context, "[Norad] IN(" + idStrings.toString() + ")", false, false));
+        return(getOrbitals(context, "[Norad] IN(" + idStrings.toString() + ")"));
     }
     public static DatabaseSatellite[] getOrbitals(Context context)
     {
-        return(getOrbitals(context, null, false, false));
-    }
-
-    //Get none and location selection items
-    public static DatabaseSatellite[] getNoneAndLocation(Context context)
-    {
-        return(getOrbitals(context, "skip", true, true));
+        return(OrbitalsBuffer.getAll(context));
     }
 
     //Returns sql conditions to get satellites from orbitals
@@ -1550,14 +1674,13 @@ public class Database extends SQLiteOpenHelper
     //Gets desired orbital with norad ID
     public static DatabaseSatellite getOrbital(Context context, int noradId)
     {
-        DatabaseSatellite[] satellites = getOrbitals(context, "[Norad]=" + noradId);
-        return(satellites.length > 0 ? satellites[0] : null);
+        return(OrbitalsBuffer.getOrbital(context, noradId));
     }
 
     //Gets all selected orbitals
-    public static DatabaseSatellite[] getSelectedOrbitals(Context context, boolean addLocation, boolean addNone)
+    public static DatabaseSatellite[] getSelectedOrbitals(Context context)
     {
-        return(getOrbitals(context, "[Selected]=1", addLocation, addNone));
+        return(OrbitalsBuffer.getSelected(context));
     }
 
     //Gets a satellite ID by norad
@@ -1568,27 +1691,6 @@ public class Database extends SQLiteOpenHelper
         return(queryResult.length > 0 ? Long.parseLong(queryResult[0][0]) : -1);
     }
 
-    //Gets whether a satellite is selected
-    private static boolean getSatelliteSelected(Context context, long id)
-    {
-        DatabaseSatellite[] satellites;
-
-        //if trying to update an existing satellite
-        if(id > 0)
-        {
-            //if able to find satellite
-            satellites = getOrbitals(context, Tables.Orbital + ".[ID]='" + id + "'");
-            if(satellites.length > 0)
-            {
-                //get current selected state
-                return(satellites[0].isSelected);
-            }
-        }
-
-        //unknown
-        return(false);
-    }
-
     //Modifies satellite data and returns ID
     public static long saveSatellite(Context context, String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
     {
@@ -1596,6 +1698,9 @@ public class Database extends SQLiteOpenHelper
         long saveId;
         ContentValues satelliteValues = getSatelliteValues(name, userName, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, pathColor, orbitalType, selected);
         saveId = runSave(context, id, Tables.Orbital, satelliteValues);
+
+        //update buffer
+        OrbitalsBuffer.setNeedReload();
 
         //update any applicable widget
         WidgetPassBaseProvider.updateWidget(context, noradId);
@@ -1605,13 +1710,12 @@ public class Database extends SQLiteOpenHelper
     }
     public static long saveSatellite(Context context, String name, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, byte orbitalType)
     {
-        long id = getSatelliteID(context, noradId);
-        return(saveSatellite(context, name, null, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Color.DKGRAY, orbitalType, (id < 0 || getSatelliteSelected(context, id))));
+        DatabaseSatellite orbital = OrbitalsBuffer.getOrbital(context, noradId, false);
+        return(saveSatellite(context, name, null, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Color.DKGRAY, orbitalType, (orbital == null || orbital.isSelected)));
     }
     public static void saveSatellite(Context context, int noradId, String userName, String ownerCode, long launchDate)
     {
-        long id = getSatelliteID(context, noradId);
-        saveSatellite(context, null, userName, noradId, ownerCode, launchDate, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, getSatelliteSelected(context, id));
+        saveSatellite(context, null, userName, noradId, ownerCode, launchDate, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, OrbitalsBuffer.getOrbitalSelected(context, noradId, false));
     }
     public static void saveSatellite(Context context, int noradId, boolean selected)
     {

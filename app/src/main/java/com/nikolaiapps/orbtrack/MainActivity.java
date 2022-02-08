@@ -1375,7 +1375,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Database.DatabaseSatellite[] dbSatellites;
 
         //load selected orbitals
-        dbSatellites = Database.getSelectedOrbitals(context, false, false);
+        dbSatellites = Database.getSelectedOrbitals(context);
         currentSatellites = new Database.SatelliteData[dbSatellites.length];
         for(index = 0; index < dbSatellites.length; index++)
         {

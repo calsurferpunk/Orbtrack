@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -1193,6 +1194,7 @@ public abstract class Calculate
         MaterialButton startButton = rootView.findViewById(R.id.Calculate_Start_Button);
         IconSpinner.CustomAdapter incrementAdapter;
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
+        ColorDrawable backgroundColorDrawable = (context != null ? new ColorDrawable(Globals.resolveColorID(context, R.attr.pageBackground)) : null);
 
         //set page displays
         page.viewUnitText = rootView.findViewById(R.id.Calculate_View_Unit_Text);
@@ -1232,10 +1234,18 @@ public abstract class Calculate
         {
             page.orbitalList.setSelectedValue(orbitalId);
         }
+        if(backgroundColorDrawable != null)
+        {
+            page.orbitalList.setPopupBackgroundDrawable(backgroundColorDrawable);
+        }
         page.orbital2List.setAdapter(new IconSpinner.CustomAdapter(context, orbitals));
         if(orbitalId2 != Universe.IDs.Invalid)
         {
             page.orbital2List.setSelectedValue(orbitalId2);
+        }
+        if(backgroundColorDrawable != null)
+        {
+            page.orbital2List.setPopupBackgroundDrawable(backgroundColorDrawable);
         }
         page.orbital2List.setVisibility(pageNumber == PageType.Intersection ? View.VISIBLE : View.GONE);
         text = (context != null ? (context.getString(R.string.title_orbital) + " 2") : "");

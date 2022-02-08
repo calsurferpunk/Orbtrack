@@ -57,4 +57,9 @@
                 tools:ignore="SmallSp" />
         </LinearLayout>
     </LinearLayout>
+
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/Spinner_Item_Progress"
+        style="@style/ProgressCircle"
+        android:visibility="gone"/>
 </LinearLayout>

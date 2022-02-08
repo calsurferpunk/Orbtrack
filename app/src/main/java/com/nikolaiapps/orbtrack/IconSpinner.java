@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -16,7 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TimeZone;
@@ -116,6 +119,65 @@ public class IconSpinner extends AppCompatSpinner
 
     public static class CustomAdapter extends BaseAdapter
     {
+        //On load items listener
+        public interface OnLoadItemsListener
+        {
+            void onLoaded(Item[] loadedItems);
+        }
+
+        //Load items task
+        private static class LoadItemsTask extends ThreadTask<Object, Void, Void>
+        {
+            private final OnLoadItemsListener loadItemsListener;
+
+            public LoadItemsTask(OnLoadItemsListener loadItemsListener)
+            {
+                this.loadItemsListener = loadItemsListener;
+            }
+
+            @Override
+            protected Void doInBackground(Object... params)
+            {
+                int index;
+                int icon1Color = (int)params[2];
+                int icon1SelectedColor = (int)params[3];
+                int icon3Color = (int)params[4];
+                int icon3SelectedColor = (int)params[5];
+                int forceColorId = (int)params[6];
+                boolean useIcons;
+                boolean isLocation;
+                boolean useIcon1Color;
+                boolean useIcon3Color;
+                Context context = (Context)params[0];
+                Database.DatabaseSatellite[] orbitals = (Database.DatabaseSatellite[])params[1];
+                IconSpinner.Item[] items;
+
+                //go through each orbital
+                items = new Item[orbitals.length];
+                for(index = 0; index < orbitals.length; index++)
+                {
+                    //remember current satellite and set item
+                    Database.DatabaseSatellite currentSat = orbitals[index];
+                    isLocation = (currentSat.noradId == Universe.IDs.CurrentLocation);
+                    useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
+                    useIcon1Color = !useIcons;
+                    useIcon3Color = (useIcons && currentSat.noradId > 0);
+                    Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.noradId, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
+                    items[index] = new Item(ownerIcons[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), currentSat.getName(), currentSat.noradId);
+                }
+
+                //if listeners are set
+                if(loadItemsListener != null)
+                {
+                    //send event
+                    loadItemsListener.onLoaded(items);
+                }
+
+                //done
+                return(null);
+            }
+        }
+
         private int selectedIndex;
         private int textColor;
         private int textSelectedColor;
@@ -124,8 +186,9 @@ public class IconSpinner extends AppCompatSpinner
         private int backgroundItemSelectedColor;
         private boolean usingIcon1;
         private boolean usingIcon3;
+        private boolean loadingItems = false;
         private LayoutInflater listInflater;
-        private final Item[] items;
+        private Item[] items;
 
         private void BaseConstructor(Context context)
         {
@@ -209,27 +272,35 @@ public class IconSpinner extends AppCompatSpinner
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
         {
-            int index;
-            boolean useIcons;
-            boolean isLocation;
-            boolean useIcon1Color;
-            boolean useIcon3Color;
+            //update status
+            loadingItems = true;
 
-            //go through each satellite
-            items = new Item[satellites.length];
-            for(index = 0; index < satellites.length; index++)
+            //set inflater
+            listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            //load items
+            LoadItemsTask loadItems = new LoadItemsTask(new OnLoadItemsListener()
             {
-                //remember current satellite and set item
-                Database.DatabaseSatellite currentSat = satellites[index];
-                isLocation = (currentSat.noradId == Universe.IDs.CurrentLocation);
-                useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
-                useIcon1Color = !useIcons;
-                useIcon3Color = (useIcons && currentSat.noradId > 0);
-                Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.noradId, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
-                items[index] = new Item(ownerIcons[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), currentSat.getName(), currentSat.noradId);
-            }
-
-            BaseConstructor(context);
+                @Override
+                public void onLoaded(Item[] loadedItems)
+                {
+                    items = loadedItems;
+                    BaseConstructor(context);
+                    loadingItems = false;
+                    if(context instanceof Activity)
+                    {
+                        ((Activity)context).runOnUiThread(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                CustomAdapter.this.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                }
+            });
+            loadItems.execute(context, satellites, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
@@ -262,30 +333,30 @@ public class IconSpinner extends AppCompatSpinner
         @Override
         public int getCount()
         {
-            return(items.length);
+            return(loadingItems ? 1 : items.length);
         }
 
         @Override
         public Object getItem(int position)
         {
-            return(items[position]);
+            return(loadingItems ? null : items[position]);
         }
 
         @Override
         public long getItemId(int position)
         {
-            return(position);
+            return(loadingItems ? 0 : position);
         }
 
         public Item[] getItems()
         {
-            return(items);
+            return(loadingItems ? new Item[0] : items);
         }
 
         public Object[] getItemValues()
         {
             int position;
-            Object[] values = new Object[items.length];
+            Object[] values = new Object[loadingItems ? 0 : items.length];
 
             //go through each time
             for(position = 0; position < values.length; position++)
@@ -301,21 +372,25 @@ public class IconSpinner extends AppCompatSpinner
         @SuppressWarnings("unused")
         public Object getItemValue(int position)
         {
-            return(items[position].value);
+            return(loadingItems ? null : items[position].value);
         }
 
         public int getItemIndex(Object val)
         {
             int index;
 
-            //go through each item
-            for(index = 0; index < items.length; index++)
+            //if not loading items
+            if(!loadingItems)
             {
-                //if a match
-                if(items[index].value.equals(val))
+                //go through each item
+                for(index = 0; index < items.length; index++)
                 {
-                    //return index
-                    return(index);
+                    //if a match
+                    if(items[index].value.equals(val))
+                    {
+                        //return index
+                        return(index);
+                    }
                 }
             }
 
@@ -327,11 +402,13 @@ public class IconSpinner extends AppCompatSpinner
         public View getView(int position, View convertView, ViewGroup parent)
         {
             boolean isSelected = (position == selectedIndex);
+            LinearLayout itemBackground;
             AppCompatImageView itemImage1;
             AppCompatImageView itemImage2;
             AppCompatImageView itemImage3;
             TextView itemText;
             TextView itemSubText;
+            CircularProgressIndicator itemProgress;
             Item currentItem = (items != null && position >= 0 && position < items.length ? items[position] : new Item("", ""));
 
             //set view
@@ -340,7 +417,8 @@ public class IconSpinner extends AppCompatSpinner
                 convertView = listInflater.inflate(R.layout.icon_spinner_item, parent, false);
             }
             convertView.setBackgroundColor(backgroundColor);
-            convertView.findViewById(R.id.Spinner_Item_Background).setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
+            itemBackground = convertView.findViewById(R.id.Spinner_Item_Background);
+            itemBackground.setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
 
             //get views
             itemImage1 = convertView.findViewById(R.id.Spinner_Item_Image1);
@@ -348,52 +426,61 @@ public class IconSpinner extends AppCompatSpinner
             itemImage3 = convertView.findViewById(R.id.Spinner_Item_Image3);
             itemText = convertView.findViewById(R.id.Spinner_Item_Text);
             itemSubText = convertView.findViewById(R.id.Spinner_Item_Sub_Text);
+            itemProgress = convertView.findViewById(R.id.Spinner_Item_Progress);
 
-            //update displays
-            if(currentItem.usingIcon1Colors())
+            //set visibility
+            itemBackground.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
+            itemProgress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
+
+            //if not loading items
+            if(!loadingItems)
             {
-                itemImage1.setBackgroundDrawable(Globals.getDrawable(currentItem.icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
-            }
-            else
-            {
-                itemImage1.setBackgroundDrawable(currentItem.icon1);
-            }
-            if(!usingIcon1)
-            {
-                itemImage1.setVisibility(View.GONE);
-            }
-            itemImage2.setBackgroundDrawable(currentItem.icon2);
-            if(currentItem.icon2 != null)
-            {
-                itemImage2.setVisibility(View.VISIBLE);
-                Globals.setLayoutWidth(itemImage1, itemImage2.getLayoutParams().width);
-            }
-            if(currentItem.usingIcon3Colors())
-            {
-                itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
-            }
-            else
-            {
-                itemImage3.setBackgroundDrawable(currentItem.icon3);
-            }
-            if(currentItem.rotate != 0)
-            {
-                itemImage3.setRotation(currentItem.rotate);
-            }
-            if(!usingIcon3)
-            {
-                itemImage3.setVisibility(View.GONE);
-            }
-            itemText.setText(currentItem.text);
-            itemText.setTextColor(isSelected ? textSelectedColor : textColor);
-            if(currentItem.subText != null)
-            {
-                itemSubText.setText(currentItem.subText);
-                itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
-            }
-            else
-            {
-                itemSubText.setVisibility(View.GONE);
+                //update displays
+                if(currentItem.usingIcon1Colors())
+                {
+                    itemImage1.setBackgroundDrawable(Globals.getDrawable(currentItem.icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
+                }
+                else
+                {
+                    itemImage1.setBackgroundDrawable(currentItem.icon1);
+                }
+                if(!usingIcon1)
+                {
+                    itemImage1.setVisibility(View.GONE);
+                }
+                itemImage2.setBackgroundDrawable(currentItem.icon2);
+                if(currentItem.icon2 != null)
+                {
+                    itemImage2.setVisibility(View.VISIBLE);
+                    Globals.setLayoutWidth(itemImage1, itemImage2.getLayoutParams().width);
+                }
+                if(currentItem.usingIcon3Colors())
+                {
+                    itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
+                }
+                else
+                {
+                    itemImage3.setBackgroundDrawable(currentItem.icon3);
+                }
+                if(currentItem.rotate != 0)
+                {
+                    itemImage3.setRotation(currentItem.rotate);
+                }
+                if(!usingIcon3)
+                {
+                    itemImage3.setVisibility(View.GONE);
+                }
+                itemText.setText(currentItem.text);
+                itemText.setTextColor(isSelected ? textSelectedColor : textColor);
+                if(currentItem.subText != null)
+                {
+                    itemSubText.setText(currentItem.subText);
+                    itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
+                }
+                else
+                {
+                    itemSubText.setVisibility(View.GONE);
+                }
             }
 
             //return view

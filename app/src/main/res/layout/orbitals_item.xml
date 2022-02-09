@@ -1,63 +1,76 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
-    android:padding="5dp"
+    android:id="@+id/Object_Layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="start|center_vertical"
+    android:orientation="vertical"
+    android:gravity="center"
     android:background="?attr/itemSelect">
     <LinearLayout
-        android:id="@+id/Object_Item_Group"
-        android:layout_width="0dp"
+        android:id="@+id/Object_Item_Layout"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_weight="0.35"
-        android:gravity="start|center_vertical"
-        android:orientation="horizontal">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Object_Item_Image"
-            android:layout_width="32dp"
-            android:layout_height="32dp"/>
-
-        <TextView
-            android:id="@+id/Object_Item_Text"
-            android:layout_width="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:gravity="start|center_vertical">
+        <LinearLayout
+            android:id="@+id/Object_Item_Group"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:padding="3dp"
-            android:textColor="?attr/defaultTextColor"/>
-    </LinearLayout>
+            android:layout_weight="0.35"
+            android:gravity="start|center_vertical"
+            android:orientation="horizontal">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Object_Item_Image"
+                android:layout_width="32dp"
+                android:layout_height="32dp"/>
 
-    <LinearLayout
-        android:id="@+id/Object_TLE_Age_Layout"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="0.25"
-        android:orientation="vertical"
-        android:padding="3dp">
-        <TextView
-            android:id="@+id/Object_TLE_Age_Text"
-            android:layout_width="wrap_content"
+            <TextView
+                android:id="@+id/Object_Item_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:padding="3dp"
+                android:textColor="?attr/defaultTextColor"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Object_TLE_Age_Layout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:textColor="?attr/defaultTextColor"/>
+            android:layout_weight="0.25"
+            android:orientation="vertical"
+            android:padding="3dp">
+            <TextView
+                android:id="@+id/Object_TLE_Age_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <View
+                android:id="@+id/Object_TLE_Age_Under"
+                android:layout_width="60dp"
+                android:layout_height="1dp"
+                android:background="@color/blue"/>
+        </LinearLayout>
+
+        <com.nikolaiapps.orbtrack.BorderButton
+            android:id="@+id/Object_Color_Button"
+            style="@style/ColorButton"/>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Object_Visible_Button"
+            style="@style/VisibleButton"
+            android:layout_marginLeft="5dp"
+            android:layout_marginStart="5dp"/>
 
         <View
-            android:id="@+id/Object_TLE_Age_Under"
-            android:layout_width="60dp"
-            android:layout_height="1dp"
-            android:background="@color/blue"/>
+            android:id="@+id/Object_Color_Button_Replace"
+            style="@style/ColorButton"
+            android:visibility="gone"/>
     </LinearLayout>
 
-    <com.nikolaiapps.orbtrack.BorderButton
-        android:id="@+id/Object_Color_Button"
-        style="@style/ColorButton"/>
-
-    <androidx.appcompat.widget.AppCompatButton
-        android:id="@+id/Object_Visible_Button"
-        style="@style/VisibleButton"
-        android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"/>
-
-    <View
-        android:id="@+id/Object_Color_Button_Replace"
-        style="@style/ColorButton"
+    <com.google.android.material.progressindicator.CircularProgressIndicator
+        android:id="@+id/Object_Progress"
+        style="@style/ProgressCircle"
         android:visibility="gone"/>
 </LinearLayout>

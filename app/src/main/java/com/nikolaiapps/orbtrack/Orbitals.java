@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -29,6 +30,7 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -46,7 +48,7 @@ public abstract class Orbitals
     }
 
     //Page list item
-    public static class PageListItem extends Selectable.ListItem
+    public static class Item extends Selectable.ListItem
     {
         public final Drawable icon;
         public int color;
@@ -58,7 +60,7 @@ public abstract class Orbitals
         public final long tleDateMs;
         public final Calculations.SatelliteObjectType satellite;
 
-        public PageListItem(Context context, int index, Database.DatabaseSatellite currentSat, boolean canEd, boolean isSel)
+        public Item(Context context, int index, Database.DatabaseSatellite currentSat, boolean canEd, boolean isSel)
         {
             super(currentSat.noradId, index, canEd, isSel, false, false);
 
@@ -82,99 +84,165 @@ public abstract class Orbitals
     {
         final AppCompatImageView itemImage;
         final TextView itemText;
+        final LinearLayout itemLayout;
         final LinearLayout tleAgeLayout;
         final TextView tleAgeText;
         final View tleUnder;
         final BorderButton colorButton;
         final AppCompatButton visibleButton;
+        final CircularProgressIndicator progress;
 
-        public PageListItemHolder(View viewItem, int itemImageID, int itemTextID, int tleAgeLayoutID, int tleAgeTextID, int tleAgeUnderID, int colorButtonID, int visibleButtonID)
+        public PageListItemHolder(View viewItem, int itemLayoutId, int itemImageId, int itemTextId, int tleAgeLayoutId, int tleAgeTextId, int tleAgeUnderId, int colorButtonId, int visibleButtonId, int progressId)
         {
             super(viewItem, -1);
-            itemImage = viewItem.findViewById(itemImageID);
-            itemText = viewItem.findViewById(itemTextID);
-            tleAgeLayout = viewItem.findViewById(tleAgeLayoutID);
-            tleAgeText = viewItem.findViewById(tleAgeTextID);
-            tleUnder = viewItem.findViewById(tleAgeUnderID);
+            itemLayout = viewItem.findViewById(itemLayoutId);
+            itemImage = viewItem.findViewById(itemImageId);
+            itemText = viewItem.findViewById(itemTextId);
+            tleAgeLayout = viewItem.findViewById(tleAgeLayoutId);
+            tleAgeText = viewItem.findViewById(tleAgeTextId);
+            tleUnder = viewItem.findViewById(tleAgeUnderId);
             tleUnder.setTag("keepBg");
-            colorButton = viewItem.findViewById(colorButtonID);
-            visibleButton = viewItem.findViewById(visibleButtonID);
+            colorButton = viewItem.findViewById(colorButtonId);
+            visibleButton = viewItem.findViewById(visibleButtonId);
+            progress = viewItem.findViewById(progressId);
         }
     }
 
     //Page list adapter
     public static class PageListAdapter extends Selectable.ListBaseAdapter
     {
+        //On load items listener
+        public interface OnLoadItemsListener
+        {
+            void onLoaded(Item[] loadedItems);
+        }
+
+        //Load items task
+        private static class LoadItemsTask extends ThreadTask<Object, Void, Void>
+        {
+            private final OnLoadItemsListener loadItemsListener;
+
+            public LoadItemsTask(OnLoadItemsListener loadItemsListener)
+            {
+                this.loadItemsListener = loadItemsListener;
+            }
+
+            @Override
+            protected Void doInBackground(Object... params)
+            {
+                int index;
+                int page = (int)params[2];
+                boolean simple = (boolean)params[3];
+                Context context = (Context)params[0];
+                Context parentViewContext = (Context)params[1];
+                byte[] orbitalTypes = null;
+                Item[] items;
+                Database.DatabaseSatellite[] satellites;
+
+                //setup items
+                switch(page)
+                {
+                    case PageType.Satellites:
+                    case PageType.Stars:
+                    case PageType.Planets:
+                        //get conditions
+                        switch(page)
+                        {
+                            case PageType.Satellites:
+                                orbitalTypes = new byte[]{Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris};
+                                break;
+
+                            case PageType.Stars:
+                                orbitalTypes = new byte[]{Database.OrbitalType.Star};
+                                break;
+
+                            case PageType.Planets:
+                                orbitalTypes = new byte[]{Database.OrbitalType.Planet};
+                                break;
+                        }
+
+                        //get items
+                        satellites = Database.getOrbitals(context, orbitalTypes);
+                        items = new Item[satellites.length];
+                        for(index = 0; index < satellites.length; index++)
+                        {
+                            Database.DatabaseSatellite currentSat = satellites[index];
+                            items[index] = new Item(parentViewContext, index, currentSat, (page == PageType.Satellites && !simple), false);
+                        }
+                        break;
+
+                    //invalid page
+                    default:
+                        items = new Item[0];
+                        break;
+                }
+
+                //if listeners are set
+                if(loadItemsListener != null)
+                {
+                    //send event
+                    loadItemsListener.onLoaded(items);
+                }
+
+                //done
+                return(null);
+            }
+        }
+
         public ChooseColorDialog colorDialog;
+        private boolean loadingItems;
         private final boolean forSetup;
         private final int currentPage;
         private final int columnTitleStringId;
-        private final PageListItem[] items;
+        private Item[] items;
 
         public PageListAdapter(View parentView, int page, int titleStringId, String categoryTitle, boolean simple)
         {
             super(parentView, categoryTitle);
 
-            int index;
-            byte[] orbitalTypes = null;
-            Database.DatabaseSatellite[] satellites;
+            //update status
+            loadingItems = true;
 
             //set page
             currentPage = page;
             columnTitleStringId = titleStringId;
             forSetup = (columnTitleStringId > 0);
-
-            //setup items
-            switch(page)
-            {
-                case PageType.Satellites:
-                case PageType.Stars:
-                case PageType.Planets:
-                    //get conditions
-                    switch(page)
-                    {
-                        case PageType.Satellites:
-                            orbitalTypes = new byte[]{Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris};
-                            break;
-
-                        case PageType.Stars:
-                            orbitalTypes = new byte[]{Database.OrbitalType.Star};
-                            break;
-
-                        case PageType.Planets:
-                            orbitalTypes = new byte[]{Database.OrbitalType.Planet};
-                            break;
-                    }
-
-                    //get items
-                    satellites = Database.getOrbitals(currentContext, orbitalTypes);
-                    items = new PageListItem[satellites.length];
-                    for(index = 0; index < satellites.length; index++)
-                    {
-                        Database.DatabaseSatellite currentSat = satellites[index];
-                        items[index] = new PageListItem((parentView != null ? parentView.getContext() : null), index, currentSat, (page == PageType.Satellites && !simple), false);
-                    }
-                    break;
-
-                //invalid page
-                default:
-                    items = new PageListItem[0];
-                    break;
-            }
-
             this.itemsRefID = R.layout.orbitals_item;
+
+            //load items
+            LoadItemsTask loadItems = new LoadItemsTask(new OnLoadItemsListener()
+            {
+                @Override
+                public void onLoaded(Item[] loadedItems)
+                {
+                    items = loadedItems;
+                    loadingItems = false;
+                    if(currentContext instanceof Activity)
+                    {
+                        ((Activity)currentContext).runOnUiThread(new Runnable()
+                        {
+                            @Override @SuppressLint("NotifyDataSetChanged")
+                            public void run()
+                            {
+                                PageListAdapter.this.notifyDataSetChanged();
+                            }
+                        });
+                    }
+                }
+            });
+            loadItems.execute(currentContext, (parentView != null ? parentView.getContext() : null), currentPage, simple);
         }
 
         @Override
         public int getItemCount()
         {
-            return(items.length);
+            return(loadingItems ? 1 : items.length);
         }
 
         @Override
-        public PageListItem getItem(int position)
+        public Item getItem(int position)
         {
-            return(items[position]);
+            return(loadingItems ? null : items[position]);
         }
 
         @Override
@@ -222,7 +290,7 @@ public abstract class Orbitals
         {
             int offset = 0;
             String text;
-            final PageListItem currentItem = (PageListItem)item;
+            final Item currentItem = (Item)item;
             final Calculations.OrbitDataType currentOrbit = currentItem.satellite.orbit;
             final Calculations.TLEDataType currentTLE = currentItem.satellite.tle;
             final AppCompatImageButton notifyButton;
@@ -352,7 +420,7 @@ public abstract class Orbitals
         public @NonNull PageListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button);
+            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Layout, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
 
             setViewClickListeners(itemView, itemHolder);
             return(itemHolder);
@@ -364,102 +432,110 @@ public abstract class Orbitals
             boolean onSatellites = (currentPage == PageType.Satellites);
             final Resources res = (currentContext != null ? currentContext.getResources() : null);
             final PageListItemHolder itemHolder = (PageListItemHolder)holder;
-            final PageListItem item = items[position];
+            final Item item = (loadingItems ? new Item(currentContext, 0, new Database.DatabaseSatellite("", Universe.IDs.Invalid, "", Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Satellite), false, false) : items[position]);
             double ageDays = (System.currentTimeMillis() - item.tleDateMs) / Calculations.MsPerDay;
             String dayText = Globals.getNumberString(ageDays, 1) + " " + (res != null ? res.getString(R.string.title_days) : "");
 
-            //set displays
-            itemHolder.itemImage.setImageDrawable(item.icon);
-            itemHolder.itemText.setText(item.text);
-            if(onSatellites)
+            //set visibility
+            itemHolder.itemLayout.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
+            itemHolder.progress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
+
+            //if not loading items
+            if(!loadingItems)
             {
-                itemHolder.tleAgeText.setText(dayText);
-                if(ageDays <= 2)
+                //set displays
+                itemHolder.itemImage.setImageDrawable(item.icon);
+                itemHolder.itemText.setText(item.text);
+                if(onSatellites)
                 {
-                    itemHolder.tleUnder.setVisibility(View.GONE);
+                    itemHolder.tleAgeText.setText(dayText);
+                    if(ageDays <= 2)
+                    {
+                        itemHolder.tleUnder.setVisibility(View.GONE);
+                    }
+                    else
+                    {
+                        itemHolder.tleUnder.setBackgroundColor(ageDays >= 14 ? Color.RED : ageDays >= 7 ? 0xFFFFA500 : Color.YELLOW);
+                        itemHolder.tleAgeLayout.setVisibility(View.VISIBLE);
+                    }
                 }
                 else
                 {
-                    itemHolder.tleUnder.setBackgroundColor(ageDays >= 14 ? Color.RED : ageDays >= 7 ? 0xFFFFA500 : Color.YELLOW);
-                    itemHolder.tleAgeLayout.setVisibility(View.VISIBLE);
+                    itemHolder.tleAgeLayout.setVisibility(View.GONE);
                 }
-            }
-            else
-            {
-                itemHolder.tleAgeLayout.setVisibility(View.GONE);
-            }
-            itemHolder.colorButton.setBackgroundColor(item.color);
-            itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
+                itemHolder.colorButton.setBackgroundColor(item.color);
+                itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
 
-            //set events
-            itemHolder.colorButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
+                //set events
+                itemHolder.colorButton.setOnClickListener(new View.OnClickListener()
                 {
-                    colorDialog = new ChooseColorDialog(currentContext, item.color);
-                    colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
+                    @Override
+                    public void onClick(View v)
                     {
-                        @Override
-                        public void onColorSelected(int color)
+                        colorDialog = new ChooseColorDialog(currentContext, item.color);
+                        colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
                         {
-                            int index;
-                            Database.SatelliteData[] currentSatellites = MainActivity.getSatellites();
-
-                            //get and save orbital in database
-                            item.color = color;
-                            itemHolder.colorButton.setBackgroundColor(color);
-                            Database.saveSatellite(currentContext, item.id, color);
-
-                            //go through currently selected satellites
-                            for(index = 0; index < currentSatellites.length; index++)
+                            @Override
+                            public void onColorSelected(int color)
                             {
-                                //remember current satellite
-                                Database.SatelliteData currentSatellite = currentSatellites[index];
+                                int index;
+                                Database.SatelliteData[] currentSatellites = MainActivity.getSatellites();
 
-                                //if current satellite has a database and matches selected satellite
-                                if(currentSatellite.database != null && currentSatellite.getSatelliteNum() == item.satellite.getSatelliteNum())
+                                //get and save orbital in database
+                                item.color = color;
+                                itemHolder.colorButton.setBackgroundColor(color);
+                                Database.saveSatellite(currentContext, item.id, color);
+
+                                //go through currently selected satellites
+                                for(index = 0; index < currentSatellites.length; index++)
                                 {
-                                    //update selected satellite
-                                    currentSatellite.database.pathColor = color;
+                                    //remember current satellite
+                                    Database.SatelliteData currentSatellite = currentSatellites[index];
+
+                                    //if current satellite has a database and matches selected satellite
+                                    if(currentSatellite.database != null && currentSatellite.getSatelliteNum() == item.satellite.getSatelliteNum())
+                                    {
+                                        //update selected satellite
+                                        currentSatellite.database.pathColor = color;
+                                    }
                                 }
                             }
-                        }
-                    });
-                    colorDialog.setIcon(item.icon);
-                    colorDialog.setTitle(res != null ? (res.getString(R.string.title_select) + " " + item.text + " " + res.getString(R.string.title_color)) : item.text);
-                    colorDialog.show(currentContext);
-                }
-            });
-            itemHolder.visibleButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    int noradId = item.id;
-                    Database.DatabaseSatellite currentOrbital;
-
-                    //update visibility and save orbital in database
-                    item.isVisible = !item.isVisible;
-                    itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
-                    Database.saveSatellite(currentContext, noradId, item.isVisible);
-
-                    //if item is visible again
-                    if(item.isVisible)
-                    {
-                        //if not a valid TLE
-                        currentOrbital = Database.getOrbital(currentContext, noradId);
-                        if(currentOrbital != null && !currentOrbital.tleIsAccurate)
-                        {
-                            //make sure not in excluded old norad IDs
-                            MainActivity.updateExcludedOldNoradIds(noradId, false);
-                        }
+                        });
+                        colorDialog.setIcon(item.icon);
+                        colorDialog.setTitle(res != null ? (res.getString(R.string.title_select) + " " + item.text + " " + res.getString(R.string.title_color)) : item.text);
+                        colorDialog.show(currentContext);
                     }
+                });
+                itemHolder.visibleButton.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        int noradId = item.id;
+                        Database.DatabaseSatellite currentOrbital;
 
-                    //update current usage
-                    MainActivity.loadOrbitals(currentContext, holder.itemView);
-                }
-            });
+                        //update visibility and save orbital in database
+                        item.isVisible = !item.isVisible;
+                        itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
+                        Database.saveSatellite(currentContext, noradId, item.isVisible);
+
+                        //if item is visible again
+                        if(item.isVisible)
+                        {
+                            //if not a valid TLE
+                            currentOrbital = Database.getOrbital(currentContext, noradId);
+                            if(currentOrbital != null && !currentOrbital.tleIsAccurate)
+                            {
+                                //make sure not in excluded old norad IDs
+                                MainActivity.updateExcludedOldNoradIds(noradId, false);
+                            }
+                        }
+
+                        //update current usage
+                        MainActivity.loadOrbitals(currentContext, holder.itemView);
+                    }
+                });
+            }
 
             //set background
             setItemBackground(itemHolder.itemView, item.isSelected);
@@ -954,7 +1030,7 @@ public abstract class Orbitals
             for(index = 0; index < selectedItems.size(); index++)
             {
                 //get current item
-                Orbitals.PageListItem currentItem = (Orbitals.PageListItem)selectedItems.get(index);
+                Item currentItem = (Item)selectedItems.get(index);
 
                 //if on satellites page
                 if(pageNum == PageType.Satellites)
@@ -1354,7 +1430,7 @@ public abstract class Orbitals
     }
 
     //Shows an edit orbital dialog
-    private static void showEditDialog(final Activity context, final ViewGroup container, final Selectable.ListFragmentAdapter adapter, ArrayList<Orbitals.PageListItem> selectedItems, final ArrayList<Database.DatabaseSatellite> orbitals, final EditValuesDialog.OnDismissListener dismissListener)
+    private static void showEditDialog(final Activity context, final ViewGroup container, final Selectable.ListFragmentAdapter adapter, ArrayList<Item> selectedItems, final ArrayList<Database.DatabaseSatellite> orbitals, final EditValuesDialog.OnDismissListener dismissListener)
     {
         int index;
         String unknownOwnerName = null;
@@ -1398,7 +1474,7 @@ public abstract class Orbitals
         for(index = 0; index < nameValues.length; index++)
         {
             //remember current item
-            Orbitals.PageListItem currentItem = selectedItems.get(index);
+            Item currentItem = selectedItems.get(index);
 
             //get current ID and values
             ids[index] = (orbitals != null ? index : currentItem.id);
@@ -1462,13 +1538,13 @@ public abstract class Orbitals
     {
         int index;
         ArrayList<Selectable.ListItem> selectedListItems = adapter.getSelectedItems(pager, Orbitals.PageType.Satellites);
-        ArrayList<Orbitals.PageListItem> selectedItems = new ArrayList<>(selectedListItems.size());
+        ArrayList<Item> selectedItems = new ArrayList<>(selectedListItems.size());
 
         //go through each item
         for(index = 0; index < selectedListItems.size(); index++)
         {
             //add converted item
-            selectedItems.add((Orbitals.PageListItem)selectedListItems.get(index));
+            selectedItems.add((Item)selectedListItems.get(index));
         }
 
         //show dialog
@@ -1479,13 +1555,13 @@ public abstract class Orbitals
     public static void showLoadDialog(Activity context, ViewGroup container, Selectable.ListFragmentAdapter adapter, ArrayList<Database.DatabaseSatellite> loadOrbitals, EditValuesDialog.OnDismissListener dismissListener)
     {
         int index;
-        ArrayList<Orbitals.PageListItem> selectedItems = new ArrayList<>(loadOrbitals.size());
+        ArrayList<Item> selectedItems = new ArrayList<>(loadOrbitals.size());
 
         //go through each orbital
         for(index = 0; index < loadOrbitals.size(); index++)
         {
             //add orbital
-            selectedItems.add(new Orbitals.PageListItem(context, index, loadOrbitals.get(index), false, true));
+            selectedItems.add(new Item(context, index, loadOrbitals.get(index), false, true));
         }
 
         //show dialog

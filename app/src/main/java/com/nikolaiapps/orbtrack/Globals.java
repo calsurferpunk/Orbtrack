@@ -2926,7 +2926,7 @@ public abstract class Globals
         Matrix rotateMatrix = new Matrix();
 
         rotateMatrix.postRotate((float)rotateDegrees);
-        rotatedImage = (haveImage ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
+        rotatedImage = (haveImage && width > 0 && height > 0 ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
 
         return(rotatedImage != null ? Bitmap.createBitmap(rotatedImage, (rotatedImage.getWidth() - width) / 2, (rotatedImage.getHeight() - height) / 2, width, height) : null);
     }

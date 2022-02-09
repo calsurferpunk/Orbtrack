@@ -115,22 +115,29 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
         public final int id;
         public Bitmap image;
+        public Bitmap lastImage;
         private double lastAzimuth;
         private double lastElevation;
         public double angleDirection;
+        public double lastAngleDirection;
 
         public IconImage(int id, Bitmap image)
         {
             this.id = id;
             this.image = image;
+            this.lastImage = null;
 
             angleDirection = 0;
+            lastAngleDirection = Double.MAX_VALUE;
             lastAzimuth = Double.MAX_VALUE;
             lastElevation = Double.MAX_VALUE;
         }
 
         public double getAngleDirection(double azimuth, double elevation)
         {
+            //remember last angle direction
+            lastAngleDirection = angleDirection;
+
             //if a used ID
             if(id >= 0)
             {
@@ -148,6 +155,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
             //return angle direction
             return(angleDirection);
+        }
+
+        public double getAngleDirectionDelta()
+        {
+            return(lastAngleDirection != Double.MAX_VALUE ? Globals.degreeDistance(lastAngleDirection, angleDirection) : Double.MAX_VALUE);
         }
 
         public void copyData(IconImage copyFrom)
@@ -1041,6 +1053,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 if(context != null)
                 {
                     int iconId;
+                    boolean isSatellite = (noradId > 0);
                     IconImage indicatorIcon = new IconImage(noradId, null);
                     int[] indexes = Globals.divideFind(indicatorIcon, orbitalIcons, iconImageComparer);
 
@@ -1048,19 +1061,39 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(indexes[0] >= 0)
                     {
                         //remember current icon in list
+                        double angleDirection = 135;
+                        double directionDelta = 0;
+                        Bitmap rotatedImage;
                         IconImage currentOrbitalIcon = orbitalIcons.get(indexes[0]);
 
                         //use center and image
                         indicatorIcon.copyData(currentOrbitalIcon);
-                        indicatorIcon.image = (showIconIndicatorDirection && noradId > 0 ? Globals.getBitmapRotated(currentOrbitalIcon.image, indicatorIcon.getAngleDirection(azimuth, elevation) - 135) : currentOrbitalIcon.image);
+                        if(showIconIndicatorDirection && isSatellite)
+                        {
+                            angleDirection = indicatorIcon.getAngleDirection(azimuth, elevation);
+                            directionDelta = indicatorIcon.getAngleDirectionDelta();
+                        }
+                        if(directionDelta == Double.MAX_VALUE || Math.abs(directionDelta) >= 2.0)
+                        {
+                            rotatedImage = Globals.getBitmapRotated(currentOrbitalIcon.image, angleDirection - 135);
+                        }
+                        else
+                        {
+                            rotatedImage = (currentOrbitalIcon.lastImage != null ? currentOrbitalIcon.lastImage : currentOrbitalIcon.image);
+                        }
+                        indicatorIcon.image = rotatedImage;
+                        if(rotatedImage != null)
+                        {
+                            currentOrbitalIcon.lastImage = rotatedImage.copy(rotatedImage.getConfig(), rotatedImage.isMutable());
+                        }
                         currentOrbitalIcon.copyData(indicatorIcon);
                     }
                     else
                     {
                         //create image and add to list
                         iconId = Globals.getOrbitalIconID(noradId, currentType);
-                        indicatorIcon.image = Globals.getBitmap(context, iconId, (noradId > 0 ? R.color.white : 0), iconLength, iconLength);
-                        if(noradId > 0)
+                        indicatorIcon.image = Globals.getBitmap(context, iconId, (isSatellite? R.color.white : 0), iconLength, iconLength);
+                        if(isSatellite)
                         {
                             //add background highlight
                             Drawable imageBg = Globals.getDrawable(context, iconId, indicatorIcon.image.getWidth(), indicatorIcon.image.getHeight(), R.color.black, false);

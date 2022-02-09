@@ -577,7 +577,7 @@ public class Database extends SQLiteOpenHelper
             ArrayList<DatabaseSatellite> selectedOrbitals;
 
             //get all orbitals
-            bufferAll = getOrbitals(context, (String)null);
+            bufferAll = Database.getOrbitals(context, (String)null);
 
             //get selected orbitals
             selectedOrbitals = new ArrayList<>(bufferAll.length);
@@ -630,6 +630,44 @@ public class Database extends SQLiteOpenHelper
 
             //return selected orbitals
             return(bufferSelected);
+        }
+
+        //Gets all satellites
+        public static DatabaseSatellite[] getOrbitals(Context context, byte ...orbitalTypes)
+        {
+            ArrayList<DatabaseSatellite> orbitals = null;
+
+            //if there are types to get
+            if(orbitalTypes != null && orbitalTypes.length > 0)
+            {
+                //load if needed
+                handleLoad(context, true, false);
+
+                //setup list
+                orbitals = new ArrayList<>(bufferAll.length);
+
+                //go through each orbital
+                for(DatabaseSatellite currentOrbital : bufferAll)
+                {
+                    //remember current orbital type
+                    byte orbitalType = currentOrbital.orbitalType;
+
+                    //go through each type
+                    for(byte currentType : orbitalTypes)
+                    {
+                        //if a desired type
+                        if(orbitalType == currentType)
+                        {
+                            //add to the list and stop searching types
+                            orbitals.add(currentOrbital);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            //return list
+            return(orbitals != null ? orbitals.toArray(new DatabaseSatellite[0]) : new DatabaseSatellite[0]);
         }
 
         //Get orbital with given norad ID
@@ -1659,6 +1697,10 @@ public class Database extends SQLiteOpenHelper
 
         //return satellites
         return(getOrbitals(context, "[Norad] IN(" + idStrings.toString() + ")"));
+    }
+    public static DatabaseSatellite[] getOrbitals(Context context, byte ...orbitalTypes)
+    {
+        return(OrbitalsBuffer.getOrbitals(context, orbitalTypes));
     }
     public static DatabaseSatellite[] getOrbitals(Context context)
     {

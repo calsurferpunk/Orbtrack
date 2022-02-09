@@ -116,7 +116,7 @@ public abstract class Orbitals
             super(parentView, categoryTitle);
 
             int index;
-            String sqlConditions = null;
+            byte[] orbitalTypes = null;
             Database.DatabaseSatellite[] satellites;
 
             //set page
@@ -134,20 +134,20 @@ public abstract class Orbitals
                     switch(page)
                     {
                         case PageType.Satellites:
-                            sqlConditions = Database.getSatelliteConditions();
+                            orbitalTypes = new byte[]{Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris};
                             break;
 
                         case PageType.Stars:
-                            sqlConditions = "[Type]=" + Database.OrbitalType.Star;
+                            orbitalTypes = new byte[]{Database.OrbitalType.Star};
                             break;
 
                         case PageType.Planets:
-                            sqlConditions = "[Type]=" + Database.OrbitalType.Planet;
+                            orbitalTypes = new byte[]{Database.OrbitalType.Planet};
                             break;
                     }
 
                     //get items
-                    satellites = Database.getOrbitals(currentContext, sqlConditions);
+                    satellites = Database.getOrbitals(currentContext, orbitalTypes);
                     items = new PageListItem[satellites.length];
                     for(index = 0; index < satellites.length; index++)
                     {

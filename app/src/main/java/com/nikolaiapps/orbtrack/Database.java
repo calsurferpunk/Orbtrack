@@ -568,29 +568,13 @@ public class Database extends SQLiteOpenHelper
     private static abstract class OrbitalsBuffer
     {
         private static boolean needReload = false;
-        private static DatabaseSatellite[] bufferAll = null;
-        private static DatabaseSatellite[] bufferSelected = null;
+        private static DatabaseSatellite[] buffer = null;
 
         //Load orbitals from database into buffers
         private static void load(Context context)
         {
-            ArrayList<DatabaseSatellite> selectedOrbitals;
-
-            //get all orbitals
-            bufferAll = Database.getOrbitals(context, (String)null);
-
-            //get selected orbitals
-            selectedOrbitals = new ArrayList<>(bufferAll.length);
-            for(DatabaseSatellite currentOrbital : bufferAll)
-            {
-                if(currentOrbital.isSelected)
-                {
-                    selectedOrbitals.add(currentOrbital);
-                }
-            }
-            bufferSelected = selectedOrbitals.toArray(new DatabaseSatellite[0]);
-
-            //reset status
+            //get all orbitals and reset status
+            buffer = Database.getOrbitals(context, (String)null);
             needReload = false;
         }
 
@@ -602,10 +586,10 @@ public class Database extends SQLiteOpenHelper
         }
 
         //Handles load if needed
-        private static void handleLoad(Context context, boolean needAll, boolean needSelected)
+        private static void handleLoad(Context context)
         {
             //if need to load orbitals
-            if(needReload || (needAll && bufferAll == null) || (needSelected && bufferSelected == null))
+            if(needReload || buffer == null)
             {
                 //load orbitals
                 load(context);
@@ -616,20 +600,34 @@ public class Database extends SQLiteOpenHelper
         public static DatabaseSatellite[] getAll(Context context)
         {
             //load if needed
-            handleLoad(context, true, false);
+            handleLoad(context);
 
             //return all orbitals
-            return(bufferAll);
+            return(buffer);
         }
 
         //Get selected orbitals
         public static DatabaseSatellite[] getSelected(Context context)
         {
-            //load if needed
-            handleLoad(context, false, true);
+            ArrayList<DatabaseSatellite> selectedOrbitals;
 
-            //return selected orbitals
-            return(bufferSelected);
+            //load if needed
+            handleLoad(context);
+
+            //get selected orbitals
+            selectedOrbitals = new ArrayList<>(buffer.length);
+            for(DatabaseSatellite currentOrbital : buffer)
+            {
+                //if selected
+                if(currentOrbital.isSelected)
+                {
+                    //add to list
+                    selectedOrbitals.add(currentOrbital);
+                }
+            }
+
+            //return list
+            return(selectedOrbitals.toArray(new DatabaseSatellite[0]));
         }
 
         //Gets all satellites
@@ -641,13 +639,13 @@ public class Database extends SQLiteOpenHelper
             if(orbitalTypes != null && orbitalTypes.length > 0)
             {
                 //load if needed
-                handleLoad(context, true, false);
+                handleLoad(context);
 
                 //setup list
-                orbitals = new ArrayList<>(bufferAll.length);
+                orbitals = new ArrayList<>(buffer.length);
 
                 //go through each orbital
-                for(DatabaseSatellite currentOrbital : bufferAll)
+                for(DatabaseSatellite currentOrbital : buffer)
                 {
                     //remember current orbital type
                     byte orbitalType = currentOrbital.orbitalType;
@@ -677,14 +675,14 @@ public class Database extends SQLiteOpenHelper
             if(allowLoad)
             {
                 //load if needed
-                handleLoad(context, true, false);
+                handleLoad(context);
             }
 
             //if buffered all exists
-            if(bufferAll != null)
+            if(buffer != null)
             {
                 //go through each orbital
-                for(DatabaseSatellite currentOrbital : bufferAll)
+                for(DatabaseSatellite currentOrbital : buffer)
                 {
                     //if norad ID matches
                     if(currentOrbital.noradId == noradId)
@@ -720,6 +718,44 @@ public class Database extends SQLiteOpenHelper
             //unknown
             return(false);
         }
+
+        //Sets path color for orbital with given norad ID
+        public static void setPathColor(Context context, int noradId, int pathColor)
+        {
+            //load if needed
+            handleLoad(context);
+
+            //go through each orbital
+            for(DatabaseSatellite currentOrbital : buffer)
+            {
+                //if norad ID is a match
+                if(currentOrbital.noradId == noradId)
+                {
+                    //update color and stop going through buffer
+                    currentOrbital.pathColor = pathColor;
+                    break;
+                }
+            }
+        }
+
+        //Sets if orbital with given norad ID is selected
+        public static void setSelected(Context context, int noradId, boolean selected)
+        {
+            //load if needed
+            handleLoad(context);
+
+            //go through each orbital
+            for(DatabaseSatellite currentOrbital : buffer)
+            {
+                //if norad ID is a match
+                if(currentOrbital.noradId == noradId)
+                {
+                    //update selected status and stop going through buffer
+                    currentOrbital.isSelected = selected;
+                    break;
+                }
+            }
+        }
     }
 
     private static final int TIME_ZONE_COLUMNS = 3;
@@ -743,7 +779,7 @@ public class Database extends SQLiteOpenHelper
         public int pathColor;
         public final byte orbitalType;
         public final boolean tleIsAccurate;
-        public final boolean isSelected;
+        public boolean isSelected;
         public static final Creator<DatabaseSatellite> CREATOR =  new Parcelable.Creator<DatabaseSatellite>()
         {
             @Override
@@ -1734,21 +1770,29 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Modifies satellite data and returns ID
-    public static long saveSatellite(Context context, String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
+    public static long saveSatellite(Context context, String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected, boolean needReload)
     {
         long id = getSatelliteID(context, noradId);
         long saveId;
         ContentValues satelliteValues = getSatelliteValues(name, userName, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, pathColor, orbitalType, selected);
         saveId = runSave(context, id, Tables.Orbital, satelliteValues);
 
-        //update buffer
-        OrbitalsBuffer.setNeedReload();
+        //if need to reload
+        if(needReload)
+        {
+            //update buffer
+            OrbitalsBuffer.setNeedReload();
+        }
 
         //update any applicable widget
         WidgetPassBaseProvider.updateWidget(context, noradId);
 
         //return save ID
         return(saveId);
+    }
+    public static long saveSatellite(Context context, String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
+    {
+        return(saveSatellite(context, name, userName, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, pathColor, orbitalType, selected, true));
     }
     public static long saveSatellite(Context context, String name, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, byte orbitalType)
     {
@@ -1759,13 +1803,19 @@ public class Database extends SQLiteOpenHelper
     {
         saveSatellite(context, null, userName, noradId, ownerCode, launchDate, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, OrbitalsBuffer.getOrbitalSelected(context, noradId, false));
     }
-    public static void saveSatellite(Context context, int noradId, boolean selected)
+
+    //Saves satellite path color
+    public static void saveSatellitePathColor(Context context, int noradId, int pathColor)
     {
-        saveSatellite(context, null, null, noradId, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, selected);
+        OrbitalsBuffer.setPathColor(context, noradId, pathColor);
+        saveSatellite(context, null, null, noradId, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, pathColor, Byte.MAX_VALUE, true, false);
     }
-    public static void saveSatellite(Context context, int noradId, int pathColor)
+
+    //Saves satellite visibility
+    public static void saveSatelliteVisible(Context context, int noradId, boolean selected)
     {
-        saveSatellite(context, null, null, noradId, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, pathColor, Byte.MAX_VALUE, true);
+        OrbitalsBuffer.setSelected(context, noradId, selected);
+        saveSatellite(context, null, null, noradId, null, Globals.INVALID_DATE_MS, null, null, Globals.INVALID_DATE_MS, null, Globals.INVALID_DATE_MS, Integer.MAX_VALUE, Byte.MAX_VALUE, selected, false);
     }
 
     //Deletes a satellite

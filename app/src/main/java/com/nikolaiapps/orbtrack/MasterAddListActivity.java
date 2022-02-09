@@ -1211,7 +1211,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         if(currentItem.isChecked != currentItem.startChecked)
                         {
                             //save with updated select state
-                            Database.saveSatellite(MasterAddListActivity.this, currentItem.satellite.noradId, currentItem.isChecked);
+                            Database.saveSatelliteVisible(MasterAddListActivity.this, currentItem.satellite.noradId, currentItem.isChecked);
                         }
                     }
 

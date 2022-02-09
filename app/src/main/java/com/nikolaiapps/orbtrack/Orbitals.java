@@ -484,7 +484,7 @@ public abstract class Orbitals
                                 //get and save orbital in database
                                 item.color = color;
                                 itemHolder.colorButton.setBackgroundColor(color);
-                                Database.saveSatellite(currentContext, item.id, color);
+                                Database.saveSatellitePathColor(currentContext, item.id, color);
 
                                 //go through currently selected satellites
                                 for(index = 0; index < currentSatellites.length; index++)
@@ -517,7 +517,7 @@ public abstract class Orbitals
                         //update visibility and save orbital in database
                         item.isVisible = !item.isVisible;
                         itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
-                        Database.saveSatellite(currentContext, noradId, item.isVisible);
+                        Database.saveSatelliteVisible(currentContext, noradId, item.isVisible);
 
                         //if item is visible again
                         if(item.isVisible)

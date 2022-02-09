@@ -272,11 +272,10 @@ public class IconSpinner extends AppCompatSpinner
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
         {
+            BaseConstructor(context);
+
             //update status
             loadingItems = true;
-
-            //set inflater
-            listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
             //load items
             LoadItemsTask loadItems = new LoadItemsTask(new OnLoadItemsListener()
@@ -285,7 +284,7 @@ public class IconSpinner extends AppCompatSpinner
                 public void onLoaded(Item[] loadedItems)
                 {
                     items = loadedItems;
-                    BaseConstructor(context);
+                    updateUsingIcons();
                     loadingItems = false;
                     if(context instanceof Activity)
                     {

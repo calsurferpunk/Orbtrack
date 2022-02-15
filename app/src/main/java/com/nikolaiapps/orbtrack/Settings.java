@@ -193,10 +193,10 @@ public abstract class Settings
                     //init indicator items
                     indicatorItems = new IconSpinner.Item[]
                     {
-                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.orbital_satellite, true), res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
-                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_circle_black, true), res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
-                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_square_black, true), res.getString(R.string.title_square), LensView.IndicatorType.Square),
-                        new IconSpinner.Item(Globals.getDrawable(context, R.drawable.shape_triangle_black, true), res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
+                        new IconSpinner.Item(R.drawable.orbital_satellite, true, res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
+                        new IconSpinner.Item(R.drawable.shape_circle_black, true, res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
+                        new IconSpinner.Item(R.drawable.shape_square_black, true, res.getString(R.string.title_square), LensView.IndicatorType.Square),
+                        new IconSpinner.Item(R.drawable.shape_triangle_black, true, res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
                     };
                 }
                 if(sensorSmoothingItems == null || sensorSmoothingItems.length == 0)
@@ -2609,7 +2609,7 @@ public abstract class Settings
     }
 
     //Gets owner icon(s)
-    public static Drawable[] getOwnerIcons(Context context, int noradId, String ownerCode)
+    public static Drawable[] getOwnerIcons(Context context, String ownerCode)
     {
         int index;
         int currentID;
@@ -2621,7 +2621,7 @@ public abstract class Settings
         {
             //remember ID and set icon
             currentID = iconIDs[index];
-            icons[index] = (noradId <= 0 ? null : Globals.getDrawable(context, currentID));
+            icons[index] = (currentID > 0 ? Globals.getDrawable(context, currentID) : null);
         }
 
         //return icons

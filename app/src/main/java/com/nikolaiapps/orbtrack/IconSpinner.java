@@ -33,13 +33,16 @@ public class IconSpinner extends AppCompatSpinner
         final String text;
         String subText;
         final Object value;
-        Drawable icon1;
-        Drawable icon2;
         Drawable icon3;
+        int icon1Id;
+        int icon2Id;
+        int icon3Id;
         int icon1Color;
         int icon1SelectedColor;
         int icon3Color;
         int icon3SelectedColor;
+        boolean iconsUseThemeTint;
+        int[] icon1Ids;
 
         public static class Comparer implements Comparator<Item>
         {
@@ -53,47 +56,58 @@ public class IconSpinner extends AppCompatSpinner
         public Item(String txt, Object val)
         {
             rotate = 0;
-            icon1 = null;
-            icon2 = null;
+            icon1Id = -1;
+            icon2Id = -1;
             icon3 = null;
+            icon3Id = -1;
             text = txt;
             subText = null;
             value = val;
             icon1Color = icon1SelectedColor = icon3Color = icon3SelectedColor = Color.TRANSPARENT;
+            iconsUseThemeTint = false;
+            icon1Ids = null;
         }
-        public Item(String txt, String sbTxt, Object val)
+        public Item(String txt, String subText, Object val)
         {
             this(txt, val);
-            subText = sbTxt;
+            this.subText = subText;
         }
-        public Item(Drawable icn3, String txt, Object val)
+        public Item(Drawable icon3, String txt, Object val)
         {
             this(txt, val);
-            icon3 = icn3;
+            this.icon3 = icon3;
         }
-        public Item(Drawable icn3, String txt, Object val, float rotateAngle)
+        public Item(int icon3Id, boolean iconsUseThemeTint, String txt, Object val)
         {
-            this(icn3, txt, val);
-            rotate = rotateAngle;
+            this(txt, val);
+            this.icon3Id = icon3Id;
+            this.iconsUseThemeTint = iconsUseThemeTint;
         }
-        public Item(Drawable icn3, String txt, Object val, String sbTxt)
-        {
-            this(icn3, txt, val);
-            subText = sbTxt;
-        }
-        public Item(Drawable icn1, int icon1Color, int icon1SelectedColor, Drawable icon2, Drawable icon3, int icon3Color, int icon3SelectedColor, String txt, Object val)
+        public Item(Drawable icon3, String txt, Object val, float rotateAngle)
         {
             this(icon3, txt, val);
-            this.icon1 = icn1;
-            this.icon2 = icon2;
+            rotate = rotateAngle;
+        }
+        public Item(Drawable icon3, String txt, Object val, String subText)
+        {
+            this(icon3, txt, val);
+            this.subText = subText;
+        }
+        public Item(int icon1Id, int icon1Color, int icon1SelectedColor, int icon2Id, Drawable icon3, int icon3Color, int icon3SelectedColor, boolean iconsUseThemeTint, String txt, Object val)
+        {
+            this(icon3, txt, val);
+            this.icon1Id = icon1Id;
+            this.icon2Id = icon2Id;
             this.icon1Color = icon1Color;
             this.icon1SelectedColor = icon1SelectedColor;
             this.icon3Color = icon3Color;
             this.icon3SelectedColor = icon3SelectedColor;
+            this.iconsUseThemeTint = iconsUseThemeTint;
         }
-        public Item(Drawable icn1, Drawable icn2, Drawable icn3, String txt, Object val)
+        public Item(int[] icon1Ids, String txt, Object val)
         {
-            this(icn1, Color.TRANSPARENT, Color.TRANSPARENT, icn2, icn3, Color.TRANSPARENT, Color.TRANSPARENT, txt, val);
+            this(-1, Color.TRANSPARENT, Color.TRANSPARENT, -1, null, Color.TRANSPARENT, Color.TRANSPARENT, false, txt, val);
+            this.icon1Ids = icon1Ids;
         }
         public Item(Context context, int colorID, String txt, Object val)
         {
@@ -162,8 +176,8 @@ public class IconSpinner extends AppCompatSpinner
                     useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
                     useIcon1Color = !useIcons;
                     useIcon3Color = (useIcons && currentSat.noradId > 0);
-                    Drawable[] ownerIcons = (useIcons ? Settings.getOwnerIcons(context, currentSat.noradId, currentSat.ownerCode) : new Drawable[]{Globals.getDrawable(context, (isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black), true)});
-                    items[index] = new Item(ownerIcons[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIcons.length > 1 ? ownerIcons[1] : null), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), currentSat.getName(), currentSat.noradId);
+                    int[] ownerIconIds = (useIcons ? Globals.getOwnerIconIDs(currentSat.ownerCode) : new int[]{isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black});
+                    items[index] = new Item(ownerIconIds[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIconIds.length > 1 ? ownerIconIds[1] : -1), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), !useIcons, currentSat.getName(), currentSat.noradId);
                 }
 
                 //if listeners are set
@@ -229,18 +243,6 @@ public class IconSpinner extends AppCompatSpinner
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Object[] items, int[] itmImgIds)
-        {
-            int index;
-
-            this.items = new Item[items.length];
-            for(index = 0; index < this.items.length; index++)
-            {
-                this.items[index] = new Item(Globals.getDrawable(context, itmImgIds[index], false), items[index].toString(), items[index]);
-            }
-
-            BaseConstructor(context);
-        }
         public CustomAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
         {
             int index;
@@ -252,10 +254,6 @@ public class IconSpinner extends AppCompatSpinner
             }
 
             BaseConstructor(context);
-        }
-        public CustomAdapter(Context context, Object[] items, int[] itemImageIds, String[] subTexts)
-        {
-            this(context, items, items, itemImageIds, subTexts);
         }
         public CustomAdapter(Context context, ArrayList<TimeZone> zones)
         {
@@ -323,8 +321,8 @@ public class IconSpinner extends AppCompatSpinner
                     Item currentItem = items[index];
 
                     //update if using icons
-                    usingIcon1 = usingIcon1 || (currentItem.icon1 != null);
-                    usingIcon3 = usingIcon3 || (currentItem.icon3 != null);
+                    usingIcon1 = usingIcon1 || (currentItem.icon1Id > 0 || currentItem.icon1Ids != null);
+                    usingIcon3 = usingIcon3 || (currentItem.icon3Id > 0 || currentItem.icon3 != null);
                 }
             }
         }
@@ -401,6 +399,10 @@ public class IconSpinner extends AppCompatSpinner
         public View getView(int position, View convertView, ViewGroup parent)
         {
             boolean isSelected = (position == selectedIndex);
+            Drawable icon1;
+            Drawable icon2;
+            Drawable icon3;
+            Context context;
             LinearLayout itemBackground;
             AppCompatImageView itemImage1;
             AppCompatImageView itemImage2;
@@ -415,6 +417,10 @@ public class IconSpinner extends AppCompatSpinner
             {
                 convertView = listInflater.inflate(R.layout.icon_spinner_item, parent, false);
             }
+            context = convertView.getContext();
+            icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
+            icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
+            icon3 = (currentItem.icon3Id > 0 ? Globals.getDrawable(context, currentItem.icon3Id, currentItem.iconsUseThemeTint) : null);
             convertView.setBackgroundColor(backgroundColor);
             itemBackground = convertView.findViewById(R.id.Spinner_Item_Background);
             itemBackground.setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
@@ -437,29 +443,29 @@ public class IconSpinner extends AppCompatSpinner
                 //update displays
                 if(currentItem.usingIcon1Colors())
                 {
-                    itemImage1.setBackgroundDrawable(Globals.getDrawable(currentItem.icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
+                    itemImage1.setBackgroundDrawable(Globals.getDrawable(icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
                 }
                 else
                 {
-                    itemImage1.setBackgroundDrawable(currentItem.icon1);
+                    itemImage1.setBackgroundDrawable(icon1);
                 }
                 if(!usingIcon1)
                 {
                     itemImage1.setVisibility(View.GONE);
                 }
-                itemImage2.setBackgroundDrawable(currentItem.icon2);
-                if(currentItem.icon2 != null)
+                itemImage2.setBackgroundDrawable(icon2);
+                if(icon2 != null)
                 {
                     itemImage2.setVisibility(View.VISIBLE);
                     Globals.setLayoutWidth(itemImage1, itemImage2.getLayoutParams().width);
                 }
                 if(currentItem.usingIcon3Colors())
                 {
-                    itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
+                    itemImage3.setBackgroundDrawable(Globals.getDrawable((icon3 != null ? icon3 : currentItem.icon3), (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
                 }
                 else
                 {
-                    itemImage3.setBackgroundDrawable(currentItem.icon3);
+                    itemImage3.setBackgroundDrawable(icon3 != null ? icon3 : currentItem.icon3);
                 }
                 if(currentItem.rotate != 0)
                 {

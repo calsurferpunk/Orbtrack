@@ -420,7 +420,7 @@ public class EditValuesDialog
                     IconSpinner.Item[] owners = new IconSpinner.Item[itemList2Values.length];
                     for(index = 0; index < owners.length; index++)
                     {
-                        owners[index] = new IconSpinner.Item(Globals.getDrawable(currentContext, Settings.getOwnerIcons(currentContext, Integer.MAX_VALUE, list2SubValues[index])), itemList2Values[index], itemList2Values[index]);
+                        owners[index] = new IconSpinner.Item(Globals.getOwnerIconIDs(list2SubValues[index]), itemList2Values[index], itemList2Values[index]);
                     }
                     editValueList2.setAdapter(new IconSpinner.CustomAdapter(currentContext, owners));
                 }

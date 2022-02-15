@@ -2737,14 +2737,23 @@ public abstract class Globals
         int lastImageIndex = 0;
         Bitmap imageBitmap;
         Canvas imageCanvas;
-        int[][] sizes = new int[images.length][2];
+        int[][] sizes;
 
-        //if only 1 image
-        if(images.length == 1)
+        //if no images
+        if(images == null || images.length == 0)
+        {
+            //nothing to return
+            return(null);
+        }
+        //else if only 1 image
+        else if(images.length == 1)
         {
             //return it
             return(images[0]);
         }
+
+        //set sizes
+        sizes = new int[images.length][2];
 
         //go through each image
         for(index = (stacked ? (images.length - 1) : 0); (stacked ? (index >= 0) : (index < images.length)); index += (stacked ? - 1 : 1))
@@ -2835,11 +2844,35 @@ public abstract class Globals
         }
         else
         {
+            //no visible image
             return(null);
         }
     }
     public static Drawable getDrawable(Context context, Drawable ...images)
     {
+        return(getDrawable(context, 0, 0, false, images));
+    }
+    public static Drawable getDrawable(Context context, int[] imageIds)
+    {
+        int index;
+        Drawable[] images = null;
+
+        //if there are images
+        if(imageIds != null && imageIds.length > 0)
+        {
+            //go through each image ID
+            images = new Drawable[imageIds.length];
+            for(index = 0; index < imageIds.length; index++)
+            {
+                //remember current ID
+                int currentId = imageIds[index];
+
+                //get image
+                images[index] = (currentId > 0 ? Globals.getDrawable(context, currentId) : null);
+            }
+        }
+
+        //return combined image
         return(getDrawable(context, 0, 0, false, images));
     }
     public static BitmapDrawable getDrawable(Context context, String text, float textSize, int textColor, int bgColor)
@@ -3549,6 +3582,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_vtnm;
                     break;
             }
+        }
+        else
+        {
+            ids[0] = -1;
         }
 
         //return IDs

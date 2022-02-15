@@ -169,28 +169,9 @@ public class IconListPreference extends Preference
         adapter = new IconSpinner.CustomAdapter(context, items, values, itemImageIds, subTexts);
         itemValues = adapter.getItemValues();
     }
-    public void setAdapter(Context context, Object[] items, int[] itemImageIds, String[] subTexts)
-    {
-        setAdapter(context, items, items, itemImageIds, subTexts);
-    }
-    public void setAdapter(Context context, Object[] items, int[] itemImageIds)
-    {
-        adapter = new IconSpinner.CustomAdapter(context, items, itemImageIds);
-        itemValues = adapter.getItemValues();
-    }
-    public void setAdapter(Context context, Object[] items)
-    {
-        adapter = new IconSpinner.CustomAdapter(context, items);
-        itemValues = adapter.getItemValues();
-    }
     public void setAdapter(Context context, IconSpinner.Item[] items)
     {
         adapter = new IconSpinner.CustomAdapter(context, items);
-        itemValues = adapter.getItemValues();
-    }
-    public void setAdapter(Context context, ArrayList<TimeZone> zones)
-    {
-        adapter = new IconSpinner.CustomAdapter(context, zones);
         itemValues = adapter.getItemValues();
     }
 

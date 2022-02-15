@@ -218,8 +218,6 @@ public class MasterAddListActivity extends BaseInputActivity
         {
             public final boolean startChecked;
             public final long launchDateMs;
-            private final Drawable orbitalIcon;
-            private final Drawable ownerIcon;
             public final UpdateService.MasterSatellite satellite;
             public final ArrayList<String> ownerCodes;
             public final ArrayList<String> categories;
@@ -253,12 +251,10 @@ public class MasterAddListActivity extends BaseInputActivity
 
                 int index;
                 String currentGroup;
-                Drawable[] ownerIcons = Settings.getOwnerIcons(context, sat.noradId, sat.ownerCode);
+                Drawable[] ownerIcons = Settings.getOwnerIcons(context, sat.ownerCode);
 
                 startChecked = isChecked;
                 launchDateMs = sat.launchDateMs;
-                orbitalIcon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), sat.noradId, sat.orbitalType);
-                ownerIcon = Globals.getDrawable(context, ownerIcons);
                 satellite = sat;
                 ownerCodes = new ArrayList<>(0);
                 categories = sat.categories;
@@ -429,9 +425,9 @@ public class MasterAddListActivity extends BaseInputActivity
                 currentItem = displayedItems.get(position);
 
                 //set displays and update checked state
-                itemHolder.orbitalImage.setBackgroundDrawable(currentItem.orbitalIcon);
+                itemHolder.orbitalImage.setBackgroundDrawable(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType));
                 itemHolder.orbitalImage.setVisibility(View.VISIBLE);
-                itemHolder.ownerImage.setBackgroundDrawable(currentItem.ownerIcon);
+                itemHolder.ownerImage.setBackgroundDrawable(Globals.getDrawable(currentContext, Settings.getOwnerIcons(currentContext, currentItem.satellite.ownerCode)));
                 itemHolder.itemText.setText(currentItem.satellite.name);
                 itemHolder.checkBoxView.setOnCheckedChangeListener(null);
                 itemHolder.checkBoxView.setChecked(currentItem.isChecked);
@@ -936,8 +932,8 @@ public class MasterAddListActivity extends BaseInputActivity
         for(index = 0; index < usedOwners.size(); index++)
         {
             UpdateService.MasterOwner currentItem = usedOwners.get(index);
-            Drawable[] ownerIcons = Settings.getOwnerIcons(this, (currentItem.code == null ? Integer.MIN_VALUE : Integer.MAX_VALUE), currentItem.code);
-            owners[index + 1] = new IconSpinner.Item(Globals.getDrawable(this, ownerIcons), null, null, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
+            int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
+            owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
         }
         ownerList.setAdapter(new IconSpinner.CustomAdapter(this, owners));
         ownerList.setBackgroundColor(listBgColor);

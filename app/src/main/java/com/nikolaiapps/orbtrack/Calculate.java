@@ -1181,6 +1181,7 @@ public abstract class Calculate
         int elRowVisibility = View.VISIBLE;
         int viewRowVisibility = View.VISIBLE;
         int intersectionRowVisibility = View.VISIBLE;
+        final boolean onIntersection = (pageNumber == PageType.Intersection);
         String text;
         Context context = page.getContext();
         Database.DatabaseSatellite[] orbitals;
@@ -1238,19 +1239,23 @@ public abstract class Calculate
         {
             page.orbitalList.setPopupBackgroundDrawable(backgroundColorDrawable);
         }
-        page.orbital2List.setAdapter(new IconSpinner.CustomAdapter(context, orbitals));
-        if(orbitalId2 != Universe.IDs.Invalid)
+        if(onIntersection)
         {
-            page.orbital2List.setSelectedValue(orbitalId2);
+            page.orbital2List.setAdapter(new IconSpinner.CustomAdapter(context, orbitals));
+
+            if(orbitalId2 != Universe.IDs.Invalid)
+            {
+                page.orbital2List.setSelectedValue(orbitalId2);
+            }
+            if(backgroundColorDrawable != null)
+            {
+                page.orbital2List.setPopupBackgroundDrawable(backgroundColorDrawable);
+            }
         }
-        if(backgroundColorDrawable != null)
-        {
-            page.orbital2List.setPopupBackgroundDrawable(backgroundColorDrawable);
-        }
-        page.orbital2List.setVisibility(pageNumber == PageType.Intersection ? View.VISIBLE : View.GONE);
+        page.orbital2List.setVisibility(onIntersection ? View.VISIBLE : View.GONE);
         text = (context != null ? (context.getString(R.string.title_orbital) + " 2") : "");
         orbital2ListTitle.setText(text);
-        orbital2ListTitle.setVisibility(pageNumber == PageType.Intersection ? View.VISIBLE : View.GONE);
+        orbital2ListTitle.setVisibility(onIntersection ? View.VISIBLE : View.GONE);
 
         //set date and time texts
         page.startDateText.setDate(dateNow);
@@ -1326,7 +1331,7 @@ public abstract class Calculate
                 Bundle inputParams = page.getInputValues();
 
                 //if inputs are set and -not on intersection- or -different ID selections-
-                if(inputParams != null && (pageNumber != PageType.Intersection || inputParams.getInt(ParamTypes.NoradId, Universe.IDs.Invalid) != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
+                if(inputParams != null && (!onIntersection || inputParams.getInt(ParamTypes.NoradId, Universe.IDs.Invalid) != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
                 {
                     //start calculation
                     page.startCalculation(inputParams);

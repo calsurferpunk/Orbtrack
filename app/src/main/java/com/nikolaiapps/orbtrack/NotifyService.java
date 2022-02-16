@@ -240,11 +240,13 @@ public abstract class NotifyService extends IntentService
     protected void sendMessage(byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int retryID, boolean showNotification, Bundle extraData)
     {
         boolean isMasterList = (serviceIndex == UpdateService.UpdateType.GetMasterList);
+        boolean isUpdateSatellites = (serviceIndex == UpdateService.UpdateType.UpdateSatellites);
         boolean isParse = (messageType == MessageTypes.Parse);
         long limitMs = 0;
-        long baseInterval = ((messageType == MessageTypes.Download || isParse) && isMasterList ? (isParse ? (count / (!showNotification ? 100 : 20)) : Globals.WEB_READ_SIZE) : 1);
-        long indexInterval = (index / baseInterval);
-        long intervals = (count / (count > baseInterval ? baseInterval : 1));
+        long baseInterval = ((messageType == MessageTypes.Download || isParse) && (isMasterList || isUpdateSatellites) ? (isParse || isUpdateSatellites ? ((count / (!showNotification ? 100 : 20)) * (isUpdateSatellites && !showNotification ? 5 : 1)) : Globals.WEB_READ_SIZE) : 1);
+        final long finalBaseInterval = (baseInterval <= 0 ? 1 : baseInterval);
+        long indexInterval = (index / finalBaseInterval);
+        long intervals = (count / (count > finalBaseInterval ? finalBaseInterval : 1));
         boolean sendProgress = true;
         boolean haveSection = (section != null && !section.equals(""));
         boolean enoughProgress = (progressType == Globals.ProgressType.Finished || intervals <= 20 || indexInterval == 0 || indexInterval == 1 || index >= (count - 1) || (indexInterval % (intervals / 20)) == 0);      //if no count or less than update divisions, on first index, on last index, or on an allowable index in between

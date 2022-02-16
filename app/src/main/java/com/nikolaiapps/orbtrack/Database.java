@@ -1719,25 +1719,27 @@ public class Database extends SQLiteOpenHelper
     }
     public static DatabaseSatellite[] getOrbitals(Context context, int[] noradIds)
     {
-        int index;
-        StringBuilder idStrings = new StringBuilder();
+        boolean haveNoradIds = (noradIds != null && noradIds.length > 0);
+        ArrayList<DatabaseSatellite> orbitals = new ArrayList<>(haveNoradIds ? noradIds.length : 0);
 
-        //go through each ID
-        for(index = 0; index < noradIds.length; index++)
+        //if have norad IDs
+        if(haveNoradIds)
         {
-            //if after the first
-            if(index > 0)
+            //go through each ID
+            for(int currentId : noradIds)
             {
-                //add separator
-                idStrings.append(",");
+                //try to get orbital
+                DatabaseSatellite currentOrbital = OrbitalsBuffer.getOrbital(context, currentId, false);
+                if(currentOrbital != null)
+                {
+                    //add orbital to list
+                    orbitals.add(currentOrbital);
+                }
             }
-
-            //add ID
-            idStrings.append(noradIds[index]);
         }
 
-        //return satellites
-        return(getOrbitals(context, "[Norad] IN(" + idStrings + ")"));
+        //return orbitals
+        return(orbitals.toArray(new DatabaseSatellite[0]));
     }
     public static DatabaseSatellite[] getOrbitals(Context context, byte ...orbitalTypes)
     {

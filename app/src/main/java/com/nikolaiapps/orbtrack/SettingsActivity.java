@@ -268,9 +268,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             //if TLE auto switch exists
                             if(tleAutoSwitch != null)
                             {
+                                Preference.OnPreferenceChangeListener listener = tleAutoSwitch.getOnPreferenceChangeListener();
+
                                 //set to checked and call change listener
                                 tleAutoSwitch.setChecked(true);
-                                tleAutoSwitch.getOnPreferenceChangeListener().onPreferenceChange(tleAutoSwitch, true);
+                                if(listener != null)
+                                {
+                                    listener.onPreferenceChange(tleAutoSwitch, true);
+                                }
                             }
                         }
                         break;
@@ -320,7 +325,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
-                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                                 {
                                     //allow if changing
                                     return((int)newValue != Settings.getColorTheme(context));
@@ -334,7 +339,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
-                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                                 {
                                     int indicatorType = (int)newValue;
 
@@ -368,7 +373,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
-                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                                 {
                                     int layerType = (int)newValue;
 
@@ -395,7 +400,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
-                                public boolean onPreferenceChange(Preference preference, Object newValue)
+                                public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                                 {
                                     byte source = (byte)newValue;
                                     SwitchPreference childSwitch = (SwitchPreference)childPreference;
@@ -477,7 +482,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                     {
                         @Override
-                        public boolean onPreferenceChange(Preference preference, Object newValue)
+                        public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                         {
                             boolean checked = (Boolean)newValue;
                             boolean isAutoUpdate = (timePreference != null);
@@ -523,8 +528,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     //if might need changes
                     if(timePreference != null)
                     {
-                        //call once to update changes
-                        preference.getOnPreferenceChangeListener().onPreferenceChange(preference, checked);
+                        Preference.OnPreferenceChangeListener listener = preference.getOnPreferenceChangeListener();
+
+                        if(listener != null)
+                        {
+                            //call once to update changes
+                            listener.onPreferenceChange(preference, checked);
+                        }
                     }
                 }
                 else
@@ -1512,12 +1522,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     @Override
-    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref)
+    public boolean onPreferenceStartFragment(@NonNull PreferenceFragmentCompat caller, Preference pref)
     {
         Bundle args = pref.getExtras();
         String fragmentClass = pref.getFragment();
-        boolean isPage = fragmentClass.equals(Settings.Page.class.getName());
-        Fragment fragment;
+        boolean haveFragment;
+        boolean isPage = Settings.Page.class.getName().equals(fragmentClass);
+        Fragment fragment = null;
 
         //update current page key
         currentPageKey = pref.getKey();
@@ -1525,10 +1536,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         //if a page
         if(isPage)
         {
-            //create settings fragment
-            fragment = getSettingsFragment(currentPageKey, pref.getTitle().toString());
+            CharSequence title = pref.getTitle();
+
+            if(title != null)
+            {
+                //create settings fragment
+                fragment = getSettingsFragment(currentPageKey, title.toString());
+            }
         }
-        else
+        else if(fragmentClass != null)
         {
             //update current page
             currentPage = -1;
@@ -1541,10 +1557,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             fragment.setArguments(args);
         }
 
-        //add fragment
-        manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, fragment, (isPage ? currentPageKey : null)).addToBackStack(null).commit();
+        //if fragment exists
+        haveFragment = (fragment != null);
+        if(haveFragment)
+        {
+            //add fragment
+            manager.beginTransaction().replace(R.id.Settings_Layout_Fragment, fragment, (isPage ? currentPageKey : null)).addToBackStack(null).commit();
+        }
 
-        return(true);
+        //handled if have fragment
+        return(haveFragment);
     }
 
     //Gets orbital fragment with given title

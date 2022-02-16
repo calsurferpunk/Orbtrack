@@ -1598,7 +1598,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Creates satellite cache file
-    public static boolean createSatelliteCacheFile(Context context, ArrayList<Database.DatabaseSatellite> satellites)
+    public static void createSatelliteCacheFile(Context context, ArrayList<Database.DatabaseSatellite> satellites)
     {
         File satCache;
         FileOutputStream outputStream;
@@ -1612,32 +1612,37 @@ public class Database extends SQLiteOpenHelper
 
             try
             {
-                //create file write each satellite
-                satCache.createNewFile();
-                outputStream = new FileOutputStream(satCache);
-                objectOutputStream = new ObjectOutputStream(outputStream);
-                for(Database.DatabaseSatellite currentSatellite : satellites)
+                //if file exists
+                if(satCache.exists())
                 {
-                    //write satellite
-                    objectOutputStream.writeObject(currentSatellite);
+                    //if unable to delete file and can't write
+                    if(!satCache.delete() && !satCache.canWrite())
+                    {
+                        //stop
+                        return;
+                    }
                 }
-                objectOutputStream.close();
-                outputStream.close();
+
+                //try to create file
+                if(satCache.createNewFile())
+                {
+                    //write each satellite
+                    outputStream = new FileOutputStream(satCache);
+                    objectOutputStream = new ObjectOutputStream(outputStream);
+                    for(Database.DatabaseSatellite currentSatellite : satellites)
+                    {
+                        //write satellite
+                        objectOutputStream.writeObject(currentSatellite);
+                    }
+                    objectOutputStream.close();
+                    outputStream.close();
+                }
             }
             catch(Exception ex)
             {
                 //failed
-                return(false);
             }
         }
-        else
-        {
-            //failed
-            return(false);
-        }
-
-        //success
-        return(true);
     }
 
     //Reads satellite data from cache file
@@ -1732,7 +1737,7 @@ public class Database extends SQLiteOpenHelper
         }
 
         //return satellites
-        return(getOrbitals(context, "[Norad] IN(" + idStrings.toString() + ")"));
+        return(getOrbitals(context, "[Norad] IN(" + idStrings + ")"));
     }
     public static DatabaseSatellite[] getOrbitals(Context context, byte ...orbitalTypes)
     {

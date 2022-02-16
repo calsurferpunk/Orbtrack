@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
@@ -251,7 +250,6 @@ public class MasterAddListActivity extends BaseInputActivity
 
                 int index;
                 String currentGroup;
-                Drawable[] ownerIcons = Settings.getOwnerIcons(context, sat.ownerCode);
 
                 startChecked = isChecked;
                 launchDateMs = sat.launchDateMs;

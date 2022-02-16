@@ -597,7 +597,7 @@ public abstract class Globals
                 if(fullData.isOkay())
                 {
                     //format in json again
-                    fullData.pageData = String.format(ResultBody, result.toString());
+                    fullData.pageData = String.format(ResultBody, result);
                 }
             }
             else

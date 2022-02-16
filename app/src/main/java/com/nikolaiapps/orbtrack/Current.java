@@ -4085,8 +4085,9 @@ public abstract class Current
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
         final CameraLens cameraView;
         final Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
-        final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath ? currentSavedPathItem.passViews : null);
-        final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem.id)) : null);
+        final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
+        final boolean havePassViews = (passViews != null && passViews.length > 0);
+        final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
         final FloatingActionStateButton showCalibrationButton;
         final FloatingActionStateButton showHorizonButton;
         final FloatingActionStateButton showPathButton;
@@ -4299,8 +4300,8 @@ public abstract class Current
         {
             //setup header
             TextView header = (TextView)Globals.replaceView(R.id.Lens_Header, R.layout.header_text_view, inflater, rootView);
-            Calendar startTime = (useSavedViewPath ? savedViewItems[0].time : passViews[0].gmtTime);
-            Calendar endTime = (useSavedViewPath ? savedViewItems[savedViewItems.length - 1].time : passViews[passViews.length - 1].gmtTime);
+            Calendar startTime = (useSavedViewPath ? savedViewItems[0].time : havePassViews ? passViews[0].gmtTime : null);
+            Calendar endTime = (useSavedViewPath ? savedViewItems[savedViewItems.length - 1].time : havePassViews ? passViews[passViews.length - 1].gmtTime : null);
             header.setText(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathItem != null ? currentSavedPathItem.name : currentSatellite.getName()), startTime, endTime));
             header.setVisibility(View.VISIBLE);
 
@@ -4314,7 +4315,7 @@ public abstract class Current
                 }
                 cameraView.playBar.setMax(savedViewItems.length - 1);
             }
-            else
+            else if(havePassViews)
             {
                 if(passViews.length > 1)
                 {

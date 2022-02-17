@@ -280,7 +280,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     @Override
     protected void onResume()
     {
-        super.onResume();
+        try
+        {
+            super.onResume();
+        }
+        catch(Exception ex)
+        {
+            //do nothing
+        }
 
         //if were paused and not recreating
         if(wasPaused && !wasRecreated)

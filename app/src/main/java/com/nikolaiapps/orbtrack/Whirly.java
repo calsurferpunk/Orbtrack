@@ -333,7 +333,8 @@ class Whirly
         private double flatScale;
         private double zoomScale;
         private double flatRotationRads;
-        private Bitmap originalImage;
+        private int imageId;
+        private int imageColor;
         private Sticker flatSticker;
         private final StickerInfo flatInfo;
         private MaplyTexture flatTexture;
@@ -362,28 +363,43 @@ class Whirly
             flatList.add(flatSticker);
             flatScale = zoomScale = 1;
             flatRotationRads = 0;
-            originalImage = null;
+            imageId = -1;
 
             setVisible(true);
         }
 
-        void setImage(Bitmap image)
+        void setImage(Context context, int id, int color, double rotateDegrees)
         {
-            if(originalImage == null)
-            {
-                originalImage = image;
-            }
+            Bitmap image;
+            Bitmap rotatedImage = null;
 
-            if(flatTexture != null)
-            {
-                controller.removeTexture(flatTexture, BaseController.ThreadMode.ThreadAny);
-                flatTextureList.clear();
-                flatTexture = null;
-            }
+            imageId = id;
+            imageColor = color;
+            image = (id > 0 ? Globals.getBitmap(context, id, color) : null);
 
-            flatTexture = controller.addTexture(image, flatTextureSettings, BaseController.ThreadMode.ThreadAny);
-            flatTextureList.add(flatTexture);
-            flatSticker.setTextures(flatTextureList);
+            if(image != null)
+            {
+                if(rotateDegrees != 0)
+                {
+                    rotatedImage = Globals.getBitmapRotated(image, rotateDegrees);
+                }
+
+                if(flatTexture != null)
+                {
+                    controller.removeTexture(flatTexture, BaseController.ThreadMode.ThreadAny);
+                    flatTextureList.clear();
+                    flatTexture = null;
+                }
+
+                flatTexture = controller.addTexture(rotatedImage != null ? rotatedImage : image, flatTextureSettings, BaseController.ThreadMode.ThreadAny);
+                flatTextureList.add(flatTexture);
+                flatSticker.setTextures(flatTextureList);
+            }
+        }
+
+        void rotateImage(Context context, double rotateDegrees)
+        {
+            setImage(context, imageId, imageColor, rotateDegrees);
         }
 
         void setRotation(double rotationRads)
@@ -676,7 +692,6 @@ class Whirly
     {
         private Context currentContext;
         private Shared common;
-        private Bitmap markerImage;
         private ScreenMarker marker;
         private ScreenMarker titleMarker;
         private ScreenMarker infoMarker;
@@ -707,10 +722,9 @@ class Whirly
                 controller = markerController;
                 markerScale = markerScaling;
                 markerBaseSizeValue = Globals.dpToPixels(currentContext, 46);
-                markerImage = Globals.getBitmap(currentContext, R.drawable.map_marker_location, 0);
 
                 marker = new ScreenMarker();
-                marker.image = markerImage;
+                marker.image = Globals.getBitmap(currentContext, R.drawable.map_marker_location, 0);
                 marker.size = new Point2d(markerBaseSizeValue * markerScale, markerBaseSizeValue * markerScale);
                 marker.userObject = noradId;
                 marker.selectable = true;
@@ -747,8 +761,7 @@ class Whirly
         {
             remove();
 
-            markerImage = image;
-            marker.image = markerImage;
+            marker.image = image;
             markerObj = controller.addScreenMarker(marker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
 
             add();
@@ -1191,7 +1204,7 @@ class Whirly
                     noradId = common.data.getSatelliteNum();
 
                     orbitalShadow = new FlatObject(controller);
-                    orbitalShadow.setImage(Globals.getBitmap(currentContext, Globals.getOrbitalIconID(noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0)));
+                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0), 0);
                 }
             }
         }
@@ -1344,7 +1357,7 @@ class Whirly
             else
             {
                 //if updating bearing and image is set
-                if(updateBearing && orbitalBoard.boardImage != null)
+                if(updateBearing && orbitalBoard.boardImageOriginal != null)
                 {
                     //rotate image and recreate board
                     bearingImage = Globals.getBitmapRotated(orbitalBoard.boardImageOriginal, bearing + 135 + orbitalRotation);
@@ -1375,10 +1388,10 @@ class Whirly
                     if(orbitalShadow != null)
                     {
                         //if updating bearing and image is set
-                        if(updateBearing && orbitalShadow.originalImage != null)
+                        if(updateBearing && orbitalShadow.imageId > 0)
                         {
                             //rotate image
-                            orbitalShadow.setImage(Globals.getBitmapRotated(orbitalShadow.originalImage, bearing + 135));
+                            orbitalShadow.rotateImage(currentContext, bearing + 135);
                             usedBearing = true;
                         }
 

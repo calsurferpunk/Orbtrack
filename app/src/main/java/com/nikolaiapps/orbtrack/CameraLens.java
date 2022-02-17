@@ -95,8 +95,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
             else
             {
-                //start running
-                start();
+                try
+                {
+                    //start running
+                    start();
+                }
+                catch(Exception ex)
+                {
+                    //do nothing
+                }
             }
         }
     }

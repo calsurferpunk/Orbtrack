@@ -170,7 +170,6 @@ class Whirly
         private double zValue;
         private final BaseController controller;
         private Bitmap boardImage;
-        private Bitmap boardImageOriginal;
         private final Billboard board;
         private final BillboardInfo boardInfo;
         private ScreenObject boardScreen;
@@ -192,7 +191,6 @@ class Whirly
             boardInfo = new BillboardInfo();
             boardScreen = new ScreenObject();
             boardImage = null;
-            boardImageOriginal = null;
             boardTexture = null;
             boardTextureSettings = new BaseController.TextureSettings();
             boardObject = null;
@@ -218,7 +216,7 @@ class Whirly
             this(boardController, copyFrom.tleIsAccurate, visible);
 
             copyFrom.remove();
-            boardImageOriginal = copyFrom.boardImageOriginal;
+            boardImage = copyFrom.boardImage;
             board.setCenter(copyFrom.board.getCenter());
         }
 
@@ -242,10 +240,47 @@ class Whirly
                 }
 
                 boardImage = image;
-                if(boardImageOriginal == null)
+                width = image.getWidth();
+                height = image.getHeight();
+                if(width < 1)
                 {
-                    boardImageOriginal = image;
+                    width = 1;
                 }
+                if(height < 1)
+                {
+                    height = 1;
+                }
+                imageWidthScale = (width / height);
+
+                boardTexture = controller.addTexture(image, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
+                boardScreen = new ScreenObject();
+                boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
+                boardScreen.translateX(offsetX, offsetY);
+                board.setScreenObject(boardScreen);
+            }
+        }
+        void setImage(Bitmap image, float markerScale)
+        {
+            setImage(image, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale);
+        }
+
+        void rotateImage(double rotateDegrees, float markerScale)
+        {
+            float width;
+            float height;
+            float imageWidthScale;
+            double baseScale = DefaultImageScale;
+
+            if(boardImage != null)
+            {
+                baseScale *= markerScale;
+
+                if(boardTexture != null)
+                {
+                    controller.removeTexture(boardTexture, BaseController.ThreadMode.ThreadAny);
+                    boardTexture = null;
+                }
+
                 width = boardImage.getWidth();
                 height = boardImage.getHeight();
                 if(width < 1)
@@ -261,13 +296,9 @@ class Whirly
                 boardTexture = controller.addTexture(boardImage, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
                 boardScreen = new ScreenObject();
                 boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
-                boardScreen.translateX(offsetX, offsetY);
+                boardScreen.rotate(Math.toRadians(rotateDegrees));
                 board.setScreenObject(boardScreen);
             }
-        }
-        void setImage(Bitmap image, float markerScale)
-        {
-            setImage(image, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale);
         }
 
         public boolean getVisible()
@@ -1014,7 +1045,7 @@ class Whirly
 
                 titleImage = infoCreator.get(currentContext, null);
                 infoBoard = new Board(controller, tleIsAccurate, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
+                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
             common.bearing = (noradId > 0 ? 225 : 0);
@@ -1133,7 +1164,10 @@ class Whirly
 
                 //set image
                 infoImage = infoCreator.get(currentContext, (usingInfo && showingInfo ? text : null));
-                infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                if(orbitalBoard.boardImage != null)
+                {
+                    infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                }
             }
         }
 
@@ -1149,7 +1183,7 @@ class Whirly
             {
                 orbitalMarker.setScale(markerScale);
             }
-            else
+            else if(orbitalBoard.boardImage != null)
             {
                 //recreate orbital
                 orbitalImage = orbitalBoard.boardImage.copy(orbitalBoard.boardImage.getConfig(), true);
@@ -1313,7 +1347,6 @@ class Whirly
             double bearing;
             double bearingDelta;
             double orbitalRotationDelta;
-            Bitmap bearingImage;
 
             //remember last and current location
             common.lastGeo = new Calculations.GeodeticDataType(common.geo);
@@ -1357,12 +1390,11 @@ class Whirly
             else
             {
                 //if updating bearing and image is set
-                if(updateBearing && orbitalBoard.boardImageOriginal != null)
+                if(updateBearing && orbitalBoard.boardImage != null)
                 {
                     //rotate image and recreate board
-                    bearingImage = Globals.getBitmapRotated(orbitalBoard.boardImageOriginal, bearing + 135 + orbitalRotation);
                     orbitalBoard = new Board(controller, orbitalBoard, true);
-                    orbitalBoard.setImage(bearingImage, markerScale);
+                    orbitalBoard.rotateImage(bearing + 135 + orbitalRotation, markerScale);
                     usedBearing = true;
                 }
 

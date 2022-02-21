@@ -269,10 +269,12 @@ class Whirly
             float width;
             float height;
             float imageWidthScale;
+            double offset = DefaultImageScale / -2;
             double baseScale = DefaultImageScale;
 
             if(boardImage != null)
             {
+                offset *= markerScale;
                 baseScale *= markerScale;
 
                 if(boardTexture != null)
@@ -296,6 +298,7 @@ class Whirly
                 boardTexture = controller.addTexture(boardImage, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
                 boardScreen = new ScreenObject();
                 boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
+                boardScreen.translateX(offset, offset);
                 boardScreen.rotate(Math.toRadians(rotateDegrees));
                 board.setScreenObject(boardScreen);
             }

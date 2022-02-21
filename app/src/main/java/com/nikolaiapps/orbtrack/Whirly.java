@@ -220,7 +220,7 @@ class Whirly
             board.setCenter(copyFrom.board.getCenter());
         }
 
-        void setImage(Bitmap image, double offsetX, double offsetY, double baseScale, double markerScale)
+        private void updateImage(Bitmap image, double offsetX, double offsetY, double baseScale, double markerScale, double rotateDegrees)
         {
             float width;
             float height;
@@ -239,7 +239,10 @@ class Whirly
                     boardTexture = null;
                 }
 
-                boardImage = image;
+                if(boardImage != image)
+                {
+                    boardImage = image;
+                }
                 width = image.getWidth();
                 height = image.getHeight();
                 if(width < 1)
@@ -256,8 +259,17 @@ class Whirly
                 boardScreen = new ScreenObject();
                 boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
                 boardScreen.translateX(offsetX, offsetY);
+                if(rotateDegrees != Double.MAX_VALUE)
+                {
+                    boardScreen.rotate(Math.toRadians(rotateDegrees));
+                }
                 board.setScreenObject(boardScreen);
             }
+        }
+
+        void setImage(Bitmap image, double offsetX, double offsetY, double baseScale, double markerScale)
+        {
+            updateImage(image, offsetX, offsetY, baseScale, markerScale, Double.MAX_VALUE);
         }
         void setImage(Bitmap image, float markerScale)
         {
@@ -266,42 +278,7 @@ class Whirly
 
         void rotateImage(double rotateDegrees, float markerScale)
         {
-            float width;
-            float height;
-            float imageWidthScale;
-            double offset = DefaultImageScale / -2;
-            double baseScale = DefaultImageScale;
-
-            if(boardImage != null)
-            {
-                offset *= markerScale;
-                baseScale *= markerScale;
-
-                if(boardTexture != null)
-                {
-                    controller.removeTexture(boardTexture, BaseController.ThreadMode.ThreadAny);
-                    boardTexture = null;
-                }
-
-                width = boardImage.getWidth();
-                height = boardImage.getHeight();
-                if(width < 1)
-                {
-                    width = 1;
-                }
-                if(height < 1)
-                {
-                    height = 1;
-                }
-                imageWidthScale = (width / height);
-
-                boardTexture = controller.addTexture(boardImage, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
-                boardScreen = new ScreenObject();
-                boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
-                boardScreen.translateX(offset, offset);
-                boardScreen.rotate(Math.toRadians(rotateDegrees));
-                board.setScreenObject(boardScreen);
-            }
+            updateImage(boardImage, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale, rotateDegrees);
         }
 
         public boolean getVisible()

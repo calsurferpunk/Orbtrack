@@ -3098,7 +3098,14 @@ public abstract class Current
             searchList = (allMapOrbitals && !useSavedPath ? (IconSpinner)rootView.findViewById(R.id.Map_Search_List) : null);
             page.playBar = (useSavedPath ? (PlayBar)rootView.findViewById(R.id.Coordinate_Play_Bar) : null);
             page.scaleBar = rootView.findViewById(R.id.Coordinate_Scale_Bar);
-            page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
+            try
+            {
+                page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
 
             //if list and selected orbitals exist
             if(searchList != null && selectedOrbitals != null)

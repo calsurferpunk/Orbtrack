@@ -3915,7 +3915,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
 
                             //if the orbital markers exist and showing map/globe
-                            if(onMap && Current.Coordinates.mapView != null && Current.Coordinates.mapView.getOrbitalCount() > 0)
+                            if(onMap && Current.Coordinates.getMapViewReady() && Current.Coordinates.mapView.getOrbitalCount() > 0)
                             {
                                 //get current orbital
                                 final CoordinatesFragment.OrbitalBase currentMarker = Current.Coordinates.mapView.getOrbital(index);
@@ -4051,7 +4051,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
 
                     //if trying to show coordinate path and not calculated yet
-                    if(Current.Coordinates.showPaths && (currentCoordinatesTask == null || (currentCoordinatesTask.needCoordinates && !currentCoordinatesTask.isRunning())))
+                    if(Current.Coordinates.getMapViewReady() && Current.Coordinates.showPaths && (currentCoordinatesTask == null || (currentCoordinatesTask.needCoordinates && !currentCoordinatesTask.isRunning())))
                     {
                         //start calculating locations
                         setCurrentCoordinateCalculations(true, julianDate);
@@ -4660,7 +4660,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         actionButton = getCurrentActionButton(Current.PageType.Coordinates);
 
         //if want to run and have items
-        if(run && Current.Coordinates.mapView != null && Current.Coordinates.mapView.getOrbitalCount() > 0)
+        if(run && Current.Coordinates.getMapViewReady() && Current.Coordinates.mapView.getOrbitalCount() > 0)
         {
             currentCoordinatesTask = Current.Coordinates.calculateCoordinates(observer, julianDate, new Current.Coordinates.CalculatePathTask.OnProgressChangedListener()
             {
@@ -4696,8 +4696,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 @Override
                                 public synchronized void run()
                                 {
-                                    //if map exists
-                                    if(Current.Coordinates.mapView != null)
+                                    //if map is ready
+                                    if(Current.Coordinates.getMapViewReady())
                                     {
                                         //update location points
                                         Current.Coordinates.mapView.setPath(index, pathPoints);

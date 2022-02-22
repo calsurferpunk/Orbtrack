@@ -2142,6 +2142,7 @@ public abstract class Current
         private static boolean showZoom = true;
         private static boolean showDividers = false;
         private static boolean showTitlesAlways = true;
+        private static boolean mapViewReady = false;
         private static FloatingActionStateButtonMenu settingsMenu = null;
         private static CoordinatesFragment.OrbitalBase moonMarker = null;
 
@@ -2617,8 +2618,8 @@ public abstract class Current
                 double pathJulianDateEnd;
                 ObserverType observer = (ObserverType)params[0];
 
-                //if map exists
-                if(mapView != null)
+                //if map is ready
+                if(getMapViewReady())
                 {
                     //update progress
                     onProgressChanged(0, Globals.ProgressType.Started, null);
@@ -2800,6 +2801,12 @@ public abstract class Current
             return(mapInfoTextReference != null ? mapInfoTextReference.get() : null);
         }
 
+        //Gets if map view is ready to use
+        public static boolean getMapViewReady()
+        {
+            return(mapViewReady && mapView != null);
+        }
+
         //Setup zoom buttons
         private static void setupZoomButtons(final Context context, final FloatingActionStateButton showZoomButton, final View zoomLayout, FloatingActionButton zoomInButton, FloatingActionButton zoomOutButton)
         {
@@ -2954,8 +2961,8 @@ public abstract class Current
                 @Override
                 public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
                 {
-                    //if map exists
-                    if(mapView != null)
+                    //if map is ready
+                    if(getMapViewReady())
                     {
                         //update scale
                         mapView.setMarkerScale(progressValue / 100f);
@@ -2979,8 +2986,8 @@ public abstract class Current
                 @Override
                 public void onClick(View view)
                 {
-                    //if map exists
-                    if(mapView != null)
+                    //if map is ready
+                    if(getMapViewReady())
                     {
                         //undo any changes
                         mapView.setMarkerScale(Settings.getMapMarkerScale(context));
@@ -3049,7 +3056,10 @@ public abstract class Current
                                 String text = timeString + "\n" + coordinateString.replace("\n", Globals.COORDINATE_SEPARATOR);
                                 mapInfoText.setText(text);
                             }
-                            mapView.moveCamera(latitude, longitude);
+                            if(getMapViewReady())
+                            {
+                                mapView.moveCamera(latitude, longitude);
+                            }
                         }
                         playbackMarker.moveLocation(latitude, longitude, altitudeKm);
                     }
@@ -3061,11 +3071,15 @@ public abstract class Current
         //Creates a map view
         public static View onCreateMapView(final Selectable.ListFragment page, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, boolean forGlobe, final Bundle savedInstanceState)
         {
+            //update status
+            mapViewReady = false;
+
+            //get context, main views, and lists
             final Context context = page.getContext();
             final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.coordinates_map_layout, container, false);
+            final FrameLayout mapFrameLayout = rootView.findViewById(R.id.Map_Frame_Layout);
             final LinearLayout searchListLayout = rootView.findViewById(R.id.Map_Search_List_Layout);
             final IconSpinner searchList;
-            Bundle args = new Bundle();
 
             //setup lists and status
             final int mapViewNoradId = (savedInstanceState != null ? savedInstanceState.getInt(MainActivity.ParamTypes.CoordinateNoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE);
@@ -3076,7 +3090,6 @@ public abstract class Current
             final Database.SatelliteData currentSatellite = (useSavedPath ? new Database.SatelliteData(context, savedItems[0].id) : null);
 
             //get menu and zoom displays
-            final FrameLayout mapFrameLayout = rootView.findViewById(R.id.Map_Frame_Layout);
             final LinearLayout zoomLayout = rootView.findViewById(R.id.Map_Zoom_Layout);
             final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
             settingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
@@ -3090,6 +3103,7 @@ public abstract class Current
             final FloatingActionButton zoomOutButton = zoomLayout.findViewById(R.id.Map_Zoom_Out_Button);
 
             //get displays
+            Bundle args = new Bundle();
             final TextView mapInfoText = rootView.findViewById(R.id.Coordinate_Info_Text);
             mapInfoTextReference = new WeakReference<>(mapInfoText);
             args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
@@ -3301,6 +3315,9 @@ public abstract class Current
                         playbackMarker.setInfoVisible(true);
                         mapView.moveCamera(playbackMarker.getGeo().latitude, playbackMarker.getGeo().longitude, CoordinatesFragment.Utils.getZoom(savedItems[0].altitudeKm));
                     }
+
+                    //ready to use
+                    mapViewReady = true;
                 }
             });
 

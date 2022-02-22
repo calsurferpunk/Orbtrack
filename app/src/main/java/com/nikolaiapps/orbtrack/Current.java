@@ -3101,6 +3101,7 @@ public abstract class Current
             final FloatingActionStateButton iconScaleButton = settingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
             final FloatingActionButton zoomInButton = zoomLayout.findViewById(R.id.Map_Zoom_In_Button);
             final FloatingActionButton zoomOutButton = zoomLayout.findViewById(R.id.Map_Zoom_Out_Button);
+            settingsMenu.setVisibility(View.GONE);
 
             //get displays
             Bundle args = new Bundle();
@@ -3118,6 +3119,7 @@ public abstract class Current
             if(searchList != null && selectedOrbitals != null)
             {
                 //setup search
+                searchList.setVisibility(View.GONE);
                 setupSearch(context, showSearchButton, searchList, searchListLayout, selectedOrbitals);
             }
 
@@ -3317,6 +3319,11 @@ public abstract class Current
                     }
 
                     //ready to use
+                    if(searchList != null)
+                    {
+                        searchList.setVisibility(View.VISIBLE);
+                    }
+                    settingsMenu.setVisibility(View.VISIBLE);
                     mapViewReady = true;
                 }
             });

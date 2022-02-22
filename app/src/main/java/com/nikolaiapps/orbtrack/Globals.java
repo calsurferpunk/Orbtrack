@@ -3071,7 +3071,7 @@ public abstract class Globals
     @SuppressWarnings("SpellCheckingInspection")
     public static int[] getOwnerIconIDs(String ownerCode)
     {
-        int[] ids = new int[]{R.drawable.ic_launcher_clear};
+        int[] ids = new int[]{-1};
 
         //if owner code is set
         if(ownerCode != null)
@@ -3582,10 +3582,6 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_vtnm;
                     break;
             }
-        }
-        else
-        {
-            ids[0] = -1;
         }
 
         //return IDs

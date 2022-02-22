@@ -2608,26 +2608,6 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.SatelliteSourceUseGP + source, source));
     }
 
-    //Gets owner icon(s)
-    public static Drawable[] getOwnerIcons(Context context, String ownerCode)
-    {
-        int index;
-        int currentID;
-        int[] iconIDs = Globals.getOwnerIconIDs(ownerCode);
-        Drawable[] icons = new Drawable[iconIDs.length];
-
-        //go through each icon ID
-        for(index = 0; index < iconIDs.length; index++)
-        {
-            //remember ID and set icon
-            currentID = iconIDs[index];
-            icons[index] = (currentID > 0 ? Globals.getDrawable(context, currentID) : null);
-        }
-
-        //return icons
-        return(icons);
-    }
-
     //Gets catalog debris usage
     public static boolean getCatalogDebris(Context context)
     {

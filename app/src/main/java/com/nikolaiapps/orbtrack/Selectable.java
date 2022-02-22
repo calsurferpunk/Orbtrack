@@ -214,9 +214,15 @@ public abstract class Selectable
                             if(icons[index] != null)
                             {
                                 //add combination of owner and icon
-                                haveOwnerCode = (ownerCodes[index] != null);
-                                Drawable[] ownerIcons = (haveOwnerCode ? Settings.getOwnerIcons(context, ownerCodes[index]) : null);
-                                resultIcons.add(Globals.getDrawable(context, icons[index].getConstantState().newDrawable().mutate(), (haveOwnerCode && ownerIcons.length > 0 ? ownerIcons[0] : null), (haveOwnerCode && ownerIcons.length > 1 ? ownerIcons[1] : null)));      //note: makes icon copy so that original is not altered
+                                int[] ownerIconIds = Globals.getOwnerIconIDs(ownerCodes[index]);
+                                resultIcons.add(Globals.getDrawable(context, icons[index].getConstantState().newDrawable().mutate()));  //note: makes icon copy so that original is not altered
+                                for(int currentId : ownerIconIds)
+                                {
+                                    if(currentId > 0)
+                                    {
+                                        resultIcons.add(Globals.getDrawable(context, currentId));
+                                    }
+                                }
                             }
                         }
 

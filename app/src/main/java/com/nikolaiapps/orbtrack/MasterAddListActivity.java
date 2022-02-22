@@ -1027,15 +1027,15 @@ public class MasterAddListActivity extends BaseInputActivity
         boolean isFilterList = (listType == ListType.VisibleList);
         boolean askUpdate = addIntent.getBooleanExtra(ParamTypes.AskUpdate, false);
         final int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
-        final TableLayout searchGroup = this.findViewById(R.id.Master_Search_Table);
-        final AppCompatImageButton showButton = this.findViewById(R.id.Master_Show_Button);
+        final TableLayout searchGroup = this.findViewById(R.id.Orbital_Search_Table);
+        final AppCompatImageButton showButton = this.findViewById(R.id.Orbital_Search_Show_Button);
         final MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
-        ownerList = this.findViewById(R.id.Master_Owner_List);
-        groupList = this.findViewById(R.id.Master_Group_List);
-        ageList = this.findViewById(R.id.Master_Age_List);
+        ownerList = this.findViewById(R.id.Orbital_Search_Owner_List);
+        groupList = this.findViewById(R.id.Orbital_Search_Group_List);
+        ageList = this.findViewById(R.id.Orbital_Search_Age_List);
         addList = this.findViewById(R.id.Master_Add_List);
-        searchText = this.findViewById(R.id.Master_Search_Text);
-        ageRow = this.findViewById(R.id.Master_Age_Row);
+        searchText = this.findViewById(R.id.Orbital_Search_Text);
+        ageRow = this.findViewById(R.id.Orbital_Search_Age_Row);
         addButton = this.findViewById(R.id.Master_Add_Button);
 
         listBgColor = Globals.resolveColorID(this, R.attr.pageTitleBackground);

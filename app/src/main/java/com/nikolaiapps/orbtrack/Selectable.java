@@ -201,7 +201,6 @@ public abstract class Selectable
                 if(title != null)
                 {
                     int index;
-                    boolean haveOwnerCode;
                     ArrayList<Drawable> resultIcons = new ArrayList<>(0);
 
                     //if same number of ids, owner codes, and icons

@@ -1,103 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/Master_Layout"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:animateLayoutChanges="true"
     android:background="?attr/viewPagerBackground">
-    <TableLayout
-        android:id="@+id/Master_Search_Table"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/pageTitleBackground"
-        android:focusableInTouchMode="true">
-        <TableRow android:padding="2dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|end"
-                android:paddingLeft="3dp"
-                android:paddingRight="3dp"
-                android:text="@string/title_owner"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/columnTitleTextColor"/>
-
-            <com.nikolaiapps.orbtrack.IconSpinner
-                android:id="@+id/Master_Owner_List"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"/>
-        </TableRow>
-
-        <TableRow android:padding="2dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|end"
-                android:paddingLeft="3dp"
-                android:paddingRight="3dp"
-                android:text="@string/title_group"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/columnTitleTextColor"/>
-
-            <com.nikolaiapps.orbtrack.IconSpinner
-                android:id="@+id/Master_Group_List"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"/>
-        </TableRow>
-
-        <TableRow android:id="@+id/Master_Age_Row" android:padding="2dp">
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center|end"
-                android:paddingLeft="3dp"
-                android:paddingRight="3dp"
-                android:text="@string/title_age"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/columnTitleTextColor"/>
-
-            <com.nikolaiapps.orbtrack.IconSpinner
-                android:id="@+id/Master_Age_List"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:enabled="false"/>
-        </TableRow>
-
-        <TableRow android:padding="2dp">
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="32dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_search_black"
-                android:tint="?attr/columnTitleTextColor"/>
-
-            <EditText
-                android:id="@+id/Master_Search_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:singleLine="true"
-                android:inputType="textNoSuggestions"
-                android:autofillHints="@string/title_name_or_id"
-                android:hint="@string/title_name_or_id"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/defaultTextColor"
-                android:enabled="false"/>
-        </TableRow>
-    </TableLayout>
-
-    <androidx.appcompat.widget.AppCompatImageButton
-        android:id="@+id/Master_Show_Button"
-        android:layout_width="match_parent"
-        android:layout_height="36dp"
-        app:srcCompat="@drawable/ic_expand_less"
-        android:background="?attr/pageTitleBackground"/>
+    <include layout="@layout/orbital_search_layout"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/Master_Add_List"

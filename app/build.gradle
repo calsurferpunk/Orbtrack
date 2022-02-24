@@ -36,16 +36,19 @@ android {
     productFlavors {
     }
 
+    sourceSets {
+        main {
+            jniLibs.srcDirs = ['libs']
+        }
+    }
+
     packagingOptions {
         exclude 'META-INF/DEPENDENCIES'
 
     }
-
-    lintOptions {
+    lint {
+        abortOnError true
         checkReleaseBuilds false
-        // Or, if you prefer, you can continue to check for errors in release builds,
-        // but continue the build even when errors are found:
-        abortOnError false
     }
 }
 
@@ -53,9 +56,6 @@ allprojects {
     repositories {
         maven {
             url "https://maven.google.com"
-        }
-        flatDir {
-            dirs 'libs'
         }
     }
 }
@@ -72,9 +72,9 @@ dependencies {
     implementation 'com.google.api-client:google-api-client-android:1.31.5'
     implementation 'com.google.apis:google-api-services-drive:v3-rev99-1.23.0'
     implementation 'com.google.oauth-client:google-oauth-client-jetty:1.31.5'
-    implementation name: 'WhirlyGlobeMaply', ext: 'aar', version: 'jackson'
     implementation 'androidx.localbroadcastmanager:localbroadcastmanager:1.1.0'
     implementation 'androidx.preference:preference:1.2.0'
+    implementation files('libs/WhirlyGlobeMaply.aar')
 
     //noinspection GradleDependency
     implementation 'com.squareup.okhttp3:okhttp:3.12.13'

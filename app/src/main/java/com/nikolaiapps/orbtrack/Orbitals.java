@@ -27,7 +27,9 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -48,34 +50,23 @@ public abstract class Orbitals
     }
 
     //Page list item
-    public static class Item extends Selectable.ListItem
+    public static class Item extends OrbitalFilterList.Item
     {
-        public final Drawable icon;
         public int color;
         public boolean isVisible;
         public final String text;
-        public final String owner;
-        public final String ownerCode;
-        public final long launchDateMs;
         public final long tleDateMs;
-        public final Calculations.SatelliteObjectType satellite;
+        public final Calculations.SatelliteObjectType satelliteObject;
 
         public Item(Context context, int index, Database.DatabaseSatellite currentSat, boolean canEd, boolean isSel)
         {
-            super(currentSat.noradId, index, canEd, isSel, false, false);
+            super(context, currentSat, index, canEd, isSel);
 
-            String localeOwner;
-
-            icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType);
-            ownerCode = currentSat.ownerCode;
-            localeOwner = Database.LocaleOwner.getName(context, ownerCode);
-            owner = (localeOwner != null ? localeOwner : currentSat.ownerName);
-            launchDateMs = currentSat.launchDateMs;
             text = currentSat.getName();
             color = currentSat.pathColor;
             isVisible = currentSat.isSelected;
             tleDateMs = currentSat.tleDateMs;
-            satellite = Calculations.loadSatellite(currentSat);
+            satelliteObject = Calculations.loadSatellite(currentSat);
         }
     }
 
@@ -109,20 +100,14 @@ public abstract class Orbitals
     }
 
     //Page list adapter
-    public static class PageListAdapter extends Selectable.ListBaseAdapter
+    public static class PageListAdapter extends OrbitalFilterList.OrbitalListAdapter
     {
-        //On load items listener
-        public interface OnLoadItemsListener
-        {
-            void onLoaded(Item[] loadedItems);
-        }
-
         //Load items task
         private static class LoadItemsTask extends ThreadTask<Object, Void, Void>
         {
-            private final OnLoadItemsListener loadItemsListener;
+            private final OrbitalFilterList.OnLoadItemsListener loadItemsListener;
 
-            public LoadItemsTask(OnLoadItemsListener loadItemsListener)
+            public LoadItemsTask(OrbitalFilterList.OnLoadItemsListener loadItemsListener)
             {
                 this.loadItemsListener = loadItemsListener;
             }
@@ -131,10 +116,10 @@ public abstract class Orbitals
             protected Void doInBackground(Object... params)
             {
                 int index;
-                int page = (int)params[2];
-                boolean simple = (boolean)params[3];
+                int page = (int)params[1];
+                boolean simple = (boolean)params[2];
+                boolean foundLaunchDate = false;
                 Context context = (Context)params[0];
-                Context parentViewContext = (Context)params[1];
                 byte[] orbitalTypes = null;
                 Item[] items;
                 Database.DatabaseSatellite[] satellites;
@@ -167,7 +152,11 @@ public abstract class Orbitals
                         for(index = 0; index < satellites.length; index++)
                         {
                             Database.DatabaseSatellite currentSat = satellites[index];
-                            items[index] = new Item(parentViewContext, index, currentSat, (page == PageType.Satellites && !simple), false);
+                            items[index] = new Item(context, index, currentSat, (page == PageType.Satellites && !simple), false);
+                            if(currentSat.launchDateMs > 0)
+                            {
+                                foundLaunchDate = true;
+                            }
                         }
                         break;
 
@@ -181,7 +170,7 @@ public abstract class Orbitals
                 if(loadItemsListener != null)
                 {
                     //send event
-                    loadItemsListener.onLoaded(items);
+                    loadItemsListener.onLoaded(new ArrayList<>(Arrays.asList(items)), foundLaunchDate);
                 }
 
                 //done
@@ -190,33 +179,36 @@ public abstract class Orbitals
         }
 
         public ChooseColorDialog colorDialog;
-        private boolean loadingItems;
+        private final boolean simple;
         private final boolean forSetup;
         private final int currentPage;
         private final int columnTitleStringId;
-        private Item[] items;
+        private final LoadItemsTask loadItems;
 
-        public PageListAdapter(View parentView, int page, int titleStringId, String categoryTitle, boolean simple)
+        public PageListAdapter(View parentView, int page, int titleStringId, String categoryTitle, boolean isSimple, OrbitalFilterList.OnLoadItemsListener loadItemsListener)
         {
             super(parentView, categoryTitle);
 
-            //update status
+            //set defaults
             loadingItems = true;
 
             //set page
             currentPage = page;
             columnTitleStringId = titleStringId;
+            simple = isSimple;
             forSetup = (columnTitleStringId > 0);
             this.itemsRefID = R.layout.orbitals_item;
 
-            //load items
-            LoadItemsTask loadItems = new LoadItemsTask(new OnLoadItemsListener()
+            //set load items task
+            loadItems = new LoadItemsTask(new OrbitalFilterList.OnLoadItemsListener()
             {
                 @Override
-                public void onLoaded(Item[] loadedItems)
+                public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
                 {
-                    items = loadedItems;
+                    displayedItems = items;
+                    allItems = items.toArray(new OrbitalFilterList.Item[0]);
                     loadingItems = false;
+                    PageListAdapter.this.foundLaunchDate = foundLaunchDate;
                     if(currentContext instanceof Activity)
                     {
                         ((Activity)currentContext).runOnUiThread(new Runnable()
@@ -228,27 +220,19 @@ public abstract class Orbitals
                             }
                         });
                     }
+                    if(loadItemsListener != null)
+                    {
+                        loadItemsListener.onLoaded(items, foundLaunchDate);
+                    }
                 }
             });
-            loadItems.execute(currentContext, (parentView != null ? parentView.getContext() : null), currentPage, simple);
         }
 
         @Override
-        public int getItemCount()
+        public void onAttachedToRecyclerView(@NonNull RecyclerView view)
         {
-            return(loadingItems ? 1 : items.length);
-        }
-
-        @Override
-        public Item getItem(int position)
-        {
-            return(loadingItems ? null : items[position]);
-        }
-
-        @Override
-        public long getItemId(int position)
-        {
-            return(-1);
+            super.onAttachedToRecyclerView(view);
+            loadItems.execute(currentContext, currentPage, simple);
         }
 
         @Override
@@ -291,21 +275,23 @@ public abstract class Orbitals
             int offset = 0;
             String text;
             final Item currentItem = (Item)item;
-            final Calculations.OrbitDataType currentOrbit = currentItem.satellite.orbit;
-            final Calculations.TLEDataType currentTLE = currentItem.satellite.tle;
+            final Calculations.OrbitDataType currentOrbit = currentItem.satelliteObject.orbit;
+            final Calculations.TLEDataType currentTLE = currentItem.satelliteObject.tle;
             final AppCompatImageButton notifyButton;
             final AppCompatImageButton preview3dButton;
             final AppCompatImageButton infoButton;
             final boolean onSatellite = (currentItem.id > 0);
             final boolean use3dPreview = have3dPreview(currentItem.id);
-            final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
-            final Resources res = (currentContext != null ? currentContext.getResources() : null);
+            final boolean haveContext = (currentContext != null);
+            final Drawable itemIcon = (haveContext ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType) : null);
+            final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.getOwnerCode(), itemIcon, itemDetailButtonClickListener);
+            final Resources res = (haveContext ? currentContext.getResources() : null);
             final TextView[] titles;
             final TextView[] texts;
             final AppCompatImageButton[] buttons;
 
             //if no context
-            if(currentContext == null)
+            if(!haveContext)
             {
                 //stop
                 return;
@@ -377,7 +363,7 @@ public abstract class Orbitals
                 TextView majorText = texts[offset++];
 
                 //update displays
-                ownerText.setText(currentItem.owner);
+                ownerText.setText(currentItem.getOwner(currentContext));
                 noradText.setText(String.valueOf(currentTLE.satelliteNum));
                 internationalText.setText(currentTLE.internationalCode);
                 text = Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.perigee)) + " " + Globals.getKmLabel(res);
@@ -416,8 +402,8 @@ public abstract class Orbitals
             detailDialog.show();
         }
 
-        @Override
-        public @NonNull PageListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+        @Override @NonNull
+        public PageListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
             PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Layout, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
@@ -432,9 +418,11 @@ public abstract class Orbitals
             boolean onSatellites = (currentPage == PageType.Satellites);
             final Resources res = (currentContext != null ? currentContext.getResources() : null);
             final PageListItemHolder itemHolder = (PageListItemHolder)holder;
-            final Item item = (loadingItems ? new Item(currentContext, 0, new Database.DatabaseSatellite("", Universe.IDs.Invalid, "", Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Satellite), false, false) : items[position]);
-            double ageDays = (System.currentTimeMillis() - item.tleDateMs) / Calculations.MsPerDay;
+            final OrbitalFilterList.Item filterItem = (position < displayedItems.size() ? displayedItems.get(position) : null);
+            final Item currentItem = (loadingItems || !(filterItem instanceof Item) ? new Item(currentContext, 0, new Database.DatabaseSatellite("", Universe.IDs.Invalid, "", Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Satellite), false, false) : (Item)filterItem);
+            double ageDays = (System.currentTimeMillis() - currentItem.tleDateMs) / Calculations.MsPerDay;
             String dayText = Globals.getNumberString(ageDays, 1) + " " + (res != null ? res.getString(R.string.title_days) : "");
+            Drawable itemIcon;
 
             //set visibility
             itemHolder.itemLayout.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
@@ -444,8 +432,9 @@ public abstract class Orbitals
             if(!loadingItems)
             {
                 //set displays
-                itemHolder.itemImage.setImageDrawable(item.icon);
-                itemHolder.itemText.setText(item.text);
+                itemIcon = Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType);
+                itemHolder.itemImage.setImageDrawable(itemIcon);
+                itemHolder.itemText.setText(currentItem.text);
                 if(onSatellites)
                 {
                     itemHolder.tleAgeText.setText(dayText);
@@ -463,8 +452,8 @@ public abstract class Orbitals
                 {
                     itemHolder.tleAgeLayout.setVisibility(View.GONE);
                 }
-                itemHolder.colorButton.setBackgroundColor(item.color);
-                itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
+                itemHolder.colorButton.setBackgroundColor(currentItem.color);
+                itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(currentItem.isVisible));
 
                 //set events
                 itemHolder.colorButton.setOnClickListener(new View.OnClickListener()
@@ -472,7 +461,7 @@ public abstract class Orbitals
                     @Override
                     public void onClick(View v)
                     {
-                        colorDialog = new ChooseColorDialog(currentContext, item.color);
+                        colorDialog = new ChooseColorDialog(currentContext, currentItem.color);
                         colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
                         {
                             @Override
@@ -482,9 +471,9 @@ public abstract class Orbitals
                                 Database.SatelliteData[] currentSatellites = MainActivity.getSatellites();
 
                                 //get and save orbital in database
-                                item.color = color;
+                                currentItem.color = color;
                                 itemHolder.colorButton.setBackgroundColor(color);
-                                Database.saveSatellitePathColor(currentContext, item.id, color);
+                                Database.saveSatellitePathColor(currentContext, currentItem.id, color);
 
                                 //go through currently selected satellites
                                 for(index = 0; index < currentSatellites.length; index++)
@@ -493,7 +482,7 @@ public abstract class Orbitals
                                     Database.SatelliteData currentSatellite = currentSatellites[index];
 
                                     //if current satellite has a database and matches selected satellite
-                                    if(currentSatellite.database != null && currentSatellite.getSatelliteNum() == item.satellite.getSatelliteNum())
+                                    if(currentSatellite.database != null && currentSatellite.getSatelliteNum() == currentItem.satelliteObject.getSatelliteNum())
                                     {
                                         //update selected satellite
                                         currentSatellite.database.pathColor = color;
@@ -501,8 +490,8 @@ public abstract class Orbitals
                                 }
                             }
                         });
-                        colorDialog.setIcon(item.icon);
-                        colorDialog.setTitle(res != null ? (res.getString(R.string.title_select) + " " + item.text + " " + res.getString(R.string.title_color)) : item.text);
+                        colorDialog.setIcon(itemIcon);
+                        colorDialog.setTitle(res != null ? (res.getString(R.string.title_select) + " " + currentItem.text + " " + res.getString(R.string.title_color)) : currentItem.text);
                         colorDialog.show(currentContext);
                     }
                 });
@@ -511,16 +500,16 @@ public abstract class Orbitals
                     @Override
                     public void onClick(View v)
                     {
-                        int noradId = item.id;
+                        int noradId = currentItem.id;
                         Database.DatabaseSatellite currentOrbital;
 
                         //update visibility and save orbital in database
-                        item.isVisible = !item.isVisible;
-                        itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(item.isVisible));
-                        Database.saveSatelliteVisible(currentContext, noradId, item.isVisible);
+                        currentItem.isVisible = !currentItem.isVisible;
+                        itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(currentItem.isVisible));
+                        Database.saveSatelliteVisible(currentContext, noradId, currentItem.isVisible);
 
                         //if item is visible again
-                        if(item.isVisible)
+                        if(currentItem.isVisible)
                         {
                             //if not a valid TLE
                             currentOrbital = Database.getOrbital(currentContext, noradId);
@@ -538,7 +527,7 @@ public abstract class Orbitals
             }
 
             //set background
-            setItemBackground(itemHolder.itemView, item.isSelected);
+            setItemBackground(itemHolder.itemView, currentItem.isSelected);
         }
 
         private Drawable getVisibleIcon(boolean isVisible)
@@ -552,10 +541,18 @@ public abstract class Orbitals
     {
         private final boolean simple;
         private final String categoryTitle;
-
         private UpdateReceiver updateReceiver;
         private UpdateReceiver saveReceiver;
         private Globals.PendingFile pendingSaveFile;
+        private PageListAdapter listAdapter;
+        private LinearLayout searchLayout;
+        private TableLayout searchGroup;
+        private IconSpinner ownerList;
+        private IconSpinner groupList;
+        private IconSpinner ageList;
+        private EditText searchText;
+        private TableRow ageRow;
+        private AppCompatImageButton showButton;
 
         public Page(String title, boolean simple)
         {
@@ -573,25 +570,64 @@ public abstract class Orbitals
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
+            Context context = Page.this.getContext();
             int group = this.getGroupParam();
             int page = this.getPageParam();
+            final boolean onSatellites = (page == PageType.Satellites);
             View newView;
             Intent serviceIntent;
             ArrayList<Database.DatabaseSatellite> satelliteList;
-            final PageListAdapter listAdapter = new PageListAdapter(listParentView, page, -1, categoryTitle, simple);
+
+            //create adapter
+            listAdapter = new PageListAdapter(listParentView, page, -1, categoryTitle, simple, new OrbitalFilterList.OnLoadItemsListener()
+            {
+                @Override
+                public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
+                {
+                    //if for satellites
+                    if(onSatellites)
+                    {
+                        //get used data
+                        final OrbitalFilterList.OrbitalListAdapter.UsedData used = listAdapter.getUsed();
+
+                        if(context instanceof Activity)
+                        {
+                            ((Activity) context).runOnUiThread(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    //setup inputs and collapse
+                                    searchLayout.setVisibility(View.VISIBLE);
+                                    listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageRow, searchText, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
+                                    listAdapter.showSearchInputs(false);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
 
             //create view
             newView = this.onCreateView(inflater, container, listAdapter, group, page);
+            searchLayout = newView.findViewById(R.id.Orbital_Search_Layout);
+            searchGroup = newView.findViewById(R.id.Orbital_Search_Table);
+            ownerList = newView.findViewById(R.id.Orbital_Search_Owner_List);
+            groupList = newView.findViewById(R.id.Orbital_Search_Group_List);
+            ageList = newView.findViewById(R.id.Orbital_Search_Age_List);
+            searchText = newView.findViewById(R.id.Orbital_Search_Text);
+            ageRow = newView.findViewById(R.id.Orbital_Search_Age_Row);
+            showButton = newView.findViewById(R.id.Orbital_Search_Show_Button);
 
             //if for satellites
-            if(page == PageType.Satellites)
+            if(onSatellites)
             {
                 //if update running
                 serviceIntent = UpdateService.getIntent(UpdateService.UpdateType.UpdateSatellites);
                 if(serviceIntent != null)
                 {
                     //set selected items
-                    satelliteList = Database.getSatelliteCacheData(Page.this.getContext());
+                    satelliteList = Database.getSatelliteCacheData(context);
 
                     //go through each satellite
                     for(Database.DatabaseSatellite currentSatellite : satelliteList)
@@ -1473,13 +1509,14 @@ public abstract class Orbitals
         //get IDs and values
         for(index = 0; index < nameValues.length; index++)
         {
-            //remember current item
+            //remember current item and owner
             Item currentItem = selectedItems.get(index);
+            String currentOwner = currentItem.getOwner(context);
 
             //get current ID and values
             ids[index] = (orbitals != null ? index : currentItem.id);
             nameValues[index] = currentItem.text;
-            defaultOwnerValues[index] = (currentItem.owner == null || currentItem.owner.equals("") ? unknownOwnerName : currentItem.owner);
+            defaultOwnerValues[index] = (currentOwner == null || currentOwner.equals("") ? unknownOwnerName : currentOwner);
             dateValues[index] = currentItem.launchDateMs;
         }
 

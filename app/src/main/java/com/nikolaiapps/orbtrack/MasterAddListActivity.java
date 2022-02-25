@@ -18,14 +18,11 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -37,7 +34,6 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Comparator;
 
 
 public class MasterAddListActivity extends BaseInputActivity
@@ -57,27 +53,21 @@ public class MasterAddListActivity extends BaseInputActivity
         static final String AskUpdate = "askUpdate";
     }
 
-    private static class MasterListAdapter extends Selectable.ListBaseAdapter
+    private static class MasterListAdapter extends OrbitalFilterList.OrbitalListAdapter
     {
-        //On load items listener
-        public interface OnLoadItemsListener
-        {
-            void onLoaded(ArrayList<ListItem> items, boolean foundLaunchDate);
-        }
-
         //On item check changed listener
         public interface OnItemCheckChangedListener
         {
-            void onCheckChanged(ListItem item);
+            void onCheckChanged(OrbitalFilterList.Item item);
         }
 
         //Load items task
         private static class LoadItemsTask extends ThreadTask<Object, Void, Void>
         {
             private final Globals.OnProgressChangedListener progressChangedListener;
-            private final OnLoadItemsListener loadItemsListener;
+            private final OrbitalFilterList.OnLoadItemsListener loadItemsListener;
 
-            public LoadItemsTask(Globals.OnProgressChangedListener progressChangedListener, OnLoadItemsListener loadItemsListener)
+            public LoadItemsTask(Globals.OnProgressChangedListener progressChangedListener, OrbitalFilterList.OnLoadItemsListener loadItemsListener)
             {
                 this.progressChangedListener = progressChangedListener;
                 this.loadItemsListener = loadItemsListener;
@@ -94,7 +84,7 @@ public class MasterAddListActivity extends BaseInputActivity
                 Resources res;
                 Context context = (Context)params[0];
                 UpdateService.MasterListType masterList = (UpdateService.MasterListType)params[1];
-                ArrayList<ListItem> items = new ArrayList<>(0);
+                ArrayList<OrbitalFilterList.Item> items = new ArrayList<>(0);
                 Database.DatabaseSatellite[] dbSatellites;
 
                 //if master list is set
@@ -107,7 +97,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         //remember current satellite, group, and item
                         UpdateService.MasterSatellite currentSatellite = masterList.satellites.get(index);
                         String currentOwner = currentSatellite.ownerCode;
-                        ListItem newItem = new ListItem(context, currentOwner, currentSatellite, false);
+                        ListItem newItem = new ListItem(currentOwner, currentSatellite, false);
                         int[] indexes = Globals.divideFind(newItem, items, new ListItem.Comparer(false));
 
                         //if item is not in the list yet
@@ -163,7 +153,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
 
                         //create item
-                        newItem = new ListItem(context, currentOwner, newSatellite, currentSatellite.isSelected);
+                        newItem = new ListItem(currentOwner, newSatellite, currentSatellite.isSelected);
 
                         //if item is not in the list yet
                         itemIndex = items.indexOf(newItem);
@@ -174,7 +164,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
                         else
                         {
-                            //add to existing item categories
+                            //add to existing item owners
                             items.get(itemIndex).addOwner(currentOwner);
                         }
 
@@ -213,85 +203,15 @@ public class MasterAddListActivity extends BaseInputActivity
         }
 
         //List item
-        public static class ListItem extends Selectable.ListItem
+        public static class ListItem extends OrbitalFilterList.Item
         {
             public final boolean startChecked;
-            public final long launchDateMs;
-            public final UpdateService.MasterSatellite satellite;
-            public final ArrayList<String> ownerCodes;
-            public final ArrayList<String> categories;
 
-            public static class Comparer implements Comparator<ListItem>
+            public ListItem(String ownerCode, UpdateService.MasterSatellite sat, boolean startCheck)
             {
-                private final boolean nameOnly;
-
-                public Comparer(boolean byNameOnly)
-                {
-                    nameOnly = byNameOnly;
-                }
-
-                @Override
-                public int compare(ListItem value1, ListItem value2)
-                {
-                    if(!nameOnly && value1.satellite.name.equals(value2.satellite.name))
-                    {
-                        return(Globals.intCompare(value1.satellite.noradId, value2.satellite.noradId));
-                    }
-                    else
-                    {
-                        return(value1.satellite.name.compareTo(value2.satellite.name));
-                    }
-                }
-            }
-
-            public ListItem(Context context, String own, UpdateService.MasterSatellite sat, boolean startCheck)
-            {
-                super(-1, -1, false, false, true, startCheck);
-
-                int index;
-                String currentGroup;
+                super(sat, ownerCode, startCheck);
 
                 startChecked = isChecked;
-                launchDateMs = sat.launchDateMs;
-                satellite = sat;
-                ownerCodes = new ArrayList<>(0);
-                categories = sat.categories;
-                ownerCodes.add(own);
-
-                //go through all groups
-                for(index = 0; index < categories.size(); index++)
-                {
-                    //set group to upper case
-                    currentGroup = categories.get(index);
-                    if(currentGroup != null)
-                    {
-                        categories.set(index, currentGroup.toUpperCase());
-                    }
-                }
-            }
-
-            public void addOwner(String ownerCode)
-            {
-                if(!ownerCodes.contains(ownerCode))
-                {
-                    ownerCodes.add(ownerCode);
-                }
-            }
-
-            public boolean equals(Object obj)
-            {
-                //if a ListItem
-                if(obj instanceof ListItem)
-                {
-                    //equal if norad ID matches
-                    ListItem other = (ListItem)obj;
-                    return(other.satellite.noradId == this.satellite.noradId);
-                }
-                else
-                {
-                    //not equal
-                    return(false);
-                }
             }
         }
 
@@ -313,41 +233,37 @@ public class MasterAddListActivity extends BaseInputActivity
             }
         }
 
-        private boolean loadingItems;
-        private boolean foundLaunchDate;
+        private final LoadItemsTask loadItems;
+        private final UpdateService.MasterListType masterList;
         private final OnItemCheckChangedListener itemCheckChangedListener;
-        private ArrayList<ListItem> displayedItems;
-        private ListItem[] allItems;
 
-        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, Globals.OnProgressChangedListener progressChangedListener, OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
+        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, Globals.OnProgressChangedListener progressChangedListener, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
         {
             super(context);
 
-            //set default
-            foundLaunchDate = false;
+            //set defaults
             loadingItems = true;
-            displayedItems = new ArrayList<>(0);
-            allItems = new ListItem[0];
             this.itemsRefID = R.layout.image_checked_item;
 
             //set check changed listener
-            itemCheckChangedListener = checkChangedListener;
+            this.masterList = masterList;
+            this.itemCheckChangedListener = checkChangedListener;
 
-            //load items
-            LoadItemsTask loadItems = new LoadItemsTask(progressChangedListener, new OnLoadItemsListener()
+            //set load items task
+            loadItems = new LoadItemsTask(progressChangedListener, new OrbitalFilterList.OnLoadItemsListener()
             {
-                @Override @SuppressLint("NotifyDataSetChanged")
-                public void onLoaded(ArrayList<ListItem> items, boolean foundLaunchDate)
+                @Override
+                public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
                 {
                     displayedItems = items;
-                    allItems = items.toArray(new ListItem[0]);
-                    MasterListAdapter.this.loadingItems = false;
+                    allItems = items.toArray(new OrbitalFilterList.Item[0]);
+                    loadingItems = false;
                     MasterListAdapter.this.foundLaunchDate = foundLaunchDate;
                     if(context instanceof Activity)
                     {
                         ((Activity)context).runOnUiThread(new Runnable()
                         {
-                            @Override
+                            @Override @SuppressLint("NotifyDataSetChanged")
                             public void run()
                             {
                                 MasterListAdapter.this.notifyDataSetChanged();
@@ -360,33 +276,21 @@ public class MasterAddListActivity extends BaseInputActivity
                     }
                 }
             });
-            loadItems.execute(context, masterList);
         }
-        public MasterListAdapter(Context context, OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
+        public MasterListAdapter(Context context, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
         {
             this(context, null, null, loadItemsListener, checkChangedListener);
         }
 
         @Override
-        public int getItemCount()
+        public void onAttachedToRecyclerView(@NonNull RecyclerView view)
         {
-            return(loadingItems ? 1 : displayedItems.size());
+            super.onAttachedToRecyclerView(view);
+            loadItems.execute(currentContext, masterList);
         }
 
-        @Override
-        public ListItem getItem(int position)
-        {
-            return(loadingItems ? null : displayedItems.get(position));
-        }
-
-        @Override
-        public long getItemId(int position)
-        {
-            return(loadingItems ? 0 : displayedItems.get(position).satellite.noradId);
-        }
-
-        @Override
-        public @NonNull ListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+        @Override @NonNull
+        public ListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
             final ListItemHolder itemHolder = new ListItemHolder(itemView, R.id.Item_Checked_Image2, R.id.Item_Checked_Image1, R.id.Item_Checked_Text, R.id.Item_Checked_Progress);
@@ -406,7 +310,7 @@ public class MasterAddListActivity extends BaseInputActivity
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
         {
-            final ListItem currentItem;
+            final OrbitalFilterList.Item currentItem;
             final ListItemHolder itemHolder = (ListItemHolder)holder;
             int showText = (loadingItems ? View.GONE : View.VISIBLE);
             int showProgress = (loadingItems ? View.VISIBLE : View.GONE);
@@ -448,47 +352,17 @@ public class MasterAddListActivity extends BaseInputActivity
             }
         }
 
-        //Sets visibility of views by group
-        @SuppressLint("NotifyDataSetChanged")
-        public void showViews(String ownerCode, String categoryName, long currentMs, int ageValue, String searchString)
-        {
-            int index;
-            Resources res = currentContext.getResources();
-            String listAllString = res.getString(R.string.title_list_all);
-            String searchStringInsensitive = searchString.trim().toLowerCase();
-
-            //clear current items
-            displayedItems.clear();
-
-            //go through all views
-            for(index = 0; index < allItems.length; index++)
-            {
-                //remember current item
-                ListItem item = allItems[index];
-
-                //add to displayed if -category is "ALL" or matches given- and -age is any or within day range- and -search string is "" or contains given-
-                if((ownerCode.equals(listAllString) || item.ownerCodes.contains(ownerCode)) && (categoryName.equals(listAllString) || item.categories.contains(categoryName)) && (ageValue == -1 || ((currentMs - item.launchDateMs) <= (ageValue * Calculations.MsPerDay))) && (searchStringInsensitive.equals("") || item.satellite.name.toLowerCase().contains(searchStringInsensitive) || String.valueOf(item.satellite.noradId).contains(searchStringInsensitive)))
-                {
-                    //add to displayed items
-                    displayedItems.add(item);
-                }
-            }
-
-            //refresh list
-            this.notifyDataSetChanged();
-        }
-
         //Gets all items
-        public ListItem[] getAllItems()
+        public OrbitalFilterList.Item[] getAllItems()
         {
             return(loadingItems ? new ListItem[0] : allItems);
         }
 
         //Gets selected items
-        public ListItem[] getSelectedItems()
+        public OrbitalFilterList.Item[] getSelectedItems()
         {
             int index;
-            ArrayList<ListItem> selectedItems = new ArrayList<>(0);
+            ArrayList<OrbitalFilterList.Item> selectedItems = new ArrayList<>(0);
 
             //if not loading items
             if(!loadingItems)
@@ -506,19 +380,13 @@ public class MasterAddListActivity extends BaseInputActivity
             }
 
             //return selected items as an array
-            return(selectedItems.toArray(new ListItem[0]));
+            return(selectedItems.toArray(new OrbitalFilterList.Item[0]));
         }
 
         //Gets displayed items
-        public ListItem[] getDisplayedItems()
+        public OrbitalFilterList.Item[] getDisplayedItems()
         {
-            return(displayedItems != null ? displayedItems.toArray(new ListItem[0]) : new ListItem[0]);
-        }
-
-        //Returns if a launch date was found
-        public boolean hasLaunchDates()
-        {
-            return(foundLaunchDate);
+            return(displayedItems != null ? displayedItems.toArray(new OrbitalFilterList.Item[0]) : new ListItem[0]);
         }
     }
 
@@ -532,21 +400,18 @@ public class MasterAddListActivity extends BaseInputActivity
     private BroadcastReceiver listReceiver;
 
     //Displays
-    private int listBgColor;
-    private int listBgItemColor;
-    private int listTextColor;
-    private int listBgSelectedColor;
-    private int listTextSelectedColor;
     private int itemSelectedCount;
     private String startTitle;
     private LinearLayout masterLayout;
     private RecyclerView addList;
     private MasterListAdapter addAdapter;
+    private TableLayout searchGroup;
     private IconSpinner ownerList;
     private IconSpinner groupList;
     private IconSpinner ageList;
     private EditText searchText;
     private TableRow ageRow;
+    private AppCompatImageButton showButton;
     private MaterialButton addButton;
     private MultiProgressDialog downloadProgress;
     private MultiProgressDialog addProgress;
@@ -554,45 +419,8 @@ public class MasterAddListActivity extends BaseInputActivity
     //Listeners
     private MasterListAdapter.OnItemCheckChangedListener checkChangedListener;
 
-    //Creates an on item selected listener
-    private AdapterView.OnItemSelectedListener createOnItemSelectedListener(final MasterListAdapter listAdapter, final IconSpinner ownerList, final IconSpinner groupList, final IconSpinner ageList, final EditText masterSearchText)
-    {
-        return(new AdapterView.OnItemSelectedListener()
-        {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                //update visible items
-                listAdapter.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), masterSearchText.getText().toString());
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) { }
-        });
-    }
-
-    //Creates a text changed listener
-    private TextWatcher createTextChangedListener(final MasterListAdapter listAdapter, final IconSpinner ownerList, final IconSpinner groupList, final IconSpinner ageList)
-    {
-        return(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after){ }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-            @Override
-            public void afterTextChanged(Editable s)
-            {
-                //update visible items
-                listAdapter.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), s.toString());
-            }
-        });
-    }
-
     //Creates local broadcast receiver
-    private BroadcastReceiver createLocalBroadcastReceiver(BroadcastReceiver oldReceiver, final MultiProgressDialog taskProgress, final MasterListAdapter.ListItem[] selectedItems)
+    private BroadcastReceiver createLocalBroadcastReceiver(BroadcastReceiver oldReceiver, final MultiProgressDialog taskProgress, final OrbitalFilterList.Item[] selectedItems)
     {
         final Resources res = this.getResources();
         final String overallString = res.getString(R.string.title_overall);
@@ -827,10 +655,10 @@ public class MasterAddListActivity extends BaseInputActivity
                                                     break;
                                             }
                                         }
-                                    }, new MasterListAdapter.OnLoadItemsListener()
+                                    }, new OrbitalFilterList.OnLoadItemsListener()
                                     {
                                         @Override
-                                        public void onLoaded(ArrayList<MasterListAdapter.ListItem> items, boolean foundLaunchDate)
+                                        public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
                                         {
                                             //setup inputs
                                             MasterAddListActivity.this.runOnUiThread(new Runnable()
@@ -839,7 +667,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                 public void run()
                                                 {
                                                     //setup inputs
-                                                    setupInputs(usedOwners, usedCategories);
+                                                    setupInputs(addAdapter, usedOwners, usedCategories);
 
                                                     //focus on search text
                                                     searchText.requestFocus();
@@ -916,97 +744,11 @@ public class MasterAddListActivity extends BaseInputActivity
         return(updateReceiver);
     }
 
-    //Sets up owner list
-    private void setupOwnerList(IconSpinner ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, AdapterView.OnItemSelectedListener itemSelectedListener)
-    {
-        int index;
-        Resources res = this.getResources();
-        String listAllString = res.getString(R.string.title_list_all);
-        String unknown = Globals.getUnknownString(this).toUpperCase();
-        IconSpinner.Item[] owners;
-
-        owners = new IconSpinner.Item[usedOwners.size() + 1];
-        owners[0] = new IconSpinner.Item(listAllString, listAllString);
-        for(index = 0; index < usedOwners.size(); index++)
-        {
-            UpdateService.MasterOwner currentItem = usedOwners.get(index);
-            int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
-            owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
-        }
-        ownerList.setAdapter(new IconSpinner.CustomAdapter(this, owners));
-        ownerList.setBackgroundColor(listBgColor);
-        ownerList.setBackgroundItemColor(listBgItemColor);
-        ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
-        ownerList.setTextColor(listTextColor);
-        ownerList.setTextSelectedColor(listTextSelectedColor);
-        ownerList.setOnItemSelectedListener(itemSelectedListener);
-        ownerList.setEnabled(true);
-    }
-
-    //Sets up group list
-    private void setupGroupList(IconSpinner groupList, ArrayList<String> usedCategories, AdapterView.OnItemSelectedListener itemSelectedListener)
-    {
-        Resources res = this.getResources();
-        ArrayList<String> groups;
-
-        groups = usedCategories;
-        groups.add(0, res.getString(R.string.title_list_all));
-        groupList.setAdapter(new IconSpinner.CustomAdapter(this, groups.toArray(new String[0])));
-        groupList.setBackgroundColor(listBgColor);
-        groupList.setBackgroundItemColor(listBgItemColor);
-        groupList.setBackgroundItemSelectedColor(listBgSelectedColor);
-        groupList.setTextColor(listTextColor);
-        groupList.setTextSelectedColor(listTextSelectedColor);
-        groupList.setOnItemSelectedListener(itemSelectedListener);
-        groupList.setEnabled(true);
-    }
-
-    //Sets up age list
-    private void setupAgeList(IconSpinner ageList, AdapterView.OnItemSelectedListener itemSelectedListener)
-    {
-        Resources res = this.getResources();
-        String lastString = res.getString(R.string.title_last_plural);
-        String daysString = res.getString(R.string.title_days);
-        String monthsString = res.getString(R.string.title_months);
-
-        ageList.setAdapter(new IconSpinner.CustomAdapter(this, new IconSpinner.Item[]
-        {
-            new IconSpinner.Item(res.getString(R.string.title_any), -1),
-            new IconSpinner.Item(res.getString(R.string.title_today), 0),
-            new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + daysString, 3),
-            new IconSpinner.Item(lastString + " " + res.getString(R.string.text_7) + " " + daysString, 7),
-            new IconSpinner.Item(lastString + " " + res.getString(R.string.text_14) + " " + daysString, 14),
-            new IconSpinner.Item(lastString + " " + res.getString(R.string.text_30) + " " + daysString, 30),
-            new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + monthsString, 93),
-            new IconSpinner.Item(lastString + " " + res.getString(R.string.text_6) + " " + monthsString, 183),
-            new IconSpinner.Item(res.getString(R.string.title_this_year), 366)
-        }));
-        ageList.setBackgroundColor(listBgColor);
-        ageList.setBackgroundItemColor(listBgItemColor);
-        ageList.setBackgroundItemSelectedColor(listBgSelectedColor);
-        ageList.setTextColor(listTextColor);
-        ageList.setTextSelectedColor(listTextSelectedColor);
-        ageList.setOnItemSelectedListener(itemSelectedListener);
-        ageList.setEnabled(true);
-    }
-
     //Sets up inputs
-    private void setupInputs(ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories)
+    private void setupInputs(MasterListAdapter listAdapter, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories)
     {
-        //create item selected listener
-        AdapterView.OnItemSelectedListener itemSelectedListener = createOnItemSelectedListener(addAdapter, ownerList, groupList, ageList, searchText);
-
-        //get owners, groups, and ages
-        setupOwnerList(ownerList, usedOwners, itemSelectedListener);
-        setupGroupList(groupList, usedCategories, itemSelectedListener);
-        setupAgeList(ageList, itemSelectedListener);
-
-        //update age row visibility
-        ageRow.setVisibility(addAdapter.hasLaunchDates() ? View.VISIBLE : View.GONE);
-
-        //setup name text
-        searchText.addTextChangedListener(createTextChangedListener(addAdapter, ownerList, groupList, ageList));
-        searchText.setEnabled(true);
+        //setup inputs
+        listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageRow, searchText, showButton, usedOwners, usedCategories, addAdapter.getHasLaunchDates());
 
         //update title
         updateTitleCount();
@@ -1027,22 +769,18 @@ public class MasterAddListActivity extends BaseInputActivity
         boolean isFilterList = (listType == ListType.VisibleList);
         boolean askUpdate = addIntent.getBooleanExtra(ParamTypes.AskUpdate, false);
         final int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
-        final TableLayout searchGroup = this.findViewById(R.id.Orbital_Search_Table);
-        final AppCompatImageButton showButton = this.findViewById(R.id.Orbital_Search_Show_Button);
         final MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
+        searchGroup = this.findViewById(R.id.Orbital_Search_Table);
         ownerList = this.findViewById(R.id.Orbital_Search_Owner_List);
         groupList = this.findViewById(R.id.Orbital_Search_Group_List);
         ageList = this.findViewById(R.id.Orbital_Search_Age_List);
         addList = this.findViewById(R.id.Master_Add_List);
         searchText = this.findViewById(R.id.Orbital_Search_Text);
         ageRow = this.findViewById(R.id.Orbital_Search_Age_Row);
+        showButton = this.findViewById(R.id.Orbital_Search_Show_Button);
         addButton = this.findViewById(R.id.Master_Add_Button);
 
-        listBgColor = Globals.resolveColorID(this, R.attr.pageTitleBackground);
-        listBgItemColor = Globals.resolveColorID(this, R.attr.pageBackground);
-        listTextColor = Globals.resolveColorID(this, R.attr.defaultTextColor);
-        listBgSelectedColor = Globals.resolveColorID(this, R.attr.columnBackground);
-        listTextSelectedColor = Globals.resolveColorID(this, R.attr.columnTitleTextColor);
+        //create dialogs
         downloadProgress = Globals.createProgressDialog(this);
         addProgress = Globals.createProgressDialog(this);
 
@@ -1062,25 +800,6 @@ public class MasterAddListActivity extends BaseInputActivity
         startTitle = this.getString(isFilterList ? R.string.title_select_visible : R.string.title_select_satellites);
         this.setTitle(startTitle);
 
-        //setup show button
-        showButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                if(searchGroup.getVisibility() == View.VISIBLE)
-                {
-                    showButton.setImageResource(R.drawable.ic_expand_more);
-                    searchGroup.setVisibility(View.GONE);
-                }
-                else
-                {
-                    showButton.setImageResource(R.drawable.ic_expand_less);
-                    searchGroup.setVisibility(View.VISIBLE);
-                }
-            }
-        });
-
         //setup cancel button
         cancelButton.setOnClickListener(new View.OnClickListener()
         {
@@ -1097,7 +816,7 @@ public class MasterAddListActivity extends BaseInputActivity
         checkChangedListener = new MasterListAdapter.OnItemCheckChangedListener()
         {
             @Override
-            public void onCheckChanged(MasterListAdapter.ListItem item)
+            public void onCheckChanged(OrbitalFilterList.Item item)
             {
                 //if now checked
                 if(item.isChecked)
@@ -1121,53 +840,13 @@ public class MasterAddListActivity extends BaseInputActivity
         if(isFilterList)
         {
             //create adapter
-            addAdapter = new MasterListAdapter(this, new MasterListAdapter.OnLoadItemsListener()
+            addAdapter = new MasterListAdapter(this, new OrbitalFilterList.OnLoadItemsListener()
             {
                 @Override
-                public void onLoaded(ArrayList<MasterListAdapter.ListItem> items, boolean foundLaunchDate)
+                public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
                 {
-                    int index;
-                    int index2;
-                    MasterListAdapter.ListItem[] allItems;
-                    ArrayList<String> usedCategories = new ArrayList<>(0);
-                    ArrayList<String> usedOwnerCodes = new ArrayList<>(0);
-                    ArrayList<UpdateService.MasterOwner> usedOwners = new ArrayList<>(0);
-
-                    //get owners and categories
-                    allItems = addAdapter.getAllItems();
-                    for(index = 0; index < allItems.length; index++)
-                    {
-                        //remember current item, owner, and code
-                        MasterListAdapter.ListItem currentItem = allItems[index];
-                        UpdateService.MasterOwner currentOwner = new UpdateService.MasterOwner(currentItem.satellite.ownerCode, currentItem.satellite.ownerName);
-                        String ownerCode = currentOwner.code;
-
-                        //if owner is not in the list
-                        if(ownerCode != null && !usedOwnerCodes.contains(ownerCode))
-                        {
-                            //add it
-                            usedOwners.add(currentOwner);
-                            usedOwnerCodes.add(ownerCode);
-                        }
-
-                        //go through each category
-                        for(index2 = 0; index2 < currentItem.categories.size(); index2++)
-                        {
-                            //remember current category
-                            String currentCategory = currentItem.categories.get(index2);
-
-                            //if group is not in the list
-                            if(!usedCategories.contains(currentCategory))
-                            {
-                                //add it
-                                usedCategories.add(currentCategory);
-                            }
-                        }
-                    }
-
-                    //sort owners and categories
-                    Collections.sort(usedOwners);
-                    Collections.sort(usedCategories);
+                    //get used data
+                    final OrbitalFilterList.OrbitalListAdapter.UsedData used = addAdapter.getUsed();
 
                     //setup inputs
                     MasterAddListActivity.this.runOnUiThread(new Runnable()
@@ -1176,10 +855,10 @@ public class MasterAddListActivity extends BaseInputActivity
                         public void run()
                         {
                             //setup inputs
-                            setupInputs(usedOwners, usedCategories);
+                            setupInputs(addAdapter, used.owners, used.categories);
 
                             //hide search by default
-                            showButton.performClick();
+                            addAdapter.showSearchInputs(false);
                         }
                     });
                 }
@@ -1193,16 +872,16 @@ public class MasterAddListActivity extends BaseInputActivity
                 public void onClick(View v)
                 {
                     int index;
-                    MasterAddListActivity.MasterListAdapter.ListItem[] items = addAdapter.getAllItems();
+                    OrbitalFilterList.Item[] items = addAdapter.getAllItems();
 
                     //go through each item
                     for(index = 0; index < items.length; index++)
                     {
                         //remember current item
-                        MasterAddListActivity.MasterListAdapter.ListItem currentItem = items[index];
+                        OrbitalFilterList.Item currentItem = items[index];
 
                         //if checked state has changed
-                        if(currentItem.isChecked != currentItem.startChecked)
+                        if(currentItem instanceof MasterListAdapter.ListItem && currentItem.isChecked != ((MasterListAdapter.ListItem)currentItem).startChecked)
                         {
                             //save with updated select state
                             Database.saveSatelliteVisible(MasterAddListActivity.this, currentItem.satellite.noradId, currentItem.isChecked);
@@ -1232,7 +911,7 @@ public class MasterAddListActivity extends BaseInputActivity
                 public void onClick(View v)
                 {
                     MasterListAdapter satelliteListAdapter = (MasterListAdapter)addList.getAdapter();
-                    final MasterListAdapter.ListItem[] selectedItems = (satelliteListAdapter != null ? satelliteListAdapter.getSelectedItems() : new MasterListAdapter.ListItem[0]);
+                    final OrbitalFilterList.Item[] selectedItems = (satelliteListAdapter != null ? satelliteListAdapter.getSelectedItems() : new MasterListAdapter.ListItem[0]);
 
                     //update selected satellites
                     updateSatellites(selectedItems);
@@ -1306,10 +985,10 @@ public class MasterAddListActivity extends BaseInputActivity
         if(addAdapter != null && (isAll || isNone))
         {
             //get current items to change
-            MasterListAdapter.ListItem[] currentItems = addAdapter.getDisplayedItems();
+            OrbitalFilterList.Item[] currentItems = addAdapter.getDisplayedItems();
 
             //go through each item
-            for(MasterListAdapter.ListItem currentItem : currentItems)
+            for(OrbitalFilterList.Item currentItem : currentItems)
             {
                 //update checked state
                 currentItem.setChecked(isAll);
@@ -1326,7 +1005,7 @@ public class MasterAddListActivity extends BaseInputActivity
     }
 
     //Update satellites
-    private void updateSatellites(final MasterListAdapter.ListItem[] selectedItems)
+    private void updateSatellites(final OrbitalFilterList.Item[] selectedItems)
     {
         int index;
         Resources res = this.getResources();
@@ -1343,7 +1022,7 @@ public class MasterAddListActivity extends BaseInputActivity
             for(index = 0; index < selectedItems.length; index++)
             {
                 //remember current item
-                MasterListAdapter.ListItem currentItem = selectedItems[index];
+                OrbitalFilterList.Item currentItem = selectedItems[index];
 
                 //create and add new satellite
                 Database.DatabaseSatellite currentSatellite = new Database.DatabaseSatellite(currentItem.satellite.name, currentItem.satellite.noradId, currentItem.satellite.ownerCode, currentItem.launchDateMs, currentItem.satellite.orbitalType);

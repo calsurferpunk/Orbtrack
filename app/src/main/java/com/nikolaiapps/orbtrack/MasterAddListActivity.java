@@ -403,6 +403,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private int itemSelectedCount;
     private String startTitle;
     private LinearLayout masterLayout;
+    private LinearLayout searchLayout;
     private RecyclerView addList;
     private MasterListAdapter addAdapter;
     private TableLayout searchGroup;
@@ -667,6 +668,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                 public void run()
                                                 {
                                                     //setup inputs
+                                                    searchLayout.setVisibility(View.VISIBLE);
                                                     setupInputs(addAdapter, usedOwners, usedCategories);
 
                                                     //focus on search text
@@ -770,6 +772,7 @@ public class MasterAddListActivity extends BaseInputActivity
         boolean askUpdate = addIntent.getBooleanExtra(ParamTypes.AskUpdate, false);
         final int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
         final MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
+        searchLayout = this.findViewById(R.id.Orbital_Search_Layout);
         searchGroup = this.findViewById(R.id.Orbital_Search_Table);
         ownerList = this.findViewById(R.id.Orbital_Search_Owner_List);
         groupList = this.findViewById(R.id.Orbital_Search_Group_List);
@@ -854,10 +857,9 @@ public class MasterAddListActivity extends BaseInputActivity
                         @Override
                         public void run()
                         {
-                            //setup inputs
+                            //setup inputs and collapse
+                            searchLayout.setVisibility(View.VISIBLE);
                             setupInputs(addAdapter, used.owners, used.categories);
-
-                            //hide search by default
                             addAdapter.showSearchInputs(false);
                         }
                     });

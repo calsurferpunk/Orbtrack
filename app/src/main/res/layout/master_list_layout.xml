@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:animateLayoutChanges="true"
     android:background="?attr/viewPagerBackground">
-    <include layout="@layout/orbital_search_layout"/>
+    <include layout="@layout/orbital_search_layout" android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/Master_Add_List"

@@ -379,6 +379,8 @@ public class OrbitalFilterList
             this.searchTable = searchGroup;
             this.showButton = showButton;
 
+            searchText.setText("");
+
             AdapterView.OnItemSelectedListener itemSelectedListener = new AdapterView.OnItemSelectedListener()
             {
                 @Override

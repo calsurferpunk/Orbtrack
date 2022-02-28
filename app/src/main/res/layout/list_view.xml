@@ -3,7 +3,8 @@
     android:id="@+id/List_Layout"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
     <View
         android:id="@+id/List_Header"
         android:layout_width="match_parent"

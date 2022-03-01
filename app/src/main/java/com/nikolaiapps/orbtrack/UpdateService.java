@@ -459,6 +459,7 @@ public class UpdateService extends NotifyService
             static final String Name = "SATNAME";
             static final String CountryCode = "COUNTRY";
             static final String ObjectType = "OBJECT_TYPE";
+            static final String ObjectName = "OBJECT_NAME";
             static final String LaunchDate = "LAUNCH";
         }
 
@@ -1075,6 +1076,7 @@ public class UpdateService extends NotifyService
         boolean useInternet = true;
         boolean allowInformationTranslate = Settings.getTranslateInformation(this);
         String urlString = null;
+        String urlAltString = null;
         String infoString;
         String sourceString = null;
         String receivedPage;
@@ -1119,6 +1121,10 @@ public class UpdateService extends NotifyService
 
             case Database.UpdateSource.NASA:
                 urlString = (haveTleData ? ("https://nssdc.gsfc.nasa.gov/nmc/spacecraft/display.action?id=" + launchYearNum + tleData.launchPiece) : "");
+                if(urlString.contains("-"))
+                {
+                    urlAltString = urlString.replace("-", "");
+                }
                 sourceString = "<p>NASA</p><a>" + urlString + "</a>";
                 break;
         }
@@ -1160,6 +1166,10 @@ public class UpdateService extends NotifyService
             {
                 //get page
                 receivedPage = Globals.getWebPage(urlString, true,null);
+                if(updateSource == Database.UpdateSource.NASA &&(receivedPage == null || receivedPage.contains("Errors and Messages")) && urlAltString != null)
+                {
+                    receivedPage = Globals.getWebPage(urlAltString, true,null);
+                }
                 receivedPageLower = (receivedPage != null ? receivedPage.toLowerCase() : null);
                 if(receivedPageLower != null && !receivedPageLower.equals(""))
                 {
@@ -1848,13 +1858,10 @@ public class UpdateService extends NotifyService
         int rowEnd;
         int colStart;
         int colEnd;
-        int listEnd;
-        int listOffset;
-        int categoryStart;
         int categoryEnd;
         int linkStart;
         int linkEnd;
-        int noradId = 0;
+        int noradId;
         int pageOffset = 0;
         int categoryIndex;
         int firstNoradID = Integer.MAX_VALUE;
@@ -1862,7 +1869,6 @@ public class UpdateService extends NotifyService
         int status = Globals.ProgressType.Finished;
         int receivedPageLength;
         byte updateType = UpdateType.GetMasterList;
-        boolean needNoradId;
         boolean addLineEnds = false;
         boolean loadDebris = Settings.getCatalogDebris(this);
         boolean loadRocketBodies = Settings.getCatalogRocketBodies(this);
@@ -1953,11 +1959,31 @@ public class UpdateService extends NotifyService
                         addLineEnds = true;
                         break;
 
+                    case UpdateSubSource.Category:
+                        //if urls are valid
+                        if(urls != null && linkIndex < urls.length)
+                        {
+                            //use category url
+                            urlMasterBase = urlBase + "NORAD/elements/" + urls[linkIndex].link;
+
+                            //remember section
+                            section = urls[linkIndex].group;
+                        }
+                        else
+                        {
+                            //no categories
+                            return(Globals.ProgressType.Cancelled);
+                        }
+
+                        rowStartText = "[";
+                        rowEndText = "]";
+                        break;
+
                     default:
                     case UpdateSubSource.Satellites:
-                        urlMasterBase = urlBase + "NORAD/elements/master.asp";
-                        rowStartText = "<th";
-                        rowEndText = "</th>";
+                        urlMasterBase = urlBase + "NORAD/elements/?FORMAT=json";
+                        rowStartText = "<a title=\"json data\" href=\"gp.php?group=";
+                        rowEndText = "</a>";
                         break;
                 }
                 break;
@@ -2117,11 +2143,11 @@ public class UpdateService extends NotifyService
                 //go through page while not cancelled
                 do
                 {
-                    //if updating celestrak
-                    if(updateSource == Database.UpdateSource.Celestrak)
+                    //if updating celestrak and not categories
+                    if(updateSource == Database.UpdateSource.Celestrak && updateSubSource != UpdateSubSource.Category)
                     {
-                        //update status (overall - overall +25%)
-                        sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (overall + (int)((pageOffset / (float)receivedPageLength) * 25)), Globals.ProgressType.Success);
+                        //update status (overall - overall +20%)
+                        sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (overall + (int)((pageOffset / (float)receivedPageLength) * 20)), Globals.ProgressType.Success);
                     }
 
                     //find next txt file row start while not cancelled
@@ -2135,7 +2161,6 @@ public class UpdateService extends NotifyService
                             //get entire row and reset status
                             currentRow = receivedPage.substring(rowStart, rowStart + (rowEnd - rowStart) + rowEndText.length());
                             currentRowLower = currentRow.toLowerCase();
-                            listEnd = -1;
 
                             //handle based on source
                             switch(updateSource)
@@ -2305,112 +2330,54 @@ public class UpdateService extends NotifyService
                                     switch(updateSubSource)
                                     {
                                         case UpdateSubSource.Satellites:
-                                            //if current row contains a txt file link
-                                            linkEnd = currentRowLower.indexOf(".txt\"");
+                                            //get link
+                                            linkStart = 27;
+                                            linkEnd = currentRowLower.indexOf("\">", linkStart);
                                             if(linkEnd >= 0)
                                             {
-                                                //get link start
-                                                linkStart = currentRowLower.indexOf("<a href=\"");
-                                                if(linkStart >= 0 && linkStart < linkEnd)
+                                                //get category
+                                                categoryEnd = currentRowLower.indexOf("<", linkEnd + 2);
+                                                if(categoryEnd >= 0)
                                                 {
-                                                    //reset
-                                                    categoryIndex = -1;
+                                                    //set category and url
+                                                    currentValue = currentRow.substring(linkEnd + 2, categoryEnd);
 
-                                                    //get category start
-                                                    categoryStart = currentRowLower.indexOf(">") + 1;
-                                                    if(categoryStart > 0)
+                                                    //add if a new category and updates urls
+                                                    masterList.addCategory(currentValue);
+                                                    urlList.add(new MasterLink(currentValue, currentRow.substring(linkStart, linkEnd)));
+                                                }
+                                            }
+                                            break;
+
+                                        case UpdateSubSource.Category:
+                                            JSONObject[] data = Globals.getJsonObjects(currentRow);
+                                            categoryIndex = masterList.categoryIndex(urls[linkIndex].group);
+
+                                            //go through each data item
+                                            for(JSONObject dataItem : data)
+                                            {
+                                                try
+                                                {
+                                                    //create satellite
+                                                    noradId = Globals.tryParseInt(dataItem.getString(SpaceTrackSatellite.Constants.NoradID));
+                                                    MasterSatellite newSatellite = new MasterSatellite(noradId, dataItem.getString(SpaceTrackSatellite.Constants.ObjectName), "", "", Globals.UNKNOWN_DATE_MS);
+
+                                                    //if -loading rocket bodies or not a rocket body- and -loading debris or not debris-
+                                                    if((loadRocketBodies || newSatellite.orbitalType != Database.OrbitalType.RocketBody) && (loadDebris || newSatellite.orbitalType != Database.OrbitalType.Debris))
                                                     {
-                                                        //end should be right before .txt link
-                                                        categoryEnd = linkStart - 2;
-                                                        if(categoryEnd > categoryStart)
-                                                        {
-                                                            //get category
-                                                            currentValue = currentRow.substring(categoryStart, categoryEnd).trim();
-
-                                                            //add if a new category
-                                                            categoryIndex = masterList.addCategory(currentValue);
-                                                        }
+                                                        //add satellite to the list
+                                                        masterList.satellites.add(newSatellite);
                                                     }
 
-                                                    //get end of satellites list
-                                                    listEnd = receivedPageLower.indexOf("</table>", rowEnd + 1);
-                                                    if(listEnd > rowEnd)
+                                                    //add satellite category
+                                                    if(categoryIndex >= 0)
                                                     {
-                                                        //reset status
-                                                        needNoradId = true;
-
-                                                        //go through list
-                                                        listOffset = rowEnd;
-                                                        do
-                                                        {
-                                                            //get column end
-                                                            colEnd = receivedPageLower.indexOf("</td>", listOffset);
-                                                            if(colEnd > listOffset && colEnd < listEnd)
-                                                            {
-                                                                //get column start
-                                                                colStart = receivedPageLower.indexOf("<td", listOffset);
-                                                                if(colStart >= listOffset && colStart < colEnd)
-                                                                {
-                                                                    //get current value
-                                                                    //note: uses entire <TD>..</TD> block as input
-                                                                    currentValue = removeHtmlTags(receivedPage.substring(colStart, colStart + (colEnd - colStart) + 5));
-
-                                                                    //update satellite data
-                                                                    if(needNoradId)
-                                                                    {
-                                                                        //if unable to get norad ID
-                                                                        noradId = Globals.tryParseInt(currentValue);
-                                                                        if(noradId == Integer.MAX_VALUE)
-                                                                        {
-                                                                            //default to 0
-                                                                            noradId = 0;
-                                                                        }
-                                                                        needNoradId = false;
-                                                                    }
-                                                                    else
-                                                                    {
-                                                                        //if a valid name
-                                                                        if(!currentValue.equals("") && !currentValue.equalsIgnoreCase("UNKNOWN"))
-                                                                        {
-                                                                            //create satellite
-                                                                            MasterSatellite newSatellite = new MasterSatellite(noradId, currentValue, "", "", Globals.UNKNOWN_DATE_MS);
-
-                                                                            //if -loading rocket bodies or not a rocket body- and -loading debris or not debris-
-                                                                            if((loadRocketBodies || newSatellite.orbitalType != Database.OrbitalType.RocketBody) && (loadDebris || newSatellite.orbitalType != Database.OrbitalType.Debris))
-                                                                            {
-                                                                                //add satellite to the list
-                                                                                masterList.satellites.add(newSatellite);
-                                                                            }
-
-                                                                            //if a valid category
-                                                                            if(categoryIndex >= 0)
-                                                                            {
-                                                                                //add satellite category
-                                                                                masterList.addSatelliteCategory(noradId, categoryIndex);
-                                                                            }
-                                                                        }
-
-                                                                        //update status
-                                                                        needNoradId = true;
-                                                                    }
-
-                                                                    //update status
-                                                                    listOffset = colEnd + 1;
-                                                                }
-                                                                else
-                                                                {
-                                                                    //done
-                                                                    listOffset = Integer.MAX_VALUE - 1;
-                                                                }
-                                                            }
-                                                            else
-                                                            {
-                                                                //done
-                                                                listOffset = Integer.MAX_VALUE - 1;
-                                                            }
-
-                                                        } while(listOffset < listEnd);
+                                                        masterList.addSatelliteCategory(noradId, categoryIndex);
                                                     }
+                                                }
+                                                catch(Exception ex)
+                                                {
+                                                    //do nothing
                                                 }
                                             }
                                             break;
@@ -2474,7 +2441,7 @@ public class UpdateService extends NotifyService
                             }
 
                             //start after current set/row
-                            pageOffset = (listEnd > -1 ? listEnd : rowEnd) + (addLineEnds ? 2 : 1);
+                            pageOffset = rowEnd + (addLineEnds ? 2 : 1);
                         }
                         else
                         {
@@ -2498,37 +2465,47 @@ public class UpdateService extends NotifyService
                         switch(updateSource)
                         {
                             case Database.UpdateSource.N2YO:
-                                //remember urls and file count
+                                //remember urls
                                 urls = urlList.toArray(new MasterLink[0]);
 
                                 //get categories while not cancelled
                                 for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                                 {
                                     //get satellites from categories (0 - 35%)
-                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.Category, index, (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
+                                    status = getMasterList(updateSource, UpdateSubSource.Category, index, (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
                                 }
 
                                 //if not cancelled and got categories
                                 if(!cancelIntent[updateType] && status == Globals.ProgressType.Finished)
                                 {
                                     //get owners (40%)
-                                    status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.Owners, 0, 40, null, null, null);
+                                    status = getMasterList(updateSource, UpdateSubSource.Owners, 0, 40, null, null, null);
                                 }
                                 break;
 
                             case Database.UpdateSource.Celestrak:
+                                //remember urls
+                                urls = urlList.toArray(new MasterLink[0]);
+
+                                //get categories while not cancelled
+                                for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
+                                {
+                                    //get satellites from categories (20 - 40%)
+                                    status = getMasterList(updateSource, UpdateSubSource.Category, index, 20 + (int)(((index + 1) / (float)urls.length) * 20), null, null, urls);
+                                }
+
                                 //if not cancelled
                                 if(!cancelIntent[updateType])
                                 {
-                                    //get owners (25 - 50%)
-                                    status = getMasterList(Database.UpdateSource.Celestrak, UpdateSubSource.Owners, 0, 25, null, null, null);
+                                    //get owners (40 - 60%)
+                                    status = getMasterList(updateSource, UpdateSubSource.Owners, 0, 40, null, null, null);
                                 }
 
                                 //if not cancelled and got owners
                                 if(!cancelIntent[updateType] && status == Globals.ProgressType.Finished)
                                 {
-                                    //get satellite owners (50 - 75%)
-                                    status = getMasterList(Database.UpdateSource.Celestrak, UpdateSubSource.SatelliteOwners, 0, 50, null, null, null);
+                                    //get satellite owners (60 - 80%)
+                                    status = getMasterList(updateSource, UpdateSubSource.SatelliteOwners, 0, 60, null, null, null);
                                 }
                                 break;
                         }
@@ -2544,7 +2521,7 @@ public class UpdateService extends NotifyService
                             //get satellite owners while not cancelled (40 - 75%)
                             for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                             {
-                                status = getMasterList(Database.UpdateSource.N2YO, UpdateSubSource.SatelliteOwners, index, overall + (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
+                                status = getMasterList(updateSource, UpdateSubSource.SatelliteOwners, index, overall + (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
                             }
                         }
                         break;

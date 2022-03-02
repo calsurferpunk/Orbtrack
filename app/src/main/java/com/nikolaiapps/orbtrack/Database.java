@@ -360,207 +360,309 @@ public class Database extends SQLiteOpenHelper
         //Gets category locale
         public static String getCategory(Resources res, String name)
         {
+            int stringId = -1;
+            
             switch(name.toLowerCase())
             {
                 case "100 (or so) brightest":
-                    name = res.getString(R.string.category_100_brightest);
+                    stringId = R.string.category_100_brightest;
+                    break;
+
+                case "active satellites":
+                    stringId = R.string.category_active_satellites;
+                    break;
+
+                case "active geosynchronous":
+                    stringId = R.string.category_active_geosynchronous;
                     break;
 
                 case "amateur":
-                    name = res.getString(R.string.category_amateur);
+                    stringId = R.string.category_amateur;
                     break;
 
                 case "amateur radio":
-                    name = res.getString(R.string.category_amateur_radio);
+                    stringId = R.string.category_amateur_radio;
                     break;
 
                 case "analyst":
-                    name = res.getString(R.string.category_analyst);
+                case "analyst satellites":
+                    stringId = R.string.category_analyst;
                     break;
 
                 case "argos data collection system":
-                    name = res.getString(R.string.category_argos_data_collection_system);
+                    stringId = R.string.category_argos_data_collection_system;
                     break;
 
+                case "beidou":
                 case "beidou navigation system":
-                    name = res.getString(R.string.category_beidou_navigation_system);
+                    stringId = R.string.category_beidou_navigation_system;
                     break;
 
                 case "breeze-m r/b breakup":
-                    name = res.getString(R.string.category_breeze_m_rb_breakup);
+                    stringId = R.string.category_breeze_m_rb_breakup;
                     break;
 
                 case "brightest":
-                    name = res.getString(R.string.category_brightest);
+                    stringId = R.string.category_brightest;
                     break;
 
                 case "bright geo":
-                    name = res.getString(R.string.category_bright_geo);
+                    stringId = R.string.category_bright_geo;
+                    break;
+
+                case "chinese asat test debris (fengyun 1c)":
+                    stringId = R.string.category_chinese_asat_test_debris;
                     break;
 
                 case "cosmos 2251 debris":
-                    name = res.getString(R.string.category_cosmos_2251_debris);
+                    stringId = R.string.category_cosmos_2251_debris;
+                    break;
+
+                case "cubesats":
+                    stringId = R.string.category_cubesats;
                     break;
 
                 case "disaster monitoring":
-                    name = res.getString(R.string.category_disaster_monitoring);
+                    stringId = R.string.category_disaster_monitoring;
                     break;
 
                 case "earth resources":
-                    name = res.getString(R.string.category_earth_resources);
+                    stringId = R.string.category_earth_resources;
                     break;
 
                 case "education":
-                    name = res.getString(R.string.category_education);
+                    stringId = R.string.category_education;
                     break;
 
                 case "engineering":
-                    name = res.getString(R.string.category_engineering);
+                    stringId = R.string.category_engineering;
                     break;
 
                 case "experimental":
-                    name = res.getString(R.string.category_experimental);
+                case "experimental comm":
+                    stringId = R.string.category_experimental;
                     break;
 
                 case "fengyun 1c debris":
-                    name = res.getString(R.string.category_fengyun_1c_debris);
+                    stringId = R.string.category_fengyun_1c_debris;
+                    break;
+
+                case "galileo":
+                    stringId = R.string.category_galileo;
                     break;
 
                 case "geodetic":
-                    name = res.getString(R.string.category_geodetic);
+                    stringId = R.string.category_geodetic;
+                    break;
+
+                case "geo protected zone":
+                    stringId = R.string.category_geo_protected_zone;
+                    break;
+
+                case "geo protected zone plus":
+                    stringId = R.string.category_geo_protected_zone_plus;
                     break;
 
                 case "geostationary":
-                    name = res.getString(R.string.category_geostationary);
+                    stringId = R.string.category_geostationary;
                     break;
 
                 case "geosynchronous":
-                    name = res.getString(R.string.category_geosynchronous);
+                    stringId = R.string.category_geosynchronous;
                     break;
 
                 case "globalstar":
-                    name = res.getString(R.string.category_globalstar);
+                    stringId = R.string.category_globalstar;
                     break;
 
                 case "global positioning system (gps)":
-                    name = res.getString(R.string.category_global_positioning_system);
+                    stringId = R.string.category_global_positioning_system;
                     break;
 
                 case "glonass operational":
-                    name = res.getString(R.string.category_glonass_operational);
+                    stringId = R.string.category_glonass_operational;
+                    break;
+
+                case "goes":
+                    stringId = R.string.category_goes;
+                    break;
+
+                case "gorizont":
+                    stringId = R.string.category_gorizont;
+                    break;
+
+                case "gnss":
+                    stringId = R.string.category_gnss;
                     break;
 
                 case "gps operational":
-                    name = res.getString(R.string.category_gps_operational);
+                    stringId = R.string.category_gps_operational;
                     break;
 
                 case "human spaceflight":
-                    name = res.getString(R.string.category_human_spaceflight);
+                    stringId = R.string.category_human_spaceflight;
+                    break;
+
+                case "indian asat test debris (microsat-r)":
+                    stringId = R.string.category_indian_asat_test_debris;
                     break;
 
                 case "inmarsat":
-                    name = res.getString(R.string.category_inmarsat);
+                    stringId = R.string.category_inmarsat;
                     break;
 
                 case "intelsat":
-                    name = res.getString(R.string.category_intelsat);
+                    stringId = R.string.category_intelsat;
                     break;
 
                 case "iridium":
-                    name = res.getString(R.string.category_iridium);
+                    stringId = R.string.category_iridium;
                     break;
 
                 case "iridium 33 debris":
-                    name = res.getString(R.string.category_iridium_33_debris);
+                    stringId = R.string.category_iridium_33_debris;
                     break;
 
                 case "iridium next":
-                    name = res.getString(R.string.category_iridium_next);
+                    stringId = R.string.category_iridium_next;
+                    break;
+
+                case "last 30 days' launches":
+                    stringId = R.string.category_last_30_days;
                     break;
 
                 case "military":
                 case "miscellaneous military":
-                    name = res.getString(R.string.category_military);
+                    stringId = R.string.category_military;
+                    break;
+
+                case "molniya":
+                    stringId = R.string.category_molniya;
                     break;
 
                 case "navigation":
-                    name = res.getString(R.string.category_navigation);
+                    stringId = R.string.category_navigation;
                     break;
 
                 case "navy navigation satellite system":
                 case "navy navigation satellite system (nnss)":
-                    name = res.getString(R.string.category_navy_navigation_satellite_system);
+                    stringId = R.string.category_navy_navigation_satellite_system;
+                    break;
+
+                case "noaa":
+                    stringId = R.string.category_noaa;
                     break;
 
                 case "o3b networks":
-                    name = res.getString(R.string.category_o3b_networks);
+                    stringId = R.string.category_o3b_networks;
+                    break;
+
+                case "oneweb":
+                    stringId = R.string.category_oneweb;
                     break;
 
                 case "orbcomm":
-                    name = res.getString(R.string.category_orbcomm);
+                    stringId = R.string.category_orbcomm;
                     break;
 
                 case "other":
                 case "other comm":
-                    name = res.getString(R.string.category_other);
+                case "other satellites":
+                    stringId = R.string.category_other;
                     break;
 
                 case "planet":
-                    name = res.getString(R.string.category_planet);
+                    stringId = R.string.category_planet;
                     break;
 
                 case "radar calibration":
-                    name = res.getString(R.string.category_radar_calibration);
+                    stringId = R.string.category_radar_calibration;
+                    break;
+
+                case "raduga":
+                    stringId = R.string.category_raduga;
+                    break;
+
+                case "russian asat test debris (cosmos 1408)":
+                    stringId = R.string.category_russian_asat_test_debris;
                     break;
 
                 case "russian leo navigation":
-                    name = res.getString(R.string.category_russian_leo_navigation);
+                    stringId = R.string.category_russian_leo_navigation;
                     break;
 
                 case "satellite-based augmentation system":
                 case "satellite-based augmentation system (waas/egnos/msas)":
-                    name = res.getString(R.string.category_satellite_based_augmentation_system);
+                    stringId = R.string.category_satellite_based_augmentation_system;
+                    break;
+
+                case "satnogs":
+                    stringId = R.string.category_satnogs;
                     break;
 
                 case "search & rescue":
                 case "search & rescue (sarsat)":
-                    name = res.getString(R.string.category_search_and_rescue);
+                    stringId = R.string.category_search_and_rescue;
+                    break;
+
+                case "ses":
+                    stringId = R.string.category_ses;
                     break;
 
                 case "space & earth science":
-                    name = res.getString(R.string.category_space_and_earth_science);
+                    stringId = R.string.category_space_and_earth_science;
                     break;
 
                 case "space stations":
-                    name = res.getString(R.string.category_space_stations);
+                    stringId = R.string.category_space_stations;
                     break;
 
                 case "special interest":
-                    name = res.getString(R.string.category_special_interest);
+                    stringId = R.string.category_special_interest;
+                    break;
+
+                case "spire":
+                    stringId = R.string.category_spire;
+                    break;
+
+                case "starlink":
+                    stringId = R.string.category_starlink;
+                    break;
+
+                case "swarm":
+                    stringId = R.string.category_swarm;
                     break;
 
                 case "tracking and data relay satellite system":
-                    name = res.getString(R.string.category_tracking_and_data_relay_satellite_system);
+                case "tracking and data relay satellite system (tdrss)":
+                    stringId = R.string.category_tracking_and_data_relay_satellite_system;
                     break;
 
                 case "tv":
-                    name = res.getString(R.string.category_tv);
+                    stringId = R.string.category_tv;
                     break;
 
                 case "visible":
-                    name = res.getString(R.string.category_visible);
+                    stringId = R.string.category_visible;
                     break;
 
                 case "weather":
-                    name = res.getString(R.string.category_weather);
+                    stringId = R.string.category_weather;
                     break;
 
                 case "xm and sirius":
-                    name = res.getString(R.string.category_xm_and_sirius);
+                    stringId = R.string.category_xm_and_sirius;
                     break;
             }
+            
+            //if string ID is set
+            if(stringId > 0)
+            {
+                //get name
+                name = res.getString(stringId);
+            }
 
-            //return name in upper case
+            //return name
             return(name.toUpperCase());
         }
     }
@@ -1311,8 +1413,8 @@ public class Database extends SQLiteOpenHelper
                     saveSatellite(context, issZarya.getName(), ISS_ZARYA_NORAD_ID, issZarya.ownerCode, issZarya.launchDateMs, TLELines.ISSZarya1, TLELines.ISSZarya2, TLELines.ISSZaryaDate, null, TLELines.ISSZaryaDate, OrbitalType.Satellite);
                 }
 
-                //if coming from version before master list parsing improved
-                if(updateStatus.previousVersion < 4 && updateStatus.currentVersion >= 4)
+                //if coming from version before master list parsing improved or celestrak changed
+                if((updateStatus.previousVersion < 4 && updateStatus.currentVersion >= 4) || (updateStatus.previousVersion < 19 && updateStatus.currentVersion >= 19))
                 {
                     //clear master satellites
                     clearMasterSatelliteTable(context);
@@ -2560,10 +2662,12 @@ public class Database extends SQLiteOpenHelper
         db.endTransaction();
     }
 
-    //Clears master satellite table
+    //Clears master satellite and associated tables
     public static void clearMasterSatelliteTable(Context context)
     {
         UpdateService.setMasterListTime(context, "", 0);
         runDelete(context, Tables.MasterSatellite, null);
+        runDelete(context, Tables.Category, null);
+        runDelete(context, Tables.SatelliteCategory, null);
     }
 }

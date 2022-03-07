@@ -201,9 +201,7 @@ class Whirly
         private final BillboardInfo boardInfo;
         private ScreenObject boardScreen;
         private MaplyTexture boardTexture;
-        private final BaseController.TextureSettings boardTextureSettings;
         private ComponentObject boardObject;
-        private final float[] boardTextureColor;
         final ArrayList<Billboard> billboardList;
 
         Board(BaseController boardController, boolean tleIsAc, boolean visible)
@@ -219,10 +217,8 @@ class Whirly
             boardScreen = new ScreenObject();
             boardImage = null;
             boardTexture = null;
-            boardTextureSettings = new BaseController.TextureSettings();
             boardObject = null;
 
-            boardTextureColor = new float[]{1.0f, 1.0f, 1.0f, 1.0f};
             billboardList = new ArrayList<>(0);
 
             boardInfo.setDrawPriority(DrawPriority.BoardEye);
@@ -282,9 +278,9 @@ class Whirly
                 }
                 imageWidthScale = (width / height);
 
-                boardTexture = controller.addTexture(image, boardTextureSettings, BaseController.ThreadMode.ThreadAny);
+                boardTexture = controller.addTexture(image, new BaseController.TextureSettings(), BaseController.ThreadMode.ThreadAny);
                 boardScreen = new ScreenObject();
-                boardScreen.addTexture(boardTexture, boardTextureColor, (float)(baseScale * imageWidthScale), (float)baseScale);
+                boardScreen.addTexture(boardTexture, new float[]{1.0f, 1.0f, 1.0f, 1.0f}, (float)(baseScale * imageWidthScale), (float)baseScale);
                 boardScreen.translateX(offsetX, offsetY);
                 if(rotateDegrees != Double.MAX_VALUE)
                 {
@@ -376,7 +372,6 @@ class Whirly
         private Sticker flatSticker;
         private final StickerInfo flatInfo;
         private MaplyTexture flatTexture;
-        private final BaseController.TextureSettings flatTextureSettings;
         private ComponentObject flatObject;
         private final BaseController controller;
         final ArrayList<Sticker> flatList;
@@ -387,7 +382,6 @@ class Whirly
             controller = boardController;
 
             flatTexture = null;
-            flatTextureSettings = new BaseController.TextureSettings();
             flatObject = null;
 
             flatList = new ArrayList<>(0);
@@ -429,7 +423,7 @@ class Whirly
                     flatTexture = null;
                 }
 
-                flatTexture = controller.addTexture(rotatedImage != null ? rotatedImage : image, flatTextureSettings, BaseController.ThreadMode.ThreadAny);
+                flatTexture = controller.addTexture(rotatedImage != null ? rotatedImage : image, new BaseController.TextureSettings(), BaseController.ThreadMode.ThreadAny);
                 flatTextureList.add(flatTexture);
                 flatSticker.setTextures(flatTextureList);
             }

@@ -49,6 +49,7 @@ import com.mousebird.maply.VectorInfo;
 import com.mousebird.maply.VectorObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -80,26 +81,38 @@ class Whirly
     {
         private boolean useText;
         private boolean useBackground;
-        private final String title;
+        private boolean lastUseBackground;
         private View snippetLayout;
         private TextView snippetText;
+        private TextView snippetTitle;
 
-        InfoImageCreator(String setTitle, boolean showText, boolean showBackground)
+        InfoImageCreator(boolean showText, boolean showBackground)
         {
             useText = showText;
             useBackground = showBackground;
-            title = setTitle;
+            lastUseBackground = !useBackground;
             snippetLayout = null;
+            snippetText = null;
+            snippetTitle = null;
         }
 
         @SuppressLint("InflateParams")
-        public Bitmap get(Context context, String text)
+        public Bitmap get(Context context, String title, String text)
         {
             int width;
             int height;
+            boolean backgroundChanged = (useBackground != lastUseBackground);
             Bitmap snippetImage;
             Canvas snippetCanvas;
-            TextView snippetTitle;
+
+            //if using of background changed and using background
+            if(backgroundChanged && useBackground)
+            {
+                //reset layout
+                snippetLayout = null;
+                snippetTitle =  null;
+                snippetText = null;
+            }
 
             //if layout has not been set
             if(snippetLayout == null)
@@ -107,20 +120,22 @@ class Whirly
                 //get layout
                 snippetLayout = LayoutInflater.from(context).inflate(R.layout.current_map_snippet, null).findViewById(R.id.Snippet_Layout);
                 snippetLayout.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
-                if(!useBackground)
-                {
-                    snippetLayout.setBackground(null);
-                }
+            }
 
+            //if title has not been set yet
+            if(snippetTitle == null)
+            {
                 //get title
                 snippetTitle = snippetLayout.findViewById(R.id.Snippet_Title_Text);
-                if(!useBackground)
-                {
-                    Globals.setShadowedText(snippetTitle);
-                }
-                snippetTitle.setText(title);
                 snippetTitle.setVisibility(View.VISIBLE);
+            }
 
+            //update title
+            snippetTitle.setText(title);
+
+            //if text has not been set yet
+            if(snippetText == null)
+            {
                 //get text
                 snippetText = snippetLayout.findViewById(R.id.Snippet_Text);
             }
@@ -129,13 +144,22 @@ class Whirly
             if(useText)
             {
                 //update text
-                if(!useBackground)
+                snippetText.setText(text);
+            }
+
+            //update text visibility
+            snippetText.setVisibility(useText && text != null ? View.VISIBLE : View.GONE);
+
+            //if using of background changed and not using background
+            if(backgroundChanged && !useBackground)
+            {
+                snippetLayout.setBackground(null);
+                Globals.setShadowedText(snippetTitle);
+                if(useText)
                 {
                     Globals.setShadowedText(snippetText);
                 }
-                snippetText.setText(text);
             }
-            snippetText.setVisibility(useText && text != null ? View.VISIBLE : View.GONE);
 
             //update size
             snippetLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
@@ -151,15 +175,18 @@ class Whirly
             snippetLayout.layout(snippetLayout.getLeft(), snippetLayout.getTop(), snippetLayout.getRight(), snippetLayout.getBottom());
             snippetLayout.draw(snippetCanvas);
 
+            //update status
+            lastUseBackground = useBackground;
+
             //return image
             return(snippetImage);
         }
 
-        public Bitmap update(Context context, String text, boolean showText, boolean showBackground)
+        public Bitmap update(Context context, String title, String text, boolean showText, boolean showBackground)
         {
             useText = showText;
             useBackground = showBackground;
-            return(get(context, text));
+            return(get(context, title, text));
         }
     }
 
@@ -701,6 +728,8 @@ class Whirly
 
     public static class MarkerObject extends CoordinatesFragment.MarkerBase
     {
+        private static WeakReference<InfoImageCreator> infoCreator;
+
         private Context currentContext;
         private Shared common;
         private ScreenMarker marker;
@@ -717,7 +746,6 @@ class Whirly
         private double markerBaseSizeValue;
         private String titleText;
         private String infoText;
-        private InfoImageCreator infoCreator;
         private BaseController controller;
 
         MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation)
@@ -749,7 +777,6 @@ class Whirly
                 infoMarker = new ScreenMarker();
                 infoMarker.selectable = false;
                 infoMarkerObj = null;
-                infoCreator = new InfoImageCreator("...", usingInfo, showBackground);
                 infoText = "...";
 
                 titleMarker = new ScreenMarker();
@@ -759,6 +786,15 @@ class Whirly
 
                 moveLocation(markerLocation.geo.latitude, markerLocation.geo.longitude, markerLocation.geo.altitudeKm);
             }
+        }
+
+        private InfoImageCreator getInfoCreator()
+        {
+            if(infoCreator == null || infoCreator.get() == null)
+            {
+                infoCreator = new WeakReference<>(new InfoImageCreator(usingInfo, showBackground));
+            }
+            return(infoCreator.get());
         }
 
         @Override
@@ -790,11 +826,10 @@ class Whirly
             remove();
 
             titleText = title;
-            infoCreator = new InfoImageCreator(titleText, usingInfo, showBackground);
-            infoMarker.image = infoCreator.get(currentContext, infoText);
+            infoMarker.image = getInfoCreator().get(currentContext, titleText, infoText);
             infoMarker.size = new Point2d(infoMarker.image.getWidth() * markerScale, infoMarker.image.getHeight() * markerScale);
 
-            titleMarker.image = infoCreator.get(currentContext, null);
+            titleMarker.image = getInfoCreator().get(currentContext, titleText, null);
             titleMarker.size = new Point2d(titleMarker.image.getWidth() * markerScale, titleMarker.image.getHeight() * markerScale);
             titleMarker.offset = new Point2d(0, (titleMarker.size.getY() / 2) + (marker.size.getY() / 2));
 
@@ -807,7 +842,7 @@ class Whirly
             remove();
 
             infoText = text;
-            infoMarker.image = infoCreator.get(currentContext, infoText);
+            infoMarker.image = getInfoCreator().get(currentContext, titleText, infoText);
             infoMarker.size = new Point2d(infoMarker.image.getWidth() * markerScale, infoMarker.image.getHeight() * markerScale);
             infoMarker.offset = new Point2d(0, (infoMarker.size.getY() / 2) + (marker.size.getY() / 2));
 
@@ -945,6 +980,8 @@ class Whirly
 
     public static class OrbitalObject extends CoordinatesFragment.OrbitalBase
     {
+        private static WeakReference<InfoImageCreator> infoCreator;
+
         boolean alwaysShowTitle;
         private final boolean forMap;
         private final int noradId;
@@ -966,14 +1003,12 @@ class Whirly
         private FlatObject orbitalShadow;
         private MarkerObject orbitalMarker;
         private final Path orbitalPath;
-        private InfoImageCreator infoCreator;
         private final BaseController controller;
 
         OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
             boolean tleIsAccurate;
-            String name;
             Bitmap titleImage;
             Bitmap orbitalImage;
             Drawable orbitalBgImage;
@@ -1020,10 +1055,7 @@ class Whirly
 
                 setShowShadow(showShadow);
 
-                name = common.data.getName();
-                infoCreator = new InfoImageCreator(name, usingInfo, usingBackground);
-
-                titleImage = infoCreator.get(currentContext, null);
+                titleImage = getInfoCreator().get(currentContext, common.data.getName(), null);
                 infoBoard = new Board(controller, tleIsAccurate, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
@@ -1034,6 +1066,15 @@ class Whirly
 
             setVisible(false);
             setInfoVisible(false);
+        }
+
+        private InfoImageCreator getInfoCreator()
+        {
+            if(infoCreator == null || infoCreator.get() == null)
+            {
+                infoCreator = new WeakReference<>(new InfoImageCreator(usingInfo, showBackground));
+            }
+            return(infoCreator.get());
         }
 
         private double getCurrentZoom()
@@ -1143,7 +1184,7 @@ class Whirly
                 infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
 
                 //set image
-                infoImage = infoCreator.get(currentContext, (usingInfo && showingInfo ? text : null));
+                infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
                 if(orbitalBoard.boardImage != null)
                 {
                     infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
@@ -1178,7 +1219,7 @@ class Whirly
                 }
 
                 //recreate info
-                infoImage = infoCreator.get(currentContext, (usingInfo && showingInfo ? lastInfo : null));
+                infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? lastInfo : null));
                 infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
             }
@@ -1195,7 +1236,7 @@ class Whirly
             }
             else
             {
-                infoBoard.setImage(infoCreator.update(currentContext, (showingInfo ? lastInfo : null), usingInfo, showBackground), markerScale);
+                infoBoard.setImage(getInfoCreator().update(currentContext, common.data.getName(), (showingInfo ? lastInfo : null), usingInfo, showBackground), markerScale);
             }
         }
 
@@ -1251,7 +1292,7 @@ class Whirly
             }
             else
             {
-                infoBoard.setImage(infoCreator.update(currentContext, (showingInfo ? lastInfo : null), usingInfo, showBackground), markerScale);
+                infoBoard.setImage(getInfoCreator().update(currentContext, common.data.getName(), (showingInfo ? lastInfo : null), usingInfo, showBackground), markerScale);
             }
         }
 

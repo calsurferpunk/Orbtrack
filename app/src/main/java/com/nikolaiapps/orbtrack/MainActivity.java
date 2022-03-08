@@ -4404,6 +4404,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     boolean onCurrent = (mainGroup == Groups.Current);
                     boolean onCalculate = (mainGroup == Groups.Calculate);
                     boolean onCalculateLens = (onCalculate && page < Calculate.PageType.PageCount && calculateSubPage[page] == Globals.SubPageType.Lens);
+                    long repeatMs;
+                    long startTimeMs = System.currentTimeMillis();
 
                     //if task still exists
                     if(timerTask != null)
@@ -4436,8 +4438,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
                         }
 
+                        //wait only as long as needed to match delay
+                        repeatMs = timerDelay - (System.currentTimeMillis() - startTimeMs);
+                        if(repeatMs < 1)
+                        {
+                            //make sure task keeps running
+                            repeatMs = 1;
+                        }
+
                         //update delay
-                        timerTask.setRepeatMs(timerDelay);
+                        timerTask.setRepeatMs(repeatMs);
                     }
                 }
             };

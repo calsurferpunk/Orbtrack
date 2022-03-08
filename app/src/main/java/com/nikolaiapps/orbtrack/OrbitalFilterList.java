@@ -145,8 +145,8 @@ public class OrbitalFilterList
         //Used data
         protected static class UsedData
         {
-            ArrayList<UpdateService.MasterOwner> owners;
-            ArrayList<String> categories;
+            final ArrayList<UpdateService.MasterOwner> owners;
+            final ArrayList<String> categories;
 
             public UsedData(ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories)
             {

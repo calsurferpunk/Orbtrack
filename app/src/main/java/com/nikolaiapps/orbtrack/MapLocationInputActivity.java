@@ -51,11 +51,6 @@ public class MapLocationInputActivity extends BaseInputActivity
             longitude = loc.longitude;
         }
 
-        public LatLng getLocation()
-        {
-            return(new LatLng(latitude, longitude));
-        }
-
         public void setLatitude(double lat)
         {
             latitude = lat;

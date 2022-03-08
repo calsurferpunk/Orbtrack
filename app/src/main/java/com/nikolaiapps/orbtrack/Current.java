@@ -1582,14 +1582,6 @@ public abstract class Current
                 return(id == otherItem.id);
             }
 
-            public void setProgress(int value)
-            {
-                if(progressBar != null)
-                {
-                    progressBar.setProgress(value);
-                }
-            }
-
             public void setLoading(boolean loading, boolean tleIsAccurate)
             {
                 isLoading = loading && tleIsAccurate;
@@ -3880,10 +3872,6 @@ public abstract class Current
         }
 
         //Gets coordinate item(s)
-        public static Coordinates.Item[] getCoordinatesItems()
-        {
-            return(coordinateItems);
-        }
         public static Coordinates.Item getCoordinatesItem(int index)
         {
             return(coordinateItems != null && index >= 0 && index < coordinateItems.length ? coordinateItems[index] : null);

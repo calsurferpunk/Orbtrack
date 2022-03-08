@@ -11,11 +11,6 @@ import android.util.AttributeSet;
 
 public class CursorImageView extends AppCompatImageView
 {
-    /*public interface OnCursorChangedListener
-    {
-        void onCursorChanged(float x, float y);
-    }*/
-
     private boolean fixedX;
     private boolean fixedY;
     private int layoutWidth;
@@ -27,7 +22,6 @@ public class CursorImageView extends AppCompatImageView
     private float cursorOuterRadius;
     private Paint cursorPaint;
     private Paint cursorBorder;
-    //private OnCursorChangedListener cursorChangedListener;
 
     public CursorImageView(Context context)
     {
@@ -120,16 +114,6 @@ public class CursorImageView extends AppCompatImageView
         cursorX = (fixedX ? (int)(layoutWidth / 2f) : x);
         cursorY = (fixedY ? (int)(layoutHeight / 2f) : y);
 
-        /*if(cursorChangedListener != null)
-        {
-            cursorChangedListener.onCursorChanged(cursorX, cursorY);
-        }*/
-
         this.invalidate();
     }
-
-    /*public void setOnCursorChangedListener(OnCursorChangedListener listener)
-    {
-        cursorChangedListener = listener;
-    }*/
 }

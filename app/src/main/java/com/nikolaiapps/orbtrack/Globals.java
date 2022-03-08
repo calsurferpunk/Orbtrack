@@ -1265,10 +1265,12 @@ public abstract class Globals
             }
             else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
             {
+                //noinspection deprecation
                 return(android.provider.Settings.Secure.getInt(context.getContentResolver(), android.provider.Settings.Secure.LOCATION_MODE, android.provider.Settings.Secure.LOCATION_MODE_OFF) != android.provider.Settings.Secure.LOCATION_MODE_OFF);
             }
             else
             {
+                //noinspection deprecation
                 return(!TextUtils.isEmpty(android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED)));
             }
         }

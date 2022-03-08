@@ -25,6 +25,9 @@ android {
         release {
             jniDebuggable false
             renderscriptDebuggable false
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles 'proguard-rules.pro'
         }
     }
     configurations {

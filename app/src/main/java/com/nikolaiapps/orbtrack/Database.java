@@ -1930,7 +1930,9 @@ public class Database extends SQLiteOpenHelper
     //Deletes a satellite
     public static boolean deleteSatellite(Context context, int noradId)
     {
-        return(runDelete(context, Tables.Orbital, "[ID]='" + getSatelliteID(context, noradId) + "'"));
+        boolean success = runDelete(context, Tables.Orbital, "[ID]='" + getSatelliteID(context, noradId) + "'");
+        OrbitalsBuffer.setNeedReload();
+        return(success);
     }
 
     //Gets location name values

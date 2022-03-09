@@ -543,7 +543,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 if(isOkay)
                 {
                     //handle open file request
-                    BaseInputActivity.handleActivityOpenFileRequest(this, mainDrawerLayout, data, requestCode);
+                    BaseInputActivity.handleActivityOpenFileRequest(this, data, requestCode);
                 }
                 break;
 

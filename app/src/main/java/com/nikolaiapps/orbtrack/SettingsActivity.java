@@ -1455,7 +1455,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if(isOkay)
                 {
                     //handle open file request
-                    BaseInputActivity.handleActivityOpenFileRequest(this, settingsLayout, data, requestCode);
+                    BaseInputActivity.handleActivityOpenFileRequest(this, data, requestCode);
                 }
                 break;
         }

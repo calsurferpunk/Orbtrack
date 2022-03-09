@@ -19,9 +19,9 @@ import androidx.core.app.NotificationManagerCompat;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -42,9 +42,10 @@ public class UpdateService extends NotifyService
         static final String User = "user";
         static final String Password = "pwd";
         static final String SatellitesCache = "satellitesCache";
+        static final String FileUris = "fileUris";
         static final String FileNames = "fileNames";
         static final String FileName = "fileName";
-        static final String FilesData = "fileData";
+        static final String Files = "files";
         static final String FileType = "fileType";
         static final String FileExt = "fileExt";
         static final String FileSourceType = "fileSourceType";
@@ -805,6 +806,7 @@ public class UpdateService extends NotifyService
         boolean runForeground = intent.getBooleanExtra(ParamTypes.RunForeground, false);
         boolean satellitesCache = intent.getBooleanExtra(ParamTypes.SatellitesCache, false);
         int index = intent.getIntExtra(ParamTypes.Index, 0);
+        int index2;
         int updateSource = intent.getIntExtra(ParamTypes.UpdateSource, Database.UpdateSource.SpaceTrack);
         int fileType = intent.getIntExtra(ParamTypes.FileType, Integer.MAX_VALUE);
         int fileSourceType = intent.getIntExtra(ParamTypes.FileSourceType, Integer.MAX_VALUE);
@@ -818,8 +820,30 @@ public class UpdateService extends NotifyService
         Calculations.TLEDataType tleData = intent.getParcelableExtra(ParamTypes.TLEData);
         NotificationCompat.Builder notifyBuilder = Globals.createNotifyBuilder(this, notifyChannelId);
         ArrayList<String> fileNames = intent.getStringArrayListExtra(ParamTypes.FileNames);
-        ArrayList<String> filesData = intent.getStringArrayListExtra(ParamTypes.FilesData);
+        Serializable filesSerial = intent.getSerializableExtra(ParamTypes.Files);
+        ArrayList<File> files = null;
+        ArrayList<Uri> fileUris = intent.getParcelableArrayListExtra(ParamTypes.FileUris);
         ArrayList<Database.DatabaseSatellite> satelliteList = new ArrayList<>(0);
+
+        //if using files
+        if(filesSerial instanceof ArrayList)
+        {
+            //remember array
+            ArrayList<?> fileSerialArray = (ArrayList<?>)filesSerial;
+            files = new ArrayList<>(0);
+
+            //go through each item
+            for(index2 = 0; index2 < fileSerialArray.size(); index2++)
+            {
+                //if current item is a file
+                Object currentItem = fileSerialArray.get(index2);
+                if(currentItem instanceof File)
+                {
+                    //add to files data
+                    files.add((File)currentItem);
+                }
+            }
+        }
 
         //if using satellites cache
         if(satellitesCache)
@@ -869,7 +893,7 @@ public class UpdateService extends NotifyService
 
             case UpdateType.LoadFile:
                 //load files
-                loadSatellite(fileNames, filesData);
+                loadSatellite(fileNames, files, fileUris);
                 break;
 
             case UpdateType.SaveFile:
@@ -3207,66 +3231,82 @@ public class UpdateService extends NotifyService
     }
 
     //Loads satellite(s) from the given file
-    private void loadSatellite(ArrayList<String> fileNames, ArrayList<String> filesData)
+    private void loadSatellite(ArrayList<String> fileNames, ArrayList<File> files, ArrayList<Uri> fileUris)
     {
-        boolean error = false;
-        boolean useFileData = (filesData != null);
+        boolean haveError = false;
         int index;
-        int fileCount = (useFileData ? filesData.size() : (fileNames != null ? fileNames.size() : 0));
+        int fileCount;
         int updatedSatellites = 0;
-        FileInputStream fileStream;
         Resources res = this.getResources();
         String readString;
         String section = res.getString(R.string.title_file);
+        Exception error = null;
+        ArrayList<String> filesAscii = null;
         ArrayList<Database.DatabaseSatellite> pendingSaveSatellites = new ArrayList<>(0);
 
-        //go through each file
-        for(index = 0; index < fileCount && !error && !cancelIntent[UpdateType.LoadFile]; index++)
+        try
         {
-            //update status
-            sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Started);
-
-            try
+            //try to read file data
+            if(fileUris != null)
             {
-                //read file
-                if(useFileData)
-                {
-                    //use file data
-                    readString = filesData.get(index);
-                }
-                else
-                {
-                    //read file data
-                    fileStream = new FileInputStream(fileNames.get(index));
-                    readString = Globals.readTextFile(this, fileStream);
-                    fileStream.close();
-                }
-
-                //try to save all satellites
-                if(readString.contains(Database.Tables.SatelliteCategory) && readString.contains(Database.Tables.Owner) && readString.contains(Database.Tables.Orbital))
-                {
-                    //load backup file
-                    updatedSatellites += loadBackup(readString);
-                }
-                else
-                {
-                    //load TLE
-                    updatedSatellites += saveSatellite(readString, Globals.getUnknownString(this), -1, null, Globals.INVALID_DATE_MS, Database.OrbitalType.Satellite, pendingSaveSatellites);
-                }
+                filesAscii = Globals.readTextFiles(this, fileUris);
             }
-            catch(Exception ex)
+            else
             {
-                //set error
-                currentError[UpdateType.LoadFile] = ex.getMessage();
-                error = true;
+                filesAscii = Globals.readTextFiles(this, fileNames, files);
             }
-
-            //update status
-            sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Success, pendingSaveSatellites);
+        }
+        catch(Exception ex)
+        {
+            error = ex;
+            haveError = true;
         }
 
+        //if no error
+        if(!haveError)
+        {
+            fileCount = filesAscii.size();
+
+            //go through each file
+            for(index = 0; index < fileCount && !haveError && !cancelIntent[UpdateType.LoadFile]; index++)
+            {
+                //update status
+                sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Started);
+
+                try
+                {
+                    //get file data
+                    readString = filesAscii.get(index);
+
+                    //try to save all satellites
+                    if(readString.contains(Database.Tables.SatelliteCategory) && readString.contains(Database.Tables.Owner) && readString.contains(Database.Tables.Orbital))
+                    {
+                        //load backup file
+                        updatedSatellites += loadBackup(readString);
+                    }
+                    else
+                    {
+                        //load TLE
+                        updatedSatellites += saveSatellite(readString, Globals.getUnknownString(this), -1, null, Globals.INVALID_DATE_MS, Database.OrbitalType.Satellite, pendingSaveSatellites);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    //set error
+                    error = ex;
+                    haveError = true;
+                }
+
+                //update status
+                sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Success, pendingSaveSatellites);
+            }
+        }
+
+        //update current error
+        currentError[UpdateType.LoadFile] = (error != null ? error.getMessage() : null);
+
         //update progress
-        sendMessage(MessageTypes.General, UpdateType.LoadFile, section, updatedSatellites, updatedSatellites, (cancelIntent[UpdateType.LoadFile] ? Globals.ProgressType.Cancelled : (error || updatedSatellites == 0) ? Globals.ProgressType.Failed : Globals.ProgressType.Finished), pendingSaveSatellites);
+        sendMessage(MessageTypes.General, UpdateType.LoadFile, section, updatedSatellites, updatedSatellites, (cancelIntent[UpdateType.LoadFile] ? Globals.ProgressType.Cancelled : (haveError || updatedSatellites == 0) ? Globals.ProgressType.Failed : Globals.ProgressType.Finished), pendingSaveSatellites);
     }
 
     //Return if running given update type
@@ -3801,12 +3841,14 @@ public class UpdateService extends NotifyService
     }
 
     //Loads file data
-    public static void loadFileData(Activity activity, ArrayList<String> filesData)
+    public static void loadFileData(Activity activity, ArrayList<String> fileNames, ArrayList<File> files, ArrayList<Uri> fileUris)
     {
         Resources res = activity.getResources();
         Intent loadIntent = createIntent(activity, UpdateType.LoadFile, res.getString(R.string.title_file_loading));
 
-        loadIntent.putExtra(ParamTypes.FilesData, filesData);
+        loadIntent.putExtra(ParamTypes.FileNames, fileNames);
+        loadIntent.putExtra(ParamTypes.Files, files);
+        loadIntent.putExtra(ParamTypes.FileUris, fileUris);
 
         Globals.startService(activity, loadIntent, false);
     }

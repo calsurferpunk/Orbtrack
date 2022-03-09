@@ -665,6 +665,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
                             {
                                 int index;
                                 int count = filesData.size();
+                                Activity activity = DropboxAccess.this;
 
                                 //pass information back to caller
                                 int passedResultCode = (resultCode == FileBrowserBaseActivity.ResultCode.Success ? RESULT_OK : RESULT_CANCELED);
@@ -672,10 +673,13 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
                                 resultData.putExtra(FileBrowserBaseActivity.ParamTypes.FilesDataCount, count);
                                 for(index = 0; index < count; index++)
                                 {
-                                    resultData.putExtra(FileBrowserBaseActivity.ParamTypes.FilesData + index, filesData.get(index));
+                                    //save file and add it
+                                    File cacheFile = new File(activity.getCacheDir(), "filesData" + index + ".txt");
+                                    Globals.saveFile(cacheFile, filesData.get(index));
+                                    resultData.putExtra(FileBrowserBaseActivity.ParamTypes.Files + index, cacheFile);
                                 }
                                 setResult(passedResultCode, resultData);
-                                DropboxAccess.this.finish();
+                                activity.finish();
                             }
                         });
                     }

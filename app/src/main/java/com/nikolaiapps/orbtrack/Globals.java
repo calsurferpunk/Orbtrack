@@ -9,6 +9,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -16,6 +17,7 @@ import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -56,6 +58,7 @@ import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.LocaleList;
+import android.provider.OpenableColumns;
 import android.text.Html;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -84,6 +87,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -4337,6 +4341,160 @@ public abstract class Globals
     public static InputStream[] readZipFile(Context context, String filePath, InputStream fileStream, String[] extensionFilter)
     {
         return(readZipFile(context, filePath, fileStream, extensionFilter, 1));
+    }
+
+    //Tries to reads the given text files into strings
+    public static ArrayList<String> readTextFiles(Context context, ArrayList<Uri> fileUris) throws Exception
+    {
+        int index;
+        InputStream fileStream;
+        ContentResolver resolver = context.getContentResolver();
+        ArrayList<String> fileAscii = new ArrayList<>(0);
+
+        //go through each file
+        for(index = 0; index < fileUris.size(); index++)
+        {
+            //remember current file, path, and extension
+            Uri currentFile = fileUris.get(index);
+            String currentPath = currentFile.getPath();
+            String currentExtension = getFileExtension(currentPath);
+
+            //if current scheme has content
+            if(currentFile.getScheme().equals("content"))
+            {
+                //if able to get cursor
+                Cursor currentCursor = resolver.query(currentFile, null, null, null, null);
+                if(currentCursor != null)
+                {
+                    //if able to get first row
+                    if(currentCursor.moveToFirst())
+                    {
+                        //if able to get display name
+                        int nameIndex = currentCursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                        String cursorResult = (nameIndex >= 0 ? currentCursor.getString(nameIndex) : null);
+                        if(cursorResult != null)
+                        {
+                            //update path and extension
+                            currentPath = cursorResult;
+                            currentExtension = getFileExtension(currentPath);
+                        }
+                    }
+                    currentCursor.close();
+                }
+            }
+
+            //read file data
+            fileStream = resolver.openInputStream(fileUris.get(index));
+            if(currentExtension.equals(".zip"))
+            {
+                //get all usable files in the .zip file
+                InputStream[] zipFileStreams = readZipFile(context, "files", fileStream, fileDataExtensions);
+                for(InputStream currentFileStream : zipFileStreams)
+                {
+                    //add file data
+                    fileAscii.add(readTextFile(context, currentFileStream));
+                    currentFileStream.close();
+                }
+            }
+            else if(currentExtension.equals(".tle") || currentExtension.equals(".json") || currentExtension.equals(".txt"))
+            {
+                //add file data
+                fileAscii.add(readTextFile(context, fileStream));
+            }
+            fileStream.close();
+        }
+
+        return(fileAscii);
+    }
+    public static ArrayList<String> readTextFiles(Context context, ArrayList<String> fileNames, ArrayList<File> files) throws Exception
+    {
+        int index;
+        ArrayList<String> fileAscii = new ArrayList<>(0);
+
+        //go through each file
+        for(index = 0; index < fileNames.size(); index++)
+        {
+            //remember file name, extension, and data
+            String currentName = fileNames.get(index);
+            String currentExtension = getFileExtension(currentName);
+            byte[] currentData = readFile(files.get(index));
+
+            //if a .zip
+            if(currentExtension.equalsIgnoreCase(".zip"))
+            {
+                //get all usable files in the .zip file
+                InputStream[] zipFileStreams = readZipFile(context, "files", new ByteArrayInputStream(currentData), fileDataExtensions);
+                for(InputStream currentFileStream : zipFileStreams)
+                {
+                    //add file data
+                    fileAscii.add(readTextFile(context, currentFileStream));
+                    currentFileStream.close();
+                }
+            }
+            else
+            {
+                //try to get text file from data
+                fileAscii.add(readTextFile(context, new ByteArrayInputStream(currentData)));
+            }
+        }
+
+        return(fileAscii);
+    }
+
+    //Saves a file
+    public static void saveFile(File file, byte[] data)
+    {
+        FileOutputStream outputStream;
+
+        try
+        {
+            //if file exists
+            if(file.exists())
+            {
+                //if unable to delete and can't write
+                if(!file.delete() && !file.canWrite())
+                {
+                    //stop
+                    return;
+                }
+            }
+
+            //try to create file
+            if(file.createNewFile())
+            {
+                //write data
+                outputStream = new FileOutputStream(file);
+                outputStream.write(data);
+                outputStream.close();
+            }
+        }
+        catch(Exception ex)
+        {
+            //failed
+        }
+    }
+
+    //Reads a file
+    public static byte[] readFile(File file)
+    {
+        FileInputStream inputStream;
+        byte[] data;
+
+        try
+        {
+            data = new byte[(int)file.length()];
+            inputStream = new FileInputStream(file);
+
+            //noinspection ResultOfMethodCallIgnored
+            inputStream.read(data);
+            inputStream.close();
+            return(data);
+        }
+        catch(Exception ex)
+        {
+            //failed
+            return(new byte[0]);
+        }
     }
 
     //Gets the given number of stars

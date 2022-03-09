@@ -65,7 +65,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         static final String FileIds = "fileIds";
         static final String FileName = "fileName";
         static final String FileNames = "fileNames";
-        static final String FilesData = "filesData";
+        static final String Files = "files";
         static final String FilesDataCount = "filesDataCount";
         static final String FolderName = "folderName";
         static final String ItemCount = "itemCount";

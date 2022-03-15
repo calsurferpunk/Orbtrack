@@ -50,6 +50,12 @@ public abstract class UpdateReceiver extends BroadcastReceiver
         //needs to be overridden
     }
 
+    //On load file update
+    protected void onLoadFileUpdate(int progressType, String section, int percent, int overallPercent)
+    {
+        //needs to be overridden
+    }
+
     //On got information
     protected void onGotInformation(Spanned infoText, int index)
     {
@@ -96,6 +102,7 @@ public abstract class UpdateReceiver extends BroadcastReceiver
         final int progressType = intent.getIntExtra(NotifyService.ParamTypes.ProgressType, Byte.MAX_VALUE);
         final int index = (int)intent.getLongExtra(NotifyService.ParamTypes.Index, 0);
         final long count = intent.getLongExtra(NotifyService.ParamTypes.Count, 0);
+        final int overall = (int)intent.getLongExtra(UpdateService.ParamTypes.SubIndex, -1);
         long countValue;
         final String section = intent.getStringExtra(NotifyService.ParamTypes.Section);
         Bundle extraData = intent.getExtras();
@@ -179,47 +186,54 @@ public abstract class UpdateReceiver extends BroadcastReceiver
                             break;
                     }
                 }
-                else
+                else if(updateType == UpdateService.UpdateType.GetInformation)
                 {
-                    //handle based on update type
-                    if(updateType == UpdateService.UpdateType.GetInformation)
+                    //if ended
+                    if(ended)
                     {
-                        //if ended
-                        if(ended)
+                        //get information
+                        infoString = (String)extraData.getSerializable(UpdateService.ParamTypes.Information);
+                        if(infoString != null)
                         {
-                            //get information
-                            infoString = (String)extraData.getSerializable(UpdateService.ParamTypes.Information);
-                            if(infoString != null)
-                            {
-                                infoText = (Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT) : Html.fromHtml(infoString));
-                            }
-                            else
-                            {
-                                infoText = null;
-                            }
-
-                            //call on got information
-                            onGotInformation(infoText, index);
+                            infoText = (Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT) : Html.fromHtml(infoString));
                         }
+                        else
+                        {
+                            infoText = null;
+                        }
+
+                        //call on got information
+                        onGotInformation(infoText, index);
                     }
                 }
                 break;
 
             case Globals.ProgressType.Running:
                 //handle based on update type
-                if(updateType == UpdateService.UpdateType.BuildDatabase)
+                switch(updateType)
                 {
-                    //get dialog
-                    MultiProgressDialog databaseProgress = getDatabaseProgressDialog();
+                    case UpdateService.UpdateType.BuildDatabase:
+                        //get dialog
+                        MultiProgressDialog databaseProgress = getDatabaseProgressDialog();
 
-                    //if progress display still exists and section is set
-                    if(databaseProgress != null && section != null)
-                    {
-                        //update display
-                        countValue = index + 1;
-                        databaseProgress.setMessage(section + " (" + (index + 1) + res.getString(R.string.text_space_of_space) + count + ")");
-                        databaseProgress.setProgress(countValue, count);
-                    }
+                        //if progress display still exists and section is set
+                        if(databaseProgress != null && section != null)
+                        {
+                            //update display
+                            countValue = index + 1;
+                            databaseProgress.setMessage(section + " (" + (index + 1) + res.getString(R.string.text_space_of_space) + count + ")");
+                            databaseProgress.setProgress(countValue, count);
+                        }
+                        break;
+
+                    case UpdateService.UpdateType.LoadFile:
+                        //if loading
+                        if(messageType == NotifyService.MessageTypes.Load)
+                        {
+                            //call on load file update
+                            onLoadFileUpdate(progressType, section, (count > 0 ? (int)(((index + 1) / (float)count) * 100) : 0), overall);
+                        }
+                        break;
                 }
                 break;
         }

@@ -1500,6 +1500,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //if need to reload orbitals
         if(reloadOrbitals)
         {
+            //stop tasks and reload
+            updateRunningTasks(false);
             loadOrbitals(this, mainDrawerLayout);
         }
 
@@ -1507,10 +1509,17 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         updateMainPagerAdapter(false, saveItems);
         setMainPage(page);
 
-        //if reloaded orbitals and showing status
-        if(reloadOrbitals && mainGroup == Groups.Current)
+        //if reloaded orbitals
+        if(reloadOrbitals)
         {
-            updateCurrentCalculations();
+            //if showing status
+            if(mainGroup == Groups.Current)
+            {
+                updateCurrentCalculations();
+            }
+
+            //resume tasks
+            updateRunningTasks(true);
         }
     }
     private void updateMainPager(boolean reloadOrbitals)
@@ -2601,6 +2610,27 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             }
 
             @Override
+            protected void onLoadFileUpdate(int progressType, String section, int percent, int overallPercent)
+            {
+                //if section is set
+                if(section != null)
+                {
+                    //update section
+                    taskProgress.setMessage(section);
+                }
+
+                //update progress
+                taskProgress.setProgress(percent);
+
+                //if overall progress is set
+                if(overallPercent > -1)
+                {
+                    //update overall progress
+                    taskProgress.setProgress2(overallPercent);
+                }
+            }
+
+            @Override
             protected void onGotInformation(Spanned infoText, int index)
             {
                 int page = getMainPage();
@@ -2633,6 +2663,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean oldSatellites = "Old".equals(section);
                 boolean loadingFile = (updateType == UpdateService.UpdateType.LoadFile);
                 boolean updatingSatellites = (updateType == UpdateService.UpdateType.UpdateSatellites);
+                boolean updatingOldSatellites = (updatingSatellites && oldSatellites);
                 boolean onOrbitalsSatellites = (mainGroup == Groups.Orbitals && page == Orbitals.PageType.Satellites);
 
                 //if -on current- or -on orbitals and satellite page-
@@ -2653,8 +2684,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
                 }
 
-                //if updating old satellites
-                if(updatingSatellites && oldSatellites)
+                //if updating old satellites or loading a file
+                if(updatingOldSatellites || loadingFile)
                 {
                     //if starting
                     if(progressType == Globals.ProgressType.Started)
@@ -2662,7 +2693,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         try
                         {
                             //reset/start showing progress
-                            Globals.setUpdateDialog(taskProgress, res.getString(R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, 2), UpdateService.UpdateType.UpdateSatellites);
+                            Globals.setUpdateDialog(taskProgress, (loadingFile ? res.getString(R.string.title_file_loading) : (res.getString(R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, 2))), (loadingFile ? UpdateService.UpdateType.LoadFile : UpdateService.UpdateType.UpdateSatellites));
                             taskProgress.show();
                         }
                         catch(Exception ex)

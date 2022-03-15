@@ -2670,7 +2670,7 @@ public class UpdateService extends NotifyService
 
     //Saves satellite(s) based on input and returns number saved
     //note: satelliteNum < 0 searches input for name(s) and number(s)
-    private int saveSatellite(String inputString, String satelliteName, int satelliteNum, String ownerCode, long launchDate, byte orbitalType, ArrayList<Database.DatabaseSatellite> pendingSaveSatellites)
+    private int saveSatellite(String inputString, String satelliteName, int satelliteNum, String ownerCode, long launchDate, byte orbitalType, ArrayList<Database.DatabaseSatellite> pendingSaveSatellites, boolean allowMessages)
     {
         int index;
         int index2;
@@ -2681,10 +2681,13 @@ public class UpdateService extends NotifyService
         int line2Index;
         int currentNum;
         int saveCount = 0;
+        int satelliteCount;
         int inputLength = inputString.length();
         boolean unknownSatellite = (satelliteNum < 0);
         boolean isGpData = inputString.contains(Calculations.GPParams.Name);
+        String section;
         String currentNumString;
+        Resources res = this.getResources();
         Calendar defaultLaunchDate = Calendar.getInstance();
         ArrayList<Integer> satelliteNumbers = new ArrayList<>(0);
         ArrayList<String> satelliteNames = new ArrayList<>(0);
@@ -2857,8 +2860,12 @@ public class UpdateService extends NotifyService
             satelliteNames.add(satelliteName);
         }
 
+        //update section and count
+        section = res.getString(R.string.title_file_loading);
+        satelliteCount = satelliteNumbers.size();
+
         //go through each satellite number
-        for(index = 0; index < satelliteNumbers.size(); index++)
+        for(index = 0; index < satelliteCount; index++)
         {
             String gpString = null;
             Calculations.SatelliteObjectType currentSatellite = null;
@@ -2914,7 +2921,7 @@ public class UpdateService extends NotifyService
                 if(satelliteName.equals(Globals.getUnknownString(this)) || ownerCode == null || launchDate == Globals.INVALID_DATE_MS)
                 {
                     //try to get existing satellite
-                    Database.DatabaseSatellite existingSatellite = Database.getOrbital(this, satelliteNum);
+                    Database.DatabaseSatellite existingSatellite = Database.getOrbital(this, satelliteNum, false);
                     if(existingSatellite != null)
                     {
                         //get existing name owner code
@@ -2947,6 +2954,13 @@ public class UpdateService extends NotifyService
                     //add to pending satellites
                     pendingSaveSatellites.add(new Database.DatabaseSatellite(satelliteName, null, satelliteNum, null, null, defaultLaunchDate.getTimeInMillis(), tleLines[0], tleLines[1], Globals.UNKNOWN_DATE_MS, gpString, Globals.UNKNOWN_DATE_MS, Color.DKGRAY, orbitalType, true));
                 }
+            }
+
+            //if allowing messages
+            if(allowMessages)
+            {
+                //update status
+                sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, satelliteCount, Globals.ProgressType.Running);
             }
         }
 
@@ -3124,7 +3138,7 @@ public class UpdateService extends NotifyService
                     }
 
                     //try to save satellite based on input
-                    saved = (saveSatellite(receivedPage, currentSatellite.getName(), currentSatellite.noradId, currentSatellite.ownerCode, currentSatellite.launchDateMs, currentSatellite.orbitalType, null) > 0);
+                    saved = (saveSatellite(receivedPage, currentSatellite.getName(), currentSatellite.noradId, currentSatellite.ownerCode, currentSatellite.launchDateMs, currentSatellite.orbitalType, null, false) > 0);
 
                     //update progress
                     sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index3, count, (saved ? Globals.ProgressType.Success : Globals.ProgressType.Failed));
@@ -3166,8 +3180,11 @@ public class UpdateService extends NotifyService
     {
         int tableIndex;
         int rowIndex;
+        int rowsLength;
         int saveCount = 0;
+        int sectionId = -1;
         JSONObject rootNode;
+        Resources res = this.getResources();
         String[] tables = new String[]{Database.Tables.SatelliteCategory, Database.Tables.Owner, Database.Tables.Orbital, Database.Tables.Information};
 
         //get root and master list
@@ -3182,9 +3199,10 @@ public class UpdateService extends NotifyService
             String currentTable = tables[tableIndex];
             JSONObject currentTableNode = (rootNode.has(currentTable) || !currentTable.equals(Database.Tables.Information) ? rootNode.getJSONObject(currentTable) : null);
             JSONArray rows = (currentTableNode != null ? currentTableNode.getJSONArray("Rows") : new JSONArray());
+            rowsLength = rows.length();
 
             //go through each row
-            for(rowIndex = 0; rowIndex < rows.length(); rowIndex++)
+            for(rowIndex = 0; rowIndex < rowsLength; rowIndex++)
             {
                 //get row node
                 JSONObject rowNode = rows.getJSONObject(rowIndex);
@@ -3194,10 +3212,12 @@ public class UpdateService extends NotifyService
                 {
                     case Database.Tables.SatelliteCategory:
                         masterList.addSatelliteCategory(rowNode.getInt("Norad"), masterList.addCategory(rowNode.getString("Name")));
+                        sectionId = R.string.title_categories;
                         break;
 
                     case Database.Tables.Owner:
                         masterList.addOwner(new UpdateService.MasterOwner(rowNode.getString("Code"), rowNode.getString("Name")));
+                        sectionId = R.string.title_owners;
                         break;
 
                     case Database.Tables.Orbital:
@@ -3213,12 +3233,17 @@ public class UpdateService extends NotifyService
                         {
                             saveCount++;
                         }
+                        sectionId = R.string.title_orbitals;
                         break;
 
                     case Database.Tables.Information:
                         Database.saveInformation(this, rowNode.getInt("Norad"), rowNode.getInt("Source"), rowNode.getString("Language"), rowNode.getString("Info"));
+                        sectionId = R.string.title_information;
                         break;
                 }
+
+                //update status
+                sendMessage(MessageTypes.Load, UpdateType.LoadFile, (sectionId > 0 ? res.getString(sectionId) : null), rowIndex, rowsLength, Globals.ProgressType.Running);
             }
         }
 
@@ -3239,7 +3264,7 @@ public class UpdateService extends NotifyService
         int updatedSatellites = 0;
         Resources res = this.getResources();
         String readString;
-        String section = res.getString(R.string.title_file);
+        String section = res.getString(R.string.title_file_loading);
         Exception error = null;
         ArrayList<String> filesAscii = null;
         ArrayList<Database.DatabaseSatellite> pendingSaveSatellites = new ArrayList<>(0);
@@ -3270,8 +3295,12 @@ public class UpdateService extends NotifyService
             //go through each file
             for(index = 0; index < fileCount && !haveError && !cancelIntent[UpdateType.LoadFile]; index++)
             {
-                //update status
-                sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Started);
+                //if more than 1 file
+                if(fileCount > 1)
+                {
+                    //update sub status
+                    sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, 0, 0, (int)((index / (float)fileCount) * 100), Globals.ProgressType.Running);
+                }
 
                 try
                 {
@@ -3287,7 +3316,7 @@ public class UpdateService extends NotifyService
                     else
                     {
                         //load TLE
-                        updatedSatellites += saveSatellite(readString, Globals.getUnknownString(this), -1, null, Globals.INVALID_DATE_MS, Database.OrbitalType.Satellite, pendingSaveSatellites);
+                        updatedSatellites += saveSatellite(readString, Globals.getUnknownString(this), -1, null, Globals.INVALID_DATE_MS, Database.OrbitalType.Satellite, pendingSaveSatellites, true);
                     }
                 }
                 catch(Exception ex)
@@ -3297,8 +3326,12 @@ public class UpdateService extends NotifyService
                     haveError = true;
                 }
 
-                //update status
-                sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, index, fileCount, Globals.ProgressType.Success, pendingSaveSatellites);
+                //if more than 1 file
+                if(fileCount > 1)
+                {
+                    //update sub status
+                    sendMessage(MessageTypes.Load, UpdateType.LoadFile, section, 0, 1, (int)(((index + 1) / (float)fileCount) * 100), (haveError ? Globals.ProgressType.Failed : Globals.ProgressType.Running), pendingSaveSatellites);
+                }
             }
         }
 

@@ -406,7 +406,6 @@ public abstract class Globals
             final boolean forSpaceTrack = (accountType == AccountType.SpaceTrack);
             final String title = res.getString(forSpaceTrack && alwaysShow ? R.string.title_login : updateType == UpdateService.UpdateType.UpdateSatellites ? R.string.title_update : R.string.title_list_update);
             final String[] createLink = (forSpaceTrack ? new String[]{context.getResources().getString(R.string.spacetrack_create_link)} : null);
-            //final String[] changeText = new String[]{context.getString(R.string.desc_change_source)};
             final WebPageData loginData = (alwaysShow || !forSpaceTrack ? null : loginSpaceTrack(user, password));
 
             //not canceled yet

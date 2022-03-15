@@ -1859,6 +1859,10 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets desired orbital with norad ID
+    public static DatabaseSatellite getOrbital(Context context, int noradId, boolean allowLoad)
+    {
+        return(OrbitalsBuffer.getOrbital(context, noradId, allowLoad));
+    }
     public static DatabaseSatellite getOrbital(Context context, int noradId)
     {
         return(OrbitalsBuffer.getOrbital(context, noradId));

@@ -239,17 +239,19 @@ public abstract class NotifyService extends IntentService
     //Sends a message
     protected void sendMessage(byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int retryID, boolean showNotification, Bundle extraData)
     {
-        boolean isMasterList = (serviceIndex == UpdateService.UpdateType.GetMasterList);
+        boolean isGeneral = (messageType == MessageTypes.General);
+        boolean isDownload = (messageType == MessageTypes.Download);
+        boolean isFinished = (progressType == Globals.ProgressType.Finished);
         boolean isUpdateSatellites = (serviceIndex == UpdateService.UpdateType.UpdateSatellites);
-        boolean isParse = (messageType == MessageTypes.Parse);
         long limitMs = 0;
-        long baseInterval = ((messageType == MessageTypes.Download || isParse) && (isMasterList || isUpdateSatellites) ? (isParse || isUpdateSatellites ? ((count / (!showNotification ? 100 : 20)) * (isUpdateSatellites && !showNotification ? 5 : 1)) : Globals.WEB_READ_SIZE) : 1);
-        final long finalBaseInterval = (baseInterval <= 0 ? 1 : baseInterval);
-        long indexInterval = (index / finalBaseInterval);
-        long intervals = (count / (count > finalBaseInterval ? finalBaseInterval : 1));
+        final long division = (showNotification ? 20 : 100);
+        final long baseInterval = (isDownload && !isUpdateSatellites ? Globals.WEB_READ_SIZE : (count / division));
+        final long intervals = (baseInterval <= 0 ? 1 : baseInterval > 2048 ? 2048 : baseInterval);
+        final long indexInterval = (index / intervals);
+        final long indexIntervalStep = (intervals / (intervals >= division ? division : 1));
         boolean sendProgress = true;
         boolean haveSection = (section != null && !section.equals(""));
-        boolean enoughProgress = (progressType == Globals.ProgressType.Finished || intervals <= 20 || indexInterval == 0 || indexInterval == 1 || index >= (count - 1) || (indexInterval % (intervals / 20)) == 0);      //if no count or less than update divisions, on first index, on last index, or on an allowable index in between
+        boolean enoughProgress = (isFinished || intervals <= 20 || indexInterval == 0 || indexInterval == 1 || index >= (count - 1) || (indexInterval % indexIntervalStep) == 0);      //if no count or less than update divisions, on first index, on last index, or on an allowable index in between
         Intent intent;
         NotificationCompat.Builder notifyBuilder = (showNotification ? Globals.createNotifyBuilder(this, notifyChannelId) : null);
 
@@ -261,7 +263,7 @@ public abstract class NotifyService extends IntentService
             case Globals.ProgressType.Denied:
             case Globals.ProgressType.Finished:
                 //if the main update
-                if(messageType == MessageTypes.General)
+                if(isGeneral)
                 {
                     //set as done
                     onClearIntent(serviceIndex);
@@ -279,7 +281,7 @@ public abstract class NotifyService extends IntentService
                         dismissIntent.putExtra(serviceParam, serviceIndex);
 
                         //update message
-                        currentNotify.title = res.getString(progressType == Globals.ProgressType.Finished ? R.string.title_finished : R.string.title_failed) + " " + titleDesc;
+                        currentNotify.title = res.getString(isFinished ? R.string.title_finished : R.string.title_failed) + " " + titleDesc;
                         currentNotify.message = "";
                         currentNotify.progress = 0;
                         currentNotify.maxProgress = 0;
@@ -287,7 +289,7 @@ public abstract class NotifyService extends IntentService
                         limitMs = 1000;     //make sure at least 1 second passed from last
 
                         //if didn't finish
-                        if(progressType != Globals.ProgressType.Finished)
+                        if(!isFinished)
                         {
                             //create retry intent
                             retryIntent = new Intent(this, receiverClass);

@@ -172,7 +172,15 @@ public abstract class NotifyService extends IntentService
         //stay awake
         if(keepAwake != null)
         {
-            keepAwake.acquire(NotifyReceiver.MAX_WAKE_LOCK_MS);
+            //try to get wake lock
+            try
+            {
+                keepAwake.acquire(NotifyReceiver.MAX_WAKE_LOCK_MS);
+            }
+            catch(Exception ex)
+            {
+                keepAwake = null;
+            }
         }
 
         //create notification channel
@@ -192,7 +200,15 @@ public abstract class NotifyService extends IntentService
         //don't keep awake
         if(keepAwake != null)
         {
-            keepAwake.release();
+            //try to release wake lock
+            try
+            {
+                keepAwake.release();
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
     }
 

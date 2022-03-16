@@ -2715,8 +2715,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         }
                     }
 
-                    //if denied
-                    if(progressType == Globals.ProgressType.Denied)
+                    //if updating old satellites and denied
+                    if(updatingOldSatellites && progressType == Globals.ProgressType.Denied)
                     {
                         //show login
                         Globals.showAccountLogin(MainActivity.this, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()

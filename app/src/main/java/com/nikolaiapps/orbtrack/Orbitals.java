@@ -598,7 +598,7 @@ public abstract class Orbitals
                                 public void run()
                                 {
                                     //setup inputs and collapse
-                                    searchLayout.setVisibility(View.VISIBLE);
+                                    searchLayout.setVisibility(simple ? View.GONE : View.VISIBLE);
                                     listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageRow, searchText, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
                                     listAdapter.showSearchInputs(false);
                                 }

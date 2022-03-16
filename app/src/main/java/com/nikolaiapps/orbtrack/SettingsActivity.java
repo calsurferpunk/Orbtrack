@@ -841,6 +841,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static Intent resultIntent = null;
 
     private byte locationSource;
+    private byte lastUpdateType;
     private int currentPage;
     private boolean isLoading;
     private boolean showSetup;
@@ -855,6 +856,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private SwipeStateViewPager setupPager;
     private MaterialButton backButton;
     private MaterialButton nextButton;
+    private MaterialButton loadingCancelButton;
     private FloatingActionButton floatingButton;
     private CircularProgressIndicator loadingBar;
     private AlertDialog addCurrentLocationDialog;
@@ -937,6 +939,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         currentPageKey = startScreenKey;
         isLoading = updateNow = false;
         locationSource = Database.LocationType.Current;
+        lastUpdateType = UpdateService.UpdateType.UpdateSatellites;
         orbitalsPageAdapter = null;
         settingsPageAdapter = null;
         settingsLocationsListAdapter = null;
@@ -1012,6 +1015,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
         infoText = (showSetup ? this.findViewById(R.id.Setup_Info_Text) : null);
         loadingBar = (showSetup ? this.findViewById(R.id.Setup_Loading_Bar) : null);
+        loadingCancelButton = (showSetup ? this.findViewById(R.id.Setup_Loading_Cancel_Button) : null);
+        if(loadingCancelButton != null)
+        {
+            loadingCancelButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    //cancel last update
+                    UpdateService.cancel(lastUpdateType);
+                    setLoading(false);
+                }
+            });
+        }
         inputCheckBox = (showSetup ? this.findViewById(R.id.Setup_Input_CheckBox) : null);
         if(inputCheckBox != null)
         {
@@ -1405,6 +1422,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if(isOkay)
                 {
                     //handle SD card open files request
+                    setLoading(true);
+                    lastUpdateType = UpdateService.UpdateType.LoadFile;
                     BaseInputActivity.handleActivitySDCardOpenFilesRequest(this, data);
                 }
                 break;
@@ -1455,6 +1474,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if(isOkay)
                 {
                     //handle open file request
+                    setLoading(true);
+                    lastUpdateType = UpdateService.UpdateType.LoadFile;
                     BaseInputActivity.handleActivityOpenFileRequest(this, data, requestCode);
                 }
                 break;
@@ -1814,6 +1835,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             @Override
             protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
             {
+                boolean loadingFile = (updateType == UpdateService.UpdateType.LoadFile);
+                boolean updatingSatellites = (updateType == UpdateService.UpdateType.UpdateSatellites);
+
                 //if button and pager exist and on satellites
                 if(floatingButton != null && setupPager != null && setupPager.getCurrentItem() == SetupPageType.Satellites)
                 {
@@ -1827,32 +1851,36 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     updateList();
                 }
 
-                //if updating satellites
-                if(updateType == UpdateService.UpdateType.UpdateSatellites)
+                //if updating satellites or loading a file
+                if(updatingSatellites || loadingFile)
                 {
                     //handle based on progress type
                     switch(progressType)
                     {
                         case Globals.ProgressType.Denied:
-                            //show login
-                            Globals.showAccountLogin(activity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
+                            //if updating satellites
+                            if(updatingSatellites)
                             {
-                                @Override
-                                public void onResult(Globals.WebPageData pageData, boolean success)
+                                //show login
+                                Globals.showAccountLogin(activity, Globals.AccountType.SpaceTrack, updateType, new Globals.WebPageListener()
                                 {
-                                    //if success or attempted to login
-                                    if(success || pageData != null)
+                                    @Override
+                                    public void onResult(Globals.WebPageData pageData, boolean success)
                                     {
-                                        //try again
-                                        updateSatellites(false);
+                                        //if success or attempted to login
+                                        if(success || pageData != null)
+                                        {
+                                            //try again
+                                            updateSatellites(false);
+                                        }
+                                        else
+                                        {
+                                            //allow inputs
+                                            setLoading(false);
+                                        }
                                     }
-                                    else
-                                    {
-                                        //allow inputs
-                                        setLoading(false);
-                                    }
-                                }
-                            });
+                                });
+                            }
                             break;
 
                         case Globals.ProgressType.Finished:
@@ -2134,6 +2162,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         {
             loadingBar.setVisibility(isLoading && onSatellites ? View.VISIBLE : View.GONE);
         }
+        if(loadingCancelButton != null)
+        {
+            loadingCancelButton.setVisibility(isLoading && onSatellites ? View.VISIBLE : View.GONE);
+        }
         if(inputCheckBox != null)
         {
             inputCheckBox.setVisibility(isLoading || !onSatellites ? View.GONE : View.VISIBLE);
@@ -2156,6 +2188,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         Resources res = this.getResources();
         Database.DatabaseSatellite[] satellites;
         ArrayList<Database.DatabaseSatellite> satelliteList = new ArrayList<>(0);
+
+        //update last update type
+        lastUpdateType = UpdateService.UpdateType.UpdateSatellites;
 
         //if asking about internet
         if(askInternet)

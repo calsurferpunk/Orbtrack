@@ -39,6 +39,12 @@
         android:background="?attr/viewPagerBackground"
         android:visibility="gone"/>
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/Setup_Loading_Cancel_Button"
+        style="@style/MaterialButton"
+        android:text="@string/title_cancel"
+        android:visibility="gone"/>
+
     <CheckBox
         android:id="@+id/Setup_Input_CheckBox"
         style="@style/Base.TextAppearance.AppCompat.Medium"

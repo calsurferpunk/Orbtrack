@@ -731,9 +731,9 @@ public abstract class Calculations
             timeZone = TimeZone.getDefault();
             geo = new GeodeticDataType();
         }
-        ObserverType(String tzId, GeodeticDataType g)
+        ObserverType(String zoneId, GeodeticDataType g)
         {
-            timeZone = TimeZone.getTimeZone(tzId);
+            timeZone = (zoneId != null ? TimeZone.getTimeZone(zoneId) : TimeZone.getDefault());
             geo = new GeodeticDataType(g);
         }
 
@@ -1612,7 +1612,7 @@ public abstract class Calculations
         observer.geo.latitude = latitude;
         observer.geo.longitude = longitude;
         observer.geo.altitudeKm = altitudeKm;
-        observer.timeZone = TimeZone.getTimeZone(zoneId);
+        observer.timeZone = (zoneId != null ? TimeZone.getTimeZone(zoneId) : TimeZone.getDefault());
         return(observer);
     }
 

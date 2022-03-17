@@ -2926,6 +2926,12 @@ public abstract class Globals
         return(tintedImage);
     }
 
+    //Copies a bitmap
+    public static Bitmap copyBitmap(Bitmap image)
+    {
+        return(image != null ? image.copy(image.getConfig(), image.isMutable()) : null);
+    }
+
     //Gets a bitmap
     public static Bitmap getBitmap(Drawable image)
     {

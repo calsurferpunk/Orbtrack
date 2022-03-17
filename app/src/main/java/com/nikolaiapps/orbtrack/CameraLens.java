@@ -1091,7 +1091,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         indicatorIcon.image = rotatedImage;
                         if(rotatedImage != null)
                         {
-                            currentOrbitalIcon.lastImage = rotatedImage.copy(rotatedImage.getConfig(), rotatedImage.isMutable());
+                            currentOrbitalIcon.lastImage = Globals.copyBitmap(rotatedImage);
                         }
                         currentOrbitalIcon.copyData(indicatorIcon);
                     }

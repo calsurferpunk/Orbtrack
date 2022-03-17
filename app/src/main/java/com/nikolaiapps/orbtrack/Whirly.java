@@ -974,6 +974,9 @@ class Whirly
 
     public static class OrbitalObject extends CoordinatesFragment.OrbitalBase
     {
+        private static Bitmap debrisImage;
+        private static Bitmap satelliteImage;
+        private static Bitmap rocketBodyImage;
         private static WeakReference<InfoImageCreator> infoCreator;
 
         boolean alwaysShowTitle;
@@ -1002,9 +1005,10 @@ class Whirly
         OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
+            byte orbitalType;
             boolean tleIsAccurate;
             Bitmap titleImage;
-            Bitmap orbitalImage;
+            Bitmap orbitalImage = null;
             Drawable orbitalBgImage;
 
             currentContext = context;
@@ -1024,40 +1028,86 @@ class Whirly
             common.data = newSat;
             orbitalShadow = null;
             noradId = common.data.getSatelliteNum();
+            orbitalType = common.data.getOrbitalType();
 
-            iconId = Globals.getOrbitalIconID(noradId, common.data.getOrbitalType());
-            tleIsAccurate = (newSat.database == null || newSat.database.tleIsAccurate);
-            orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(currentContext, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(currentContext, iconId, (noradId > 0 ? Color.WHITE : 0)));
-            if(noradId > 0)
+            //try to use saved image
+            switch(orbitalType)
             {
-                orbitalBgImage = Globals.getDrawable(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
-                orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
+                case Database.OrbitalType.Satellite:
+                    orbitalImage = Globals.copyBitmap(satelliteImage);
+                    break;
+
+                case Database.OrbitalType.RocketBody:
+                    orbitalImage = Globals.copyBitmap(rocketBodyImage);
+                    break;
+
+                case Database.OrbitalType.Debris:
+                    orbitalImage = Globals.copyBitmap(debrisImage);
+                    break;
             }
 
+            //if image not set yet
+            if(orbitalImage == null)
+            {
+                //get image
+                iconId = Globals.getOrbitalIconID(noradId, orbitalType);
+                orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(currentContext, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(currentContext, iconId, (noradId > 0 ? Color.WHITE : 0)));
+                if(noradId > 0)
+                {
+                    //add outline
+                    orbitalBgImage = Globals.getDrawable(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
+                    orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
+                }
+
+                //save image for repeat use
+                switch(orbitalType)
+                {
+                    case Database.OrbitalType.Satellite:
+                        satelliteImage = Globals.copyBitmap(orbitalImage);
+                        break;
+
+                    case Database.OrbitalType.RocketBody:
+                        rocketBodyImage = Globals.copyBitmap(orbitalImage);
+                        break;
+
+                    case Database.OrbitalType.Debris:
+                        debrisImage = Globals.copyBitmap(orbitalImage);
+                        break;
+                }
+            }
+
+            //remember if old information and initialize path
+            tleIsAccurate = (newSat.database == null || newSat.database.tleIsAccurate);
             orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(currentContext), tleIsAccurate, common.data.database.pathColor);
 
             if(forMap)
             {
+                //create marker
                 orbitalMarker = new MarkerObject(currentContext, controller, newSat.getSatelliteNum(), observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
                 orbitalMarker.setTitle(newSat.getName());
                 orbitalMarker.setImage(orbitalImage);
             }
             else
             {
+                //create board
                 orbitalBoard = new Board(controller, tleIsAccurate, true);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
+                //add/remove shadow
                 setShowShadow(showShadow);
 
+                //set title
                 titleImage = getInfoCreator().get(currentContext, common.data.getName(), null);
                 infoBoard = new Board(controller, tleIsAccurate, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
+            //set defaults
             common.bearing = (noradId > 0 ? 225 : 0);
             common.geo = new Calculations.GeodeticDataType(0, 0, 0, 0, 0);
             common.lastGeo = new Calculations.GeodeticDataType(common.geo);
 
+            //don't show anything until used
             setVisible(false);
             setInfoVisible(false);
         }

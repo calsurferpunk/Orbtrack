@@ -2879,76 +2879,85 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Resources res = this.getResources();
         final int page = Orbitals.PageType.Satellites;
 
-        Globals.showConfirmDialog(this, res.getString(R.string.title_satellites_update_all) + " (" + orbitalPageAdapter.getPageItemCount(mainPager, page) + ")?", null, res.getString(R.string.title_ok), res.getString(R.string.title_cancel), true, new DialogInterface.OnClickListener()
+        //if orbital adapter exists and is not loading items
+        if(orbitalPageAdapter != null && !orbitalPageAdapter.isPageLoadingItems(mainPager, page))
         {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int which)
+            Globals.showConfirmDialog(this, res.getString(R.string.title_satellites_update_all) + " (" + orbitalPageAdapter.getPageItemCount(mainPager, page) + ")?", null, res.getString(R.string.title_ok), res.getString(R.string.title_cancel), true, new DialogInterface.OnClickListener()
             {
-                //select and update all satellites
-                orbitalPageAdapter.updateSelectedItems(mainPager, page);
-            }
-        },
-        null,
-        new DialogInterface.OnDismissListener()
-        {
-            @Override
-            public void onDismiss(DialogInterface dialogInterface)
+                @Override
+                public void onClick(DialogInterface dialogInterface, int which)
+                {
+                    //select and update all satellites
+                    orbitalPageAdapter.updateSelectedItems(mainPager, page);
+                }
+            },
+            null,
+            new DialogInterface.OnDismissListener()
             {
-                //make sure no items are selected
-                orbitalPageAdapter.selectItems(mainPager, page, false);
-            }
-        });
+                @Override
+                public void onDismiss(DialogInterface dialogInterface)
+                {
+                    //make sure no items are selected
+                    orbitalPageAdapter.selectItems(mainPager, page, false);
+                }
+            });
+        }
     }
 
     //Shows a save satellites to file dialog
     private void showSaveSatellitesFileDialog()
     {
         Resources res = this.getResources();
+        final int page = Orbitals.PageType.Satellites;
 
-        Globals.showSelectDialog(this, res.getString(R.string.title_save_format), AddSelectListAdapter.SelectType.SaveAs, new AddSelectListAdapter.OnItemClickListener()
+        //if orbital adapter exists and is not loading items
+        if(orbitalPageAdapter != null && !orbitalPageAdapter.isPageLoadingItems(mainPager, page))
         {
-            @Override
-            public void onItemClick(final int which)
+            Globals.showSelectDialog(this, res.getString(R.string.title_save_format), AddSelectListAdapter.SelectType.SaveAs, new AddSelectListAdapter.OnItemClickListener()
             {
-                final boolean isBackup = which == Globals.FileType.Backup;
-                final int page = Orbitals.PageType.Satellites;
-                final String fileType = (isBackup ? Globals.FileExtensionType.JSON : Globals.FileExtensionType.TLE);
-                final Resources res = MainActivity.this.getResources();
-
-                new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
+                @Override
+                public void onItemClick(final int which)
                 {
-                    @Override
-                    public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
-                    {
-                        //remember file source
-                        int fileSourceType = Globals.getFileSource(MainActivity.this, list2Value);
+                    final boolean isBackup = which == Globals.FileType.Backup;
+                    final int page = Orbitals.PageType.Satellites;
+                    final String fileType = (isBackup ? Globals.FileExtensionType.JSON : Globals.FileExtensionType.TLE);
+                    final Resources res = MainActivity.this.getResources();
 
-                        //if for others
-                        if(fileSourceType == AddSelectListAdapter.FileSourceType.Others)
-                        {
-                            //remember pending save file
-                            setSaveFileData(null, textValue, listValue, which, fileSourceType);
-
-                            //get folder
-                            Globals.showOthersFolderSelect(otherSaveLauncher);
-                        }
-                        else
-                        {
-                            //save all satellites or prepare for later
-                            orbitalPageAdapter.saveFileSelectedItems(mainPager, page, null, textValue, listValue, which, fileSourceType);
-                        }
-                    }
-                }, new EditValuesDialog.OnDismissListener()
-                {
-                    @Override
-                    public void onDismiss(EditValuesDialog dialog, int saveCount)
+                    new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
                     {
-                        //make sure no items are selected
-                        orbitalPageAdapter.selectItems(mainPager, page, false);
-                    }
-                }).getFileLocation(res.getString(R.string.title_satellites_save_file), new int[]{0}, new String[]{res.getString(R.string.title_satellites) + (isBackup ? (" " + res.getString(R.string.title_backup)) : "")}, new String[]{fileType}, new String[]{fileType}, new String[]{res.getString(R.string.title_downloads)});
-            }
-        });
+                        @Override
+                        public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                        {
+                            //remember file source
+                            int fileSourceType = Globals.getFileSource(MainActivity.this, list2Value);
+
+                            //if for others
+                            if(fileSourceType == AddSelectListAdapter.FileSourceType.Others)
+                            {
+                                //remember pending save file
+                                setSaveFileData(null, textValue, listValue, which, fileSourceType);
+
+                                //get folder
+                                Globals.showOthersFolderSelect(otherSaveLauncher);
+                            }
+                            else
+                            {
+                                //save all satellites or prepare for later
+                                orbitalPageAdapter.saveFileSelectedItems(mainPager, page, null, textValue, listValue, which, fileSourceType);
+                            }
+                        }
+                    }, new EditValuesDialog.OnDismissListener()
+                    {
+                        @Override
+                        public void onDismiss(EditValuesDialog dialog, int saveCount)
+                        {
+                            //make sure no items are selected
+                            orbitalPageAdapter.selectItems(mainPager, page, false);
+                        }
+                    }).getFileLocation(res.getString(R.string.title_satellites_save_file), new int[]{0}, new String[]{res.getString(R.string.title_satellites) + (isBackup ? (" " + res.getString(R.string.title_backup)) : "")}, new String[]{fileType}, new String[]{fileType}, new String[]{res.getString(R.string.title_downloads)});
+                }
+            });
+        }
     }
 
     //Shows a save calculate page to file dialog

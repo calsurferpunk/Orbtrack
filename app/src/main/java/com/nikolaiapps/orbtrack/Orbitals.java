@@ -1259,6 +1259,13 @@ public abstract class Orbitals
             }
         }
 
+        //Gets if items are loading on page
+        public boolean isPageLoadingItems(ViewGroup container, int pageNum)
+        {
+            Page page = (Page)getPage(container, pageNum);
+            return(page != null && page.isListLoadingItems());
+        }
+
         //Gets count of items on page
         public int getPageItemCount(ViewGroup container, int pageNum)
         {

@@ -155,14 +155,13 @@ public class OrbitalFilterList
             }
         }
 
-        protected boolean loadingItems;
         protected boolean foundLaunchDate;
         protected ArrayList<Item> displayedItems;
         protected Item[] allItems;
 
         private void baseConstructor()
         {
-            loadingItems = foundLaunchDate = false;
+            foundLaunchDate = false;
             displayedItems = new ArrayList<>(0);
             allItems = new Item[0];
         }

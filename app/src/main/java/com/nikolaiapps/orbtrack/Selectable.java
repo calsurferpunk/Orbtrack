@@ -931,7 +931,7 @@ public abstract class Selectable
             }
         }
 
-
+        protected boolean loadingItems;
         private boolean enableItemClicks;
         //protected boolean horizontal = false;
         protected int dataID = Integer.MAX_VALUE;
@@ -954,6 +954,7 @@ public abstract class Selectable
             categoryTitle = null;
             currentContext = context;
             listInflater = (currentContext != null ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
+            loadingItems = false;
             enableItemClicks = true;
         }
         public ListBaseAdapter(Context context, String categoryTitle)
@@ -1128,6 +1129,12 @@ public abstract class Selectable
         {
             //needs to be overridden
             return(null);
+        }
+
+        //Returns if loading items
+        public boolean isLoadingItems()
+        {
+            return(loadingItems);
         }
 
         //Returns true if 3d preview available for norad ID
@@ -1771,6 +1778,12 @@ public abstract class Selectable
         protected ListBaseAdapter getAdapter()
         {
             return(selectListAdapter);
+        }
+
+        //Gets if list is loading items
+        public boolean isListLoadingItems()
+        {
+            return(selectListAdapter != null && selectListAdapter.isLoadingItems());
         }
 
         //Gets list item count

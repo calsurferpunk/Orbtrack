@@ -1,12 +1,15 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Parcelable;
 import androidx.appcompat.widget.AppCompatEditText;
 import android.util.AttributeSet;
+import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.widget.TimePicker;
 import java.text.DateFormat;
@@ -62,24 +65,71 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
         //if for the on touch down event
         if(event.getAction() == MotionEvent.ACTION_DOWN)
         {
-            TimePickerDialog dateDialog;
+            Context context = this.getContext();
 
             performClick();
 
-            //show date picker
-            if(Build.VERSION.SDK_INT <= 20)
+            //if possibly a version with time picker dialog problems
+            if(Build.VERSION.SDK_INT >= 22 && Build.VERSION.SDK_INT <= 23)
             {
-                dateDialog = new TimePickerDialog(this.getContext(), this, currentHour, currentMinute, false);
-                if(dateDialog.getWindow() != null)
+                TimePicker timeView = new TimePicker(new ContextThemeWrapper(context, themeID));
+
+                //set defaults
+                if(Build.VERSION.SDK_INT > 22)
                 {
-                    dateDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                    timeView.setHour(currentHour);
+                    timeView.setMinute(currentMinute);
                 }
+                else
+                {
+                    timeView.setCurrentHour(currentHour);
+                    timeView.setCurrentMinute(currentMinute);
+                }
+                timeView.setIs24HourView(false);
+
+                //show time picker
+                new AlertDialog.Builder(context, themeID).setPositiveButton(R.string.title_ok, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        if(Build.VERSION.SDK_INT > 22)
+                        {
+                            TimeInputView.this.onTimeSet(timeView, timeView.getHour(), timeView.getMinute());
+                        }
+                        else
+                        {
+                            TimeInputView.this.onTimeSet(timeView, timeView.getCurrentHour(), timeView.getCurrentMinute());
+                        }
+                    }
+                }).setNegativeButton(R.string.title_cancel, new DialogInterface.OnClickListener()
+                {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i)
+                    {
+                        dialogInterface.dismiss();
+                    }
+                }).setView(timeView).show();
             }
             else
             {
-                dateDialog = new TimePickerDialog(this.getContext(), themeID, this, currentHour, currentMinute, false);
+                TimePickerDialog timeDialog;
+
+                //show time picker
+                if(Build.VERSION.SDK_INT <= 20)
+                {
+                    timeDialog = new TimePickerDialog(context, this, currentHour, currentMinute, false);
+                    if(timeDialog.getWindow() != null)
+                    {
+                        timeDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                    }
+                }
+                else
+                {
+                    timeDialog = new TimePickerDialog(context, themeID, this, currentHour, currentMinute, false);
+                }
+                timeDialog.show();
             }
-            dateDialog.show();
         }
 
         //handled

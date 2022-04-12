@@ -1628,6 +1628,19 @@ class Whirly
         }
 
         @Override
+        protected void preControlCreated()
+        {
+            if(isMap())
+            {
+                mapSettings.modelsHaveDepth = false;
+            }
+            else
+            {
+                globeSettings.modelsHaveDepth = false;
+            }
+        }
+
+        @Override
         protected void controlHasStarted()
         {
             final Activity activity = this.getActivity();

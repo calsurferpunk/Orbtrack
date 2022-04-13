@@ -267,7 +267,7 @@ public abstract class NotifyService extends IntentService
         final long indexIntervalStep = (intervals / (intervals >= division ? division : 1));
         boolean sendProgress = true;
         boolean haveSection = (section != null && !section.equals(""));
-        boolean enoughProgress = (isFinished || intervals <= 20 || indexInterval == 0 || indexInterval == 1 || index >= (count - 1) || (indexInterval % indexIntervalStep) == 0);      //if no count or less than update divisions, on first index, on last index, or on an allowable index in between
+        boolean enoughProgress = (isFinished || intervals <= 33 || indexInterval == 0 || indexInterval == 1 || index >= (count - 1) || (indexInterval % indexIntervalStep) == 0);      //if no count or less than update divisions, on first index, on last index, or on an allowable index in between
         Intent intent;
         NotificationCompat.Builder notifyBuilder = (showNotification ? Globals.createNotifyBuilder(this, notifyChannelId) : null);
 

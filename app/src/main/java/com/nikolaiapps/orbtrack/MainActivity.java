@@ -2803,12 +2803,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             @Override
                             public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
                             {
-                                //update current sort by for page
+                                //update current sort by for page and set pending
                                 Settings.setCurrentSortBy(MainActivity.this, page, list2Value);
-
-                                //sort page and notify of change
-                                Current.PageAdapter.sortItems(MainActivity.this, page, true);
-                                Current.PageAdapter.notifyItemsChanged(page);
+                                Current.PageAdapter.setPendingSort(page, true);
                             }
                         }).getSortBy(res.getString(R.string.title_sort_by), page);
                         break;
@@ -4054,10 +4051,17 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //if there is a pending sort
                         if(Current.PageAdapter.hasPendingSort(index))
                         {
-                            //sort page and notify of change
-                            Current.PageAdapter.sortItems(MainActivity.this, index, true);
-                            Current.PageAdapter.setPendingSort(index, false);
-                            updateList[index] = true;
+                            //try to sort page and notify of change
+                            try
+                            {
+                                Current.PageAdapter.sortItems(index, Settings.getCurrentSortBy(MainActivity.this, index));
+                                Current.PageAdapter.setPendingSort(index, false);
+                                updateList[index] = true;
+                            }
+                            catch(Exception ex)
+                            {
+                                //try again later
+                            }
                         }
 
                         //if update needed
@@ -4643,50 +4647,61 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //if pass it set and not none
                     if(pass != null)
                     {
-                        //if there are pass items
-                        if(Current.PageAdapter.hasItems(Current.PageType.Passes))
+                        Activity activity = MainActivity.this;
+                        int sortBy = Settings.getCurrentSortBy(activity, (haveCombined ? Current.PageType.Combined : Current.PageType.Passes));
+
+                        //if a sort is needed
+                        switch(sortBy)
                         {
-                            //remember current item
-                            final Current.Passes.Item currentItem = (pass instanceof Current.Passes.Item ? (Current.Passes.Item)pass : null);
-                            if(currentItem != null && observer != null)
-                            {
-                                MainActivity.this.runOnUiThread(new Runnable()
+                            case Current.Items.SortBy.PassStartTime:
+                            case Current.Items.SortBy.PassDuration:
+                            case Current.Items.SortBy.MaxElevation:
+                                //if there are pass items
+                                if(Current.PageAdapter.hasItems(Current.PageType.Passes))
                                 {
-                                    @Override
-                                    public void run()
+                                    //remember current item
+                                    final Current.Passes.Item currentItem = (pass instanceof Current.Passes.Item ? (Current.Passes.Item)pass : null);
+                                    if(currentItem != null && observer != null)
                                     {
-                                        //update displays
-                                        currentItem.setLoading(false, currentItem.tleIsAccurate);
-                                        currentItem.updateDisplays(MainActivity.this, observer.timeZone);
+                                        activity.runOnUiThread(new Runnable()
+                                        {
+                                            @Override
+                                            public void run()
+                                            {
+                                                //update displays
+                                                currentItem.setLoading(false, currentItem.tleIsAccurate);
+                                                currentItem.updateDisplays(activity, observer.timeZone);
 
-                                        //set pending sort
-                                        Current.PageAdapter.setPendingSort(Current.PageType.Passes, true);
+                                                //set pending sort
+                                                Current.PageAdapter.setPendingSort(Current.PageType.Passes, true);
+                                            }
+                                        });
                                     }
-                                });
-                            }
-                        }
+                                }
 
-                        //if there are combined items
-                        if(Current.PageAdapter.hasItems(Current.PageType.Combined))
-                        {
-                            //remember current item
-                            final Current.Combined.Item currentItem = (pass instanceof Current.Combined.Item ? (Current.Combined.Item)pass : null);
-                            if(currentItem != null && observer != null)
-                            {
-                                MainActivity.this.runOnUiThread(new Runnable()
+                                //if there are combined items
+                                if(Current.PageAdapter.hasItems(Current.PageType.Combined))
                                 {
-                                    @Override
-                                    public void run()
+                                    //remember current item
+                                    final Current.Combined.Item currentItem = (pass instanceof Current.Combined.Item ? (Current.Combined.Item)pass : null);
+                                    if(currentItem != null && observer != null)
                                     {
-                                        //update displays
-                                        currentItem.setLoading(false);
-                                        currentItem.updateDisplays(MainActivity.this, observer.timeZone);
+                                        activity.runOnUiThread(new Runnable()
+                                        {
+                                            @Override
+                                            public void run()
+                                            {
+                                                //update displays
+                                                currentItem.setLoading(false);
+                                                currentItem.updateDisplays(activity, observer.timeZone);
 
-                                        //set pending sort
-                                        Current.PageAdapter.setPendingSort(Current.PageType.Combined, true);
+                                                //set pending sort
+                                                Current.PageAdapter.setPendingSort(Current.PageType.Combined, true);
+                                            }
+                                        });
                                     }
-                                });
-                            }
+                                }
+                                break;
                         }
                     }
                 }

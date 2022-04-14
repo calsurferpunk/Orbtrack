@@ -203,11 +203,11 @@ public abstract class Current
             }
         }
 
-        public void sort(int sortBy)
+        public void sort(Context context, int page)
         {
             if(group == MainActivity.Groups.Current)
             {
-                PageAdapter.sortItems(page, sortBy);
+                PageAdapter.sortItems(page, Settings.getCurrentSortBy(context, page));
             }
         }
 
@@ -731,7 +731,10 @@ public abstract class Current
                         combinedItems.set(index, new Item(context, index, orbitals[index], usePathProgress));
                     }
                 }
-                combinedItems.sort(Settings.getCurrentSortBy(currentContext, PageType.Combined));
+                combinedItems.sort(currentContext, PageType.Combined);
+
+                //ID stays the same
+                this.setHasStableIds(true);
             }
 
             @Override
@@ -1035,13 +1038,14 @@ public abstract class Current
             @Override
             public Item getItem(int position)
             {
-                return(position >= 0 && position < combinedItems.getCount() ? combinedItems.getCombinedItem(position) : null);
+                return(combinedItems.getCombinedItem(position));
             }
 
             @Override
             public long getItemId(int position)
             {
-                return(-1);
+                Item currentItem = combinedItems.getCombinedItem(position);
+                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
             }
         }
     }
@@ -1175,6 +1179,9 @@ public abstract class Current
                 dataGroupTitle2String = res.getString(R.string.abbrev_elevation) + ":";
                 dataGroupTitle3String = Globals.getKmLabel(res) + ":";
                 this.itemsRefID = R.layout.current_view_item;
+
+                //ID stays the same
+                this.setHasStableIds(true);
             }
             public ItemListAdapter(Context context, Database.SatelliteData[] satellites)
             {
@@ -1190,7 +1197,7 @@ public abstract class Current
                     Database.SatelliteData currentSatellite = satellites[index];
                     viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, currentSatellite.getTLEIsAccurate()));
                 }
-                viewItems.sort(Settings.getCurrentSortBy(currentContext, PageType.View));
+                viewItems.sort(currentContext, PageType.View);
 
                 hasItems = (viewItems.getCount() > 0);
                 forCalculation = false;
@@ -1215,7 +1222,7 @@ public abstract class Current
                     //set as empty
                     viewItems.set(new Item[]{new Item(0, true)});
                 }
-                viewItems.sort(Settings.getCurrentSortBy(currentContext, PageType.View));
+                viewItems.sort(currentContext, PageType.View);
             }
 
             @Override
@@ -1227,13 +1234,14 @@ public abstract class Current
             @Override
             public Item getItem(int position)
             {
-                return(position >= 0 && position < viewItems.getCount() ? viewItems.getViewItem(position) : null);
+                return(viewItems.getViewItem(position));
             }
 
             @Override
             public long getItemId(int position)
             {
-                return(-1);
+                Item currentItem = viewItems.getViewItem(position);
+                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
             }
 
             @Override
@@ -1752,13 +1760,16 @@ public abstract class Current
                         }
                     }
                 }
-                pathItems.sort(Settings.getCurrentSortBy(currentContext, page));
+                pathItems.sort(currentContext, page);
 
                 //remember strings and layout ID
                 dataGroupTitle1String = Globals.Symbols.Up;
                 dataGroupTitle2String = Globals.Symbols.Time;
                 dataGroupTitle4String = Globals.Symbols.Elevating;
                 this.itemsRefID = R.layout.current_pass_item;
+
+                //ID stays the same
+                this.setHasStableIds(true);
             }
 
             @Override
@@ -1776,7 +1787,8 @@ public abstract class Current
             @Override
             public long getItemId(int position)
             {
-                return(-1);
+                Item currentItem = pathItems.getPassItem(position);
+                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
             }
 
             @Override
@@ -2297,7 +2309,7 @@ public abstract class Current
                     Database.SatelliteData currentSatellite = satellites[index];
                     coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, currentSatellite.getTLEIsAccurate()));
                 }
-                coordinateItems.sort(Settings.getCurrentSortBy(currentContext, PageType.Coordinates));
+                coordinateItems.sort(currentContext, PageType.Coordinates);
 
                 updateHasItems();
                 forCalculation = false;
@@ -2307,6 +2319,9 @@ public abstract class Current
                 dataGroupTitle2String = res.getString(R.string.abbrev_longitude) + ":";
                 dataGroupTitle3String = Globals.getKmLabel(res) + ":";
                 this.itemsRefID = R.layout.current_coordinates_item;
+
+                //ID stays the same
+                this.setHasStableIds(true);
             }
             public ItemListAdapter(Context context, Item[] savedItems, TimeZone zone)
             {
@@ -2329,10 +2344,13 @@ public abstract class Current
                     //set as empty
                     coordinateItems.set(new Item[]{new Coordinates.Item(0)});
                 }
-                coordinateItems.sort(Settings.getCurrentSortBy(currentContext, PageType.Coordinates));
+                coordinateItems.sort(currentContext, PageType.Coordinates);
 
                 //remember layout ID
                 this.itemsRefID = R.layout.current_coordinates_item;
+
+                //ID stays the same
+                this.setHasStableIds(true);
             }
 
             @Override
@@ -2344,13 +2362,14 @@ public abstract class Current
             @Override
             public Item getItem(int position)
             {
-                return(position >= 0 ? PageAdapter.getCoordinatesItem(position) : null);
+                return(PageAdapter.getCoordinatesItem(position));
             }
 
             @Override
             public long getItemId(int position)
             {
-                return(-1);
+                Item currentItem = PageAdapter.getCoordinatesItem(position);
+                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
             }
 
             @Override
@@ -3557,9 +3576,14 @@ public abstract class Current
                     public void itemsChanged()
                     {
                         FragmentActivity activity = Page.this.getActivity();
+                        int sortBy = Settings.getCurrentSortBy(activity, page);
 
-                        //perform any needed sorting
-                        PageAdapter.sortItems(page);
+                        //if not a constant value for sorting
+                        if(sortBy != Items.SortBy.Name && sortBy != Items.SortBy.PassStartTime && sortBy != Items.SortBy.PassDuration && sortBy != Items.SortBy.MaxElevation)
+                        {
+                            //set pending sort
+                            PageAdapter.setPendingSort(pageNum, true);
+                        }
 
                         //if able to get activity
                         if(activity != null)
@@ -3586,7 +3610,6 @@ public abstract class Current
     //Page adapter
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
-        private static final int[] itemSortBy = new int[PageType.PageCount];
         private static final boolean[] pendingSort = new boolean[PageType.PageCount];
         private static Combined.Item[] combinedItems;
         private static ViewAngles.Item[] viewItems;
@@ -3721,13 +3744,6 @@ public abstract class Current
         {
             int index;
 
-            //if a valid page
-            if(page >= 0 && page < itemSortBy.length)
-            {
-                //update sort by
-                itemSortBy[page] = sortBy;
-            }
-
             switch(page)
             {
                 case PageType.View:
@@ -3787,21 +3803,6 @@ public abstract class Current
                     }
                     break;
             }
-        }
-        public static void sortItems(Context context, int page, boolean forceSort)
-        {
-            int sortBy = (page >= 0 && page < PageType.PageCount ? (forceSort && context != null ? Settings.getCurrentSortBy(context, page) : itemSortBy[page]) : Items.SortBy.Name);
-
-            //if a needed sort (i.e. forced or not a constant value)
-            if(forceSort || (sortBy != Items.SortBy.Name && sortBy != Items.SortBy.PassStartTime && sortBy != Items.SortBy.PassDuration && sortBy != Items.SortBy.MaxElevation))
-            {
-                //sort items
-                sortItems(page, sortBy);
-            }
-        }
-        public static void sortItems(int page)
-        {
-            sortItems(null, page, false);
         }
 
         //Gets count of items in given page
@@ -3886,7 +3887,7 @@ public abstract class Current
         public static void setPendingSort(int pageNum, boolean pending)
         {
             //if a valid page
-            if(pageNum < pendingSort.length)
+            if(pageNum >= 0 && pageNum < pendingSort.length)
             {
                 //set pending status
                 pendingSort[pageNum] = pending;

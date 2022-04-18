@@ -124,8 +124,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         Settings.Options.Display.initValues(context);
 
                         //setup displays
-                        setupSwitch(darkThemeSwitch, null);
-                        setupSwitch(allowNumberCommasSwitch, null);
+                        setupSwitch(darkThemeSwitch);
+                        setupSwitch(allowNumberCommasSwitch);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
                         break;
 
@@ -146,9 +146,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         Settings.Options.Rates.initValues(context);
 
                         //setup displays
-                        setupSwitch(useCameraSwitch, null);
-                        setupSwitch(rotateSwitch, null);
-                        setupSwitch(lensShowIconDirection, null);
+                        setupSwitch(useCameraSwitch);
+                        setupSwitch(rotateSwitch);
+                        setupSwitch(lensShowIconDirection);
                         setupSwitchButton(lensUseHorizonSwitch);
                         setupSwitchText(lensWidthSwitch);
                         setupSwitchText(lensHeightSwitch);
@@ -167,8 +167,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         Settings.Options.Rates.initValues(context);
 
                         //setup displays
-                        setupSwitch(combinedSwitch, null);
-                        setupSwitch(pathProgressSwitch, null);
+                        setupSwitch(combinedSwitch);
+                        setupSwitch(pathProgressSwitch);
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
@@ -185,6 +185,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
                         SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
+                        SwitchTextPreference showOrbitalDirectionLimit = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirectionLimit);
                         SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
                         SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
                         SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
@@ -199,18 +200,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         Settings.Options.MapView.initValues(context);
 
                         //setup displays
-                        setupSwitch(showCloudsGlobeSwitch, null);
-                        setupSwitch(showCloudsMapSwitch, null);
-                        setupSwitch(show3dPathsSwitch, null);
-                        setupSwitch(showSunlightSwitch, null);
-                        setupSwitch(allowRotationSwitch, null);
-                        setupSwitch(showOrbitalDirection, null);
-                        setupSwitch(showInformationBackgroundSwitch, null);
-                        setupSwitch(showSearchSwitch, null);
-                        setupSwitch(showZoomSwitch, null);
-                        setupSwitch(showLabelsAlwaysSwitch, null);
-                        setupSwitch(showShadowsSwitch, null);
-                        setupSwitch(showStarsSwitch, null);
+                        setupSwitch(showCloudsGlobeSwitch);
+                        setupSwitch(showCloudsMapSwitch);
+                        setupSwitch(show3dPathsSwitch);
+                        setupSwitch(showSunlightSwitch);
+                        setupSwitch(allowRotationSwitch);
+                        setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
+                        setupSwitch(showInformationBackgroundSwitch);
+                        setupSwitch(showSearchSwitch);
+                        setupSwitch(showZoomSwitch);
+                        setupSwitch(showLabelsAlwaysSwitch);
+                        setupSwitch(showShadowsSwitch);
+                        setupSwitch(showStarsSwitch);
+                        setupSwitchText(showOrbitalDirectionLimit);
                         setupSwitchButton(showGridSwitch);
                         setupSlider(globeSensitivitySlider);
                         setupSlider(globeSpeedScaleSlider);
@@ -247,11 +249,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(tleAutoSwitch, tleAutoTime);
                         setupSwitch(catalogAutoSwitch, catalogAutoTime);
-                        setupSwitch(rocketBodySwitch, null);
-                        setupSwitch(debrisSwitch, null);
-                        setupSwitch(legacyDataSwitch, null);
-                        setupSwitch(translateInformationSwitch, null);
-                        setupSwitch(shareTranslateSwitch, null);
+                        setupSwitch(rocketBodySwitch);
+                        setupSwitch(debrisSwitch);
+                        setupSwitch(legacyDataSwitch);
+                        setupSwitch(translateInformationSwitch);
+                        setupSwitch(shareTranslateSwitch);
                         setupList(satellitesList, Settings.Options.Updates.SatelliteSourceItems, Settings.Options.Updates.SatelliteSourceValues, Settings.Options.Updates.SatelliteSourceImageIds, Settings.Options.Updates.SatelliteSourceSubTexts, legacyDataSwitch);
                         setupList(altitudeList, Settings.Options.Updates.AltitudeSourceItems, Settings.Options.Updates.AltitudeSourceValues, Settings.Options.Updates.AltitudeSourceImageIds, null, null);
                         setupList(timeZoneList, Settings.Options.Updates.TimeZoneSourceItems, Settings.Options.Updates.TimeZoneSourceValues, Settings.Options.Updates.TimeZoneSourceImageIds, null, null);
@@ -460,8 +462,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }
 
-        //Sets up up a preference switch
-        private static void setupSwitch(SwitchPreference preference, TimeIntervalPreference timePreference)
+        //Sets up a preference switch
+        private static void setupSwitch(SwitchPreference preference, Preference childPreference)
         {
             //if preference exists
             if(preference != null)
@@ -485,7 +487,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                         {
                             boolean checked = (Boolean)newValue;
-                            boolean isAutoUpdate = (timePreference != null);
+                            boolean isAutoUpdate = (childPreference instanceof TimeIntervalPreference);
                             String subKey = "";
                             UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
 
@@ -514,10 +516,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             }
 
                             //if time preference is set
-                            if(timePreference != null)
+                            if(childPreference != null)
                             {
                                 //update visibility
-                                timePreference.setVisible(checked);
+                                childPreference.setVisible(checked);
                             }
 
                             //allow change
@@ -526,7 +528,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     });
 
                     //if might need changes
-                    if(timePreference != null)
+                    if(childPreference != null)
                     {
                         Preference.OnPreferenceChangeListener listener = preference.getOnPreferenceChangeListener();
 
@@ -543,6 +545,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     preference.setVisible(false);
                 }
             }
+        }
+        private static void setupSwitch(SwitchPreference preference)
+        {
+            setupSwitch(preference, null);
         }
 
         //Sets up a slider preference
@@ -638,6 +644,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 final Context context = preference.getContext();
                 final String preferenceKey = preference.getKey();
+                String value = null;
                 float enabledValue;
                 float disabledValue;
 
@@ -666,8 +673,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     case Settings.PreferenceName.LensAzimuthUserOffset:
                         //set value
-                        preference.setValueText(String.valueOf(Settings.getLensAzimuthUserOffset(context)));
+                        value = String.valueOf(Settings.getLensAzimuthUserOffset(context));
                         break;
+
+                    case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
+                        //set value
+                        value = String.valueOf(Settings.getMapShowOrbitalDirectionLimit(context));
+                        break;
+                }
+
+                //if using single value
+                if(value != null)
+                {
+                    //set value text
+                    preference.setValueText(value);
                 }
             }
         }
@@ -1256,6 +1275,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowZoom:
                         case Settings.PreferenceName.MapShowLabelsAlways:
                         case Settings.PreferenceName.MapShowOrbitalDirection:
+                        case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapShowStars:
                         case Settings.PreferenceName.MapShowSunlight:

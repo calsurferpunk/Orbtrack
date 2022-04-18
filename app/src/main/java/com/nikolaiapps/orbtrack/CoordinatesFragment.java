@@ -123,6 +123,7 @@ public interface CoordinatesFragment
         abstract void setShowShadow(boolean show);
         abstract void setTitleAlwaysVisible(boolean visible);
         abstract void setUsingInfo(boolean using);
+        abstract void setUsingDirection(boolean using);
         abstract void setInfoVisible(boolean visible);
         abstract boolean getInfoVisible();
         abstract void setVisible(boolean visible);
@@ -160,6 +161,7 @@ public interface CoordinatesFragment
     class Shared
     {
         private int infoLocation;
+        private int orbitalDirectionLimitCount;
         private boolean showShadow;
         private boolean showSunlight;
         private boolean showBackground;
@@ -185,7 +187,7 @@ public interface CoordinatesFragment
             infoLocation = MapMarkerInfoLocation.ScreenBottom;
             showBackground = false;
             showShadow = showSunlight = showTitlesAlways = showOrbitalDirection = true;
-            lastSelectEventDateMs = 0;
+            lastSelectEventDateMs = orbitalDirectionLimitCount = 0;
             markerScale = 0.75f;
             readyListener = null;
             movedListener = null;
@@ -405,6 +407,16 @@ public interface CoordinatesFragment
         boolean getShowOrbitalDirection()
         {
             return(showOrbitalDirection);
+        }
+
+        void setOrbitalDirectionLimitCount(int limitCount)
+        {
+            orbitalDirectionLimitCount = limitCount;
+        }
+
+        int getOrbitalDirectionLimitCount()
+        {
+            return(orbitalDirectionLimitCount);
         }
 
         void setMarkerScale(float markerScaling)
@@ -784,6 +796,7 @@ public interface CoordinatesFragment
     void setMarkerShowShadow(boolean show);
     void setShowSunlight(boolean show);
     void setShowOrbitalDirection(boolean show);
+    void setShowOrbitalDirectionLimitCount(int limitCount);
     void setShowTitlesAlways(boolean show);
     void setStarsEnabled(boolean enabled);
     void setSensitivityScale(float sensitivityScaling);

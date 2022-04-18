@@ -986,7 +986,8 @@ class Whirly
         private boolean showBackground;
         private boolean usingInfo;
         private boolean showingInfo;
-        private final boolean showingDirection;
+        private boolean showingDirection;
+        private boolean lastShowingDirection;
         private boolean lastMoveWithinZoom;
         private float markerScale;
         private double lastMoveZoom;
@@ -1020,8 +1021,7 @@ class Whirly
             showingDirection = usingDirection;
             alwaysShowTitle = startWithTitleShown;
             usingInfo = (infoLocation == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
-            showingInfo = false;
-            lastMoveWithinZoom = false;
+            showingInfo = lastShowingDirection = lastMoveWithinZoom = false;
             markerScale = markerScaling;
             orbitalRotation = lastMoveZoom = lastOrbitalRotation = 0;
             lastInfo = null;
@@ -1341,6 +1341,14 @@ class Whirly
         }
 
         @Override
+        void setUsingDirection(boolean using)
+        {
+            //update last and current showing direction
+            lastShowingDirection = showingDirection;
+            showingDirection = using;
+        }
+
+        @Override
         void setInfoVisible(boolean visible)
         {
             showingInfo = visible;
@@ -1431,8 +1439,8 @@ class Whirly
                 bearing = bearingDelta = orbitalRotationDelta = 0;
             }
 
-            //update bearing if using and -enough to see or rotation changed-
-            updateBearing = showingDirection && (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2);
+            //update bearing if -using and -enough to see or rotation changed-- or -changed showing direction-
+            updateBearing = (showingDirection && (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2)) || (lastShowingDirection != showingDirection);
             if(updateBearing)
             {
                 //update value
@@ -1509,8 +1517,9 @@ class Whirly
             //if updated bearing
             if(usedBearing)
             {
-                //update last rotation
+                //update last rotation and showing direction
                 lastOrbitalRotation = orbitalRotation;
+                lastShowingDirection = showingDirection;
             }
         }
 
@@ -1648,7 +1657,8 @@ class Whirly
             byte gpuType;
             boolean forMap = isMap();
             boolean forPreview = false;
-            boolean allowOrbitalDirection = true;
+            boolean useOrbitalDirection = Settings.getMapShowOrbitalDirection(activity);
+            boolean useOrbitalDirectionLimit = Settings.getMapShowOrbitalDirectionUseLimit(activity);
             Bundle args = this.getArguments();
 
             if(args == null)
@@ -1719,10 +1729,12 @@ class Whirly
             {
                 case RenderGPUType.Mali:
                 case RenderGPUType.PowerVr:
-                    allowOrbitalDirection = false;
+                    //force limit on
+                    useOrbitalDirectionLimit = true;
                     break;
             }
-            setShowOrbitalDirection(allowOrbitalDirection && Settings.getMapShowOrbitalDirection(activity));
+            setShowOrbitalDirection(useOrbitalDirection);
+            setShowOrbitalDirectionLimitCount(useOrbitalDirection && useOrbitalDirectionLimit ? Settings.getMapShowOrbitalDirectionLimit(activity) : 0);
 
             //set if tilt allowed
             setRotateAllowed(Settings.getMapRotateAllowed(activity));
@@ -2266,6 +2278,12 @@ class Whirly
         }
 
         @Override
+        public void setShowOrbitalDirectionLimitCount(int limitCount)
+        {
+            common.setOrbitalDirectionLimitCount(limitCount);
+        }
+
+        @Override
         public void setShowTitlesAlways(boolean show)
         {
             common.setShowTitlesAlways(show);
@@ -2337,13 +2355,37 @@ class Whirly
             return(common.getOrbital(orbitalIndex));
         }
 
+        //Set using direction for all orbitals
+        private void setUsingDirection(boolean using)
+        {
+            //go through each orbital
+            for(OrbitalBase currentObject : common.orbitalObjects)
+            {
+                //set using direction
+                currentObject.setUsingDirection(using);
+            }
+        }
+
         @Override
         public OrbitalObject addOrbital(Context context, Database.SatelliteData newSat, Calculations.ObserverType observerLocation)
         {
-            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), newSat, observerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowOrbitalDirection(), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
+            int currentCount = common.getOrbitalCount();
+            int limitCount = common.getOrbitalDirectionLimitCount();
+            boolean useDirection = common.getShowOrbitalDirection();
+            boolean overLimit = (useDirection && (limitCount > 0) && (currentCount + 1 > limitCount));
+            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), newSat, observerLocation, common.getMarkerScale(), common.getShowBackground(), (useDirection && !overLimit), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
 
+            //if able to create object
             if(newObject != null)
             {
+                //if currently at limit to show direction
+                if(overLimit && (currentCount == limitCount))
+                {
+                    //remove direction from all previous
+                    setUsingDirection(false);
+                }
+
+                //add it
                 common.orbitalObjects.add(newObject);
             }
 
@@ -2353,8 +2395,19 @@ class Whirly
         @Override
         public void removeOrbital(OrbitalBase object)
         {
+            int limitCount = common.getOrbitalDirectionLimitCount();
+            boolean useDirection = common.getShowOrbitalDirection();
+
+            //remove object
             object.remove();
             common.orbitalObjects.remove(object);
+
+            //if now at limit to show direction
+            if(useDirection && (limitCount > 0) && (common.getOrbitalCount() == limitCount))
+            {
+                //add direction to all current
+                setUsingDirection(true);
+            }
         }
 
         @Override

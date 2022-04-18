@@ -79,6 +79,8 @@ public abstract class Settings
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
         static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
+        static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
+        static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
         static final String MapShowSearchList = "MapShowSearchList";
         static final String UseCombinedCurrentLayout = "UseCombinedCurrentLayout";
         static final String UseCurrentGridLayout = "UseCurrentGridLayout";
@@ -1800,7 +1802,6 @@ public abstract class Settings
             case PreferenceName.TranslateInformation:
             case PreferenceName.UseCombinedCurrentLayout:
                 return(true);
-
         }
 
         return(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartNextOnly, PreferenceName.NotifyFullMoonEndNextOnly, PreferenceName.NotifyPassStartNextOnly, PreferenceName.NotifyPassEndNextOnly));
@@ -1863,6 +1864,9 @@ public abstract class Settings
             case PreferenceName.ListUpdateDelay:
             case PreferenceName.LensUpdateDelay:
                 return(1000);
+
+            case PreferenceName.MapShowOrbitalDirectionLimit:
+                return(100);
 
             case PreferenceName.MapLayerType + SubPreferenceName.Globe:
                 return(CoordinatesFragment.MapLayerType.Hybrid);
@@ -2382,6 +2386,18 @@ public abstract class Settings
     public static boolean getMapShowOrbitalDirection(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirection));
+    }
+
+    //Returns map showing orbital direction limit
+    public static int getMapShowOrbitalDirectionLimit(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapShowOrbitalDirectionLimit));
+    }
+
+    //Returns if map showing orbital direction using limit
+    public static boolean getMapShowOrbitalDirectionUseLimit(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirectionUseLimit));
     }
 
     //Returns map marker info location

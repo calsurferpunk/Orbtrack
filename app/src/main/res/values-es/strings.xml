@@ -153,7 +153,8 @@
     <string name="desc_show_grid">Mostrar cuadrícula de latitud/longitud</string>
     <string name="desc_show_horizon">Mostrar el horizonte en la pantalla</string>
     <string name="desc_show_path_progress">Mostrar línea de progreso de ruta</string>
-    <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria\nNota: Deshabilitado para GPUs Mali y PowerVR</string>
+    <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria</string>
+    <string name="desc_show_orbital_direction_limit">Mostrar dirección si está dentro del conteo orbital visible\nNota: Obligatorio para las GPU Mali y PowerVR</string>
     <string name="desc_show_search">Mostrar lista de búsqueda orbital</string>
     <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo</string>
     <string name="desc_show_stars">Mostrar estrellas en vista de globo</string>
@@ -518,6 +519,7 @@
     <string name="title_show_labels_always">Mostrar Etiquetas Siempre</string>
     <string name="title_show_latitude_longitude">Mostrar Latitud/Longitud</string>
     <string name="title_show_orbital_direction">Mostrar Dirección Orbital</string>
+    <string name="title_show_orbital_direction_limit">Dirección Orbital Límite</string>
     <string name="title_show_path">Mostrar Ruta</string>
     <string name="title_show_search">Mostrar Búsqueda</string>
     <string name="title_show_shadows">Mostrar Sombras</string>

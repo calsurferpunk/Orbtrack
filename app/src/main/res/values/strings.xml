@@ -153,7 +153,8 @@
     <string name="desc_show_grid">Show latitude/longitude grid</string>
     <string name="desc_show_horizon">Show horizon level on display</string>
     <string name="desc_show_path_progress">Show path progress line</string>
-    <string name="desc_show_orbital_direction">Orbitals point in path direction\nNote: Disabled for Mali and PowerVR GPUs</string>
+    <string name="desc_show_orbital_direction">Orbitals point in path direction</string>
+    <string name="desc_show_orbital_direction_limit">Show direction if within visible orbital count\nNote: Required for Mali and PowerVR GPUs</string>
     <string name="desc_show_search">Show orbital search list</string>
     <string name="desc_show_shadows">Show orbital shadows in globe view</string>
     <string name="desc_show_stars">Show stars in globe view</string>
@@ -518,6 +519,7 @@
     <string name="title_show_labels_always">Show Labels Always</string>
     <string name="title_show_latitude_longitude">Show Latitude/Longitude</string>
     <string name="title_show_orbital_direction">Show Orbital Direction</string>
+    <string name="title_show_orbital_direction_limit">Limit Orbital Direction</string>
     <string name="title_show_path">Show Path</string>
     <string name="title_show_search">Show Search</string>
     <string name="title_show_shadows">Show Shadows</string>

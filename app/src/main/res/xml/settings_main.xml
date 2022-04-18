@@ -88,6 +88,7 @@
                         app:switchKey="LensUseAutoWidth"
                         app:minValue="0"
                         app:maxValue="360"
+                        app:valueType="Float"
                         android:summary="@string/desc_auto_width"/>
 
                     <com.nikolaiapps.orbtrack.SwitchTextPreference
@@ -97,6 +98,7 @@
                         app:switchKey="LensUseAutoHeight"
                         app:minValue="0"
                         app:maxValue="360"
+                        app:valueType="Float"
                         android:summary="@string/desc_auto_height"/>
 
                     <com.nikolaiapps.orbtrack.SwitchTextPreference
@@ -106,6 +108,7 @@
                         app:showSwitch="false"
                         app:minValue="-180"
                         app:maxValue="360"
+                        app:valueType="Float"
                         android:summary="@string/desc_azimuth_offset"/>
                 </PreferenceCategory>
             </PreferenceCategory>
@@ -239,6 +242,16 @@
                     android:key="MapShowOrbitalDirection"
                     android:summary="@string/desc_show_orbital_direction"
                     android:persistent="false"/>
+
+                <com.nikolaiapps.orbtrack.SwitchTextPreference
+                    app:titleText="@string/title_show_orbital_direction_limit"
+                    android:key="MapShowOrbitalDirectionLimit"
+                    app:switchKey="MapShowOrbitalDirectionUseLimit"
+                    app:minValue="1"
+                    app:maxValue="1000"
+                    app:valueType="Integer"
+                    app:reverseEnabled="true"
+                    android:summary="@string/desc_show_orbital_direction_limit"/>
 
                 <SwitchPreference
                     android:title="@string/title_show_search"

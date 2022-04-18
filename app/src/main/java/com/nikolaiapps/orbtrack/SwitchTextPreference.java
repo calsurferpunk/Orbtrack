@@ -2,28 +2,27 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.SwitchCompat;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 
-public class SwitchTextPreference extends Preference
+public class SwitchTextPreference extends ValueTypePreference
 {
     private boolean showSwitch;
+    private boolean reverseEnabled;
     private float minValue;
     private float maxValue;
-    private String sharedName;
     private String switchKey;
     private String titleText;
     private String suffixText;
@@ -37,13 +36,14 @@ public class SwitchTextPreference extends Preference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        this.setPersistent(false);
         this.setLayoutResource(R.layout.switch_text_preference_layout);
 
         TypedArray valueArray;
 
         //set defaults
+        valueType = Integer.class;
         showSwitch = true;
+        reverseEnabled = false;
         switchKey = null;
         minValue = 0;
         maxValue = 100;
@@ -54,21 +54,19 @@ public class SwitchTextPreference extends Preference
         {
             valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwitchTextPreference, 0, 0);
             showSwitch = valueArray.getBoolean(R.styleable.SwitchTextPreference_showSwitch, true);
+            reverseEnabled = valueArray.getBoolean(R.styleable.SwitchTextPreference_reverseEnabled, false);
             switchKey = valueArray.getString(R.styleable.SwitchTextPreference_switchKey);
             minValue = valueArray.getFloat(R.styleable.SwitchTextPreference_minValue, 0);
             maxValue = valueArray.getFloat(R.styleable.SwitchTextPreference_maxValue, 100);
             sharedName = valueArray.getString(R.styleable.SwitchTextPreference_sharedName);
             titleText = valueArray.getString(R.styleable.SwitchTextPreference_titleText);
             suffixText = valueArray.getString(R.styleable.SwitchTextPreference_suffixText);
+            setValueType(valueArray.getInt(R.styleable.SwitchTextPreference_valueType, ClassType.Integer));
             valueArray.recycle();
         }
 
-        //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
-        {
-            //use default
-            sharedName = "Settings";
-        }
+        //set shared name
+        setSharedName(sharedName);
     }
 
     public SwitchTextPreference(Context context, AttributeSet attrs, int defStyleAttr)
@@ -88,12 +86,10 @@ public class SwitchTextPreference extends Preference
         super.onBindViewHolder(holder);
 
         final Context context = this.getContext();
-        final String preferenceName = this.getKey();
         final CharSequence summary = this.getSummary();
         final TextView summaryView;
         final TextView valueSuffixView;
         final ViewGroup rootView;
-        final SharedPreferences.Editor writeSettings = getWriteSettings(context);
         final CompoundButton.OnCheckedChangeListener checkedChangeListener;
 
         //get displays
@@ -106,6 +102,7 @@ public class SwitchTextPreference extends Preference
 
         //set displays
         rootView.setClickable(false);
+        valueView.setImeOptions(EditorInfo.IME_ACTION_DONE);
         valueView.addTextChangedListener(new TextWatcher()
         {
             @Override
@@ -117,15 +114,25 @@ public class SwitchTextPreference extends Preference
             @Override
             public void afterTextChanged(Editable s)
             {
+                boolean save;
                 String stringValue = s.toString();
-                float value = Globals.tryParseFloat(stringValue);
-                boolean save = (value != Float.MAX_VALUE && value >= minValue && value <= maxValue);
+
+                //save value if within range
+                if(valueType == Integer.class)
+                {
+                    int value = Globals.tryParseInt(stringValue);
+                    save = (value != Integer.MAX_VALUE && value >= (int)minValue && value <= (int)maxValue);
+                }
+                else
+                {
+                    float value = Globals.tryParseFloat(stringValue);
+                    save = (value != Float.MAX_VALUE && value >= minValue && value <= maxValue);
+                }
 
                 //if saving
                 if(save)
                 {
-                    //save setting
-                    writeSettings.putFloat(preferenceName, value).apply();
+                    saveValue(stringValue);
                 }
 
                 //set/clear error
@@ -154,18 +161,23 @@ public class SwitchTextPreference extends Preference
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
                 {
+                    boolean textCheckedValue;
+
                     //if showing switch and value exists
                     if(showSwitch && valueView != null)
                     {
+                        //get text checked value
+                        textCheckedValue = (reverseEnabled != isChecked);
+
                         //update text and state
-                        updateValueText(isChecked);
-                        valueView.setEnabled(!isChecked);
+                        updateValueText(textCheckedValue);
+                        valueView.setEnabled(!textCheckedValue);
 
                         //if saving switch
                         if(switchKey != null)
                         {
                             //save setting
-                            writeSettings.putBoolean(switchKey, isChecked).apply();
+                            getWriteSettings(context).putBoolean(switchKey, isChecked).apply();
                         }
                     }
                 }
@@ -179,18 +191,6 @@ public class SwitchTextPreference extends Preference
             updateValueText(false);
         }
         setShowSwitch(showSwitch);
-    }
-
-    //Gets shared preferences
-    private SharedPreferences getPreferences(Context context)
-    {
-        return(context.getSharedPreferences(sharedName, Context.MODE_PRIVATE));
-    }
-
-    //Gets write settings
-    private SharedPreferences.Editor getWriteSettings(Context context)
-    {
-        return(getPreferences(context).edit());
     }
 
     //Updates value text based on switch state

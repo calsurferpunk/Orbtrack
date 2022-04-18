@@ -2,7 +2,6 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -15,24 +14,11 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.core.widget.CompoundButtonCompat;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 
-public class RadioGroupPreference extends Preference
+public class RadioGroupPreference extends ValueTypePreference
 {
-    //Valid class types for preference value
-    private static abstract class ClassType
-    {
-        private static final int String = 0;
-        private static final int Boolean = 1;
-        private static final int Byte = 2;
-        private static final int Integer = 3;
-        private static final int Long = 4;
-    }
-
-    private Class<?> valueType;
-    private String sharedName;
     private String titleText;
     private String pendingSetValue;
     private String[] itemTexts;
@@ -43,7 +29,6 @@ public class RadioGroupPreference extends Preference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        this.setPersistent(false);
         this.setLayoutResource(R.layout.radio_group_preference_layout);
 
         int resId;
@@ -71,16 +56,12 @@ public class RadioGroupPreference extends Preference
             {
                 itemValues = res.getStringArray(resId);
             }
-            setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, 0));
+            setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, ClassType.String));
             valueArray.recycle();
         }
 
-        //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
-        {
-            //use default
-            sharedName = "Settings";
-        }
+        //set shared name
+        setSharedName(sharedName);
 
         //set to current preference value
         setSelectedValue(getPreferenceValue());
@@ -105,10 +86,8 @@ public class RadioGroupPreference extends Preference
         int index;
         int count;
         final Context context = this.getContext();
-        final String preferenceName = this.getKey();
         final TextView titleView;
         final RadioGroup groupView;
-        final SharedPreferences.Editor writeSettings = getWriteSettings(context);
         View rootView = holder.itemView;
 
         rootView.setClickable(false);
@@ -164,27 +143,7 @@ public class RadioGroupPreference extends Preference
                             }
 
                             //save value
-                            if(valueType == Boolean.class)
-                            {
-                                writeSettings.putBoolean(preferenceName, Boolean.parseBoolean(currentValue));
-                            }
-                            else if(valueType == Byte.class)
-                            {
-                                writeSettings.putInt(preferenceName, Byte.parseByte(currentValue));
-                            }
-                            else if(valueType == Integer.class)
-                            {
-                                writeSettings.putInt(preferenceName, Integer.parseInt(currentValue));
-                            }
-                            else if(valueType == Long.class)
-                            {
-                                writeSettings.putLong(preferenceName, Long.parseLong(currentValue));
-                            }
-                            else if(valueType == String.class)
-                            {
-                                writeSettings.putString(preferenceName, currentValue);
-                            }
-                            writeSettings.apply();
+                            saveValue(currentValue);
                         }
                     }
                 });
@@ -197,73 +156,6 @@ public class RadioGroupPreference extends Preference
             //clear any pending value
             pendingSetValue = null;
         }
-    }
-
-    //Gets shared preferences
-    private SharedPreferences getPreferences(Context context)
-    {
-        return(context.getSharedPreferences(sharedName, Context.MODE_PRIVATE));
-    }
-
-    //Gets write settings
-    private SharedPreferences.Editor getWriteSettings(Context context)
-    {
-        return(getPreferences(context).edit());
-    }
-
-    //Sets value type
-    public void setValueType(int classType)
-    {
-        switch(classType)
-        {
-            case ClassType.Boolean:
-                valueType = Boolean.class;
-                break;
-
-            case ClassType.Byte:
-                valueType = Byte.class;
-                break;
-
-            case ClassType.Integer:
-                valueType = Integer.class;
-                break;
-
-            case ClassType.Long:
-                valueType = Long.class;
-                break;
-
-            default:
-            case ClassType.String:
-                valueType = String.class;
-                break;
-        }
-    }
-
-    //Gets current preference value as a string
-    private String getPreferenceValue()
-    {
-        final Context context = this.getContext();
-        final String preferenceName = this.getKey();
-        String value = null;
-
-        if(valueType == Boolean.class)
-        {
-            value = String.valueOf(Settings.getPreferenceBoolean(context, preferenceName));
-        }
-        else if(valueType == Byte.class || valueType == Integer.class)
-        {
-            value = String.valueOf(Settings.getPreferenceInt(context, preferenceName));
-        }
-        else if(valueType == Long.class)
-        {
-            value = String.valueOf(Settings.getPreferenceLong(context, preferenceName));
-        }
-        else if(valueType == String.class)
-        {
-            value = String.valueOf(Settings.getPreferenceString(context, preferenceName));
-        }
-
-        return(value);
     }
 
     //Set selected value

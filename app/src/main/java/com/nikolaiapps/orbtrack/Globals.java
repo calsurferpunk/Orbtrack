@@ -2320,15 +2320,24 @@ public abstract class Globals
         int[] ids = new int[resIDs.length];
         TypedValue values = new TypedValue();
         TypedArray valueArray = null;
-        Resources.Theme currentTheme = context.getTheme();
+        Resources.Theme currentTheme = (context != null ? context.getTheme() : null);
 
         //go through each resource ID
         for(index = 0; index < resIDs.length; index++)
         {
-            //resolve attribute ID
-            currentTheme.resolveAttribute(resIDs[index], values, true);
-            valueArray = context.obtainStyledAttributes(values.data, resIDs);
-            ids[index] = valueArray.getResourceId(index, -1);
+            //if theme exists
+            if(currentTheme != null)
+            {
+                //resolve attribute ID
+                currentTheme.resolveAttribute(resIDs[index], values, true);
+                valueArray = context.obtainStyledAttributes(values.data, resIDs);
+                ids[index] = valueArray.getResourceId(index, -1);
+            }
+            else
+            {
+                //can't resolve
+                ids[index] = -1;
+            }
         }
 
         //if value array was used

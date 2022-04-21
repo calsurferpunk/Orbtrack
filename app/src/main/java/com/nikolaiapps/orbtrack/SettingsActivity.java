@@ -472,12 +472,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
                 final String preferenceKey = preference.getKey();
                 final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
+                final boolean useCompatibility = Settings.getUseGlobeCompatibility(context);
                 final Object dependency = Settings.getSatelliteSource(context);
                 final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
 
                 //if preference should be visible
                 if(preferenceVisible(preferenceKey))
                 {
+                    //handle compatibility
+                    if(preferenceKey.equals(Settings.PreferenceName.MapMarkerShowShadow))
+                    {
+                        //enabled if not using compatibility
+                        preference.setEnabled(!useCompatibility);
+                    }
+
                     //set state and listener
                     preference.setIconSpaceReserved(false);
                     preference.setChecked(checked);
@@ -643,6 +651,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if(preference != null)
             {
                 final Context context = preference.getContext();
+                final boolean useCompatibility = Settings.getUseGlobeCompatibility(context);
                 final String preferenceKey = preference.getKey();
                 String value = null;
                 float enabledValue;
@@ -677,6 +686,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
 
                     case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
+                        //switch enabled if not using compatibility and checked if using
+                        preference.setSwitchEnabled(!useCompatibility);
+                        if(useCompatibility)
+                        {
+                            preference.setSwitchChecked(true);
+                        }
+
                         //set value
                         value = String.valueOf(Settings.getMapShowOrbitalDirectionLimit(context));
                         break;

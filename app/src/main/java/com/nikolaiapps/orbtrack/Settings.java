@@ -153,6 +153,7 @@ public abstract class Settings
         static final String SpaceTrackUser = "SpaceTrackUser";
         static final String SpaceTrackPassword = "SpaceTrackPwd";
         static final String AskInternet = "askInternet";
+        static final String UseGlobeCompatibility = "UseGlobeCompatibility";
     }
 
     //Sub preference name
@@ -2438,6 +2439,12 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.MapMarkerShowShadow));
     }
 
+    //Sets map marker showing shadow
+    public static void setMapMarkerShowShadow(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.MapMarkerShowShadow, show);
+    }
+
     //Gets if using combined current layout
     public static boolean getCombinedCurrentLayout(Context context)
     {
@@ -3093,5 +3100,17 @@ public abstract class Settings
     public static void setAskInternet(Context context, boolean ask)
     {
         setPreferenceBoolean(context, PreferenceName.AskInternet, ask);
+    }
+
+    //Gets if using globe compatibility mode
+    public static boolean getUseGlobeCompatibility(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.UseGlobeCompatibility));
+    }
+
+    //Sets if using globe compatibility mode
+    public static void setUseGlobeCompatibility(Context context, boolean use)
+    {
+        setPreferenceBoolean(context, PreferenceName.UseGlobeCompatibility, use);
     }
 }

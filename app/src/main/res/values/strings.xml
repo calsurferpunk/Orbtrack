@@ -156,7 +156,7 @@
     <string name="desc_show_orbital_direction">Orbitals point in path direction</string>
     <string name="desc_show_orbital_direction_limit">Show direction if within visible orbital count\nNote: Required for Mali and PowerVR GPUs</string>
     <string name="desc_show_search">Show orbital search list</string>
-    <string name="desc_show_shadows">Show orbital shadows in globe view</string>
+    <string name="desc_show_shadows">Show orbital shadows in globe view\nNote: Disabled for Mali and PowerVR GPUs</string>
     <string name="desc_show_stars">Show stars in globe view</string>
     <string name="desc_show_zoom">Show zoom buttons</string>
     <string name="desc_time_zone_source">Location time zone detection</string>

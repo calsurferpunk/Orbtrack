@@ -1657,6 +1657,7 @@ class Whirly
             byte gpuType;
             boolean forMap = isMap();
             boolean forPreview = false;
+            boolean useCompatibility;
             boolean useOrbitalDirection = Settings.getMapShowOrbitalDirection(activity);
             boolean useOrbitalDirectionLimit = Settings.getMapShowOrbitalDirectionUseLimit(activity);
             Bundle args = this.getArguments();
@@ -1729,10 +1730,22 @@ class Whirly
             {
                 case RenderGPUType.Mali:
                 case RenderGPUType.PowerVr:
-                    //force limit on
-                    useOrbitalDirectionLimit = true;
-                    Settings.setMapShowOrbitalDirectionUseLimit(activity, true);
+                    useCompatibility = true;
                     break;
+
+                default:
+                    useCompatibility = false;
+                    break;
+            }
+            Settings.setUseGlobeCompatibility(activity, useCompatibility);
+            if(useCompatibility)
+            {
+                //force limit on
+                useOrbitalDirectionLimit = true;
+                Settings.setMapShowOrbitalDirectionUseLimit(activity, true);
+
+                //disable shadows
+                Settings.setMapMarkerShowShadow(activity, false);
             }
             setShowOrbitalDirection(useOrbitalDirection);
             setShowOrbitalDirectionLimitCount(useOrbitalDirection && useOrbitalDirectionLimit ? Settings.getMapShowOrbitalDirectionLimit(activity) : 0);

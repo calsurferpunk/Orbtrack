@@ -20,6 +20,8 @@ import androidx.preference.PreferenceViewHolder;
 public class SwitchTextPreference extends ValueTypePreference
 {
     private boolean showSwitch;
+    private boolean switchEnabled;
+    private boolean switchChecked;
     private boolean reverseEnabled;
     private float minValue;
     private float maxValue;
@@ -42,8 +44,8 @@ public class SwitchTextPreference extends ValueTypePreference
 
         //set defaults
         valueType = Integer.class;
-        showSwitch = true;
-        reverseEnabled = false;
+        showSwitch = switchEnabled = true;
+        switchChecked = reverseEnabled = false;
         switchKey = null;
         minValue = 0;
         maxValue = 100;
@@ -155,7 +157,7 @@ public class SwitchTextPreference extends ValueTypePreference
         if(showSwitch)
         {
             switchView.setText(titleText);
-            switchView.setChecked(Settings.getPreferenceBoolean(context, switchKey));
+            setSwitchChecked(switchChecked || Settings.getPreferenceBoolean(context, switchKey));
             checkedChangeListener = new CompoundButton.OnCheckedChangeListener()
             {
                 @Override
@@ -183,6 +185,7 @@ public class SwitchTextPreference extends ValueTypePreference
                 }
             };
             switchView.setOnCheckedChangeListener(checkedChangeListener);
+            setSwitchEnabled(switchEnabled);
             checkedChangeListener.onCheckedChanged(switchView, switchView.isChecked());
         }
         else
@@ -209,6 +212,32 @@ public class SwitchTextPreference extends ValueTypePreference
     {
         enabledValueText = enabledText;
         disabledValueText = disabledText;
+    }
+
+    //Sets if switch is enabled
+    public void setSwitchEnabled(boolean enabled)
+    {
+        switchEnabled = enabled;
+
+        //if view exists
+        if(switchView != null)
+        {
+            //set enabled state
+            switchView.setEnabled(switchEnabled);
+        }
+    }
+
+    //Sets if switch is checked
+    public void setSwitchChecked(boolean checked)
+    {
+        switchChecked = checked;
+
+        //if view exists
+        if(switchView != null)
+        {
+            //set checked state
+            switchView.setChecked(checked);
+        }
     }
 
     //Sets if showing switch

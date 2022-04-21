@@ -1731,6 +1731,7 @@ class Whirly
                 case RenderGPUType.PowerVr:
                     //force limit on
                     useOrbitalDirectionLimit = true;
+                    Settings.setMapShowOrbitalDirectionUseLimit(activity, true);
                     break;
             }
             setShowOrbitalDirection(useOrbitalDirection);

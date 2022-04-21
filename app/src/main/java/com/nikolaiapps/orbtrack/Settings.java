@@ -2400,6 +2400,12 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirectionUseLimit));
     }
 
+    //Sets if map showing orbital direction using limit
+    public static void setMapShowOrbitalDirectionUseLimit(Context context, boolean use)
+    {
+        setPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirectionUseLimit, use);
+    }
+
     //Returns map marker info location
     public static int getMapMarkerInfoLocation(Context context)
     {

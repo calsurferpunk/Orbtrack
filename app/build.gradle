@@ -21,6 +21,7 @@ android {
         debug {
             jniDebuggable true
             renderscriptDebuggable true
+            applicationIdSuffix ".test"
         }
         release {
             jniDebuggable false

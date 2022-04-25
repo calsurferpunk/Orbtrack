@@ -192,13 +192,13 @@ public class OrbitalFilterList
         @Override
         public OrbitalFilterList.Item getItem(int position)
         {
-            return(loadingItems ? null : displayedItems.get(position));
+            return(loadingItems || position < 0 || position >= displayedItems.size() ? null : displayedItems.get(position));
         }
 
         @Override
         public long getItemId(int position)
         {
-            return(loadingItems ? 0 : displayedItems.get(position).satellite.noradId);
+            return(loadingItems || position < 0 || position >= displayedItems.size() ? 0 : displayedItems.get(position).satellite.noradId);
         }
 
         //Sets visibility of views by group

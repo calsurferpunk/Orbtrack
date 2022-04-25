@@ -1104,8 +1104,8 @@ class Whirly
 
             //set defaults
             common.bearing = (noradId > 0 ? 225 : 0);
-            common.geo = new Calculations.GeodeticDataType(0, 0, 0, 0, 0);
-            common.lastGeo = new Calculations.GeodeticDataType(common.geo);
+            common.geo = new Calculations.GeodeticDataType();
+            common.lastBearingGeo = new Calculations.GeodeticDataType(common.geo);
 
             //don't show anything until used
             setVisible(false);
@@ -1416,20 +1416,24 @@ class Whirly
             boolean withinZoom;
             boolean updateBearing;
             boolean usedBearing = false;
+            boolean canUseBearing = (showingDirection && noradId > 0);
             double currentZoom;
             double bearing;
             double bearingDelta;
             double orbitalRotationDelta;
 
             //remember last and current location
-            common.lastGeo = new Calculations.GeodeticDataType(common.geo);
+            if(canUseBearing)
+            {
+                common.lastBearingGeo = new Calculations.GeodeticDataType(common.geo);
+            }
             common.geo = new Calculations.GeodeticDataType(latitude, longitude, altitudeKm, 0, 0);
 
             //if can use bearing
-            if(showingDirection && noradId > 0)
+            if(canUseBearing)
             {
                 //get bearing and delta
-                bearing = Calculations.getBearing(common.lastGeo, common.geo);
+                bearing = Calculations.getBearing(common.lastBearingGeo, common.geo);
                 bearingDelta = Globals.degreeDistance(common.bearing, bearing);
                 orbitalRotationDelta = Globals.degreeDistance(orbitalRotation, lastOrbitalRotation);
             }

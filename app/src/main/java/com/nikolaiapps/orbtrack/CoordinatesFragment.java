@@ -102,14 +102,14 @@ public interface CoordinatesFragment
             double bearing;
             Database.SatelliteData data;
             Calculations.GeodeticDataType geo;
-            Calculations.GeodeticDataType lastGeo;
+            Calculations.GeodeticDataType lastBearingGeo;
 
             Shared()
             {
                 bearing = 0;
                 data = null;
                 geo = null;
-                lastGeo = null;
+                lastBearingGeo = null;
             }
         }
 

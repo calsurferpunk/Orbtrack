@@ -4071,6 +4071,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             Current.PageAdapter.notifyItemsChanged(index);
                         }
                     }
+                    Current.Coordinates.handleMarkerScale();
 
                     //update camera view
                     if(onLens && cameraView != null && (onView || onPasses || onCombined))

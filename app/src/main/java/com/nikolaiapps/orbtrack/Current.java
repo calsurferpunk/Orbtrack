@@ -2147,6 +2147,7 @@ public abstract class Current
         private static boolean showDividers = false;
         private static boolean showTitlesAlways = true;
         private static boolean mapViewReady = false;
+        private static float pendingMarkerScale = Float.MAX_VALUE;
         private static FloatingActionStateButtonMenu settingsMenu = null;
         private static CoordinatesFragment.OrbitalBase moonMarker = null;
 
@@ -2818,6 +2819,18 @@ public abstract class Current
             return(mapViewReady && mapView != null);
         }
 
+        //Handles any pending marker scale
+        public static void handleMarkerScale()
+        {
+            //if map view is ready and there is a pending marker scale
+            if(getMapViewReady() && pendingMarkerScale != Float.MAX_VALUE)
+            {
+                //set scale and update status
+                mapView.setMarkerScale(pendingMarkerScale);
+                pendingMarkerScale = Float.MAX_VALUE;
+            }
+        }
+
         //Setup zoom buttons
         private static void setupZoomButtons(final Context context, final FloatingActionStateButton showZoomButton, final View zoomLayout, FloatingActionButton zoomInButton, FloatingActionButton zoomOutButton)
         {
@@ -2946,7 +2959,7 @@ public abstract class Current
                     else
                     {
                         //undo any changes
-                        mapView.setMarkerScale(Settings.getMapMarkerScale(context));
+                        pendingMarkerScale = Settings.getMapMarkerScale(context);
                     }
 
                     //toggle scale bar visibility
@@ -2976,7 +2989,7 @@ public abstract class Current
                     if(getMapViewReady())
                     {
                         //update scale
-                        mapView.setMarkerScale(progressValue / 100f);
+                        pendingMarkerScale = progressValue / 100f;
 
                         //update text
                         seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));
@@ -3001,7 +3014,7 @@ public abstract class Current
                     if(getMapViewReady())
                     {
                         //undo any changes
-                        mapView.setMarkerScale(Settings.getMapMarkerScale(context));
+                        pendingMarkerScale = Settings.getMapMarkerScale(context);
                     }
                     scaleBar.setVisibility(View.GONE);
                 }
@@ -3073,6 +3086,9 @@ public abstract class Current
                             }
                         }
                         playbackMarker.moveLocation(latitude, longitude, altitudeKm);
+
+                        //handle any needed update
+                        handleMarkerScale();
                     }
                 }
             });
@@ -3203,7 +3219,7 @@ public abstract class Current
                     });
 
                     //setup markers
-                    mapView.setMarkerScale(Settings.getMapMarkerScale(context));
+                    pendingMarkerScale = Settings.getMapMarkerScale(context);
                     mapView.setMarkerShowBackground(Settings.getMapMarkerShowBackground(context));
                     mapView.setMarkerShowShadow(Settings.getMapMarkerShowShadow(context));
                     mapView.setInfoLocation(Settings.getMapMarkerInfoLocation(context));

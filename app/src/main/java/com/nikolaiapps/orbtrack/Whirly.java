@@ -7,6 +7,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -400,14 +401,9 @@ class Whirly
             setVisible(true);
         }
 
-        void setImage(Context context, int id, int color, double rotateDegrees)
+        void setImage(Bitmap image, double rotateDegrees)
         {
-            Bitmap image;
             Bitmap rotatedImage = null;
-
-            imageId = id;
-            imageColor = color;
-            image = (id > 0 ? Globals.getBitmap(context, id, color) : null);
 
             if(image != null)
             {
@@ -427,6 +423,19 @@ class Whirly
                 flatTextureList.add(flatTexture);
                 flatSticker.setTextures(flatTextureList);
             }
+        }
+        void setImage(Context context, int id, int color, double rotateDegrees)
+        {
+            Bitmap image = (id > 0 ? Globals.getBitmap(context, id, color) : null);
+
+            imageId = id;
+            imageColor = color;
+            setImage(image, rotateDegrees);
+        }
+        void setImage(Bitmap image)
+        {
+            imageId = imageColor = 0;
+            setImage(image, 0);
         }
 
         void rotateImage(Context context, double rotateDegrees)
@@ -460,28 +469,41 @@ class Whirly
             flatInfo.setEnable(visible);
         }
 
-        void moveLocation(double latitude, double longitude)
+        private void move(double latitude, double longitude, double halfLatitudeRadsWidth, double halfLongitudeRadsWidth)
         {
-            double latRads;
-            double lonRads;
-            double halfWidth = (DefaultImageScale / 3.0) * flatScale * Math.min(zoomScale, 1);
+            double latitudeRads;
+            double longitudeRads;
 
             remove();
 
             //normalize values
             latitude = Globals.normalizeLatitude(latitude);
             longitude = Globals.normalizeLongitude(longitude);
-            latRads = Math.toRadians(latitude);
-            lonRads = Math.toRadians(longitude);
+            latitudeRads = Math.toRadians(latitude);
+            longitudeRads = Math.toRadians(longitude);
 
             //recreate sticker
             flatSticker = new Sticker();
             flatSticker.setRotation(flatRotationRads);
             flatSticker.setTextures(flatTextureList);
-            flatSticker.setLowerLeft(new Point2d(lonRads - halfWidth, latRads - halfWidth));
-            flatSticker.setUpperRight(new Point2d(lonRads + halfWidth, latRads + halfWidth));
+            flatSticker.setLowerLeft(new Point2d(longitudeRads - halfLongitudeRadsWidth, latitudeRads - halfLatitudeRadsWidth));
+            flatSticker.setUpperRight(new Point2d(longitudeRads + halfLongitudeRadsWidth, latitudeRads + halfLatitudeRadsWidth));
 
             add();
+        }
+
+        void moveLocation(double latitude, double longitude, double latitudeWidth, double longitudeWidth)
+        {
+            double halfLatRadsWidth = Math.toRadians(latitudeWidth);
+            double halfLonRadsWidth = Math.toRadians(longitudeWidth);
+
+            move(latitude, longitude, halfLatRadsWidth, halfLonRadsWidth);
+        }
+        void moveLocation(double latitude, double longitude)
+        {
+            double halfRadsWidth = (DefaultImageScale / 3.0) * flatScale * Math.min(zoomScale, 1);
+
+            move(latitude, longitude, halfRadsWidth, halfRadsWidth);
         }
 
         private void add()
@@ -977,12 +999,14 @@ class Whirly
         private static Bitmap debrisImage;
         private static Bitmap satelliteImage;
         private static Bitmap rocketBodyImage;
+        private static Bitmap footprintImage;
         private static WeakReference<InfoImageCreator> infoCreator;
 
         boolean alwaysShowTitle;
         private final boolean forMap;
         private final int noradId;
         private boolean showShadow;
+        private boolean showFootprint;
         private boolean showBackground;
         private boolean usingInfo;
         private boolean showingInfo;
@@ -999,6 +1023,7 @@ class Whirly
         private Board infoBoard;
         private Board orbitalBoard;
         private FlatObject orbitalShadow;
+        private FlatObject orbitalFootprint;
         private MarkerObject orbitalMarker;
         private final Path orbitalPath;
         private final BaseController controller;
@@ -1010,6 +1035,8 @@ class Whirly
             boolean tleIsAccurate;
             Bitmap titleImage;
             Bitmap orbitalImage = null;
+            Paint footprintPaint;
+            Canvas footprintCanvas;
             Drawable orbitalBgImage;
 
             currentContext = context;
@@ -1017,6 +1044,7 @@ class Whirly
             controller = orbitalController;
             forMap = (controller instanceof MapController);
             showShadow = usingShadow;
+            showFootprint = false;
             showBackground = usingBackground;
             showingDirection = usingDirection;
             alwaysShowTitle = startWithTitleShown;
@@ -1027,6 +1055,7 @@ class Whirly
             lastInfo = null;
             common.data = newSat;
             orbitalShadow = null;
+            orbitalFootprint = null;
             noradId = common.data.getSatelliteNum();
             orbitalType = common.data.getOrbitalType();
 
@@ -1074,6 +1103,15 @@ class Whirly
                         debrisImage = Globals.copyBitmap(orbitalImage);
                         break;
                 }
+            }
+            if(footprintImage == null)
+            {
+                //set/draw footprint image for repeat use
+                footprintImage = Bitmap.createBitmap(1600, 1600, Bitmap.Config.ARGB_8888);
+                footprintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                footprintPaint.setColor(Color.argb(75, 150, 150, 200));
+                footprintCanvas = new Canvas(footprintImage);
+                footprintCanvas.drawCircle(800, 800, 800, footprintPaint);
             }
 
             //remember if old information and initialize path
@@ -1309,6 +1347,23 @@ class Whirly
         }
 
         @Override
+        void setShowFootprint(boolean show)
+        {
+            showFootprint = show;
+
+            if(!showFootprint && orbitalFootprint != null)
+            {
+                orbitalFootprint.remove();
+                orbitalFootprint = null;
+            }
+            else if(showFootprint && orbitalFootprint == null)
+            {
+                orbitalFootprint = new FlatObject(controller);
+                orbitalFootprint.setImage(footprintImage);
+            }
+        }
+
+        @Override
         void setTitleAlwaysVisible(boolean visible)
         {
             alwaysShowTitle = visible;
@@ -1396,6 +1451,11 @@ class Whirly
                     orbitalShadow.setVisible(visible);
                 }
             }
+
+            if(showFootprint && orbitalFootprint != null)
+            {
+                orbitalFootprint.setVisible(visible);
+            }
         }
 
         @Override
@@ -1421,6 +1481,7 @@ class Whirly
             double bearing;
             double bearingDelta;
             double orbitalRotationDelta;
+            Calculations.GeodeticAreaType footprint;
 
             //remember last and current location
             if(canUseBearing)
@@ -1518,6 +1579,14 @@ class Whirly
                 lastMoveWithinZoom = withinZoom;
             }
 
+            //if showing footprint and it exists
+            if(showFootprint && orbitalFootprint != null)
+            {
+                //move footprint
+                footprint = Calculations.getFootprint(latitude, longitude, altitudeKm);
+                orbitalFootprint.moveLocation(latitude, longitude, footprint.latitudeWidth, footprint.longitudeWidth);
+            }
+
             //if updated bearing
             if(usedBearing)
             {
@@ -1543,6 +1612,12 @@ class Whirly
                 }
                 infoBoard.remove();
             }
+
+            if(showFootprint && orbitalFootprint != null)
+            {
+                orbitalFootprint.remove();
+            }
+
             orbitalPath.remove();
         }
     }

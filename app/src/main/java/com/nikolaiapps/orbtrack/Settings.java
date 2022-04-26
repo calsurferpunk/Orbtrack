@@ -78,6 +78,7 @@ public abstract class Settings
         static final String MapMarkerShowBackground = "MapMarkerShowBackground";
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
         static final String MapShowSunlight = "MapShowSunlight";
+        static final String MapShowSelectedFootprint = "MapShowSelectedFootprint";
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
@@ -1747,11 +1748,12 @@ public abstract class Settings
         }
     }
 
-    //Status of using metric units, grid, and map marker bottom info
+    //Status of using metric units, grid, map marker bottom info, and footprint
     private static boolean usingMetric = true;
     private static boolean allowNumberCommas = true;
     private static boolean usingCurrentGridLayout = false;
     private static boolean mapMarkerInfoBottom = true;
+    private static boolean mapSelectedShowFootprint = false;
 
     //Gets read settings
     public static SharedPreferences getReadSettings(Context context)
@@ -1792,6 +1794,7 @@ public abstract class Settings
             case PreferenceName.MapShow3dPaths:
             case PreferenceName.MapShowLabelsAlways:
             case PreferenceName.MapShowOrbitalDirection:
+            case PreferenceName.MapShowSelectedFootprint:
             case PreferenceName.MapShowStars:
             case PreferenceName.MapShowSunlight:
             case PreferenceName.MapShowSearchList:
@@ -2381,6 +2384,26 @@ public abstract class Settings
     public static boolean getMapShowSunlight(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.MapShowSunlight));
+    }
+
+    //Returns if showing selected orbital footprint
+    public static boolean getMapShowSelectedFootprint(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapShowSelectedFootprint));
+    }
+
+    //Sets map showing selected orbital footprint
+    public static void setMapShowSelectedFootprint(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.MapShowSelectedFootprint, show);
+        mapSelectedShowFootprint = show;
+    }
+
+    //Returns map showing orbital footprint
+    //note: faster than getting through preferences since called a lot
+    public static boolean usingMapShowSelectedFootprint()
+    {
+        return(mapSelectedShowFootprint);
     }
 
     //Returns map showing orbital direction

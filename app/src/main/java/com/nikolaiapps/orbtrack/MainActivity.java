@@ -183,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
         Settings.setAllowNumberCommas(this, Settings.getAllowNumberCommas(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
+        Settings.setMapShowSelectedFootprint(this, Settings.getMapShowSelectedFootprint(this));
         Settings.setUsingCurrentGridLayout(this, Settings.getCurrentGridLayout(this));
         setSaveFileData(null, "", "", -1, -1);
         backPressTime = Globals.getGMTTime();
@@ -3954,24 +3955,34 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             //if the orbital markers exist and showing map/globe
                             if(onMap && Current.Coordinates.getMapViewReady() && Current.Coordinates.mapView.getOrbitalCount() > 0)
                             {
-                                //get current orbital
+                                //get current marker
                                 final CoordinatesFragment.OrbitalBase currentMarker = Current.Coordinates.mapView.getOrbital(index);
                                 if(currentMarker != null)
                                 {
-                                    //if using all orbitals or norad ID matches
-                                    if(allMapOrbitals || mapViewNoradID == currentNoradId)
+                                    //remember if current orbital is selected
+                                    boolean currentOrbitalSelected = (mapViewNoradID == currentNoradId);
+
+                                    //if using all orbitals or current is selected
+                                    if(allMapOrbitals || currentOrbitalSelected)
                                     {
                                         //remember latitude, longitude, and if visible
                                         double currentLatitude = currentOrbital.geo.latitude;
                                         double currentLongitude = currentOrbital.geo.longitude;
                                         double currentAltitudeKm = currentOrbital.geo.altitudeKm;
 
-                                        //if there is a selection and it has not been selected yet
-                                        if(mapViewNoradID == currentNoradId && currentNoradId != lastNoradId)
+                                        //if current is selected
+                                        if(currentOrbitalSelected)
                                         {
-                                            //make sure info is displayed
-                                            Current.Coordinates.mapView.selectOrbital(currentNoradId);
-                                            currentMarker.setInfoVisible(true);
+                                            //update showing footprint
+                                            currentMarker.setShowFootprint(Settings.usingMapShowSelectedFootprint());
+
+                                            //if selection changed
+                                            if(currentNoradId != lastNoradId)
+                                            {
+                                                //make sure info is displayed
+                                                Current.Coordinates.mapView.selectOrbital(currentNoradId);
+                                                currentMarker.setInfoVisible(true);
+                                            }
                                         }
 
                                         //update coordinates display

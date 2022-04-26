@@ -3340,6 +3340,7 @@ public abstract class Current
                         playbackMarker.setPathVisible(true);
 
                         //show marker and move to it
+                        playbackMarker.setShowFootprint(Settings.usingMapShowSelectedFootprint());
                         playbackMarker.setVisible(true);
                         playbackMarker.setInfoVisible(true);
                         mapView.moveCamera(playbackMarker.getGeo().latitude, playbackMarker.getGeo().longitude, CoordinatesFragment.Utils.getZoom(savedItems[0].altitudeKm));

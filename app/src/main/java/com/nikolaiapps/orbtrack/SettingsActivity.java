@@ -179,6 +179,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
                         SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
                         SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
+                        SwitchPreference showSelectedFootprint = this.findPreference(Settings.PreferenceName.MapShowSelectedFootprint);
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
                         SwitchPreference showSearchSwitch = this.findPreference(Settings.PreferenceName.MapShowSearchList);
                         SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
@@ -205,6 +206,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(show3dPathsSwitch);
                         setupSwitch(showSunlightSwitch);
                         setupSwitch(allowRotationSwitch);
+                        setupSwitch(showSelectedFootprint);
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
                         setupSwitch(showInformationBackgroundSwitch);
                         setupSwitch(showSearchSwitch);
@@ -472,6 +474,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
                 final String preferenceKey = preference.getKey();
                 final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
+                final boolean isShowFootprint = preferenceKey.equals(Settings.PreferenceName.MapShowSelectedFootprint);
                 final boolean useCompatibility = Settings.getUseGlobeCompatibility(context);
                 final Object dependency = Settings.getSatelliteSource(context);
                 final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
@@ -510,6 +513,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                                     //invert value
                                     checked = !checked;
+                                }
+                                //else if for showing footprint
+                                else if(isShowFootprint)
+                                {
+                                    //update setting
+                                    Settings.setMapShowSelectedFootprint(context, checked);
                                 }
 
                                 //save preference

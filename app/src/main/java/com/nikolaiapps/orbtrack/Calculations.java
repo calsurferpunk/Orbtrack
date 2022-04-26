@@ -129,6 +129,8 @@ public abstract class Calculations
     private static final double G44				= 1.8014998;
     private static final double G52				= 1.0508330;
     private static final double G54				= 4.4108898;
+    private static final double DegToLatKm      = 110.574;                //convert between degrees and latitude in km
+    private static final double DegToLonKm      = 111.320;                //convert between degrees and longitude in km (111.320 * cos(latitude))
     private static final SimpleDateFormat epochParser = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSSSSS", Locale.US);
 
     //Functions/conversions
@@ -281,6 +283,20 @@ public abstract class Calculations
             dest.writeDouble(altitudeKm);
             dest.writeDouble(speedKmS);
             dest.writeDouble(radius);
+        }
+    }
+
+    //Geodetic area type
+    public static class GeodeticAreaType
+    {
+        public double latitude;
+        public double longitude;
+        public double latitudeWidth;
+        public double longitudeWidth;
+
+        public GeodeticAreaType()
+        {
+            latitude = longitude = latitudeWidth = longitudeWidth = 0;
         }
     }
 
@@ -2829,5 +2845,23 @@ public abstract class Calculations
         double bearing = Math.atan2(x, y);
 
         return(Math.toDegrees(bearing));
+    }
+
+    //Calculates the satellite min/max latitude and longitude area for visibility
+    public static GeodeticAreaType getFootprint(double latitude, double longitude, double altitudeKm)
+    {
+        double latRad = Math.toRadians(latitude);
+        double areaPercent = (1 - (EarthRadiusKM / (EarthRadiusKM + altitudeKm))) / 2.0;
+        double areaRadiusKm = EarthRadiusKM * areaPercent;
+        double latRadius = areaRadiusKm / DegToLatKm;
+        double lonRadius = areaRadiusKm / (DegToLonKm * Math.cos(latRad));
+        GeodeticAreaType geoArea = new GeodeticAreaType();
+
+        geoArea.latitude = latitude;
+        geoArea.longitude = longitude;
+        geoArea.latitudeWidth = latRadius * 2;
+        geoArea.longitudeWidth = lonRadius * 2;
+
+        return(geoArea);
     }
 }

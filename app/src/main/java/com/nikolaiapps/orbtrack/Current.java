@@ -1241,7 +1241,7 @@ public abstract class Current
             public long getItemId(int position)
             {
                 Item currentItem = viewItems.getViewItem(position);
-                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
+                return(currentItem != null ? (forCalculation ? currentItem.listIndex : currentItem.id) : Integer.MIN_VALUE);
             }
 
             @Override
@@ -1788,7 +1788,7 @@ public abstract class Current
             public long getItemId(int position)
             {
                 Item currentItem = pathItems.getPassItem(position);
-                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
+                return(currentItem != null ? (forCalculation ? currentItem.listIndex : currentItem.id) : Integer.MIN_VALUE);
             }
 
             @Override
@@ -2363,14 +2363,14 @@ public abstract class Current
             @Override
             public Item getItem(int position)
             {
-                return(PageAdapter.getCoordinatesItem(position));
+                return(coordinateItems.getCoordinateItem(position));
             }
 
             @Override
             public long getItemId(int position)
             {
-                Item currentItem = PageAdapter.getCoordinatesItem(position);
-                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
+                Item currentItem = coordinateItems.getCoordinateItem(position);
+                return(currentItem != null ? (forCalculation ? currentItem.listIndex : currentItem.id) : Integer.MIN_VALUE);
             }
 
             @Override

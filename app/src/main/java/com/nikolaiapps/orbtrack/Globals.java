@@ -4399,7 +4399,7 @@ public abstract class Globals
 
             //read file data
             fileStream = resolver.openInputStream(fileUris.get(index));
-            if(currentExtension.equals(".zip"))
+            if(currentExtension.startsWith(".zip"))
             {
                 //get all usable files in the .zip file
                 InputStream[] zipFileStreams = readZipFile(context, "files", fileStream, fileDataExtensions);
@@ -4410,7 +4410,7 @@ public abstract class Globals
                     currentFileStream.close();
                 }
             }
-            else if(currentExtension.equals(".tle") || currentExtension.equals(".json") || currentExtension.equals(".txt"))
+            else if(currentExtension.startsWith(".tle") || currentExtension.startsWith(".json") || currentExtension.startsWith(".txt"))
             {
                 //add file data
                 fileAscii.add(readTextFile(context, fileStream));

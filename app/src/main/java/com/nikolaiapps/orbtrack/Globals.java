@@ -1685,6 +1685,12 @@ public abstract class Globals
                 y = -y;
             }
 
+            while(sc >= 60)
+            {
+                sc -= 60;
+                mn++;
+            }
+
             result.set((int)y, (int)m - 1, (int)d, (int)hr, (int)mn, (int)sc);
         }
         else

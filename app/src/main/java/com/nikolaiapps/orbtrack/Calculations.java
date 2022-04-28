@@ -2850,17 +2850,16 @@ public abstract class Calculations
     //Calculates the satellite min/max latitude and longitude area for visibility
     public static GeodeticAreaType getFootprint(double latitude, double longitude, double altitudeKm)
     {
-        double latRad = Math.toRadians(latitude);
-        double areaPercent = (1 - (EarthRadiusKM / (EarthRadiusKM + altitudeKm))) / 2.0;
-        double areaRadiusKm = EarthRadiusKM * areaPercent;
-        double latRadius = areaRadiusKm / DegToLatKm;
-        double lonRadius = areaRadiusKm / (DegToLonKm * Math.cos(latRad));
+        double radiusKm = Math.acos(EarthRadiusKM / (EarthRadiusKM + altitudeKm)) * EarthRadiusKM;
+        double latitudeKm = radiusKm / DegToLatKm;
+        double latitudeRad = Math.toRadians(latitude);
+        double longitudeKm = radiusKm / (DegToLonKm * Math.cos(latitudeRad));
         GeodeticAreaType geoArea = new GeodeticAreaType();
 
         geoArea.latitude = latitude;
         geoArea.longitude = longitude;
-        geoArea.latitudeWidth = latRadius * 2;
-        geoArea.longitudeWidth = lonRadius * 2;
+        geoArea.latitudeWidth = latitudeKm;
+        geoArea.longitudeWidth = longitudeKm;
 
         return(geoArea);
     }

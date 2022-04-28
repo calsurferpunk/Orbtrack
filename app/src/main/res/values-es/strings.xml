@@ -333,6 +333,7 @@
     <string name="title_first_deriv_mean_motion_div_2">Primera Derivada de Movimiento Medio / 2</string>
     <string name="title_first_quarter">Primer Cuarto</string>
     <string name="title_follow">Seguir</string>
+    <string name="title_footprint_color">Color Huella</string>
     <string name="title_force_rotate">Forzar Rotación</string>
     <string name="title_full">Lleno</string>
     <string name="title_full_moon_start">Comienza Luna Llena</string>

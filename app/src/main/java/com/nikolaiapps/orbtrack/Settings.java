@@ -79,6 +79,7 @@ public abstract class Settings
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
         static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowSelectedFootprint = "MapShowSelectedFootprint";
+        static final String MapSelectedFootprintColor = "MapSelectedFootprintColor";
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
@@ -1872,6 +1873,9 @@ public abstract class Settings
             case PreferenceName.MapShowOrbitalDirectionLimit:
                 return(100);
 
+            case PreferenceName.MapSelectedFootprintColor:
+                return(Color.argb(102, 200, 200, 220));
+
             case PreferenceName.MapLayerType + SubPreferenceName.Globe:
                 return(CoordinatesFragment.MapLayerType.Hybrid);
 
@@ -2384,6 +2388,12 @@ public abstract class Settings
     public static boolean getMapShowSunlight(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.MapShowSunlight));
+    }
+
+    //Get map selected footprint color
+    public static int getMapSelectedFootprintColor(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapSelectedFootprintColor));
     }
 
     //Returns if showing selected orbital footprint

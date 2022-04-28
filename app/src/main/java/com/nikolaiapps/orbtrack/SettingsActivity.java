@@ -179,7 +179,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
                         SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
                         SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
-                        SwitchPreference showSelectedFootprint = this.findPreference(Settings.PreferenceName.MapShowSelectedFootprint);
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
                         SwitchPreference showSearchSwitch = this.findPreference(Settings.PreferenceName.MapShowSearchList);
                         SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
@@ -187,6 +186,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
                         SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
                         SwitchTextPreference showOrbitalDirectionLimit = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirectionLimit);
+                        SwitchButtonPreference showSelectedFootprint = this.findPreference(Settings.PreferenceName.MapShowSelectedFootprint);
                         SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
                         SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
                         SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
@@ -206,7 +206,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(show3dPathsSwitch);
                         setupSwitch(showSunlightSwitch);
                         setupSwitch(allowRotationSwitch);
-                        setupSwitch(showSelectedFootprint);
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
                         setupSwitch(showInformationBackgroundSwitch);
                         setupSwitch(showSearchSwitch);
@@ -215,6 +214,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(showShadowsSwitch);
                         setupSwitch(showStarsSwitch);
                         setupSwitchText(showOrbitalDirectionLimit);
+                        setupSwitchButton(showSelectedFootprint);
                         setupSwitchButton(showGridSwitch);
                         setupSlider(globeSensitivitySlider);
                         setupSlider(globeSpeedScaleSlider);
@@ -474,7 +474,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
                 final String preferenceKey = preference.getKey();
                 final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
-                final boolean isShowFootprint = preferenceKey.equals(Settings.PreferenceName.MapShowSelectedFootprint);
                 final boolean useCompatibility = Settings.getUseGlobeCompatibility(context);
                 final Object dependency = Settings.getSatelliteSource(context);
                 final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
@@ -513,12 +512,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                                     //invert value
                                     checked = !checked;
-                                }
-                                //else if for showing footprint
-                                else if(isShowFootprint)
-                                {
-                                    //update setting
-                                    Settings.setMapShowSelectedFootprint(context, checked);
                                 }
 
                                 //save preference
@@ -615,16 +608,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             {
                 final Context context = preference.getContext();
                 final int titleId;
-                final boolean allowOpacity;
                 final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
                 final String preferenceKey = preference.getKey();
                 final String buttonPreferenceKey;
+                final boolean allowOpacity;
+                final boolean isFootprint = (preferenceKey.equals(Settings.PreferenceName.MapShowSelectedFootprint));
 
                 //if lens horizon or show grid toggle
                 switch(preferenceKey)
                 {
                     case Settings.PreferenceName.LensUseHorizon:
                     case Settings.PreferenceName.MapShowGrid:
+                    case Settings.PreferenceName.MapShowSelectedFootprint:
                         BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
                         float[] size = Globals.dpsToPixels(context, 60, 40);
                         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
@@ -635,6 +630,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             titleId = R.string.title_horizon_color;
                             buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
                             allowOpacity = false;
+                        }
+                        else if(isFootprint)
+                        {
+                            titleId = R.string.title_footprint_color;
+                            buttonPreferenceKey = Settings.PreferenceName.MapSelectedFootprintColor;
+                            allowOpacity = true;
                         }
                         else
                         {
@@ -648,6 +649,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         switchButton.setLayoutParams(params);
                         preference.setButton(switchButton);
                         preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, allowOpacity, writeSettings));
+                        if(isFootprint)
+                        {
+                            preference.setCheckedChangedListener(new SwitchButtonPreference.OnCheckedChangedListener()
+                            {
+                                @Override
+                                public void onCheckedChanged(String preferenceName, boolean isChecked)
+                                {
+                                    Settings.setMapShowSelectedFootprint(context, isChecked);
+                                }
+                            });
+                        }
                         break;
                 }
             }
@@ -1301,6 +1313,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowLabelsAlways:
                         case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
+                        case Settings.PreferenceName.MapSelectedFootprintColor:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapShowStars:
                         case Settings.PreferenceName.MapShowSunlight:
@@ -1480,6 +1493,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     //update list
                     updateList();
+
+                    //if location
+                    if(requestCode == BaseInputActivity.RequestCode.MapLocationInput)
+                    {
+                        //update observer
+                        setReloadLocationNeeded();
+                    }
                 }
                 break;
 

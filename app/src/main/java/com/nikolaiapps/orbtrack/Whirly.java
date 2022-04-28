@@ -1030,6 +1030,8 @@ class Whirly
 
         OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
+            int alpha;
+            int color;
             int iconId;
             byte orbitalType;
             boolean tleIsAccurate;
@@ -1107,11 +1109,18 @@ class Whirly
             if(footprintImage == null)
             {
                 //set/draw footprint image for repeat use
+                color = Settings.getMapSelectedFootprintColor(context);
+                alpha = Color.alpha(color);
                 footprintImage = Bitmap.createBitmap(1600, 1600, Bitmap.Config.ARGB_8888);
-                footprintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                footprintPaint.setColor(Color.argb(75, 150, 150, 200));
                 footprintCanvas = new Canvas(footprintImage);
+                footprintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+                footprintPaint.setColor(color);
+                footprintPaint.setStyle(Paint.Style.FILL);
                 footprintCanvas.drawCircle(800, 800, 800, footprintPaint);
+                footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
+                footprintPaint.setStyle(Paint.Style.STROKE);
+                footprintPaint.setStrokeWidth(40f);
+                footprintCanvas.drawCircle(800, 800, 780, footprintPaint);
             }
 
             //remember if old information and initialize path
@@ -1746,6 +1755,9 @@ class Whirly
                 args = new Bundle();
             }
             mapLayerType = args.getInt(ParamTypes.MapLayerType, MapLayerType.Normal);
+
+            //reset footprint image
+            OrbitalObject.footprintImage = null;
 
             //set if showing sunlight
             setShowSunlight(Settings.getMapShowSunlight(activity));

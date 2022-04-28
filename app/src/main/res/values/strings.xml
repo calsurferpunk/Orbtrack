@@ -333,6 +333,7 @@
     <string name="title_first_deriv_mean_motion_div_2">First Derivative of Mean Motion / 2</string>
     <string name="title_first_quarter">First Quarter</string>
     <string name="title_follow">Follow</string>
+    <string name="title_footprint_color">Footprint Color</string>
     <string name="title_force_rotate">Force Rotate</string>
     <string name="title_full">Full</string>
     <string name="title_full_moon_start">Full Moon Start</string>

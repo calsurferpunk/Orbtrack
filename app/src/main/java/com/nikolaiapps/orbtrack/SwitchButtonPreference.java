@@ -18,9 +18,15 @@ import androidx.preference.PreferenceViewHolder;
 
 public class SwitchButtonPreference extends Preference
 {
+    public interface OnCheckedChangedListener
+    {
+        void onCheckedChanged(String preferenceName, boolean isChecked);
+    }
+
     private String sharedName;
     private String titleText;
     private AppCompatButton button;
+    private OnCheckedChangedListener checkedChangedListener;
 
     public SwitchButtonPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
@@ -99,7 +105,15 @@ public class SwitchButtonPreference extends Preference
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
             {
+                //update preference setting
                 writeSettings.putBoolean(preferenceName, isChecked).apply();
+
+                //if listener is set
+                if(checkedChangedListener != null)
+                {
+                    //call it
+                    checkedChangedListener.onCheckedChanged(preferenceName, isChecked);
+                }
             }
         });
     }
@@ -129,5 +143,11 @@ public class SwitchButtonPreference extends Preference
         {
             button.setOnClickListener(listener);
         }
+    }
+
+    //Sets the on checked changed listener
+    public void setCheckedChangedListener(OnCheckedChangedListener listener)
+    {
+        checkedChangedListener = listener;
     }
 }

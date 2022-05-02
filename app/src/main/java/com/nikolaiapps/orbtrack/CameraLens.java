@@ -1098,8 +1098,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     else
                     {
                         //create image and add to list
-                        iconId = Globals.getOrbitalIconID(noradId, currentType);
-                        indicatorIcon.image = Globals.getBitmap(context, iconId, (isSatellite? R.color.white : 0), iconLength, iconLength);
+                        iconId = Globals.getOrbitalIconID(context, noradId, currentType);
+                        indicatorIcon.image = Globals.getBitmap(context, iconId, (isSatellite && (currentType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? R.color.white : 0), iconLength, iconLength);
                         if(isSatellite)
                         {
                             //add background highlight

@@ -61,6 +61,7 @@ public abstract class Settings
         static final String ColorTheme = "ColorTheme";
         static final String MetricUnits = "MetricUnits";
         static final String AllowNumberCommas = "AllowNumberCommas";
+        static final String SatelliteIcon = "SatelliteIcon";
         static final String MapLayerType = "MapLayerType";
         static final String MapShow3dPaths = "MapShow3dPaths";
         static final String ShowSatelliteClouds = "ShowSatelliteClouds";
@@ -197,7 +198,7 @@ public abstract class Settings
                     //init indicator items
                     indicatorItems = new IconSpinner.Item[]
                     {
-                        new IconSpinner.Item(R.drawable.orbital_satellite, true, res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
+                        new IconSpinner.Item(Settings.getSatelliteIconImageId(context), Settings.getSatelliteIconImageIsThemeable(context), res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
                         new IconSpinner.Item(R.drawable.shape_circle_black, true, res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
                         new IconSpinner.Item(R.drawable.shape_square_black, true, res.getString(R.string.title_square), LensView.IndicatorType.Square),
                         new IconSpinner.Item(R.drawable.shape_triangle_black, true, res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
@@ -219,6 +220,18 @@ public abstract class Settings
         //Display
         public static abstract class Display
         {
+            //Satellite icon types
+            public static abstract class SatelliteIcon
+            {
+                static final int Black = 0;
+                static final int GrayBlue = 1;
+                static final int Sputnik1 = 2;
+                static final int Sputnik2 = 3;
+                static final int Emoji = 4;
+                static final int GrayOrange = 5;
+            }
+            public static IconSpinner.Item[] satelliteIconItems;
+
             //Theme colors
             private static abstract class ThemeIndex
             {
@@ -241,6 +254,19 @@ public abstract class Settings
                 Resources res = context.getResources();
 
                 //if values are not set
+                if(satelliteIconItems == null || satelliteIconItems.length == 0)
+                {
+                    //init indicator items
+                    satelliteIconItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(R.drawable.orbital_satellite_black, true, null, SatelliteIcon.Black),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_blue, false, null, SatelliteIcon.GrayBlue),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_sputnik1, true, null, SatelliteIcon.Sputnik1),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_sputnik2, true, null, SatelliteIcon.Sputnik2),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_emoji, false, null, SatelliteIcon.Emoji),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_orange, false, null, SatelliteIcon.GrayOrange)
+                    };
+                }
                 if(colorAdvancedItems == null || colorAdvancedItems.length == 0)
                 {
                     //init color advanced items
@@ -1857,6 +1883,9 @@ public abstract class Settings
             case PreferenceName.InformationSource:
                 return(Database.UpdateSource.NASA);
 
+            case PreferenceName.SatelliteIcon:
+                return(Options.Display.SatelliteIcon.Black);
+
             case PreferenceName.LensIndicator:
                 return(Options.LensView.IndicatorType.Icon);
 
@@ -2060,6 +2089,56 @@ public abstract class Settings
     public static void setCombinedShown(Context context, boolean shown)
     {
         setPreferenceBoolean(context, PreferenceName.CombinedNotice, shown);
+    }
+
+    //Gets satellite icon type
+    public static int getSatelliteIconType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.SatelliteIcon));
+    }
+
+    //Returns image ID for satellite icon type
+    public static int getSatelliteIconImageId(Context context)
+    {
+        if(context != null)
+        {
+            switch(getSatelliteIconType(context))
+            {
+                case Options.Display.SatelliteIcon.GrayBlue:
+                    return(R.drawable.orbital_satellite_gray_blue);
+
+                case Options.Display.SatelliteIcon.Sputnik1:
+                    return(R.drawable.orbital_satellite_sputnik1);
+
+                case Options.Display.SatelliteIcon.Sputnik2:
+                    return(R.drawable.orbital_satellite_sputnik2);
+
+                case Options.Display.SatelliteIcon.Emoji:
+                    return(R.drawable.orbital_satellite_emoji);
+
+                case Options.Display.SatelliteIcon.GrayOrange:
+                    return(R.drawable.orbital_satellite_gray_orange);
+            }
+        }
+
+        return(R.drawable.orbital_satellite_black);
+    }
+
+    //Returns if satellite icon type is themeable
+    public static boolean getSatelliteIconImageIsThemeable(Context context)
+    {
+        if(context != null)
+        {
+            switch(getSatelliteIconType(context))
+            {
+                case Options.Display.SatelliteIcon.Black:
+                case Options.Display.SatelliteIcon.Sputnik1:
+                case Options.Display.SatelliteIcon.Sputnik2:
+                    return(true);
+            }
+        }
+
+        return(false);
     }
 
     //Gets indicator type

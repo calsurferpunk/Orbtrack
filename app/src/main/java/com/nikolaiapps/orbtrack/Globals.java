@@ -2991,9 +2991,9 @@ public abstract class Globals
     }
 
     //Gets an orbital icon ID
-    public static int getOrbitalIconID(int satelliteNum, byte orbitalType)
+    public static int getOrbitalIconID(Context context, int satelliteNum, byte orbitalType)
     {
-        int iconId = R.drawable.orbital_satellite;
+        int iconId = -1;
 
         if(satelliteNum > 0)
         {
@@ -3058,14 +3058,19 @@ public abstract class Globals
             }
         }
 
+        if(iconId == -1)
+        {
+            iconId = Settings.getSatelliteIconImageId(context);
+        }
+
         return(iconId);
     }
 
     //Gets an orbital icon
     public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType, long timeMs, int forceColorId)
     {
-        int iconID = getOrbitalIconID(satelliteNum, orbitalType);
-        boolean allowIconColor = (iconID == R.drawable.orbital_satellite || iconID == R.drawable.orbital_rocket || iconID == R.drawable.orbital_debris);
+        int iconID = getOrbitalIconID(context, satelliteNum, orbitalType);
+        boolean allowIconColor = (iconID == R.drawable.orbital_rocket || iconID == R.drawable.orbital_debris || (satelliteNum > 0 && Settings.getSatelliteIconImageIsThemeable(context)));
 
         if(context == null)
         {

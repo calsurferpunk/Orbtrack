@@ -269,11 +269,18 @@ public abstract class Orbitals
             super.setColumnTitles(listColumns, categoryText, page);
         }
 
+        private void setText(TextView view, String text)
+        {
+            if(view != null)
+            {
+                view.setText(text);
+            }
+        }
+
         @Override
         protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
         {
             int offset = 0;
-            String text;
             final Item currentItem = (Item)item;
             final Calculations.OrbitDataType currentOrbit = currentItem.satelliteObject.orbit;
             final Calculations.TLEDataType currentTLE = currentItem.satelliteObject.tle;
@@ -317,8 +324,7 @@ public abstract class Orbitals
                 //
                 titles = detailDialog.getItemDetailTitles();
                 texts = detailDialog.getItemDetailTexts();
-                text = res.getString(R.string.title_owner) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_owner) + ":");
                 detailDialog.hideVerticalItemDetailDivider(offset);
                 TextView ownerText = texts[offset++];
                 TableRow.LayoutParams viewParams = (TableRow.LayoutParams)ownerText.getLayoutParams();
@@ -326,57 +332,44 @@ public abstract class Orbitals
                 ownerText.setLayoutParams(viewParams);
                 offset++;
 
-                text = res.getString(R.string.title_norad) + " " + res.getString(R.string.title_id) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_norad) + " " + res.getString(R.string.title_id) + ":");
                 TextView noradText = texts[offset++];
 
-                text = res.getString(R.string.abbrev_international) + " " + res.getString(R.string.title_code) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.abbrev_international) + " " + res.getString(R.string.title_code) + ":");
                 TextView internationalText = texts[offset++];
 
-                text = res.getString(R.string.title_launch_date) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_launch_date) + ":");
                 TextView launchDateText = texts[offset++];
 
-                text = res.getString(R.string.title_perigee) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_perigee) + ":");
                 TextView perigeeText = texts[offset++];
 
-                text = res.getString(R.string.title_launch_number) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_launch_number) + ":");
                 TextView launchNumberText = texts[offset++];
 
-                text = res.getString(R.string.title_apogee) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_apogee) + ":");
                 TextView apogeeText = texts[offset++];
 
-                text = res.getString(R.string.title_inclination) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_inclination) + ":");
                 TextView inclinationText = texts[offset++];
 
-                text = res.getString(R.string.title_period) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_period) + ":");
                 TextView periodText = texts[offset++];
 
-                text = res.getString(R.string.title_semi_major_axis) + ":";
-                titles[offset].setText(text);
+                setText(titles[offset], res.getString(R.string.title_semi_major_axis) + ":");
                 TextView majorText = texts[offset++];
 
                 //update displays
-                ownerText.setText(currentItem.getOwner(currentContext));
-                noradText.setText(String.valueOf(currentTLE.satelliteNum));
-                internationalText.setText(currentTLE.internationalCode);
-                text = Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.perigee)) + " " + Globals.getKmLabel(res);
-                perigeeText.setText(text);
-                text = Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.apogee)) + " " + Globals.getKmLabel(res);
-                apogeeText.setText(text);
-                inclinationText.setText(Globals.getNumberString(currentTLE.inclinationDeg));
-                text = Globals.getNumberString(currentOrbit.periodMinutes) + " " + res.getString(R.string.abbrev_minutes_lower);
-                periodText.setText(text);
-                text = Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.semiMajorAxisKm)) + " " + Globals.getKmLabel(res);
-                majorText.setText(text);
-                launchDateText.setText(String.valueOf(currentTLE.launchYear));
-                launchNumberText.setText(String.valueOf(currentTLE.launchNum));
+                setText(ownerText, currentItem.getOwner(currentContext));
+                setText(noradText, String.valueOf(currentTLE.satelliteNum));
+                setText(internationalText, currentTLE.internationalCode);
+                setText(perigeeText, Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.perigee)) + " " + Globals.getKmLabel(res));
+                setText(apogeeText, Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.apogee)) + " " + Globals.getKmLabel(res));
+                setText(inclinationText, Globals.getNumberString(currentTLE.inclinationDeg));
+                setText(periodText, Globals.getNumberString(currentOrbit.periodMinutes) + " " + res.getString(R.string.abbrev_minutes_lower));
+                setText(majorText, Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.semiMajorAxisKm)) + " " + Globals.getKmLabel(res));
+                setText(launchDateText, String.valueOf(currentTLE.launchYear));
+                setText(launchNumberText, String.valueOf(currentTLE.launchNum));
             }
             //else if info button exists
             else if(infoButton != null)

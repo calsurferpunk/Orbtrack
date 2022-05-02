@@ -183,7 +183,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             fileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_insert_drive_file_black, true);
             folderDrawable = Globals.getDrawable(currentContext, R.drawable.ic_folder_open_black, true);
             backupFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_storage_black, true);
-            tleFileDrawable = Globals.getDrawable(currentContext, R.drawable.orbital_satellite, true);
+            tleFileDrawable = Globals.getDrawable(currentContext, Settings.getSatelliteIconImageId(currentContext), Settings.getSatelliteIconImageIsThemeable(currentContext));
             zipFileDrawable = Globals.getDrawable(currentContext, R.drawable.ic_briefcase_black, true);
 
             itemClickedListener = new OnItemClickListener()

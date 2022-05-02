@@ -204,6 +204,7 @@ public class AddSelectListAdapter extends BaseAdapter
     {
         int imageId = -1;
         boolean useTheme = true;
+        Context context = (parent != null ? parent.getContext() : null);
         TextView addSourceItemText;
         AppCompatImageView addSourceItemImage;
 
@@ -268,7 +269,8 @@ public class AddSelectListAdapter extends BaseAdapter
 
                     default:
                     case Globals.FileType.TLEs:
-                        imageId = R.drawable.orbital_satellite;
+                        imageId = Settings.getSatelliteIconImageId(context);
+                        useTheme = Settings.getSatelliteIconImageIsThemeable(context);
                         break;
                 }
                 break;
@@ -361,7 +363,7 @@ public class AddSelectListAdapter extends BaseAdapter
         }
         if(imageId != -1)
         {
-            addSourceItemImage.setBackgroundDrawable(Globals.getDrawable(parent.getContext(), imageId, useTheme));
+            addSourceItemImage.setBackgroundDrawable(Globals.getDrawable(context, imageId, useTheme));
         }
         addSourceItemText.setText(selections[position]);
 

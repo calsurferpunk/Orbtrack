@@ -1461,7 +1461,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void updateSideMenu()
     {
         Resources res = this.getResources();
-        Drawable satelliteDrawable = Globals.getDrawable(this, R.drawable.orbital_satellite, true);
+        Drawable satelliteDrawable = Globals.getDrawable(this, Settings.getSatelliteIconImageId(this), Settings.getSatelliteIconImageIsThemeable(this));
         Drawable viewDrawable = Globals.getDrawable(this, R.drawable.ic_remove_red_eye_white, true);
         Drawable passDrawable = Globals.getDrawable(this, R.drawable.orbit, true);
         Drawable coordinateDrawable = Globals.getDrawable(this, R.drawable.ic_language_black, true);

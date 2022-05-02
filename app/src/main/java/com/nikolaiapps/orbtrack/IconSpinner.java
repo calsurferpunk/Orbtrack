@@ -175,7 +175,7 @@ public class IconSpinner extends AppCompatSpinner
                     isLocation = (currentSat.noradId == Universe.IDs.CurrentLocation);
                     useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
                     useIcon1Color = !useIcons;
-                    useIcon3Color = (useIcons && currentSat.noradId > 0);
+                    useIcon3Color = (useIcons && currentSat.noradId > 0 && (currentSat.orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)));
                     int[] ownerIconIds = (useIcons ? Globals.getOwnerIconIDs(currentSat.ownerCode) : new int[]{isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black});
                     items[index] = new Item(ownerIconIds[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIconIds.length > 1 ? ownerIconIds[1] : -1), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), !useIcons, currentSat.getName(), currentSat.noradId);
                 }
@@ -200,6 +200,7 @@ public class IconSpinner extends AppCompatSpinner
         private int backgroundItemSelectedColor;
         private boolean usingIcon1;
         private boolean usingIcon3;
+        private boolean usingIcon3Only;
         private boolean loadingItems = false;
         private LayoutInflater listInflater;
         private Item[] items;
@@ -212,7 +213,7 @@ public class IconSpinner extends AppCompatSpinner
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
             backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
 
-            updateUsingIcons();
+            updateUsing();
         }
 
         public CustomAdapter(Context context, Item[] items)
@@ -282,7 +283,7 @@ public class IconSpinner extends AppCompatSpinner
                 public void onLoaded(Item[] loadedItems)
                 {
                     items = loadedItems;
-                    updateUsingIcons();
+                    updateUsing();
                     loadingItems = false;
                     if(context instanceof Activity)
                     {
@@ -304,27 +305,34 @@ public class IconSpinner extends AppCompatSpinner
             this(context, satellites, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0);
         }
 
-        private void updateUsingIcons()
+        private void updateUsing()
         {
             int index;
+            boolean usingText;
+            boolean usingIcon2;
 
             //not using until found
-            usingIcon1 = usingIcon3 = false;
+            usingText = usingIcon1 = usingIcon2 = usingIcon3 = usingIcon3Only = false;
 
             //if items are set
             if(items != null)
             {
-                //go through items while not using either icons
-                for(index = 0; index < items.length && (!usingIcon1 || !usingIcon3); index++)
+                //go through items while any using status is still false
+                for(index = 0; index < items.length && (!usingText || !usingIcon1 || !usingIcon3); index++)
                 {
                     //remember current item
                     Item currentItem = items[index];
 
-                    //update if using icons
+                    //update using status
+                    usingText = usingText || (currentItem.text != null);
                     usingIcon1 = usingIcon1 || (currentItem.icon1Id > 0 || currentItem.icon1Ids != null);
+                    usingIcon2 = usingIcon2 || (currentItem.icon2Id > 0);
                     usingIcon3 = usingIcon3 || (currentItem.icon3Id > 0 || currentItem.icon3 != null);
                 }
             }
+
+            //update if using icon 3 only
+            usingIcon3Only = (usingIcon3 && !usingText && !usingIcon1 && !usingIcon2);
         }
 
         @Override
@@ -422,6 +430,12 @@ public class IconSpinner extends AppCompatSpinner
             icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
             icon3 = (currentItem.icon3Id > 0 ? Globals.getDrawable(context, currentItem.icon3Id, currentItem.iconsUseThemeTint) : null);
             convertView.setBackgroundColor(backgroundColor);
+            if(usingIcon3Only)
+            {
+                LayoutParams viewParams = convertView.getLayoutParams();
+                viewParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                convertView.setLayoutParams(viewParams);
+            }
             itemBackground = convertView.findViewById(R.id.Spinner_Item_Background);
             itemBackground.setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
 
@@ -475,6 +489,13 @@ public class IconSpinner extends AppCompatSpinner
                 {
                     itemImage3.setVisibility(View.GONE);
                 }
+                if(usingIcon3Only)
+                {
+                    LayoutParams imageParams = itemImage2.getLayoutParams();
+                    imageParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                    imageParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                    itemImage3.setLayoutParams(imageParams);
+                }
                 itemText.setText(currentItem.text);
                 itemText.setTextColor(isSelected ? textSelectedColor : textColor);
                 if(currentItem.subText != null)
@@ -525,6 +546,11 @@ public class IconSpinner extends AppCompatSpinner
         public void setSelectedIndex(int index)
         {
             selectedIndex = index;
+        }
+
+        public boolean getUsingIcon3Only()
+        {
+            return(usingIcon3Only);
         }
     }
 

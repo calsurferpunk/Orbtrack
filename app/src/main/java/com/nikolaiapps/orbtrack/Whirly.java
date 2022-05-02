@@ -1081,8 +1081,8 @@ class Whirly
             if(orbitalImage == null)
             {
                 //get image
-                iconId = Globals.getOrbitalIconID(noradId, orbitalType);
-                orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(currentContext, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(currentContext, iconId, (noradId > 0 ? Color.WHITE : 0)));
+                iconId = Globals.getOrbitalIconID(context, noradId, orbitalType);
+                orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(context, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(context, iconId, (noradId > 0 && (orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? Color.WHITE : 0)));
                 if(noradId > 0)
                 {
                     //add outline
@@ -1125,12 +1125,12 @@ class Whirly
 
             //remember if old information and initialize path
             tleIsAccurate = (newSat.database == null || newSat.database.tleIsAccurate);
-            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(currentContext), tleIsAccurate, common.data.database.pathColor);
+            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(context), tleIsAccurate, common.data.database.pathColor);
 
             if(forMap)
             {
                 //create marker
-                orbitalMarker = new MarkerObject(currentContext, controller, newSat.getSatelliteNum(), observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
+                orbitalMarker = new MarkerObject(context, controller, newSat.getSatelliteNum(), observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
                 orbitalMarker.setTitle(newSat.getName());
                 orbitalMarker.setImage(orbitalImage);
             }
@@ -1144,7 +1144,7 @@ class Whirly
                 setShowShadow(showShadow);
 
                 //set title
-                titleImage = getInfoCreator().get(currentContext, common.data.getName(), null);
+                titleImage = getInfoCreator().get(context, common.data.getName(), null);
                 infoBoard = new Board(controller, tleIsAccurate, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
@@ -1157,6 +1157,14 @@ class Whirly
             //don't show anything until used
             setVisible(false);
             setInfoVisible(false);
+        }
+
+        public static void clearImages()
+        {
+            debrisImage = null;
+            satelliteImage = null;
+            rocketBodyImage = null;
+            footprintImage = null;
         }
 
         private InfoImageCreator getInfoCreator()
@@ -1350,7 +1358,7 @@ class Whirly
                     noradId = common.data.getSatelliteNum();
 
                     orbitalShadow = new FlatObject(controller);
-                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0), 0);
+                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(currentContext, noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0), 0);
                 }
             }
         }
@@ -1756,8 +1764,8 @@ class Whirly
             }
             mapLayerType = args.getInt(ParamTypes.MapLayerType, MapLayerType.Normal);
 
-            //reset footprint image
-            OrbitalObject.footprintImage = null;
+            //reset static images
+            OrbitalObject.clearImages();
 
             //set if showing sunlight
             setShowSunlight(Settings.getMapShowSunlight(activity));

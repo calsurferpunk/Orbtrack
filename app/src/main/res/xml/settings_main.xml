@@ -31,6 +31,13 @@
                     android:title="@string/title_numbers_have_commas"
                     android:key="AllowNumberCommas"
                     android:persistent="false"/>
+
+                <PreferenceCategory android:title="@string/title_icon">
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_satellite"
+                        android:key="SatelliteIcon"
+                        android:summary="@string/desc_satellite_icon"/>
+                </PreferenceCategory>
             </PreferenceCategory>
         </PreferenceScreen>
 

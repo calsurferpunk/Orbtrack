@@ -119,6 +119,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
                         SwitchPreference allowNumberCommasSwitch = this.findPreference(Settings.PreferenceName.AllowNumberCommas);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
+                        IconListPreference satelliteIconList = this.findPreference(Settings.PreferenceName.SatelliteIcon);
 
                         //initialize values
                         Settings.Options.Display.initValues(context);
@@ -126,6 +127,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(darkThemeSwitch);
                         setupSwitch(allowNumberCommasSwitch);
+                        setupList(satelliteIconList, Settings.Options.Display.satelliteIconItems, null, null, null, null);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
                         break;
 
@@ -335,6 +337,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     return((int)newValue != Settings.getColorTheme(context));
                                 }
                             });
+                            break;
+
+                        case Settings.PreferenceName.SatelliteIcon:
+                            currentValue = Settings.getSatelliteIconType(context);
                             break;
 
                         case Settings.PreferenceName.LensIndicator:
@@ -1272,6 +1278,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     {
                         case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.DarkTheme:
+                        case Settings.PreferenceName.SatelliteIcon:
                             recreateThis = true;
                             //fall through
 

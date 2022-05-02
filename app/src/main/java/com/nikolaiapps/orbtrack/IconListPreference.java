@@ -6,7 +6,9 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.preference.Preference;
@@ -68,6 +70,7 @@ public class IconListPreference extends Preference
         final CharSequence summary = this.getSummary();
         final TextView titleView;
         final TextView summaryView;
+        final LinearLayout listParentView;
         final SharedPreferences.Editor writeSettings = getWriteSettings(context);
         View rootView = holder.itemView;
 
@@ -82,7 +85,8 @@ public class IconListPreference extends Preference
         //get displays
         titleView = rootView.findViewById(R.id.Icon_List_Preference_Title);
         summaryView = rootView.findViewById(R.id.Icon_List_Preference_Summary);
-        iconList = rootView.findViewById(R.id.Icon_List_Preference_Layout);
+        listParentView = rootView.findViewById(R.id.Icon_List_Preference_List_Parent);
+        iconList = rootView.findViewById(R.id.Icon_List_Preference_List);
 
         //set displays
         titleView.setText(titleText);
@@ -96,6 +100,17 @@ public class IconListPreference extends Preference
             pendingSetValue = iconList.getSelectedValue(null);
         }
         iconList.setAdapter(adapter);
+        if(adapter != null && adapter.getUsingIcon3Only())
+        {
+            ViewGroup.LayoutParams listParams = iconList.getLayoutParams();
+            ViewGroup.LayoutParams parentParams = listParentView.getLayoutParams();
+
+            listParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+            parentParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+
+            iconList.setLayoutParams(listParams);
+            listParentView.setLayoutParams(parentParams);
+        }
         if(pendingSetValue != null)
         {
             if(pendingDefaultValue != null)
@@ -174,6 +189,7 @@ public class IconListPreference extends Preference
         itemValues = adapter.getItemValues();
     }
 
+    //Sets selected value
     public void setSelectedValue(Object value, Object defaultValue)
     {
         if(iconList != null)

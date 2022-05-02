@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
@@ -2108,6 +2109,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     @Override
                     public void onColorSelected(int color)
                     {
+                        int alpha = Color.alpha(color);
+
+                        //if selected footprint color with not enough transparency
+                        if(preferenceKey.equals(Settings.PreferenceName.MapSelectedFootprintColor) && alpha > 127)
+                        {
+                            //force more transparency
+                            color = Globals.getColor(color, 127);
+                        }
+
                         writeSettings.putInt(preferenceKey, color).apply();
                         v.setBackgroundColor(color);
                     }

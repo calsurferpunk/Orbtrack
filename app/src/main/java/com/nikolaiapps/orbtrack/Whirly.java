@@ -164,8 +164,8 @@ class Whirly
 
             //update size
             snippetLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            width = snippetLayout.getMeasuredWidth();
-            height = snippetLayout.getMeasuredHeight();
+            width = Math.max(snippetLayout.getMeasuredWidth(), 1);
+            height = Math.max(snippetLayout.getMeasuredHeight(), 1);
             snippetLayout.layout(0, 0, width, height);
 
             //get image

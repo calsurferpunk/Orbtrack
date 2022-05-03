@@ -3013,47 +3013,47 @@ public abstract class Globals
             switch(satelliteNum)
             {
                 case Universe.IDs.Saturn:
-                    iconId = R.drawable.orbital_saturn;
+                    iconId = R.drawable.orbital_saturn_moozarov;
                     break;
 
                 case Universe.IDs.Sun:
-                    iconId = R.drawable.orbital_sun;
+                    iconId = R.drawable.orbital_sun_moozarov;
                     break;
 
                 case Universe.IDs.Pluto:
-                    iconId = R.drawable.orbital_pluto;
+                    iconId = R.drawable.orbital_pluto_moozarov;
                     break;
 
                 case Universe.IDs.Polaris:
-                    iconId = R.drawable.orbital_star;
+                    iconId = R.drawable.orbital_star_moozarov;
                     break;
 
                 case Universe.IDs.Venus:
-                    iconId = R.drawable.orbital_venus;
+                    iconId = R.drawable.orbital_venus_moozarov;
                     break;
 
                 case Universe.IDs.Neptune:
-                    iconId = R.drawable.orbital_neptune;
+                    iconId = R.drawable.orbital_neptune_moozarov;
                     break;
 
                 case Universe.IDs.Mars:
-                    iconId = R.drawable.orbital_mars;
+                    iconId = R.drawable.orbital_mars_moozarov;
                     break;
 
                 case Universe.IDs.Jupiter:
-                    iconId = R.drawable.orbital_jupiter;
+                    iconId = R.drawable.orbital_jupiter_moozarov;
                     break;
 
                 case Universe.IDs.Mercury:
-                    iconId = R.drawable.orbital_mercury;
+                    iconId = R.drawable.orbital_mercury_moozarov;
                     break;
 
                 case Universe.IDs.Moon:
-                    iconId = R.drawable.orbital_moon;
+                    iconId = R.drawable.orbital_moon_moozarov;
                     break;
 
                 case Universe.IDs.Uranus:
-                    iconId = R.drawable.orbital_uranus;
+                    iconId = R.drawable.orbital_uranus_moozarov;
                     break;
             }
         }

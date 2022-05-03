@@ -1466,8 +1466,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Drawable passDrawable = Globals.getDrawable(this, R.drawable.orbit, true);
         Drawable coordinateDrawable = Globals.getDrawable(this, R.drawable.ic_language_black, true);
         Drawable intersectionDrawable = Globals.getDrawable(this, R.drawable.ic_intersect, true);
-        Drawable starDrawable = Globals.getDrawable(this, R.drawable.orbital_sun);
-        Drawable planetDrawable = Globals.getDrawable(this, R.drawable.orbital_moon);
+        Drawable starDrawable = Globals.getDrawable(this, R.drawable.orbital_sun_moozarov);
+        Drawable planetDrawable = Globals.getDrawable(this, R.drawable.orbital_moon_moozarov);
         Drawable displayDrawable = Globals.getDrawable(this, R.drawable.ic_tablet_white, true);
         Drawable locationDrawable = Globals.getDrawable(this, R.drawable.ic_my_location_black, true);
         Drawable notificationsDrawable = Globals.getDrawable(this, R.drawable.ic_notifications_white, true);

@@ -390,7 +390,7 @@ public abstract class Universe
 
         public static Bitmap getPhaseImage(Context context, Calculations.ObserverType location, long gmtMs)
         {
-            Bitmap phaseImage = Globals.getBitmap(context, R.drawable.orbital_moon, 0);
+            Bitmap phaseImage = Globals.getBitmap(context, R.drawable.orbital_moon_moozarov, 0);
             boolean havePhaseImage = (phaseImage != null);
             Canvas phaseCanvas;
             int imageWidth;

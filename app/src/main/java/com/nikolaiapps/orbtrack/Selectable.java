@@ -1462,8 +1462,8 @@ public abstract class Selectable
                 //update column count
                 selectList.setTag(columns);
 
-                //if columns are set
-                if(listColumns != null)
+                //if columns and adapter are set
+                if(listColumns != null && selectListAdapter != null)
                 {
                     //update column titles
                     selectListAdapter.setColumnTitles((ViewGroup)listColumns, categoryText, pageNum);
@@ -1637,6 +1637,7 @@ public abstract class Selectable
         //Sets item clicked enabled
         public void setItemClicksEnabled(boolean enabled)
         {
+            //if adapter exists
             if(selectListAdapter != null)
             {
                 selectListAdapter.setItemClicksEnabled(enabled);
@@ -1649,7 +1650,7 @@ public abstract class Selectable
             int itemIndex;
 
             //if a valid position
-            if(position >= 0 && position < selectListAdapter.getItemCount())
+            if(position >= 0 && selectListAdapter != null && position < selectListAdapter.getItemCount())
             {
                 //remember current item and view
                 ListItem currentItem = selectListAdapter.getItem(position);
@@ -1688,10 +1689,14 @@ public abstract class Selectable
         {
             int index;
 
-            //go through each item
-            for(index = 0; index < selectListAdapter.getItemCount(); index++)
+            //if adapter exists
+            if(selectListAdapter != null)
             {
-                setItemSelected(index, selected);
+                //go through each item
+                for(index = 0; index < selectListAdapter.getItemCount(); index++)
+                {
+                    setItemSelected(index, selected);
+                }
             }
         }
 
@@ -1701,18 +1706,22 @@ public abstract class Selectable
             int index;
             boolean wasChecked;
 
-            //go through each item
-            for(index = 0; index < selectListAdapter.getItemCount(); index++)
+            //if adapter exists
+            if(selectListAdapter != null)
             {
-                //remember current item
-                ListItem currentItem = selectListAdapter.getItem(index);
-
-                //update item
-                wasChecked = currentItem.isChecked;
-                currentItem.setChecked(index == position);
-                if(wasChecked != currentItem.isChecked)
+                //go through each item
+                for(index = 0; index < selectListAdapter.getItemCount(); index++)
                 {
-                    onItemCheckChanged(currentItem);
+                    //remember current item
+                    ListItem currentItem = selectListAdapter.getItem(index);
+
+                    //update item
+                    wasChecked = currentItem.isChecked;
+                    currentItem.setChecked(index == position);
+                    if(wasChecked != currentItem.isChecked)
+                    {
+                        onItemCheckChanged(currentItem);
+                    }
                 }
             }
         }
@@ -1721,7 +1730,7 @@ public abstract class Selectable
         protected int getPosition(int id)
         {
             int position;
-            int count = selectListAdapter.getItemCount();
+            int count = (selectListAdapter != null ? selectListAdapter.getItemCount() : 0);
 
             //try to find position
             for(position = 0; position < count; position++)
@@ -1851,7 +1860,7 @@ public abstract class Selectable
                 @Override
                 public void onItemClicked(View view, int position)
                 {
-                    ListItem currentItem = selectListAdapter.getItem(position);
+                    ListItem currentItem = (selectListAdapter != null ? selectListAdapter.getItem(position) : null);
                     if(currentItem != null)
                     {
                         //if not in edit mode and item can be checked
@@ -1884,7 +1893,7 @@ public abstract class Selectable
                 @Override
                 public void onItemLongClicked(View view, int position)
                 {
-                    ListItem currentItem = selectListAdapter.getItem(position);
+                    ListItem currentItem = (selectListAdapter != null ? selectListAdapter.getItem(position) : null);
 
                     //if not in edit mode and item can be edited
                     if(!inEditMode && currentItem != null && currentItem.canEdit)

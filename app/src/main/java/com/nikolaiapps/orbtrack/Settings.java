@@ -62,6 +62,7 @@ public abstract class Settings
         static final String MetricUnits = "MetricUnits";
         static final String AllowNumberCommas = "AllowNumberCommas";
         static final String SatelliteIcon = "SatelliteIcon";
+        static final String OrbitalIcons = "OrbitalIcons";
         static final String MapLayerType = "MapLayerType";
         static final String MapShow3dPaths = "MapShow3dPaths";
         static final String ShowSatelliteClouds = "ShowSatelliteClouds";
@@ -232,6 +233,14 @@ public abstract class Settings
             }
             public static IconSpinner.Item[] satelliteIconItems;
 
+            //Orbital icons types
+            public static abstract class OrbitalIcons
+            {
+                static final int Moozarov = 0;
+                static final int Freepik = 1;
+            }
+            public static IconSpinner.Item[] orbitalIconsItems;
+
             //Theme colors
             private static abstract class ThemeIndex
             {
@@ -256,7 +265,7 @@ public abstract class Settings
                 //if values are not set
                 if(satelliteIconItems == null || satelliteIconItems.length == 0)
                 {
-                    //init indicator items
+                    //init icon items
                     satelliteIconItems = new IconSpinner.Item[]
                     {
                         new IconSpinner.Item(R.drawable.orbital_satellite_black, true, null, SatelliteIcon.Black),
@@ -265,6 +274,15 @@ public abstract class Settings
                         new IconSpinner.Item(R.drawable.orbital_satellite_sputnik2, true, null, SatelliteIcon.Sputnik2),
                         new IconSpinner.Item(R.drawable.orbital_satellite_emoji, false, null, SatelliteIcon.Emoji),
                         new IconSpinner.Item(R.drawable.orbital_satellite_gray_orange, false, null, SatelliteIcon.GrayOrange)
+                    };
+                }
+                if(orbitalIconsItems == null || orbitalIconsItems.length == 0)
+                {
+                    //init icon items
+                    orbitalIconsItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(Globals.getDrawable(context, new int[]{R.drawable.orbital_sun_moozarov, R.drawable.orbital_mercury_moozarov, R.drawable.orbital_venus_moozarov, R.drawable.orbital_moon_moozarov, R.drawable.orbital_mars_moozarov, R.drawable.orbital_jupiter_moozarov, R.drawable.orbital_saturn_moozarov, R.drawable.orbital_uranus_moozarov, R.drawable.orbital_neptune_moozarov, R.drawable.orbital_pluto_moozarov}), null, OrbitalIcons.Moozarov),
+                        new IconSpinner.Item(Globals.getDrawable(context, new int[]{R.drawable.orbital_sun_freepik, R.drawable.orbital_mercury_freepik, R.drawable.orbital_venus_freepik, R.drawable.orbital_moon_freepik, R.drawable.orbital_mars_freepik, R.drawable.orbital_jupiter_freepik, R.drawable.orbital_saturn_freepik, R.drawable.orbital_uranus_freepik, R.drawable.orbital_neptune_freepik, R.drawable.orbital_pluto_freepik}), null, OrbitalIcons.Freepik),
                     };
                 }
                 if(colorAdvancedItems == null || colorAdvancedItems.length == 0)
@@ -1886,6 +1904,9 @@ public abstract class Settings
             case PreferenceName.SatelliteIcon:
                 return(Options.Display.SatelliteIcon.Black);
 
+            case PreferenceName.OrbitalIcons:
+                return(Options.Display.OrbitalIcons.Freepik);
+
             case PreferenceName.LensIndicator:
                 return(Options.LensView.IndicatorType.Icon);
 
@@ -2139,6 +2160,12 @@ public abstract class Settings
         }
 
         return(false);
+    }
+
+    //Gets orbital icons type
+    public static int getOrbitalIconsType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.OrbitalIcons));
     }
 
     //Gets indicator type

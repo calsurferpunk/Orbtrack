@@ -2994,6 +2994,7 @@ public abstract class Globals
     public static int getOrbitalIconID(Context context, int satelliteNum, byte orbitalType)
     {
         int iconId = -1;
+        boolean isMoozarov;
 
         if(satelliteNum > 0)
         {
@@ -3010,50 +3011,52 @@ public abstract class Globals
         }
         else
         {
+            isMoozarov = (Settings.getOrbitalIconsType(context) == Settings.Options.Display.OrbitalIcons.Moozarov);
+
             switch(satelliteNum)
             {
                 case Universe.IDs.Saturn:
-                    iconId = R.drawable.orbital_saturn_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_saturn_moozarov : R.drawable.orbital_saturn_freepik);
                     break;
 
                 case Universe.IDs.Sun:
-                    iconId = R.drawable.orbital_sun_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_sun_moozarov : R.drawable.orbital_sun_freepik);
                     break;
 
                 case Universe.IDs.Pluto:
-                    iconId = R.drawable.orbital_pluto_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_pluto_moozarov : R.drawable.orbital_pluto_freepik);
                     break;
 
                 case Universe.IDs.Polaris:
-                    iconId = R.drawable.orbital_star_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_star_moozarov : R.drawable.orbital_star_freepik);
                     break;
 
                 case Universe.IDs.Venus:
-                    iconId = R.drawable.orbital_venus_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_venus_moozarov : R.drawable.orbital_venus_freepik);
                     break;
 
                 case Universe.IDs.Neptune:
-                    iconId = R.drawable.orbital_neptune_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_neptune_moozarov : R.drawable.orbital_neptune_freepik);
                     break;
 
                 case Universe.IDs.Mars:
-                    iconId = R.drawable.orbital_mars_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_mars_moozarov : R.drawable.orbital_mars_freepik);
                     break;
 
                 case Universe.IDs.Jupiter:
-                    iconId = R.drawable.orbital_jupiter_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_jupiter_moozarov : R.drawable.orbital_jupiter_freepik);
                     break;
 
                 case Universe.IDs.Mercury:
-                    iconId = R.drawable.orbital_mercury_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_mercury_moozarov : R.drawable.orbital_mercury_freepik);
                     break;
 
                 case Universe.IDs.Moon:
-                    iconId = R.drawable.orbital_moon_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_moon_moozarov : R.drawable.orbital_moon_freepik);
                     break;
 
                 case Universe.IDs.Uranus:
-                    iconId = R.drawable.orbital_uranus_moozarov;
+                    iconId = (isMoozarov ? R.drawable.orbital_uranus_moozarov : R.drawable.orbital_uranus_freepik);
                     break;
             }
         }
@@ -3064,6 +3067,10 @@ public abstract class Globals
         }
 
         return(iconId);
+    }
+    public static int getOrbitalIconID(Context context, int satelliteNum)
+    {
+        return(getOrbitalIconID(context, satelliteNum, Database.OrbitalType.Satellite));
     }
 
     //Gets an orbital icon

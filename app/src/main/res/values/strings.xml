@@ -136,6 +136,7 @@
     <string name="desc_need_updating">The data is too old and inaccurate. Please update to use.</string>
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
     <string name="desc_orbital_icon">Icon to show orbital position</string>
+    <string name="desc_orbital_icons">Icons to use for orbital displays</string>
     <string name="desc_permission_camera">Camera is needed to visualize object locations.</string>
     <string name="desc_permission_camera_deny">Camera permission denied</string>
     <string name="desc_permission_location">At least rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
@@ -356,6 +357,7 @@
     <string name="title_hours">Hours</string>
     <string name="title_hybrid">Hybrid</string>
     <string name="title_icon">Icon</string>
+    <string name="title_icons">Icons</string>
     <string name="title_icon_scale">Icon Scale</string>
     <string name="title_id">ID</string>
     <string name="title_ignore">Ignore</string>

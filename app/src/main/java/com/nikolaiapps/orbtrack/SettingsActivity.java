@@ -121,6 +121,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference allowNumberCommasSwitch = this.findPreference(Settings.PreferenceName.AllowNumberCommas);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
                         IconListPreference satelliteIconList = this.findPreference(Settings.PreferenceName.SatelliteIcon);
+                        IconListPreference orbitalIconsList = this.findPreference(Settings.PreferenceName.OrbitalIcons);
 
                         //initialize values
                         Settings.Options.Display.initValues(context);
@@ -128,8 +129,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(darkThemeSwitch);
                         setupSwitch(allowNumberCommasSwitch);
-                        setupList(satelliteIconList, Settings.Options.Display.satelliteIconItems, null, null, null, null);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
+                        setupList(satelliteIconList, Settings.Options.Display.satelliteIconItems, null, null, null, null);
+                        setupList(orbitalIconsList, Settings.Options.Display.orbitalIconsItems, null, null, null, null);
                         break;
 
                     case ScreenKey.LensView:
@@ -342,6 +344,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.SatelliteIcon:
                             currentValue = Settings.getSatelliteIconType(context);
+                            break;
+
+                        case Settings.PreferenceName.OrbitalIcons:
+                            currentValue = Settings.getOrbitalIconsType(context);
                             break;
 
                         case Settings.PreferenceName.LensIndicator:
@@ -1280,6 +1286,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.DarkTheme:
                         case Settings.PreferenceName.SatelliteIcon:
+                        case Settings.PreferenceName.OrbitalIcons:
                             recreateThis = true;
                             //fall through
 

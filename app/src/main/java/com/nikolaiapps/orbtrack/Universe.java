@@ -390,9 +390,7 @@ public abstract class Universe
 
         public static Bitmap getPhaseImage(Context context, Calculations.ObserverType location, long gmtMs)
         {
-            Bitmap phaseImage = Globals.getBitmap(context, R.drawable.orbital_moon_moozarov, 0);
-            boolean havePhaseImage = (phaseImage != null);
-            Canvas phaseCanvas;
+
             int imageWidth;
             int imageHeight;
             int imageHalfWidth;
@@ -402,7 +400,12 @@ public abstract class Universe
             int centerX;
             int centerY;
             int radius;
+            int moonIconId = Globals.getOrbitalIconID(context, IDs.Moon);
             double phase = getPhase(gmtMs);
+            Canvas phaseCanvas;
+            Bitmap phaseImage = Globals.getBitmap(context, moonIconId, 0);
+            boolean isMoozarov = (moonIconId == R.drawable.orbital_moon_moozarov);
+            boolean havePhaseImage = (phaseImage != null);
             Calculations.GeodeticDataType geoLocation = (location != null && location.geo != null ? location.geo : new Calculations.GeodeticDataType());
             Paint brush = new Paint(Paint.ANTI_ALIAS_FLAG);
             Path ovalPath;
@@ -414,9 +417,9 @@ public abstract class Universe
             phaseCanvas = new Canvas(phaseImage);
             imageWidth = phaseCanvas.getWidth();
             imageHeight = phaseCanvas.getHeight();
-            leftOffset = (int)(imageWidth * 0.05f);
-            rightOffset = (int)(imageWidth * 0.04f);
-            bottomOffset = (int)(imageHeight * 0.09f);
+            leftOffset = (isMoozarov ? (int)(imageWidth * 0.05f) : 0);
+            rightOffset = (isMoozarov ? (int)(imageWidth * 0.04f) : 0);
+            bottomOffset = (isMoozarov ? (int)(imageHeight * 0.09f) : 0);
             imageWidth -= (leftOffset + rightOffset);
             imageHeight -= bottomOffset;
             imageHalfWidth = imageWidth / 2;

@@ -2686,11 +2686,11 @@ public class UpdateService extends NotifyService
         boolean unknownSatellite = (satelliteNum < 0);
         boolean isGpData = inputString.contains(Calculations.GPParams.Name);
         String section;
-        String currentNumString;
         Resources res = this.getResources();
         Calendar defaultLaunchDate = Calendar.getInstance();
         ArrayList<Integer> satelliteNumbers = new ArrayList<>(0);
         ArrayList<String> satelliteNames = new ArrayList<>(0);
+        ArrayList<String> satelliteLines = new ArrayList<>(0);
         ArrayList<String> satelliteOwnerCodes = new ArrayList<>(0);
         ArrayList<Long> satelliteLaunchDates = new ArrayList<>(0);
         String[] tleLines;
@@ -2790,8 +2790,10 @@ public class UpdateService extends NotifyService
                         line2Index = inputString.indexOf("2 ", line1Index + TLE_LINE_LENGTH);
                         if(line2Index > line1Index && line2Index + TLE_LINE_LENGTH <= inputLength)
                         {
-                            //get current number string
-                            currentNumString = inputString.substring(line1Index + 2, line1Index + 7).trim();
+                            //get lines and current number string
+                            String currentLine1 = inputString.substring(line1Index, line1Index + TLE_LINE_LENGTH).trim();
+                            String currentLine2 = inputString.substring(line2Index, line2Index + TLE_LINE_LENGTH).trim();
+                            String currentNumString = inputString.substring(line1Index + 2, line1Index + 7).trim();
 
                             //if line 1 and 2 indexes are followed by the same number
                             if(inputString.substring(line1Index + 2, line1Index + 2 + currentNumString.length()).equals(inputString.substring(line2Index + 2, line2Index + 2 + currentNumString.length())))
@@ -2823,6 +2825,9 @@ public class UpdateService extends NotifyService
                                         }
                                     }
                                     satelliteNames.add(satelliteName);
+
+                                    //add lines
+                                    satelliteLines.add(currentLine1 + "\n" + currentLine2);
 
                                     //continue
                                     inputOffset = line2Index + TLE_LINE_LENGTH;
@@ -2906,7 +2911,7 @@ public class UpdateService extends NotifyService
             else
             {
                 //if data was read for current satellite number
-                tleLines = parseTLEData(inputString, satelliteNum);
+                tleLines = parseTLEData((index < satelliteLines.size() ? satelliteLines.get(index) : null), satelliteNum);
                 if(!tleLines[0].equals("") && !tleLines[1].equals(""))
                 {
                     //get current satellite

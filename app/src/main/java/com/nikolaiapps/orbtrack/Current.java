@@ -2145,13 +2145,13 @@ public abstract class Current
         private static boolean showSearch = true;
         private static boolean showZoom = true;
         private static boolean showDividers = false;
-        private static boolean showTitlesAlways = true;
         private static boolean mapViewReady = false;
         private static float pendingMarkerScale = Float.MAX_VALUE;
         private static FloatingActionStateButtonMenu settingsMenu = null;
         private static CoordinatesFragment.OrbitalBase moonMarker = null;
 
         public static boolean showPaths = false;
+        public static boolean showFootprints = false;
         public static WeakReference<TextView> mapInfoTextReference;
         public static CoordinatesFragment mapView;
         public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
@@ -2858,34 +2858,6 @@ public abstract class Current
 
         }
 
-        //Setups show titles always button
-        private static void setupAlwaysShowTitlesButton(final Context context, final FloatingActionStateButton showTitlesAlwaysButton)
-        {
-            //if show titles always button exists
-            if(showTitlesAlwaysButton != null)
-            {
-                //setup show labels always button
-                showTitlesAlwaysButton.setOnClickListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View v)
-                    {
-                        //reverse state
-                        showTitlesAlways = !showTitlesAlways;
-                        showTitlesAlwaysButton.setChecked(showTitlesAlways);
-                        Settings.setMapShowLabelsAlways(context, showTitlesAlways);
-
-                        //update visibility
-                        mapView.setShowTitlesAlways(showTitlesAlways);
-                    }
-                });
-
-                //set to opposite to then perform click to set it correctly
-                showTitlesAlways = !Settings.getMapShowLabelsAlways(context);
-                showTitlesAlwaysButton.performClick();
-            }
-        }
-
         //Setup latitude/longitude button
         private static void setupLatLonButton(final Context context, final FloatingActionStateButton showLatLonButton)
         {
@@ -2908,6 +2880,25 @@ public abstract class Current
             //set to opposite then perform click to set it correctly
             showDividers = !Settings.getMapShowGrid(context);
             showLatLonButton.performClick();
+        }
+
+        //Setup footprint button
+        private static void setupFootprintButton(Context context, final FloatingActionStateButton showFootprintButton)
+        {
+            showFootprintButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    //reverse state
+                    showFootprints = !showFootprints;
+                    showFootprintButton.setChecked(showFootprints);
+                }
+            });
+
+            //set to opposite then perform click to set it correctly
+            showFootprints = !showFootprints;
+            showFootprintButton.performClick();
         }
 
         //Setup path button
@@ -3122,9 +3113,9 @@ public abstract class Current
             settingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
             final FloatingActionStateButton showSearchButton = (allMapOrbitals && !useSavedPath ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_search) : null);
             final FloatingActionStateButton showZoomButton = settingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
-            final FloatingActionStateButton showTitlesAlwaysButton = (!useSavedPath ? settingsMenu.addMenuItem(R.drawable.ic_title_black, R.string.title_show_labels_always) : null);
             final FloatingActionStateButton showLatLonButton = settingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
             final FloatingActionStateButton showPathButton = (!useSavedPath ? settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
+            final FloatingActionStateButton showFootprintButton = settingsMenu.addMenuItem(R.drawable.ic_circle_white, R.string.title_show_footprint);
             final FloatingActionStateButton iconScaleButton = settingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
             final FloatingActionButton zoomInButton = zoomLayout.findViewById(R.id.Map_Zoom_In_Button);
             final FloatingActionButton zoomOutButton = zoomLayout.findViewById(R.id.Map_Zoom_Out_Button);
@@ -3242,11 +3233,11 @@ public abstract class Current
                     //setup zoom buttons
                     setupZoomButtons(context, showZoomButton, zoomLayout, zoomInButton, zoomOutButton);
 
-                    //setup always show titles button
-                    setupAlwaysShowTitlesButton(context, showTitlesAlwaysButton);
-
                     //setup latitude/longitude button
                     setupLatLonButton(context, showLatLonButton);
+
+                    //setup show footprint button
+                    setupFootprintButton(context, showFootprintButton);
 
                     //setup icon scale button
                     setupIconScaleButton(context, iconScaleButton, page.scaleBar);
@@ -3340,7 +3331,7 @@ public abstract class Current
                         playbackMarker.setPathVisible(true);
 
                         //show marker and move to it
-                        playbackMarker.setShowFootprint(Settings.usingMapShowSelectedFootprint());
+                        playbackMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
                         playbackMarker.setVisible(true);
                         playbackMarker.setInfoVisible(true);
                         mapView.moveCamera(playbackMarker.getGeo().latitude, playbackMarker.getGeo().longitude, CoordinatesFragment.Utils.getZoom(savedItems[0].altitudeKm));

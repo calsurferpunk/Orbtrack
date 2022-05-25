@@ -522,6 +522,7 @@
     <string name="title_show_3d_paths">Show 3d Paths</string>
     <string name="title_show_background">Show Background</string>
     <string name="title_show_clouds">Show Clouds</string>
+    <string name="title_show_footprint">Show Footprint</string>
     <string name="title_show_grid">Show Grid</string>
     <string name="title_show_horizon">Show Horizon</string>
     <!--string name="title_show_label_background">Show Label Background</string-->

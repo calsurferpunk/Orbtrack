@@ -122,6 +122,7 @@ public interface CoordinatesFragment
         abstract void setShowBackground(boolean show);
         abstract void setShowShadow(boolean show);
         abstract void setShowFootprint(boolean show);
+        abstract void setShowSelectedFootprint(boolean show);
         abstract void setTitleAlwaysVisible(boolean visible);
         abstract void setUsingInfo(boolean using);
         abstract void setUsingDirection(boolean using);
@@ -575,7 +576,7 @@ public interface CoordinatesFragment
             if(selectOrbital != null)
             {
                 //show/hide footprint and info window
-                selectOrbital.setShowFootprint(visible && Settings.usingMapShowSelectedFootprint());
+                selectOrbital.setShowSelectedFootprint(visible && Settings.usingMapShowSelectedFootprint());
                 selectOrbital.setInfoVisible(visible);
             }
             //else if none selected and there are markers

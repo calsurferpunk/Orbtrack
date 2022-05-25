@@ -999,7 +999,7 @@ class Whirly
         private static Bitmap debrisImage;
         private static Bitmap satelliteImage;
         private static Bitmap rocketBodyImage;
-        private static Bitmap footprintImage;
+        private static Bitmap selectedFootprintImage;
         private static WeakReference<InfoImageCreator> infoCreator;
 
         boolean alwaysShowTitle;
@@ -1007,6 +1007,7 @@ class Whirly
         private final int noradId;
         private boolean showShadow;
         private boolean showFootprint;
+        private boolean showSelectedFootprint;
         private boolean showBackground;
         private boolean usingInfo;
         private boolean showingInfo;
@@ -1024,21 +1025,18 @@ class Whirly
         private Board orbitalBoard;
         private FlatObject orbitalShadow;
         private FlatObject orbitalFootprint;
+        private FlatObject orbitalSelectedFootprint;
         private MarkerObject orbitalMarker;
         private final Path orbitalPath;
         private final BaseController controller;
 
         OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
-            int alpha;
-            int color;
             int iconId;
             byte orbitalType;
             boolean tleIsAccurate;
             Bitmap titleImage;
             Bitmap orbitalImage = null;
-            Paint footprintPaint;
-            Canvas footprintCanvas;
             Drawable orbitalBgImage;
 
             currentContext = context;
@@ -1046,7 +1044,7 @@ class Whirly
             controller = orbitalController;
             forMap = (controller instanceof MapController);
             showShadow = usingShadow;
-            showFootprint = false;
+            showFootprint = showSelectedFootprint = false;
             showBackground = usingBackground;
             showingDirection = usingDirection;
             alwaysShowTitle = startWithTitleShown;
@@ -1058,6 +1056,7 @@ class Whirly
             common.data = newSat;
             orbitalShadow = null;
             orbitalFootprint = null;
+            orbitalSelectedFootprint = null;
             noradId = common.data.getSatelliteNum();
             orbitalType = common.data.getOrbitalType();
 
@@ -1106,21 +1105,10 @@ class Whirly
                         break;
                 }
             }
-            if(footprintImage == null)
+            if(selectedFootprintImage == null)
             {
                 //set/draw footprint image for repeat use
-                color = Settings.getMapSelectedFootprintColor(context);
-                alpha = Color.alpha(color);
-                footprintImage = Bitmap.createBitmap(1600, 1600, Bitmap.Config.ARGB_8888);
-                footprintCanvas = new Canvas(footprintImage);
-                footprintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                footprintPaint.setColor(color);
-                footprintPaint.setStyle(Paint.Style.FILL);
-                footprintCanvas.drawCircle(800, 800, 800, footprintPaint);
-                footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
-                footprintPaint.setStyle(Paint.Style.STROKE);
-                footprintPaint.setStrokeWidth(40f);
-                footprintCanvas.drawCircle(800, 800, 780, footprintPaint);
+                selectedFootprintImage = createFootprintImage(Settings.getMapSelectedFootprintColor(context));
             }
 
             //remember if old information and initialize path
@@ -1164,7 +1152,29 @@ class Whirly
             debrisImage = null;
             satelliteImage = null;
             rocketBodyImage = null;
-            footprintImage = null;
+            selectedFootprintImage = null;
+        }
+
+        private static Bitmap createFootprintImage(int color)
+        {
+            int alpha;
+            Paint footprintPaint;
+            Canvas footprintCanvas;
+            Bitmap footprintImage;
+
+            alpha = Color.alpha(color);
+            footprintImage = Bitmap.createBitmap(1600, 1600, Bitmap.Config.ARGB_8888);
+            footprintCanvas = new Canvas(footprintImage);
+            footprintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            footprintPaint.setColor(color);
+            footprintPaint.setStyle(Paint.Style.FILL);
+            footprintCanvas.drawCircle(800, 800, 800, footprintPaint);
+            footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
+            footprintPaint.setStyle(Paint.Style.STROKE);
+            footprintPaint.setStrokeWidth(40f);
+            footprintCanvas.drawCircle(800, 800, 780, footprintPaint);
+
+            return(footprintImage);
         }
 
         private InfoImageCreator getInfoCreator()
@@ -1376,7 +1386,24 @@ class Whirly
             else if(showFootprint && orbitalFootprint == null)
             {
                 orbitalFootprint = new FlatObject(controller);
-                orbitalFootprint.setImage(footprintImage);
+                orbitalFootprint.setImage(createFootprintImage(Globals.getColor(common.data.database.pathColor, 100)));
+            }
+        }
+
+        @Override
+        void setShowSelectedFootprint(boolean show)
+        {
+            showSelectedFootprint = show;
+
+            if(!showSelectedFootprint && orbitalSelectedFootprint != null)
+            {
+                orbitalSelectedFootprint.remove();
+                orbitalSelectedFootprint = null;
+            }
+            else if(showSelectedFootprint && orbitalSelectedFootprint == null)
+            {
+                orbitalSelectedFootprint = new FlatObject(controller);
+                orbitalSelectedFootprint.setImage(selectedFootprintImage);
             }
         }
 
@@ -1473,6 +1500,10 @@ class Whirly
             {
                 orbitalFootprint.setVisible(visible);
             }
+            if(showSelectedFootprint && orbitalSelectedFootprint != null)
+            {
+                orbitalSelectedFootprint.setVisible(visible);
+            }
         }
 
         @Override
@@ -1494,11 +1525,13 @@ class Whirly
             boolean updateBearing;
             boolean usedBearing = false;
             boolean canUseBearing = (showingDirection && noradId > 0);
+            boolean canShowFootprint = (showFootprint && orbitalFootprint != null);
+            boolean canShowSelectedFootprint = (showSelectedFootprint && orbitalSelectedFootprint != null);
             double currentZoom;
             double bearing;
             double bearingDelta;
             double orbitalRotationDelta;
-            Calculations.GeodeticAreaType footprint;
+            Calculations.GeodeticAreaType selectedFootprint;
 
             //remember last and current location
             if(canUseBearing)
@@ -1596,12 +1629,19 @@ class Whirly
                 lastMoveWithinZoom = withinZoom;
             }
 
-            //if showing footprint and it exists
-            if(showFootprint && orbitalFootprint != null)
+            //if showing a footprint that exists
+            if(canShowFootprint || canShowSelectedFootprint)
             {
-                //move footprint
-                footprint = Calculations.getFootprint(latitude, longitude, altitudeKm);
-                orbitalFootprint.moveLocation(latitude, longitude, footprint.latitudeWidth, footprint.longitudeWidth);
+                //move footprints
+                selectedFootprint = Calculations.getFootprint(latitude, longitude, altitudeKm);
+                if(canShowFootprint)
+                {
+                    orbitalFootprint.moveLocation(latitude, longitude, selectedFootprint.latitudeWidth, selectedFootprint.longitudeWidth);
+                }
+                if(canShowSelectedFootprint)
+                {
+                    orbitalSelectedFootprint.moveLocation(latitude, longitude, selectedFootprint.latitudeWidth, selectedFootprint.longitudeWidth);
+                }
             }
 
             //if updated bearing
@@ -1633,6 +1673,10 @@ class Whirly
             if(showFootprint && orbitalFootprint != null)
             {
                 orbitalFootprint.remove();
+            }
+            if(showSelectedFootprint && orbitalSelectedFootprint != null)
+            {
+                orbitalSelectedFootprint.remove();
             }
 
             orbitalPath.remove();

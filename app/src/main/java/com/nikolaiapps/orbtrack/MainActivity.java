@@ -3751,6 +3751,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 int currentNoradId;
                 int page = getMainPage();
                 int subPage = currentSubPage[page];
+                boolean currentIsSatellite;
                 boolean updateElapsed = false;
                 boolean onView = (page == Current.PageType.View);
                 boolean onPasses = (page == Current.PageType.Passes);
@@ -3817,6 +3818,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
 
                             currentNoradId = currentOrbital.getSatelliteNum();
+                            currentIsSatellite = (currentNoradId > 0);
                             Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
                             topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
 
@@ -3852,7 +3854,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
 
                             //if not a satellite
-                            if(currentNoradId <= 0)
+                            if(!currentIsSatellite)
                             {
                                 //if first run
                                 if(firstRun.value)
@@ -3973,8 +3975,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         //if current is selected
                                         if(currentOrbitalSelected)
                                         {
-                                            //update showing footprint
-                                            currentMarker.setShowFootprint(Settings.usingMapShowSelectedFootprint());
+                                            //update showing selected footprint
+                                            currentMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
 
                                             //if selection changed
                                             if(currentNoradId != lastNoradId)
@@ -3996,6 +3998,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             //update last
                                             lastNoradId = currentNoradId;
                                         }
+                                        currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Current.Coordinates.showFootprints);
                                         currentMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
                                         currentMarker.setVisible(true);
                                     }

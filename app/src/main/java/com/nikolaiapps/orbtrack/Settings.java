@@ -2406,18 +2406,6 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.MapShowZoom, show);
     }
 
-    //Returns map showing labels always
-    public static boolean getMapShowLabelsAlways(Context context)
-    {
-        return(getPreferenceBoolean(context, PreferenceName.MapShowLabelsAlways));
-    }
-
-    //Sets map showing labels always
-    public static void setMapShowLabelsAlways(Context context, boolean show)
-    {
-        setPreferenceBoolean(context, PreferenceName.MapShowLabelsAlways, show);
-    }
-
     //Returns map showing stars
     public static boolean getMapShowStars(Context context)
     {

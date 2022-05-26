@@ -2893,11 +2893,12 @@ public abstract class Current
                     //reverse state
                     showFootprints = !showFootprints;
                     showFootprintButton.setChecked(showFootprints);
+                    Settings.setMapShowFootprint(context, showFootprints);
                 }
             });
 
             //set to opposite then perform click to set it correctly
-            showFootprints = !showFootprints;
+            showFootprints = !Settings.getMapShowFootprint(context);
             showFootprintButton.performClick();
         }
 
@@ -3114,8 +3115,8 @@ public abstract class Current
             final FloatingActionStateButton showSearchButton = (allMapOrbitals && !useSavedPath ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_search) : null);
             final FloatingActionStateButton showZoomButton = settingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
             final FloatingActionStateButton showLatLonButton = settingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
+            final FloatingActionStateButton showFootprintButton = settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint);
             final FloatingActionStateButton showPathButton = (!useSavedPath ? settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
-            final FloatingActionStateButton showFootprintButton = settingsMenu.addMenuItem(R.drawable.ic_circle_white, R.string.title_show_footprint);
             final FloatingActionStateButton iconScaleButton = settingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
             final FloatingActionButton zoomInButton = zoomLayout.findViewById(R.id.Map_Zoom_In_Button);
             final FloatingActionButton zoomOutButton = zoomLayout.findViewById(R.id.Map_Zoom_Out_Button);

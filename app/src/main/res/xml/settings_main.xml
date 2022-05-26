@@ -253,6 +253,12 @@
                     app:maxValue="200"
                     app:scaleType="Percent"/>
 
+                <SwitchPreference
+                    android:title="@string/title_show_footprint"
+                    android:key="MapShowFootprint"
+                    android:summary="@string/desc_show_footprint"
+                    android:persistent="false"/>
+
                 <com.nikolaiapps.orbtrack.SwitchButtonPreference
                     app:titleText="@string/title_show_selected_footprint"
                     android:key="MapShowSelectedFootprint"

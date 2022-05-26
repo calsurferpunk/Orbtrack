@@ -70,6 +70,7 @@ class Whirly
     private static abstract class DrawPriority
     {
         private static final int BoardEye           = 50000000;
+        private static final int SelectedBoardFlat  = 35000000;
         private static final int BoardFlat          = 25000000;
         private static final int Path               = 400000;
         private static final int Layer              = 10000;
@@ -456,6 +457,11 @@ class Whirly
         void setZoomScale(double zoomScaling)
         {
             zoomScale = zoomScaling;
+        }
+
+        void setDrawPriority(int priority)
+        {
+            flatInfo.setDrawPriority(priority);
         }
 
         public boolean getVisible()
@@ -1014,6 +1020,7 @@ class Whirly
         private boolean showingDirection;
         private boolean lastShowingDirection;
         private boolean lastMoveWithinZoom;
+        private final boolean tleIsAccurate;
         private float markerScale;
         private double lastMoveZoom;
         private double orbitalRotation;
@@ -1034,7 +1041,6 @@ class Whirly
         {
             int iconId;
             byte orbitalType;
-            boolean tleIsAccurate;
             Bitmap titleImage;
             Bitmap orbitalImage = null;
             Drawable orbitalBgImage;
@@ -1356,7 +1362,7 @@ class Whirly
 
             showShadow = show;
 
-            if(!forMap)
+            if(!forMap && tleIsAccurate)
             {
                 if(!showShadow && orbitalShadow != null)
                 {
@@ -1378,15 +1384,18 @@ class Whirly
         {
             showFootprint = show;
 
-            if(!showFootprint && orbitalFootprint != null)
+            if(tleIsAccurate)
             {
-                orbitalFootprint.remove();
-                orbitalFootprint = null;
-            }
-            else if(showFootprint && orbitalFootprint == null)
-            {
-                orbitalFootprint = new FlatObject(controller);
-                orbitalFootprint.setImage(createFootprintImage(Globals.getColor(common.data.database.pathColor, 100)));
+                if(!showFootprint && orbitalFootprint != null)
+                {
+                    orbitalFootprint.remove();
+                    orbitalFootprint = null;
+                }
+                else if(showFootprint && orbitalFootprint == null)
+                {
+                    orbitalFootprint = new FlatObject(controller);
+                    orbitalFootprint.setImage(createFootprintImage(Globals.getColor(common.data.database.pathColor, 60)));
+                }
             }
         }
 
@@ -1395,15 +1404,19 @@ class Whirly
         {
             showSelectedFootprint = show;
 
-            if(!showSelectedFootprint && orbitalSelectedFootprint != null)
+            if(tleIsAccurate)
             {
-                orbitalSelectedFootprint.remove();
-                orbitalSelectedFootprint = null;
-            }
-            else if(showSelectedFootprint && orbitalSelectedFootprint == null)
-            {
-                orbitalSelectedFootprint = new FlatObject(controller);
-                orbitalSelectedFootprint.setImage(selectedFootprintImage);
+                if(!showSelectedFootprint && orbitalSelectedFootprint != null)
+                {
+                    orbitalSelectedFootprint.remove();
+                    orbitalSelectedFootprint = null;
+                }
+                else if(showSelectedFootprint && orbitalSelectedFootprint == null)
+                {
+                    orbitalSelectedFootprint = new FlatObject(controller);
+                    orbitalSelectedFootprint.setDrawPriority(DrawPriority.SelectedBoardFlat);
+                    orbitalSelectedFootprint.setImage(selectedFootprintImage);
+                }
             }
         }
 

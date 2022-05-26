@@ -80,6 +80,7 @@ public abstract class Settings
         static final String MapMarkerShowBackground = "MapMarkerShowBackground";
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
         static final String MapShowSunlight = "MapShowSunlight";
+        static final String MapShowFootprint = "MapShowFootprint";
         static final String MapShowSelectedFootprint = "MapShowSelectedFootprint";
         static final String MapSelectedFootprintColor = "MapSelectedFootprintColor";
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
@@ -2482,6 +2483,18 @@ public abstract class Settings
     public static boolean getMapShowSunlight(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.MapShowSunlight));
+    }
+
+    //Returns map showing orbital footprints
+    public static boolean getMapShowFootprint(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapShowFootprint));
+    }
+
+    //Sets map showing orbital footprints
+    public static void setMapShowFootprint(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.MapShowFootprint, show);
     }
 
     //Get map selected footprint color

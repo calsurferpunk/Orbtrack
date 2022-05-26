@@ -1915,7 +1915,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
 
             @Override
-            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
+            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int index, int count, File usedFile)
             {
                 boolean loadingFile = (updateType == UpdateService.UpdateType.LoadFile);
                 boolean updatingSatellites = (updateType == UpdateService.UpdateType.UpdateSatellites);

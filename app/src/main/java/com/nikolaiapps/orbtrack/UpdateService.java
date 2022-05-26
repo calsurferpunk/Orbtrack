@@ -2980,11 +2980,12 @@ public class UpdateService extends NotifyService
         int index;
         int index2;
         int index3;
+        int saved;
+        int saveCount = 0;
         int startIndex;
         int endIndex;
         int count;
         int currentNumber;
-        boolean saved;
         boolean isLast;
         boolean loginFailed = false;
         boolean downloadError = false;
@@ -3143,10 +3144,11 @@ public class UpdateService extends NotifyService
                     }
 
                     //try to save satellite based on input
-                    saved = (saveSatellite(receivedPage, currentSatellite.getName(), currentSatellite.noradId, currentSatellite.ownerCode, currentSatellite.launchDateMs, currentSatellite.orbitalType, null, false) > 0);
+                    saved = saveSatellite(receivedPage, currentSatellite.getName(), currentSatellite.noradId, currentSatellite.ownerCode, currentSatellite.launchDateMs, currentSatellite.orbitalType, null, false);
+                    saveCount += saved;
 
                     //update progress
-                    sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index3, count, (saved ? Globals.ProgressType.Success : Globals.ProgressType.Failed));
+                    sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index3, count, (saved > 0 ? Globals.ProgressType.Success : Globals.ProgressType.Failed));
                 }
 
                 //prevent overloading website
@@ -3177,7 +3179,7 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, UpdateType.UpdateSatellites, section, index, count, (loginFailed ? Globals.ProgressType.Denied : downloadError ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
+        sendMessage(MessageTypes.General, UpdateType.UpdateSatellites, section, saveCount, count, (loginFailed ? Globals.ProgressType.Denied : downloadError ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
     }
 
     //Loads a database backup file and returns saved satellite count
@@ -3592,7 +3594,7 @@ public class UpdateService extends NotifyService
                 Database.DatabaseSatellite currentSatellite = satellites[rowIndex];
 
                 //update progress
-                section = (rowIndex + 1) + res.getString(R.string.text_space_of_space) + count;
+                section = res.getQuantityString(R.plurals.title_space_of_space, count, (rowIndex + 1), count);
                 if(service != null)
                 {
                     service.sendMessage(MessageTypes.Save, UpdateType.SaveFile, section, rowIndex, count, Globals.ProgressType.Started);

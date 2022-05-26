@@ -219,7 +219,7 @@ public class EditValuesDialog
         if(itemCount > 1)
         {
             //add current position
-            titleText +=  (" " + (currentIndex + 1) + res.getString(R.string.text_space_of_space) + itemCount);
+            titleText +=  (" " + res.getQuantityString(R.plurals.title_space_of_space, itemCount, (currentIndex + 1), itemCount));
         }
 
         //set titles

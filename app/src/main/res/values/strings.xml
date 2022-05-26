@@ -73,6 +73,10 @@
         <item quantity="one">Updating Satellite TLE</item>
         <item quantity="other">Updating Satellite TLEs</item>
     </plurals>
+    <plurals name="title_space_of_space">
+        <item quantity="one">%1$d of %2$d</item>
+        <item quantity="other">%1$d of %2$d</item>
+    </plurals>
     <plurals name="title_updates">
         <item quantity="one">Update</item>
         <item quantity="other">Updates</item>

@@ -63,7 +63,7 @@ public abstract class UpdateReceiver extends BroadcastReceiver
     }
 
     //On general update
-    protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
+    protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int index, int count, File usedFile)
     {
         //needs to be overridden
     }
@@ -182,7 +182,7 @@ public abstract class UpdateReceiver extends BroadcastReceiver
                         case UpdateService.UpdateType.GetMasterList:
                         case UpdateService.UpdateType.SaveFile:
                             //call on general update
-                            onGeneralUpdate(progressType, updateType, ended, (section == null ? "" : section), (int)count, (File)extraData.getSerializable(UpdateService.ParamTypes.UsedFile));
+                            onGeneralUpdate(progressType, updateType, ended, (section == null ? "" : section), index, (int)count, (File)extraData.getSerializable(UpdateService.ParamTypes.UsedFile));
                             break;
                     }
                 }
@@ -221,7 +221,7 @@ public abstract class UpdateReceiver extends BroadcastReceiver
                         {
                             //update display
                             countValue = index + 1;
-                            databaseProgress.setMessage(section + " (" + (index + 1) + res.getString(R.string.text_space_of_space) + count + ")");
+                            databaseProgress.setMessage(section + " (" + res.getQuantityString(R.plurals.title_space_of_space, (int)count, (index + 1), count) + ")");
                             databaseProgress.setProgress(countValue, count);
                         }
                         break;

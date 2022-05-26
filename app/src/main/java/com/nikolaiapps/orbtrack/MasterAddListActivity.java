@@ -428,7 +428,6 @@ public class MasterAddListActivity extends BaseInputActivity
         final String savingString = res.getString(R.string.title_saving);
         final String loadingString = res.getString(R.string.title_loading);
         final String gettingString = res.getString(R.string.title_getting);
-        final String spaceOfSpaceString = res.getString(R.string.text_space_of_space);
 
         //if old receiver is set
         if(oldReceiver != null)
@@ -475,7 +474,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                 {
                                     //update progress
                                     updateValue = updateIndex + 1;
-                                    taskProgress.setMessage(updateValue + spaceOfSpaceString + updateCount + " (" + selectedItems[(int)updateIndex].satellite.name + ")");
+                                    taskProgress.setMessage(res.getQuantityString(R.plurals.title_space_of_space, (int)updateCount, updateValue, updateCount) + " (" + selectedItems[(int)updateIndex].satellite.name + ")");
                                     taskProgress.setProgress(updateValue, updateCount);
                                 }
                                 break;
@@ -559,7 +558,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                         case UpdateService.MessageTypes.Save:
                                         case UpdateService.MessageTypes.Load:
                                             updateValue = updateIndex + 1;
-                                            message = (updateValue + spaceOfSpaceString + updateCount);
+                                            message = res.getQuantityString(R.plurals.title_space_of_space, (int)updateCount, updateValue, updateCount);
                                             break;
 
                                         case NotifyService.MessageTypes.LoadPercent:
@@ -635,7 +634,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                             public void run()
                                                             {
                                                                 //update progress
-                                                                taskProgress.setMessage(title + " (" + (updateIndex + 1) + spaceOfSpaceString + updateCount + ")");
+                                                                taskProgress.setMessage(title + " (" + res.getQuantityString(R.plurals.title_space_of_space, (int)updateCount, (updateIndex + 1), updateCount) + ")");
                                                                 taskProgress.setProgress(updateIndex + 1, updateCount);
 
                                                                 //if ran update

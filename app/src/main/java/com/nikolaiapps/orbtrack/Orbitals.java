@@ -883,13 +883,13 @@ public abstract class Orbitals
                     //if progress exists
                     if(taskProgress != null && (updateValue - 1) < satellites.size())
                     {
-                        taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount + (savingFile ? "" : (" (" + satellites.get((int)updateValue - 1).getName() + ")")));
+                        taskProgress.setMessage(res.getQuantityString(R.plurals.title_space_of_space, (int)updateCount, updateValue, updateCount) + (savingFile ? "" : (" (" + satellites.get((int)updateValue - 1).getName() + ")")));
                         taskProgress.setProgress(updateValue, updateCount);
                     }
                 }
 
                 @Override
-                protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
+                protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int index, int count, File usedFile)
                 {
                     boolean forDropbox = (section != null && section.equals(Globals.FileLocationType.Dropbox));
                     boolean forGoogleDrive = (section != null && section.equals(Globals.FileLocationType.GoogleDrive));
@@ -990,7 +990,7 @@ public abstract class Orbitals
                                     else
                                     {
                                         //show success
-                                        Globals.showSnackBar(Page.this.listParentView, res.getQuantityString(savingFile ? R.plurals.title_satellites_saved : R.plurals.title_satellites_updated, count, count), (count < 1));
+                                        Globals.showSnackBar(Page.this.listParentView, res.getQuantityString(savingFile ? R.plurals.title_satellites_saved : R.plurals.title_satellites_updated, count, count) + (savingFile || (index == count) ? "" : (" (" + res.getQuantityString(R.plurals.title_space_of_space, count, index, count) + ")")), (count < 1));
                                     }
                                     break;
                             }

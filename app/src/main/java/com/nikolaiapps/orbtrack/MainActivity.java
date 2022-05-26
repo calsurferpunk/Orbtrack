@@ -2605,7 +2605,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 if(res != null && "Old".equals(section))
                 {
                     //update progress
-                    taskProgress.setMessage(updateValue + res.getString(R.string.text_space_of_space) + updateCount);
+                    taskProgress.setMessage(res.getQuantityString(R.plurals.title_space_of_space, (int)updateCount, updateValue, updateCount));
                     taskProgress.setProgress(updateValue, updateCount);
                 }
             }
@@ -2658,7 +2658,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             }
 
             @Override
-            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int count, File usedFile)
+            protected void onGeneralUpdate(int progressType, byte updateType, boolean ended, String section, int index, int count, File usedFile)
             {
                 int page = getMainPage();
                 boolean oldSatellites = "Old".equals(section);

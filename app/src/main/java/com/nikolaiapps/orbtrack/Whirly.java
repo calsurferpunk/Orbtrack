@@ -2264,7 +2264,7 @@ class Whirly
                         try
                         {
                             //add stars
-                            globeControl.makeLayerThread(false);
+                            globeControl.makeLayerThread(false, "Particles");
                             stars = new MaplyStarModel("starcatalog_orig.txt", "star_background.png", activity);
                             stars.addToViewc(globeControl, BaseController.ThreadMode.ThreadCurrent);
                         }

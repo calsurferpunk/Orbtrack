@@ -272,6 +272,7 @@
     <string name="title_blue_hour">Blue Hour</string>
     <string name="title_bold">Bold</string>
     <string name="title_border">Border</string>
+    <string name="title_both">Both</string>
     <string name="title_bottom">Bottom</string>
     <string name="title_brown">Brown</string>
     <string name="title_bytes">Bytes</string>
@@ -335,12 +336,14 @@
     <string name="title_file">File</string>
     <string name="title_file_loading">Loading File</string>
     <string name="title_file_select_source">Select File Source</string>
+    <string name="title_filled">Filled</string>
     <string name="title_finish">Finish</string>
     <string name="title_finished">Finished</string>
     <string name="title_first_deriv_mean_motion_div_2">First Derivative of Mean Motion / 2</string>
     <string name="title_first_quarter">First Quarter</string>
     <string name="title_follow">Follow</string>
     <string name="title_footprint_color">Footprint Color</string>
+    <string name="title_footprint_type">Footprint Type</string>
     <string name="title_force_rotate">Force Rotate</string>
     <string name="title_full">Full</string>
     <string name="title_full_moon_start">Full Moon Start</string>
@@ -448,6 +451,7 @@
     <string name="title_orbital_icon">Orbital Icon</string>
     <string name="title_orbitals">Orbitals</string>
     <string name="title_other">Other</string>
+    <string name="title_outline">Outline</string>
     <string name="title_overall">Overall</string>
     <string name="title_owner">Owner</string>
     <string name="title_owners">Owners</string>

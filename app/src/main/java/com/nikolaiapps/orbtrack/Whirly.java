@@ -1114,7 +1114,7 @@ class Whirly
             if(selectedFootprintImage == null)
             {
                 //set/draw footprint image for repeat use
-                selectedFootprintImage = createFootprintImage(Settings.getMapSelectedFootprintColor(context));
+                selectedFootprintImage = createFootprintImage(Settings.getMapFootprintType(context), Settings.getMapSelectedFootprintColor(context));
             }
 
             //remember if old information and initialize path
@@ -1161,25 +1161,55 @@ class Whirly
             selectedFootprintImage = null;
         }
 
-        private static Bitmap createFootprintImage(int color)
+        private static Bitmap createFootprintImage(int footprintStyle, int color)
         {
             int alpha;
+            boolean drawFill = false;
+            boolean drawOutline = false;
             Paint footprintPaint;
             Canvas footprintCanvas;
             Bitmap footprintImage;
 
+            //setup
             alpha = Color.alpha(color);
             footprintImage = Bitmap.createBitmap(1600, 1600, Bitmap.Config.ARGB_8888);
             footprintCanvas = new Canvas(footprintImage);
             footprintPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            footprintPaint.setColor(color);
-            footprintPaint.setStyle(Paint.Style.FILL);
-            footprintCanvas.drawCircle(800, 800, 800, footprintPaint);
-            footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
-            footprintPaint.setStyle(Paint.Style.STROKE);
-            footprintPaint.setStrokeWidth(40f);
-            footprintCanvas.drawCircle(800, 800, 780, footprintPaint);
+            switch(footprintStyle)
+            {
+                case Settings.Options.MapView.FootprintType.Filled:
+                case Settings.Options.MapView.FootprintType.OutlineFilled:
+                    drawFill = true;
+                    break;
+            }
+            switch(footprintStyle)
+            {
+                case Settings.Options.MapView.FootprintType.Outline:
+                case Settings.Options.MapView.FootprintType.OutlineFilled:
+                    drawOutline = true;
+                    break;
+            }
 
+            //if filling
+            if(drawFill)
+            {
+                //draw footprint
+                footprintPaint.setColor(color);
+                footprintPaint.setStyle(Paint.Style.FILL);
+                footprintCanvas.drawCircle(800, 800, 800, footprintPaint);
+            }
+
+            //if drawing outline
+            if(drawOutline)
+            {
+                //draw border
+                footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
+                footprintPaint.setStyle(Paint.Style.STROKE);
+                footprintPaint.setStrokeWidth(40f);
+                footprintCanvas.drawCircle(800, 800, 780, footprintPaint);
+            }
+
+            //return image
             return(footprintImage);
         }
 
@@ -1394,7 +1424,7 @@ class Whirly
                 else if(showFootprint && orbitalFootprint == null)
                 {
                     orbitalFootprint = new FlatObject(controller);
-                    orbitalFootprint.setImage(createFootprintImage(Globals.getColor(common.data.database.pathColor, 60)));
+                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(common.data.database.pathColor, 60)));
                 }
             }
         }

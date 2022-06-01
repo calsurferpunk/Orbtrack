@@ -272,6 +272,7 @@
     <string name="title_blue_hour">Hora Azul</string>
     <string name="title_bold">Negrita</string>
     <string name="title_border">Borde</string>
+    <string name="title_both">Ambos</string>
     <string name="title_bottom">Fondo</string>
     <string name="title_brown">Marrón</string>
     <string name="title_bytes">Bytes</string>
@@ -335,12 +336,14 @@
     <string name="title_file">Archivo</string>
     <string name="title_file_loading">Cargando archivo</string>
     <string name="title_file_select_source">Seleccionar Fuente de Archivo</string>
+    <string name="title_filled">Lleno</string>
     <string name="title_finish">Terminar</string>
     <string name="title_finished">Terminado</string>
     <string name="title_first_deriv_mean_motion_div_2">Primera Derivada de Movimiento Medio / 2</string>
     <string name="title_first_quarter">Primer Cuarto</string>
     <string name="title_follow">Seguir</string>
     <string name="title_footprint_color">Color Huella</string>
+    <string name="title_footprint_type">Tipo Huella</string>
     <string name="title_force_rotate">Forzar Rotación</string>
     <string name="title_full">Lleno</string>
     <string name="title_full_moon_start">Comienza Luna Llena</string>
@@ -448,6 +451,7 @@
     <string name="title_orbital_icon">Ícono Orbital</string>
     <string name="title_orbitals">Orbitales</string>
     <string name="title_other">Otro</string>
+    <string name="title_outline">Contorno</string>
     <string name="title_overall">General</string>
     <string name="title_owner">Propietario</string>
     <string name="title_owners">Propietarios</string>

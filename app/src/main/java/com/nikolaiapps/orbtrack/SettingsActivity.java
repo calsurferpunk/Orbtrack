@@ -201,6 +201,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
                         IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
                         IconListPreference mapTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map);
+                        IconListPreference footprintTypeList = this.findPreference(Settings.PreferenceName.MapFootprintType);
                         IconListPreference informationLocationList = this.findPreference(Settings.PreferenceName.MapMarkerInfoLocation);
 
                         //initialize values
@@ -230,6 +231,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSlider(iconScaleSlider);
                         setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
                         setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsMapSwitch);
+                        setupList(footprintTypeList, Settings.Options.MapView.footprintTypeItems, Settings.Options.MapView.FootprintTypeValues, null, null, null);
                         setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
                         break;
 
@@ -407,6 +409,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     return(true);
                                 }
                             });
+                            break;
+
+                        case Settings.PreferenceName.MapFootprintType:
+                            currentValue = Settings.getMapFootprintType(context);
                             break;
 
                         case Settings.PreferenceName.MapMarkerInfoLocation:
@@ -1330,6 +1336,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowLabelsAlways:
                         case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
+                        case Settings.PreferenceName.MapFootprintType:
                         case Settings.PreferenceName.MapSelectedFootprintColor:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapShowStars:

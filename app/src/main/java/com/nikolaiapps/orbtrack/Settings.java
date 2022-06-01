@@ -81,6 +81,7 @@ public abstract class Settings
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
         static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowFootprint = "MapShowFootprint";
+        static final String MapFootprintType = "MapFootprintType";
         static final String MapShowSelectedFootprint = "MapShowSelectedFootprint";
         static final String MapSelectedFootprintColor = "MapSelectedFootprintColor";
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
@@ -701,9 +702,21 @@ public abstract class Settings
         //Map view
         public static abstract class MapView
         {
+            //Footprint types
+            public static abstract class FootprintType
+            {
+                static final int Outline = 0;
+                static final int Filled = 1;
+                static final int OutlineFilled = 2;
+            }
+
             //Map types
             public static String[] mapTypeItems;
             public static final Integer[] MapTypeValues = new Integer[]{CoordinatesFragment.MapLayerType.Normal, CoordinatesFragment.MapLayerType.Satellite, /*CoordinatesFragment.MapLayerType.Terrain,*/ CoordinatesFragment.MapLayerType.Hybrid};
+
+            //Footprint types
+            public static String[] footprintTypeItems;
+            public static final Integer[] FootprintTypeValues = new Integer[]{FootprintType.Outline, FootprintType.Filled, FootprintType.OutlineFilled};
 
             //Information location types
             public static String[] infoLocationItems;
@@ -724,6 +737,16 @@ public abstract class Settings
                         res.getQuantityString(R.plurals.title_satellites, 1),
                         /*res.getString(R.string.title_terrain),*/
                         res.getString(R.string.title_hybrid)
+                    };
+                }
+                if(footprintTypeItems == null || footprintTypeItems.length == 0)
+                {
+                    //init footprint type items
+                    footprintTypeItems = new String[]
+                    {
+                        res.getString(R.string.title_outline),
+                        res.getString(R.string.title_filled),
+                        res.getString(R.string.title_both)
                     };
                 }
                 if(infoLocationItems == null || infoLocationItems.length == 0)
@@ -1924,6 +1947,9 @@ public abstract class Settings
             case PreferenceName.MapShowOrbitalDirectionLimit:
                 return(100);
 
+            case PreferenceName.MapFootprintType:
+                return(Options.MapView.FootprintType.OutlineFilled);
+
             case PreferenceName.MapSelectedFootprintColor:
                 return(Color.argb(102, 200, 200, 220));
 
@@ -2495,6 +2521,12 @@ public abstract class Settings
     public static void setMapShowFootprint(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.MapShowFootprint, show);
+    }
+
+    //Returns map orbital footprint type
+    public static int getMapFootprintType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapFootprintType));
     }
 
     //Get map selected footprint color

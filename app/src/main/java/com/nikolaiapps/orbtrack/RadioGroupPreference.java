@@ -109,6 +109,11 @@ public class RadioGroupPreference extends ValueTypePreference
                 //set to shortest
                 radioButtons = new AppCompatRadioButton[count];
             }
+            else
+            {
+                //remove all old buttons
+                groupView.removeAllViews();
+            }
 
             //go through texts/values
             for(index = 0; index < count; index++)
@@ -150,6 +155,10 @@ public class RadioGroupPreference extends ValueTypePreference
                 groupView.addView(currentRadioButton);
 
                 //set radio button
+                if(radioButtons[index] != null)
+                {
+                    radioButtons[index] = null;
+                }
                 radioButtons[index] = currentRadioButton;
             }
 

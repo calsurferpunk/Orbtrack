@@ -111,6 +111,20 @@ public class RadioGroupPreference extends ValueTypePreference
             }
             else
             {
+                //get current checked button
+                for(AppCompatRadioButton currentRadioButton : radioButtons)
+                {
+                    //remember current tag
+                    Object currentTag = currentRadioButton.getTag();
+
+                    //if checked and a string
+                    if(currentRadioButton.isChecked() && currentTag instanceof String)
+                    {
+                        //remember value
+                        pendingSetValue = (String)currentRadioButton.getTag();
+                    }
+                }
+
                 //remove all old buttons
                 groupView.removeAllViews();
             }

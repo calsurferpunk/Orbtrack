@@ -6,10 +6,9 @@ import android.content.SharedPreferences;
 import android.util.AttributeSet;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.preference.Preference;
 
 
-public class ValueTypePreference extends Preference
+public class ValueTypePreference extends CustomPreference
 {
     //Valid class types for preference value
     protected static abstract class ClassType
@@ -23,7 +22,6 @@ public class ValueTypePreference extends Preference
     }
 
     protected Class<?> valueType;
-    protected String sharedName;
 
     public ValueTypePreference(@NonNull Context context, @Nullable @org.jetbrains.annotations.Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
@@ -33,21 +31,6 @@ public class ValueTypePreference extends Preference
 
         //set defaults
         valueType = Integer.class;
-        sharedName = "Settings";
-    }
-
-    //Sets shared name
-    protected void setSharedName(String name)
-    {
-        //set shared name
-        sharedName = name;
-
-        //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
-        {
-            //use default
-            sharedName = "Settings";
-        }
     }
 
     //Sets value type
@@ -80,18 +63,6 @@ public class ValueTypePreference extends Preference
                 valueType = String.class;
                 break;
         }
-    }
-
-    //Gets shared preferences
-    private SharedPreferences getPreferences(Context context)
-    {
-        return(context.getSharedPreferences(sharedName, Context.MODE_PRIVATE));
-    }
-
-    //Gets write settings
-    protected SharedPreferences.Editor getWriteSettings(Context context)
-    {
-        return(getPreferences(context).edit());
     }
 
     //Saves the value

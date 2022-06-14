@@ -772,6 +772,8 @@ class Whirly
 
         MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation)
         {
+            int locationIconType;
+
             if(markerController != null)
             {
                 currentContext = context;
@@ -785,7 +787,8 @@ class Whirly
                 markerBaseSizeValue = Globals.dpToPixels(currentContext, 46);
 
                 marker = new ScreenMarker();
-                marker.image = Globals.getBitmap(currentContext, R.drawable.map_marker_location, 0);
+                locationIconType = Settings.getMapMarkerLocationIcon(context);
+                marker.image = Globals.getBitmap(currentContext, Globals.getLocationIconTypeIconID(locationIconType), Settings.getMapMarkerLocationIconUsedTintColor(context, locationIconType));
                 marker.size = new Point2d(markerBaseSizeValue * markerScale, markerBaseSizeValue * markerScale);
                 marker.userObject = noradId;
                 marker.selectable = true;

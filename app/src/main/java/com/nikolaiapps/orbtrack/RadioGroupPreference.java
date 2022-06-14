@@ -19,7 +19,6 @@ import androidx.preference.PreferenceViewHolder;
 
 public class RadioGroupPreference extends ValueTypePreference
 {
-    private String titleText;
     private String pendingSetValue;
     private String[] itemTexts;
     private String[] itemValues;
@@ -44,8 +43,6 @@ public class RadioGroupPreference extends ValueTypePreference
         if(attrs != null)
         {
             valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RadioGroupPreference, 0, 0);
-            sharedName = valueArray.getString(R.styleable.RadioGroupPreference_sharedName);
-            titleText = valueArray.getString(R.styleable.RadioGroupPreference_titleText);
             resId = valueArray.getResourceId(R.styleable.RadioGroupPreference_itemTexts, 0);
             if(resId != 0)
             {
@@ -59,9 +56,6 @@ public class RadioGroupPreference extends ValueTypePreference
             setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, ClassType.String));
             valueArray.recycle();
         }
-
-        //set shared name
-        setSharedName(sharedName);
 
         //set to current preference value
         setSelectedValue(getPreferenceValue());

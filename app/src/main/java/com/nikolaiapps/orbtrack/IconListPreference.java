@@ -3,7 +3,6 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,14 +10,11 @@ import android.widget.AdapterView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 
-public class IconListPreference extends Preference
+public class IconListPreference extends CustomPreference
 {
-    private String sharedName;
-    private String titleText;
     private IconSpinner iconList;
     private IconSpinner.CustomAdapter adapter;
     private Object pendingSetValue;
@@ -31,24 +27,6 @@ public class IconListPreference extends Preference
 
         this.setPersistent(false);
         this.setLayoutResource(R.layout.icon_list_preference_layout);
-
-        TypedArray valueArray;
-
-        //if there are attributes, retrieve them
-        if(attrs != null)
-        {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.IconListPreference, 0, 0);
-            sharedName = valueArray.getString(R.styleable.IconListPreference_sharedName);
-            titleText = valueArray.getString(R.styleable.IconListPreference_titleText);
-            valueArray.recycle();
-        }
-
-        //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
-        {
-            //use default
-            sharedName = "Settings";
-        }
     }
     public IconListPreference(Context context, AttributeSet attrs, int defStyleAttr)
     {
@@ -165,28 +143,29 @@ public class IconListPreference extends Preference
         });
     }
 
-    //Gets shared preferences
-    private SharedPreferences getPreferences(Context context)
-    {
-        return(context.getSharedPreferences(sharedName, Context.MODE_PRIVATE));
-    }
-
-    //Gets write settings
-    private SharedPreferences.Editor getWriteSettings(Context context)
-    {
-        return(getPreferences(context).edit());
-    }
-
     //Sets adapter
     public void setAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
     {
         adapter = new IconSpinner.CustomAdapter(context, items, values, itemImageIds, subTexts);
         itemValues = adapter.getItemValues();
     }
-    public void setAdapter(Context context, IconSpinner.Item[] items)
+    public void setAdapter(Context context, IconSpinner.Item[] items, boolean refresh)
     {
+        Object selectedValue;
+
         adapter = new IconSpinner.CustomAdapter(context, items);
         itemValues = adapter.getItemValues();
+
+        if(refresh)
+        {
+            selectedValue = iconList.getSelectedValue(null);
+            iconList.setAdapter(adapter);
+            iconList.setSelectedValue(selectedValue);
+        }
+    }
+    public void setAdapter(Context context, IconSpinner.Item[] items)
+    {
+        setAdapter(context, items, false);
     }
 
     //Sets selected value

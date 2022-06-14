@@ -3705,6 +3705,56 @@ public abstract class Globals
         }
     }
 
+    //Gets location icon type icon ID
+    public static int getLocationIconTypeIconID(int locationIconType)
+    {
+        switch(locationIconType)
+        {
+            case Settings.Options.Display.LocationIcon.Person:
+                return(R.drawable.map_location_person_red);
+
+            case Settings.Options.Display.LocationIcon.Home:
+                return(R.drawable.map_location_home_red);
+
+            case Settings.Options.Display.LocationIcon.City:
+                return(R.drawable.map_location_city_red);
+
+            case Settings.Options.Display.LocationIcon.Tower:
+                return(R.drawable.map_location_tower_red);
+
+            case Settings.Options.Display.LocationIcon.Radar:
+                return(R.drawable.map_location_radar_red);
+
+            case Settings.Options.Display.LocationIcon.Telescope1:
+                return(R.drawable.map_location_telescope1);
+
+            case Settings.Options.Display.LocationIcon.Telescope2:
+                return(R.drawable.map_location_telescope2);
+
+            case Settings.Options.Display.LocationIcon.Observatory1:
+                return(R.drawable.map_location_observatory1);
+
+            case Settings.Options.Display.LocationIcon.Observatory2:
+                return(R.drawable.map_location_observatory2);
+
+            case Settings.Options.Display.LocationIcon.Dish1:
+                return(R.drawable.map_location_dish1);
+
+            case Settings.Options.Display.LocationIcon.Dish2:
+                return(R.drawable.map_location_dish2);
+
+            case Settings.Options.Display.LocationIcon.Dish3:
+                return(R.drawable.map_location_dish3);
+
+            case Settings.Options.Display.LocationIcon.Dish4:
+                return(R.drawable.map_location_dish4);
+
+            default:
+            case Settings.Options.Display.LocationIcon.Marker:
+                return(R.drawable.map_location_marker_red);
+        }
+    }
+
     //Gets location icon
     public static int getLocationIcon(byte locationType)
     {

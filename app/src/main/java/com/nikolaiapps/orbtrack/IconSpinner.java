@@ -40,6 +40,7 @@ public class IconSpinner extends AppCompatSpinner
         int icon1Color;
         int icon1SelectedColor;
         int icon3Color;
+        int icon3TintColor;
         int icon3SelectedColor;
         boolean iconsUseThemeTint;
         int[] icon1Ids;
@@ -63,7 +64,7 @@ public class IconSpinner extends AppCompatSpinner
             text = txt;
             subText = null;
             value = val;
-            icon1Color = icon1SelectedColor = icon3Color = icon3SelectedColor = Color.TRANSPARENT;
+            icon1Color = icon1SelectedColor = icon3Color = icon3TintColor = icon3SelectedColor = Color.TRANSPARENT;
             iconsUseThemeTint = false;
             icon1Ids = null;
         }
@@ -82,6 +83,11 @@ public class IconSpinner extends AppCompatSpinner
             this(txt, val);
             this.icon3Id = icon3Id;
             this.iconsUseThemeTint = iconsUseThemeTint;
+        }
+        public Item(int icon3Id, int tintColor, Object val)
+        {
+            this(icon3Id, false, null, val);
+            this.icon3TintColor = tintColor;
         }
         public Item(Drawable icon3, String txt, Object val, float rotateAngle)
         {
@@ -428,7 +434,7 @@ public class IconSpinner extends AppCompatSpinner
             context = convertView.getContext();
             icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
             icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
-            icon3 = (currentItem.icon3Id > 0 ? Globals.getDrawable(context, currentItem.icon3Id, currentItem.iconsUseThemeTint) : null);
+            icon3 = (currentItem.icon3Id > 0 ? (currentItem.icon3TintColor != Color.TRANSPARENT ? Globals.getDrawable(context, currentItem.icon3Id, currentItem.icon3TintColor, false) : Globals.getDrawable(context, currentItem.icon3Id, currentItem.iconsUseThemeTint)) : null);
             convertView.setBackgroundColor(backgroundColor);
             if(usingIcon3Only)
             {

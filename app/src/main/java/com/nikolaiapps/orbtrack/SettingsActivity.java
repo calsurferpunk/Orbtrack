@@ -42,7 +42,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceCategory;
 import androidx.preference.PreferenceFragmentCompat;
-import androidx.preference.SwitchPreference;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.button.MaterialButton;
@@ -119,9 +118,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case ScreenKey.Display:
                         SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
                         SwitchPreference allowNumberCommasSwitch = this.findPreference(Settings.PreferenceName.AllowNumberCommas);
+                        SwitchButtonPreference useLocationTintSwitch = this.findPreference(Settings.PreferenceName.MapMarkerLocationIconUseTint);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
+                        IconListPreference locationIconList = this.findPreference(Settings.PreferenceName.MapMarkerLocationIcon);
                         IconListPreference satelliteIconList = this.findPreference(Settings.PreferenceName.SatelliteIcon);
                         IconListPreference orbitalIconsList = this.findPreference(Settings.PreferenceName.OrbitalIcons);
+
+                        //always reset location icon items to update tint color
+                        Settings.Options.Display.locationIconItems = null;
 
                         //initialize values
                         Settings.Options.Display.initValues(context);
@@ -129,7 +133,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(darkThemeSwitch);
                         setupSwitch(allowNumberCommasSwitch);
+                        setupSwitchButton(useLocationTintSwitch);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
+                        setupList(locationIconList, Settings.Options.Display.locationIconItems, null, null, null, useLocationTintSwitch);
                         setupList(satelliteIconList, Settings.Options.Display.satelliteIconItems, null, null, null, null);
                         setupList(orbitalIconsList, Settings.Options.Display.orbitalIconsItems, null, null, null, null);
                         break;
@@ -415,6 +421,27 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             currentValue = Settings.getMapFootprintType(context);
                             break;
 
+                        case Settings.PreferenceName.MapMarkerLocationIcon:
+                            currentValue = Settings.getMapMarkerLocationIcon(context);
+
+                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            {
+                                @Override
+                                public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
+                                {
+                                    //if child preference exists
+                                    if(childPreference != null)
+                                    {
+                                        //update child visibility
+                                        childPreference.setVisible(Settings.getLocationIconTypeCanTint((int)newValue));
+                                    }
+
+                                    //allow change
+                                    return(true);
+                                }
+                            });
+                            break;
+
                         case Settings.PreferenceName.MapMarkerInfoLocation:
                             currentValue = Settings.getMapMarkerInfoLocation(context);
                             break;
@@ -429,10 +456,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                 {
                                     byte source = (byte)newValue;
                                     SwitchPreference childSwitch = (SwitchPreference)childPreference;
-                                    boolean sourceUseGP = !Settings.getSatelliteSourceUseGP(context, source);
+                                    boolean sourceUseGP = Settings.getSatelliteSourceUseGP(context, source);
 
                                     //update child switch
-                                    childSwitch.setChecked(sourceUseGP);
+                                    childSwitch.setSubKey(String.valueOf(source));
+                                    childSwitch.setChecked(!sourceUseGP);
                                     childSwitch.setEnabled(source != Database.UpdateSource.N2YO);
 
                                     //if changing source
@@ -519,7 +547,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         {
                             boolean checked = (Boolean)newValue;
                             boolean isAutoUpdate = (childPreference instanceof TimeIntervalPreference);
-                            String subKey = "";
+                            String subKey = ((SwitchPreference)preference).getSubKey();
                             UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
 
                             //if -not for auto update- or -settings are changing-
@@ -528,9 +556,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                 //if for GP data usage
                                 if(isGPDataUsage)
                                 {
-                                    //get sub key
-                                    subKey = String.valueOf(Settings.getSatelliteSource(context));
-
                                     //invert value
                                     checked = !checked;
                                 }
@@ -641,6 +666,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case Settings.PreferenceName.LensUseHorizon:
                     case Settings.PreferenceName.MapShowGrid:
                     case Settings.PreferenceName.MapShowSelectedFootprint:
+                    case Settings.PreferenceName.MapMarkerLocationIconUseTint:
                         BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
                         float[] size = Globals.dpsToPixels(context, 60, 40);
                         ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
@@ -657,6 +683,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             titleId = R.string.title_footprint_color;
                             buttonPreferenceKey = Settings.PreferenceName.MapSelectedFootprintColor;
                             allowOpacity = true;
+                        }
+                        else if(preferenceKey.equals(Settings.PreferenceName.MapMarkerLocationIconUseTint))
+                        {
+                            titleId = R.string.title_tint_color;
+                            buttonPreferenceKey = Settings.PreferenceName.MapMarkerLocationIconTintColor;
+                            allowOpacity = false;
                         }
                         else
                         {
@@ -1328,6 +1360,33 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             setLensRecreateNeed();
                             break;
 
+                        case Settings.PreferenceName.MapMarkerLocationIconUseTint:
+                        case Settings.PreferenceName.MapMarkerLocationIconTintColor:
+                            //update location icon list
+                            List<Fragment> fragments = manager.getFragments();
+                            for(Fragment currentFragment : fragments)
+                            {
+                                //if a SettingsSubFragment
+                                if(currentFragment instanceof SettingsSubFragment)
+                                {
+                                    //get location icon preference
+                                    Preference locationIconPreference = ((SettingsSubFragment)currentFragment).findPreference(Settings.PreferenceName.MapMarkerLocationIcon);
+                                    if(locationIconPreference instanceof IconListPreference)
+                                    {
+                                        IconListPreference locationIconList = (IconListPreference)locationIconPreference;
+
+                                        //reset location icon items to update tint color
+                                        Settings.Options.Display.locationIconItems = null;
+                                        Settings.Options.Display.initValues(SettingsActivity.this);
+
+                                        //update adapter
+                                        locationIconList.setAdapter(SettingsActivity.this, Settings.Options.Display.locationIconItems, true);
+                                    }
+                                }
+                            }
+
+                            //fall through
+
                         case Settings.PreferenceName.MapShow3dPaths:
                         case Settings.PreferenceName.MapRotateAllowed:
                         case Settings.PreferenceName.MapMarkerShowBackground:
@@ -1344,6 +1403,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowGrid:
                         case Settings.PreferenceName.MapGridColor:
                         case Settings.PreferenceName.MapMarkerScale:
+                        case Settings.PreferenceName.MapMarkerLocationIcon:
                         case Settings.PreferenceName.MapMarkerInfoLocation:
                             //map needs recreate
                             setMapRecreateNeeded();

@@ -26,7 +26,6 @@ public class SwitchTextPreference extends ValueTypePreference
     private float minValue;
     private float maxValue;
     private String switchKey;
-    private String titleText;
     private String suffixText;
     private String enabledValueText;
     private String disabledValueText;
@@ -60,15 +59,10 @@ public class SwitchTextPreference extends ValueTypePreference
             switchKey = valueArray.getString(R.styleable.SwitchTextPreference_switchKey);
             minValue = valueArray.getFloat(R.styleable.SwitchTextPreference_minValue, 0);
             maxValue = valueArray.getFloat(R.styleable.SwitchTextPreference_maxValue, 100);
-            sharedName = valueArray.getString(R.styleable.SwitchTextPreference_sharedName);
-            titleText = valueArray.getString(R.styleable.SwitchTextPreference_titleText);
             suffixText = valueArray.getString(R.styleable.SwitchTextPreference_suffixText);
             setValueType(valueArray.getInt(R.styleable.SwitchTextPreference_valueType, ClassType.Integer));
             valueArray.recycle();
         }
-
-        //set shared name
-        setSharedName(sharedName);
     }
 
     public SwitchTextPreference(Context context, AttributeSet attrs, int defStyleAttr)

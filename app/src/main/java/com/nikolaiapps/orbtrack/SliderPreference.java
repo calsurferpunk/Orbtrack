@@ -8,12 +8,11 @@ import android.util.AttributeSet;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import java.util.Locale;
 
 
-public class SliderPreference extends Preference
+public class SliderPreference extends CustomPreference
 {
     //Valid scale types for preference value
     private static abstract class ScaleType
@@ -25,8 +24,6 @@ public class SliderPreference extends Preference
     private int scaleType;
     private int minValue;
     private int maxValue;
-    private String sharedName;
-    private String titleText;
     private PlayBar sliderView;
 
     public SliderPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
@@ -50,16 +47,7 @@ public class SliderPreference extends Preference
             scaleType = valueArray.getInt(R.styleable.SliderPreference_scaleType, ScaleType.Integer);
             minValue = (int)valueArray.getFloat(R.styleable.SliderPreference_minValue, 0);
             maxValue = (int)valueArray.getFloat(R.styleable.SliderPreference_maxValue, 100);
-            sharedName = valueArray.getString(R.styleable.SliderPreference_sharedName);
-            titleText = valueArray.getString(R.styleable.SliderPreference_titleText);
             valueArray.recycle();
-        }
-
-        //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
-        {
-            //use default
-            sharedName = "Settings";
         }
     }
 
@@ -136,18 +124,6 @@ public class SliderPreference extends Preference
                 sliderView.setValue((int)(Settings.getPreferenceFloat(context, preferenceName) * 100), true);
                 break;
         }
-    }
-
-    //Gets shared preferences
-    private SharedPreferences getPreferences(Context context)
-    {
-        return(context.getSharedPreferences(sharedName, Context.MODE_PRIVATE));
-    }
-
-    //Gets write settings
-    private SharedPreferences.Editor getWriteSettings(Context context)
-    {
-        return(getPreferences(context).edit());
     }
 
     public void setRange(int min, int max)

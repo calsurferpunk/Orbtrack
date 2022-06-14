@@ -9,13 +9,12 @@ import android.util.AttributeSet;
 import android.view.View;
 import android.widget.AdapterView;
 import androidx.annotation.NonNull;
-import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 import java.util.Arrays;
 import java.util.Calendar;
 
 
-public class TimeIntervalPreference extends Preference
+public class TimeIntervalPreference extends CustomPreference
 {
     public interface OnPreferenceChangedListener
     {
@@ -47,7 +46,6 @@ public class TimeIntervalPreference extends Preference
     private String hourKey;
     private String minuteKey;
     private String intervalKey;
-    private String sharedName;
     private IconSpinner frequencyList;
     private TimeInputView timeView;
     private OnPreferenceChangedListener changedListener;
@@ -91,15 +89,7 @@ public class TimeIntervalPreference extends Preference
             hourKey = valueArray.getString(R.styleable.TimeIntervalPreference_hourKey);
             minuteKey = valueArray.getString(R.styleable.TimeIntervalPreference_minuteKey);
             intervalKey = valueArray.getString(R.styleable.TimeIntervalPreference_intervalKey);
-            sharedName = valueArray.getString(R.styleable.TimeIntervalPreference_sharedName);
             valueArray.recycle();
-        }
-
-        //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
-        {
-            //use default
-            sharedName = "Settings";
         }
     }
     public TimeIntervalPreference(Context context, AttributeSet attrs, int defStyleAttr)
@@ -201,18 +191,6 @@ public class TimeIntervalPreference extends Preference
     public void setOnPreferenceChangedListener(OnPreferenceChangedListener listener)
     {
         changedListener = listener;
-    }
-
-    //Gets shared preferences
-    private SharedPreferences getPreferences(Context context)
-    {
-        return(context.getSharedPreferences(sharedName, Context.MODE_PRIVATE));
-    }
-
-    //Gets write settings
-    private SharedPreferences.Editor getWriteSettings(Context context)
-    {
-        return(getPreferences(context).edit());
     }
 
     //Gets the interval value

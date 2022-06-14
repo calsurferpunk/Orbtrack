@@ -18,8 +18,6 @@
     <attr name="itemSelected" format="reference"/>
     <attr name="normalTint" format="color"/>
     <attr name="checkedTint" format="color"/>
-    <attr name="sharedName" format="string"/>
-    <attr name="titleText" format="string"/>
     <attr name="minValue" format="float"/>
     <attr name="maxValue" format="float"/>
 
@@ -54,35 +52,26 @@
         <attr name="checkedTint"/>
     </declare-styleable>
 
+    <declare-styleable name="CustomPreference">
+        <attr name="sharedName" format="string"/>
+        <attr name="titleText" format="string"/>
+        <attr name="paddingLeft" format="dimension"/>
+    </declare-styleable>
+
     <declare-styleable name="TimeIntervalPreference">
-        <attr name="sharedName"/>
         <attr name="hourKey" format="string"/>
         <attr name="minuteKey" format="string"/>
         <attr name="intervalKey" format="string"/>
     </declare-styleable>
 
-    <declare-styleable name="IconListPreference">
-        <attr name="sharedName"/>
-        <attr name="titleText"/>
-    </declare-styleable>
-
     <declare-styleable name="RadioGroupPreference">
-        <attr name="sharedName"/>
-        <attr name="titleText"/>
         <attr name="itemTexts" format="reference"/>
         <attr name="itemValues" format="reference"/>
         <attr name="valueType"/>
     </declare-styleable>
 
-    <declare-styleable name="SwitchButtonPreference">
-        <attr name="sharedName"/>
-        <attr name="titleText"/>
-    </declare-styleable>
-
     <declare-styleable name="SwitchTextPreference">
-        <attr name="sharedName"/>
         <attr name="switchKey" format="string"/>
-        <attr name="titleText"/>
         <attr name="suffixText" format="string"/>
         <attr name="showSwitch" format="boolean"/>
         <attr name="reverseEnabled" format="boolean"/>
@@ -92,8 +81,6 @@
     </declare-styleable>
 
     <declare-styleable name="SliderPreference">
-        <attr name="sharedName"/>
-        <attr name="titleText"/>
         <attr name="minValue"/>
         <attr name="maxValue"/>
         <attr name="scaleType" format="enum">

@@ -76,6 +76,9 @@ public abstract class Settings
         static final String MapShowGrid = "MapShowGrid";
         static final String MapGridColor = "MapGridColor";
         static final String MapMarkerScale = "MapMarkerScale";
+        static final String MapMarkerLocationIcon = "MapMarkerLocationIcon";
+        static final String MapMarkerLocationIconUseTint = "MapMarkerLocationIconUseTint";
+        static final String MapMarkerLocationIconTintColor = "MapMarkerLocationIconTintColor";
         static final String MapMarkerInfoLocation = "MapMarkerInfoLocation";
         static final String MapMarkerShowBackground = "MapMarkerShowBackground";
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
@@ -223,6 +226,26 @@ public abstract class Settings
         //Display
         public static abstract class Display
         {
+            //Location icon types
+            public static abstract class LocationIcon
+            {
+                static final int Marker = 0;
+                static final int Person = 1;
+                static final int Home = 2;
+                static final int City = 3;
+                static final int Tower = 4;
+                static final int Radar = 5;
+                static final int Telescope1 = 6;
+                static final int Telescope2 = 7;
+                static final int Observatory1 = 8;
+                static final int Observatory2 = 9;
+                static final int Dish1 = 10;
+                static final int Dish2 = 11;
+                static final int Dish3 = 12;
+                static final int Dish4 = 13;
+            }
+            public static IconSpinner.Item[] locationIconItems;
+
             //Satellite icon types
             public static abstract class SatelliteIcon
             {
@@ -262,12 +285,35 @@ public abstract class Settings
             //Initializes values
             public static void initValues(Context context)
             {
+                int color;
                 Resources res = context.getResources();
 
                 //if values are not set
+                if(locationIconItems == null || locationIconItems.length == 0)
+                {
+                    //init location icon items
+                    color = getMapMarkerLocationIconUsedTintColor(context, LocationIcon.Person);
+                    locationIconItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(R.drawable.map_location_marker_red, Color.TRANSPARENT, LocationIcon.Marker),
+                        new IconSpinner.Item(R.drawable.map_location_person_red, color, LocationIcon.Person),
+                        new IconSpinner.Item(R.drawable.map_location_home_red, color, LocationIcon.Home),
+                        new IconSpinner.Item(R.drawable.map_location_city_red, color, LocationIcon.City),
+                        new IconSpinner.Item(R.drawable.map_location_tower_red, color, LocationIcon.Tower),
+                        new IconSpinner.Item(R.drawable.map_location_radar_red, color, LocationIcon.Radar),
+                        new IconSpinner.Item(R.drawable.map_location_telescope1, color, LocationIcon.Telescope1),
+                        new IconSpinner.Item(R.drawable.map_location_telescope2, color, LocationIcon.Telescope2),
+                        new IconSpinner.Item(R.drawable.map_location_observatory1, color, LocationIcon.Observatory1),
+                        new IconSpinner.Item(R.drawable.map_location_observatory2, color, LocationIcon.Observatory2),
+                        new IconSpinner.Item(R.drawable.map_location_dish1, color, LocationIcon.Dish1),
+                        new IconSpinner.Item(R.drawable.map_location_dish2, Color.TRANSPARENT, LocationIcon.Dish2),
+                        new IconSpinner.Item(R.drawable.map_location_dish3, Color.TRANSPARENT, LocationIcon.Dish3),
+                        new IconSpinner.Item(R.drawable.map_location_dish4, Color.TRANSPARENT, LocationIcon.Dish4)
+                    };
+                }
                 if(satelliteIconItems == null || satelliteIconItems.length == 0)
                 {
-                    //init icon items
+                    //init satellite icon items
                     satelliteIconItems = new IconSpinner.Item[]
                     {
                         new IconSpinner.Item(R.drawable.orbital_satellite_black, true, null, SatelliteIcon.Black),
@@ -280,7 +326,7 @@ public abstract class Settings
                 }
                 if(orbitalIconsItems == null || orbitalIconsItems.length == 0)
                 {
-                    //init icon items
+                    //init orbital icon items
                     orbitalIconsItems = new IconSpinner.Item[]
                     {
                         new IconSpinner.Item(Globals.getDrawable(context, new int[]{R.drawable.orbital_sun_moozarov, R.drawable.orbital_mercury_moozarov, R.drawable.orbital_venus_moozarov, R.drawable.orbital_moon_moozarov, R.drawable.orbital_mars_moozarov, R.drawable.orbital_jupiter_moozarov, R.drawable.orbital_saturn_moozarov, R.drawable.orbital_uranus_moozarov, R.drawable.orbital_neptune_moozarov, R.drawable.orbital_pluto_moozarov}), null, OrbitalIcons.Moozarov),
@@ -1859,6 +1905,7 @@ public abstract class Settings
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.MapMarkerShowShadow:
+            case PreferenceName.MapMarkerLocationIconUseTint:
             case PreferenceName.MapRotateAllowed:
             case PreferenceName.MapShow3dPaths:
             case PreferenceName.MapShowLabelsAlways:
@@ -1921,6 +1968,12 @@ public abstract class Settings
 
             case PreferenceName.ColorTheme:
                 return(Options.Display.ThemeIndex.Cyan);
+
+            case PreferenceName.MapMarkerLocationIcon:
+                return(Options.Display.LocationIcon.Marker);
+
+            case PreferenceName.MapMarkerLocationIconTintColor:
+                return(Color.rgb(255, 0, 0));
 
             case PreferenceName.InformationSource:
                 return(Database.UpdateSource.NASA);
@@ -2491,6 +2544,48 @@ public abstract class Settings
             //set scale
             setPreferenceFloat(context, PreferenceName.MapMarkerScale, scale);
         }
+    }
+
+    //Gets if location icon type can use tint
+    public static boolean getLocationIconTypeCanTint(int locationIconType)
+    {
+        switch(locationIconType)
+        {
+            case Settings.Options.Display.LocationIcon.Person:
+            case Settings.Options.Display.LocationIcon.Home:
+            case Settings.Options.Display.LocationIcon.City:
+            case Settings.Options.Display.LocationIcon.Tower:
+            case Settings.Options.Display.LocationIcon.Radar:
+            case Settings.Options.Display.LocationIcon.Telescope1:
+            case Settings.Options.Display.LocationIcon.Telescope2:
+            case Settings.Options.Display.LocationIcon.Observatory1:
+            case Settings.Options.Display.LocationIcon.Observatory2:
+            case Settings.Options.Display.LocationIcon.Dish1:
+                return(true);
+
+            default:
+                return(false);
+        }
+    }
+
+    //Returns map marker location icon
+    public static int getMapMarkerLocationIcon(Context context)
+    {
+        //get location icon type
+        return(getPreferenceInt(context, PreferenceName.MapMarkerLocationIcon));
+    }
+
+    //Returns map marker location icon tint color
+    public static int getMapMarkerLocationIconTintColor(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapMarkerLocationIconTintColor));
+    }
+
+    //Returns map marker location icon used tint color
+    public static int getMapMarkerLocationIconUsedTintColor(Context context, int locationIconType)
+    {
+        boolean canUseTint = getLocationIconTypeCanTint(locationIconType);
+        return(canUseTint && getPreferenceBoolean(context, PreferenceName.MapMarkerLocationIconUseTint) ? getMapMarkerLocationIconTintColor(context) : canUseTint ? Color.RED : Color.TRANSPARENT);
     }
 
     //Returns map showing search list

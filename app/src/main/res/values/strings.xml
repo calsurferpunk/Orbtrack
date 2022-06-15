@@ -300,7 +300,6 @@
     <string name="title_compass_align">Compass Align</string>
     <string name="title_compass_calibrate">Calibrate Compass</string>
     <string name="title_compass_inaccurate_fix">Compass Inaccurate [Fix]</string>
-    <string name="title_control">Control</string>
     <string name="title_coordinates">Coordinates</string>
     <string name="title_current">Current</string>
     <string name="title_current_input_colon">"Current Input: "</string>
@@ -344,6 +343,7 @@
     <string name="title_first_deriv_mean_motion_div_2">First Derivative of Mean Motion / 2</string>
     <string name="title_first_quarter">First Quarter</string>
     <string name="title_follow">Follow</string>
+    <string name="title_footprint">Footprint</string>
     <string name="title_footprint_color">Footprint Color</string>
     <string name="title_footprint_type">Footprint Type</string>
     <string name="title_force_rotate">Force Rotate</string>

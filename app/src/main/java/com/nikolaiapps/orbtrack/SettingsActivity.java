@@ -80,6 +80,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         public static final String ListView = "listView";
         public static final String Locations = "locations";
         public static final String MapView = "mapView";
+        public static final String MapViewGlobe = "mapViewGlobe";
+        public static final String MapViewMap = "mapViewMap";
+        public static final String MapViewFootprint = "mapViewFootprint";
+        public static final String MapViewLabelData = "mapViewLabelData";
+        public static final String MapViewDisplay = "mapViewDisplay";
         public static final String Notifications = "notifications";
         public static final String Updates = "updates";
         public static final String Widgets = "widgets";
@@ -95,6 +100,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             final FragmentActivity context = getActivity();
             Bundle args = this.getArguments();
             String screenKey;
+            SwitchPreference allowRotationSwitch;
 
             //if args do not exist
             if(args == null)
@@ -183,14 +189,73 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
-                    case ScreenKey.MapView:
+                    case ScreenKey.MapViewGlobe:
                         SwitchPreference showCloudsGlobeSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Globe);
-                        SwitchPreference showCloudsMapSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Map);
                         SwitchPreference showSunlightSwitch = this.findPreference(Settings.PreferenceName.MapShowSunlight);
                         SwitchPreference show3dPathsSwitch = this.findPreference(Settings.PreferenceName.MapShow3dPaths);
-                        SwitchPreference allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
-                        SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
+                        allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
+                        SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
+                        SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
+                        IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showCloudsGlobeSwitch);
+                        setupSwitch(showSunlightSwitch);
+                        setupSwitch(show3dPathsSwitch);
+                        setupSwitch(allowRotationSwitch);
+                        setupSlider(globeSensitivitySlider);
+                        setupSlider(globeSpeedScaleSlider);
+                        setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
+                        break;
+
+                    case ScreenKey.MapViewMap:
+                        SwitchPreference showCloudsMapSwitch = this.findPreference(Settings.PreferenceName.ShowSatelliteClouds + Settings.SubPreferenceName.Map);
+                        allowRotationSwitch = this.findPreference(Settings.PreferenceName.MapRotateAllowed);
+                        SliderPreference mapSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map);
+                        SliderPreference mapSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map);
+                        IconListPreference mapTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showCloudsMapSwitch);
+                        setupSwitch(allowRotationSwitch);
+                        setupSlider(mapSensitivitySlider);
+                        setupSlider(mapSpeedScaleSlider);
+                        setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsMapSwitch);
+                        break;
+
+                    case ScreenKey.MapViewFootprint:
                         SwitchPreference showFootprint = this.findPreference(Settings.PreferenceName.MapShowFootprint);
+                        SwitchButtonPreference showSelectedFootprint = this.findPreference(Settings.PreferenceName.MapShowSelectedFootprint);
+                        IconListPreference footprintTypeList = this.findPreference(Settings.PreferenceName.MapFootprintType);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showFootprint);
+                        setupSwitchButton(showSelectedFootprint);
+                        setupList(footprintTypeList, Settings.Options.MapView.footprintTypeItems, Settings.Options.MapView.FootprintTypeValues, null, null, null);
+                        break;
+
+                    case ScreenKey.MapViewLabelData:
+                        SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
+                        IconListPreference informationLocationList = this.findPreference(Settings.PreferenceName.MapMarkerInfoLocation);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showInformationBackgroundSwitch);
+                        setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
+                        break;
+
+                    case ScreenKey.MapViewDisplay:
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
                         SwitchPreference showSearchSwitch = this.findPreference(Settings.PreferenceName.MapShowSearchList);
                         SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
@@ -198,47 +263,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
                         SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
                         SwitchTextPreference showOrbitalDirectionLimit = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirectionLimit);
-                        SwitchButtonPreference showSelectedFootprint = this.findPreference(Settings.PreferenceName.MapShowSelectedFootprint);
                         SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
-                        SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
-                        SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
-                        SliderPreference mapSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map);
-                        SliderPreference mapSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map);
                         SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
-                        IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
-                        IconListPreference mapTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map);
-                        IconListPreference footprintTypeList = this.findPreference(Settings.PreferenceName.MapFootprintType);
-                        IconListPreference informationLocationList = this.findPreference(Settings.PreferenceName.MapMarkerInfoLocation);
-
-                        //initialize values
-                        Settings.Options.MapView.initValues(context);
 
                         //setup displays
-                        setupSwitch(showCloudsGlobeSwitch);
-                        setupSwitch(showCloudsMapSwitch);
-                        setupSwitch(show3dPathsSwitch);
-                        setupSwitch(showSunlightSwitch);
-                        setupSwitch(allowRotationSwitch);
-                        setupSwitch(showFootprint);
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
-                        setupSwitch(showInformationBackgroundSwitch);
                         setupSwitch(showSearchSwitch);
                         setupSwitch(showZoomSwitch);
                         setupSwitch(showLabelsAlwaysSwitch);
                         setupSwitch(showShadowsSwitch);
                         setupSwitch(showStarsSwitch);
                         setupSwitchText(showOrbitalDirectionLimit);
-                        setupSwitchButton(showSelectedFootprint);
                         setupSwitchButton(showGridSwitch);
-                        setupSlider(globeSensitivitySlider);
-                        setupSlider(globeSpeedScaleSlider);
-                        setupSlider(mapSensitivitySlider);
-                        setupSlider(mapSpeedScaleSlider);
                         setupSlider(iconScaleSlider);
-                        setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
-                        setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsMapSwitch);
-                        setupList(footprintTypeList, Settings.Options.MapView.footprintTypeItems, Settings.Options.MapView.FootprintTypeValues, null, null, null);
-                        setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
                         break;
 
                     case ScreenKey.Updates:

@@ -3,7 +3,9 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.view.ViewGroup;
 import android.widget.CompoundButton;
+import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
@@ -44,7 +46,21 @@ public class SwitchPreference extends CustomPreference
     {
         super.onBindViewHolder(holder);
 
+        final CharSequence summary = this.getSummary();
+        final TextView summaryView;
+        final ViewGroup rootView;
+
+        //get displays
+        rootView = (ViewGroup)holder.itemView;
+        summaryView = rootView.findViewById(R.id.Switch_Preference_Summary);
         switchView = holder.itemView.findViewById(R.id.Switch_Preference_Switch);
+
+        //set displays
+        if(summary != null && summary.length() > 0)
+        {
+            summaryView.setText(summary);
+            summaryView.setVisibility(ViewGroup.VISIBLE);
+        }
         switchView.setText(this.getTitle());
         switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
         {

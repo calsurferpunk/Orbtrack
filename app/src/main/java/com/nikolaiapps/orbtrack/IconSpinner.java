@@ -42,6 +42,7 @@ public class IconSpinner extends AppCompatSpinner
         int icon3Color;
         int icon3TintColor;
         int icon3SelectedColor;
+        int icon3OnlyDp;
         boolean iconsUseThemeTint;
         int[] icon1Ids;
 
@@ -65,6 +66,7 @@ public class IconSpinner extends AppCompatSpinner
             subText = null;
             value = val;
             icon1Color = icon1SelectedColor = icon3Color = icon3TintColor = icon3SelectedColor = Color.TRANSPARENT;
+            icon3OnlyDp = LinearLayout.LayoutParams.WRAP_CONTENT;
             iconsUseThemeTint = false;
             icon1Ids = null;
         }
@@ -84,10 +86,16 @@ public class IconSpinner extends AppCompatSpinner
             this.icon3Id = icon3Id;
             this.iconsUseThemeTint = iconsUseThemeTint;
         }
+        public Item(int icon3Id, boolean iconsUseThemeTint, Object val)
+        {
+            this(icon3Id, iconsUseThemeTint, null, val);
+            this.icon3OnlyDp = 32;
+        }
         public Item(int icon3Id, int tintColor, Object val)
         {
             this(icon3Id, false, null, val);
             this.icon3TintColor = tintColor;
+            this.icon3OnlyDp = 32;
         }
         public Item(Drawable icon3, String txt, Object val, float rotateAngle)
         {
@@ -412,6 +420,7 @@ public class IconSpinner extends AppCompatSpinner
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
+            int sizePx;
             boolean isSelected = (position == selectedIndex);
             Drawable icon1;
             Drawable icon2;
@@ -497,9 +506,10 @@ public class IconSpinner extends AppCompatSpinner
                 }
                 if(usingIcon3Only)
                 {
-                    LayoutParams imageParams = itemImage2.getLayoutParams();
-                    imageParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                    imageParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                    LayoutParams imageParams = itemImage3.getLayoutParams();
+                    sizePx = (currentItem.icon3OnlyDp != LinearLayout.LayoutParams.WRAP_CONTENT ? (int)Globals.dpToPixels(context, currentItem.icon3OnlyDp) : LinearLayout.LayoutParams.WRAP_CONTENT);
+                    imageParams.width = sizePx;
+                    imageParams.height = sizePx;
                     itemImage3.setLayoutParams(imageParams);
                 }
                 itemText.setText(currentItem.text);

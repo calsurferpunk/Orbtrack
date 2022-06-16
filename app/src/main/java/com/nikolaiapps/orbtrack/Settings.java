@@ -316,12 +316,12 @@ public abstract class Settings
                     //init satellite icon items
                     satelliteIconItems = new IconSpinner.Item[]
                     {
-                        new IconSpinner.Item(R.drawable.orbital_satellite_black, true, null, SatelliteIcon.Black),
-                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_blue, false, null, SatelliteIcon.GrayBlue),
-                        new IconSpinner.Item(R.drawable.orbital_satellite_sputnik1, true, null, SatelliteIcon.Sputnik1),
-                        new IconSpinner.Item(R.drawable.orbital_satellite_sputnik2, true, null, SatelliteIcon.Sputnik2),
-                        new IconSpinner.Item(R.drawable.orbital_satellite_emoji, false, null, SatelliteIcon.Emoji),
-                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_orange, false, null, SatelliteIcon.GrayOrange)
+                        new IconSpinner.Item(R.drawable.orbital_satellite_black, true, SatelliteIcon.Black),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_blue, false, SatelliteIcon.GrayBlue),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_sputnik1, true, SatelliteIcon.Sputnik1),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_sputnik2, true, SatelliteIcon.Sputnik2),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_emoji, false, SatelliteIcon.Emoji),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_orange, false, SatelliteIcon.GrayOrange)
                     };
                 }
                 if(orbitalIconsItems == null || orbitalIconsItems.length == 0)

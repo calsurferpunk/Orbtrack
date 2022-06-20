@@ -1279,16 +1279,16 @@ public abstract class Selectable
             void itemSelected(int group, int page, int subPage, int position, boolean selected);
         }
 
+        //On pause listener
+        public interface OnPagePauseListener
+        {
+            void paused(ListFragment page);
+        }
+
         //On resume listener
         public interface OnPageResumeListener
         {
             void resumed(ListFragment page);
-        }
-
-        //On page destroy listener
-        public interface OnPageDestroyListener
-        {
-            void destroyed(ListFragment page);
         }
 
         //Sets action mode item properties
@@ -1315,8 +1315,8 @@ public abstract class Selectable
         private OnItemSelectedListener itemSelectedListener;
         private OnUpdateNeededListener updateNeededListener;
         private OnUpdatePageListener updatePageListener;
+        private OnPagePauseListener pagePauseListener;
         private OnPageResumeListener pageResumeListener;
-        private OnPageDestroyListener pageDestroyListener;
         private BroadcastReceiver updateReceiver;
 
         private Menu actionMenu;
@@ -1361,6 +1361,17 @@ public abstract class Selectable
         }
 
         @Override
+        public void onPause()
+        {
+            super.onPause();
+
+            if(pagePauseListener != null)
+            {
+                pagePauseListener.paused(this);
+            }
+        }
+
+        @Override
         public void onResume()
         {
             super.onResume();
@@ -1375,11 +1386,6 @@ public abstract class Selectable
         public void onDestroy()
         {
             Context context = this.getContext();
-
-            if(pageDestroyListener != null)
-            {
-                pageDestroyListener.destroyed(this);
-            }
 
             cancelEditMode();
 
@@ -2163,16 +2169,16 @@ public abstract class Selectable
             }
         }
 
+        //Sets on page paused listener
+        public void setOnPagePausedListener(OnPagePauseListener listener)
+        {
+            pagePauseListener = listener;
+        }
+
         //Sets on page resumed listener
         public void setOnPageResumeListener(OnPageResumeListener listener)
         {
             pageResumeListener = listener;
-        }
-
-        //Sets on page destroy listener
-        public void setOnPageDestroyListener(OnPageDestroyListener listener)
-        {
-            pageDestroyListener = listener;
         }
 
         //Sets on item checked listener

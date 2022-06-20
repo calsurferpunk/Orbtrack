@@ -376,7 +376,7 @@ public abstract class Calculate
                 case PageType.Intersection:
                     //get units
                     intersection = Globals.tryParseDouble(intersectionUnitText.getText().toString());
-                    if(intersection == Double.MAX_VALUE || intersection <= 0 || intersection > 300)
+                    if(intersection <= 0 || intersection > 300)
                     {
                         //invalid input
                         intersectionUnitText.setError(res.getString(R.string.text_invalid_unit));
@@ -391,7 +391,7 @@ public abstract class Calculate
 
                 case PageType.Passes:
                     elMin = Globals.tryParseDouble(elevationMinUnitText.getText().toString());
-                    if(elMin == Double.MAX_VALUE || elMin < -90 || elMin > 90)
+                    if(elMin < -90 || elMin > 90)
                     {
                         //invalid input
                         elevationMinUnitText.setError(res.getString(R.string.text_invalid_unit));
@@ -572,16 +572,31 @@ public abstract class Calculate
 
             //create page
             newPage.setOnPageSetListener(pageSetListener);
-            newPage.setOnPageDestroyListener(new Selectable.ListFragment.OnPageDestroyListener()
+            newPage.setOnPageResumeListener(new Selectable.ListFragment.OnPageResumeListener()
             {
                 @Override
-                public void destroyed(Selectable.ListFragment page)
+                public void resumed(Selectable.ListFragment page)
+                {
+                    int pageNum = page.getPageParam();
+
+                    //if saved inputs exist and within range
+                    if(savedInputs != null && pageNum >= 0 && pageNum < savedInputs.length)
+                    {
+                        //restore page input values
+                        setPageInputValues((Page)page, savedInputs[position]);
+                    }
+                }
+            });
+            newPage.setOnPagePausedListener(new Selectable.ListFragment.OnPagePauseListener()
+            {
+                @Override
+                public void paused(Selectable.ListFragment page)
                 {
                     int pageNum = page.getPageParam();
                     int subPageNum = page.getSubPageParam();
 
                     //if a valid page number
-                    if(pageNum >= 0 && pageNum < savedInputs.length)
+                    if(savedInputs != null && pageNum >= 0 && pageNum < savedInputs.length)
                     {
                         //handle based on sub page
                         if(subPageNum == Globals.SubPageType.Input)
@@ -1169,15 +1184,115 @@ public abstract class Calculate
         return(task);
     }
 
-    private static View onCreateView(final Page page, LayoutInflater inflater, ViewGroup container, Bundle saveInstanceState)
+    //Set page input values from saved state
+    private static void setPageInputValues(Page page, Bundle savedInstanceState)
     {
+        Context context = page.getContext();
+        int orbitalId = Integer.MAX_VALUE;
+        int orbitalId2 = Universe.IDs.Invalid;
+        int pageNumber = PageType.View;
+        int incrementType = IncrementType.Minutes;
         int incrementUnit = 10;
         double elMin = 0.0;
         double intersectionDegrees = 0.2;
-        final int pageNumber = saveInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
-        int orbitalId = Integer.MAX_VALUE;
-        int orbitalId2 = Universe.IDs.Invalid;
-        int incrementType = IncrementType.Minutes;
+        Calendar dateNow = Calendar.getInstance();
+        Calendar dateLater = Calendar.getInstance();
+        String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
+
+        //if there is a saved state
+        if(savedInstanceState != null)
+        {
+            try
+            {
+                //get values
+                orbitalId = savedInstanceState.getInt(ParamTypes.NoradId);
+                orbitalId2 = savedInstanceState.getInt(ParamTypes.NoradId2, orbitalId2);
+                pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
+                dateNow.setTimeInMillis(savedInstanceState.getLong(ParamTypes.StartDateMs));
+                dateLater.setTimeInMillis(savedInstanceState.getLong(ParamTypes.EndDateMs));
+                incrementUnit = savedInstanceState.getInt(ParamTypes.IncrementUnit);
+                incrementType = savedInstanceState.getInt(ParamTypes.IncrementType);
+                elMin = savedInstanceState.getDouble(ParamTypes.ElevationMinDegs, elMin);
+                intersectionDegrees = savedInstanceState.getDouble(ParamTypes.IntersectionDegs, intersectionDegrees);
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
+
+            //if orbital is valid
+            if(orbitalId != Integer.MAX_VALUE && page.orbitalList != null)
+            {
+                //set orbital
+                page.orbitalList.setSelectedValue(orbitalId);
+            }
+
+            //set dates and times
+            if(page.startDateText != null)
+            {
+                page.startDateText.setDate(dateNow);
+            }
+            if(page.startTimeText != null)
+            {
+                page.startTimeText.setTime(dateNow);
+            }
+            if(page.endDateText != null)
+            {
+                page.endDateText.setDate(dateLater);
+            }
+            if(page.endTimeText != null)
+            {
+                page.endTimeText.setTime(dateLater);
+            }
+
+            //handle based on page
+            switch(pageNumber)
+            {
+                case PageType.View:
+                case PageType.Coordinates:
+                    //if increment types are set
+                    if(incrementTypeArray != null)
+                    {
+                        //set unit displays
+                        if(page.viewUnitText != null)
+                        {
+                            page.viewUnitText.setText(String.valueOf(incrementUnit));
+                        }
+                        if(page.viewUnitList != null)
+                        {
+                            page.viewUnitList.setSelectedValue(incrementTypeArray[incrementType], incrementTypeArray[IncrementType.Minutes]);
+                        }
+                    }
+                    break;
+
+                case PageType.Intersection:
+                    //if orbital 2 is valid
+                    if(orbitalId2 != Universe.IDs.Invalid && page.orbital2List != null)
+                    {
+                        //set orbital 2
+                        page.orbital2List.setSelectedValue(orbitalId2);
+                    }
+                    //fall through
+
+                case PageType.Passes:
+                    //set unit displays
+                    if(page.elevationMinUnitText != null)
+                    {
+                        page.elevationMinUnitText.setText(String.valueOf(elMin));
+                    }
+                    if(page.intersectionUnitText != null)
+                    {
+                        page.intersectionUnitText.setText(String.valueOf(intersectionDegrees));
+                    }
+                    break;
+            }
+        }
+    }
+
+    //Create page
+    private static View onCreateView(final Page page, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    {
+        final int pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
         int elRowVisibility = View.VISIBLE;
         int viewRowVisibility = View.VISIBLE;
         int intersectionRowVisibility = View.VISIBLE;
@@ -1185,8 +1300,6 @@ public abstract class Calculate
         String text;
         Context context = page.getContext();
         Database.DatabaseSatellite[] orbitals;
-        Calendar dateNow = Calendar.getInstance();
-        Calendar dateLater = Calendar.getInstance();
         ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.calculate_view_layout, container, false);
         View viewRow = rootView.findViewById(R.id.Calculate_View_Row);
         View intersectionRow = rootView.findViewById(R.id.Calculate_Intersection_Row);
@@ -1212,29 +1325,8 @@ public abstract class Calculate
         //load objects
         orbitals = Database.getOrbitals(context);
 
-        try
-        {
-            //get values
-            orbitalId = saveInstanceState.getInt(ParamTypes.NoradId);
-            orbitalId2 = saveInstanceState.getInt(ParamTypes.NoradId2, orbitalId2);
-            dateNow.setTimeInMillis(saveInstanceState.getLong(ParamTypes.StartDateMs));
-            dateLater.setTimeInMillis(saveInstanceState.getLong(ParamTypes.EndDateMs));
-            incrementUnit = saveInstanceState.getInt(ParamTypes.IncrementUnit);
-            incrementType = saveInstanceState.getInt(ParamTypes.IncrementType);
-            elMin = saveInstanceState.getDouble(ParamTypes.ElevationMinDegs, elMin);
-            intersectionDegrees = saveInstanceState.getDouble(ParamTypes.IntersectionDegs, intersectionDegrees);
-        }
-        catch(Exception ex)
-        {
-            //do nothing
-        }
-
         //set orbital list items
         page.orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitals));
-        if(orbitalId != Integer.MAX_VALUE)
-        {
-            page.orbitalList.setSelectedValue(orbitalId);
-        }
         if(backgroundColorDrawable != null)
         {
             page.orbitalList.setPopupBackgroundDrawable(backgroundColorDrawable);
@@ -1243,10 +1335,6 @@ public abstract class Calculate
         {
             page.orbital2List.setAdapter(new IconSpinner.CustomAdapter(context, orbitals));
 
-            if(orbitalId2 != Universe.IDs.Invalid)
-            {
-                page.orbital2List.setSelectedValue(orbitalId2);
-            }
             if(backgroundColorDrawable != null)
             {
                 page.orbital2List.setPopupBackgroundDrawable(backgroundColorDrawable);
@@ -1256,12 +1344,6 @@ public abstract class Calculate
         text = (context != null ? (context.getString(R.string.title_orbital) + " 2") : "");
         orbital2ListTitle.setText(text);
         orbital2ListTitle.setVisibility(onIntersection ? View.VISIBLE : View.GONE);
-
-        //set date and time texts
-        page.startDateText.setDate(dateNow);
-        page.startTimeText.setTime(dateNow);
-        page.endDateText.setDate(dateLater);
-        page.endTimeText.setTime(dateLater);
 
         //setup date and time listeners
         page.startDateText.setOnDateSetListener(new DateInputView.OnDateSetListener()
@@ -1291,13 +1373,9 @@ public abstract class Calculate
                 //if increment types are set
                 if(incrementTypeArray != null)
                 {
-                    //set adapter
+                    //set unit adapter
                     incrementAdapter = new IconSpinner.CustomAdapter(context, incrementTypeArray);
-
-                    //set unit displays
-                    page.viewUnitText.setText(String.valueOf(incrementUnit));
                     page.viewUnitList.setAdapter(incrementAdapter);
-                    page.viewUnitList.setSelectedValue(incrementTypeArray[incrementType], incrementTypeArray[IncrementType.Minutes]);
                 }
 
                 //set visibility
@@ -1310,10 +1388,6 @@ public abstract class Calculate
                 //fall through
 
             case PageType.Intersection:
-                //set unit display
-                page.elevationMinUnitText.setText(String.valueOf(elMin));
-                page.intersectionUnitText.setText(String.valueOf(intersectionDegrees));
-
                 //set visibility
                 viewRowVisibility = View.GONE;
                 break;
@@ -1338,6 +1412,9 @@ public abstract class Calculate
                 }
             }
         });
+
+        //set page input values
+        setPageInputValues(page, savedInstanceState);
 
         //return view
         return(rootView);

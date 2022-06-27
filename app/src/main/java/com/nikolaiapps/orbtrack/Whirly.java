@@ -1220,8 +1220,8 @@ class Whirly
                 //draw border
                 footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
                 footprintPaint.setStyle(Paint.Style.STROKE);
-                footprintPaint.setStrokeWidth(40f);
-                footprintCanvas.drawCircle(800, 800, 780, footprintPaint);
+                footprintPaint.setStrokeWidth(10f);
+                footprintCanvas.drawCircle(800, 800, 795, footprintPaint);
             }
 
             //return image

@@ -757,6 +757,9 @@ class Whirly
         private ScreenMarker marker;
         private ScreenMarker titleMarker;
         private ScreenMarker infoMarker;
+        private final MarkerInfo markerInfo;
+        private final MarkerInfo titleMarkerInfo;
+        private final MarkerInfo infoMarkerInfo;
         private ComponentObject markerObj;
         private ComponentObject titleMarkerObj;
         private ComponentObject infoMarkerObj;
@@ -811,6 +814,15 @@ class Whirly
 
                 moveLocation(markerLocation.geo.latitude, markerLocation.geo.longitude, markerLocation.geo.altitudeKm);
             }
+
+            markerInfo = new MarkerInfo();
+            markerInfo.setDrawPriority(DrawPriority.BoardFlat + 100);
+
+            infoMarkerInfo = new MarkerInfo();
+            infoMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 200);
+
+            titleMarkerInfo = new MarkerInfo();
+            titleMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 300);
         }
 
         private InfoImageCreator getInfoCreator()
@@ -834,7 +846,7 @@ class Whirly
             remove();
 
             marker.image = image;
-            markerObj = controller.addScreenMarker(marker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+            markerObj = controller.addScreenMarker(marker, markerInfo, BaseController.ThreadMode.ThreadAny);
 
             add();
         }
@@ -967,17 +979,17 @@ class Whirly
             {
                 if(markerObj == null)
                 {
-                    markerObj = controller.addScreenMarker(marker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                    markerObj = controller.addScreenMarker(marker, markerInfo, BaseController.ThreadMode.ThreadAny);
                 }
                 if(infoMarkerObj == null && showInfo)
                 {
                     setInfoLocation();
-                    infoMarkerObj = controller.addScreenMarker(infoMarker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                    infoMarkerObj = controller.addScreenMarker(infoMarker, infoMarkerInfo, BaseController.ThreadMode.ThreadAny);
                 }
                 if(titleMarkerObj == null && !showInfo && alwaysShowTitle)
                 {
                     setInfoLocation();
-                    titleMarkerObj = controller.addScreenMarker(titleMarker, new MarkerInfo(), BaseController.ThreadMode.ThreadAny);
+                    titleMarkerObj = controller.addScreenMarker(titleMarker, titleMarkerInfo, BaseController.ThreadMode.ThreadAny);
                 }
             }
         }

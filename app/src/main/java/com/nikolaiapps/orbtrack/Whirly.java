@@ -1828,10 +1828,12 @@ class Whirly
             if(isMap())
             {
                 mapSettings.modelsHaveDepth = false;
+                mapSettings.trianglesHaveDepth = false;
             }
             else
             {
                 globeSettings.modelsHaveDepth = false;
+                globeSettings.trianglesHaveDepth = false;
             }
         }
 

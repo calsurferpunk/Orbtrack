@@ -2686,6 +2686,7 @@ public class UpdateService extends NotifyService
         boolean unknownSatellite = (satelliteNum < 0);
         boolean isGpData = inputString.contains(Calculations.GPParams.Name);
         String section;
+        String satelliteNumString = String.valueOf(satelliteNum);
         Resources res = this.getResources();
         Calendar defaultLaunchDate = Calendar.getInstance();
         ArrayList<Integer> satelliteNumbers = new ArrayList<>(0);
@@ -2703,13 +2704,9 @@ public class UpdateService extends NotifyService
             //try to get all new satellites
             gpData = Globals.getJsonObjects(inputString);
             newSatellites = Calculations.loadSatellites(gpData);
-        }
 
-        //if no satellite number specified
-        if(unknownSatellite)
-        {
-            //if gp data
-            if(isGpData)
+            //if no satellite number specified
+            if(unknownSatellite)
             {
                 //go through each gp
                 for(index = 0; index < gpData.length; index++)
@@ -2770,41 +2767,51 @@ public class UpdateService extends NotifyService
             }
             else
             {
-                //if starts with "0 "
-                if(inputString.startsWith("0 "))
-                {
-                    //remove it
-                    inputString = inputString.substring(2);
-                    inputLength = inputString.length();
-                }
+                //add satellite number and name
+                satelliteNumbers.add(satelliteNum);
+                satelliteNames.add(satelliteName);
+            }
+        }
+        else
+        {
+            //if starts with "0 "
+            if(inputString.startsWith("0 "))
+            {
+                //remove it
+                inputString = inputString.substring(2);
+                inputLength = inputString.length();
+            }
 
-                //while there are more input lines
-                inputOffset = 0;
-                while(inputOffset < inputLength)
+            //while there are more input lines
+            inputOffset = 0;
+            while(inputOffset < inputLength)
+            {
+                //get starting line 1 index
+                line1Index = inputString.indexOf("1 ", inputOffset);
+                if(line1Index >= 0 && line1Index + TLE_LINE_LENGTH < inputLength)
                 {
-                    //get starting line 1 index
-                    line1Index = inputString.indexOf("1 ", inputOffset);
-                    if(line1Index >= 0 && line1Index + TLE_LINE_LENGTH < inputLength)
+                    //if get starting line 2 index
+                    line2Index = inputString.indexOf("2 ", line1Index + TLE_LINE_LENGTH);
+                    if(line2Index > line1Index && line2Index + TLE_LINE_LENGTH <= inputLength)
                     {
-                        //if get starting line 2 index
-                        line2Index = inputString.indexOf("2 ", line1Index + TLE_LINE_LENGTH);
-                        if(line2Index > line1Index && line2Index + TLE_LINE_LENGTH <= inputLength)
+                        //get lines and current number string
+                        String currentLine1 = inputString.substring(line1Index, line1Index + TLE_LINE_LENGTH).trim();
+                        String currentLine2 = inputString.substring(line2Index, line2Index + TLE_LINE_LENGTH).trim();
+                        String currentNumString = inputString.substring(line1Index + 2, line1Index + 7).trim();
+
+                        //if -unknown satellite or satellite number matches- and -line 1 and 2 indexes are followed by the same number-
+                        if((unknownSatellite || satelliteNumString.equals(currentNumString)) && inputString.substring(line1Index + 2, line1Index + 2 + currentNumString.length()).equals(inputString.substring(line2Index + 2, line2Index + 2 + currentNumString.length())))
                         {
-                            //get lines and current number string
-                            String currentLine1 = inputString.substring(line1Index, line1Index + TLE_LINE_LENGTH).trim();
-                            String currentLine2 = inputString.substring(line2Index, line2Index + TLE_LINE_LENGTH).trim();
-                            String currentNumString = inputString.substring(line1Index + 2, line1Index + 7).trim();
-
-                            //if line 1 and 2 indexes are followed by the same number
-                            if(inputString.substring(line1Index + 2, line1Index + 2 + currentNumString.length()).equals(inputString.substring(line2Index + 2, line2Index + 2 + currentNumString.length())))
+                            //if satellite number is valid
+                            currentNum = Globals.tryParseInt(currentNumString);
+                            if(currentNum < Integer.MAX_VALUE)
                             {
-                                //if satellite number is valid
-                                currentNum = Globals.tryParseInt(currentNumString);
-                                if(currentNum < Integer.MAX_VALUE)
-                                {
-                                    //add satellite number to list
-                                    satelliteNumbers.add(currentNum);
+                                //add satellite number to list
+                                satelliteNumbers.add(currentNum);
 
+                                //if unknown satellite
+                                if(unknownSatellite)
+                                {
                                     //try to get name
                                     satelliteName = Globals.getUnknownString(this);
                                     nameEndIndex = line1Index - 2;
@@ -2824,30 +2831,27 @@ public class UpdateService extends NotifyService
                                             satelliteName = inputString.substring(nameStartIndex, nameEndIndex).trim();
                                         }
                                     }
-                                    satelliteNames.add(satelliteName);
-
-                                    //add lines
-                                    satelliteLines.add(currentLine1 + "\n" + currentLine2);
-
-                                    //continue
-                                    inputOffset = line2Index + TLE_LINE_LENGTH;
                                 }
-                                else
-                                {
-                                    //done
-                                    inputOffset = inputString.length();
-                                }
+
+                                //add satellite name to list
+                                satelliteNames.add(satelliteName);
+
+                                //add lines
+                                satelliteLines.add(currentLine1 + "\n" + currentLine2);
+
+                                //continue
+                                inputOffset = line2Index + TLE_LINE_LENGTH;
                             }
                             else
                             {
-                                //line 1 index was not really line 1, so skip
-                                inputOffset = line1Index + 2;
+                                //done
+                                inputOffset = inputString.length();
                             }
                         }
                         else
                         {
-                            //done
-                            inputOffset = inputString.length();
+                            //line 1 index was not really line 1, so skip
+                            inputOffset = line1Index + 2;
                         }
                     }
                     else
@@ -2856,13 +2860,12 @@ public class UpdateService extends NotifyService
                         inputOffset = inputString.length();
                     }
                 }
+                else
+                {
+                    //done
+                    inputOffset = inputString.length();
+                }
             }
-        }
-        else
-        {
-            //add satellite number and name
-            satelliteNumbers.add(satelliteNum);
-            satelliteNames.add(satelliteName);
         }
 
         //update section and count

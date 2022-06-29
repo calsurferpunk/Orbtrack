@@ -260,7 +260,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         Resources res = this.getResources();
         String description = "(" + res.getString(R.string.title_space) + ")";
         String numberString = res.getString(R.string.title_number);
-        String satelliteString = res.getQuantityString(R.plurals.text_satellites, 1);
+        String satelliteString = res.getQuantityString(R.plurals.title_satellites, 1);
 
         switch(lineNumber)
         {

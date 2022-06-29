@@ -13,10 +13,6 @@
         <item quantity="one">%d file</item>
         <item quantity="other">%d files</item>
     </plurals>
-    <plurals name="text_satellites">
-        <item quantity="one">satellite</item>
-        <item quantity="other">satellites</item>
-    </plurals>
     <plurals name="text_weeks">
         <item quantity="one">%d week</item>
         <item quantity="other">%d weeks</item>

@@ -818,7 +818,7 @@ public abstract class Orbitals
         {
             int count = selectedItems.size();
             Resources res = this.getResources();
-            String items = res.getQuantityString(R.plurals.text_satellites, count) + " (" + count + ")";
+            String items = res.getQuantityString(R.plurals.title_satellites, count) + " (" + count + ")";
 
             //show dialog
             Globals.showConfirmDialog(this.getContext(), res.getString(R.string.title_update_selected) + " " + items + "?", null, res.getString(R.string.title_ok), res.getString(R.string.title_cancel), true, new DialogInterface.OnClickListener()

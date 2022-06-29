@@ -696,17 +696,26 @@ public abstract class Orbitals
         }
 
         @Override
-        protected boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
+        protected boolean setupActionModeItems(MenuItem all, MenuItem none, MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
         {
             boolean onEditSatellitesNoUpdate = (inEditMode && pageNum == PageType.Satellites && !UpdateService.updatingSatellites());
 
             //set visibility
+            all.setVisible(onEditSatellitesNoUpdate);
+            none.setVisible(onEditSatellitesNoUpdate);
             edit.setVisible(false);
             delete.setVisible(onEditSatellitesNoUpdate);
             save.setVisible(onEditSatellitesNoUpdate);
             sync.setVisible(onEditSatellitesNoUpdate);
 
             return(true);
+        }
+
+        @Override
+        protected void onActionModeSelect(boolean all)
+        {
+            //select/deselect items
+            setItemsSelected(all);
         }
 
         @Override

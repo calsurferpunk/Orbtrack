@@ -1292,7 +1292,10 @@ public abstract class Selectable
         }
 
         //Sets action mode item properties
-        protected abstract boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync);
+        protected abstract boolean setupActionModeItems(MenuItem all, MenuItem none, MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync);
+
+        //Handles action mode select
+        protected abstract void onActionModeSelect(boolean all);
 
         //Handles action mode delete
         protected abstract void onActionModeDelete();
@@ -1547,7 +1550,7 @@ public abstract class Selectable
         @Override
         public boolean onPrepareActionMode(ActionMode mode, Menu menu)
         {
-            return(setupActionModeItems(menu.findItem(R.id.menu_edit), menu.findItem(R.id.menu_delete), menu.findItem(R.id.menu_save), menu.findItem(R.id.menu_update)));
+            return(setupActionModeItems(menu.findItem(R.id.menu_all), menu.findItem(R.id.menu_none), menu.findItem(R.id.menu_edit), menu.findItem(R.id.menu_delete), menu.findItem(R.id.menu_save), menu.findItem(R.id.menu_update)));
         }
 
         //Stops the play timer
@@ -1574,9 +1577,14 @@ public abstract class Selectable
         public boolean onActionItemClicked(ActionMode mode, MenuItem item)
         {
             int id = item.getItemId();
+            boolean isAll = (id == R.id.menu_all);
 
             //handle item
-            if(id == R.id.menu_delete)
+            if(isAll || id == R.id.menu_none)
+            {
+                onActionModeSelect(isAll);
+            }
+            else if(id == R.id.menu_delete)
             {
                 onActionModeDelete();
             }

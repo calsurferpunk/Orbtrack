@@ -1,31 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+<menu xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" tools:ignore="AlwaysShowAction">
+    <item android:id="@+id/menu_all"
+        android:title="@string/title_all"
+        android:icon="@drawable/ic_check_box_white"
+        android:orderInCategory="10"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item android:id="@+id/menu_none"
+        android:title="@string/title_none"
+        android:icon="@drawable/ic_check_none_box_white"
+        android:orderInCategory="20"
+        app:showAsAction="always"
+        android:visible="false"/>
+
     <item android:id="@+id/menu_edit"
         android:title="@string/title_edit"
         android:icon="@drawable/ic_mode_edit_white"
-        android:orderInCategory="10"
+        android:orderInCategory="30"
         app:showAsAction="ifRoom"
         android:visible="false"/>
 
     <item android:id="@+id/menu_save"
         android:title="@string/title_save"
         android:icon="@drawable/ic_save_white"
-        android:orderInCategory="20"
-        app:showAsAction="ifRoom"
+        android:orderInCategory="40"
+        app:showAsAction="always"
         android:visible="false"/>
 
     <item android:id="@+id/menu_delete"
           android:title="@string/title_delete"
           android:icon="@drawable/ic_delete_white"
-          android:orderInCategory="30"
-          app:showAsAction="ifRoom"
+          android:orderInCategory="50"
+          app:showAsAction="always"
           android:visible="false"/>
 
     <item android:id="@+id/menu_update"
           android:title="@string/title_update"
           android:icon="@drawable/ic_sync_white"
-          android:orderInCategory="40"
-          app:showAsAction="ifRoom"
+          android:orderInCategory="60"
+          app:showAsAction="always"
           android:visible="false"/>
 </menu>

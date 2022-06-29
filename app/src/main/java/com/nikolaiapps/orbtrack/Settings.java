@@ -1657,13 +1657,15 @@ public abstract class Settings
         }
 
         @Override
-        protected boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
+        protected boolean setupActionModeItems(MenuItem all, MenuItem none, MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
         {
             boolean onLocations = (pageNum == PageType.Locations);
             boolean onNotifications = (pageNum == PageType.Notifications);
             boolean onAccounts = isOnAccounts();
 
             //set visibility
+            all.setVisible(false);
+            none.setVisible(false);
             edit.setVisible(false);
             delete.setVisible(inEditMode && (onLocations || onNotifications || onAccounts));
             save.setVisible(false);
@@ -1672,6 +1674,9 @@ public abstract class Settings
             //handled
             return(true);
         }
+
+        @Override
+        protected void onActionModeSelect(boolean all) {}
 
         @Override
         protected void onActionModeDelete()

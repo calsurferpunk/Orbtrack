@@ -3538,10 +3538,13 @@ public abstract class Current
         }
 
         @Override
-        protected boolean setupActionModeItems(MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
+        protected boolean setupActionModeItems(MenuItem all, MenuItem none, MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync)
         {
             return(false);
         }
+
+        @Override
+        protected void onActionModeSelect(boolean all) {}
 
         @Override
         protected void onActionModeDelete() {}

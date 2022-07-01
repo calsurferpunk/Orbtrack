@@ -24,6 +24,7 @@ public class AddSelectListAdapter extends BaseAdapter
         static final byte AddAccount = 5;
         static final byte Filter = 6;
         static final byte Settings = 7;
+        static final byte Edit = 8;
     }
 
     static abstract class SatelliteSourceType
@@ -64,6 +65,13 @@ public class AddSelectListAdapter extends BaseAdapter
     {
         static final int Settings = 0;
         static final int Visibility = 1;
+    }
+
+    static abstract class EditType
+    {
+        static final int Color = 0;
+        static final int Visibility = 1;
+        static final int Details = 2;
     }
 
     public interface OnItemClickListener
@@ -132,6 +140,10 @@ public class AddSelectListAdapter extends BaseAdapter
                         selections[0] = res.getString(R.string.title_settings);
                         break;
                 }
+                break;
+
+            case SelectType.Edit:
+                selections = new String[]{res.getString(R.string.title_color), res.getString(R.string.title_visible), res.getString(R.string.title_details)};
                 break;
 
             default:
@@ -339,6 +351,24 @@ public class AddSelectListAdapter extends BaseAdapter
 
                     case SettingsType.Visibility:
                         imageId = R.drawable.ic_remove_red_eye_white;
+                        break;
+                }
+                break;
+
+            case SelectType.Edit:
+                switch(position)
+                {
+                    case EditType.Color:
+                        imageId = R.drawable.ic_color_white;
+                        break;
+
+                    case EditType.Visibility:
+                        imageId = R.drawable.ic_remove_red_eye_white;
+                        break;
+
+                    default:
+                    case EditType.Details:
+                        imageId = R.drawable.ic_list_white;
                         break;
                 }
                 break;

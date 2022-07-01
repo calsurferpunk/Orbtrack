@@ -36,6 +36,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -446,7 +447,7 @@ public abstract class Orbitals
                     itemHolder.tleAgeLayout.setVisibility(View.GONE);
                 }
                 itemHolder.colorButton.setBackgroundColor(currentItem.color);
-                itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(currentItem.isVisible));
+                itemHolder.visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, currentItem.isVisible));
 
                 //set events
                 itemHolder.colorButton.setOnClickListener(new View.OnClickListener()
@@ -498,7 +499,7 @@ public abstract class Orbitals
 
                         //update visibility and save orbital in database
                         currentItem.isVisible = !currentItem.isVisible;
-                        itemHolder.visibleButton.setBackgroundDrawable(getVisibleIcon(currentItem.isVisible));
+                        itemHolder.visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, currentItem.isVisible));
                         Database.saveSatelliteVisible(currentContext, noradId, currentItem.isVisible);
 
                         //if item is visible again
@@ -521,11 +522,6 @@ public abstract class Orbitals
 
             //set background
             setItemBackground(itemHolder.itemView, currentItem.isSelected);
-        }
-
-        private Drawable getVisibleIcon(boolean isVisible)
-        {
-            return(Globals.getDrawable(currentContext, (isVisible ? R.drawable.ic_remove_red_eye_white : R.drawable.ic_visibility_off_white), true));
         }
     }
 
@@ -772,7 +768,7 @@ public abstract class Orbitals
                         new EditValuesDialog(activity, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
-                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                             {
                                 //remember file source
                                 int fileSourceType = Globals.getFileSource(activity, list2Value);
@@ -1425,6 +1421,7 @@ public abstract class Orbitals
     {
         final Resources res = context.getResources();
 
+        //show SatelliteSourceType dialog
         Globals.showSelectDialog(context, res.getString(R.string.title_select_source), AddSelectListAdapter.SelectType.SatelliteSource, new AddSelectListAdapter.OnItemClickListener()
         {
             @Override
@@ -1438,6 +1435,7 @@ public abstract class Orbitals
                         break;
 
                     case AddSelectListAdapter.SatelliteSourceType.File:
+                        //show FileSourceType dialog
                         Globals.showSelectDialog(context, res.getString(R.string.title_file_select_source), AddSelectListAdapter.SelectType.FileSource, new AddSelectListAdapter.OnItemClickListener()
                         {
                             @Override
@@ -1475,7 +1473,7 @@ public abstract class Orbitals
     }
 
     //Shows an edit orbital dialog
-    private static void showEditDialog(final Activity context, final ViewGroup container, final Selectable.ListFragmentAdapter adapter, ArrayList<Item> selectedItems, final ArrayList<Database.DatabaseSatellite> orbitals, final EditValuesDialog.OnDismissListener dismissListener)
+    private static void showEditOrbitalDialog(final Activity context, final ViewGroup container, final Selectable.ListFragmentAdapter adapter, ArrayList<Item> selectedItems, final ArrayList<Database.DatabaseSatellite> orbitals, final EditValuesDialog.OnDismissListener dismissListener)
     {
         int index;
         String unknownOwnerName = null;
@@ -1533,7 +1531,7 @@ public abstract class Orbitals
         new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
         {
             @Override
-            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
             {
                 String ownerCode = ownerCodes[ownerValuesList.indexOf(list2Value)];
 
@@ -1580,10 +1578,12 @@ public abstract class Orbitals
             }
         }).getOrbital(res.getString(R.string.title_edit), ids, res.getString(R.string.title_name), nameValues, res.getString(R.string.title_owner), ownerValues, ownerCodes, defaultOwnerValues, res.getString(R.string.title_launch_date), dateValues);
     }
-    public static void showEditDialog(Activity context, SwipeStateViewPager pager, Selectable.ListFragmentAdapter adapter)
+
+    //Shows an edit details dialog
+    private static void showEditDetailsDialog(Activity context, SwipeStateViewPager pager, Selectable.ListFragmentAdapter adapter)
     {
         int index;
-        ArrayList<Selectable.ListItem> selectedListItems = adapter.getSelectedItems(pager, Orbitals.PageType.Satellites);
+        ArrayList<Selectable.ListItem> selectedListItems = adapter.getSelectedItems(pager, PageType.Satellites);
         ArrayList<Item> selectedItems = new ArrayList<>(selectedListItems.size());
 
         //go through each item
@@ -1594,7 +1594,139 @@ public abstract class Orbitals
         }
 
         //show dialog
-        showEditDialog(context, pager, adapter, selectedItems, null, null);
+        showEditOrbitalDialog(context, pager, adapter, selectedItems, null, null);
+    }
+
+    //Shows an edit dialog
+    public static void showEditDialog(Activity context, SwipeStateViewPager pager, Selectable.ListFragmentAdapter adapter)
+    {
+        Resources res = context.getResources();
+        ArrayList<Selectable.ListItem> selectedItems = adapter.getSelectedItems(pager, PageType.Satellites);
+        int selectedItemCount = selectedItems.size();
+        String editString = res.getString(R.string.title_edit);
+
+        //if less than 2 selected items
+        if(selectedItemCount < 2)
+        {
+            //show edit details dialog
+            showEditDetailsDialog(context, pager, adapter);
+        }
+        else
+        {
+            //show EditType dialog
+            Globals.showSelectDialog(context, res.getString(R.string.title_edit), AddSelectListAdapter.SelectType.Edit, new AddSelectListAdapter.OnItemClickListener()
+            {
+                @Override
+                public void onItemClick(int which)
+                {
+                    //create dismiss listener
+                    EditValuesDialog.OnDismissListener dismissListener = new EditValuesDialog.OnDismissListener()
+                    {
+                        @Override
+                        public void onDismiss(EditValuesDialog dialog, int saveCount)
+                        {
+                            //if any were saved
+                            if(saveCount > 0)
+                            {
+                                //need update
+                                adapter.notifyDataSetChanged();
+                            }
+
+                            //end edit mode
+                            adapter.cancelEditMode(pager);
+                        }
+                    };
+
+                    //handle based on edit type
+                    switch(which)
+                    {
+                        case AddSelectListAdapter.EditType.Color:
+                            //sort items to keep in list order
+                            Collections.sort(selectedItems, new Selectable.ListItem.Comparer());
+
+                            //get colors using first and last selected item colors
+                            new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
+                            {
+                                @Override
+                                public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
+                                {
+                                    boolean isTransition = (color2 != Integer.MAX_VALUE);
+                                    double redDelta = 0;
+                                    double greenDelta = 0;
+                                    double blueDelta = 0;
+                                    double currentRed = 0;
+                                    double currentGreen = 0;
+                                    double currentBlue = 0;
+
+                                    //if a transition
+                                    if(isTransition)
+                                    {
+                                        //get color component and deltas
+                                        currentRed = Color.red(color1);
+                                        currentGreen = Color.green(color1);
+                                        currentBlue = Color.blue(color1);
+                                        redDelta = (Color.red(color2) - Color.red(color1)) / (selectedItemCount - 1.0);
+                                        greenDelta = (Color.green(color2) - Color.green(color1)) / (selectedItemCount - 1.0);
+                                        blueDelta = (Color.blue(color2) - Color.blue(color1)) / (selectedItemCount - 1.0);
+                                    }
+
+                                    //go through each selected item
+                                    for(Selectable.ListItem currentItem : selectedItems)
+                                    {
+                                        //save color
+                                        Database.saveSatellitePathColor(context, currentItem.id, (isTransition ? Color.rgb((int)currentRed, (int)currentGreen, (int)currentBlue) : color1));
+
+                                        //if a transition
+                                        if(isTransition)
+                                        {
+                                            //update color components
+                                            currentRed += redDelta;
+                                            currentGreen += greenDelta;
+                                            currentBlue += blueDelta;
+                                        }
+                                    }
+                                }
+                            }, dismissListener).getEditColors(editString + " " + res.getString(R.string.title_colors), ((Item)selectedItems.get(0)).color, ((Item)(selectedItems.get(selectedItemCount - 1))).color);
+                            break;
+
+                        case AddSelectListAdapter.EditType.Visibility:
+                            int visibleCount = 0;
+
+                            //get visible count
+                            for(Selectable.ListItem currentItem : selectedItems)
+                            {
+                                //if current item is visible
+                                if(((Item)currentItem).isVisible)
+                                {
+                                    //add to count
+                                    visibleCount++;
+                                }
+                            }
+
+                            //get visible
+                            new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
+                            {
+                                @Override
+                                public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
+                                {
+                                    //go through each selected item
+                                    for(Selectable.ListItem currentItem : selectedItems)
+                                    {
+                                        //save visibility
+                                        Database.saveSatelliteVisible(context, currentItem.id, visible);
+                                    }
+                                }
+                            }, dismissListener).getVisible(editString + " " + res.getString(R.string.title_visible), visibleCount >= (int)Math.ceil(selectedItemCount / 2.0));
+                            break;
+
+                        case AddSelectListAdapter.EditType.Details:
+                            //show edit details dialog
+                            showEditDetailsDialog(context, pager, adapter);
+                            break;
+                    }
+                }
+            });
+        }
     }
 
     //Shows a load orbital dialog
@@ -1611,6 +1743,6 @@ public abstract class Orbitals
         }
 
         //show dialog
-        showEditDialog(context, container, adapter, selectedItems, loadOrbitals, dismissListener);
+        showEditOrbitalDialog(context, container, adapter, selectedItems, loadOrbitals, dismissListener);
     }
 }

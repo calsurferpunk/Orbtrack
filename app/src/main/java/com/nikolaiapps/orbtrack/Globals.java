@@ -424,7 +424,7 @@ public abstract class Globals
                         new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
-                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                             {
                                 int index;
 
@@ -2988,6 +2988,12 @@ public abstract class Globals
         rotatedImage = (haveImage && width > 0 && height > 0 ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
 
         return(rotatedImage != null ? Bitmap.createBitmap(rotatedImage, (rotatedImage.getWidth() - width) / 2, (rotatedImage.getHeight() - height) / 2, width, height) : null);
+    }
+
+    //Get visible icon for given state
+    public static Drawable getVisibleIcon(Context context, boolean isVisible)
+    {
+        return(Globals.getDrawable(context, (isVisible ? R.drawable.ic_remove_red_eye_white : R.drawable.ic_visibility_off_white), true));
     }
 
     //Gets an orbital icon ID

@@ -47,6 +47,7 @@ import android.widget.TextView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -63,6 +64,15 @@ public abstract class Selectable
     //Select list item
     protected static class ListItem
     {
+        public static class Comparer implements Comparator<ListItem>
+        {
+            @Override
+            public int compare(ListItem value1, ListItem value2)
+            {
+                return(Globals.intCompare(value1.listIndex, value2.listIndex));
+            }
+        }
+
         public int id;
         public int listIndex;
         public final boolean canEdit;

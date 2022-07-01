@@ -291,6 +291,7 @@
     <string name="title_closest_intersection_delta">Delta Intersección Más Cercana</string>
     <string name="title_code">Código</string>
     <string name="title_color">Color</string>
+    <string name="title_colors">Colores</string>
     <string name="title_color_theme">Tema Color</string>
     <string name="title_combine_lists">Combinar Listas</string>
     <string name="title_compass_align">Alinear Brújula</string>
@@ -310,6 +311,7 @@
     <string name="title_delete">Borrar</string>
     <string name="title_deleted">Eliminado</string>
     <string name="title_deny">Negar</string>
+    <string name="title_details">Detalles</string>
     <string name="title_dismiss">Despedir</string>
     <string name="title_display">Monitor</string>
     <string name="title_downloads">Descargas</string>
@@ -323,6 +325,7 @@
     <string name="title_elevation">Elevación</string>
     <string name="title_elevation_minimum">Elevación Mínima</string>
     <string name="title_end">Fin</string>
+    <string name="title_end_color">Color Final</string>
     <string name="title_end_date">Fecha Fin</string>
     <string name="title_end_time">Hora Fin</string>
     <string name="title_epoch_day">Epoch Día</string>
@@ -525,6 +528,7 @@
     <string name="title_set_icon_scale">Establecer Escala Iconos</string>
     <string name="title_settings">Configuraciones</string>
     <string name="title_shared">Compartido</string>
+    <string name="title_shared_color">Color Compartido</string>
     <string name="title_share_translations_online">Compartir Traducciones en Línea</string>
     <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
     <string name="title_show_background">Mostrar Fondo</string>
@@ -553,6 +557,7 @@
     <string name="title_square">Cuadrado</string>
     <string name="title_stars">Estrellas</string>
     <string name="title_start">Comienzo</string>
+    <string name="title_start_color">Color Inicio</string>
     <string name="title_start_date">Fecha Inicio</string>
     <string name="title_start_time">Hora Inicio</string>
     <string name="title_status">Estado</string>
@@ -574,6 +579,7 @@
     <string name="title_tle_age">Edad TLE</string>
     <string name="title_today">Hoy</string>
     <string name="title_top">Superior</string>
+    <string name="title_transition">Transición</string>
     <string name="title_translate_information">Traducir Información</string>
     <string name="title_transparent">Transparente</string>
     <string name="title_travel">Viajar</string>

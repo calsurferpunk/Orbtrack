@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatButton;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -33,11 +34,13 @@ public class EditValuesDialog
         static final byte Folder = 2;
         static final byte Login = 3;
         static final byte SortBy = 4;
+        static final byte EditColors = 5;
+        static final byte Visible = 6;
     }
 
     public interface OnSaveListener
     {
-        void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue);
+        void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible);
     }
 
     public interface OnDismissListener
@@ -55,6 +58,9 @@ public class EditValuesDialog
     private int currentIndex;
     private boolean isLogin;
     private boolean isSortBy;
+    private boolean isVisible;
+    private boolean isEditColors;
+    private boolean visibleValue;
     private String title;
     private String itemTextValueTitle;
     private String itemTextValue2Title;
@@ -78,12 +84,14 @@ public class EditValuesDialog
     private TextView editValueList2Title;
     private IconSpinner editValueList2;
     private DateInputView editDate;
+    private IconSpinner editColorList;
     private Button positiveButton;
     private AlertDialog editDialog;
     private final OnSaveListener saveListener;
     private OnDismissListener dismissListener;
     private final OnCancelListener cancelListener;
     private int[] itemIDs;
+    private final int[] selectedColors;
     private double[] itemNumberValues;
     private double[] itemNumber2Values;
     private double[] itemNumber3Values;
@@ -102,6 +110,7 @@ public class EditValuesDialog
     {
         currentIndex = savedCount = 0;
         currentContext = context;
+        visibleValue = false;
         title = null;
         itemTextValueTitle = null;
         itemTextValue2Title = null;
@@ -109,6 +118,7 @@ public class EditValuesDialog
         saveListener = sListener;
         dismissListener = dListener;
         cancelListener = cListener;
+        selectedColors = new int[]{Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
     }
     public EditValuesDialog(Activity context, OnSaveListener sListener, OnDismissListener dListener)
     {
@@ -138,6 +148,7 @@ public class EditValuesDialog
                 Editable text;
                 boolean ignoreClick = false;
                 boolean isSpaceTrack = (isLogin && (list2Value == null || list2Value.equals(Settings.Options.Sources.SpaceTrack)));
+                boolean isTransition = (isEditColors && (boolean)editColorList.getSelectedValue(false));
                 boolean usingNumberValues = (itemNumberValues != null);
                 double number = (usingNumberValues ? Globals.tryParseDouble(editNumberText.getText().toString()) : Double.MAX_VALUE);
                 double number2 = (usingNumberValues ? Globals.tryParseDouble(editNumber2Text.getText().toString()) : Double.MAX_VALUE);
@@ -152,14 +163,14 @@ public class EditValuesDialog
                         text = editValue2Text.getText();
                         text2Value = (text != null ? text.toString().trim() : "");
 
-                        //if -sort by- or -text exists and -not login or not space-track or text 2 exists--
-                        if(isSortBy || ((!textValue.equals("") || (isLogin && !isSpaceTrack)) && (!isLogin || !isSpaceTrack || !text2Value.equals(""))))
+                        //if -sort by- or -edit colors- or -text exists and -not login or not space-track or text 2 exists--
+                        if(isSortBy || isEditColors || isVisible || ((!textValue.equals("") || (isLogin && !isSpaceTrack)) && (!isLogin || !isSpaceTrack || !text2Value.equals(""))))
                         {
                             //save changes
                             savedCount++;
                             if(saveListener != null)
                             {
-                                saveListener.onSave(EditValuesDialog.this, currentIndex, (itemIDs != null && currentIndex < itemIDs.length ? itemIDs[currentIndex] : -1), textValue, text2Value, number, number2, number3, (itemListValues != null ? editValueList.getSelectedValue("").toString() : null), (itemList2Values != null ? editValueList2.getSelectedValue("").toString() : null), (itemDateValues != null ? editDate.getDate().getTimeInMillis() : -1));
+                                saveListener.onSave(EditValuesDialog.this, currentIndex, (itemIDs != null && currentIndex < itemIDs.length ? itemIDs[currentIndex] : -1), textValue, text2Value, number, number2, number3, (itemListValues != null ? editValueList.getSelectedValue("").toString() : null), (itemList2Values != null ? editValueList2.getSelectedValue("").toString() : null), (itemDateValues != null ? editDate.getDate().getTimeInMillis() : -1), (isEditColors ? selectedColors[isTransition ? 1 : 0] : Integer.MAX_VALUE), (isEditColors && isTransition ? selectedColors[2] : Integer.MAX_VALUE), visibleValue);
                             }
                         }
                         else
@@ -204,6 +215,40 @@ public class EditValuesDialog
                 }
             }
         };
+    }
+
+    //Creates aan on color button click listener
+    private View.OnClickListener createOnColorButtonClickListener(Context context, String title, int selectedColorIndex)
+    {
+        //if an invalid index
+        if(selectedColorIndex < 0 || selectedColorIndex >= selectedColors.length)
+        {
+            //error
+            return(null);
+        }
+
+        //return listener
+        return(new View.OnClickListener()
+        {
+            @Override
+            public void onClick(View view)
+            {
+                //show color dialog
+                ChooseColorDialog colorDialog = new ChooseColorDialog(context, selectedColors[selectedColorIndex]);
+                colorDialog.setTitle(title);
+                colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
+                {
+                    @Override
+                    public void onColorSelected(int color)
+                    {
+                        //update selected color and display
+                        selectedColors[selectedColorIndex] = color;
+                        view.setBackgroundColor(color);
+                    }
+                });
+                colorDialog.show(context);
+            }
+        });
     }
 
     //Updates displays
@@ -305,7 +350,7 @@ public class EditValuesDialog
     }
 
     //Show the dialog
-    private void show(byte editType, String titleText, int[] ids, @Nullable String textValueTitle, String[] textValues, @Nullable String textValue2Title, @Nullable String[] text2Values, @Nullable String[] textRowValues, @Nullable String[] textRow2Values, @Nullable String[] numberTitles, @Nullable double[] numberValues, @Nullable double[] number2Values, @Nullable double[] number3Values, String[] listValues, String[] defaultListValue, String list2Title, int[] list2IconIds, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues)
+    private void show(byte editType, String titleText, int[] ids, @Nullable String textValueTitle, String[] textValues, @Nullable String textValue2Title, @Nullable String[] text2Values, @Nullable String[] textRowValues, @Nullable String[] textRow2Values, @Nullable String[] numberTitles, @Nullable double[] numberValues, @Nullable double[] number2Values, @Nullable double[] number3Values, String[] listValues, String[] defaultListValue, String list2Title, int[] list2IconIds, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues, int[] colorValues, boolean defaultVisible)
     {
         boolean isEditFolder = (editType == EditType.Folder);
         boolean usingText = (textValues != null);
@@ -325,7 +370,14 @@ public class EditValuesDialog
         int showNumber3 = (number3Values != null ? View.VISIBLE : View.GONE);
         final TableRow valueRow;
         final TableRow value2Row;
+        final TableRow colorRow;
+        final TableRow colorsRow;
+        final TableRow visibleRow;
         final TextView editValueList2Title2;
+        BorderButton editColorButton;
+        BorderButton editColorsButton1;
+        BorderButton editColorsButton2;
+        AppCompatButton visibleButton;
         AlertDialog.Builder editDialogBuilder = new AlertDialog.Builder(currentContext, Globals.getDialogThemeID(currentContext));
         LayoutInflater viewInflater = (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View editDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.edit_dialog, currentContext.findViewById(android.R.id.content), false) : null);
@@ -333,6 +385,8 @@ public class EditValuesDialog
         //remember if a specific edit type
         isLogin = (editType == EditType.Login);
         isSortBy = (editType == EditType.SortBy);
+        isVisible = (editType == EditType.Visible);
+        isEditColors = (editType == EditType.EditColors);
 
         //get values
         title = titleText;
@@ -375,7 +429,7 @@ public class EditValuesDialog
             editText.setVisibility(showRowText);
             editText2 = editDialogView.findViewById(R.id.Edit_Text2);
             editText2.setVisibility(showRowText2);
-            editValueList =  editDialogView.findViewById(R.id.Edit_Value_List);
+            editValueList = editDialogView.findViewById(R.id.Edit_Value_List);
             if(usingList)
             {
                 //set text align right and add list values
@@ -409,7 +463,7 @@ public class EditValuesDialog
             editValueList2Title2 = editDialogView.findViewById(R.id.Edit_List2_Title2);
             editValueList2Title2.setVisibility(isEditFolder && usingList2 ? View.VISIBLE : View.GONE);
             editValueList2 = editDialogView.findViewById(R.id.Edit_Value_List2);
-            editDialogView.findViewById(R.id.Edit_List2_Row).setVisibility((isLogin && usingList2) || !usingText2 ? View.VISIBLE : View.GONE);
+            editDialogView.findViewById(R.id.Edit_List2_Row).setVisibility((isLogin && usingList2) || (!usingText2 && !isEditColors && !isVisible) ? View.VISIBLE : View.GONE);
             editDialogView.findViewById(R.id.Edit_List2_Layout).setVisibility(usingList2 ? View.VISIBLE : View.GONE);
             if(usingList2)
             {
@@ -517,6 +571,77 @@ public class EditValuesDialog
                     }
                 }
             }
+
+            //get colors
+            editColorList = editDialogView.findViewById(R.id.Edit_Color_List);
+            editColorList.setVisibility(isEditColors ? View.VISIBLE : View.GONE);
+            colorRow = editDialogView.findViewById(R.id.Edit_Color_Row);
+            colorRow.setVisibility(View.GONE);
+            editColorButton = editDialogView.findViewById(R.id.Edit_Color_Button);
+            colorsRow = editDialogView.findViewById(R.id.Edit_Colors_Row);
+            colorsRow.setVisibility(View.GONE);
+            editColorsButton1 = editDialogView.findViewById(R.id.Edit_Colors_Button1);
+            editColorsButton2 = editDialogView.findViewById(R.id.Edit_Colors_Button2);
+            if(isEditColors)
+            {
+                //add items with color options
+                Resources res = currentContext.getResources();
+                IconSpinner.Item[] items = new IconSpinner.Item[]{new IconSpinner.Item(res.getString(R.string.title_shared), false), new IconSpinner.Item(res.getString(R.string.title_transition), true)};
+                editColorList.setAdapter(new IconSpinner.CustomAdapter(currentContext, items));
+                editColorList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                    {
+                        boolean isTransition = (boolean)items[position].value;
+
+                        //update displayed color selection
+                        colorRow.setVisibility(isTransition ? View.GONE : View.VISIBLE);
+                        colorsRow.setVisibility(isTransition ? View.VISIBLE : View.GONE);
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> adapterView) {}
+                });
+
+                //if have colors
+                if(colorValues != null && colorValues.length >= 2)
+                {
+                    //set colors
+                    selectedColors[0] = selectedColors[1] = colorValues[0];
+                    selectedColors[2] = colorValues[1];
+
+                    //setup displays
+                    editColorButton.setBackgroundColor(selectedColors[0]);
+                    editColorButton.setOnClickListener(createOnColorButtonClickListener(currentContext, res.getString(R.string.title_shared), 0));
+                    editColorsButton1.setBackgroundColor(selectedColors[1]);
+                    editColorsButton1.setOnClickListener(createOnColorButtonClickListener(currentContext, res.getString(R.string.title_start_color), 1));
+                    editColorsButton2.setBackgroundColor(selectedColors[2]);
+                    editColorsButton2.setOnClickListener(createOnColorButtonClickListener(currentContext, res.getString(R.string.title_end_color), 2));
+                }
+            }
+
+            //get visible
+            visibleRow = editDialogView.findViewById(R.id.Edit_Visible_Row);
+            visibleRow.setVisibility(isVisible ? View.VISIBLE : View.GONE);
+            visibleButton = editDialogView.findViewById(R.id.Edit_Visible_Button);
+            if(isVisible)
+            {
+                visibleButton.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        //reverse state and update display
+                        visibleValue = !visibleValue;
+                        visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, visibleValue));
+                    }
+                });
+
+                //set to opposite to update after click
+                visibleValue = !defaultVisible;
+                visibleButton.performClick();
+            }
         }
 
         //setup and show dialog
@@ -575,20 +700,20 @@ public class EditValuesDialog
     }
     public void getLocation(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String[] numberTitles, double[] numberValues, double[] number2Values, double[] number3Values, String list2Title, String[] list2Values, String[] defaultList2Value)
     {
-        show(EditType.Location, titleText, ids, textValueTitle, textValues, null, null, null, null, numberTitles, numberValues, number2Values, number3Values, null, null, list2Title, null, list2Values, null, defaultList2Value, null, null);
+        show(EditType.Location, titleText, ids, textValueTitle, textValues, null, null, null, null, numberTitles, numberValues, number2Values, number3Values, null, null, list2Title, null, list2Values, null, defaultList2Value, null, null, null, false);
     }
     public void getFileLocation(String titleText, int[] ids, @NonNull String[] textValues, String[] listValues, String[] defaultListValue, String[] defaultList2Value)
     {
-        show(EditType.Folder, titleText, ids, null, textValues, null, null, null, null, null, null, null, null, listValues, defaultListValue, null, Globals.fileSourceImageIds, Globals.getFileLocations(currentContext), null, defaultList2Value, null, null);
+        show(EditType.Folder, titleText, ids, null, textValues, null, null, null, null, null, null, null, null, listValues, defaultListValue, null, Globals.fileSourceImageIds, Globals.getFileLocations(currentContext), null, defaultList2Value, null, null, null, false);
     }
     public void getOrbital(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String list2Title, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues)
     {
-        show(EditType.Orbital, titleText, ids, textValueTitle, textValues, null, null, null, null, null, null, null, null, null, null, list2Title, null, list2Values, list2SubValues, defaultList2Value, dateTitleText, dateValues);
+        show(EditType.Orbital, titleText, ids, textValueTitle, textValues, null, null, null, null, null, null, null, null, null, null, list2Title, null, list2Values, list2SubValues, defaultList2Value, dateTitleText, dateValues, null, false);
     }
     public void getLogin(String titleText, String textValueTitle, @NonNull String[] textValues, String textValue2Title, String[] text2Values, String[] textRowValues, String[] textRow2Values, String list2Title)
     {
         boolean createOnly = (list2Title == null);
-        show(EditType.Login, titleText, null, textValueTitle, textValues, textValue2Title, text2Values, textRowValues, textRow2Values, null, null, null, null, null, null, list2Title, (createOnly ? null : Settings.Options.Updates.SatelliteSourceImageIds), (createOnly ? null : Settings.Options.Updates.SatelliteSourceItems), null, (createOnly ? null : new String[]{Settings.Options.Sources.SpaceTrack}), null, null);
+        show(EditType.Login, titleText, null, textValueTitle, textValues, textValue2Title, text2Values, textRowValues, textRow2Values, null, null, null, null, null, null, list2Title, (createOnly ? null : Settings.Options.Updates.SatelliteSourceImageIds), (createOnly ? null : Settings.Options.Updates.SatelliteSourceItems), null, (createOnly ? null : new String[]{Settings.Options.Sources.SpaceTrack}), null, null, null, false);
     }
     public void getSortBy(String titleText, int page)
     {
@@ -607,6 +732,14 @@ public class EditValuesDialog
             listSubValues[index] = String.valueOf(listIds[index]);
         }
 
-        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext, page)}, null, null);
+        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext, page)}, null, null, null, false);
+    }
+    public void getEditColors(String titleText, int color1, int color2)
+    {
+        show(EditType.EditColors, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, new int[]{color1, color2}, false);
+    }
+    public void getVisible(String titleText, boolean defaultVisible)
+    {
+        show(EditType.Visible, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, defaultVisible);
     }
 }

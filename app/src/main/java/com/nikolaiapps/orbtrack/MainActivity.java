@@ -2802,7 +2802,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
-                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                             {
                                 //update current sort by for page and set pending
                                 Settings.setCurrentSortBy(MainActivity.this, page, list2Value);
@@ -2924,7 +2924,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
                     {
                         @Override
-                        public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                        public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                         {
                             //remember file source
                             int fileSourceType = Globals.getFileSource(MainActivity.this, list2Value);
@@ -3000,7 +3000,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
                 {
                     @Override
-                    public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+                    public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                     {
                         //remember file source
                         int fileSourceType = Globals.getFileSource(MainActivity.this, list2Value);

@@ -2219,7 +2219,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 ChooseColorDialog colorDialog = new ChooseColorDialog(context, Settings.getPreferenceInt(context, preferenceKey));
                 colorDialog.setAllowOpacity(allowOpacity);
                 colorDialog.setAllowTransparent(allowOpacity);
-                colorDialog.setTitle(context.getResources().getString(titleId));
+                colorDialog.setTitle(context.getString(titleId));
                 colorDialog.setOnColorSelectedListener(new ChooseColorDialog.OnColorSelectedListener()
                 {
                     @Override
@@ -2716,7 +2716,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
         {
             @Override
-            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue)
+            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
             {
                 String zoneId = zones.get(Arrays.asList(zoneNames).indexOf(list2Value)).getID();
                 double altitudeM = (Settings.getUsingMetric() ? number3 : (number3 / Globals.FEET_PER_METER));

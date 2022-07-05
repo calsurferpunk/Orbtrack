@@ -439,6 +439,7 @@ public abstract class Orbitals
                     else
                     {
                         itemHolder.tleUnder.setBackgroundColor(ageDays >= 14 ? Color.RED : ageDays >= 7 ? 0xFFFFA500 : Color.YELLOW);
+                        itemHolder.tleUnder.setVisibility(View.VISIBLE);
                         itemHolder.tleAgeLayout.setVisibility(View.VISIBLE);
                     }
                 }

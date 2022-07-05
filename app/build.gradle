@@ -12,10 +12,10 @@ android {
         applicationId "com.nikolaiapps.orbtrack"
         minSdkVersion 18
         targetSdkVersion 32
-        versionName '1.12.0'
+        versionName '1.13.0'
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        versionCode 47
+        versionCode 48
     }
     buildTypes {
         debug {
@@ -67,10 +67,10 @@ allprojects {
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.4.1'
+    implementation 'androidx.appcompat:appcompat:1.4.2'
     implementation 'com.android.volley:volley:1.2.1'
-    implementation 'com.google.android.material:material:1.6.0'
-    implementation 'com.google.android.gms:play-services-location:19.0.1'
+    implementation 'com.google.android.material:material:1.6.1'
+    implementation 'com.google.android.gms:play-services-location:20.0.0'
     implementation 'com.google.android.libraries.places:places:2.6.0'
     implementation 'com.google.android.gms:play-services-auth:20.2.0'
     implementation 'com.dropbox.core:dropbox-core-sdk:4.0.0'

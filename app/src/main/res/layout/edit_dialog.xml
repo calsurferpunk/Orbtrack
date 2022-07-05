@@ -196,15 +196,6 @@
             android:layout_height="wrap_content"
             android:visibility="gone"/>
 
-        <TextView
-            android:id="@+id/Edit_Text2"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="5dp"
-            android:text="@string/empty"
-            android:visibility="gone"
-            style="@style/EditValueTitle"/>
-
         <TableRow android:id="@+id/Edit_Color_Row" android:padding="5dp" android:visibility="gone">
             <com.nikolaiapps.orbtrack.BorderButton
                 android:id="@+id/Edit_Color_Button"
@@ -226,7 +217,18 @@
         <TableRow android:id="@+id/Edit_Visible_Row" android:padding="5dp" android:visibility="gone">
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/Edit_Visible_Button"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp"
                 style="@style/VisibleButton"/>
         </TableRow>
+
+        <TextView
+            android:id="@+id/Edit_Text2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:text="@string/empty"
+            android:visibility="gone"
+            style="@style/EditValueTitle"/>
     </TableLayout>
 </ScrollView>

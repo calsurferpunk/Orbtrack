@@ -353,6 +353,7 @@ public class EditValuesDialog
     private void show(byte editType, String titleText, int[] ids, @Nullable String textValueTitle, String[] textValues, @Nullable String textValue2Title, @Nullable String[] text2Values, @Nullable String[] textRowValues, @Nullable String[] textRow2Values, @Nullable String[] numberTitles, @Nullable double[] numberValues, @Nullable double[] number2Values, @Nullable double[] number3Values, String[] listValues, String[] defaultListValue, String list2Title, int[] list2IconIds, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues, int[] colorValues, boolean defaultVisible)
     {
         boolean isEditFolder = (editType == EditType.Folder);
+        boolean isVisibleEdit = (editType == EditType.Visible);
         boolean usingText = (textValues != null);
         boolean usingText2 = (text2Values != null);
         boolean usingList = (listValues != null && defaultListValue != null);
@@ -364,7 +365,7 @@ public class EditValuesDialog
         int currentId;
         int showText2 = (usingText2 ? View.VISIBLE : View.GONE);
         int showRowText = (textRowValues != null ? View.VISIBLE : View.GONE);
-        int showRowText2 = (textRow2Values != null ? View.VISIBLE : View.GONE);
+        int showRowText2 = (textRow2Values != null || isVisibleEdit ? View.VISIBLE : View.GONE);
         int showNumber = (numberValues != null ? View.VISIBLE : View.GONE);
         int showNumber2 = (number2Values != null ? View.VISIBLE : View.GONE);
         int showNumber3 = (number3Values != null ? View.VISIBLE : View.GONE);
@@ -385,7 +386,7 @@ public class EditValuesDialog
         //remember if a specific edit type
         isLogin = (editType == EditType.Login);
         isSortBy = (editType == EditType.SortBy);
-        isVisible = (editType == EditType.Visible);
+        isVisible = isVisibleEdit;
         isEditColors = (editType == EditType.EditColors);
 
         //get values
@@ -632,9 +633,10 @@ public class EditValuesDialog
                     @Override
                     public void onClick(View view)
                     {
-                        //reverse state and update display
+                        //reverse state and update displays
                         visibleValue = !visibleValue;
                         visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, visibleValue));
+                        editText2.setText(visibleValue ? R.string.title_show_selected : R.string.title_hide_selected);
                     }
                 });
 

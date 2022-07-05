@@ -360,6 +360,7 @@
     <string name="title_grid_color">Grid Color</string>
     <string name="title_grid_view">Grid View</string>
     <string name="title_group">Group</string>
+    <string name="title_hide_selected">Hide Selected</string>
     <string name="title_high">High</string>
     <string name="title_horizon_color">Horizon Color</string>
     <string name="title_hour">Hour</string>
@@ -543,6 +544,7 @@
     <string name="title_show_orbital_direction_limit">Limit Orbital Direction</string>
     <string name="title_show_path">Show Path</string>
     <string name="title_show_search">Show Search</string>
+    <string name="title_show_selected">Show Selected</string>
     <string name="title_show_selected_footprint">Show Selected Footprint</string>
     <string name="title_show_shadows">Show Shadows</string>
     <string name="title_show_stars">Show Stars</string>

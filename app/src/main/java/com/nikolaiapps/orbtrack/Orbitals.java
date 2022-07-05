@@ -1712,9 +1712,23 @@ public abstract class Orbitals
                                     //go through each selected item
                                     for(Selectable.ListItem currentItem : selectedItems)
                                     {
+                                        //get current norad ID and orbital
+                                        int currentNoradId = currentItem.id;
+                                        Database.DatabaseSatellite currentOrbital = Database.getOrbital(context, currentNoradId);
+
                                         //save visibility
-                                        Database.saveSatelliteVisible(context, currentItem.id, visible);
+                                        Database.saveSatelliteVisible(context, currentNoradId, visible);
+
+                                        //if current orbital exists
+                                        if(currentOrbital != null)
+                                        {
+                                            //update whether in excluded old norad IDs
+                                            MainActivity.updateExcludedOldNoradIds(currentNoradId, currentOrbital.tleIsAccurate);
+                                        }
                                     }
+
+                                    //update current usage
+                                    MainActivity.loadOrbitals(context, pager);
                                 }
                             }, dismissListener).getVisible(editString + " " + res.getString(R.string.title_visible), visibleCount >= (int)Math.ceil(selectedItemCount / 2.0));
                             break;

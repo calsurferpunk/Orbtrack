@@ -757,9 +757,9 @@ class Whirly
         private ScreenMarker marker;
         private ScreenMarker titleMarker;
         private ScreenMarker infoMarker;
-        private final MarkerInfo markerInfo;
-        private final MarkerInfo titleMarkerInfo;
-        private final MarkerInfo infoMarkerInfo;
+        private MarkerInfo markerInfo;
+        private MarkerInfo titleMarkerInfo;
+        private MarkerInfo infoMarkerInfo;
         private ComponentObject markerObj;
         private ComponentObject titleMarkerObj;
         private ComponentObject infoMarkerObj;
@@ -790,6 +790,7 @@ class Whirly
                 markerBaseSizeValue = Globals.dpToPixels(currentContext, 46);
 
                 marker = new ScreenMarker();
+                markerInfo = new MarkerInfo();
                 locationIconType = Settings.getMapMarkerLocationIcon(context);
                 marker.image = Globals.getBitmap(currentContext, Globals.getLocationIconTypeIconID(locationIconType), Settings.getMapMarkerLocationIconUsedTintColor(context, locationIconType));
                 marker.size = new Point2d(markerBaseSizeValue * markerScale, markerBaseSizeValue * markerScale);
@@ -797,32 +798,28 @@ class Whirly
                 marker.selectable = true;
                 marker.rotation = Math.toRadians(noradId > 0 && noradId != Universe.IDs.CurrentLocation ? 135 : 0);
                 markerObj = null;
+                markerInfo.setDrawPriority(DrawPriority.BoardFlat + 100);
 
                 showInfo = false;
                 showBackground = usingBackground;
                 alwaysShowTitle = startWithTitleShown && (noradId != Universe.IDs.CurrentLocation);
                 usingInfo = (infoLocation == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
                 infoMarker = new ScreenMarker();
+                infoMarkerInfo = new MarkerInfo();
                 infoMarker.selectable = false;
                 infoMarkerObj = null;
                 infoText = "...";
+                infoMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 200);
 
                 titleMarker = new ScreenMarker();
+                titleMarkerInfo = new MarkerInfo();
                 titleMarker.selectable = false;
                 titleMarkerObj = null;
                 titleText = "...";
+                titleMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 300);
 
                 moveLocation(markerLocation.geo.latitude, markerLocation.geo.longitude, markerLocation.geo.altitudeKm);
             }
-
-            markerInfo = new MarkerInfo();
-            markerInfo.setDrawPriority(DrawPriority.BoardFlat + 100);
-
-            infoMarkerInfo = new MarkerInfo();
-            infoMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 200);
-
-            titleMarkerInfo = new MarkerInfo();
-            titleMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 300);
         }
 
         private InfoImageCreator getInfoCreator()
@@ -977,16 +974,16 @@ class Whirly
         {
             if(common.tleIsAccurate)
             {
-                if(markerObj == null)
+                if(markerObj == null && markerInfo != null)
                 {
                     markerObj = controller.addScreenMarker(marker, markerInfo, BaseController.ThreadMode.ThreadAny);
                 }
-                if(infoMarkerObj == null && showInfo)
+                if(infoMarkerObj == null && infoMarkerInfo != null && showInfo)
                 {
                     setInfoLocation();
                     infoMarkerObj = controller.addScreenMarker(infoMarker, infoMarkerInfo, BaseController.ThreadMode.ThreadAny);
                 }
-                if(titleMarkerObj == null && !showInfo && alwaysShowTitle)
+                if(titleMarkerObj == null && titleMarkerInfo != null && !showInfo && alwaysShowTitle)
                 {
                     setInfoLocation();
                     titleMarkerObj = controller.addScreenMarker(titleMarker, titleMarkerInfo, BaseController.ThreadMode.ThreadAny);

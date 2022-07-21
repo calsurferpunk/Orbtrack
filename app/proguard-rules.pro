@@ -17,3 +17,7 @@
 #}
 -keep class com.mousebird.** { *; }
 -keep class com.mousebirdconsulting.** { *; }
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}

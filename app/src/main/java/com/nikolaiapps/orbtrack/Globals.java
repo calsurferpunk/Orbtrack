@@ -11,6 +11,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -96,6 +97,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -157,6 +159,8 @@ public abstract class Globals
         static final byte WriteExternalStorageRetry = 8;
         static final byte ExactAlarm = 9;
         static final byte ExactAlarmRetry = 10;
+        static final byte PostNotifications = 11;
+        static final byte PostNotificationsRetry = 12;
     }
 
     //Symbols
@@ -694,6 +698,7 @@ public abstract class Globals
     public static boolean canAskWritePermission = true;
     public static boolean canAskReadPermission = true;
     public static boolean canAskExactAlarmPermission = true;
+    public static boolean canAskPostNotificationsPermission = true;
 
     //Gets unknown string
     public static String getUnknownString(Context context)
@@ -1004,6 +1009,7 @@ public abstract class Globals
     {
         final boolean isRetry;
         final boolean isExactAlarm;
+        final boolean isNotification;
         boolean createDialog;
         final AppCompatActivity currentActivity = (AppCompatActivity)context;
 
@@ -1015,23 +1021,30 @@ public abstract class Globals
             case PermissionType.ReadExternalStorageRetry:
             case PermissionType.WriteExternalStorageRetry:
                 isRetry = true;
-                isExactAlarm = false;
+                isExactAlarm = isNotification = false;
                 break;
 
             case PermissionType.ExactAlarm:
             case PermissionType.ExactAlarmRetry:
                 isRetry = (resultCode == PermissionType.ExactAlarmRetry);
                 isExactAlarm = true;
+                isNotification = false;
+                break;
+
+            case PermissionType.PostNotifications:
+            case PermissionType.PostNotificationsRetry:
+                isRetry = (resultCode == PermissionType.PostNotificationsRetry);
+                isExactAlarm = false;
+                isNotification = true;
                 break;
 
             default:
-                isRetry = false;
-                isExactAlarm = false;
+                isRetry = isExactAlarm = isNotification = false;
                 break;
         }
 
         //determine if need to create dialog
-        createDialog = isExactAlarm;
+        createDialog = (isExactAlarm || isNotification);
         for(String currentPermission : permissions)
         {
             //create dialog if need to already or current permission should
@@ -1087,6 +1100,10 @@ public abstract class Globals
 
                         case PermissionType.ExactAlarmRetry:
                             canAskExactAlarmPermission = false;
+                            break;
+
+                        case PermissionType.PostNotificationsRetry:
+                            canAskPostNotificationsPermission = false;
                             break;
                     }
 
@@ -1162,6 +1179,16 @@ public abstract class Globals
         {
             Resources res = context.getResources();
             askPermission(context, launcher, new String[]{Manifest.permission.SCHEDULE_EXACT_ALARM}, res.getString(R.string.title_set_exact_alarm), res.getString(R.string.desc_permission_set_exact_alarm), (retrying ? PermissionType.ExactAlarmRetry : PermissionType.ExactAlarm), listener);
+        }
+    }
+
+    //Ask for post notifications permission
+    public static void askPostNotificationsPermission(Context context, boolean retrying)
+    {
+        if(Build.VERSION.SDK_INT >= 33)
+        {
+            Resources res = context.getResources();
+            askPermission(context, Manifest.permission.POST_NOTIFICATIONS, res.getString(R.string.title_show_notifications), res.getString(R.string.desc_permission_post_notifications), (retrying ? PermissionType.PostNotificationsRetry : PermissionType.PostNotifications), null);
         }
     }
 
@@ -1254,6 +1281,12 @@ public abstract class Globals
     public static boolean haveCameraPermission(Context context)
     {
         return(havePermission(context, Manifest.permission.CAMERA));
+    }
+
+    //Check if have post notifications permission
+    public static boolean havePostNotificationsPermission(Context context)
+    {
+        return(Build.VERSION.SDK_INT < 33 || havePermission(context, Manifest.permission.POST_NOTIFICATIONS));
     }
 
     //Check if location services is enabled
@@ -2537,9 +2570,10 @@ public abstract class Globals
     public static void setUpdateDialog(MultiProgressDialog updateDialog, String title, final BaseInputActivity cancelActivity, final byte updateType, final boolean closeOnBackground)
     {
         final boolean haveUpdateType = (updateType != Byte.MAX_VALUE);
-        final BoolObject setBackground = new BoolObject(false);
-        final Resources res = updateDialog.getContext().getResources();
+        final Context context = updateDialog.getContext();
+        final Resources res = context.getResources();
 
+        updateDialog.setTag(false);
         updateDialog.setCancelable(true);
         updateDialog.setMessage(null);
         updateDialog.setTitle(title);
@@ -2557,7 +2591,7 @@ public abstract class Globals
                 }
 
                 //if closing from going to background and activity is set
-                if(closeOnBackground && setBackground.value && cancelActivity != null)
+                if(closeOnBackground && (boolean)updateDialog.getTag() && cancelActivity != null)
                 {
                     //close it
                     cancelActivity.finish();
@@ -2593,14 +2627,24 @@ public abstract class Globals
                 dialog.cancel();
             }
         });
-        updateDialog.setButton(DialogInterface.BUTTON_NEGATIVE, res.getString(R.string.title_background), new DialogInterface.OnClickListener()
+        updateDialog.setButton(DialogInterface.BUTTON_NEGATIVE, res.getString(R.string.title_background), (DialogInterface.OnClickListener)null);
+        updateDialog.setManualButtonClick(DialogInterface.BUTTON_NEGATIVE, new View.OnClickListener()
         {
             @Override
-            public void onClick(DialogInterface dialog, int which)
+            public void onClick(View view)
             {
-                //set as going to background and close dialog
-                setBackground.value = true;
-                dialog.dismiss();
+                //if have permission to use notifications
+                if(havePostNotificationsPermission(context))
+                {
+                    //set as going to background and close dialog
+                    updateDialog.setTag(true);
+                    updateDialog.dismiss();
+                }
+                else if(Globals.canAskPostNotificationsPermission)
+                {
+                    //ask permission again
+                    askPostNotificationsPermission(((ContextWrapper)context).getBaseContext(), false);
+                }
             }
         });
     }
@@ -3682,11 +3726,9 @@ public abstract class Globals
             name = name.toUpperCase();
 
             //check and fix any typos
-            switch(name)
+            if(name.equals("IRAK"))
             {
-                case "IRAK":
-                    name = "IRAQ";
-                    break;
+                name = "IRAQ";
             }
         }
 
@@ -4211,7 +4253,7 @@ public abstract class Globals
     public static double truncate(double value, int decimalCount)
     {
         BigDecimal roundValue = new BigDecimal(value);
-        roundValue = roundValue.setScale(decimalCount, BigDecimal.ROUND_FLOOR);
+        roundValue = roundValue.setScale(decimalCount, RoundingMode.FLOOR);
         return(roundValue.doubleValue());
     }
 

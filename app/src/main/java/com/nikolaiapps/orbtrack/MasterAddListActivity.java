@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
@@ -965,6 +966,40 @@ public class MasterAddListActivity extends BaseInputActivity
             //close it
             addProgress.dismiss();
         }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        boolean granted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+        boolean retrying = (requestCode == Globals.PermissionType.PostNotificationsRetry);
+
+        //handle response
+        switch(requestCode)
+        {
+            case Globals.PermissionType.PostNotifications:
+            case Globals.PermissionType.PostNotificationsRetry:
+                //if granted
+                if(granted)
+                {
+                    //if progress exists
+                    if(downloadProgress != null)
+                    {
+                        //set as going to background and close dialog
+                        downloadProgress.setTag(true);
+                        downloadProgress.dismiss();
+                    }
+                }
+                //else if not retrying
+                else if(!retrying)
+                {
+                    //ask permission again
+                    Globals.askPostNotificationsPermission(this, true);
+                }
+                break;
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override

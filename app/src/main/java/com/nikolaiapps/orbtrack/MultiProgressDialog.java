@@ -6,6 +6,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import java.util.Locale;
@@ -17,6 +18,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 public class MultiProgressDialog extends AlertDialog
 {
+    private Object tag;
     private TextView messageText;
     private TextView messageText2;
     private TextView percentText;
@@ -25,6 +27,7 @@ public class MultiProgressDialog extends AlertDialog
     private LinearProgressIndicator bar2;
     private LinearLayout barLayout;
     private LinearLayout barLayout2;
+    private final View.OnClickListener[] manualButtonClick = new View.OnClickListener[]{null, null, null};
 
     protected MultiProgressDialog(@NonNull Context context)
     {
@@ -98,6 +101,53 @@ public class MultiProgressDialog extends AlertDialog
         }
     }
 
+    private int getButtonIndex(int whichButton)
+    {
+        switch(whichButton)
+        {
+            case BUTTON_NEGATIVE:
+                return(0);
+
+            case BUTTON_NEUTRAL:
+                return(1);
+
+            default:
+            case BUTTON_POSITIVE:
+                return(2);
+        }
+    }
+
+    private int getWhichButton(int buttonIndex)
+    {
+        switch(buttonIndex)
+        {
+            case 0:
+                return(BUTTON_NEGATIVE);
+
+            case 1:
+                return(BUTTON_NEUTRAL);
+
+            default:
+            case 2:
+                return(BUTTON_POSITIVE);
+        }
+    }
+
+    public void setTag(Object value)
+    {
+        tag = value;
+    }
+
+    public Object getTag()
+    {
+        return(tag);
+    }
+
+    public void setManualButtonClick(int whichButton, View.OnClickListener listener)
+    {
+        manualButtonClick[getButtonIndex(whichButton)] = listener;
+    }
+
     public void setProgress(int percent)
     {
         setProgressDisplays(barLayout, bar, percentText, percent);
@@ -125,5 +175,29 @@ public class MultiProgressDialog extends AlertDialog
     public void setMessage2(CharSequence message)
     {
         setMessageDisplay(barLayout2, messageText2, message);
+    }
+
+    @Override
+    public void show()
+    {
+        super.show();
+
+        int buttonIndex;
+
+        //go through each manual click
+        for(buttonIndex = 0; buttonIndex < manualButtonClick.length; buttonIndex++)
+        {
+            //if setting button click manually
+            if(manualButtonClick[buttonIndex] != null)
+            {
+                //if current button exists
+                Button currentButton = getButton(getWhichButton(buttonIndex));
+                if(currentButton != null)
+                {
+                    //clear click values
+                    currentButton.setOnClickListener(manualButtonClick[buttonIndex]);
+                }
+            }
+        }
     }
 }

@@ -4,11 +4,12 @@ package com.nikolaiapps.orbtrack;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
-
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.SwitchCompat;
 import android.view.View;
@@ -28,6 +29,10 @@ public class NotifySettingsActivity extends BaseInputActivity
         static final String Location = "location";
     }
 
+    private int noradId;
+    private boolean useList;
+    private Intent resultData;
+    private Calculations.ObserverType location;
     private View fullMoonStartDivider;
     private View fullMoonEndDivider;
     private IconSpinner orbitalList;
@@ -46,13 +51,9 @@ public class NotifySettingsActivity extends BaseInputActivity
         this.setContentView(R.layout.notify_settings_layout);
 
         byte index;
-        final int noradId;
-        final boolean useList;
         String text;
         Intent intent = this.getIntent();
-        Intent resultData = new Intent();
         Database.DatabaseSatellite currentOrbital;
-        final Calculations.ObserverType location;
         final View divider = this.findViewById(R.id.Notify_Settings_Divider);
         final View orbitalGroup = this.findViewById(R.id.Notify_Settings_Orbital_Group);
         final TextView notificationsTitle = this.findViewById(R.id.Notify_Settings_Notifications_Title);
@@ -100,6 +101,7 @@ public class NotifySettingsActivity extends BaseInputActivity
         currentOrbital = (useList ? null : Database.getOrbital(this, noradId));
 
         //set defaults
+        resultData = new Intent();
         BaseInputActivity.setRequestCode(resultData, BaseInputActivity.getRequestCode(intent));
 
         //if -found orbital or using list- and -valid location-
@@ -156,8 +158,11 @@ public class NotifySettingsActivity extends BaseInputActivity
             if(!useList)
             {
                 //update displays
-                text = currentOrbital.getName() + " " + notificationsTitle.getText();
-                notificationsTitle.setText(text);
+                if(currentOrbital != null)
+                {
+                    text = currentOrbital.getName() + " " + notificationsTitle.getText();
+                    notificationsTitle.setText(text);
+                }
                 updateDisplays(noradId);
             }
             else
@@ -174,24 +179,67 @@ public class NotifySettingsActivity extends BaseInputActivity
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
+    {
+        boolean granted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
+        boolean retrying = (requestCode == Globals.PermissionType.PostNotificationsRetry);
+
+        //handle response
+        switch(requestCode)
+        {
+            case Globals.PermissionType.PostNotifications:
+            case Globals.PermissionType.PostNotificationsRetry:
+                //if granted
+                if(granted)
+                {
+                    //set notification
+                    setNotifications(noradId, location, useList, resultData);
+                }
+                //else if not retrying
+                else if(!retrying)
+                {
+                    //ask permission again
+                    Globals.askPostNotificationsPermission(this, true);
+                }
+                break;
+        }
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
+
     //Sets notifications
-    private void setNotifications(int noradId, Calculations.ObserverType location, boolean useList)
+    private void setNotifications(int noradId, Calculations.ObserverType location, boolean useList, Intent resultData)
     {
         byte index;
         int id = (useList ? (int)orbitalList.getSelectedValue(Universe.IDs.Invalid) : noradId);
         boolean[] notifyUsing = new boolean[Globals.NotifyType.NotifyCount];
         boolean[] notifyNextChecked = new boolean[Globals.NotifyType.NotifyCount];
 
-        //go through each notify type
-        for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
+        //if have permission to use notifications
+        if(Globals.havePostNotificationsPermission(this))
         {
-            //update status
-            notifyUsing[index] = notifySwitch[index].isChecked();
-            notifyNextChecked[index] = notifyNext[index].isChecked();
-        }
+            //go through each notify type
+            for(index = 0; index < Globals.NotifyType.NotifyCount; index++)
+            {
+                //update status
+                notifyUsing[index] = notifySwitch[index].isChecked();
+                notifyNextChecked[index] = notifyNext[index].isChecked();
+            }
 
-        //set notifications
-        Settings.setNotify(this, id, location, notifyUsing, notifyNextChecked);
+            //set notifications
+            Settings.setNotify(this, id, location, notifyUsing, notifyNextChecked);
+
+            //set result
+            setResult(RESULT_OK, resultData);
+            this.finish();
+        }
+        //else if can ask for permission
+        else if(Globals.canAskPostNotificationsPermission)
+        {
+            //ask permission
+            Globals.askPostNotificationsPermission(this, false);
+        }
     }
 
     //Handles settings notifications
@@ -201,11 +249,7 @@ public class NotifySettingsActivity extends BaseInputActivity
         if(Globals.haveExactAlarmPermission(NotifySettingsActivity.this) || !Globals.canAskExactAlarmPermission)
         {
             //set notifications
-            setNotifications(noradId, location, useList);
-
-            //set result
-            setResult(RESULT_OK, resultData);
-            NotifySettingsActivity.this.finish();
+            setNotifications(noradId, location, useList, resultData);
         }
         else
         {
@@ -216,11 +260,7 @@ public class NotifySettingsActivity extends BaseInputActivity
                 public void OnDeny(byte resultCode)
                 {
                     //set notifications with denial
-                    setNotifications(noradId, location, useList);
-
-                    //set result
-                    setResult(RESULT_OK, resultData);
-                    NotifySettingsActivity.this.finish();
+                    setNotifications(noradId, location, useList, resultData);
                 }
             });
         }

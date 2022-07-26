@@ -142,6 +142,7 @@
     <string name="desc_permission_camera_deny">Camera permission denied</string>
     <string name="desc_permission_location">At least rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
     <string name="desc_permission_location_deny">Location permission denied</string>
+    <string name="desc_permission_post_notifications">Need permission to show notifications of background updates and desired user events.</string>
     <string name="desc_permission_read_external_storage">Need access to external storage to read files.</string>
     <string name="desc_permission_read_external_storage_deny">Read from external storage denied</string>
     <string name="desc_permission_set_exact_alarm">Need access to set exact alarms, otherwise they may appear much later.</string>
@@ -540,6 +541,7 @@
     <!--string name="title_show_label_background">Show Label Background</string-->
     <string name="title_show_labels_always">Show Labels Always</string>
     <string name="title_show_latitude_longitude">Show Latitude/Longitude</string>
+    <string name="title_show_notifications">Show Notifications</string>
     <string name="title_show_orbital_direction">Show Orbital Direction</string>
     <string name="title_show_orbital_direction_limit">Limit Orbital Direction</string>
     <string name="title_show_path">Show Path</string>

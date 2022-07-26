@@ -4050,7 +4050,7 @@ public abstract class Current
     public static boolean showPaths = false;
     private static boolean showHorizon = false;
     public static boolean showCalibration = false;
-    public static WeakReference<CameraLens> cameraViewReference;
+    private static WeakReference<CameraLens> cameraViewReference;
     public static CalculateViewsTask.OrbitalPathBase[] orbitalViews = new CalculateViewsTask.OrbitalPathBase[0];
 
     //Gets camera view

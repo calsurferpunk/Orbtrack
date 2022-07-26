@@ -34,6 +34,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -543,6 +544,7 @@ public abstract class Orbitals
         private EditText searchText;
         private TableRow ageRow;
         private AppCompatImageButton showButton;
+        public static WeakReference<MultiProgressDialog> updateProgressReference;
 
         public Page(String title, boolean simple)
         {
@@ -851,6 +853,12 @@ public abstract class Orbitals
             setItemClicksEnabled(true);
         }
 
+        //Gets update progress dialog
+        public static MultiProgressDialog getUpdateProgress()
+        {
+            return(updateProgressReference != null ? updateProgressReference.get() : null);
+        }
+
         //Creates an update receiver
         private UpdateReceiver createLocalUpdateReceiver(UpdateReceiver oldReceiver, byte updateType, final ArrayList<Database.DatabaseSatellite> satellites, final ArrayList<Integer> listIndexes, boolean showProgress)
         {
@@ -868,6 +876,7 @@ public abstract class Orbitals
 
             //create progress if using
             taskProgress = (showProgress ? Globals.createProgressDialog(context) : null);
+            updateProgressReference = new WeakReference<>(taskProgress);
             if(showProgress)
             {
                 Globals.setUpdateDialog(taskProgress, res.getString(savingFile ? R.string.title_saving : R.string.title_updating) + " " + res.getQuantityString(R.plurals.title_satellites, 2), updateType);

@@ -142,6 +142,7 @@
     <string name="desc_permission_camera_deny">Permiso de cámara rechazado</string>
     <string name="desc_permission_location">Se necesita al menos una ubicación aproximada para calcular los ángulos de visión de su ubicación. Si no está permitido, solo se utilizarán las ubicaciones manuales/guardadas.</string>
     <string name="desc_permission_location_deny">Permiso de ubicación negado</string>
+    <string name="desc_permission_post_notifications">Necesita permiso para mostrar notificaciones de actualizaciones en segundo plano y eventos de usuario deseados.</string>
     <string name="desc_permission_read_external_storage">Necesita acceso a almacenamiento externo para leer archivos.</string>
     <string name="desc_permission_read_external_storage_deny">Lectura del almacenamiento externo denegado</string>
     <string name="desc_permission_set_exact_alarm">Necesita acceso para configurar alarmas exactas, de lo contrario pueden aparecer mucho más tarde.</string>
@@ -540,6 +541,7 @@
     <!--string name="title_show_label_background">Mostrar Fondo Etiqueta</string-->
     <string name="title_show_labels_always">Mostrar Etiquetas Siempre</string>
     <string name="title_show_latitude_longitude">Mostrar Latitud/Longitud</string>
+    <string name="title_show_notifications">Mostrar Notificaciones</string>
     <string name="title_show_orbital_direction">Mostrar Dirección Orbital</string>
     <string name="title_show_orbital_direction_limit">Dirección Orbital Límite</string>
     <string name="title_show_path">Mostrar Ruta</string>

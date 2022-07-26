@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
@@ -593,7 +592,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         boolean granted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
         boolean retrying = false;
-        CameraLens cameraView = Current.getCameraView();
 
         //check if retrying
         switch(requestCode)
@@ -603,6 +601,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             case Globals.PermissionType.ReadExternalStorageRetry:
             case Globals.PermissionType.WriteExternalStorageRetry:
             case Globals.PermissionType.ExactAlarmRetry:
+            case Globals.PermissionType.PostNotificationsRetry:
                 retrying = true;
                 break;
         }
@@ -633,6 +632,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     case Groups.Current:
                     case Groups.Calculate:
                         //if view exists
+                        CameraLens cameraView = Current.getCameraView();
                         if(cameraView != null)
                         {
                             //try to start the camera again
@@ -670,6 +670,27 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     //ask permission again
                     Globals.askWritePermission(this, true);
+                }
+                break;
+
+            case Globals.PermissionType.PostNotifications:
+            case Globals.PermissionType.PostNotificationsRetry:
+                //if granted
+                if(granted)
+                {
+                    //if progress exists
+                    MultiProgressDialog updateProgress = Orbitals.Page.getUpdateProgress();
+                    if(updateProgress != null)
+                    {
+                        //set as going to background and close dialog
+                        updateProgress.setTag(true);
+                        updateProgress.dismiss();
+                    }
+                }
+                else if(!retrying)
+                {
+                    //ask permission again
+                    Globals.askPostNotificationsPermission(this, true);
                 }
                 break;
         }

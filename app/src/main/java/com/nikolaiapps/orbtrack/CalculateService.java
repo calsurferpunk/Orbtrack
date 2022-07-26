@@ -398,7 +398,7 @@ public class CalculateService extends NotifyService
         @Override
         protected void onBootCompleted(Context context, long timeNowMs, AlarmManager manager)
         {
-            Database.DatabaseLocation location = Database.getSelectedLocation(context);
+            Database.DatabaseLocation location = Database.getLocation(context);
 
             //update with current or existing locations
             firstUpdate = true;

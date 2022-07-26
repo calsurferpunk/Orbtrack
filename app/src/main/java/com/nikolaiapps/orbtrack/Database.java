@@ -11,6 +11,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Color;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -2161,8 +2162,8 @@ public class Database extends SQLiteOpenHelper
         return(getLocations(context, null));
     }
 
-    //Gets the selected location form the database
-    public static DatabaseLocation getSelectedLocation(Context context)
+    //Gets the selected location from the database
+    private static DatabaseLocation getSelectedLocation(Context context)
     {
         DatabaseLocation[] locations = getLocations(context,"[Selected]=1");
 
@@ -2174,6 +2175,27 @@ public class Database extends SQLiteOpenHelper
         {
             return(new DatabaseLocation(0, context.getResources().getString(R.string.title_current), 0, 0 , 0, TimeZone.getDefault().getID(), LocationType.Current, true));
         }
+    }
+
+    //Gets the last known location
+    public static DatabaseLocation getLocation(Context context)
+    {
+        Location lastLocation;
+        DatabaseLocation currentLocation = getSelectedLocation(context);
+        boolean isCurrent = (currentLocation.locationType == LocationType.Current);
+
+        //if is current location
+        if(isCurrent)
+        {
+            //update with last known location
+            lastLocation = Settings.getLastLocation(context);
+            currentLocation.latitude = lastLocation.getLatitude();
+            currentLocation.longitude = lastLocation.getLongitude();
+            currentLocation.altitudeKM = lastLocation.getAltitude() / 1000;
+        }
+
+        //return location
+        return(currentLocation);
     }
 
     //Gets a location ID by name

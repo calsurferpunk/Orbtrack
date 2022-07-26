@@ -1884,7 +1884,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 break;
 
             case Settings.PageType.Notifications:
-                Database.DatabaseLocation currentLocation = Database.getSelectedLocation(this);
+                Database.DatabaseLocation currentLocation = Database.getLocation(this);
                 NotifySettingsActivity.show(this, resultLauncher, new Calculations.ObserverType(currentLocation.zoneId, new Calculations.GeodeticDataType(currentLocation.latitude, currentLocation.longitude, currentLocation.altitudeKM, 0, 0)));
                 break;
         }

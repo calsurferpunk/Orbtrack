@@ -1675,19 +1675,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Gets the most recently selected location
     private Database.DatabaseLocation getSelectedLocation()
     {
-        Location lastLocation;
-        Database.DatabaseLocation selectedLocation = Database.getSelectedLocation(this);
+        Database.DatabaseLocation selectedLocation = Database.getLocation(this);
         boolean isCurrent = (selectedLocation.locationType == Database.LocationType.Current);
-
-        //if is current location
-        if(isCurrent)
-        {
-            //update with last known location
-            lastLocation = Settings.getLastLocation(this);
-            selectedLocation.latitude = lastLocation.getLatitude();
-            selectedLocation.longitude = lastLocation.getLongitude();
-            selectedLocation.altitudeKM = lastLocation.getAltitude() / 1000;
-        }
 
         //if observer is set, using current location, and selected is not valid
         if(observer != null && isCurrent && !selectedLocation.isValid())

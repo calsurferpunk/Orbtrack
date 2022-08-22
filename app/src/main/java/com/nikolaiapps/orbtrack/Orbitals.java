@@ -329,9 +329,13 @@ public abstract class Orbitals
                 setText(titles[offset], res.getString(R.string.title_owner) + ":");
                 detailDialog.hideVerticalItemDetailDivider(offset);
                 TextView ownerText = texts[offset++];
-                TableRow.LayoutParams viewParams = (TableRow.LayoutParams)ownerText.getLayoutParams();
-                viewParams.span = 4;
-                ownerText.setLayoutParams(viewParams);
+                TableRow.LayoutParams viewParams = (ownerText != null ? (TableRow.LayoutParams)ownerText.getLayoutParams() : null);
+
+                if(viewParams != null)
+                {
+                    viewParams.span = 4;
+                    ownerText.setLayoutParams(viewParams);
+                }
                 offset++;
 
                 setText(titles[offset], res.getString(R.string.title_norad) + " " + res.getString(R.string.title_id) + ":");

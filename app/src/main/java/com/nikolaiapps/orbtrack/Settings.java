@@ -257,6 +257,7 @@ public abstract class Settings
                 static final int Sputnik2 = 3;
                 static final int Emoji = 4;
                 static final int GrayOrange = 5;
+                static final int Signal = 6;
             }
             public static IconSpinner.Item[] satelliteIconItems;
 
@@ -323,7 +324,8 @@ public abstract class Settings
                         new IconSpinner.Item(R.drawable.orbital_satellite_sputnik1, true, SatelliteIcon.Sputnik1),
                         new IconSpinner.Item(R.drawable.orbital_satellite_sputnik2, true, SatelliteIcon.Sputnik2),
                         new IconSpinner.Item(R.drawable.orbital_satellite_emoji, false, SatelliteIcon.Emoji),
-                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_orange, false, SatelliteIcon.GrayOrange)
+                        new IconSpinner.Item(R.drawable.orbital_satellite_gray_orange, false, SatelliteIcon.GrayOrange),
+                        new IconSpinner.Item(R.drawable.orbital_satellite_signal, false, SatelliteIcon.Signal)
                     };
                 }
                 if(orbitalIconsItems == null || orbitalIconsItems.length == 0)
@@ -2246,6 +2248,9 @@ public abstract class Settings
 
                 case Options.Display.SatelliteIcon.GrayOrange:
                     return(R.drawable.orbital_satellite_gray_orange);
+
+                case Options.Display.SatelliteIcon.Signal:
+                    return(R.drawable.orbital_satellite_signal);
             }
         }
 

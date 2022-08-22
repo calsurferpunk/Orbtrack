@@ -287,7 +287,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference legacyDataSwitch = this.findPreference(Settings.PreferenceName.SatelliteSourceUseGP);
                         SwitchPreference translateInformationSwitch = this.findPreference(Settings.PreferenceName.TranslateInformation);
                         SwitchPreference shareTranslateSwitch = this.findPreference(Settings.PreferenceName.ShareTranslations);
-                        IconListPreference satellitesList = this.findPreference(Settings.PreferenceName.SatelliteSource);
+                        SwitchPreference sharedSourceSwitch = this.findPreference(Settings.PreferenceName.SatelliteSourceShared);
+                        IconListPreference satelliteSourceList = this.findPreference(Settings.PreferenceName.SatelliteSource);
+                        IconListPreference satelliteDataList = this.findPreference(Settings.PreferenceName.SatelliteDataSource);
                         IconListPreference altitudeList = this.findPreference(Settings.PreferenceName.AltitudeSource);
                         IconListPreference timeZoneList = this.findPreference(Settings.PreferenceName.TimeZoneSource);
                         IconListPreference informationList = this.findPreference(Settings.PreferenceName.InformationSource);
@@ -308,7 +310,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(legacyDataSwitch);
                         setupSwitch(translateInformationSwitch);
                         setupSwitch(shareTranslateSwitch);
-                        setupList(satellitesList, Settings.Options.Updates.SatelliteSourceItems, Settings.Options.Updates.SatelliteSourceValues, Settings.Options.Updates.SatelliteSourceImageIds, Settings.Options.Updates.SatelliteSourceSubTexts, legacyDataSwitch);
+                        setupSwitch(sharedSourceSwitch, satelliteDataList, satelliteSourceList);
+                        setupList(satelliteSourceList, Settings.Options.Updates.SatelliteSourceItems, Settings.Options.Updates.SatelliteSourceValues, Settings.Options.Updates.SatelliteSourceImageIds, Settings.Options.Updates.SatelliteSourceSubTexts, legacyDataSwitch);
+                        setupList(satelliteDataList, Settings.Options.Updates.SatelliteDataSourceItems, Settings.Options.Updates.SatelliteDataSourceValues, Settings.Options.Updates.SatelliteDataSourceImageIds, Settings.Options.Updates.SatelliteDataSourceSubTexts, legacyDataSwitch);
                         setupList(altitudeList, Settings.Options.Updates.AltitudeSourceItems, Settings.Options.Updates.AltitudeSourceValues, Settings.Options.Updates.AltitudeSourceImageIds, null, null);
                         setupList(timeZoneList, Settings.Options.Updates.TimeZoneSourceItems, Settings.Options.Updates.TimeZoneSourceValues, Settings.Options.Updates.TimeZoneSourceImageIds, null, null);
                         setupList(informationList, Settings.Options.Updates.InformationSourceItems, Settings.Options.Updates.InformationSourceValues, Settings.Options.Updates.InformationSourceImageIds, null, null);
@@ -366,6 +370,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final Context context = preference.getContext();
                 final String preferenceKey = preference.getKey();
                 boolean forGlobe = false;
+                int index;
+                int value = -1;
                 int valueIndex = -1;
                 Object currentValue = null;
 
@@ -484,24 +490,28 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             break;
 
                         case Settings.PreferenceName.SatelliteSource:
-                            valueIndex = Settings.getSatelliteSource(context);
+                        case Settings.PreferenceName.SatelliteDataSource:
+                            boolean isCatalog = preferenceKey.equals(Settings.PreferenceName.SatelliteSource);
+                            value = (isCatalog ? Settings.getSatelliteCatalogSource(context) : Settings.getSatelliteDataSource(context));
 
                             preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                                 {
-                                    byte source = (byte)newValue;
+                                    boolean isSharedSource = Settings.getSatelliteSourceShared(context);
+                                    byte dataSource = (!isCatalog || isSharedSource ? (byte)newValue : Integer.valueOf(Settings.getSatelliteDataSource(context)).byteValue());
+                                    byte catalogSource = (isCatalog ? (byte)newValue : Integer.valueOf(Settings.getSatelliteCatalogSource(context)).byteValue());
                                     SwitchPreference childSwitch = (SwitchPreference)childPreference;
-                                    boolean sourceUseGP = Settings.getSatelliteSourceUseGP(context, source);
+                                    boolean sourceUseGP = Settings.getSatelliteSourceUseGP(context, dataSource);
 
                                     //update child switch
-                                    childSwitch.setSubKey(String.valueOf(source));
+                                    childSwitch.setSubKey(String.valueOf(dataSource));
                                     childSwitch.setChecked(!sourceUseGP);
-                                    childSwitch.setEnabled(source != Database.UpdateSource.N2YO);
+                                    childSwitch.setEnabled(dataSource != Database.UpdateSource.N2YO && dataSource != Database.UpdateSource.HeavensAbove);
 
-                                    //if changing source
-                                    if(source != Settings.getSatelliteSource(context))
+                                    //if changing catalog source
+                                    if(catalogSource != Settings.getSatelliteCatalogSource(context))
                                     {
                                         //clear master satellites
                                         Database.clearMasterSatelliteTable(context);
@@ -526,8 +536,26 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             valueIndex = (valueIndex == Database.UpdateSource.NASA ? 0 : valueIndex == Database.UpdateSource.Celestrak ? 1 : 2);
                             break;
                     }
+
+                    //if value is set
+                    if(value >= 0)
+                    {
+                        //go through values
+                        for(index = 0; index < values.length && valueIndex == -1; index++)
+                        {
+                            //if value and index matches value
+                            if(values[index] instanceof Byte && (byte)values[index] == value)
+                            {
+                                //set value index
+                                valueIndex = index;
+                            }
+                        }
+                    }
+
+                    //if value index set and valid
                     if(valueIndex >= 0 && valueIndex < values.length)
                     {
+                        //remember current value
                         currentValue = values[valueIndex];
                     }
 
@@ -551,7 +579,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         //Sets up a preference switch
-        private static void setupSwitch(SwitchPreference preference, Preference childPreference)
+        private static void setupSwitch(SwitchPreference preference, Preference childPreference, Preference childPreference2)
         {
             //if preference exists
             if(preference != null)
@@ -560,8 +588,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final SharedPreferences.Editor writeSettings = Settings.getWriteSettings(context);
                 final String preferenceKey = preference.getKey();
                 final boolean isGPDataUsage = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceUseGP);
+                final boolean isSourceShared = preferenceKey.equals(Settings.PreferenceName.SatelliteSourceShared);
                 final boolean useCompatibility = Settings.getUseGlobeCompatibility(context);
-                final Object dependency = Settings.getSatelliteSource(context);
+                final Object dependency = Settings.getSatelliteDataSource(context);
                 final boolean checked = Settings.getPreferenceBoolean(context, preferenceKey + (isGPDataUsage ? dependency : ""), (isGPDataUsage ? dependency : null));
 
                 //if preference should be visible
@@ -583,6 +612,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                         {
                             boolean checked = (Boolean)newValue;
+                            boolean visible = checked;
                             boolean isAutoUpdate = (childPreference instanceof TimeIntervalPreference);
                             String subKey = ((SwitchPreference)preference).getSubKey();
                             UpdateService.AlarmUpdateSettings settings = (isAutoUpdate ? Settings.getAutoUpdateSettings(context, preferenceKey) : null);
@@ -593,8 +623,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                 //if for GP data usage
                                 if(isGPDataUsage)
                                 {
-                                    //invert value
-                                    checked = !checked;
+                                    //invert checked
+                                    checked = visible = !checked;
+                                }
+
+                                //if for shared source
+                                if(isSourceShared)
+                                {
+                                    //invert visible
+                                    visible = !visible;
                                 }
 
                                 //save preference
@@ -612,7 +649,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             if(childPreference != null)
                             {
                                 //update visibility
-                                childPreference.setVisible(checked);
+                                childPreference.setVisible(visible);
+                            }
+                            if(childPreference2 instanceof IconListPreference && isSourceShared)
+                            {
+                                IconListPreference satelliteSourceList = (IconListPreference)childPreference2;
+
+                                //if shared source
+                                if(checked)
+                                {
+                                    //update selected catalog and data source
+                                    satelliteSourceList.setSelectedValue(Settings.getSatelliteCatalogSource(context));
+                                }
+
+                                //update title
+                                satelliteSourceList.setTitle(checked ? R.string.title_source : R.string.title_catalog);
                             }
 
                             //allow change
@@ -638,6 +689,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     preference.setVisible(false);
                 }
             }
+        }
+        private static void setupSwitch(SwitchPreference preference, Preference childPreference)
+        {
+            setupSwitch(preference, childPreference, null);
         }
         private static void setupSwitch(SwitchPreference preference)
         {

@@ -182,6 +182,7 @@ public abstract class Globals
         static final String N2YO = "N2YO";
         static final String SpaceTrack = "Space-Track";
         static final String Celestrak = "Celestrak";
+        static final String HeavensAbove = "Heavens Above";
     }
 
     //Encoding
@@ -407,8 +408,9 @@ public abstract class Globals
             final String password = (String)objects[4];
             final boolean alwaysShow = (boolean)objects[5];
             final Resources res = context.getResources();
+            final boolean forSatellites = (updateType == UpdateService.UpdateType.UpdateSatellites);
             final boolean forSpaceTrack = (accountType == AccountType.SpaceTrack);
-            final String title = res.getString(forSpaceTrack && alwaysShow ? R.string.title_login : updateType == UpdateService.UpdateType.UpdateSatellites ? R.string.title_update : R.string.title_list_update);
+            final String title = res.getString(forSpaceTrack && alwaysShow ? R.string.title_login : forSatellites ? R.string.title_update : R.string.title_list_update);
             final String[] createLink = (forSpaceTrack ? new String[]{context.getResources().getString(R.string.spacetrack_create_link)} : null);
             final WebPageData loginData = (alwaysShow || !forSpaceTrack ? null : loginSpaceTrack(user, password));
 
@@ -444,7 +446,7 @@ public abstract class Globals
                                 if(index >= 0 && index < Settings.Options.Updates.SatelliteSourceValues.length)
                                 {
                                     //update source
-                                    Settings.setSatelliteSource(context, Settings.Options.Updates.SatelliteSourceValues[index]);
+                                    Settings.setSatelliteCatalogSource(context, Settings.Options.Updates.SatelliteSourceValues[index]);
                                 }
                             }
                         },
@@ -453,11 +455,14 @@ public abstract class Globals
                             @Override
                             public void onDismiss(EditValuesDialog dialog, int saveCount)
                             {
+                                //remember source
+                                int source = (forSatellites ? Settings.getSatelliteDataSource(context) : Settings.getSatelliteCatalogSource(context));
+
                                 //if listener is set and not canceled
                                 if(loginListener != null && !canceled)
                                 {
-                                    //send any login data and success -if creating only or not space-track-
-                                    loginListener.onResult(loginData, (createOnly || Settings.getSatelliteSource(context) != Database.UpdateSource.SpaceTrack));
+                                    //send any login data and success -if creating only or source not space-track-
+                                    loginListener.onResult(loginData, (createOnly || (source != Database.UpdateSource.SpaceTrack)));
                                 }
                             }
                         },

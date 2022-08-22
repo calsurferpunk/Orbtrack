@@ -168,6 +168,12 @@ public class IconListPreference extends CustomPreference
         setAdapter(context, items, false);
     }
 
+    //Sets title
+    public void setTitle(int resId)
+    {
+        titleText = this.getContext().getString(resId);
+    }
+
     //Sets selected value
     public void setSelectedValue(Object value, Object defaultValue)
     {

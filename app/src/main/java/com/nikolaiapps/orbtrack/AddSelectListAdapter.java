@@ -148,8 +148,8 @@ public class AddSelectListAdapter extends BaseAdapter
 
             default:
             case SelectType.SatelliteSource:
-                updateSource = Settings.getSatelliteSource(context);
-                selections = new String[]{(updateSource == Database.UpdateSource.N2YO ? Globals.Strings.N2YO : updateSource == Database.UpdateSource.SpaceTrack ? Globals.Strings.SpaceTrack : updateSource == Database.UpdateSource.Celestrak ? Globals.Strings.Celestrak : res.getString(R.string.title_unknown)), res.getString(R.string.title_file), res.getString(R.string.title_manual)};
+                updateSource = Settings.getSatelliteCatalogSource(context);
+                selections = new String[]{(updateSource == Database.UpdateSource.N2YO ? Globals.Strings.N2YO : updateSource == Database.UpdateSource.SpaceTrack ? Globals.Strings.SpaceTrack : updateSource == Database.UpdateSource.Celestrak ? Globals.Strings.Celestrak : updateSource == Database.UpdateSource.HeavensAbove ? Globals.Strings.HeavensAbove : res.getString(R.string.title_unknown)), res.getString(R.string.title_file), res.getString(R.string.title_manual)};
                 break;
         }
     }

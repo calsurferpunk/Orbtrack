@@ -120,6 +120,8 @@ public abstract class Settings
         static final String TimeZoneSource = "TimeZoneSource";
         static final String SatelliteSource = "SatelliteSource";
         static final String SatelliteSourceUseGP = "SatelliteSourceUseGP";
+        static final String SatelliteDataSource = "SatelliteDataSource";
+        static final String SatelliteSourceShared = "SatelliteSourceShared";
         static final String CatalogDebris = "CatalogDebris";
         static final String CatalogRocketBodies = "CatalogRocketBodies";
         static final String CatalogAutoUpdate = "CatalogAutoUpdate";
@@ -817,6 +819,7 @@ public abstract class Settings
             static final String Celestrak = Globals.Strings.Celestrak;
             static final String N2YO = Globals.Strings.N2YO;
             static final String SpaceTrack = Globals.Strings.SpaceTrack;
+            static final String HeavensAbove = Globals.Strings.HeavensAbove;
             static final String NASA = "NASA";
         }
 
@@ -838,6 +841,12 @@ public abstract class Settings
             public static final Byte[] SatelliteSourceValues = new Byte[]{Database.UpdateSource.Celestrak, Database.UpdateSource.N2YO, Database.UpdateSource.SpaceTrack};
             public static final int[] SatelliteSourceImageIds = new int[]{R.drawable.org_celestrak, R.drawable.org_n2yo, R.drawable.org_space_track};
             public static String[] SatelliteSourceSubTexts;
+
+            //Satellite data sources
+            public static final String[] SatelliteDataSourceItems = new String[]{Sources.Celestrak, Sources.HeavensAbove, Sources.N2YO, Sources.SpaceTrack};
+            public static final Byte[] SatelliteDataSourceValues = new Byte[]{Database.UpdateSource.Celestrak, Database.UpdateSource.HeavensAbove, Database.UpdateSource.N2YO, Database.UpdateSource.SpaceTrack};
+            public static final int[] SatelliteDataSourceImageIds = new int[]{R.drawable.org_celestrak, R.drawable.org_heavens_above, R.drawable.org_n2yo, R.drawable.org_space_track};
+            public static String[] SatelliteDataSourceSubTexts;
 
             //Information sources
             public static final String[] InformationSourceItems = new String[]{Sources.NASA, Sources.Celestrak, Sources.N2YO};
@@ -862,6 +871,17 @@ public abstract class Settings
                     //init satellite source sub texts
                     SatelliteSourceSubTexts = new String[]
                     {
+                        qualityString + Globals.getStars(2) + speedString + Globals.getStars(2),
+                        qualityString + Globals.getStars(1) + speedString + Globals.getStars(2),
+                        qualityString + Globals.getStars(3) + speedString + Globals.getStars(3) + " " + Globals.Symbols.Lock
+                    };
+                }
+                if(SatelliteDataSourceSubTexts == null || SatelliteDataSourceSubTexts.length == 0)
+                {
+                    //init satellite data source sub texts
+                    SatelliteDataSourceSubTexts = new String[]
+                    {
+                        qualityString + Globals.getStars(2) + speedString + Globals.getStars(2),
                         qualityString + Globals.getStars(2) + speedString + Globals.getStars(2),
                         qualityString + Globals.getStars(1) + speedString + Globals.getStars(2),
                         qualityString + Globals.getStars(3) + speedString + Globals.getStars(3) + " " + Globals.Symbols.Lock
@@ -1892,7 +1912,7 @@ public abstract class Settings
     {
         if(preferenceName.startsWith(PreferenceName.SatelliteSourceUseGP) && dependency instanceof Integer)
         {
-            return((int)dependency != Database.UpdateSource.N2YO);
+            return((int)dependency != Database.UpdateSource.N2YO && (int)dependency != Database.UpdateSource.HeavensAbove);
         }
         else
         {
@@ -1925,6 +1945,7 @@ public abstract class Settings
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Map:
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
             case PreferenceName.TranslateInformation:
+            case PreferenceName.SatelliteSourceShared:
             case PreferenceName.UseCombinedCurrentLayout:
                 return(true);
         }
@@ -2027,6 +2048,7 @@ public abstract class Settings
                 return(CoordinatesFragment.MapMarkerInfoLocation.ScreenBottom);
 
             case PreferenceName.SatelliteSource:
+            case PreferenceName.SatelliteDataSource:
                 return(Database.UpdateSource.SpaceTrack);
 
             case PreferenceName.TimeZoneSource:
@@ -2882,11 +2904,11 @@ public abstract class Settings
         return(getPreferenceInt(context, PreferenceName.TimeZoneSource));
     }
 
-    //Sets satellite source
-    public static void setSatelliteSource(Context context, int source)
+    //Sets satellite catalog source
+    public static void setSatelliteCatalogSource(Context context, int source)
     {
         //if source is changing
-        if(source != getSatelliteSource(context))
+        if(source != getSatelliteCatalogSource(context))
         {
             //clear master satellites
             Database.clearMasterSatelliteTable(context);
@@ -2896,16 +2918,28 @@ public abstract class Settings
         setPreferenceInt(context, PreferenceName.SatelliteSource, source);
     }
 
-    //Gets satellites source
-    public static int getSatelliteSource(Context context)
+    //Gets satellites catalog source
+    public static int getSatelliteCatalogSource(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.SatelliteSource));
+    }
+
+    //Gets satellites data source
+    public static int getSatelliteDataSource(Context context)
+    {
+        return(getPreferenceInt(context, (getSatelliteSourceShared(context) ? PreferenceName.SatelliteSource : PreferenceName.SatelliteDataSource)));
     }
 
     //Gets satellite source using GP
     public static boolean getSatelliteSourceUseGP(Context context, int source)
     {
         return(getPreferenceBoolean(context, PreferenceName.SatelliteSourceUseGP + source, source));
+    }
+
+    //Gets satellite source being shared
+    public static boolean getSatelliteSourceShared(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.SatelliteSourceShared));
     }
 
     //Gets catalog debris usage

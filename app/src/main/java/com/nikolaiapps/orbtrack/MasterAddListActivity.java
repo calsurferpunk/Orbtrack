@@ -712,7 +712,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                         @Override
                                                         public void run()
                                                         {
-                                                            updateMasterList(Settings.getSatelliteSource(context), true);
+                                                            updateMasterList(Settings.getSatelliteCatalogSource(context), true);
                                                         }
                                                     });
                                                 }
@@ -1214,7 +1214,7 @@ public class MasterAddListActivity extends BaseInputActivity
             Intent intent = new Intent(context, MasterAddListActivity.class);
             intent.putExtra(ParamTypes.ListType, ListType.MasterList);
             intent.putExtra(ParamTypes.AskUpdate, askUpdate);
-            intent.putExtra(Settings.PreferenceName.SatelliteSource, Settings.getSatelliteSource(context));
+            intent.putExtra(Settings.PreferenceName.SatelliteSource, Settings.getSatelliteCatalogSource(context));
             Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.MasterAddList);
         }
     }

@@ -83,6 +83,7 @@ public class Database extends SQLiteOpenHelper
         static final byte N2YO = 1;
         static final byte SpaceTrack = 2;
         static final byte NASA = 3;
+        static final byte HeavensAbove = 4;
         static final byte SpaceDotCom = 127;
     }
 

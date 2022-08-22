@@ -384,6 +384,11 @@
                         app:titleText="@string/title_source"
                         android:key="SatelliteSource"/>
 
+                    <com.nikolaiapps.orbtrack.IconListPreference
+                        app:titleText="@string/title_data"
+                        android:key="SatelliteDataSource"
+                        app:isPreferenceVisible="false"/>
+
                     <com.nikolaiapps.orbtrack.SwitchPreference
                         android:title="@string/title_add_rocket_bodies"
                         android:key="CatalogRocketBodies"/>
@@ -395,6 +400,10 @@
                     <com.nikolaiapps.orbtrack.SwitchPreference
                         android:title="@string/title_use_legacy_tle_format"
                         android:key="SatelliteSourceUseGP"/>
+
+                    <com.nikolaiapps.orbtrack.SwitchPreference
+                        android:title="@string/title_shared_source"
+                        android:key="SatelliteSourceShared"/>
                 </PreferenceCategory>
 
                 <PreferenceCategory android:title="@string/title_altitude" android:key="AltitudeCategory">

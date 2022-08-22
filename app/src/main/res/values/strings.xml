@@ -281,6 +281,7 @@
     <string name="title_camera">Camera</string>
     <string name="title_cancel">Cancel</string>
     <!--string name="title_cancelled">Cancelled</string-->
+    <string name="title_catalog">Catalog</string>
     <string name="title_categories">Categories</string>
     <string name="title_caution">Caution</string>
     <string name="title_character_colon">Character:</string>
@@ -304,6 +305,7 @@
     <string name="title_custom">Custom</string>
     <string name="title_cyan">Cyan</string>
     <string name="title_dark_theme">Dark Theme</string>
+    <string name="title_data">Data</string>
     <string name="title_database_backup">Database Backup</string>
     <string name="title_database_building">Building Database</string>
     <string name="title_day">Day</string>
@@ -531,6 +533,7 @@
     <string name="title_settings">Settings</string>
     <string name="title_shared">Shared</string>
     <string name="title_shared_color">Shared Color</string>
+    <string name="title_shared_source">Shared Source</string>
     <string name="title_share_translations_online">Share Translations Online</string>
     <string name="title_show_3d_paths">Show 3d Paths</string>
     <string name="title_show_background">Show Background</string>

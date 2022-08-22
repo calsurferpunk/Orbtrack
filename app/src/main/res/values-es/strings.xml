@@ -281,6 +281,7 @@
     <string name="title_camera">Cámara</string>
     <string name="title_cancel">Cancelar</string>
     <!--string name="title_cancelled">Cancelado</string-->
+    <string name="title_catalog">Catalogar</string>
     <string name="title_categories">Categorías</string>
     <string name="title_caution">Precaución</string>
     <string name="title_character_colon">"Caractere: "</string>
@@ -304,6 +305,7 @@
     <string name="title_custom">Personalizado</string>
     <string name="title_cyan">Cyan</string>
     <string name="title_dark_theme">Tema Oscuro</string>
+    <string name="title_data">Datos</string>
     <string name="title_database_backup">Copia De Seguridad</string>
     <string name="title_database_building">Construyendo Base Datos</string>
     <string name="title_day">Día</string>
@@ -531,6 +533,7 @@
     <string name="title_settings">Configuraciones</string>
     <string name="title_shared">Compartido</string>
     <string name="title_shared_color">Color Compartido</string>
+    <string name="title_shared_source">Fuente Compartida</string>
     <string name="title_share_translations_online">Compartir Traducciones en Línea</string>
     <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
     <string name="title_show_background">Mostrar Fondo</string>

@@ -651,7 +651,7 @@ public class UpdateService extends NotifyService
             {
                 case UpdateType.GetMasterList:
                     //check for update
-                    updateMasterList(context, Settings.getSatelliteSource(context), false, true, true);
+                    updateMasterList(context, Settings.getSatelliteCatalogSource(context), false, true, true);
                     break;
 
                 case UpdateType.UpdateSatellites:
@@ -3098,6 +3098,11 @@ public class UpdateService extends NotifyService
                         //try to get html page
                         receivedPage = Globals.getWebPage("https://www.n2yo.com/satellite/?s=" + currentNumber, isLast, null);
                         break;
+
+                    case Database.UpdateSource.HeavensAbove:
+                        //try to get html page
+                        receivedPage = Globals.getWebPage("https://www.heavens-above.com/orbit.aspx?satid=" + currentNumber, isLast, null);
+                        break;
                 }
             }
 
@@ -3846,7 +3851,7 @@ public class UpdateService extends NotifyService
     //Update given satellites
     public static void updateSatellites(Context context, String notifyTitle, ArrayList<Database.DatabaseSatellite> satellites, boolean oldSatellites, boolean runForeground)
     {
-        int updateSource = Settings.getSatelliteSource(context);
+        int updateSource = Settings.getSatelliteDataSource(context);
         Intent updateIntent = createIntent(context, UpdateType.UpdateSatellites, notifyTitle);
         String[] loginData = Settings.getLogin(context, getAccountType(updateSource));
 

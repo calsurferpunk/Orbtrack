@@ -222,7 +222,7 @@ public class IconSpinner extends AppCompatSpinner
         private void BaseConstructor(Context context)
         {
             selectedIndex = -1;
-            listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            listInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
             textColor = textSelectedColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
             backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
@@ -438,7 +438,7 @@ public class IconSpinner extends AppCompatSpinner
             //set view
             if(convertView == null)
             {
-                convertView = listInflater.inflate(R.layout.icon_spinner_item, parent, false);
+                convertView = (listInflater != null ? listInflater.inflate(R.layout.icon_spinner_item, parent, false) : new View(null));
             }
             context = convertView.getContext();
             icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);

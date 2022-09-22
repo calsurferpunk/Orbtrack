@@ -206,8 +206,7 @@ public class OrbitalFilterList
         protected void showViews(String ownerCode, String categoryName, long currentMs, int ageValue, String searchString)
         {
             int index;
-            Resources res = currentContext.getResources();
-            String listAllString = res.getString(R.string.title_list_all);
+            String listAllString = (currentContext != null ? currentContext.getString(R.string.title_list_all) : null);
             String searchStringInsensitive = searchString.trim().toLowerCase();
 
             //clear current items
@@ -289,11 +288,14 @@ public class OrbitalFilterList
         private void setupOwnerList(IconSpinner ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
             int index;
-            Resources res = currentContext.getResources();
-            String listAllString = res.getString(R.string.title_list_all);
-            String unknown = Globals.getUnknownString(currentContext).toUpperCase();
+            String listAllString = (currentContext != null ? currentContext.getString(R.string.title_list_all) : null);
+            String unknown = Globals.getUnknownString(currentContext);
             IconSpinner.Item[] owners;
 
+            if(unknown != null)
+            {
+                unknown = unknown.toUpperCase();
+            }
             owners = new IconSpinner.Item[usedOwners.size() + 1];
             owners[0] = new IconSpinner.Item(listAllString, listAllString);
             for(index = 0; index < usedOwners.size(); index++)
@@ -315,11 +317,10 @@ public class OrbitalFilterList
         //Sets up group list
         private void setupGroupList(IconSpinner groupList, ArrayList<String> usedCategories, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
-            Resources res = currentContext.getResources();
             ArrayList<String> groups;
 
             groups = usedCategories;
-            groups.add(0, res.getString(R.string.title_list_all));
+            groups.add(0, (currentContext != null ? currentContext.getString(R.string.title_list_all) : null));
             groupList.setAdapter(new IconSpinner.CustomAdapter(currentContext, groups.toArray(new String[0])));
             groupList.setBackgroundColor(listBgColor);
             groupList.setBackgroundItemColor(listBgItemColor);
@@ -333,12 +334,12 @@ public class OrbitalFilterList
         //Sets up age list
         private void setupAgeList(IconSpinner ageList, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
-            Resources res = currentContext.getResources();
-            String lastString = res.getString(R.string.title_last_plural);
-            String daysString = res.getString(R.string.title_days);
-            String monthsString = res.getString(R.string.title_months);
+            Resources res = (currentContext != null ? currentContext.getResources() : null);
+            String lastString = (res != null ? res.getString(R.string.title_last_plural) : null);
+            String daysString = (res != null ? res.getString(R.string.title_days) : null);
+            String monthsString = (res != null ? res.getString(R.string.title_months) : null);
 
-            ageList.setAdapter(new IconSpinner.CustomAdapter(currentContext, new IconSpinner.Item[]
+            ageList.setAdapter(new IconSpinner.CustomAdapter(currentContext, res != null ? (new IconSpinner.Item[]
             {
                 new IconSpinner.Item(res.getString(R.string.title_any), -1),
                 new IconSpinner.Item(res.getString(R.string.title_today), 0),
@@ -349,7 +350,7 @@ public class OrbitalFilterList
                 new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + monthsString, 93),
                 new IconSpinner.Item(lastString + " " + res.getString(R.string.text_6) + " " + monthsString, 183),
                 new IconSpinner.Item(res.getString(R.string.title_this_year), 366)
-            }));
+            }) : new IconSpinner.Item[0]));
             ageList.setBackgroundColor(listBgColor);
             ageList.setBackgroundItemColor(listBgItemColor);
             ageList.setBackgroundItemSelectedColor(listBgSelectedColor);

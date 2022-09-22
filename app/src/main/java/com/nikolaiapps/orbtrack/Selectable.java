@@ -1754,13 +1754,14 @@ public abstract class Selectable
         protected int getPosition(int id)
         {
             int position;
-            int count = (selectListAdapter != null ? selectListAdapter.getItemCount() : 0);
+            int count = getListItemCount();
 
             //try to find position
             for(position = 0; position < count; position++)
             {
                 //if current item ID matches
-                if(selectListAdapter.getItem(position).id == id)
+                ListItem currentItem = selectListAdapter.getItem(position);
+                if(currentItem != null && currentItem.id == id)
                 {
                     //found position
                     return(position);

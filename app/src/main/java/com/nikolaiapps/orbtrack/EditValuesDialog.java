@@ -340,8 +340,7 @@ public class EditValuesDialog
         if(itemDateValues != null && currentIndex < itemDateValues.length)
         {
             //set date
-            date = Globals.getGMTTime();
-            date.setTimeInMillis(itemDateValues[currentIndex]);
+            date = Globals.getGMTTime(itemDateValues[currentIndex]);
             itemTitle = (itemDateTitle != null ? itemDateTitle : "");
             editDateTitle.setText(itemTitle);
             editDate.setTimeZone(Globals.gmtTimeZone);

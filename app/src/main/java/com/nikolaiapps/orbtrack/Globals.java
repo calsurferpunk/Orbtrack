@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.DatePickerDialog;
 import android.app.Dialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -897,6 +898,35 @@ public abstract class Globals
     public static void showSelectDialog(Context context, String title, byte selectType, AddSelectListAdapter.OnItemClickListener listener)
     {
         showSelectDialog(context, -1, title, selectType, AccountType.None, -1, null, listener);
+    }
+
+    //Shows a date dialog
+    public static void showDateDialog(Context context, Calendar date, DatePickerDialog.OnDateSetListener listener)
+    {
+        //if context an date are set
+        if(context != null && date != null)
+        {
+            int themeID = Globals.getDialogThemeID(context);
+            int year = date.get(Calendar.YEAR);
+            int month = date.get(Calendar.MONTH);
+            int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+            DatePickerDialog dateDialog;
+
+            //show picker
+            if(Build.VERSION.SDK_INT <= 20)
+            {
+                dateDialog = new DatePickerDialog(context, listener, year, month, dayOfMonth);
+                if(dateDialog.getWindow() != null)
+                {
+                    dateDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                }
+            }
+            else
+            {
+                dateDialog = new DatePickerDialog(context, themeID, listener, year, month, dayOfMonth);
+            }
+            dateDialog.show();
+        }
     }
 
     //Shows a snack bar progress and returns text
@@ -1905,25 +1935,42 @@ public abstract class Globals
         return(shortDateFormatter.format(date.getTime()));
     }
 
+    //Clears time in given calendar
+    public static Calendar clearCalendarTime(Calendar date)
+    {
+        date.set(Calendar.HOUR_OF_DAY, 0);
+        date.set(Calendar.MINUTE, 0);
+        date.set(Calendar.SECOND, 0);
+        date.set(Calendar.MILLISECOND, 0);
+
+        return(date);
+    }
+
     //Gets current gmt time
     public static Calendar getGMTTime()
     {
         return(Calendar.getInstance(gmtTimeZone));
     }
-    public static Calendar getGMTTime(Calendar localTime)
+    public static Calendar getGMTTime(long dateMs)
     {
         Calendar gmtTime = getGMTTime();
-
-        if(localTime != null)
-        {
-            gmtTime.setTimeInMillis(localTime.getTimeInMillis());
-        }
+        gmtTime.setTimeInMillis(dateMs);
 
         return(gmtTime);
+    }
+    public static Calendar getGMTTime(Calendar date)
+    {
+        return(date != null ? getGMTTime(date.getTimeInMillis()) : getGMTTime());
     }
     public static Calendar getGMTTime(long dateMs, TimeZone localZone, TimeZone wantedZone, String wantedZoneId)
     {
         return(getGMTTime(getCalendar(wantedZoneId, dateMs + getTimeZoneDifferenceMs(localZone, wantedZone, dateMs))));
+    }
+
+    //Gets current julian date
+    public static double getJulianDate()
+    {
+        return(Calculations.julianDateCalendar(getGMTTime()));
     }
 
     //Converts given time to given local time zone

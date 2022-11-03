@@ -639,8 +639,7 @@ public class CalculateService extends NotifyService
             Calendar nextStartTime;
 
             //get next starting time
-            nextStartTime = Globals.getGMTTime();
-            nextStartTime.setTimeInMillis(endTimeMs + 10000);     //10 seconds after last pass ending time
+            nextStartTime = Globals.getGMTTime(endTimeMs + 10000);      //10 seconds after last pass ending time
             nextStartJulianDate = Calculations.julianDateCalendar(nextStartTime);
 
             //possibly get calculate type
@@ -714,7 +713,7 @@ public class CalculateService extends NotifyService
                 Database.SatelliteData currentOrbital = new Database.SatelliteData(context, noradId);
 
                 //get parameters
-                julianStart = Calculations.julianDateCalendar(Globals.getGMTTime());
+                julianStart = Globals.getJulianDate();
 
                 //if using pass
                 if(usingPass)
@@ -1265,15 +1264,16 @@ public class CalculateService extends NotifyService
         double phase;
         long spanMs;
         long firstTimeMs;
+        long startTimeMs = startGMT.getTimeInMillis();
         String section;
-        Calendar currentGMT = Globals.getGMTTime();
+        Calendar currentGMT = Globals.getGMTTime(startTimeMs);
         Calendar currentEndGMT = Globals.getGMTTime();
-        Calendar hourAfterStartGMT = Globals.getGMTTime();
+        Calendar hourAfterStartGMT = Globals.getGMTTime(startTimeMs);
         Calendar pathStartGMT = null;
         Calendar pathHourAfterStartGMT = Globals.getGMTTime();
         Calendar pathEndGMT = null;
-        Calendar maxEndGMT = Globals.getGMTTime();
-        Calendar extendedSearchGMT = Globals.getGMTTime();
+        Calendar maxEndGMT = Globals.getGMTTime(endGMT);
+        Calendar extendedSearchGMT = Globals.getGMTTime(startTimeMs);
         Calculations.TopographicDataType pointData1;
         Calculations.TopographicDataType pointData2;
         ArrayList<CalculateViewsTask.OrbitalView> pathViewsList = new ArrayList<>(0);
@@ -1300,15 +1300,12 @@ public class CalculateService extends NotifyService
         neededTLEsAccurate = (tle1IsAccurate && (!forIntersection || tle2IsAccurate));
 
         //set hour after start
-        hourAfterStartGMT.setTimeInMillis(startGMT.getTimeInMillis());
         hourAfterStartGMT.add(Calendar.HOUR, 1);
 
         //set maximum ending time to 180 days after ending time
-        maxEndGMT.setTimeInMillis(endGMT.getTimeInMillis());
         maxEndGMT.add(Calendar.DAY_OF_YEAR, 180);
 
         //set extended search time to 1 day after start
-        extendedSearchGMT.setTimeInMillis(startGMT.getTimeInMillis());
         extendedSearchGMT.add(Calendar.DAY_OF_YEAR, 1);
 
         //update progress
@@ -1321,11 +1318,10 @@ public class CalculateService extends NotifyService
         doneWithPath = (neededTLEsAccurate && (currentItem.passCalculating || currentItem.passCalculated || (currentItem.passTimeStart != null && !currentItem.passTimeStart.after(endGMT)) || (currentItem.passTimeEnd != null && !currentItem.passTimeEnd.before(startGMT))));
         if(!doneWithPath)
         {
-            //reset
+            //initialize
             azStart = azStart2 = azEnd = azEnd2 = azTravel = azTravel2 = elTravel = elTravel2 = 0;
             azLast = azLast2 = elLast = elLast2 = Double.MAX_VALUE;
             highestEl = -180;
-            currentGMT.setTimeInMillis(startGMT.getTimeInMillis());
 
             //update status
             currentItem.clearPass();
@@ -1367,8 +1363,7 @@ public class CalculateService extends NotifyService
                             currentItem.passStartFound = updateTimeInPath(calculateType, satellite1, satellite2, observer, intersection, (forIntersection ? 1 : 15), (long)(Calculations.SecondsPerDay * 180), currentGMT, false, applyRefraction);
 
                             //set pass start to now
-                            pathStartGMT = Globals.getGMTTime();
-                            pathStartGMT.setTimeInMillis((currentItem.passStartFound ? currentGMT : startGMT).getTimeInMillis());
+                            pathStartGMT = Globals.getGMTTime(currentItem.passStartFound ? currentGMT : startGMT);
 
                             //if pass start was not found
                             if(!currentItem.passStartFound)
@@ -1436,8 +1431,7 @@ public class CalculateService extends NotifyService
                     else if(pathStartGMT != null)
                     {
                         //update pass and az end
-                        pathEndGMT = Globals.getGMTTime();
-                        pathEndGMT.setTimeInMillis(currentGMT.getTimeInMillis());
+                        pathEndGMT = Globals.getGMTTime(currentGMT);
                         azEnd = pointData1.azimuth;
                         azEnd2 = (forIntersection ? pointData2.azimuth : azEnd);
 
@@ -1539,12 +1533,10 @@ public class CalculateService extends NotifyService
                     currentItem.passElMax = highestEl;
                     currentItem.passClosestAz = azIntersectClosest;
                     currentItem.passClosestEl = elIntersectClosest;
-                    currentItem.passTimeStart = Globals.getGMTTime();
-                    currentItem.passTimeStart.setTimeInMillis(pathStartGMT.getTimeInMillis());
+                    currentItem.passTimeStart = Globals.getGMTTime(pathStartGMT);
                     if(pathEndGMT != null)
                     {
-                        currentItem.passTimeEnd = Globals.getGMTTime();
-                        currentItem.passTimeEnd.setTimeInMillis(pathEndGMT.getTimeInMillis());
+                        currentItem.passTimeEnd = Globals.getGMTTime(pathEndGMT);
                     }
                     currentItem.passDuration = Globals.getTimeBetween(context, pathStartGMT, pathEndGMT);
                     phase = (isMoon ? Universe.Moon.getPhase(currentItem.getMidPass()) : 0);

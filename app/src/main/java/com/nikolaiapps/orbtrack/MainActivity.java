@@ -3774,10 +3774,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean onList = (subPage == Globals.SubPageType.List);
                 boolean onLens = (subPage == Globals.SubPageType.Lens);
                 boolean[] updateList = new boolean[Current.PageType.PageCount];
+                long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
-                long travelSeconds = (currentSystemElapsedSeconds - lastSystemElapsedSeconds.value);
                 double phase;
-                double julianDate = Calculations.julianDateCalendar(Globals.getGMTTime());
+                double julianDate = Globals.getJulianDate();
                 String coordinateString = null;
                 TextView mapInfoText = Current.Coordinates.getMapInfoText();
                 CameraLens cameraView = Current.getCameraView();
@@ -3797,6 +3797,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 if(!pendingLocationUpdate)
                 {
                     //if enough time has passed
+                    travelSeconds = (currentSystemElapsedSeconds - lastSystemElapsedSeconds.value);
                     if(travelSeconds >= 2)
                     {
                         //update later

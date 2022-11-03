@@ -1159,7 +1159,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 {
                     int index;
                     byte locationSource;
-                    double julianStart = Calculations.julianDateCalendar(Globals.getGMTTime());
+                    double julianStart = Globals.getJulianDate();
                     ArrayList<Integer> widgetIds;
 
                     //go through all widget classes
@@ -1205,7 +1205,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         {
             //get location, satellite, and time range
             final byte locationSource = WidgetBaseSetupActivity.getLocationSource(context, widgetId);
-            final double julianStart = Calculations.julianDateCalendar(Globals.getGMTTime());
+            final double julianStart = Globals.getJulianDate();
 
             //get pass
             if(locationSource == Database.LocationType.Current)

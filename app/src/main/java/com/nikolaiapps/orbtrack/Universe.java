@@ -290,8 +290,7 @@ public abstract class Universe
 
         public static double getPhase(long gmtMs)
         {
-            Calendar gmtTime = Globals.getGMTTime();
-            gmtTime.setTimeInMillis(gmtMs);
+            Calendar gmtTime = Globals.getGMTTime(gmtMs);
             int year = gmtTime.get(Calendar.YEAR);
             double phase = 0;
             double calcJD = 0;

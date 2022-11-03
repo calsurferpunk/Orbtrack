@@ -59,24 +59,8 @@ public class DateInputView extends AppCompatEditText implements DatePickerDialog
         //if for the on touch down event
         if(event.getAction() == MotionEvent.ACTION_DOWN)
         {
-            DatePickerDialog dateDialog;
-
             performClick();
-
-            //show picker
-            if(Build.VERSION.SDK_INT <= 20)
-            {
-                dateDialog = new DatePickerDialog(this.getContext(), this, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH));
-                if(dateDialog.getWindow() != null)
-                {
-                    dateDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                }
-            }
-            else
-            {
-                dateDialog = new DatePickerDialog(this.getContext(), themeID, this, currentDate.get(Calendar.YEAR), currentDate.get(Calendar.MONTH), currentDate.get(Calendar.DAY_OF_MONTH));
-            }
-            dateDialog.show();
+            Globals.showDateDialog(this.getContext(), currentDate, this);
         }
 
         //handled
@@ -130,10 +114,7 @@ public class DateInputView extends AppCompatEditText implements DatePickerDialog
         currentDate.setTimeInMillis(date.getTimeInMillis());
 
         //clear hours, minutes, seconds, and ms
-        currentDate.set(Calendar.HOUR_OF_DAY, 0);
-        currentDate.set(Calendar.MINUTE, 0);
-        currentDate.set(Calendar.SECOND, 0);
-        currentDate.set(Calendar.MILLISECOND, 0);
+        Globals.clearCalendarTime(currentDate);
 
         //update display
         updateDisplay();

@@ -47,24 +47,26 @@
                 style="@style/MaterialButton"
                 android:text="@string/title_cancel"/>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/Lens_Help_Text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:padding="5dp"
+            android:gravity="center"
+            android:text="@string/title_select"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:textColor="?attr/columnTitleTextColor"
+            android:background="?attr/columnBackground"
+            android:visibility="gone"/>
+
+        <com.nikolaiapps.orbtrack.PlayBar
+            android:id="@+id/Lens_Play_Bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="?attr/pageTitleBackground"
+            android:visibility="gone"/>
     </FrameLayout>
-
-    <TextView
-        android:id="@+id/Lens_Help_Text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:padding="5dp"
-        android:gravity="center"
-        android:text="@string/title_select"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-        android:textColor="?attr/columnTitleTextColor"
-        android:background="?attr/columnBackground"
-        android:visibility="gone"/>
-
-    <com.nikolaiapps.orbtrack.PlayBar
-        android:id="@+id/Lens_Play_Bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/pageTitleBackground"
-        android:visibility="gone"/>
 </LinearLayout>

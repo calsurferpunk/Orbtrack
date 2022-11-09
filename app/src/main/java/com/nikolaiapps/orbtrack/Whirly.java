@@ -174,7 +174,6 @@ class Whirly
             snippetCanvas = new Canvas(snippetImage);
 
             //draw image
-            snippetLayout.layout(snippetLayout.getLeft(), snippetLayout.getTop(), snippetLayout.getRight(), snippetLayout.getBottom());
             snippetLayout.draw(snippetCanvas);
 
             //update status

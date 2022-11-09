@@ -1223,6 +1223,12 @@ public abstract class Selectable
             void updateNeeded();
         }
 
+        //On page set listener
+        public interface OnPageSetListener
+        {
+            void onPageSet(ListFragment page, int pageNum, int subPageNum);
+        }
+
         //On update page listener
         public interface OnUpdatePageListener
         {
@@ -1328,6 +1334,7 @@ public abstract class Selectable
         private OnItemSelectedListener itemSelectedListener;
         private OnUpdateNeededListener updateNeededListener;
         private OnUpdatePageListener updatePageListener;
+        protected OnPageSetListener pageSetListener;
         private OnPagePauseListener pagePauseListener;
         private OnPageResumeListener pageResumeListener;
         private BroadcastReceiver updateReceiver;
@@ -2188,6 +2195,12 @@ public abstract class Selectable
             }
         }
 
+        //Sets on page set listener
+        public void setOnPageSetListener(OnPageSetListener listener)
+        {
+            pageSetListener = listener;
+        }
+
         //Sets on page paused listener
         public void setOnPagePausedListener(OnPagePauseListener listener)
         {
@@ -2241,9 +2254,10 @@ public abstract class Selectable
         private final ListFragment.OnItemCheckChangedListener itemCheckChangedListener;
         private final ListFragment.OnItemDetailButtonClickListener itemDetailButtonClickListener;
         private final ListFragment.OnAdapterSetListener adapterSetListener;
+        protected final Selectable.ListFragment.OnPageSetListener pageSetListener;
         private final ListFragment.OnPageResumeListener pageResumeListener;
 
-        public ListFragmentAdapter(FragmentManager fm, View parentView, ListFragment.OnItemSelectedListener selectedListener, ListFragment.OnUpdateNeededListener updateListener, ListFragment.OnUpdatePageListener updatePgListener, ListFragment.OnItemCheckChangedListener checkChangedListener, ListFragment.OnItemDetailButtonClickListener detailButtonClickListener, ListFragment.OnAdapterSetListener adapterListener, ListFragment.OnPageResumeListener resumeListener, int grp, int[] subPg)
+        public ListFragmentAdapter(FragmentManager fm, View parentView, ListFragment.OnItemSelectedListener selectedListener, ListFragment.OnUpdateNeededListener updateListener, ListFragment.OnUpdatePageListener updatePgListener, ListFragment.OnItemCheckChangedListener checkChangedListener, ListFragment.OnItemDetailButtonClickListener detailButtonClickListener, ListFragment.OnAdapterSetListener adapterListener, ListFragment.OnPageSetListener setListener, ListFragment.OnPageResumeListener resumeListener, int grp, int[] subPg)
         {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             currentParentVIew = parentView;
@@ -2256,6 +2270,7 @@ public abstract class Selectable
             itemCheckChangedListener = checkChangedListener;
             itemDetailButtonClickListener = detailButtonClickListener;
             adapterSetListener = adapterListener;
+            pageSetListener = setListener;
             pageResumeListener = resumeListener;
         }
 

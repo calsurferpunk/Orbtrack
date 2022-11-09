@@ -1294,7 +1294,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
         public TabAdapter(FragmentManager fm, View parentView, Class<?> setWidgetClass, Page.OnSettingChangedListener settingListener, Page.OnAllowOkayListener allowListener)
         {
-            super(fm, parentView, null, null, null, null, null, null, null, -1, null);
+            super(fm, parentView, null, null, null, null, null, null, null, null, -1, null);
 
             widgetClass = setWidgetClass;
             allowOkayListener = allowListener;

@@ -3602,6 +3602,13 @@ public abstract class Current
             //set change listeners
             setChangeListeners(selectList, listAdapter, page);
 
+            //if listener is set
+            if(pageSetListener != null)
+            {
+                //send event
+                pageSetListener.onPageSet(this, page, subPage);
+            }
+
             //return view
             return(newView);
         }
@@ -3708,9 +3715,9 @@ public abstract class Current
         private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
         private static final Object[][] savedItems = new Object[PageType.PageCount][];
 
-        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, int[] subPg)
+        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg)
         {
-            super(fm, parentView, null, null, null, null, detailListener, adapterListener, null, MainActivity.Groups.Current, subPg);
+            super(fm, parentView, null, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, subPg);
         }
 
         @Override
@@ -3725,6 +3732,9 @@ public abstract class Current
         {
             Bundle params;
             Page newPage = (Page)setupItem((Page)super.instantiateItem(container, position));
+
+            //setup page
+            newPage.setOnPageSetListener(pageSetListener);
 
             //set params
             params = newPage.getArguments();

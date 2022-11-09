@@ -2183,7 +2183,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             switch(mainGroup)
             {
                 case Groups.Current:
-                    desiredAdapter = currentPageAdapter = new Current.PageAdapter(currentManger, mainDrawerLayout, createOnItemDetailButtonClickListener(), createOnSetAdapterListener(), currentSubPage);
+                    desiredAdapter = currentPageAdapter = new Current.PageAdapter(currentManger, mainDrawerLayout, createOnItemDetailButtonClickListener(), createOnSetAdapterListener(), createOnPageSetListener(), currentSubPage);
                     break;
 
                 case Groups.Calculate:
@@ -3424,12 +3424,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Creates an on page set listener
-    private Calculate.OnPageSetListener createOnPageSetListener()
+    private Selectable.ListFragment.OnPageSetListener createOnPageSetListener()
     {
-        return(new Calculate.OnPageSetListener()
+        return(new Selectable.ListFragment.OnPageSetListener()
         {
             @Override
-            public void onPageSet(Calculate.Page page, int pageNum, int subPageNum)
+            public void onPageSet(Selectable.ListFragment page, int pageNum, int subPageNum)
             {
                 switch(pageNum)
                 {
@@ -3440,7 +3440,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //if getting input
                         if(subPageNum == Globals.SubPageType.Input)
                         {
-                            page.setOnStartCalculationListener(startCalculationListener);
+                                ((Calculate.Page)page).setOnStartCalculationListener(startCalculationListener);
                         }
                         break;
                 }

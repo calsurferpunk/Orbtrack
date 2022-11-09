@@ -59,11 +59,6 @@ public abstract class Calculate
         void onStartCalculation(Bundle params);
     }
 
-    public interface OnPageSetListener
-    {
-        void onPageSet(Page page, int pageNum, int subPageNum);
-    }
-
     private static final int[] incrementTypes = new int[]{IncrementType.Seconds, IncrementType.Minutes, IncrementType.Hours, IncrementType.Days};
 
     //Gets increment types
@@ -105,7 +100,6 @@ public abstract class Calculate
         public TimeInputView startTimeText;
         public TimeInputView endTimeText;
         private OnStartCalculationListener startCalculationListener;
-        private OnPageSetListener pageSetListener;
 
         @Override
         protected int getListColumns(Context context, int page)
@@ -442,11 +436,6 @@ public abstract class Calculate
             }
         }
 
-        public void setOnPageSetListener(OnPageSetListener listener)
-        {
-            pageSetListener = listener;
-        }
-
         public void setChangeListeners(final Selectable.ListBaseAdapter listAdapter, final int page)
         {
             PageAdapter.setOrientationChangedListener(page, new OnOrientationChangedListener()
@@ -523,16 +512,15 @@ public abstract class Calculate
         private final Bundle[] savedInputs;
         private final Bundle[] savedSubInputs;
         private static final Object[][] savedItems = new Object[PageType.PageCount][];
-        private final OnPageSetListener pageSetListener;
         private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnItemsChangedListener[] itemsChangedListeners = new Selectable.ListFragment.OnItemsChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnHeaderChangedListener[] headerChangedListeners = new Selectable.ListFragment.OnHeaderChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnGraphChangedListener[] graphChangedListeners = new Selectable.ListFragment.OnGraphChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
 
-        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, OnPageSetListener pageListener, int[] subPg, Bundle savedInstanceState)
+        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg, Bundle savedInstanceState)
         {
-            super(fm, parentView, null, null, null, null, detailListener, adapterListener, null, MainActivity.Groups.Calculate, subPg);
+            super(fm, parentView, null, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Calculate, subPg);
 
             int index;
 
@@ -550,7 +538,6 @@ public abstract class Calculate
                     savedSubInputs[index] = new Bundle();
                 }
             }
-            pageSetListener = pageListener;
         }
 
         @Override
@@ -573,7 +560,7 @@ public abstract class Calculate
             //set later date for later
             dateLater.add(Calendar.DATE, (position == PageType.Passes || position == PageType.Intersection ? 7 : 1));
 
-            //create page
+            //setup page
             newPage.setOnPageSetListener(pageSetListener);
             newPage.setOnPageResumeListener(new Selectable.ListFragment.OnPageResumeListener()
             {

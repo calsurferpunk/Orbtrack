@@ -973,7 +973,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         public SetupPageAdapter(FragmentManager fm, View parentView)
         {
-            super(fm, parentView, null, null, null, null, null, null, null, -1, null);
+            super(fm, parentView, null, null, null, null, null, null, null, null, -1, null);
         }
 
         @Override

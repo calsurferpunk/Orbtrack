@@ -162,11 +162,11 @@
     <string name="desc_show_path_progress">Mostrar línea de progreso de ruta</string>
     <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria</string>
     <string name="desc_show_orbital_direction_limit">Mostrar dirección si está dentro del conteo orbital visible\nNota: Obligatorio para las GPU Mali y PowerVR</string>
-    <string name="desc_show_search">Mostrar lista de búsqueda orbital</string>
     <string name="desc_show_selected_footprint">Mostrar el área visible orbital seleccionada en la superficie</string>
     <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo\nNota: Deshabilitado para GPU Mali y PowerVR</string>
     <string name="desc_show_stars">Mostrar estrellas en vista de globo</string>
     <string name="desc_show_sunlight">Mostrar/ocultar la luz diurna actual en la superficie</string>
+    <string name="desc_show_toolbars">Mostrar barras herramientas en los bordes de la pantalla</string>
     <string name="desc_show_zoom">Mostrar botones de enfocar</string>
     <string name="desc_time_zone_source">Localización zona horaria detección</string>
     <string name="desc_unit_size_error">Debe ser más grande (demasiados incrementos)</string>
@@ -548,12 +548,12 @@
     <string name="title_show_orbital_direction">Mostrar Dirección Orbital</string>
     <string name="title_show_orbital_direction_limit">Dirección Orbital Límite</string>
     <string name="title_show_path">Mostrar Ruta</string>
-    <string name="title_show_search">Mostrar Búsqueda</string>
     <string name="title_show_selected">Mostrar Seleccionado</string>
     <string name="title_show_selected_footprint">Mostrar Huella Seleccionada</string>
     <string name="title_show_shadows">Mostrar Sombras</string>
     <string name="title_show_stars">Mostrar Estrellas</string>
     <string name="title_show_sunlight">Mostrar Luz Sol</string>
+    <string name="title_show_toolbars">Mostrar Barras Herramientas</string>
     <string name="title_show_zoom">Mostrar Enfocar</string>
     <string name="title_skip">Omitir</string>
     <string name="title_slow">Lento</string>

@@ -257,7 +257,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     case ScreenKey.MapViewDisplay:
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
-                        SwitchPreference showSearchSwitch = this.findPreference(Settings.PreferenceName.MapShowSearchList);
+                        SwitchPreference showToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
                         SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
                         SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
@@ -268,7 +268,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
-                        setupSwitch(showSearchSwitch);
+                        setupSwitch(showToolbarsSwitch);
                         setupSwitch(showZoomSwitch);
                         setupSwitch(showLabelsAlwaysSwitch);
                         setupSwitch(showShadowsSwitch);
@@ -1485,7 +1485,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShow3dPaths:
                         case Settings.PreferenceName.MapRotateAllowed:
                         case Settings.PreferenceName.MapMarkerShowBackground:
-                        case Settings.PreferenceName.MapShowSearchList:
+                        case Settings.PreferenceName.MapShowToolbars:
                         case Settings.PreferenceName.MapShowZoom:
                         case Settings.PreferenceName.MapShowLabelsAlways:
                         case Settings.PreferenceName.MapShowOrbitalDirection:

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/Play_Bar_Layout"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Play_Bar_Layout"
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
@@ -29,11 +30,26 @@
                     android:layout_width="40dp"
                     android:layout_height="40dp"/>
 
-                <androidx.appcompat.widget.AppCompatSeekBar
-                    android:id="@+id/Play_Bar_Seek_Bar"
+                <FrameLayout
                     android:layout_width="0dp"
-                    android:layout_height="42dp"
-                    android:layout_weight="1"/>
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1">
+                        <androidx.appcompat.widget.AppCompatSeekBar
+                            android:id="@+id/Play_Bar_Seek_Bar"
+                            android:layout_width="match_parent"
+                            android:layout_height="42dp"
+                            android:layout_gravity="center"/>
+
+                        <TextView
+                            android:id="@+id/Play_Bar_Value_Text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_horizontal|bottom"
+                            android:text="@string/empty"
+                            android:textSize="12sp"
+                            android:textColor="@color/white"
+                            android:visibility="gone"/>
+                </FrameLayout>
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/Play_Bar_Right_Button"
@@ -50,8 +66,13 @@
                     android:focusable="true"
                     android:text="@string/empty"
                     android:textSize="16sp"
-                    android:textColor="@color/white"
-                    android:visibility="visible"/>
+                    android:textColor="@color/white"/>
+
+                <androidx.appcompat.widget.AppCompatImageButton
+                    android:id="@+id/Play_Bar_Sync_Button"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:visibility="gone"/>
         </LinearLayout>
 
         <LinearLayout

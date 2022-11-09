@@ -1,7 +1,9 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.app.DatePickerDialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -13,15 +15,24 @@ import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.DatePicker;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import java.util.Calendar;
+import java.util.TimeZone;
 import java.util.Timer;
 import java.util.TimerTask;
 
 
 public class PlayBar extends LinearLayout
 {
+    public static abstract class ScaleType
+    {
+        static final int Speed = 0;
+        static final int Time = 1;
+    }
+
     public interface OnPlayBarChangedListener
     {
         void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser);
@@ -29,25 +40,32 @@ public class PlayBar extends LinearLayout
 
     private int minValue;
     private int maxValue;
+    private int playScaleType;
     private int playScaleFactor;
+    private long value2;
     private double playIndexIncrementUnits;
     private double playSubProgressPercent;
     private double playDelayUnits;
-    private Drawable pauseDrawable;
-    private Drawable playDrawable;
+    private TimeZone zone;
+    private final Drawable pauseDrawable;
+    private final Drawable playDrawable;
     private Timer playTimer;
     private FragmentActivity playActivity;
-    private AppCompatButton cancelButton;
-    private AppCompatButton confirmButton;
-    private AppCompatSeekBar seekBar;
-    private AppCompatImageButton playButton;
-    private TextView scaleText;
-    private TextView scaleTitle;
-    private LinearLayout buttonLayout;
+    private final AppCompatButton cancelButton;
+    private final AppCompatButton confirmButton;
+    private final AppCompatSeekBar seekBar;
+    private final AppCompatImageButton syncButton;
+    private final AppCompatImageButton playButton;
+    private final TextView valueText;
+    private final TextView scaleText;
+    private final TextView scaleTitle;
+    private final LinearLayout buttonLayout;
     private OnPlayBarChangedListener progressChangedListener;
 
-    private void baseConstructor(Context context, AttributeSet attrs)
+    public PlayBar(Context context, AttributeSet attrs)
     {
+        super(context, attrs);
+
         int textColor;
         int buttonColor;
         TypedArray valueArray;
@@ -72,9 +90,11 @@ public class PlayBar extends LinearLayout
         leftButton = rootView.findViewById(R.id.Play_Bar_Left_Button);
         playButton = rootView.findViewById(R.id.Play_Bar_Play_Button);
         rightButton = rootView.findViewById(R.id.Play_Bar_Right_Button);
+        syncButton = rootView.findViewById(R.id.Play_Bar_Sync_Button);
         cancelButton = rootView.findViewById(R.id.Play_Bar_Cancel_Button);
         confirmButton = rootView.findViewById(R.id.Play_Bar_Ok_Button);
         seekBar = rootView.findViewById(R.id.Play_Bar_Seek_Bar);
+        valueText = rootView.findViewById(R.id.Play_Bar_Value_Text);
         scaleText = rootView.findViewById(R.id.Play_Bar_Scale_Text);
         scaleTitle = rootView.findViewById(R.id.Play_Bar_Title);
         buttonLayout = rootView.findViewById(R.id.Play_Bar_Button_Layout);
@@ -87,38 +107,40 @@ public class PlayBar extends LinearLayout
         playButton.setBackgroundDrawable(playDrawable);
         leftButton.setBackgroundDrawable(Globals.getDrawable(context, R.drawable.ic_arrow_left_white, buttonColor, false));
         rightButton.setBackgroundDrawable(Globals.getDrawable(context, R.drawable.ic_arrow_right_white, buttonColor, false));
+        syncButton.setBackgroundDrawable(Globals.getDrawable(context, R.drawable.ic_sync_white, buttonColor, false));
 
         //set colors
+        valueText.setTextColor(textColor);
         scaleText.setTextColor(textColor);
         scaleTitle.setTextColor(textColor);
 
         //set defaults
-        playSubProgressPercent = playDelayUnits = 0;
+        setValueTextVisible(false);
+        resetPlayIncrements();
+        playScaleType = ScaleType.Speed;
         playScaleFactor = 1;
         playIndexIncrementUnits = 1;
-        minValue = 0;
+        value2 = minValue = 0;
         maxValue = seekBar.getMax();
+        zone = TimeZone.getDefault();
 
         //setup seek buttons
         leftButton.setOnClickListener(createSeekManualOnClickListener(false));
         rightButton.setOnClickListener(createSeekManualOnClickListener(true));
     }
-
     public PlayBar(Context context)
     {
-        super(context);
-        baseConstructor(context, null);
-    }
-
-    public PlayBar(Context context, AttributeSet attrs)
-    {
-        super(context, attrs);
-        baseConstructor(context, attrs);
+        this(context, null);
     }
 
     public int getValue()
     {
         return(seekBar != null ? (seekBar.getProgress() + minValue) : minValue);
+    }
+
+    public long getValue2()
+    {
+        return(value2);
     }
 
     public void setValue(int value, boolean forceChange)
@@ -138,14 +160,30 @@ public class PlayBar extends LinearLayout
                 progressChangedListener.onProgressChanged(this, value, 0, false);
             }
 
-            //update value
+            //update value and reset increments
             seekBar.setProgress(actualValue);
-            playDelayUnits = 0;
+            resetPlayIncrements();
         }
     }
     public void setValue(int value)
     {
         setValue(value, false);
+    }
+
+    public void setValues(int value, long value2)
+    {
+        this.value2 = value2;
+        setValue(value);
+    }
+
+    public void setValueText(String text)
+    {
+        valueText.setText(text);
+    }
+
+    public void setValueTextVisible(boolean show)
+    {
+        valueText.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
     public double getSubProgressPercent()
@@ -190,24 +228,6 @@ public class PlayBar extends LinearLayout
         buttonLayout.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
-    public void setPlayActivity(FragmentActivity activity)
-    {
-        boolean usingActivity = (activity != null);
-
-        //set activity
-        playActivity = activity;
-
-        //update displays
-        playButton.setOnClickListener(createPlayButtonOnClickListener());
-        playButton.setVisibility(usingActivity ? View.VISIBLE : View.GONE);
-        if(usingActivity)
-        {
-            scaleText.setText(R.string.text_1_x);
-            scaleText.setOnClickListener(createSpeedTextOnClickListener());
-        }
-        scaleText.setVisibility(usingActivity ? View.VISIBLE : View.GONE);
-    }
-
     public void setScaleText(String text)
     {
         boolean showText = (text != null);
@@ -224,6 +244,64 @@ public class PlayBar extends LinearLayout
         scaleText.setVisibility(showText ? View.VISIBLE : View.GONE);
     }
 
+    public void setPlayScaleType(int scaleType)
+    {
+        boolean forTime = (scaleType == ScaleType.Time);
+        LayoutParams params;
+
+        //set scale type and defaults
+        playScaleType = scaleType;
+        playScaleFactor = 1;
+        if(forTime)
+        {
+            params = (LayoutParams)scaleText.getLayoutParams();
+            params.width = params.height = LayoutParams.WRAP_CONTENT;
+            scaleText.setLayoutParams(params);
+        }
+        scaleText.setBackground(forTime ? Globals.getDrawable(getContext(), R.drawable.ic_calendar_month_white) : null);
+    }
+
+    public void setTimeZone(TimeZone zone)
+    {
+        this.zone = zone;
+    }
+
+    public void setSyncButtonListener(OnClickListener listener)
+    {
+        if(syncButton != null)
+        {
+            syncButton.setOnClickListener(listener);
+            syncButton.setVisibility(listener != null ? View.VISIBLE : View.GONE);
+        }
+    }
+
+    public void sync()
+    {
+        if(syncButton != null)
+        {
+            syncButton.setVisibility(View.VISIBLE);
+            syncButton.callOnClick();
+        }
+    }
+
+    public void setPlayActivity(FragmentActivity activity)
+    {
+        boolean usingActivity = (activity != null);
+
+        //set activity
+        playActivity = activity;
+
+        //update displays
+        playButton.setOnClickListener(createPlayButtonOnClickListener());
+        playButton.setVisibility(usingActivity ? View.VISIBLE : View.GONE);
+        if(usingActivity)
+        {
+            scaleText.setText(playScaleType == ScaleType.Time ? R.string.empty : R.string.text_1_x);
+            scaleText.setOnClickListener(createScaleTextOnClickListener());
+        }
+        scaleText.setVisibility(usingActivity ? View.VISIBLE : View.GONE);
+    }
+
     public void setOnSeekChangedListener(OnPlayBarChangedListener changedListener)
     {
         progressChangedListener = changedListener;
@@ -232,8 +310,17 @@ public class PlayBar extends LinearLayout
             @Override
             public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser)
             {
+                //if user moved
+                if(fromUser)
+                {
+                    //reset increments
+                    resetPlayIncrements();
+                }
+
+                //if listener is set
                 if(progressChangedListener != null)
                 {
+                    //call it
                     progressChangedListener.onProgressChanged(PlayBar.this, progressValue + minValue, playSubProgressPercent, fromUser);
                 }
             }
@@ -244,6 +331,13 @@ public class PlayBar extends LinearLayout
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
+    }
+
+    //Resets play increments
+    private void resetPlayIncrements()
+    {
+        //reset delay increments
+        playDelayUnits = playSubProgressPercent = 0;
     }
 
     //Calculates increments based on delay
@@ -291,15 +385,19 @@ public class PlayBar extends LinearLayout
         //stop any running timer
         stopPlayTimer();
 
-        //set button to pause
-        playButton.setBackgroundDrawable(pauseDrawable);
-
-        //if already at end
-        if(seekBar.getProgress() >= seekBar.getMax())
+        //if button exists
+        if(playButton != null)
         {
-            //reset
-            playSubProgressPercent = 0;
+            //set button to pause
+            playButton.setBackgroundDrawable(pauseDrawable);
+        }
+
+        //if using speed scale and already at end
+        if(playScaleType == ScaleType.Speed && seekBar.getProgress() >= seekBar.getMax())
+        {
+            //reset value and increments
             seekBar.setProgress(0);
+            resetPlayIncrements();
         }
 
         //if using activity
@@ -330,23 +428,31 @@ public class PlayBar extends LinearLayout
                                 //add increments
                                 progressValue += increments;
 
-                                //if at or past end
-                                if(progressValue >= actualMaxValue)
+                                //if after end
+                                if(progressValue > actualMaxValue)
                                 {
-                                    //set to end
-                                    progressValue = actualMaxValue;
-                                    playSubProgressPercent = 0;
+                                    //handle based on scale type
+                                    switch(playScaleType)
+                                    {
+                                        case ScaleType.Speed:
+                                            //set to end and stop
+                                            progressValue = actualMaxValue;
+                                            stopPlayTimer();
+                                            break;
+
+                                        case ScaleType.Time:
+                                            //set to start of next day
+                                            progressValue = 0;
+                                            setValues(progressValue, value2 + (long)Calculations.SecondsPerDay);
+                                            break;
+                                    }
+
+                                    //reset increments
+                                    resetPlayIncrements();
                                 }
 
-                                //add to progress and continue
+                                //update progress
                                 seekBar.setProgress(progressValue);
-
-                                //if at or after end
-                                if(progressValue >= actualMaxValue)
-                                {
-                                    //done
-                                    stopPlayTimer();
-                                }
                             }
                             //else if listener exists
                             else if(progressChangedListener != null)
@@ -386,6 +492,19 @@ public class PlayBar extends LinearLayout
         });
     }
 
+    //Starts playing
+    public void start()
+    {
+        if(playButton != null)
+        {
+            playButton.performClick();
+        }
+        else
+        {
+            startPlayTimer();
+        }
+    }
+
     //Creates an on seek manual click listener
     private View.OnClickListener createSeekManualOnClickListener(final boolean forward)
     {
@@ -394,6 +513,8 @@ public class PlayBar extends LinearLayout
             @Override
             public void onClick(View view)
             {
+                boolean clear = false;
+                int max = seekBar.getMax();
                 int progressValue = seekBar.getProgress();
                 int increments = updatePlayIncrements(forward);
 
@@ -401,20 +522,37 @@ public class PlayBar extends LinearLayout
                 if(forward)
                 {
                     //if before end
-                    if(progressValue < seekBar.getMax())
+                    if(progressValue < max)
                     {
-                        //go forward increment
+                        //go forward an increment
                         progressValue += increments;
                     }
                 }
                 else
                 {
-                    //if before first
+                    //if after first
                     if(progressValue > 0)
                     {
-                        //go back 1
+                        //go backward an increment
                         progressValue += increments;
                     }
+                }
+
+                //make sure still within range
+                if(forward && (progressValue + playSubProgressPercent) >= max)
+                {
+                    progressValue = max;
+                    clear = true;
+                }
+                else if(!forward && (progressValue + playSubProgressPercent) <= 0)
+                {
+                    progressValue = 0;
+                    clear = true;
+                }
+                if(clear)
+                {
+                    resetPlayIncrements();
+                    increments = 0;
                 }
 
                 //if no increments and listener is set
@@ -432,38 +570,74 @@ public class PlayBar extends LinearLayout
     }
 
     //Creates an on speed text click listener
-    private View.OnClickListener createSpeedTextOnClickListener()
+    private View.OnClickListener createScaleTextOnClickListener()
     {
+        Resources res = getResources();
+
         return(new View.OnClickListener()
         {
             @Override
             public void onClick(View view)
             {
                 String text;
+                Calendar date;
 
-                //update speed
-                switch(playScaleFactor)
+                switch(playScaleType)
                 {
-                    case 1:
-                        playScaleFactor = 10;
+                    case ScaleType.Speed:
+                        //update speed
+                        switch(playScaleFactor)
+                        {
+                            case 1:
+                                playScaleFactor = 10;
+                                break;
+
+                            case 10:
+                                playScaleFactor = 100;
+                                break;
+
+                            case 100:
+                                playScaleFactor = 1000;
+                                break;
+
+                            default:
+                                playScaleFactor = 1;
+                                break;
+                        }
+
+                        //update display
+                        text = playScaleFactor + res.getString(R.string.text_x);
+                        scaleText.setText(text);
                         break;
 
-                    case 10:
-                        playScaleFactor = 100;
-                        break;
+                    case ScaleType.Time:
+                        //set date
+                        date = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(value2 * 1000), zone));
 
-                    case 100:
-                        playScaleFactor = 1000;
-                        break;
+                        //show calendar dialog
+                        Globals.showDateDialog(getContext(), date, new DatePickerDialog.OnDateSetListener()
+                        {
+                            @Override
+                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth)
+                            {
+                                //get new date without time
+                                Calendar newDate = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(), zone));
 
-                    default:
-                        playScaleFactor = 1;
+                                //if new date is set
+                                if(newDate != null)
+                                {
+                                    //set date values
+                                    newDate.set(Calendar.YEAR, year);
+                                    newDate.set(Calendar.MONTH, month);
+                                    newDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                                    //update values
+                                    setValues(getValue(), newDate.getTimeInMillis() / 1000);
+                                }
+                            }
+                        });
                         break;
                 }
-
-                //update display
-                text = playScaleFactor + PlayBar.this.getResources().getString(R.string.text_x);
-                scaleText.setText(text);
             }
         });
     }

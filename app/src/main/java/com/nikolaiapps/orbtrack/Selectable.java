@@ -2014,7 +2014,7 @@ public abstract class Selectable
                                 graphProgress.setVisibility(View.GONE);
 
                                 //set graph data and show
-                                elevationGraph.setData(timePoints, elevationPoints, (usingOrbital2 ? elevation2Points : null), MainActivity.getObserver().timeZone);
+                                elevationGraph.setData(timePoints, elevationPoints, (usingOrbital2 ? elevation2Points : null), MainActivity.getTimeZone());
                                 elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 6);
                                 elevationGraph.setRangeY(0, 90, 6);
                                 elevationGraph.setSelectedType(Graph.SelectType.Image);

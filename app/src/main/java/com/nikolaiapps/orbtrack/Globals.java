@@ -691,6 +691,7 @@ public abstract class Globals
     private static final DateFormat shortDateFormatter = DateFormat.getDateInstance(DateFormat.SHORT);
     private static final DateFormat shortTimeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT);
     private static final DateFormat shortDateTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT);
+    private static final DateFormat shortDateLongTimeFormatter = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG);
     private static final DateFormat mediumTimeFormatter = DateFormat.getTimeInstance(DateFormat.MEDIUM);
     private static final SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static ArrayList<TimeZone> timeZoneList = null;
@@ -1743,10 +1744,7 @@ public abstract class Globals
             //
             double hr  = Math.floor(dayfrac * 24.0);
             double mn  = Math.floor((dayfrac*24.0 - hr)*60.0);
-            double f  = ((dayfrac*24.0 - hr)*60.0 - mn)*60.0;
-            double sc  = Math.floor(f);
-            f -= sc;
-            if( f > 0.5 ) ++sc;
+            double sc  = ((dayfrac*24.0 - hr)*60.0 - mn)*60.0;
 
             if( y < 0 )
             {
@@ -1759,7 +1757,8 @@ public abstract class Globals
                 mn++;
             }
 
-            result.set((int)y, (int)m - 1, (int)d, (int)hr, (int)mn, (int)sc);
+            result.set((int)y, (int)m - 1, (int)d, (int)hr, (int)mn, (int)Math.floor(sc));
+            result.set(Calendar.MILLISECOND, (int)((sc - Math.floor(sc)) * 1000));
         }
         else
         {
@@ -1910,13 +1909,21 @@ public abstract class Globals
     }
 
     //Gets formatted date and time
-    private static synchronized String getDateTimeString(Calendar date, TimeZone zone)
+    private static synchronized String getDateTimeString(Calendar date, TimeZone zone, boolean showSeconds)
     {
         Calendar localTime = getLocalTime(date, zone);
 
         //return for desired zone
-        shortDateTimeFormatter.setTimeZone(zone);
-        return(localTime != null ? shortDateTimeFormatter.format(localTime.getTime()) : "");
+        (showSeconds ? shortDateLongTimeFormatter : shortDateTimeFormatter).setTimeZone(zone);
+        return(localTime != null ? (showSeconds ? shortDateLongTimeFormatter : shortDateTimeFormatter).format(localTime.getTime()) : "");
+    }
+    private static String getDateTimeString(Calendar date, TimeZone zone)
+    {
+        return(getDateTimeString(date, zone, false));
+    }
+    public static String getDateTimeString(Calendar date, boolean showSeconds)
+    {
+        return(getDateTimeString(date, TimeZone.getDefault(), showSeconds));
     }
     public static String getDateTimeString(Calendar date)
     {
@@ -1938,10 +1945,13 @@ public abstract class Globals
     //Clears time in given calendar
     public static Calendar clearCalendarTime(Calendar date)
     {
-        date.set(Calendar.HOUR_OF_DAY, 0);
-        date.set(Calendar.MINUTE, 0);
-        date.set(Calendar.SECOND, 0);
-        date.set(Calendar.MILLISECOND, 0);
+        if(date != null)
+        {
+            date.set(Calendar.HOUR_OF_DAY, 0);
+            date.set(Calendar.MINUTE, 0);
+            date.set(Calendar.SECOND, 0);
+            date.set(Calendar.MILLISECOND, 0);
+        }
 
         return(date);
     }

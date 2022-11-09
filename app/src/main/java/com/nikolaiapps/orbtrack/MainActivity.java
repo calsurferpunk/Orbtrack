@@ -1229,7 +1229,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Returns observer
     public static ObserverType getObserver()
     {
-        return(observer);
+        return(observer != null ? observer : new ObserverType());
     }
 
     //Returns observer time zone
@@ -3777,7 +3777,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 double phase;
-                double julianDate = Globals.getJulianDate();
+                double julianDate;
                 String coordinateString = null;
                 TextView mapInfoText = Current.Coordinates.getMapInfoText();
                 CameraLens cameraView = Current.getCameraView();
@@ -3796,6 +3796,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 //if not waiting on location update
                 if(!pendingLocationUpdate)
                 {
+                    //if on map
+                    if(onMap)
+                    {
+                        julianDate = Calculations.julianDateCalendar(Globals.getGMTTime(Current.secondsPlayBar * 1000));
+                    }
+                    else
+                    {
+                        julianDate = Globals.getJulianDate();
+                    }
+
                     //if enough time has passed
                     travelSeconds = (currentSystemElapsedSeconds - lastSystemElapsedSeconds.value);
                     if(travelSeconds >= 2)

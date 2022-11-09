@@ -90,7 +90,7 @@ public abstract class Settings
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
-        static final String MapShowSearchList = "MapShowSearchList";
+        static final String MapShowToolbars = "MapShowToolbars";
         static final String UseCombinedCurrentLayout = "UseCombinedCurrentLayout";
         static final String UseCurrentGridLayout = "UseCurrentGridLayout";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
@@ -1940,7 +1940,7 @@ public abstract class Settings
             case PreferenceName.MapShowSelectedFootprint:
             case PreferenceName.MapShowStars:
             case PreferenceName.MapShowSunlight:
-            case PreferenceName.MapShowSearchList:
+            case PreferenceName.MapShowToolbars:
             case PreferenceName.MetricUnits:
             case PreferenceName.AllowNumberCommas:
             case PreferenceName.ShareTranslations:
@@ -2620,16 +2620,16 @@ public abstract class Settings
         return(canUseTint && getPreferenceBoolean(context, PreferenceName.MapMarkerLocationIconUseTint) ? getMapMarkerLocationIconTintColor(context) : canUseTint ? Color.RED : Color.TRANSPARENT);
     }
 
-    //Returns map showing search list
-    public static boolean getMapShowSearchList(Context context)
+    //Returns map showing toolbars
+    public static boolean getMapShowToolbars(Context context)
     {
-        return(getPreferenceBoolean(context, PreferenceName.MapShowSearchList));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowToolbars));
     }
 
     //Sets map showing search list
-    public static void setMapShowSearchList(Context context, boolean show)
+    public static void setMapShowToolbars(Context context, boolean show)
     {
-        setPreferenceBoolean(context, PreferenceName.MapShowSearchList, show);
+        setPreferenceBoolean(context, PreferenceName.MapShowToolbars, show);
     }
 
     //Returns map showing sunlight

@@ -3250,7 +3250,8 @@ public abstract class Current
             {
                 //setup header
                 TextView header = (TextView)Globals.replaceView(R.id.Coordinate_Header, R.layout.header_text_view, inflater, rootView);
-                header.setText(Globals.getHeaderText(context, currentSatellite.getName(), savedItems[0].time, savedItems[savedItems.length - 1].time));
+                header.setTag(Globals.getHeaderText(context, currentSatellite.getName(), savedItems[0].time, savedItems[savedItems.length - 1].time));
+                Calculate.setOrientationHeaderText(header);
             }
 
             //setup map view

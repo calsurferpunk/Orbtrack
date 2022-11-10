@@ -3252,6 +3252,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_alg;
                     break;
 
+                case "ang":
+                    ids[0] = R.drawable.owner_ang;
+                    break;
+
                 case "argn":
                     ids[0] = R.drawable.owner_argn;
                     break;
@@ -3506,6 +3510,10 @@ public abstract class Globals
 
                 case "mala":
                     ids[0] = R.drawable.owner_mala;
+                    break;
+
+                case "mda":
+                    ids[0] = R.drawable.owner_mda;
                     break;
 
                 case "mex":

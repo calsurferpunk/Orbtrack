@@ -4174,7 +4174,7 @@ public abstract class Current
         final Context context = pageFragment.getContext();
         final Resources res = (context != null ? context.getResources() : null);
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
-        ViewGroup rootView = (ViewGroup) inflater.inflate(R.layout.lens_view, container, false);
+        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.lens_view, container, false);
         FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
         int page = pageFragment.getPageParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
@@ -4407,7 +4407,8 @@ public abstract class Current
             TextView header = (TextView)Globals.replaceView(R.id.Lens_Header, R.layout.header_text_view, inflater, rootView);
             Calendar startTime = (useSavedViewPath ? savedViewItems[0].time : havePassViews ? passViews[0].gmtTime : null);
             Calendar endTime = (useSavedViewPath ? savedViewItems[savedViewItems.length - 1].time : havePassViews ? passViews[passViews.length - 1].gmtTime : null);
-            header.setText(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathItem != null ? currentSavedPathItem.name : currentSatellite.getName()), startTime, endTime));
+            header.setTag(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathItem != null ? currentSavedPathItem.name : currentSatellite.getName()), startTime, endTime));
+            Calculate.setOrientationHeaderText(header);
             header.setVisibility(View.VISIBLE);
 
             //setup play bar

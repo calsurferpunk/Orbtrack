@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentManager;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
@@ -445,10 +446,21 @@ public abstract class Calculate
                 {
                     View rootView = Page.this.getView();
                     View listColumns = (rootView != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+                    Selectable.ListBaseAdapter adapter;
 
                     if(listColumns != null)
                     {
                         Page.this.setListColumns(Page.this.getContext(), listColumns, page);
+                    }
+
+                    adapter = Page.this.getAdapter();
+                    if(adapter != null)
+                    {
+                       setOrientationHeaderText(adapter.headerView);
+                    }
+                    if(Page.this.listParentView != null)
+                    {
+                        setOrientationHeaderText(Page.this.listParentView.findViewById(R.id.Header_TextView));
                     }
                 }
             });
@@ -482,7 +494,8 @@ public abstract class Calculate
 
                     if(listAdapter.headerView != null)
                     {
-                        ((TextView)listAdapter.headerView).setText(text);
+                        listAdapter.headerView.setTag(text);
+                        setOrientationHeaderText(listAdapter.headerView);
                     }
 
                     if(page == PageType.View)
@@ -1275,6 +1288,33 @@ public abstract class Calculate
                         page.intersectionUnitText.setText(String.valueOf(intersectionDegrees));
                     }
                     break;
+            }
+        }
+    }
+
+    //Set header text based on screen orientation
+    public static void setOrientationHeaderText(View headerText)
+    {
+        int orientation;
+        String headerValue;
+
+        //if view is a TextView
+        if(headerText instanceof TextView)
+        {
+            //get saved value
+            headerValue = (String)headerText.getTag();
+            if(headerValue != null)
+            {
+                //if horizontal orientation
+                orientation = Globals.getScreenOrientation(headerText.getContext());
+                if(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270)
+                {
+                    //change to single line value
+                    headerValue = headerValue.replace("\n", " - ");
+                }
+
+                //update view
+                ((TextView)headerText).setText(headerValue);
             }
         }
     }

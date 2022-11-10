@@ -2720,31 +2720,31 @@ public abstract class Current
         }
 
         //setup search
-        private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlaybar, Database.SatelliteData[] selectedOrbitals)
+        private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals)
         {
-            //if show toolbars button exists
-            if(showToolbarsButton != null)
+            boolean usingSearchList = (searchList != null);
+            int textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
+            int textSelectedColor = Globals.resolveColorID(context, R.attr.columnTitleTextColor);
+            ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
+
+            //setup selection list
+            if(selectedOrbitals != null)
             {
-                int textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
-                int textSelectedColor = Globals.resolveColorID(context, R.attr.columnTitleTextColor);
-                ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
+                //add none and location
+                selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_none), Universe.IDs.None, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
+                selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
 
-                //setup selection list
-                if(selectedOrbitals != null)
+                //go through each selected orbital
+                for(Database.SatelliteData currentData : selectedOrbitals)
                 {
-                    //add none and location
-                    selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_none), Universe.IDs.None, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
-                    selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
-
-                    //go through each selected orbital
-                    for(Database.SatelliteData currentData : selectedOrbitals)
-                    {
-                        //add current orbital to list
-                        selectedOrbitalList.add(currentData.database);
-                    }
+                    //add current orbital to list
+                    selectedOrbitalList.add(currentData.database);
                 }
+            }
 
-                //setup search list
+            //setup search list
+            if(usingSearchList)
+            {
                 searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
                 searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
@@ -2784,7 +2784,11 @@ public abstract class Current
                     public void onNothingSelected(AdapterView<?> parent) {}
                 });
                 searchList.setSelectedValue(Universe.IDs.None);
+            }
 
+            //if show toolbars button exists
+            if(showToolbarsButton != null)
+            {
                 //setup toolbars button
                 showToolbarsButton.setOnClickListener(new View.OnClickListener()
                 {
@@ -2797,14 +2801,19 @@ public abstract class Current
                         Settings.setMapShowToolbars(context, showToolbars);
 
                         //update visibility
-                        searchListLayout.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
-                        pagePlaybar.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                        if(searchListLayout != null)
+                        {
+                            searchListLayout.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                        }
+                        if(pagePlayBar != null)
+                        {
+                            pagePlayBar.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                        }
                     }
                 });
 
-                //set to opposite then perform click to set it correctly
-                showToolbars = !Settings.getMapShowToolbars(context);
-                showToolbarsButton.performClick();
+                //set to opposite for later click called
+                showToolbars = !(Settings.getMapShowToolbars(context));
             }
         }
 
@@ -2833,7 +2842,7 @@ public abstract class Current
         }
 
         //Setup zoom buttons
-        private static void setupZoomButtons(final Context context, final FloatingActionStateButton showZoomButton, final View zoomLayout, FloatingActionButton zoomInButton, FloatingActionButton zoomOutButton)
+        private static void setupZoomButtons(final Context context, final FloatingActionStateButton showZoomButton, FloatingActionButton zoomInButton, FloatingActionButton zoomOutButton)
         {
             //setup zoom buttons
             showZoomButton.setOnClickListener(new View.OnClickListener()
@@ -2841,13 +2850,17 @@ public abstract class Current
                 @Override
                 public void onClick(View v)
                 {
+                    int buttonVisibility;
+
                     //reverse state
                     showZoom = !showZoom;
                     showZoomButton.setChecked(showZoom);
                     Settings.setMapShowZoom(context, showZoom);
 
                     //update visibility
-                    zoomLayout.setVisibility(showZoom ? View.VISIBLE : View.GONE);
+                    buttonVisibility = (showZoom ? View.VISIBLE : View.GONE);
+                    zoomInButton.setVisibility(buttonVisibility);
+                    zoomOutButton.setVisibility(buttonVisibility);
                 }
             });
             CoordinatesFragment.Utils.setupZoomButton(context, mapView, zoomInButton, true);
@@ -3022,141 +3035,145 @@ public abstract class Current
             final int max = (usingPlaybackItems ? playbackItems.length : (int)Calculations.SecondsPerDay) - 1;
             final int scaleType = (usingPlaybackItems ? PlayBar.ScaleType.Speed : PlayBar.ScaleType.Time);
 
-            playBar.setMin(min);
-            playBar.setMax(max);
-            playBar.setPlayScaleType(scaleType);
-            playBar.setPlayActivity(activity);
-            playBar.setValueTextVisible(true);
-            playBar.setTimeZone(MainActivity.getTimeZone());
-            playBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
+            //if play bar exists
+            if(playBar != null)
             {
-                @Override
-                public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
+                playBar.setMin(min);
+                playBar.setMax(max);
+                playBar.setPlayScaleType(scaleType);
+                playBar.setPlayActivity(activity);
+                playBar.setValueTextVisible(true);
+                playBar.setTimeZone(MainActivity.getTimeZone());
+                playBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
                 {
-                    //if a valid value
-                    if(progressValue >= min && progressValue <= max)
+                    @Override
+                    public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
                     {
-                        //if using playback items
-                        if(usingPlaybackItems)
+                        //if a valid value
+                        if(progressValue >= min && progressValue <= max)
                         {
-                            //remember current item and point
-                            long ms;
-                            double latitude;
-                            double longitude;
-                            double altitudeKm;
-                            int currentItemIndex = (int)Math.floor(progressValue + subProgressPercent);
-                            Item nextItem;
-                            Item currentItem = playbackItems[currentItemIndex];
-                            Calendar playTime = Globals.getGMTTime(currentItem.time);
-                            TextView mapInfoText = getMapInfoText();
-
-                            //if more points after current
-                            if(currentItemIndex + 1 < playbackItems.length)
+                            //if using playback items
+                            if(usingPlaybackItems)
                             {
-                                //get add distance index percentage to current point
-                                nextItem = playbackItems[currentItemIndex + 1];
-                                latitude = Globals.normalizeLatitude(currentItem.latitude + (Globals.latitudeDistance(currentItem.latitude, nextItem.latitude) * subProgressPercent));
-                                longitude = Globals.normalizeLongitude(currentItem.longitude + (Globals.longitudeDistance(currentItem.longitude, nextItem.longitude) * subProgressPercent));
-                                altitudeKm = currentItem.altitudeKm + ((nextItem.altitudeKm - currentItem.altitudeKm) * subProgressPercent);
+                                //remember current item and point
+                                long ms;
+                                double latitude;
+                                double longitude;
+                                double altitudeKm;
+                                int currentItemIndex = (int)Math.floor(progressValue + subProgressPercent);
+                                Item nextItem;
+                                Item currentItem = playbackItems[currentItemIndex];
+                                Calendar playTime = Globals.getGMTTime(currentItem.time);
+                                TextView mapInfoText = getMapInfoText();
 
-                                //add distance percentage to play time
-                                playTime.add(Calendar.MILLISECOND, (int)((nextItem.time.getTimeInMillis() - currentItem.time.getTimeInMillis()) * subProgressPercent));
+                                //if more points after current
+                                if(currentItemIndex + 1 < playbackItems.length)
+                                {
+                                    //get add distance index percentage to current point
+                                    nextItem = playbackItems[currentItemIndex + 1];
+                                    latitude = Globals.normalizeLatitude(currentItem.latitude + (Globals.latitudeDistance(currentItem.latitude, nextItem.latitude) * subProgressPercent));
+                                    longitude = Globals.normalizeLongitude(currentItem.longitude + (Globals.longitudeDistance(currentItem.longitude, nextItem.longitude) * subProgressPercent));
+                                    altitudeKm = currentItem.altitudeKm + ((nextItem.altitudeKm - currentItem.altitudeKm) * subProgressPercent);
+
+                                    //add distance percentage to play time
+                                    playTime.add(Calendar.MILLISECOND, (int)((nextItem.time.getTimeInMillis() - currentItem.time.getTimeInMillis()) * subProgressPercent));
+                                }
+                                else
+                                {
+                                    //set point
+                                    latitude = currentItem.latitude;
+                                    longitude = currentItem.longitude;
+                                    altitudeKm = currentItem.altitudeKm;
+                                }
+
+                                //update marker
+                                if(playbackMarker != null)
+                                {
+                                    //if marker is visible
+                                    if(playbackMarker.getInfoVisible())
+                                    {
+                                        String timeString = Globals.getDateTimeString(playTime, true);
+                                        String coordinateString = Globals.getCoordinateString(activity, latitude, longitude, altitudeKm);
+
+                                        //update coordinates
+                                        playbackMarker.setText(coordinateString);
+                                        if(mapInfoText != null && Settings.usingMapMarkerInfoBottom())
+                                        {
+                                            mapInfoText.setText(coordinateString.replace("\n", Globals.COORDINATE_SEPARATOR));
+                                        }
+
+                                        //update time
+                                        playBar.setValueText(timeString);
+
+                                        //if map is ready
+                                        if(getMapViewReady())
+                                        {
+                                            //update map view
+                                            mapView.moveCamera(latitude, longitude);
+                                        }
+                                    }
+
+                                    //move marker location
+                                    playbackMarker.moveLocation(latitude, longitude, altitudeKm);
+                                }
                             }
                             else
                             {
-                                //set point
-                                latitude = currentItem.latitude;
-                                longitude = currentItem.longitude;
-                                altitudeKm = currentItem.altitudeKm;
+                                //set time in seconds and update display
+                                Current.secondsPlayBar = progressValue + playBar.getValue2();
+                                playBar.setValueText(Globals.getDateTimeString(Globals.getGMTTime(Current.secondsPlayBar * 1000), true));
                             }
 
-                            //update marker
-                            if(playbackMarker != null)
-                            {
-                                //if marker is visible
-                                if(playbackMarker.getInfoVisible())
-                                {
-                                    String timeString = Globals.getDateTimeString(playTime, true);
-                                    String coordinateString = Globals.getCoordinateString(activity, latitude, longitude, altitudeKm);
-
-                                    //update coordinates
-                                    playbackMarker.setText(coordinateString);
-                                    if(mapInfoText != null && Settings.usingMapMarkerInfoBottom())
-                                    {
-                                        mapInfoText.setText(coordinateString.replace("\n", Globals.COORDINATE_SEPARATOR));
-                                    }
-
-                                    //update time
-                                    playBar.setValueText(timeString);
-
-                                    //if map is ready
-                                    if(getMapViewReady())
-                                    {
-                                        //update map view
-                                        mapView.moveCamera(latitude, longitude);
-                                    }
-                                }
-
-                                //move marker location
-                                playbackMarker.moveLocation(latitude, longitude, altitudeKm);
-                            }
+                            //handle any needed update
+                            handleMarkerScale();
                         }
-                        else
-                        {
-                            //set time in seconds and update display
-                            Current.secondsPlayBar = progressValue + playBar.getValue2();
-                            playBar.setValueText(Globals.getDateTimeString(Globals.getGMTTime(Current.secondsPlayBar * 1000), true));
-                        }
-
-                        //handle any needed update
-                        handleMarkerScale();
-                    }
-                }
-            });
-            if(usingPlaybackItems)
-            {
-                //go to first point
-                playBar.setValue(0);
-
-                //if at least 2 saved items
-                if(playbackItems.length > 1)
-                {
-                    //set speed increment to time between 2 points
-                    playBar.setPlayIndexIncrementUnits((playbackItems[1].time.getTimeInMillis() - playbackItems[0].time.getTimeInMillis()) / 1000.0);
-                }
-            }
-            else
-            {
-                //set sync button listener
-                playBar.setSyncButtonListener(new View.OnClickListener()
-                {
-                    @Override
-                    public void onClick(View v)
-                    {
-                        int timeSeconds;
-                        long dateSeconds;
-                        Calendar currentTime;
-
-                        //get local time
-                        currentTime = Globals.getLocalTime(Globals.getGMTTime(), MainActivity.getTimeZone());
-                        if(currentTime == null)
-                        {
-                            currentTime = Calendar.getInstance();
-                        }
-
-                        //set to current time/date
-                        timeSeconds = (int)((currentTime.get(Calendar.HOUR_OF_DAY) * Calculations.SecondsPerHour) + (currentTime.get(Calendar.MINUTE) * 60) + currentTime.get(Calendar.SECOND) + Math.round(currentTime.get(Calendar.MILLISECOND) / 1000.0));
-                        dateSeconds = (Globals.clearCalendarTime(currentTime).getTimeInMillis() / 1000);
-                        playBar.setValues(timeSeconds, dateSeconds);
                     }
                 });
+                if(usingPlaybackItems)
+                {
+                    //go to first point
+                    playBar.setValue(0);
 
-                //set time increment and begin
-                playBar.setPlayIndexIncrementUnits(1);
-                playBar.sync();
-                playBar.start();
+                    //if at least 2 saved items
+                    if(playbackItems.length > 1)
+                    {
+                        //set speed increment to time between 2 points
+                        playBar.setPlayIndexIncrementUnits((playbackItems[1].time.getTimeInMillis() - playbackItems[0].time.getTimeInMillis()) / 1000.0);
+                    }
+                }
+                else
+                {
+                    //set sync button listener
+                    playBar.setSyncButtonListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View v)
+                        {
+                            int timeSeconds;
+                            long dateSeconds;
+                            Calendar currentTime;
+
+                            //get local time
+                            currentTime = Globals.getLocalTime(Globals.getGMTTime(), MainActivity.getTimeZone());
+                            if(currentTime == null)
+                            {
+                                currentTime = Calendar.getInstance();
+                            }
+
+                            //set to current time/date
+                            timeSeconds = (int)((currentTime.get(Calendar.HOUR_OF_DAY) * Calculations.SecondsPerHour) + (currentTime.get(Calendar.MINUTE) * 60) + currentTime.get(Calendar.SECOND) + Math.round(currentTime.get(Calendar.MILLISECOND) / 1000.0));
+                            dateSeconds = (Globals.clearCalendarTime(currentTime).getTimeInMillis() / 1000);
+                            playBar.setValues(timeSeconds, dateSeconds);
+                        }
+                    });
+
+                    //set time increment and begin
+                    playBar.setPlayIndexIncrementUnits(1);
+                    playBar.sync();
+                    playBar.start();
+                }
+                playBar.setVisibility(usingPlaybackItems || Settings.getMapShowToolbars(playBar.getContext()) ? View.VISIBLE : View.GONE);
             }
-            playBar.setVisibility(Settings.getMapShowToolbars(playBar.getContext()) ? View.VISIBLE : View.GONE);
         }
 
         //Creates a map view
@@ -3184,23 +3201,25 @@ public abstract class Current
             final Database.SatelliteData currentSatellite = (useSavedPath ? new Database.SatelliteData(context, savedItems[0].id) : null);
 
             //get menu and zoom displays
-            final LinearLayout zoomLayout = rootView.findViewById(R.id.Map_Zoom_Layout);
+            final LinearLayout floatingButtonLayout = rootView.findViewById(R.id.Map_Floating_Button_Layout);
             final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
             settingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
+            final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Map_Fullscreen_Button);
             final FloatingActionStateButton showToolbarsButton = (allMapOrbitals && !useSavedPath ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
             final FloatingActionStateButton showZoomButton = settingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
             final FloatingActionStateButton showLatLonButton = settingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
             final FloatingActionStateButton showFootprintButton = settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint);
             final FloatingActionStateButton showPathButton = (!useSavedPath ? settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
             final FloatingActionStateButton iconScaleButton = settingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
-            final FloatingActionButton zoomInButton = zoomLayout.findViewById(R.id.Map_Zoom_In_Button);
-            final FloatingActionButton zoomOutButton = zoomLayout.findViewById(R.id.Map_Zoom_Out_Button);
+            final FloatingActionButton zoomInButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_In_Button);
+            final FloatingActionButton zoomOutButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_Out_Button);
             settingsMenu.setVisibility(View.GONE);
 
             //get displays
             Bundle args = new Bundle();
             final TextView mapInfoText = rootView.findViewById(R.id.Coordinate_Info_Text);
             mapInfoTextReference = new WeakReference<>(mapInfoText);
+            fullscreenButtonReference = new WeakReference<>(fullscreenButton);
             args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
             mapView = (forGlobe ? new Whirly.GlobeFragment() : new Whirly.MapFragment());
             mapView.setArguments(args);
@@ -3209,13 +3228,15 @@ public abstract class Current
             page.scaleBar = rootView.findViewById(R.id.Coordinate_Scale_Bar);
             page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
 
-            //if list and selected orbitals exist
-            if(searchList != null && selectedOrbitals != null)
+            //if search list layout exists
+            if(searchListLayout != null)
             {
-                //setup search
-                searchList.setVisibility(View.GONE);
-                setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, selectedOrbitals);
+                //hide until map is ready
+                searchListLayout.setVisibility(View.GONE);
             }
+
+            //setup search displays
+            setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, selectedOrbitals);
 
             //if map info text exists and not using background
             if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))
@@ -3309,7 +3330,7 @@ public abstract class Current
                     setCurrentLocation(page.getActivity(), currentLocation);
 
                     //setup zoom buttons
-                    setupZoomButtons(context, showZoomButton, zoomLayout, zoomInButton, zoomOutButton);
+                    setupZoomButtons(context, showZoomButton, zoomInButton, zoomOutButton);
 
                     //setup latitude/longitude button
                     setupLatLonButton(context, showLatLonButton);
@@ -3407,10 +3428,11 @@ public abstract class Current
                     //setup play bar
                     setupPlayBar(page.getActivity(), page.playBar, (useSavedPath ? savedItems : null), playbackMarker);
 
-                    //ready to use
-                    if(searchList != null)
+                    //ready to show displays and use
+                    if(showToolbarsButton != null)
                     {
-                        searchList.setVisibility(Settings.getMapShowToolbars(context) ? View.VISIBLE : View.GONE);
+                        //toggle displays
+                        showToolbarsButton.performClick();
                     }
                     settingsMenu.setVisibility(View.VISIBLE);
                     mapViewReady = true;
@@ -4131,12 +4153,19 @@ public abstract class Current
     public static boolean showCalibration = false;
     public static long secondsPlayBar = 0;
     private static WeakReference<CameraLens> cameraViewReference;
+    private static WeakReference<FloatingActionButton> fullscreenButtonReference;
     public static CalculateViewsTask.OrbitalPathBase[] orbitalViews = new CalculateViewsTask.OrbitalPathBase[0];
 
     //Gets camera view
     public static CameraLens getCameraView()
     {
         return(cameraViewReference != null ? cameraViewReference.get() : null);
+    }
+
+    //Gets fullscreen button
+    public static FloatingActionButton getFullScreenButton()
+    {
+        return(fullscreenButtonReference != null ? fullscreenButtonReference.get() : null);
     }
 
     //Begin calculating view information
@@ -4193,6 +4222,7 @@ public abstract class Current
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
         final boolean havePassViews = (passViews != null && passViews.length > 0);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
+        final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Lens_Fullscreen_Button);
         final FloatingActionStateButton showCalibrationButton;
         final FloatingActionStateButton showHorizonButton;
         final FloatingActionStateButton showPathButton;
@@ -4204,6 +4234,7 @@ public abstract class Current
         //create camera
         cameraView = new CameraLens(context);
         cameraViewReference = new WeakReference<>(cameraView);
+        fullscreenButtonReference = new WeakReference<>(fullscreenButton);
         cameraView.updateAzDeclination(MainActivity.getObserver());
         cameraView.pathDivisions = pathDivisions;
         cameraView.showPaths = (showPaths || useSaved);       //if showing paths or using a saved path

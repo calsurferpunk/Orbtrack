@@ -48,6 +48,22 @@
                 android:text="@string/title_cancel"/>
         </LinearLayout>
 
+        <LinearLayout
+            android:id="@+id/Lens_Floating_Button_Layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|end"
+            android:orientation="vertical"
+            android:paddingBottom="24dp">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/Lens_Fullscreen_Button"
+                style="@style/FloatingButton"
+                android:alpha="0.7"
+                app:backgroundTint="@color/transparent"
+                app:srcCompat="@drawable/ic_fullscreen_white"
+                app:fabSize="mini"/>
+        </LinearLayout>
+
         <TextView
             android:id="@+id/Lens_Help_Text"
             android:layout_width="match_parent"

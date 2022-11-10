@@ -21,8 +21,8 @@
             android:orientation="horizontal">
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/Play_Bar_Play_Button"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
                     android:visibility="gone"/>
 
                 <androidx.appcompat.widget.AppCompatImageButton

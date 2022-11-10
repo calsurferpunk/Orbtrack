@@ -90,6 +90,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private static boolean pendingOldSatelliteMessage = false;
     private boolean savedState;
     private boolean finishedSetup;
+    private boolean allowingPagerSwipe = false;
+    private boolean showingPagerTitles = false;
     private Bundle calculateBundle;
     private Bundle savedStateBundle;
     //
@@ -1083,12 +1085,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     public void onBackPressed()
     {
         boolean updateDisplay = false;
+        boolean exitFullScreen = false;
         boolean cancelCalibration = false;
         boolean closedSettings = false;
         int page = getMainPage();
         int desiredSubPage;
         Calendar currentTime = Globals.getGMTTime();
         CameraLens cameraView = Current.getCameraView();
+        FloatingActionButton fullscreenButton = null;
+        ActionBar mainActionBar = this.getSupportActionBar();
+        boolean inFullscreen = (mainActionBar != null && !mainActionBar.isShowing());
         Resources res = this.getResources();
 
         //if drawer is open
@@ -1103,6 +1109,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         switch(mainGroup)
         {
             case Groups.Current:
+                //if in fullscreen and button exists
+                fullscreenButton = Current.getFullScreenButton();
+                if(inFullscreen && fullscreenButton != null)
+                {
+                    //exit fullscreen
+                    exitFullScreen = true;
+                    break;
+                }
+
+                //handle based on sub page
                 switch(currentSubPage[page])
                 {
                     case Globals.SubPageType.Lens:
@@ -1142,7 +1158,18 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 break;
 
             case Groups.Calculate:
+                //if in fullscreen and button exists
+                fullscreenButton = Current.getFullScreenButton();
+                if(inFullscreen && fullscreenButton != null)
+                {
+                    //exit fullscreen
+                    exitFullScreen = true;
+                    break;
+                }
+
                 desiredSubPage = Globals.SubPageType.Input;
+
+                //handle based on page
                 switch(page)
                 {
                     case Calculate.PageType.View:
@@ -1183,6 +1210,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //update displays
             updateMainPager(false);
             updateOptionsMenu();
+        }
+        //else if exiting fullscreen
+        else if(exitFullScreen)
+        {
+            //exit fullscreen
+            fullscreenButton.callOnClick();
         }
         //else if cancelling calibration
         else if(cancelCalibration)
@@ -2284,8 +2317,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //update titles and swiping status to allow if not on current/calculate with map/globe
-        mainPager.setSwipeEnabled(!((showCurrent && (page == Current.PageType.Coordinates || page == Current.PageType.Combined) && (currentSubPage[page] == Globals.SubPageType.Map || currentSubPage[page] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe))));
-        mainPagerTitles.setVisibility(showCurrent && Settings.getCombinedCurrentLayout(this.getBaseContext()) ? View.GONE : View.VISIBLE);
+        allowingPagerSwipe = !((showCurrent && (page == Current.PageType.Coordinates || page == Current.PageType.Combined) && (currentSubPage[page] == Globals.SubPageType.Map || currentSubPage[page] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe)));
+        mainPager.setSwipeEnabled(allowingPagerSwipe);
+        showingPagerTitles = !(showCurrent && Settings.getCombinedCurrentLayout(this.getBaseContext()));
+        mainPagerTitles.setVisibility(showingPagerTitles ? View.VISIBLE : View.GONE);
     }
 
     //Sets main group
@@ -3431,18 +3466,77 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             @Override
             public void onPageSet(Selectable.ListFragment page, int pageNum, int subPageNum)
             {
-                switch(pageNum)
+                final FloatingActionButton fullscreenButton;
+
+                //if a Current.Page
+                if(page instanceof Current.Page)
                 {
-                    case Calculate.PageType.View:
-                    case Calculate.PageType.Passes:
-                    case Calculate.PageType.Coordinates:
-                    case Calculate.PageType.Intersection:
-                        //if getting input
-                        if(subPageNum == Globals.SubPageType.Input)
-                        {
+                    fullscreenButton = Current.getFullScreenButton();
+                }
+                //else if a Calculate.Page
+                else if(page instanceof Calculate.Page)
+                {
+                    fullscreenButton = Current.getFullScreenButton();
+
+                    switch(pageNum)
+                    {
+                        case Calculate.PageType.View:
+                        case Calculate.PageType.Passes:
+                        case Calculate.PageType.Coordinates:
+                        case Calculate.PageType.Intersection:
+                            //if getting input
+                            if(subPageNum == Globals.SubPageType.Input)
+                            {
                                 ((Calculate.Page)page).setOnStartCalculationListener(startCalculationListener);
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    fullscreenButton = null;
+                }
+
+                //if fullscreen button exists
+                if(fullscreenButton != null)
+                {
+                    //setup fullscreen button
+                    fullscreenButton.setOnClickListener(new View.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View v)
+                        {
+                            boolean setFullscreen;
+                            ActionBar pageActionBar;
+                            AppCompatActivity activity = MainActivity.this;
+
+                             //get action bar
+                            pageActionBar = activity.getSupportActionBar();
+                            if(pageActionBar != null)
+                            {
+                                //get fullscreen status
+                                setFullscreen = pageActionBar.isShowing();
+
+                                //if fullscreen
+                                if(setFullscreen)
+                                {
+                                    //hide action bar
+                                    pageActionBar.hide();
+                                }
+                                else
+                                {
+                                    //show action bar
+                                    pageActionBar.show();
+                                }
+
+                                //update titles, drawer, and button
+                                mainPager.setSwipeEnabled(allowingPagerSwipe && !setFullscreen);
+                                mainPagerTitles.setVisibility(showingPagerTitles && !setFullscreen ? View.VISIBLE : View.GONE);
+                                mainDrawerLayout.setDrawerLockMode(setFullscreen ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED);
+                                fullscreenButton.setImageDrawable(Globals.getDrawable(activity, (setFullscreen ? R.drawable.ic_fullscreen_exit_white : R.drawable.ic_fullscreen_white)));
+                            }
                         }
-                        break;
+                    });
                 }
             }
         });
@@ -3579,7 +3673,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 lastPosition = position;
 
                 //update pager swipe
-                mainPager.setSwipeEnabled(allowSwipe);
+                allowingPagerSwipe = allowSwipe;
+                mainPager.setSwipeEnabled(allowingPagerSwipe);
             }
 
             @Override

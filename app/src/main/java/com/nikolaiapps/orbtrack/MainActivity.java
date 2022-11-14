@@ -3894,7 +3894,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //if on map
                     if(onMap)
                     {
-                        julianDate = Calculations.julianDateCalendar(Globals.getGMTTime(Current.secondsPlayBar * 1000));
+                        julianDate = Calculations.julianDateCalendar(Globals.getGMTTime(Current.millisecondsPlayBar));
                     }
                     else
                     {

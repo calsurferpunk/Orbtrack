@@ -3032,7 +3032,7 @@ public abstract class Current
         {
             boolean usingPlaybackItems = (playbackItems != null);
             final int min = 0;
-            final int max = (usingPlaybackItems ? playbackItems.length : (int)Calculations.SecondsPerDay) - 1;
+            final int max = (usingPlaybackItems ? playbackItems.length : (int)(Calculations.SecondsPerDay * 1000)) - 1;
             final int scaleType = (usingPlaybackItems ? PlayBar.ScaleType.Speed : PlayBar.ScaleType.Time);
 
             //if play bar exists
@@ -3040,6 +3040,7 @@ public abstract class Current
             {
                 playBar.setMin(min);
                 playBar.setMax(max);
+                playBar.setPlayPeriod(usingPlaybackItems ? 1000 : Settings.getListUpdateDelay(playBar.getContext()));
                 playBar.setPlayScaleType(scaleType);
                 playBar.setPlayActivity(activity);
                 playBar.setValueTextVisible(true);
@@ -3056,7 +3057,6 @@ public abstract class Current
                             if(usingPlaybackItems)
                             {
                                 //remember current item and point
-                                long ms;
                                 double latitude;
                                 double longitude;
                                 double altitudeKm;
@@ -3120,8 +3120,8 @@ public abstract class Current
                             else
                             {
                                 //set time in seconds and update display
-                                Current.secondsPlayBar = progressValue + playBar.getValue2();
-                                playBar.setValueText(Globals.getDateTimeString(Globals.getGMTTime(Current.secondsPlayBar * 1000), true));
+                                Current.millisecondsPlayBar = progressValue + playBar.getValue2();
+                                playBar.setValueText(Globals.getDateTimeString(Globals.getGMTTime(Current.millisecondsPlayBar), true));
                             }
 
                             //handle any needed update
@@ -3149,8 +3149,8 @@ public abstract class Current
                         @Override
                         public void onClick(View v)
                         {
-                            int timeSeconds;
-                            long dateSeconds;
+                            int timeMilliseconds;
+                            long dateMilliseconds;
                             Calendar currentTime;
 
                             //get local time
@@ -3161,9 +3161,9 @@ public abstract class Current
                             }
 
                             //set to current time/date
-                            timeSeconds = (int)((currentTime.get(Calendar.HOUR_OF_DAY) * Calculations.SecondsPerHour) + (currentTime.get(Calendar.MINUTE) * 60) + currentTime.get(Calendar.SECOND) + Math.round(currentTime.get(Calendar.MILLISECOND) / 1000.0));
-                            dateSeconds = (Globals.clearCalendarTime(currentTime).getTimeInMillis() / 1000);
-                            playBar.setValues(timeSeconds, dateSeconds);
+                            timeMilliseconds = (int)(((currentTime.get(Calendar.HOUR_OF_DAY) * Calculations.SecondsPerHour) + (currentTime.get(Calendar.MINUTE) * 60) + currentTime.get(Calendar.SECOND)) * 1000) + currentTime.get(Calendar.MILLISECOND);
+                            dateMilliseconds = Globals.clearCalendarTime(currentTime).getTimeInMillis();
+                            playBar.setValues(timeMilliseconds, dateMilliseconds);
                         }
                     });
 
@@ -3183,7 +3183,7 @@ public abstract class Current
             mapViewReady = false;
 
             //clear time
-            secondsPlayBar = 0;
+            millisecondsPlayBar = 0;
 
             //get context, main views, and lists
             final Context context = page.getContext();
@@ -4152,7 +4152,7 @@ public abstract class Current
     public static boolean showPaths = false;
     private static boolean showHorizon = false;
     public static boolean showCalibration = false;
-    public static long secondsPlayBar = 0;
+    public static long millisecondsPlayBar = 0;
     private static WeakReference<CameraLens> cameraViewReference;
     private static WeakReference<FloatingActionButton> fullscreenButtonReference;
     public static CalculateViewsTask.OrbitalPathBase[] orbitalViews = new CalculateViewsTask.OrbitalPathBase[0];

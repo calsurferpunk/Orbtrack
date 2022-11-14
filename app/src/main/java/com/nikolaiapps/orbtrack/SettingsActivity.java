@@ -1482,6 +1482,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                             //fall through
 
+                        case Settings.PreferenceName.ListUpdateDelay:
                         case Settings.PreferenceName.MapShow3dPaths:
                         case Settings.PreferenceName.MapRotateAllowed:
                         case Settings.PreferenceName.MapMarkerShowBackground:

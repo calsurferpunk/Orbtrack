@@ -269,6 +269,11 @@ public abstract class Calculations
             radius = copyFrom.radius;
         }
 
+        public boolean equals(GeodeticDataType other)
+        {
+            return(other != null && other.latitude == this.latitude && other.longitude == this.longitude && other.altitudeKm == this.altitudeKm);
+        }
+
         @Override
         public int describeContents()
         {

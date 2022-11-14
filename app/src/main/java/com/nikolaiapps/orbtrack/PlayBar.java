@@ -38,10 +38,12 @@ public class PlayBar extends LinearLayout
         void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser);
     }
 
+    private boolean synced;
     private int minValue;
     private int maxValue;
+    private int playPeriodMs;
     private int playScaleType;
-    private int playScaleFactor;
+    private double playScaleFactor;
     private long value2;
     private double playIndexIncrementUnits;
     private double playSubProgressPercent;
@@ -60,6 +62,7 @@ public class PlayBar extends LinearLayout
     private final TextView scaleText;
     private final TextView scaleTitle;
     private final LinearLayout buttonLayout;
+    private OnClickListener syncButtonListener;
     private OnPlayBarChangedListener progressChangedListener;
 
     public PlayBar(Context context, AttributeSet attrs)
@@ -117,6 +120,8 @@ public class PlayBar extends LinearLayout
         //set defaults
         setValueTextVisible(false);
         resetPlayIncrements();
+        synced = false;
+        playPeriodMs = 1000;
         playScaleType = ScaleType.Speed;
         playScaleFactor = 1;
         playIndexIncrementUnits = 1;
@@ -163,6 +168,7 @@ public class PlayBar extends LinearLayout
             //update value and reset increments
             seekBar.setProgress(actualValue);
             resetPlayIncrements();
+            synced = false;
         }
     }
     public void setValue(int value)
@@ -244,6 +250,26 @@ public class PlayBar extends LinearLayout
         scaleText.setVisibility(showText ? View.VISIBLE : View.GONE);
     }
 
+    private void updatePlayScaleFactor()
+    {
+        boolean forTime = (playScaleType == ScaleType.Time);
+        playScaleFactor = (forTime ? playPeriodMs : 1);
+    }
+
+    public void setPlayPeriod(int ms)
+    {
+        //update play period and scale factor
+        playPeriodMs = ms;
+        updatePlayScaleFactor();
+
+        //if timer was running
+        if(playTimer != null)
+        {
+            //restart it
+            startPlayTimer();
+        }
+    }
+
     public void setPlayScaleType(int scaleType)
     {
         boolean forTime = (scaleType == ScaleType.Time);
@@ -251,7 +277,7 @@ public class PlayBar extends LinearLayout
 
         //set scale type and defaults
         playScaleType = scaleType;
-        playScaleFactor = 1;
+        updatePlayScaleFactor();
         if(forTime)
         {
             params = (LayoutParams)scaleText.getLayoutParams();
@@ -268,19 +294,49 @@ public class PlayBar extends LinearLayout
 
     public void setSyncButtonListener(OnClickListener listener)
     {
+        //set listener
+        syncButtonListener = listener;
+
+        //if button exists
         if(syncButton != null)
         {
-            syncButton.setOnClickListener(listener);
+            //apply listener
+            syncButton.setOnClickListener(new OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    //if listener is set
+                    if(syncButtonListener != null)
+                    {
+                        //call it
+                        syncButtonListener.onClick(v);
+                    }
+
+                    //update status
+                    synced = true;
+                }
+            });
+
+            //update visibility
             syncButton.setVisibility(listener != null ? View.VISIBLE : View.GONE);
         }
     }
 
     public void sync()
     {
+        //if button exists
         if(syncButton != null)
         {
+            //update visibility
             syncButton.setVisibility(View.VISIBLE);
-            syncButton.callOnClick();
+        }
+
+        //if listener exists
+        if(syncButtonListener != null)
+        {
+            //call it
+            syncButtonListener.onClick(syncButton);
         }
     }
 
@@ -315,6 +371,7 @@ public class PlayBar extends LinearLayout
                 {
                     //reset increments
                     resetPlayIncrements();
+                    synced = false;
                 }
 
                 //if listener is set
@@ -341,12 +398,12 @@ public class PlayBar extends LinearLayout
     }
 
     //Calculates increments based on delay
-    private int updatePlayIncrements(boolean forward)
+    private int updatePlayIncrements(boolean forward, boolean fromUser)
     {
         int increments = 0;
 
         //update delay
-        playDelayUnits += (playScaleFactor * (forward ? 1 : -1));
+        playDelayUnits += (playScaleFactor * (fromUser ? (1000.0 / playPeriodMs) : 1) * (fromUser && playScaleType == ScaleType.Time ? 15 : 1) * (forward ? 1 : -1));
 
         //if long enough delay
         if(Math.abs(playDelayUnits) >= playIndexIncrementUnits)
@@ -363,9 +420,11 @@ public class PlayBar extends LinearLayout
         return(increments);
     }
 
-    //Stops the play timer
-    public void stopPlayTimer()
+    //Stops the play timer and returns true if was running
+    public boolean stopPlayTimer(boolean resetSynced)
     {
+        boolean stopped = false;
+
         //if timer exists
         if(playTimer != null)
         {
@@ -373,17 +432,30 @@ public class PlayBar extends LinearLayout
             playTimer.cancel();
             playTimer.purge();
             playTimer = null;
+            stopped = true;
+        }
+
+        //if resetting sync status
+        if(resetSynced)
+        {
+            //reset synced
+            synced = false;
         }
 
         //set button to play
         playButton.setBackgroundDrawable(playDrawable);
+        return(stopped);
+    }
+    public void stopPlayTimer()
+    {
+        stopPlayTimer(true);
     }
 
     //Starts the play timer
     private void startPlayTimer()
     {
         //stop any running timer
-        stopPlayTimer();
+        stopPlayTimer(false);
 
         //if button exists
         if(playButton != null)
@@ -398,6 +470,13 @@ public class PlayBar extends LinearLayout
             //reset value and increments
             seekBar.setProgress(0);
             resetPlayIncrements();
+        }
+
+        //if previously synced
+        if(synced)
+        {
+            //sync again
+            sync();
         }
 
         //if using activity
@@ -418,9 +497,10 @@ public class PlayBar extends LinearLayout
                             int actualMaxValue = seekBar.getMax();
                             int progressValue = seekBar.getProgress();
                             int increments;
+                            boolean wasSynced = synced;
 
                             //add to delay
-                            increments = updatePlayIncrements(true);
+                            increments = updatePlayIncrements(true, false);
 
                             //if there are increments
                             if(increments > 0)
@@ -443,7 +523,8 @@ public class PlayBar extends LinearLayout
                                         case ScaleType.Time:
                                             //set to start of next day
                                             progressValue = 0;
-                                            setValues(progressValue, value2 + (long)Calculations.SecondsPerDay);
+                                            setValues(progressValue, value2 + (long)(Calculations.SecondsPerDay * 1000));
+                                            synced = wasSynced;
                                             break;
                                     }
 
@@ -463,7 +544,7 @@ public class PlayBar extends LinearLayout
                         }
                     });
                 }
-            }, 0, 1000);
+            }, 0, playPeriodMs);
         }
     }
 
@@ -495,14 +576,8 @@ public class PlayBar extends LinearLayout
     //Starts playing
     public void start()
     {
-        if(playButton != null)
-        {
-            playButton.performClick();
-        }
-        else
-        {
-            startPlayTimer();
-        }
+        //manually start timer
+        startPlayTimer();
     }
 
     //Creates an on seek manual click listener
@@ -516,7 +591,7 @@ public class PlayBar extends LinearLayout
                 boolean clear = false;
                 int max = seekBar.getMax();
                 int progressValue = seekBar.getProgress();
-                int increments = updatePlayIncrements(forward);
+                int increments = updatePlayIncrements(forward, true);
 
                 //if going forward
                 if(forward)
@@ -565,6 +640,7 @@ public class PlayBar extends LinearLayout
                 //update progress
                 playSubProgressPercent = 0;
                 seekBar.setProgress(progressValue);
+                synced = false;
             }
         });
     }
@@ -586,7 +662,7 @@ public class PlayBar extends LinearLayout
                 {
                     case ScaleType.Speed:
                         //update speed
-                        switch(playScaleFactor)
+                        switch((int)playScaleFactor)
                         {
                             case 1:
                                 playScaleFactor = 10;
@@ -606,13 +682,13 @@ public class PlayBar extends LinearLayout
                         }
 
                         //update display
-                        text = playScaleFactor + res.getString(R.string.text_x);
+                        text = (int)playScaleFactor + res.getString(R.string.text_x);
                         scaleText.setText(text);
                         break;
 
                     case ScaleType.Time:
                         //set date
-                        date = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(value2 * 1000), zone));
+                        date = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(value2), zone));
 
                         //show calendar dialog
                         Globals.showDateDialog(getContext(), date, new DatePickerDialog.OnDateSetListener()
@@ -632,7 +708,7 @@ public class PlayBar extends LinearLayout
                                     newDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
 
                                     //update values
-                                    setValues(getValue(), newDate.getTimeInMillis() / 1000);
+                                    setValues(getValue(), newDate.getTimeInMillis());
                                 }
                             }
                         });

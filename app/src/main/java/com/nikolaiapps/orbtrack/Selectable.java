@@ -1347,6 +1347,7 @@ public abstract class Selectable
         protected int group;
         protected int pageNum;
         protected boolean inEditMode;
+        protected boolean playBarWasRunning;
         protected View listParentView;
         protected PlayBar playBar;
         protected PlayBar scaleBar;
@@ -1356,7 +1357,7 @@ public abstract class Selectable
         {
             super();
             group = pageNum = -1;
-            inEditMode = false;
+            inEditMode = playBarWasRunning = false;
             categoryText = null;
             selectList = null;
             selectListAdapter = null;
@@ -1385,6 +1386,10 @@ public abstract class Selectable
         {
             super.onPause();
 
+            if(playBar != null)
+            {
+                playBarWasRunning = playBar.stopPlayTimer(false);
+            }
             if(pagePauseListener != null)
             {
                 pagePauseListener.paused(this);
@@ -1396,6 +1401,11 @@ public abstract class Selectable
         {
             super.onResume();
 
+            if(playBarWasRunning && playBar != null)
+            {
+                playBar.start();
+                playBarWasRunning = false;
+            }
             if(pageResumeListener != null)
             {
                 pageResumeListener.resumed(this);
@@ -1412,6 +1422,7 @@ public abstract class Selectable
             if(playBar != null)
             {
                 playBar.stopPlayTimer();
+                playBarWasRunning = false;
             }
 
             if(context != null)

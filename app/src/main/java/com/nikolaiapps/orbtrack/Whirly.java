@@ -1595,6 +1595,7 @@ class Whirly
             common.geo = new Calculations.GeodeticDataType(latitude, longitude, altitudeKm, 0, 0);
 
             //if can use bearing
+            canUseBearing = (canUseBearing && !common.geo.equals(common.lastBearingGeo));
             if(canUseBearing)
             {
                 //get bearing and delta

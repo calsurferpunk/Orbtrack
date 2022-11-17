@@ -791,16 +791,16 @@ public abstract class Calculations
         if(cosX == 0.0)
         {
             if (sinX > 0.0)
-            ret = HalfPI;
+                ret = HalfPI;
             else
-            ret = 3.0 * Math.PI / 2.0;
+                ret = 3.0 * Math.PI / 2.0;
         }
         else
         {
             if (cosX > 0.0)
-            ret = Math.atan(sinX / cosX);
+                ret = Math.atan(sinX / cosX);
             else
-            ret = Math.PI + Math.atan(sinX / cosX);
+                ret = Math.PI + Math.atan(sinX / cosX);
         }
 
         return(ret);
@@ -812,7 +812,7 @@ public abstract class Calculations
         double mod = Math.IEEEremainder(arg, TwoPI);
 
         if (mod < 0.0)
-        mod += TwoPI;
+            mod += TwoPI;
 
         return(mod);
     }
@@ -906,7 +906,7 @@ public abstract class Calculations
 
         //wrap negative modulo value
         if(gmst < 0.0)
-        gmst += SecondsPerDay;
+            gmst += SecondsPerDay;
 
         return(TwoPI * (gmst / SecondsPerDay));
     }
@@ -1011,7 +1011,7 @@ public abstract class Calculations
 
         //wrap negative modulo
         if (longitude < 0.0)
-        longitude += TwoPI;
+            longitude += TwoPI;
 
         r = Math.sqrt(Square(eciData.positionX) + Square(eciData.positionY));
         e2  = EarthFlattening * (2.0 - EarthFlattening);

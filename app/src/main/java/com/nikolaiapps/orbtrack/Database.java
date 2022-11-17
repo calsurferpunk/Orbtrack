@@ -1061,6 +1061,23 @@ public class Database extends SQLiteOpenHelper
 
             return((satNull && otherSatNull) || (!satNull && !otherSatNull && satellite.getSatelliteNum() == other.satellite.getSatelliteNum()));
         }
+
+        public static SatelliteData[] getSatellites(Context context, ArrayList<Integer> noraIds)
+        {
+            int index;
+            SatelliteData[] satellites = null;
+
+            if(noraIds != null)
+            {
+                satellites = new SatelliteData[noraIds.size()];
+                for(index = 0; index < noraIds.size(); index++)
+                {
+                    satellites[index] = new SatelliteData(context, noraIds.get(index));
+                }
+            }
+
+            return(satellites);
+        }
     }
 
     public static abstract class LocationType

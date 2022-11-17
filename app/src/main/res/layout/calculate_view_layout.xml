@@ -45,6 +45,16 @@
             android:visibility="gone"/>
 
         <LinearLayout
+            android:id="@+id/Calculate_Select_Layout"
+            style="@style/ResultButtonLayout"
+            android:visibility="gone">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Calculate_Select_Button"
+                style="@style/ResultButton"
+                android:text="@string/title_select"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"

@@ -2,10 +2,6 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.view.View;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Calendar;
 
@@ -13,91 +9,36 @@ import java.util.Calendar;
 //Task to calculate coordinate information
 public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Integer[]>
 {
-    public static class CoordinateBase
+    public static class CoordinateSpan
     {
         public final Calculations.SatelliteObjectType satellite;
         public double pathJulianDateStart;
         public double pathJulianDateEnd;
 
-        public CoordinateBase(Database.SatelliteData newSat)
+        public CoordinateSpan(Database.SatelliteData newSat)
         {
             satellite = newSat.satellite;
             pathJulianDateStart = pathJulianDateEnd = 0;
         }
     }
 
-    public static class CoordinateItemBase extends Selectable.ListItem
+    public static class CoordinateData
     {
-        public boolean isLoading;
         public float latitude;
         public float longitude;
         public float altitudeKm;
         public double illumination;
         public double speedKms;
         public String phaseName;
-        public TextView latitudeText;
-        public TextView longitudeText;
-        public TextView altitudeText;
-        public LinearLayout progressGroup;
-        public LinearLayout dataGroup;
 
-        public CoordinateItemBase(int index, float latitude, float longitude, float altitudeKm)
+        public CoordinateData()
         {
-            super(Integer.MAX_VALUE, index, false, false, false, false);
-            this.isLoading = false;
-            this.latitude = latitude;
-            this.longitude = longitude;
-            this.altitudeKm = altitudeKm;
+            this.latitude = Float.MAX_VALUE;
+            this.longitude = Float.MAX_VALUE;
+            this.altitudeKm = Float.MAX_VALUE;
             this.illumination = 0;
             this.speedKms = Double.MAX_VALUE;
             this.phaseName = null;
-            this.latitudeText = null;
-            this.longitudeText = null;
-            this.altitudeText = null;
-            this.progressGroup = null;
-            this.dataGroup = null;
-        }
-        public CoordinateItemBase(int index)
-        {
-            this(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-        }
-
-        public boolean equals(CoordinateItemBase otherItem)
-        {
-            return(id == otherItem.id);
-        }
-
-        public void setLoading(boolean loading, boolean tleIsAccurate)
-        {
-            isLoading = loading && tleIsAccurate;
-
-            if(progressGroup != null)
-            {
-                progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
-            }
-            if(dataGroup != null)
-            {
-                dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
-            }
-        }
-
-        public void updateDisplays()
-        {
-            Context context = (latitudeText != null ? latitudeText.getContext() : longitudeText != null ? longitudeText.getContext() : null);
-            Resources res = (context != null ? context.getResources() : null);
-
-            if(latitudeText != null)
-            {
-                latitudeText.setText(latitude != Float.MAX_VALUE ? Globals.getLatitudeDirectionString(res, latitude, 2) : "-");
-            }
-            if(longitudeText != null)
-            {
-                longitudeText.setText(longitude != Float.MAX_VALUE ? Globals.getLongitudeDirectionString(res, longitude, 2) : "-");
-            }
-            if(altitudeText != null)
-            {
-                altitudeText.setText(altitudeKm != Float.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(altitudeKm), 0) : "-");
-            }
         }
     }
 
@@ -107,7 +48,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
     //Progress listener
     public interface OnProgressChangedListener
     {
-        void onProgressChanged(int progressType, ArrayList<OrbitalCoordinate> coordinates);
+        void onProgressChanged(int progressType, int satelliteIndex, ArrayList<OrbitalCoordinate> coordinates);
     }
 
     //Coordinate information at time
@@ -137,24 +78,24 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         calculatingCoordinates = false;
     }
 
-    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, CoordinateBase currentPath, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double dayIncrement)
+    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, CoordinateSpan currentSpan, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double dayIncrement)
     {
         int index = 0;
         double phase;
         double illumination = 0;
         double coordinateJulianDate;
         double beforeDayIncrement = ((10.0 / Calculations.SecondsPerDay));     //10 seconds
-        final boolean isSun = (currentPath.satellite.getSatelliteNum() == Universe.IDs.Sun);
-        final boolean isMoon = (currentPath.satellite.getSatelliteNum() == Universe.IDs.Moon);
+        final boolean isSun = (currentSpan.satellite.getSatelliteNum() == Universe.IDs.Sun);
+        final boolean isMoon = (currentSpan.satellite.getSatelliteNum() == Universe.IDs.Moon);
         String phaseName = null;
         Calculations.GeodeticDataType geoData;
         Calculations.TopographicDataType oldTopographicData;
         Calculations.TopographicDataType currentTopographicData;
-        Calculations.SatelliteObjectType coordinateSatellite = new Calculations.SatelliteObjectType(currentPath.satellite);
+        Calculations.SatelliteObjectType coordinateSatellite = new Calculations.SatelliteObjectType(currentSpan.satellite);
         ArrayList<OrbitalCoordinate> coordinates = new ArrayList<>(0);
 
         //calculate coordinates in path unless cancelled
-        for(coordinateJulianDate = currentPath.pathJulianDateStart; coordinateJulianDate <= currentPath.pathJulianDateEnd && !this.isCancelled(); coordinateJulianDate += dayIncrement)
+        for(coordinateJulianDate = currentSpan.pathJulianDateStart; coordinateJulianDate <= currentSpan.pathJulianDateEnd && !this.isCancelled(); coordinateJulianDate += dayIncrement)
         {
             //create new geographic data
             geoData = new Calculations.GeodeticDataType();
@@ -166,11 +107,11 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
                 Current.Coordinates.Item currentItem = savedCoordinateItems[index];
 
                 //set next coordinate
-                geoData.latitude = currentItem.latitude;
-                geoData.longitude = currentItem.longitude;
-                geoData.altitudeKm = currentItem.altitudeKm;
-                illumination = currentItem.illumination;
-                phaseName = currentItem.phaseName;
+                geoData.latitude = currentItem.coordinates[0].latitude;
+                geoData.longitude = currentItem.coordinates[0].longitude;
+                geoData.altitudeKm = currentItem.coordinates[0].altitudeKm;
+                illumination = currentItem.coordinates[0].illumination;
+                phaseName = currentItem.coordinates[0].phaseName;
             }
             else
             {
@@ -209,14 +150,14 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             coordinates.add(new OrbitalCoordinate(geoData, coordinateJulianDate, illumination, phaseName));
 
             //if date is before end date and next date would be after
-            if(coordinateJulianDate < currentPath.pathJulianDateEnd && (coordinateJulianDate + dayIncrement) > currentPath.pathJulianDateEnd)
+            if(coordinateJulianDate < currentSpan.pathJulianDateEnd && (coordinateJulianDate + dayIncrement) > currentSpan.pathJulianDateEnd)
             {
                 //set to increment before end date
-                coordinateJulianDate = currentPath.pathJulianDateEnd - dayIncrement;
+                coordinateJulianDate = currentSpan.pathJulianDateEnd - dayIncrement;
             }
         }
 
-        //return views
+        //return coordinates
         return(coordinates);
     }
 
@@ -232,47 +173,48 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         double dayIncrement = (Double)params[6];
         Context context = (Context)params[0];
         Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
-        CoordinateBase[] orbitalCoordinates = (CoordinateBase[])params[1];
+        CoordinateSpan[] satellitesPathSpan = (CoordinateSpan[])params[1];
         Current.Coordinates.Item[] savedCoordinateItems = (Current.Coordinates.Item[])params[2];
 
         //update progress
-        onProgressChanged(Globals.ProgressType.Started, null);
+        onProgressChanged(Globals.ProgressType.Started, Integer.MAX_VALUE, null);
 
         //go through each orbital while not cancelled
-        for(index = 0; index < orbitalCoordinates.length && !this.isCancelled(); index++)
+        for(index = 0; index < satellitesPathSpan.length && !this.isCancelled(); index++)
         {
             //get current path and satellite
-            CoordinateBase currentPath = orbitalCoordinates[index];
+            CoordinateSpan currentSpan = satellitesPathSpan[index];
             ArrayList<OrbitalCoordinate> coordinates;
 
             //update progress
             publishProgress(index, Globals.ProgressType.Started);
 
             //set given dates
-            currentPath.pathJulianDateStart = julianDateStart;
-            currentPath.pathJulianDateEnd = julianDateEnd;
+            currentSpan.pathJulianDateStart = julianDateStart;
+            currentSpan.pathJulianDateEnd = julianDateEnd;
 
             //get coordinates
-            coordinates = getCoordinates(context, currentPath, savedCoordinateItems, observer, dayIncrement);
+            coordinates = getCoordinates(context, currentSpan, savedCoordinateItems, observer, dayIncrement);
 
             //update progress
-            onProgressChanged((!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), coordinates);
+            onProgressChanged((!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), index, coordinates);
         }
 
         //update status
         calculatingCoordinates = false;
 
-        //return status
-        return(new Integer[]{!this.isCancelled() ? Globals.ProgressType.Finished : Globals.ProgressType.Cancelled});
+        //update progress and return status
+        onProgressChanged((!this.isCancelled() ? Globals.ProgressType.Finished : Globals.ProgressType.Cancelled), Integer.MAX_VALUE, null);
+        return(new Integer[]{!this.isCancelled() ? Globals.ProgressType.Finished : Globals.ProgressType.Cancelled, Integer.MAX_VALUE});
     }
 
     //Calls on progress changed listener
-    private void onProgressChanged(int progressType, ArrayList<OrbitalCoordinate> coordinates)
+    private void onProgressChanged(int progressType, int satelliteIndex, ArrayList<OrbitalCoordinate> coordinates)
     {
         //if there is a listener
         if(progressChangedListener != null)
         {
-            progressChangedListener.onProgressChanged(progressType, coordinates);
+            progressChangedListener.onProgressChanged(progressType, satelliteIndex, coordinates);
         }
     }
 
@@ -280,13 +222,15 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
     protected  void onPostExecute(Integer[] result)
     {
         //finished
-        onProgressChanged(result[0], null);
+        onProgressChanged(result[0], result[1], null);
     }
 
     @Override
     protected void onCancelled(Integer[] result)
     {
+        boolean haveResult = (result != null && result.length >= 2);
+
         //cancelled
-        onProgressChanged((result != null ? result[0] : Globals.ProgressType.Cancelled), null);
+        onProgressChanged((haveResult ? result[0] : Globals.ProgressType.Cancelled), (haveResult ? result[1] : Integer.MAX_VALUE), null);
     }
 }

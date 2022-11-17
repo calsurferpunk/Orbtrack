@@ -43,6 +43,7 @@ public class MasterAddListActivity extends BaseInputActivity
     {
         static final byte MasterList = 0;
         static final byte VisibleList = 1;
+        static final byte SelectList = 2;
     }
 
     public static abstract class ParamTypes
@@ -52,6 +53,7 @@ public class MasterAddListActivity extends BaseInputActivity
         static final String TotalCount = "totalCount";
         static final String ProgressType = "progressType";
         static final String AskUpdate = "askUpdate";
+        static final String OrbitalIsSelected = "orbitalIsSelected";
     }
 
     private static class MasterListAdapter extends OrbitalFilterList.OrbitalListAdapter
@@ -80,25 +82,27 @@ public class MasterAddListActivity extends BaseInputActivity
                 int index;
                 int index2;
                 int itemIndex;
-                int satelliteCount;
+                int orbitalCount;
                 boolean foundLaunchDate = false;
                 Resources res;
                 Context context = (Context)params[0];
                 UpdateService.MasterListType masterList = (UpdateService.MasterListType)params[1];
                 ArrayList<OrbitalFilterList.Item> items = new ArrayList<>(0);
-                Database.DatabaseSatellite[] dbSatellites;
+                boolean[] orbitalIsSelected = (boolean[])params[2];
+                boolean haveOrbitalIsSelected = (orbitalIsSelected != null);
+                Database.DatabaseSatellite[] orbitals;
 
                 //if master list is set
                 if(masterList != null)
                 {
-                    //go through each satellite
-                    satelliteCount = masterList.satellites.size();
-                    for(index = 0; index < satelliteCount; index++)
+                    //go through each orbital
+                    orbitalCount = masterList.satellites.size();
+                    for(index = 0; index < orbitalCount; index++)
                     {
-                        //remember current satellite, group, and item
-                        UpdateService.MasterSatellite currentSatellite = masterList.satellites.get(index);
-                        String currentOwner = currentSatellite.ownerCode;
-                        ListItem newItem = new ListItem(currentOwner, currentSatellite, false);
+                        //remember current orbital, group, and item
+                        UpdateService.MasterSatellite currentOrbital = masterList.satellites.get(index);
+                        String currentOwner = currentOrbital.ownerCode;
+                        ListItem newItem = new ListItem(currentOwner, currentOrbital, false);
                         int[] indexes = Globals.divideFind(newItem, items, new ListItem.Comparer(false));
 
                         //if item is not in the list yet
@@ -115,7 +119,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
 
                         //if there is a launch date
-                        if(currentSatellite.launchDateMs > 0)
+                        if(currentOrbital.launchDateMs > 0)
                         {
                             //found
                             foundLaunchDate = true;
@@ -125,23 +129,23 @@ public class MasterAddListActivity extends BaseInputActivity
                         if(progressChangedListener != null)
                         {
                             //send event
-                            progressChangedListener.onProgressChanged(Globals.ProgressType.Running, null, index, satelliteCount);
+                            progressChangedListener.onProgressChanged(Globals.ProgressType.Running, null, index, orbitalCount);
                         }
                     }
                 }
                 else
                 {
-                    //get resources and satellites
+                    //get resources and orbitals
                     res = context.getResources();
-                    dbSatellites = Database.getOrbitals(context);
+                    orbitals = Database.getOrbitals(context);
 
-                    //go through each satellite
-                    satelliteCount = dbSatellites.length;
-                    for(index = 0; index < satelliteCount; index++)
+                    //go through each orbital
+                    orbitalCount = orbitals.length;
+                    for(index = 0; index < orbitalCount; index++)
                     {
                         ListItem newItem;
                         UpdateService.MasterSatellite newSatellite;
-                        Database.DatabaseSatellite currentSatellite = dbSatellites[index];
+                        Database.DatabaseSatellite currentSatellite = orbitals[index];
                         String currentOwner = currentSatellite.ownerCode;
                         String[][] groups = Database.getSatelliteCategoriesEnglish(context, currentSatellite.noradId);
 
@@ -154,7 +158,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
 
                         //create item
-                        newItem = new ListItem(currentOwner, newSatellite, currentSatellite.isSelected);
+                        newItem = new ListItem(currentOwner, newSatellite, ((haveOrbitalIsSelected && index < orbitalIsSelected.length) ? orbitalIsSelected[index] : currentSatellite.isSelected));
 
                         //if item is not in the list yet
                         itemIndex = items.indexOf(newItem);
@@ -180,7 +184,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         if(progressChangedListener != null)
                         {
                             //send event
-                            progressChangedListener.onProgressChanged(Globals.ProgressType.Running, null, index, satelliteCount);
+                            progressChangedListener.onProgressChanged(Globals.ProgressType.Running, null, index, orbitalCount);
                         }
                     }
                 }
@@ -195,7 +199,7 @@ public class MasterAddListActivity extends BaseInputActivity
                 if(progressChangedListener != null)
                 {
                     //send event
-                    progressChangedListener.onProgressChanged(Globals.ProgressType.Finished, null, satelliteCount, satelliteCount);
+                    progressChangedListener.onProgressChanged(Globals.ProgressType.Finished, null, orbitalCount, orbitalCount);
                 }
 
                 //done
@@ -237,8 +241,9 @@ public class MasterAddListActivity extends BaseInputActivity
         private final LoadItemsTask loadItems;
         private final UpdateService.MasterListType masterList;
         private final OnItemCheckChangedListener itemCheckChangedListener;
+        private final boolean[] orbitalIsSelected;
 
-        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, Globals.OnProgressChangedListener progressChangedListener, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
+        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, boolean[] orbitalIsSelected, Globals.OnProgressChangedListener progressChangedListener, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
         {
             super(context);
 
@@ -246,8 +251,9 @@ public class MasterAddListActivity extends BaseInputActivity
             loadingItems = true;
             this.itemsRefID = R.layout.image_checked_item;
 
-            //set check changed listener
+            //set items and check changed listener
             this.masterList = masterList;
+            this.orbitalIsSelected = orbitalIsSelected;
             this.itemCheckChangedListener = checkChangedListener;
 
             //set load items task
@@ -278,16 +284,16 @@ public class MasterAddListActivity extends BaseInputActivity
                 }
             });
         }
-        public MasterListAdapter(Context context, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
+        public MasterListAdapter(Context context, boolean[] orbitalIsSelected, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener)
         {
-            this(context, null, null, loadItemsListener, checkChangedListener);
+            this(context, null, orbitalIsSelected, null, loadItemsListener, checkChangedListener);
         }
 
         @Override
         public void onAttachedToRecyclerView(@NonNull RecyclerView view)
         {
             super.onAttachedToRecyclerView(view);
-            loadItems.execute(currentContext, masterList);
+            loadItems.execute(currentContext, masterList, orbitalIsSelected);
         }
 
         @Override @NonNull
@@ -617,7 +623,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                     final ArrayList<UpdateService.MasterOwner> usedOwners = masterList.usedOwners;
 
                                     //add satellites
-                                    addAdapter = new MasterListAdapter(MasterAddListActivity.this, masterList, new Globals.OnProgressChangedListener()
+                                    addAdapter = new MasterListAdapter(MasterAddListActivity.this, masterList, null, new Globals.OnProgressChangedListener()
                                     {
                                         @Override
                                         public void onProgressChanged(int progressType, String section, final long updateIndex, final long updateCount)
@@ -769,9 +775,11 @@ public class MasterAddListActivity extends BaseInputActivity
         Intent addIntent = this.getIntent();
         byte listType = addIntent.getByteExtra(ParamTypes.ListType, ListType.VisibleList);
         boolean isFilterList = (listType == ListType.VisibleList);
+        boolean isSelectList = (listType == ListType.SelectList);
         boolean askUpdate = addIntent.getBooleanExtra(ParamTypes.AskUpdate, false);
-        final int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
-        final MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
+        int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
+        boolean[] orbitalIsSelected = addIntent.getBooleanArrayExtra(ParamTypes.OrbitalIsSelected);
+        MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
         searchLayout = this.findViewById(R.id.Orbital_Search_Layout);
         searchGroup = this.findViewById(R.id.Orbital_Search_Table);
         ownerList = this.findViewById(R.id.Orbital_Search_Owner_List);
@@ -839,11 +847,11 @@ public class MasterAddListActivity extends BaseInputActivity
             }
         };
 
-        //if for visible list
-        if(isFilterList)
+        //if for visible or select list
+        if(isFilterList || isSelectList)
         {
             //create adapter
-            addAdapter = new MasterListAdapter(this, new OrbitalFilterList.OnLoadItemsListener()
+            addAdapter = new MasterListAdapter(this, orbitalIsSelected, new OrbitalFilterList.OnLoadItemsListener()
             {
                 @Override
                 public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
@@ -874,7 +882,9 @@ public class MasterAddListActivity extends BaseInputActivity
                 public void onClick(View v)
                 {
                     int index;
+                    Intent data = new Intent();
                     OrbitalFilterList.Item[] items = addAdapter.getAllItems();
+                    boolean[] userOrbitalIsSelected = ((isSelectList && items.length > 0) ? new boolean[items.length] : null);
 
                     //go through each item
                     for(index = 0; index < items.length; index++)
@@ -882,19 +892,30 @@ public class MasterAddListActivity extends BaseInputActivity
                         //remember current item
                         OrbitalFilterList.Item currentItem = items[index];
 
-                        //if checked state has changed
-                        if(currentItem instanceof MasterListAdapter.ListItem && currentItem.isChecked != ((MasterListAdapter.ListItem)currentItem).startChecked)
+                        //if for select list
+                        if(isSelectList)
                         {
-                            //save with updated select state
-                            Database.saveSatelliteVisible(MasterAddListActivity.this, currentItem.satellite.noradId, currentItem.isChecked);
+                            //add selected ID
+                            userOrbitalIsSelected[index] = currentItem.isChecked;
+                        }
+                        else
+                        {
+                            //if checked state has changed
+                            if(currentItem instanceof MasterListAdapter.ListItem && currentItem.isChecked != ((MasterListAdapter.ListItem)currentItem).startChecked)
+                            {
+                                //save with updated select state
+                                Database.saveSatelliteVisible(MasterAddListActivity.this, currentItem.satellite.noradId, currentItem.isChecked);
+                            }
                         }
                     }
 
-                    MasterAddListActivity.this.sendResult(RESULT_OK);
+                    //add any data and finish
+                    data.putExtra(ParamTypes.OrbitalIsSelected, userOrbitalIsSelected);
+                    MasterAddListActivity.this.sendResult(data, Globals.ProgressType.Finished);
                     MasterAddListActivity.this.finish();
                 }
             });
-            addButton.setText(R.string.title_set);
+            addButton.setText(isSelectList ? R.string.title_select : R.string.title_set);
         }
         else
         {
@@ -1192,7 +1213,7 @@ public class MasterAddListActivity extends BaseInputActivity
         this.setResult(resultCode, data);
     }
 
-    //Shows add list
+    //Shows list
     public static void showList(final Activity context, ActivityResultLauncher<Intent> launcher, final boolean askUpdate, boolean confirmInternet)
     {
         //if confirm internet and should ask
@@ -1217,6 +1238,13 @@ public class MasterAddListActivity extends BaseInputActivity
             intent.putExtra(Settings.PreferenceName.SatelliteSource, Settings.getSatelliteCatalogSource(context));
             Globals.startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.MasterAddList);
         }
+    }
+    public static void showList(Activity context, ActivityResultLauncher<Intent> launcher, byte listType, byte requestCode, boolean[] orbitalIsSelected)
+    {
+        Intent intent = new Intent(context, MasterAddListActivity.class);
+        intent.putExtra(ParamTypes.ListType, listType);
+        intent.putExtra(ParamTypes.OrbitalIsSelected, orbitalIsSelected);
+        Globals.startActivityForResult(launcher, intent, requestCode);
     }
 
     //Shows manual orbital input

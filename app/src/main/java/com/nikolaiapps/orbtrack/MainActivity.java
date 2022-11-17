@@ -396,6 +396,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     @Override
     public void onActivityResult(ActivityResult result)
     {
+        int page = getMainPage();
         int subPage;
         int resultCode = result.getResultCode();
         int progressType = Globals.ProgressType.Finished;
@@ -512,6 +513,28 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     //update list without saved items
                     updateMainPager(true, false);
+                }
+                break;
+
+            case BaseInputActivity.RequestCode.OrbitalSelectList:
+                //if set
+                if(isOkay)
+                {
+                    //get selected
+                    boolean[] orbitalIsSelected = data.getBooleanArrayExtra(MasterAddListActivity.ParamTypes.OrbitalIsSelected);
+
+                    //if calculate adapter exists
+                    if(calculatePageAdapter != null)
+                    {
+                        //if able to get page
+                        Selectable.ListFragment calculatePage = calculatePageAdapter.getPage(mainPager, page);
+                        if(calculatePage instanceof Calculate.Page)
+                        {
+                            //set selected
+                            //note: sets saved value to use when page resumes
+                            calculatePageAdapter.setSavedItem(calculatePage.getPageParam(), Calculate.ParamTypes.OrbitalIsSelected, orbitalIsSelected);
+                        }
+                    }
                 }
                 break;
 
@@ -1907,7 +1930,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Coordinates.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.latitude, false) + separator + Globals.getNumberString(currentItem.longitude, false) + separator + (currentItem.altitudeKm > 0 && currentItem.altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.altitudeKm)) : "-") + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.coordinates[0].latitude, false) + separator + Globals.getNumberString(currentItem.coordinates[0].longitude, false) + separator + (currentItem.coordinates[0].altitudeKm > 0 && currentItem.coordinates[0].altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.coordinates[0].altitudeKm)) : "-") + (isMoon ? (separator + Globals.getNumberString(currentItem.coordinates[0].illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.coordinates[0].phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
@@ -2382,6 +2405,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean onCalculateIntersectionNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] != Globals.SubPageType.Input);
         boolean onCalculateIntersectionLens = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens);
         Bundle params;
+        ArrayList<Integer> multiNoradId;
 
         //update running tasks
         setTimer(run && (onCurrent || onCalculateViewLens || onCalculatePassesLens || onCalculateIntersectionLens));
@@ -2413,7 +2437,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Coordinates);
                 if(params != null)
                 {
-                    setCalculateCoordinateCalculations(true, new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId)), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
+                    multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                    setCalculateCoordinateCalculations(true, (multiNoradId != null && multiNoradId.size() > 0 ? Database.SatelliteData.getSatellites(this, multiNoradId) : new Database.SatelliteData[]{new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId))}), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
                 }
             }
             if(onCalculateIntersectionNonInput)
@@ -2823,9 +2848,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Shows orbital view list
     private void showOrbitalViewList()
     {
-        Intent intent = new Intent(this, MasterAddListActivity.class);
-        intent.putExtra(MasterAddListActivity.ParamTypes.ListType, MasterAddListActivity.ListType.VisibleList);
-        Globals.startActivityForResult(resultLauncher, intent, BaseInputActivity.RequestCode.OrbitalViewList);
+        MasterAddListActivity.showList(this, resultLauncher, MasterAddListActivity.ListType.VisibleList, BaseInputActivity.RequestCode.OrbitalViewList, null);
     }
 
     //Shows a filter dialog
@@ -3264,6 +3287,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 int orbitalId;
                 Bundle params;
+                ArrayList<Integer> multiNoradId;
 
                 switch(group)
                 {
@@ -3365,7 +3389,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(params != null)
                                 {
                                     orbitalId = params.getInt(Calculate.ParamTypes.NoradId);
-                                    Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.Coordinates, orbitalId, Globals.getHeaderText(MainActivity.this, new Database.SatelliteData(MainActivity.this, orbitalId).getName(), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer)));
+                                    multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                                    if(orbitalId == Universe.IDs.Invalid && multiNoradId != null && multiNoradId.size() == 1)
+                                    {
+                                        orbitalId = multiNoradId.get(0);
+                                    }
+                                    Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.Coordinates, orbitalId, Globals.getHeaderText(MainActivity.this, (orbitalId != Universe.IDs.Invalid ? new Database.SatelliteData(MainActivity.this, orbitalId).getName() : null), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer)));
                                 }
 
                                 //recreate tasks
@@ -3388,21 +3417,31 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 //get params
                 int page = params.getInt(Selectable.ParamTypes.PageNumber);
                 int subPage = params.getInt(Selectable.ParamTypes.SubPageNumber);
-                int objectId = params.getInt(Calculate.ParamTypes.NoradId);
+                int objectId = params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid);
                 int object2Id = params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid);
                 long startDateMs = params.getLong(Calculate.ParamTypes.StartDateMs);
                 long endDateMs = params.getLong(Calculate.ParamTypes.EndDateMs);
                 double dayIncrement = 1;
                 double intersection = params.getDouble(Calculate.ParamTypes.IntersectionDegs, 0.2);
                 double elevationMin = params.getDouble(Calculate.ParamTypes.ElevationMinDegs, 0.0);
-                final double julianDateStart = Calculations.julianDateCalendar(startDateMs, observer);
-                final double julianDateEnd = Calculations.julianDateCalendar(endDateMs, observer);
-                final Database.SatelliteData satellite = new Database.SatelliteData(MainActivity.this, objectId);
-                final Database.SatelliteData satellite2 = new Database.SatelliteData(MainActivity.this, object2Id);
+                double julianDateStart = Calculations.julianDateCalendar(startDateMs, observer);
+                double julianDateEnd = Calculations.julianDateCalendar(endDateMs, observer);
+                Bundle oldParams = Calculate.PageAdapter.getParams(page);
+                Database.SatelliteData satellite = new Database.SatelliteData(MainActivity.this, objectId);
+                Database.SatelliteData satellite2 = new Database.SatelliteData(MainActivity.this, object2Id);
+                ArrayList<Integer> multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                int multiNoradIdLength = (multiNoradId != null ? multiNoradId.size() : 0);
 
                 //if not waiting on a location update
                 if(!pendingLocationUpdate)
                 {
+                    //if old params not set
+                    if(oldParams == null)
+                    {
+                        //set to empty
+                        oldParams = new Bundle();
+                    }
+
                     //params based on page
                     switch(page)
                     {
@@ -3415,6 +3454,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                     //update sub page and params
                     setSubPage(Groups.Calculate, page, subPage);
+                    params.putInt(Calculate.ParamTypes.NoradIdOld, oldParams.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid)) ;
+                    params.putInt(Calculate.ParamTypes.NoradId2Old, oldParams.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid)) ;
+                    params.putIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld, oldParams.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId));
                     Calculate.PageAdapter.setParams(page, params);
 
                     //update display
@@ -3439,7 +3481,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                             case Calculate.PageType.Coordinates:
                                 //start calculating
-                                setCalculateCoordinateCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
+                                setCalculateCoordinateCalculations(true, (multiNoradIdLength > 0 ? Database.SatelliteData.getSatellites(MainActivity.this, multiNoradId) : new Database.SatelliteData[]{satellite}), julianDateStart, julianDateEnd, dayIncrement);
                                 break;
 
                             case Calculate.PageType.Intersection:
@@ -4133,14 +4175,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(currentItem != null)
                                 {
                                     //update values
-                                    currentItem.latitude = (float)currentOrbital.geo.latitude;
-                                    currentItem.longitude = (float)currentOrbital.geo.longitude;
-                                    currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
-                                    currentItem.speedKms = currentOrbital.geo.speedKmS;
-                                    currentItem.illumination = illumination;
+                                    currentItem.coordinates[0].latitude = (float)currentOrbital.geo.latitude;
+                                    currentItem.coordinates[0].longitude = (float)currentOrbital.geo.longitude;
+                                    currentItem.coordinates[0].altitudeKm = (float)currentOrbital.geo.altitudeKm;
+                                    currentItem.coordinates[0].speedKms = currentOrbital.geo.speedKmS;
+                                    currentItem.coordinates[0].illumination = illumination;
                                     if(phaseName != null)
                                     {
-                                        currentItem.phaseName = phaseName;
+                                        currentItem.coordinates[0].phaseName = phaseName;
                                     }
 
                                     //update list later
@@ -5183,10 +5225,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Starts/stops calculate coordinate calculations
-    private void setCalculateCoordinateCalculations(boolean run, final Database.SatelliteData satellite, final double julianDateStart, final double julianDateEnd, double dayIncrement)
+    private void setCalculateCoordinateCalculations(boolean run, final Database.SatelliteData[] satellites, final double julianDateStart, final double julianDateEnd, double dayIncrement)
     {
+        boolean satelliteChanged;
+        int index;
+        int noradId;
         Bundle params;
-        Database.SatelliteData listSatellite;
+        ArrayList<Integer> multiNoradId = new ArrayList<>(0);
+        Database.SatelliteData firstSatellite;
         Current.Coordinates.Item[] savedCoordinateItems;
 
         //if task was running
@@ -5197,18 +5243,41 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //if want to run and have an item
-        if(run && satellite != null && satellite.database != null)
+        if(run && satellites != null && satellites.length > 0 && satellites[0] != null)
         {
-            //get any saved items and params
+            //get first satellite and any saved items and params
+            firstSatellite = satellites[0];
             savedCoordinateItems = (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates);
             params = Calculate.PageAdapter.getParams(Calculate.PageType.Coordinates);
 
             //check if params changed
             if(params != null && savedCoordinateItems != null)
             {
-                //if satellite, start, end, or increment changed
-                listSatellite = new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId));
-                if(listSatellite.database != null && (listSatellite.database.noradId != satellite.database.noradId || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
+                //get old satellite data
+                noradId = params.getInt(Calculate.ParamTypes.NoradIdOld, Universe.IDs.Invalid);
+                if(noradId != Universe.IDs.Invalid)
+                {
+                    multiNoradId.add(noradId);
+                }
+                else
+                {
+                    multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld);
+                }
+
+                //look for satellite changes
+                satelliteChanged = (multiNoradId == null || multiNoradId.size() != satellites.length);
+                if(!satelliteChanged)
+                {
+                    //go through each satellite while no change detected
+                    for(index = 0; index < satellites.length && !satelliteChanged; index++)
+                    {
+                        //check for changed ID
+                        satelliteChanged = satellites[index].getSatelliteNum() != multiNoradId.get(index);
+                    }
+                }
+
+                //if satellite(s), start, end, or increment changed
+                if(satelliteChanged || (Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart) || (Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd) || (Calculate.getDayIncrement(params) != dayIncrement))
                 {
                     //ignore saved
                     savedCoordinateItems = null;
@@ -5216,10 +5285,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             }
 
             //start task
-            calculateCoordinatesTask = Calculate.calculateCoordinates(this, satellite, savedCoordinateItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateCoordinatesTask.OnProgressChangedListener()
+            calculateCoordinatesTask = Calculate.calculateCoordinates(this, satellites, savedCoordinateItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateCoordinatesTask.OnProgressChangedListener()
             {
                 @Override
-                public void onProgressChanged(int progressType, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
+                public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
                 {
                     Runnable passAction = null;
 
@@ -5233,7 +5302,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 public synchronized void run()
                                 {
                                     //update header and menu
-                                    Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.Coordinates, satellite.getSatelliteNum(), Globals.getHeaderText(MainActivity.this, satellite.getName(), julianDateStart, julianDateEnd));
+                                    Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.Coordinates, firstSatellite.getSatelliteNum(), Globals.getHeaderText(MainActivity.this, (satellites.length == 1 ? firstSatellite.getName() : null), julianDateStart, julianDateEnd));
                                     updateOptionsMenu();
                                 }
                             };
@@ -5256,19 +5325,31 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         Current.Coordinates.Item currentItem = new Current.Coordinates.Item(index);
                                         Calendar time = Globals.getLocalTime(currentCoordinate.time, observer.timeZone);
 
-                                        currentItem.id = satellite.getSatelliteNum();
+                                        currentItem.id = firstSatellite.getSatelliteNum();
                                         currentItem.julianDate = currentCoordinate.julianDate;
                                         currentItem.time = time;
-                                        currentItem.latitude = (float)currentCoordinate.latitude;
-                                        currentItem.longitude = (float)currentCoordinate.longitude;
-                                        currentItem.altitudeKm = (float)currentCoordinate.altitudeKm;
-                                        currentItem.illumination = currentCoordinate.illumination;
-                                        currentItem.phaseName = currentCoordinate.phaseName;
+                                        currentItem.coordinates[0].latitude = (float)currentCoordinate.latitude;
+                                        currentItem.coordinates[0].longitude = (float)currentCoordinate.longitude;
+                                        currentItem.coordinates[0].altitudeKm = (float)currentCoordinate.altitudeKm;
+                                        currentItem.coordinates[0].illumination = currentCoordinate.illumination;
+                                        currentItem.coordinates[0].phaseName = currentCoordinate.phaseName;
                                         items[index] = currentItem;
                                     }
 
-                                    //update list and menu
+                                    //set coordinates
                                     Calculate.PageAdapter.setCoordinateItems(items);
+                                }
+                            };
+                            break;
+
+                        case Globals.ProgressType.Finished:
+                        case Globals.ProgressType.Cancelled:
+                            passAction = new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    //update list and menu
                                     Calculate.PageAdapter.notifyItemsChanged(Calculate.PageType.Coordinates);
                                     updateOptionsMenu();
                                 }

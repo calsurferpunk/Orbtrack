@@ -2157,12 +2157,12 @@ public abstract class Current
         public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
 
         //Item
-        public static class Item extends CalculateCoordinatesTask.CoordinateItemBase
+        public static class Item extends Selectable.ListItem
         {
-            private String name;
-            private String ownerCode;
-
+            public boolean isLoading;
             public final boolean tleIsAccurate;
+            private final String name;
+            private final String ownerCode;
             public double julianDate;
             public Calendar time;
             public Drawable icon;
@@ -2170,7 +2170,12 @@ public abstract class Current
             public TextView nameText;
             public TextView speedText;
             public TextView timeText;
-            public Calculations.SatelliteObjectType satellite;
+            public TextView latitudeText;
+            public TextView longitudeText;
+            public TextView altitudeText;
+            public LinearLayout dataGroup;
+            public LinearLayout progressGroup;
+            public CalculateCoordinatesTask.CoordinateData[] coordinates;
 
             public static class Comparer implements Comparator<Item>
             {
@@ -2187,13 +2192,13 @@ public abstract class Current
                     switch(sort)
                     {
                         case Items.SortBy.Latitude:
-                            return(Float.compare(value1.latitude, value2.latitude));
+                            return(Float.compare(value1.coordinates[0].latitude, value2.coordinates[0].latitude));
 
                         case Items.SortBy.Longitude:
-                            return(Float.compare(value1.longitude, value2.longitude));
+                            return(Float.compare(value1.coordinates[0].longitude, value2.coordinates[0].longitude));
 
                         case Items.SortBy.Altitude:
-                            return(Float.compare(value1.altitudeKm, value2.altitudeKm));
+                            return(Float.compare(value1.coordinates[0].altitudeKm, value2.coordinates[0].altitudeKm));
 
                         default:
                         case Items.SortBy.Name:
@@ -2204,40 +2209,57 @@ public abstract class Current
 
             public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, boolean tleAccurate)
             {
-                super(index);
+                super(Integer.MAX_VALUE, index, false, false, false, false);
+                coordinates = new CalculateCoordinatesTask.CoordinateData[]{new CalculateCoordinatesTask.CoordinateData()};
+                isLoading = false;
+                tleIsAccurate = tleAccurate;
                 icon = icn;
                 name = nm;
                 ownerCode = ownCd;
+                julianDate = Double.MAX_VALUE;
+                time = Globals.julianDateToCalendar(julianDate);
                 nameImage = null;
                 nameText = null;
                 speedText = null;
-                satellite = currentSatellite;
-                if(satellite != null)
+                timeText = null;
+                latitudeText = null;
+                longitudeText = null;
+                altitudeText = null;
+                dataGroup = null;
+                progressGroup = null;
+                if(currentSatellite != null)
                 {
-                    id = satellite.getSatelliteNum();
+                    id = currentSatellite.getSatelliteNum();
                 }
-                tleIsAccurate = tleAccurate;
             }
             public Item(int index)
             {
-                super(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-                julianDate = Double.MAX_VALUE;
-                time = Globals.julianDateToCalendar(julianDate);
-                timeText = null;
-                tleIsAccurate = false;
+                this(index, null, null, null, null, false);
             }
 
             public boolean haveGeo()
             {
-                return((latitude != 0 || longitude != 0 || altitudeKm != 0) && (latitude != Float.MAX_VALUE && longitude != Float.MAX_VALUE && altitudeKm != Float.MAX_VALUE));
+                return((coordinates[0].latitude != 0 || coordinates[0].longitude != 0 || coordinates[0].altitudeKm != 0) && (coordinates[0].latitude != Float.MAX_VALUE && coordinates[0].longitude != Float.MAX_VALUE && coordinates[0].altitudeKm != Float.MAX_VALUE));
             }
 
             public void updateDisplays(TimeZone zone)
             {
-                super.updateDisplays();
-
                 String text;
+                Context context = (latitudeText != null ? latitudeText.getContext() : longitudeText != null ? longitudeText.getContext() : null);
+                Resources res = (context != null ? context.getResources() : null);
 
+                if(latitudeText != null)
+                {
+                    latitudeText.setText(coordinates[0].latitude != Float.MAX_VALUE ? Globals.getLatitudeDirectionString(res, coordinates[0].latitude, 2) : "-");
+                }
+                if(longitudeText != null)
+                {
+                    longitudeText.setText(coordinates[0].longitude != Float.MAX_VALUE ? Globals.getLongitudeDirectionString(res, coordinates[0].longitude, 2) : "-");
+                }
+                if(altitudeText != null)
+                {
+                    altitudeText.setText(coordinates[0].altitudeKm != Float.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(coordinates[0].altitudeKm), 0) : "-");
+                }
                 if(nameImage != null && icon != null)
                 {
                     nameImage.setBackgroundDrawable(icon);
@@ -2248,7 +2270,7 @@ public abstract class Current
                 }
                 if(speedText != null)
                 {
-                    text = (speedKms != Double.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(speedKms)) : "-");
+                    text = (coordinates[0].speedKms != Double.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(coordinates[0].speedKms)) : "-");
                     speedText.setText(text);
                 }
                 if(timeText != null)
@@ -2261,6 +2283,20 @@ public abstract class Current
                     {
                         timeText.setText(Globals.getDateString(timeText.getContext(), time, zone, true));
                     }
+                }
+            }
+
+            public void setLoading(boolean loading, boolean tleIsAccurate)
+            {
+                isLoading = loading && tleIsAccurate;
+
+                if(progressGroup != null)
+                {
+                    progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                }
+                if(dataGroup != null)
+                {
+                    dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
             }
         }
@@ -2496,7 +2532,7 @@ public abstract class Current
                 final Item currentItem = (Item)item;
 
                 //if not for calculation and altitude has been set
-                if(!forCalculation && currentItem.altitudeKm != Float.MAX_VALUE)
+                if(!forCalculation && currentItem.coordinates[0].altitudeKm != Float.MAX_VALUE)
                 {
                     final int mapDisplayType = Settings.getMapDisplayType(currentContext);
                     final boolean isSun = (item.id == Universe.IDs.Sun);
@@ -2552,27 +2588,27 @@ public abstract class Current
                                         switch(index)
                                         {
                                             case 0:
-                                                text = (haveGeo ? Globals.getLatitudeDirectionString(res, currentItem.latitude, 4) : "-");
+                                                text = (haveGeo ? Globals.getLatitudeDirectionString(res, currentItem.coordinates[0].latitude, 4) : "-");
                                                 break;
 
                                             case 1:
-                                                text = (haveGeo ? Globals.getLongitudeDirectionString(res, currentItem.longitude, 4) : "-");
+                                                text = (haveGeo ? Globals.getLongitudeDirectionString(res, currentItem.coordinates[0].longitude, 4) : "-");
                                                 break;
 
                                             case 2:
-                                                text = (haveGeo ? Globals.getNumberString(Globals.getKmUnitValue(currentItem.altitudeKm)) : "-") + " " + kmUnit;
+                                                text = (haveGeo ? Globals.getNumberString(Globals.getKmUnitValue(currentItem.coordinates[0].altitudeKm)) : "-") + " " + kmUnit;
                                                 break;
 
                                             case 3:
-                                                text = (currentItem.speedKms != Double.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(currentItem.speedKms)) : "-") + " " + kmUnit + "/" + res.getString(R.string.abbrev_seconds_lower);
+                                                text = (currentItem.coordinates[0].speedKms != Double.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(currentItem.coordinates[0].speedKms)) : "-") + " " + kmUnit + "/" + res.getString(R.string.abbrev_seconds_lower);
                                                 break;
 
                                             case 4:
-                                                text = (currentItem.phaseName == null ? "-" : currentItem.phaseName);
+                                                text = (currentItem.coordinates[0].phaseName == null ? "-" : currentItem.coordinates[0].phaseName);
                                                 break;
 
                                             case 5:
-                                                text = Globals.getNumberString(currentItem.illumination, 1) + "%";
+                                                text = Globals.getNumberString(currentItem.coordinates[0].illumination, 1) + "%";
                                                 break;
                                         }
 
@@ -2745,7 +2781,7 @@ public abstract class Current
             //setup search list
             if(usingSearchList)
             {
-                searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+                searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
                 searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
                 searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
@@ -3028,7 +3064,7 @@ public abstract class Current
         }
 
         //Setup play bar
-        private static void setupPlayBar(final FragmentActivity activity, PlayBar playBar, final Current.Coordinates.Item[] playbackItems, final CoordinatesFragment.OrbitalBase playbackMarker)
+        private static void setupPlayBar(final FragmentActivity activity, PlayBar playBar, final Item[] playbackItems, final CoordinatesFragment.OrbitalBase playbackMarker)
         {
             boolean usingPlaybackItems = (playbackItems != null);
             final int min = 0;
@@ -3071,9 +3107,9 @@ public abstract class Current
                                 {
                                     //get add distance index percentage to current point
                                     nextItem = playbackItems[currentItemIndex + 1];
-                                    latitude = Globals.normalizeLatitude(currentItem.latitude + (Globals.latitudeDistance(currentItem.latitude, nextItem.latitude) * subProgressPercent));
-                                    longitude = Globals.normalizeLongitude(currentItem.longitude + (Globals.longitudeDistance(currentItem.longitude, nextItem.longitude) * subProgressPercent));
-                                    altitudeKm = currentItem.altitudeKm + ((nextItem.altitudeKm - currentItem.altitudeKm) * subProgressPercent);
+                                    latitude = Globals.normalizeLatitude(currentItem.coordinates[0].latitude + (Globals.latitudeDistance(currentItem.coordinates[0].latitude, nextItem.coordinates[0].latitude) * subProgressPercent));
+                                    longitude = Globals.normalizeLongitude(currentItem.coordinates[0].longitude + (Globals.longitudeDistance(currentItem.coordinates[0].longitude, nextItem.coordinates[0].longitude) * subProgressPercent));
+                                    altitudeKm = currentItem.coordinates[0].altitudeKm + ((nextItem.coordinates[0].altitudeKm - currentItem.coordinates[0].altitudeKm) * subProgressPercent);
 
                                     //add distance percentage to play time
                                     playTime.add(Calendar.MILLISECOND, (int)((nextItem.time.getTimeInMillis() - currentItem.time.getTimeInMillis()) * subProgressPercent));
@@ -3081,9 +3117,9 @@ public abstract class Current
                                 else
                                 {
                                     //set point
-                                    latitude = currentItem.latitude;
-                                    longitude = currentItem.longitude;
-                                    altitudeKm = currentItem.altitudeKm;
+                                    latitude = currentItem.coordinates[0].latitude;
+                                    longitude = currentItem.coordinates[0].longitude;
+                                    altitudeKm = currentItem.coordinates[0].altitudeKm;
                                 }
 
                                 //update marker
@@ -3391,7 +3427,7 @@ public abstract class Current
                         {
                             //remember current item and point
                             Item currentItem = savedItems[index];
-                            CoordinatesFragment.Coordinate currentPoint = new CoordinatesFragment.Coordinate(currentItem.latitude, currentItem.longitude, currentItem.altitudeKm);
+                            CoordinatesFragment.Coordinate currentPoint = new CoordinatesFragment.Coordinate(currentItem.coordinates[0].latitude, currentItem.coordinates[0].longitude, currentItem.coordinates[0].altitudeKm);
 
                             //if on first point
                             if(index == 0)
@@ -3423,7 +3459,7 @@ public abstract class Current
                         playbackMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
                         playbackMarker.setVisible(true);
                         playbackMarker.setInfoVisible(true);
-                        mapView.moveCamera(playbackMarker.getGeo().latitude, playbackMarker.getGeo().longitude, CoordinatesFragment.Utils.getZoom(savedItems[0].altitudeKm));
+                        mapView.moveCamera(playbackMarker.getGeo().latitude, playbackMarker.getGeo().longitude, CoordinatesFragment.Utils.getZoom(savedItems[0].coordinates[0].altitudeKm));
                     }
 
                     //setup play bar
@@ -3896,7 +3932,7 @@ public abstract class Current
                         coordinateNoradIndex.clear();
                         for(index = 0; index < coordinateItems.length; index++)
                         {
-                            coordinateNoradIndex.add(new Items.NoradIndex(coordinateItems[index].satellite.getSatelliteNum(), index));
+                            coordinateNoradIndex.add(new Items.NoradIndex(coordinateItems[index].id, index));
                         }
                         Collections.sort(coordinateNoradIndex, new Items.NoradIndex.Comparer());
                     }

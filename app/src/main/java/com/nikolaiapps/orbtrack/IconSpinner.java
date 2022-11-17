@@ -167,21 +167,29 @@ public class IconSpinner extends AppCompatSpinner
             protected Void doInBackground(Object... params)
             {
                 int index;
-                int icon1Color = (int)params[2];
-                int icon1SelectedColor = (int)params[3];
-                int icon3Color = (int)params[4];
-                int icon3SelectedColor = (int)params[5];
-                int forceColorId = (int)params[6];
+                int icon1Color = (int)params[3];
+                int icon1SelectedColor = (int)params[4];
+                int icon3Color = (int)params[5];
+                int icon3SelectedColor = (int)params[6];
+                int forceColorId = (int)params[7];
                 boolean useIcons;
                 boolean isLocation;
                 boolean useIcon1Color;
                 boolean useIcon3Color;
+                boolean addMulti = (boolean)params[2];
+                int offset = (addMulti ? 1 : 0);
                 Context context = (Context)params[0];
+                boolean haveContext = (context != null);
                 Database.DatabaseSatellite[] orbitals = (Database.DatabaseSatellite[])params[1];
                 IconSpinner.Item[] items;
 
                 //go through each orbital
-                items = new Item[orbitals.length];
+                items = new Item[orbitals.length + offset];
+                if(addMulti)
+                {
+                    items[0] = new Item((haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
+                    items[0].icon1Id = (haveContext ? R.drawable.ic_list_white : -1);
+                }
                 for(index = 0; index < orbitals.length; index++)
                 {
                     //remember current satellite and set item
@@ -191,7 +199,7 @@ public class IconSpinner extends AppCompatSpinner
                     useIcon1Color = !useIcons;
                     useIcon3Color = (useIcons && currentSat.noradId > 0 && (currentSat.orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)));
                     int[] ownerIconIds = (useIcons ? Globals.getOwnerIconIDs(currentSat.ownerCode) : new int[]{isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black});
-                    items[index] = new Item(ownerIconIds[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIconIds.length > 1 ? ownerIconIds[1] : -1), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), !useIcons, currentSat.getName(), currentSat.noradId);
+                    items[index + offset] = new Item(ownerIconIds[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIconIds.length > 1 ? ownerIconIds[1] : -1), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), !useIcons, currentSat.getName(), currentSat.noradId);
                 }
 
                 //if listeners are set
@@ -283,7 +291,7 @@ public class IconSpinner extends AppCompatSpinner
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
+        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
         {
             BaseConstructor(context);
 
@@ -312,11 +320,15 @@ public class IconSpinner extends AppCompatSpinner
                     }
                 }
             });
-            loadItems.execute(context, satellites, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
+            loadItems.execute(context, satellites, addMulti, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
+        }
+        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti)
+        {
+            this(context, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
-            this(context, satellites, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0);
+            this(context, satellites, false);
         }
 
         private void updateUsing()

@@ -5287,16 +5287,19 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //start task
             calculateCoordinatesTask = Calculate.calculateCoordinates(this, satellites, savedCoordinateItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateCoordinatesTask.OnProgressChangedListener()
             {
+                //items to use
+                private Current.Coordinates.Item[] items = null;
+
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
                 {
-                    Runnable passAction = null;
+                    Runnable coordinateAction = null;
 
                     //handle based on progress
                     switch(progressType)
                     {
                         case Globals.ProgressType.Started:
-                            passAction = new Runnable()
+                            coordinateAction = new Runnable()
                             {
                                 @Override
                                 public synchronized void run()
@@ -5309,47 +5312,68 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
 
                         case Globals.ProgressType.Success:
-                            passAction = new Runnable()
+                            coordinateAction = new Runnable()
                             {
                                 @Override
                                 public synchronized void run()
                                 {
                                     int index;
-                                    Current.Coordinates.Item[] items = new Current.Coordinates.Item[pathPoints.size()];
+
+                                    //if items not setup yet
+                                    if(items == null)
+                                    {
+                                        //setup items
+                                        items = new Current.Coordinates.Item[pathPoints.size()];
+
+                                        //go through each item
+                                        for(index = 0; index < items.length; index++)
+                                        {
+                                            //remember current item, coordinate, and time
+                                            Current.Coordinates.Item currentItem = new Current.Coordinates.Item(index, satellites.length);
+                                            CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
+                                            Calendar time = Globals.getLocalTime(currentCoordinate.time, observer.timeZone);
+
+                                            //set shared values
+                                            currentItem.id = firstSatellite.getSatelliteNum();
+                                            currentItem.julianDate = currentCoordinate.julianDate;
+                                            currentItem.time = time;
+                                            items[index] = currentItem;
+                                        }
+                                    }
 
                                     //go through each item/view
                                     for(index = 0; index < items.length; index++)
                                     {
-                                        //remember current view, item, time, and if moon
+                                        //remember current item, coordinate, and data
+                                        Current.Coordinates.Item currentItem = items[index];
                                         CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
-                                        Current.Coordinates.Item currentItem = new Current.Coordinates.Item(index);
-                                        Calendar time = Globals.getLocalTime(currentCoordinate.time, observer.timeZone);
+                                        CalculateCoordinatesTask.CoordinateData currentData = new CalculateCoordinatesTask.CoordinateData();
 
-                                        currentItem.id = firstSatellite.getSatelliteNum();
-                                        currentItem.julianDate = currentCoordinate.julianDate;
-                                        currentItem.time = time;
-                                        currentItem.coordinates[0].latitude = (float)currentCoordinate.latitude;
-                                        currentItem.coordinates[0].longitude = (float)currentCoordinate.longitude;
-                                        currentItem.coordinates[0].altitudeKm = (float)currentCoordinate.altitudeKm;
-                                        currentItem.coordinates[0].illumination = currentCoordinate.illumination;
-                                        currentItem.coordinates[0].phaseName = currentCoordinate.phaseName;
-                                        items[index] = currentItem;
+                                        //if index is within range
+                                        if(satelliteIndex < currentItem.coordinates.length)
+                                        {
+                                            //set current data
+                                            currentData.latitude = (float)currentCoordinate.latitude;
+                                            currentData.longitude = (float)currentCoordinate.longitude;
+                                            currentData.altitudeKm = (float)currentCoordinate.altitudeKm;
+                                            currentData.illumination = currentCoordinate.illumination;
+                                            currentData.phaseName = currentCoordinate.phaseName;
+                                            currentItem.coordinates[satelliteIndex] = currentData;
+                                        }
                                     }
-
-                                    //set coordinates
-                                    Calculate.PageAdapter.setCoordinateItems(items);
                                 }
                             };
                             break;
 
                         case Globals.ProgressType.Finished:
                         case Globals.ProgressType.Cancelled:
-                            passAction = new Runnable()
+                            coordinateAction = new Runnable()
                             {
                                 @Override
                                 public void run()
                                 {
                                     //update list and menu
+                                    Calculate.PageAdapter.setCoordinateItems(items);
                                     Calculate.PageAdapter.notifyItemsChanged(Calculate.PageType.Coordinates);
                                     updateOptionsMenu();
                                 }
@@ -5358,10 +5382,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
 
                     //if pass action is set
-                    if(passAction != null)
+                    if(coordinateAction != null)
                     {
                         //run action
-                        MainActivity.this.runOnUiThread(passAction);
+                        MainActivity.this.runOnUiThread(coordinateAction);
                     }
                 }
             });

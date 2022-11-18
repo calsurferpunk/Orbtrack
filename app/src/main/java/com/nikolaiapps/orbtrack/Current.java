@@ -2207,10 +2207,20 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, boolean tleAccurate)
+            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, int coordinateCount, boolean tleAccurate)
             {
                 super(Integer.MAX_VALUE, index, false, false, false, false);
-                coordinates = new CalculateCoordinatesTask.CoordinateData[]{new CalculateCoordinatesTask.CoordinateData()};
+
+                if(coordinateCount < 1)
+                {
+                    coordinateCount = 1;
+                }
+                coordinates = new CalculateCoordinatesTask.CoordinateData[coordinateCount];
+                for(index = 0; index < coordinates.length; index++)
+                {
+                    coordinates[index] = new CalculateCoordinatesTask.CoordinateData();
+                }
+
                 isLoading = false;
                 tleIsAccurate = tleAccurate;
                 icon = icn;
@@ -2232,9 +2242,9 @@ public abstract class Current
                     id = currentSatellite.getSatelliteNum();
                 }
             }
-            public Item(int index)
+            public Item(int index, int coordinateCount)
             {
-                this(index, null, null, null, null, false);
+                this(index, null, null, null, null, coordinateCount, false);
             }
 
             public boolean haveGeo()
@@ -2344,7 +2354,7 @@ public abstract class Current
                 for(index = 0; index < satellites.length; index++)
                 {
                     Database.SatelliteData currentSatellite = satellites[index];
-                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, currentSatellite.getTLEIsAccurate()));
+                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, 1, currentSatellite.getTLEIsAccurate()));
                 }
                 coordinateItems.sort(currentContext, PageType.Coordinates);
 
@@ -2379,7 +2389,7 @@ public abstract class Current
                 else
                 {
                     //set as empty
-                    coordinateItems.set(new Item[]{new Coordinates.Item(0)});
+                    coordinateItems.set(new Item[]{new Coordinates.Item(0, 0)});
                 }
                 coordinateItems.sort(currentContext, PageType.Coordinates);
 

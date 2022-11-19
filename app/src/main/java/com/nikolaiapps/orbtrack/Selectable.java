@@ -941,11 +941,13 @@ public abstract class Selectable
             }
         }
 
+        protected boolean forSubItems;
         protected boolean loadingItems;
         private boolean enableItemClicks;
         //protected boolean horizontal = false;
         protected int dataID = Integer.MAX_VALUE;
         protected int itemsRefID = -1;
+        protected int itemsRefSubId = -1;
         protected int itemsRootViewID = -1;
         protected int widthDp = Globals.getDeviceDp(null, true);
         protected String categoryTitle;
@@ -964,7 +966,7 @@ public abstract class Selectable
             categoryTitle = null;
             currentContext = context;
             listInflater = (currentContext != null ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
-            loadingItems = false;
+            forSubItems = loadingItems = false;
             enableItemClicks = true;
         }
         public ListBaseAdapter(Context context, String categoryTitle)
@@ -1089,6 +1091,11 @@ public abstract class Selectable
         //Sets view click listeners
         protected void setViewClickListeners(View itemView, final RecyclerView.ViewHolder itemHolder)
         {
+            if(forSubItems)
+            {
+                return;
+            }
+
             itemView.setOnClickListener(new View.OnClickListener()
             {
                 @Override

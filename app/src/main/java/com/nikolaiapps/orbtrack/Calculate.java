@@ -138,6 +138,7 @@ public abstract class Calculate
             Bundle params = this.getArguments();
             Context context = this.getContext();
             Selectable.ListBaseAdapter listAdapter;
+            ArrayList<Integer> multiNoradId;
 
             if(savedInstanceState == null)
             {
@@ -147,10 +148,12 @@ public abstract class Calculate
             {
                 params = new Bundle();
             }
+            multiNoradId = params.getIntegerArrayList(ParamTypes.MultiNoradId);
             savedInstanceState.putInt(Selectable.ParamTypes.PageNumber, page);
             savedInstanceState.putInt(ParamTypes.NoradId, params.getInt(ParamTypes.NoradId));
             savedInstanceState.putInt(ParamTypes.NoradId2, params.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
             savedInstanceState.putBooleanArray(ParamTypes.OrbitalIsSelected, params.getBooleanArray(ParamTypes.OrbitalIsSelected));
+            savedInstanceState.putIntegerArrayList(ParamTypes.MultiNoradId, multiNoradId);
             savedInstanceState.putLong(ParamTypes.StartDateMs, params.getLong(ParamTypes.StartDateMs));
             savedInstanceState.putLong(ParamTypes.EndDateMs, params.getLong(ParamTypes.EndDateMs));
             savedInstanceState.putDouble(ParamTypes.ElevationMinDegs, params.getDouble(ParamTypes.ElevationMinDegs, 0.0));
@@ -232,7 +235,7 @@ public abstract class Calculate
                             switch(subPage)
                             {
                                 case Globals.SubPageType.List:
-                                    listAdapter = new Current.Coordinates.ItemListAdapter(context, savedItems, MainActivity.getTimeZone());
+                                    listAdapter = new Current.Coordinates.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0), MainActivity.getTimeZone());
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
@@ -663,9 +666,10 @@ public abstract class Calculate
         @Override
         public @NonNull Object instantiateItem(@NonNull final ViewGroup container, int position)
         {
+            boolean haveSavedParams;
             int subPageNum = subPage[position];
             Bundle params;
-            Bundle savedParams = null;
+            Bundle savedParams;
             Calendar dateNow = Calendar.getInstance();
             Calendar dateLater = Calendar.getInstance();
             Page newPage = (Page)setupItem((Page)super.instantiateItem(container, position));
@@ -712,10 +716,8 @@ public abstract class Calculate
             });
 
             //get saved params
-            if(subPageNum == Globals.SubPageType.Input)
-            {
-                savedParams = savedInputs[position];
-            }
+            savedParams = savedInputs[position];
+            haveSavedParams = (savedParams != null);
 
             //set params
             params = newPage.getArguments();
@@ -727,13 +729,17 @@ public abstract class Calculate
             params.putInt(ParamTypes.NoradId, Integer.MAX_VALUE);
             params.putInt(ParamTypes.NoradId2, Universe.IDs.Invalid);
             params.putBooleanArray(ParamTypes.OrbitalIsSelected, null);
+            if(position == PageType.Coordinates)
+            {
+                params.putIntegerArrayList(ParamTypes.MultiNoradId, (haveSavedParams ? savedParams.getIntegerArrayList(ParamTypes.MultiNoradId) : null));
+            }
             params.putLong(ParamTypes.StartDateMs, dateNow.getTimeInMillis());
             params.putLong(ParamTypes.EndDateMs, dateLater.getTimeInMillis());
             params.putInt(ParamTypes.IncrementUnit, 5);
             params.putInt(ParamTypes.IncrementType, IncrementType.Minutes);
             params.putDouble(ParamTypes.ElevationMinDegs, 0.0);
             params.putDouble(ParamTypes.IntersectionDegs, 0.2);
-            if(savedParams != null)
+            if(haveSavedParams && subPageNum == Globals.SubPageType.Input)
             {
                 params.putAll(savedParams);
             }

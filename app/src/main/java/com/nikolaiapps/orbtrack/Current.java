@@ -2370,7 +2370,7 @@ public abstract class Current
                 //ID stays the same
                 this.setHasStableIds(true);
             }
-            public ItemListAdapter(Context context, Item[] savedItems, TimeZone zone)
+            public ItemListAdapter(Context context, Item[] savedItems, int multiCount, TimeZone zone)
             {
                 super(context, PageType.Coordinates);
 
@@ -2394,7 +2394,12 @@ public abstract class Current
                 coordinateItems.sort(currentContext, PageType.Coordinates);
 
                 //remember layout ID
-                this.itemsRefID = R.layout.current_coordinates_item;
+                forSubItems = (multiCount > 1);
+                this.itemsRefID = (forSubItems ? R.layout.current_coordinates_multi_item : R.layout.current_coordinates_item);
+                if(forSubItems)
+                {
+                    this.itemsRefSubId = R.layout.current_coordinates_item;
+                }
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -2441,6 +2446,11 @@ public abstract class Current
                 TextView timeText;
                 TextView speedText;
                 Resources res = currentContext.getResources();
+
+                if(forSubItems)
+                {
+                    return;
+                }
 
                 if(forCalculation)
                 {
@@ -2496,6 +2506,11 @@ public abstract class Current
                 boolean showSpeed = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 Item currentItem = coordinateItems.getCoordinateItem(position);
                 ItemHolder itemHolder = (ItemHolder)holder;
+
+                if(forSubItems)
+                {
+                    return;
+                }
 
                 //get displays
                 if(forCalculation)

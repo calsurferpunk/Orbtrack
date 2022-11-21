@@ -64,6 +64,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             this.latitude = geoData.latitude;
             this.longitude = geoData.longitude;
             this.altitudeKm = geoData.altitudeKm;
+            this.speedKmS = geoData.speedKmS;
             this.julianDate = julianDate;
             this.illumination = illumination;
             this.phaseName = phaseName;
@@ -110,6 +111,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
                 geoData.latitude = currentItem.coordinates[0].latitude;
                 geoData.longitude = currentItem.coordinates[0].longitude;
                 geoData.altitudeKm = currentItem.coordinates[0].altitudeKm;
+                geoData.speedKmS = currentItem.coordinates[0].speedKms;
                 illumination = currentItem.coordinates[0].illumination;
                 phaseName = currentItem.coordinates[0].phaseName;
             }
@@ -120,6 +122,14 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
                 geoData.latitude = coordinateSatellite.geo.latitude;
                 geoData.longitude = coordinateSatellite.geo.longitude;
                 geoData.altitudeKm = coordinateSatellite.geo.altitudeKm;
+                if(coordinateSatellite.getSatelliteNum() < 0)
+                {
+                    geoData.speedKmS = (index > 0 ? Calculations.getDistanceKm(coordinates.get(index - 1), coordinateSatellite.geo) / (dayIncrement * Calculations.SecondsPerDay) : 0);
+                }
+                else
+                {
+                    geoData.speedKmS = coordinateSatellite.geo.speedKmS;
+                }
 
                 //if moon
                 if(isMoon)

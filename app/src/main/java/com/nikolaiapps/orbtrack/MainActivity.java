@@ -5356,6 +5356,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             currentData.latitude = (float)currentCoordinate.latitude;
                                             currentData.longitude = (float)currentCoordinate.longitude;
                                             currentData.altitudeKm = (float)currentCoordinate.altitudeKm;
+                                            currentData.speedKms = currentCoordinate.speedKmS;
                                             currentData.illumination = currentCoordinate.illumination;
                                             currentData.phaseName = currentCoordinate.phaseName;
                                             currentItem.coordinates[satelliteIndex] = currentData;

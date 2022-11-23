@@ -1027,7 +1027,7 @@ public class Database extends SQLiteOpenHelper
 
         public int getSatelliteNum()
         {
-            return(satellite != null ? satellite.getSatelliteNum() : Universe.IDs.None);
+            return(database != null ? database.noradId : satellite != null ? satellite.getSatelliteNum() : Universe.IDs.None);
         }
 
         public String getName(String defaultVal)

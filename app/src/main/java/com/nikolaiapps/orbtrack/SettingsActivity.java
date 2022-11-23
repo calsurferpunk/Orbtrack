@@ -1479,7 +1479,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     }
                                 }
                             }
+                            //fall through
 
+                        case Settings.PreferenceName.MapMarkerInfoLocation:
+                            if(key.equals(Settings.PreferenceName.MapMarkerInfoLocation))
+                            {
+                                //update global setting
+                                Settings.setMapMarkerInfoLocation(SettingsActivity.this, Settings.getMapMarkerInfoLocation(SettingsActivity.this));
+                            }
                             //fall through
 
                         case Settings.PreferenceName.ListUpdateDelay:
@@ -1500,7 +1507,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapGridColor:
                         case Settings.PreferenceName.MapMarkerScale:
                         case Settings.PreferenceName.MapMarkerLocationIcon:
-                        case Settings.PreferenceName.MapMarkerInfoLocation:
                             //map needs recreate
                             setMapRecreateNeeded();
                             break;

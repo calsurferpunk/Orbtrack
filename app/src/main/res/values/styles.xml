@@ -345,6 +345,10 @@
         <item name="android:background">?attr/dividerLineColor</item>
     </style>
 
+    <style name="DividerThin" parent="Divider">
+        <item name="android:layout_height">1dp</item>
+    </style>
+
     <style name="DividerCategory" parent="Preference.Category">
         <item name="layout">@layout/divider_view</item>
     </style>

@@ -264,6 +264,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             outState.putInt(ParamTypes.CurrentSubPage + index, currentSubPage[index]);
         }
+        for(index = 0; index < Calculate.PageType.PageCount; index++)
+        {
+            outState.putInt(ParamTypes.CalculateSubPage + index, calculateSubPage[index]);
+        }
         outState.putInt(ParamTypes.MainPagerItem, getMainPage());
 
         super.onSaveInstanceState(outState);
@@ -1352,6 +1356,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Loads start data and updates display
     private void loadStartData(Bundle savedInstanceState)
     {
+        int page;
+
         //get displays
         optionsMenu = null;
         sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
@@ -1408,10 +1414,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         mainPager.addOnPageChangeListener(createOnPageChangedListener());
 
         //update display
-        setMainGroup(mainGroup, true);
+        page = savedInstanceState.getInt(ParamTypes.MainPagerItem, 0);
+        setMainGroup(mainGroup, page, true);
 
         //force refresh first time
-        setMainPage(savedInstanceState.getInt(ParamTypes.MainPagerItem, 0));
+        setMainPage(page);
 
         //if need to recreate after setup
         if(recreateAfterSetup)
@@ -2170,10 +2177,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Updates main pager adapter
-    private void updateMainPagerAdapter(boolean groupChanged, boolean saveItems)
+    private void updateMainPagerAdapter(int page, boolean groupChanged, boolean saveItems)
     {
         int index;
-        int page = getMainPage();
         boolean showCurrent = (mainGroup == Groups.Current);
         boolean showCalculate = (mainGroup == Groups.Calculate);
         PagerAdapter currentAdapter = mainPager.getAdapter();
@@ -2345,9 +2351,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         showingPagerTitles = !(showCurrent && Settings.getCombinedCurrentLayout(this.getBaseContext()));
         mainPagerTitles.setVisibility(showingPagerTitles ? View.VISIBLE : View.GONE);
     }
+    private void updateMainPagerAdapter(boolean groupChanged, boolean saveItems)
+    {
+        updateMainPagerAdapter(getMainPage(), groupChanged, saveItems);
+    }
 
     //Sets main group
-    private void setMainGroup(int group, boolean force)
+    private void setMainGroup(int group, int page, boolean force)
     {
         boolean groupChanging = (mainGroup != group);
 
@@ -2358,7 +2368,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             mainGroup = group;
 
             //update pager adapter
-            updateMainPagerAdapter(groupChanging, true);
+            updateMainPagerAdapter(page, groupChanging, true);
 
             //if not paused and not recreated
             if(!wasPaused && !wasRecreated)
@@ -2371,6 +2381,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             updateOptionsMenu();
             updateSubtitle();
         }
+    }
+    private void setMainGroup(int group, boolean force)
+    {
+        setMainGroup(group, getMainPage(), force);
     }
 
     //Gets main page
@@ -3671,9 +3685,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     //stop any running timer
                                     calculatePageAdapter.stopPlayTimer(mainPager, Calculate.PageType.Coordinates);
                                 }
-
-                                //don't allow swiping if on map/globe
-                                allowSwipe = (calculateSubPage[position] != Globals.SubPageType.Map && calculateSubPage[position] != Globals.SubPageType.Globe);
                                 break;
                         }
 
@@ -3688,6 +3699,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     //start camera
                                     startCamera = true;
                                 }
+                                break;
+
+                            case Calculate.PageType.Coordinates:
+                                //don't allow swiping if on map/globe
+                                allowSwipe = (calculateSubPage[position] != Globals.SubPageType.Map && calculateSubPage[position] != Globals.SubPageType.Globe);
                                 break;
                         }
                         break;

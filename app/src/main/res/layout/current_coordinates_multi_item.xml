@@ -1,8 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ExpandableListView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/Coordinate_Multi_Item"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Coordinate_Multi_Layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:divider="@android:color/transparent"
-    android:dividerHeight="0dp"
-    android:background="?attr/itemSelect"/>
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="?attr/itemSelect">
+    <com.nikolaiapps.orbtrack.ExpandingListView
+        android:id="@+id/Coordinate_Multi_List"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:divider="@android:color/transparent"
+        android:dividerHeight="0dp"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:id="@+id/Coordinate_Multi_Progress_Group"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            style="@style/ProgressCircleSmall"/>
+    </LinearLayout>
+</LinearLayout>

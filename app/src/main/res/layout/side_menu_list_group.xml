@@ -26,5 +26,5 @@
             android:textColor="?attr/defaultTextColor"/>
     </LinearLayout>
 
-    <View style="@style/Divider"/>
+    <View android:id="@+id/Group_Divider" style="@style/Divider"/>
 </LinearLayout>

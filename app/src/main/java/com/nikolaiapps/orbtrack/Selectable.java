@@ -944,7 +944,6 @@ public abstract class Selectable
         protected boolean forSubItems;
         protected boolean loadingItems;
         private boolean enableItemClicks;
-        //protected boolean horizontal = false;
         protected int dataID = Integer.MAX_VALUE;
         protected int itemsRefID = -1;
         protected int itemsRefSubId = -1;
@@ -1091,36 +1090,34 @@ public abstract class Selectable
         //Sets view click listeners
         protected void setViewClickListeners(View itemView, final RecyclerView.ViewHolder itemHolder)
         {
-            if(forSubItems)
+            if(!forSubItems)
             {
-                return;
+                itemView.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View view)
+                    {
+                        if(itemClickedListener != null && enableItemClicks)
+                        {
+                            itemClickedListener.onItemClicked(view, itemHolder.getAdapterPosition());
+                        }
+                    }
+                });
+                itemView.setOnLongClickListener(new View.OnLongClickListener()
+                {
+                    @Override
+                    public boolean onLongClick(View view)
+                    {
+                        if(itemLongClickedListener != null && enableItemClicks)
+                        {
+                            itemLongClickedListener.onItemLongClicked(view, itemHolder.getAdapterPosition());
+                            return(true);
+                        }
+
+                        return(false);
+                    }
+                });
             }
-
-            itemView.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View view)
-                {
-                    if(itemClickedListener != null && enableItemClicks)
-                    {
-                        itemClickedListener.onItemClicked(view, itemHolder.getAdapterPosition());
-                    }
-                }
-            });
-            itemView.setOnLongClickListener(new View.OnLongClickListener()
-            {
-                @Override
-                public boolean onLongClick(View view)
-                {
-                    if(itemLongClickedListener != null && enableItemClicks)
-                    {
-                        itemLongClickedListener.onItemLongClicked(view, itemHolder.getAdapterPosition());
-                        return(true);
-                    }
-
-                    return(false);
-                }
-            });
         }
 
         //Sets on item clicked listener
@@ -1536,7 +1533,7 @@ public abstract class Selectable
             rootView.removeViewAt(viewIndex);
             if(listAdapter != null && listAdapter.itemsRefID > -1)
             {
-                listColumns = inflater.inflate(listAdapter.itemsRefID, rootView, false);
+                listColumns = inflater.inflate(listAdapter.forSubItems ? listAdapter.itemsRefSubId : listAdapter.itemsRefID, rootView, false);
                 rootView.addView(listColumns, viewIndex);
                 listAdapter.itemsRootViewID = listColumns.getId();
             }

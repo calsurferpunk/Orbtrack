@@ -369,11 +369,11 @@ public abstract class Orbitals
                 setText(ownerText, currentItem.getOwner(currentContext));
                 setText(noradText, String.valueOf(currentTLE.satelliteNum));
                 setText(internationalText, currentTLE.internationalCode);
-                setText(perigeeText, Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.perigee)) + " " + Globals.getKmLabel(res));
-                setText(apogeeText, Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.apogee)) + " " + Globals.getKmLabel(res));
+                setText(perigeeText, Globals.getKmUnitValueString(currentOrbit.perigee) + " " + Globals.getKmLabel(res));
+                setText(apogeeText, Globals.getKmUnitValueString(currentOrbit.apogee) + " " + Globals.getKmLabel(res));
                 setText(inclinationText, Globals.getNumberString(currentTLE.inclinationDeg));
                 setText(periodText, Globals.getNumberString(currentOrbit.periodMinutes) + " " + res.getString(R.string.abbrev_minutes_lower));
-                setText(majorText, Globals.getNumberString(Globals.getKmUnitValue(currentOrbit.semiMajorAxisKm)) + " " + Globals.getKmLabel(res));
+                setText(majorText, Globals.getKmUnitValueString(currentOrbit.semiMajorAxisKm) + " " + Globals.getKmLabel(res));
                 setText(launchDateText, String.valueOf(currentTLE.launchYear));
                 setText(launchNumberText, String.valueOf(currentTLE.launchNum));
             }

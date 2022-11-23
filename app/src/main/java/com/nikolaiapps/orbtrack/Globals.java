@@ -2286,6 +2286,16 @@ public abstract class Globals
         return(getDegreeString(value, 0));
     }
 
+    //Gets km unit value string
+    public static String getKmUnitValueString(double value, int decimalPlaces)
+    {
+        return(getNumberString(getKmUnitValue(value), decimalPlaces));
+    }
+    public static String getKmUnitValueString(double value)
+    {
+        return(getNumberString(getKmUnitValue(value)));
+    }
+
     //Gets latitude compass direction
     public static String getLatitudeDirection(Resources res, double latitude)
     {
@@ -2314,7 +2324,7 @@ public abstract class Globals
     public static String getCoordinateString(Context context, double latitude, double longitude, double altitude)
     {
         Resources res = (context != null ? context.getResources() : null);
-        return(res != null ? res.getString(R.string.abbrev_latitude) + ": " + getLatitudeDirectionString(res, latitude, 3) + "\n" + res.getString(R.string.abbrev_longitude) + ": " + getLongitudeDirectionString(res, longitude, 3) + "\n" + res.getString(R.string.abbrev_altitude) + ": " + getNumberString(getKmUnitValue(altitude)) + " " + getKmLabel(res) : "");
+        return(res != null ? res.getString(R.string.abbrev_latitude) + ": " + getLatitudeDirectionString(res, latitude, 3) + "\n" + res.getString(R.string.abbrev_longitude) + ": " + getLongitudeDirectionString(res, longitude, 3) + "\n" + res.getString(R.string.abbrev_altitude) + ": " + getKmUnitValueString(altitude) + " " + getKmLabel(res) : "");
     }
 
     //Gets azimuth compass direction
@@ -2411,7 +2421,7 @@ public abstract class Globals
     public static String getHeaderText(Context context, String satelliteName, Calendar startGMT, Calendar endGMT)
     {
         TimeZone zone = MainActivity.getTimeZone();
-        return(context != null ? (satelliteName + "\n" + getDateTimeString(startGMT, zone) + " " + context.getString(R.string.text_to) + " " + getDateTimeString(endGMT, zone)) : "");
+        return(context != null ? ((satelliteName != null ? (satelliteName + "\n") : "") + getDateTimeString(startGMT, zone) + " " + context.getString(R.string.text_to) + " " + getDateTimeString(endGMT, zone)) : "");
     }
 
     //Resolves attribute IDs

@@ -5353,6 +5353,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         if(satelliteIndex < currentItem.coordinates.length)
                                         {
                                             //set current data
+                                            currentData.noradId = satellites[satelliteIndex].getSatelliteNum();
                                             currentData.latitude = (float)currentCoordinate.latitude;
                                             currentData.longitude = (float)currentCoordinate.longitude;
                                             currentData.altitudeKm = (float)currentCoordinate.altitudeKm;

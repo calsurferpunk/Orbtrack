@@ -242,7 +242,7 @@ public abstract class Calculate
 
                                 case Globals.SubPageType.Map:
                                 case Globals.SubPageType.Globe:
-                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, null, (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, (multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : null), (subPage == Globals.SubPageType.Globe), savedInstanceState);
                                     break;
                             }
                             break;

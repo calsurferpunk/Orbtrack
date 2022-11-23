@@ -24,6 +24,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
 
     public static class CoordinateData
     {
+        public int noradId;
         public float latitude;
         public float longitude;
         public float altitudeKm;
@@ -33,6 +34,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
 
         public CoordinateData()
         {
+            this.noradId = Universe.IDs.Invalid;
             this.latitude = Float.MAX_VALUE;
             this.longitude = Float.MAX_VALUE;
             this.altitudeKm = Float.MAX_VALUE;

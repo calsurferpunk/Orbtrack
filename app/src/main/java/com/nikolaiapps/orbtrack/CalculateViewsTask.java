@@ -112,7 +112,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             }
             if(rangeText != null)
             {
-                rangeText.setText(rangeKm != Float.MAX_VALUE ? Globals.getNumberString(Globals.getKmUnitValue(rangeKm), 0) : "-");
+                rangeText.setText(rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(rangeKm, 0) : "-");
             }
             if(phaseText != null)
             {

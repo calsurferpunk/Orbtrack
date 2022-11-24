@@ -5245,9 +5245,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         boolean satelliteChanged;
         int index;
-        int noradId;
+        int oldNoradId;
         Bundle params;
-        ArrayList<Integer> multiNoradId = new ArrayList<>(0);
+        ArrayList<Integer> oldMultiNoradId = new ArrayList<>(0);
         Database.SatelliteData firstSatellite;
         Current.Coordinates.Item[] savedCoordinateItems;
 
@@ -5270,25 +5270,25 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(params != null && savedCoordinateItems != null)
             {
                 //get old satellite data
-                noradId = params.getInt(Calculate.ParamTypes.NoradIdOld, Universe.IDs.Invalid);
-                if(noradId != Universe.IDs.Invalid)
+                oldNoradId = params.getInt(Calculate.ParamTypes.NoradIdOld, Universe.IDs.Invalid);
+                if(oldNoradId != Universe.IDs.Invalid)
                 {
-                    multiNoradId.add(noradId);
+                    oldMultiNoradId.add(oldNoradId);
                 }
                 else
                 {
-                    multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld);
+                    oldMultiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld);
                 }
 
                 //look for satellite changes
-                satelliteChanged = (multiNoradId == null || multiNoradId.size() != satellites.length);
+                satelliteChanged = (oldMultiNoradId == null || oldMultiNoradId.size() != satellites.length);
                 if(!satelliteChanged)
                 {
                     //go through each satellite while no change detected
                     for(index = 0; index < satellites.length && !satelliteChanged; index++)
                     {
                         //check for changed ID
-                        satelliteChanged = satellites[index].getSatelliteNum() != multiNoradId.get(index);
+                        satelliteChanged = satellites[index].getSatelliteNum() != oldMultiNoradId.get(index);
                     }
                 }
 
@@ -5384,6 +5384,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
 
                         case Globals.ProgressType.Finished:
+                            //if params exist
+                            if(params != null)
+                            {
+                                //update params with previously used ID(s)
+                                params.putInt(Calculate.ParamTypes.NoradIdOld, params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid));
+                                params.putIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld, params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId));
+                                Calculate.PageAdapter.setParams(Calculate.PageType.Coordinates, params);
+                            }
+                            //fall through
+
                         case Globals.ProgressType.Cancelled:
                             coordinateAction = new Runnable()
                             {

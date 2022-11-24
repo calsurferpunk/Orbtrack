@@ -81,7 +81,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         calculatingCoordinates = false;
     }
 
-    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, CoordinateSpan currentSpan, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double dayIncrement)
+    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, CoordinateSpan currentSpan, int satelliteIndex, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double dayIncrement)
     {
         int index = 0;
         double phase;
@@ -103,19 +103,19 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             //create new geographic data
             geoData = new Calculations.GeodeticDataType();
 
-            //if there are saved items and julian date matches current
-            if(savedCoordinateItems != null && index < savedCoordinateItems.length && coordinateJulianDate == savedCoordinateItems[index].julianDate)
+            //if there are saved items, satellite index is valid, and julian date matches current
+            if(savedCoordinateItems != null && index < savedCoordinateItems.length && satelliteIndex < savedCoordinateItems[index].coordinates.length && coordinateJulianDate == savedCoordinateItems[index].julianDate)
             {
                 //remember current item
                 Current.Coordinates.Item currentItem = savedCoordinateItems[index];
 
                 //set next coordinate
-                geoData.latitude = currentItem.coordinates[0].latitude;
-                geoData.longitude = currentItem.coordinates[0].longitude;
-                geoData.altitudeKm = currentItem.coordinates[0].altitudeKm;
-                geoData.speedKmS = currentItem.coordinates[0].speedKms;
-                illumination = currentItem.coordinates[0].illumination;
-                phaseName = currentItem.coordinates[0].phaseName;
+                geoData.latitude = currentItem.coordinates[satelliteIndex].latitude;
+                geoData.longitude = currentItem.coordinates[satelliteIndex].longitude;
+                geoData.altitudeKm = currentItem.coordinates[satelliteIndex].altitudeKm;
+                geoData.speedKmS = currentItem.coordinates[satelliteIndex].speedKms;
+                illumination = currentItem.coordinates[satelliteIndex].illumination;
+                phaseName = currentItem.coordinates[satelliteIndex].phaseName;
             }
             else
             {
@@ -206,7 +206,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             currentSpan.pathJulianDateEnd = julianDateEnd;
 
             //get coordinates
-            coordinates = getCoordinates(context, currentSpan, savedCoordinateItems, observer, dayIncrement);
+            coordinates = getCoordinates(context, currentSpan, index, savedCoordinateItems, observer, dayIncrement);
 
             //update progress
             onProgressChanged((!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), index, coordinates);

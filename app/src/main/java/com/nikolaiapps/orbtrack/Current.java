@@ -3096,21 +3096,25 @@ public abstract class Current
         //Setup footprint button
         private static void setupFootprintButton(Context context, final FloatingActionStateButton showFootprintButton)
         {
-            showFootprintButton.setOnClickListener(new View.OnClickListener()
+            //if button exists
+            if(showFootprintButton != null)
             {
-                @Override
-                public void onClick(View view)
+                showFootprintButton.setOnClickListener(new View.OnClickListener()
                 {
-                    //reverse state
-                    showFootprints = !showFootprints;
-                    showFootprintButton.setChecked(showFootprints);
-                    Settings.setMapShowFootprint(context, showFootprints);
-                }
-            });
+                    @Override
+                    public void onClick(View view)
+                    {
+                        //reverse state
+                        showFootprints = !showFootprints;
+                        showFootprintButton.setChecked(showFootprints);
+                        Settings.setMapShowFootprint(context, showFootprints);
+                    }
+                });
 
-            //set to opposite then perform click to set it correctly
-            showFootprints = !Settings.getMapShowFootprint(context);
-            showFootprintButton.performClick();
+                //set to opposite then perform click to set it correctly
+                showFootprints = !Settings.getMapShowFootprint(context);
+                showFootprintButton.performClick();
+            }
         }
 
         //Setup path button
@@ -3227,7 +3231,9 @@ public abstract class Current
         //Setup play bar
         private static void setupPlayBar(final FragmentActivity activity, PlayBar playBar, final Item[] playbackItems, final CoordinatesFragment.OrbitalBase[] playbackMarkers)
         {
-            boolean usingPlaybackItems = (playbackItems != null);
+            final boolean usingPlaybackItems = (playbackItems != null);
+            final boolean usingMarkers = (playbackMarkers != null);
+            final boolean singlePlaybackMarker = (usingMarkers && playbackMarkers.length == 1);
             final int min = 0;
             final int max = (usingPlaybackItems ? playbackItems.length : (int)(Calculations.SecondsPerDay * 1000)) - 1;
             final int scaleType = (usingPlaybackItems ? PlayBar.ScaleType.Speed : PlayBar.ScaleType.Time);
@@ -3250,15 +3256,16 @@ public abstract class Current
                         //if a valid value
                         if(progressValue >= min && progressValue <= max)
                         {
+                            String timeString;
+
                             //if using playback items and markers exist
-                            if(usingPlaybackItems && playbackMarkers != null)
+                            if(usingPlaybackItems && usingMarkers)
                             {
                                 int index;
                                 int currentItemIndex = (int)Math.floor(progressValue + subProgressPercent);
                                 double latitude;
                                 double longitude;
                                 double altitudeKm;
-                                String timeString;
                                 Item nextItem = (currentItemIndex + 1 < playbackItems.length ? playbackItems[currentItemIndex + 1] : null);
                                 Item currentItem = playbackItems[currentItemIndex];
                                 TextView mapInfoText = getMapInfoText();
@@ -3299,6 +3306,16 @@ public abstract class Current
                                     //update marker
                                     if(currentMarker != null)
                                     {
+                                        Database.SatelliteData currentOrbital = currentMarker.getData();
+                                        boolean currentIsSatellite = (currentOrbital.getSatelliteNum() > 0);
+
+                                        //if a single playback marker
+                                        if(singlePlaybackMarker)
+                                        {
+                                            //update showing selected footprint
+                                            currentMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
+                                        }
+
                                         //if marker is visible
                                         if(currentMarker.getInfoVisible())
                                         {
@@ -3309,10 +3326,8 @@ public abstract class Current
                                             if(mapInfoText != null && Settings.usingMapMarkerInfoBottom())
                                             {
                                                 mapInfoText.setText(coordinateString.replace("\n", Globals.COORDINATE_SEPARATOR));
+                                                mapInfoText.setVisibility(View.VISIBLE);
                                             }
-
-                                            //update time
-                                            playBar.setValueText(timeString);
 
                                             //if map is ready
                                             if(getMapViewReady())
@@ -3322,17 +3337,22 @@ public abstract class Current
                                             }
                                         }
 
-                                        //move marker location
+                                        //move marker location and update status
+                                        currentMarker.setShowFootprint(currentIsSatellite && !singlePlaybackMarker && showFootprints);
                                         currentMarker.moveLocation(latitude, longitude, altitudeKm);
+                                        currentMarker.setVisible(true);
                                     }
                                 }
                             }
                             else
                             {
-                                //set time in seconds and update display
+                                //set time in seconds
                                 Current.millisecondsPlayBar = progressValue + playBar.getValue2();
-                                playBar.setValueText(Globals.getDateTimeString(Globals.getGMTTime(Current.millisecondsPlayBar), true));
+                                timeString = Globals.getDateTimeString(Globals.getGMTTime(Current.millisecondsPlayBar), true);
                             }
+
+                            //update time
+                            playBar.setValueText(timeString);
 
                             //handle any needed update
                             handleMarkerScale();
@@ -3342,7 +3362,7 @@ public abstract class Current
                 if(usingPlaybackItems)
                 {
                     //go to first point
-                    playBar.setValue(0);
+                    playBar.setValue(0, true);
 
                     //if at least 2 saved items
                     if(playbackItems.length > 1)
@@ -3406,10 +3426,11 @@ public abstract class Current
             final int mapViewNoradId = (savedInstanceState != null ? savedInstanceState.getInt(MainActivity.ParamTypes.CoordinateNoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE);
             final Item[] savedItems = (savedInstanceState != null ? (Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
             final boolean allMapOrbitals = (mapViewNoradId == Integer.MAX_VALUE);
+            final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
             final boolean useSavedPath = (page instanceof Calculate.Page && savedItems != null && savedItems.length > 0);
             final boolean useMultiNoradId = (useSavedPath && savedItems[0].coordinates.length > 1);
             final boolean rotateAllowed = Settings.getMapRotateAllowed(context);
-            final Database.SatelliteData currentSatellite = (useSavedPath && !useMultiNoradId ? new Database.SatelliteData(context, savedItems[0].id) : null);
+            final Database.SatelliteData currentSatellite = (useSavedPath && haveSelected && !useMultiNoradId ? selectedOrbitals[0] : null);
 
             //get menu and zoom displays
             final LinearLayout floatingButtonLayout = rootView.findViewById(R.id.Map_Floating_Button_Layout);
@@ -3419,8 +3440,8 @@ public abstract class Current
             final FloatingActionStateButton showToolbarsButton = (allMapOrbitals && !useSavedPath ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
             final FloatingActionStateButton showZoomButton = settingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
             final FloatingActionStateButton showLatLonButton = settingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
-            final FloatingActionStateButton showFootprintButton = settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint);
-            final FloatingActionStateButton showPathButton = (!useSavedPath ? settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
+            final FloatingActionStateButton showFootprintButton = (!useSavedPath || useMultiNoradId ? settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint) : null);
+            final FloatingActionStateButton showPathButton = settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path);
             final FloatingActionStateButton iconScaleButton = settingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
             final FloatingActionButton zoomInButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_In_Button);
             final FloatingActionButton zoomOutButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_Out_Button);
@@ -3471,6 +3492,8 @@ public abstract class Current
                 @Override
                 public void ready()
                 {
+                    double firstZoom;
+                    CalculateCoordinatesTask.CoordinateData firstPoint;
                     CoordinatesFragment.OrbitalBase[] playbackMarkers = null;
 
                     //setup compass
@@ -3533,23 +3556,22 @@ public abstract class Current
                         currentLocationMarker.remove();
                     }
 
-                    //add current location
+                    //add current location and set as first point
                     currentLocationMarker = mapView.addMarker(context, Universe.IDs.CurrentLocation, currentLocation);
                     if(context != null)
                     {
                         currentLocationMarker.setTitle(context.getString(R.string.title_location_current));
                     }
+                    firstPoint = new CalculateCoordinatesTask.CoordinateData();
+                    firstPoint.latitude = (float)currentLocation.geo.latitude;
+                    firstPoint.longitude = (float)currentLocation.geo.longitude;
+                    firstPoint.altitudeKm = (float)currentLocation.geo.altitudeKm;
+                    firstZoom = CoordinatesFragment.DefaultNearZoom;
 
-                    //setup zoom buttons
+                    //setup buttons
                     setupZoomButtons(context, showZoomButton, zoomInButton, zoomOutButton);
-
-                    //setup latitude/longitude button
                     setupLatLonButton(context, showLatLonButton);
-
-                    //setup show footprint button
                     setupFootprintButton(context, showFootprintButton);
-
-                    //setup icon scale button
                     setupIconScaleButton(context, iconScaleButton, page.scaleBar);
 
                     //if not using saved path
@@ -3558,10 +3580,7 @@ public abstract class Current
                         //add all orbitals
                         addOrbitals(context, MainActivity.getSatellites(), null);
 
-                        //setup path button
-                        setupPathButton(showPathButton, mapViewNoradId);
-
-                        //select and move to current location
+                        //select current location
                         if(searchList != null)
                         {
                             searchList.setSelectedValue(Universe.IDs.CurrentLocation);
@@ -3587,69 +3606,33 @@ public abstract class Current
                             }
                         });
                     }
-                    else if(useMultiNoradId)
+                    else
                     {
                         //add selected orbitals and get markers
                         playbackMarkers = addOrbitals(context, selectedOrbitals, savedItems);
-                    }
-                    else
-                    {
-                        //create markers and points
-                        int index;
-                        final int itemLength = savedItems.length;
-                        final CoordinatesFragment.OrbitalBase playbackMarker = mapView.addOrbital(context, currentSatellite, currentLocation);
-                        final ArrayList<CoordinatesFragment.Coordinate> points = new ArrayList<>(itemLength);
 
-                        //go through saved points
-                        for(index = 0; index < itemLength; index++)
+                        //if have only 1 marker
+                        if(playbackMarkers != null && playbackMarkers.length == 1)
                         {
-                            //remember current item and point
-                            Item currentItem = savedItems[index];
-                            CoordinatesFragment.Coordinate currentPoint = new CoordinatesFragment.Coordinate(currentItem.coordinates[0].latitude, currentItem.coordinates[0].longitude, currentItem.coordinates[0].altitudeKm);
+                            //remember marker and first point/zoom
+                            CoordinatesFragment.OrbitalBase playbackMarker = playbackMarkers[0];
+                            firstPoint = savedItems[0].coordinates[0];
+                            firstZoom = CoordinatesFragment.Utils.getZoom(firstPoint.altitudeKm);
 
-                            //if on first point
-                            if(index == 0)
-                            {
-                                String text;
-                                String timeString = Globals.getDateTimeString(currentItem.time, true);
-                                String coordinateString = Globals.getCoordinateString(context, currentPoint.latitude, currentPoint.longitude, currentPoint.altitudeKm);
-
-                                //set to first point
-                                playbackMarker.setText(timeString + "\n" + coordinateString);
-                                playbackMarker.moveLocation(currentPoint.latitude, currentPoint.longitude, currentPoint.altitudeKm);
-                                if(mapInfoText != null && Settings.usingMapMarkerInfoBottom())
-                                {
-                                    text = timeString  + "\n" + coordinateString.replace("\n", Globals.COORDINATE_SEPARATOR);
-                                    mapInfoText.setText(text);
-                                    mapInfoText.setVisibility(View.VISIBLE);
-                                }
-                            }
-
-                            //add to points
-                            points.add(currentPoint);
+                            //show info and selected footprint
+                            playbackMarker.setInfoVisible(true);
+                            playbackMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
                         }
-
-                        //set points
-                        playbackMarker.setPath(points);
-                        playbackMarker.setPathVisible(true);
-
-                        //show marker and move to it
-                        playbackMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
-                        playbackMarker.setVisible(true);
-                        playbackMarker.setInfoVisible(true);
-                        playbackMarkers = new CoordinatesFragment.OrbitalBase[]{playbackMarker};
-                        mapView.moveCamera(playbackMarker.getGeo().latitude, playbackMarker.getGeo().longitude, CoordinatesFragment.Utils.getZoom(savedItems[0].coordinates[0].altitudeKm));
                     }
+
+                    //setup path button after markers have been added
+                    setupPathButton(showPathButton, mapViewNoradId);
 
                     //set current location
                     setCurrentLocation(page.getActivity(), currentLocation);
 
-                    //if not using saved path or using multi norad IDs
-                    if(!useSavedPath || useMultiNoradId)
-                    {
-                        //move to current location
-                        mapView.moveCamera(currentLocation.geo.latitude, currentLocation.geo.longitude, CoordinatesFragment.DefaultNearZoom);
-                    }
+                    //move to first point
+                    mapView.moveCamera(firstPoint.latitude, firstPoint.longitude, firstZoom);
 
                     //setup play bar
                     setupPlayBar(page.getActivity(), page.playBar, (useSavedPath ? savedItems : null), playbackMarkers);
@@ -3751,7 +3734,6 @@ public abstract class Current
 
                         //set points
                         markers[index].setPath(points);
-                        markers[index].setPathVisible(true);
                     }
                 }
 

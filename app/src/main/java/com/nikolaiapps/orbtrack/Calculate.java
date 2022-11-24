@@ -230,6 +230,7 @@ public abstract class Calculate
                         case Globals.SubPageType.List:
                         case Globals.SubPageType.Map:
                         case Globals.SubPageType.Globe:
+                            Database.SatelliteData[] selectedOrbitals;
                             Current.Coordinates.Item[] savedItems = (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(page);
 
                             switch(subPage)
@@ -242,7 +243,8 @@ public abstract class Calculate
 
                                 case Globals.SubPageType.Map:
                                 case Globals.SubPageType.Globe:
-                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, (multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : null), (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                                    selectedOrbitals = (multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : (savedItems != null && savedItems.length > 0) ? (new Database.SatelliteData[]{new Database.SatelliteData(context, savedItems[0].id)}) : null);
+                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, selectedOrbitals, (subPage == Globals.SubPageType.Globe), savedInstanceState);
                                     break;
                             }
                             break;

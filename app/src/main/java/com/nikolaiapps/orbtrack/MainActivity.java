@@ -1903,9 +1903,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void saveCalculateCoordinatesFile(OutputStream outStream, String separator) throws Exception
     {
         int index;
+        int index2;
+        int idCount;
+        int currentId;
+        boolean useMultiNorad;
         boolean isSun;
         boolean isMoon;
-        String line;
+        String currentName;
+        StringBuilder lineString = new StringBuilder();
         Resources res = this.getResources();
         Current.Coordinates.Item[] items;
 
@@ -1918,17 +1923,36 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 //show error
                 throw(new Exception(res.getString(R.string.text_no_items)));
             }
-            else
-            {
-                //remember if sun and moon
-                isSun = (items[0].id == Universe.IDs.Sun);
-                isMoon = (items[0].id == Universe.IDs.Moon);
-            }
 
-            //write column headers
-            line = res.getString(R.string.title_time) + separator + res.getString(R.string.title_latitude) + separator + res.getString(R.string.title_longitude) + separator + res.getString(R.string.abbrev_altitude) + " (" + Globals.getKmLabel(res) + ")" + (isMoon ? (separator + res.getString(R.string.title_illumination)) : "") + (isSun || isMoon ? (separator + res.getString(R.string.title_phase)) : "") + "\r\n";
+            //get ID count and if using multiple IDs
+            idCount = items[0].coordinates.length;
+            useMultiNorad = (idCount > 1);
+
+            //build and write column headers
+            lineString.append(res.getString(R.string.title_time));
+            for(index = 0; index < idCount; index++)
+            {
+                //get current ID and name
+                currentId = items[0].coordinates[index].noradId;
+                isSun = (currentId == Universe.IDs.Sun);
+                isMoon = (currentId == Universe.IDs.Moon);
+                currentName = (useMultiNorad ? ((new Database.SatelliteData(this, currentId)).getName() + " ") : "");
+
+                //add columns for current ID
+                lineString.append(separator).append(currentName).append(res.getString(R.string.title_latitude)).append(separator).append(currentName).append(res.getString(R.string.title_longitude)).append(separator).append(currentName).append(res.getString(R.string.abbrev_altitude)).append(" (").append(Globals.getKmLabel(res)).append(")");
+                if(isMoon)
+                {
+                    lineString.append(separator).append(currentName).append(res.getString(R.string.title_illumination));
+                }
+                if(isSun || isMoon)
+                {
+                    lineString.append(separator).append(currentName).append(res.getString(R.string.title_phase));
+                }
+            }
+            lineString.append("\r\n");
             //noinspection CharsetObjectCanBeUsed
-            outStream.write(line.getBytes(Globals.Encoding.UTF16));
+            outStream.write(lineString.toString().getBytes(Globals.Encoding.UTF16));
+            lineString.setLength(0);
 
             //go through each item
             for(index = 0; index < items.length; index++)
@@ -1937,9 +1961,30 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Coordinates.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.coordinates[0].latitude, false) + separator + Globals.getNumberString(currentItem.coordinates[0].longitude, false) + separator + (currentItem.coordinates[0].altitudeKm > 0 && currentItem.coordinates[0].altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.coordinates[0].altitudeKm)) : "-") + (isMoon ? (separator + Globals.getNumberString(currentItem.coordinates[0].illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.coordinates[0].phaseName) : "") + "\r\n";
+                lineString.setLength(0);
+                lineString.append(Globals.getDateTimeString(currentItem.time));
+                for(index2 = 0; index2 < currentItem.coordinates.length; index2++)
+                {
+                    //remember current coordinates, id, if moon, and if sun
+                    CalculateCoordinatesTask.CoordinateData currentData = currentItem.coordinates[index2];
+                    currentId = currentData.noradId;
+                    isSun = (currentId == Universe.IDs.Sun);
+                    isMoon = (currentId == Universe.IDs.Moon);
+
+                    //add data to line
+                    lineString.append(separator).append(Globals.getNumberString(currentData.latitude, false)).append(separator).append(Globals.getNumberString(currentData.longitude, false)).append(separator).append(currentData.altitudeKm > 0 && currentData.altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentData.altitudeKm)) : "-");
+                    if(isMoon)
+                    {
+                        lineString.append(separator).append(Globals.getNumberString(currentItem.coordinates[0].illumination, 1, false)).append("%");
+                    }
+                    if(isSun || isMoon)
+                    {
+                        lineString.append(separator).append(currentData.phaseName);
+                    }
+                }
+                lineString.append("\r\n");
                 //noinspection CharsetObjectCanBeUsed
-                outStream.write(line.getBytes(Globals.Encoding.UTF16));
+                outStream.write(lineString.toString().getBytes(Globals.Encoding.UTF16));
             }
         }
         catch(Exception ex)
@@ -3052,10 +3097,23 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 String fileName = null;
                 Resources res = this.getResources();
-                Database.SatelliteData satellite = new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId));
+                ArrayList<Integer> multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                int noradId = params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid);
+                int multiCount = (multiNoradId != null ? multiNoradId.size() : 0);
+                String satelliteName;
+                Database.SatelliteData satellite;
                 Database.SatelliteData satellite2 = new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid));
-                String satelliteName = satellite.getName();
 
+                //if ID is invalid but have 1 multi ID
+                if(noradId == Universe.IDs.Invalid && multiCount == 1)
+                {
+                    //use multi ID
+                    noradId = multiNoradId.get(0);
+                }
+                satellite = new Database.SatelliteData(this, noradId);
+                satelliteName = (multiCount > 1 ? res.getString(R.string.title_multiple) : satellite.getName());
+
+                //get file name
                 switch(calculatePageType)
                 {
                     case Calculate.PageType.View:
@@ -3079,6 +3137,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     fileName = "save.txt";
                 }
 
+                //show dialog
                 new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
                 {
                     @Override

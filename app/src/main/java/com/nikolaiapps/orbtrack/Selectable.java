@@ -1407,6 +1407,7 @@ public abstract class Selectable
 
             if(playBarWasRunning && playBar != null)
             {
+                playBar.setPlayActivity(this.getActivity());
                 playBar.start();
                 playBarWasRunning = false;
             }

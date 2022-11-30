@@ -195,6 +195,13 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         //calculate points in path unless cancelled
         for(viewJulianDate = pathJulianDateStart; viewJulianDate <= pathJulianDateEnd && (!limitTravel || viewJulianDate <= periodJulianEnd || Math.abs(azTravel) <= 360) && !this.isCancelled(); viewJulianDate += dayIncrement)
         {
+            //if adjusting time and not on first or last
+            if(adjustTime && viewJulianDate > pathJulianDateStart && viewJulianDate < pathJulianDateEnd)
+            {
+                //set julian date to 0 seconds at that time
+                viewJulianDate = Globals.julianDateNoSeconds(viewJulianDate);
+            }
+
             //if there are saved items and julian date matches current
             if(savedViewItems != null && index < savedViewItems.length && satelliteIndex < savedViewItems[index].views.length && viewJulianDate == savedViewItems[index].julianDate)
             {
@@ -208,13 +215,6 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             }
             else
             {
-                //if adjusting time and not on first or last
-                if(adjustTime && viewJulianDate > pathJulianDateStart && viewJulianDate < pathJulianDateEnd)
-                {
-                    //set julian date to 0 seconds at that time
-                    viewJulianDate = Globals.julianDateNoSeconds(viewJulianDate);
-                }
-
                 //calculate position
                 Calculations.updateOrbitalPosition(viewSatellite, observer, viewJulianDate, false);
                 topographicData = Calculations.getLookAngles(observer, viewSatellite, true);

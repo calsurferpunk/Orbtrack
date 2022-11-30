@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/Coordinate_Multi_Layout"
+    android:id="@+id/Current_Multi_Item_Layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
     android:background="?attr/itemSelect">
     <com.nikolaiapps.orbtrack.ExpandingListView
-        android:id="@+id/Coordinate_Multi_List"
+        android:id="@+id/Current_Multi_Item_List"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
@@ -15,7 +15,7 @@
         android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@+id/Coordinate_Multi_Progress_Group"
+        android:id="@+id/Current_Multi_Item_Progress_Group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">

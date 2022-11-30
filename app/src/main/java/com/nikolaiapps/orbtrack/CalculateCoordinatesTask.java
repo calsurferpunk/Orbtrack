@@ -9,38 +9,19 @@ import java.util.Calendar;
 //Task to calculate coordinate information
 public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Integer[]>
 {
-    public static class CoordinateSpan
+    public static class CoordinateData extends Calculate.CalculateDataBase
     {
-        public final Calculations.SatelliteObjectType satellite;
-        public double pathJulianDateStart;
-        public double pathJulianDateEnd;
-
-        public CoordinateSpan(Database.SatelliteData newSat)
-        {
-            satellite = newSat.satellite;
-            pathJulianDateStart = pathJulianDateEnd = 0;
-        }
-    }
-
-    public static class CoordinateData
-    {
-        public int noradId;
         public float latitude;
         public float longitude;
         public float altitudeKm;
-        public double illumination;
         public double speedKms;
-        public String phaseName;
 
         public CoordinateData()
         {
-            this.noradId = Universe.IDs.Invalid;
             this.latitude = Float.MAX_VALUE;
             this.longitude = Float.MAX_VALUE;
             this.altitudeKm = Float.MAX_VALUE;
-            this.illumination = 0;
             this.speedKms = Double.MAX_VALUE;
-            this.phaseName = null;
         }
     }
 
@@ -81,24 +62,24 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         calculatingCoordinates = false;
     }
 
-    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, CoordinateSpan currentSpan, int satelliteIndex, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double dayIncrement)
+    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, Calculations.SatelliteObjectType currentSatellite, int satelliteIndex, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement)
     {
         int index = 0;
         double phase;
         double illumination = 0;
         double coordinateJulianDate;
         double beforeDayIncrement = ((10.0 / Calculations.SecondsPerDay));     //10 seconds
-        final boolean isSun = (currentSpan.satellite.getSatelliteNum() == Universe.IDs.Sun);
-        final boolean isMoon = (currentSpan.satellite.getSatelliteNum() == Universe.IDs.Moon);
+        final boolean isSun = (currentSatellite.getSatelliteNum() == Universe.IDs.Sun);
+        final boolean isMoon = (currentSatellite.getSatelliteNum() == Universe.IDs.Moon);
         String phaseName = null;
         Calculations.GeodeticDataType geoData;
         Calculations.TopographicDataType oldTopographicData;
         Calculations.TopographicDataType currentTopographicData;
-        Calculations.SatelliteObjectType coordinateSatellite = new Calculations.SatelliteObjectType(currentSpan.satellite);
+        Calculations.SatelliteObjectType coordinateSatellite = new Calculations.SatelliteObjectType(currentSatellite);
         ArrayList<OrbitalCoordinate> coordinates = new ArrayList<>(0);
 
         //calculate coordinates in path unless cancelled
-        for(coordinateJulianDate = currentSpan.pathJulianDateStart; coordinateJulianDate <= currentSpan.pathJulianDateEnd && !this.isCancelled(); coordinateJulianDate += dayIncrement)
+        for(coordinateJulianDate = pathJulianDateStart; coordinateJulianDate <= pathJulianDateEnd && !this.isCancelled(); coordinateJulianDate += dayIncrement)
         {
             //create new geographic data
             geoData = new Calculations.GeodeticDataType();
@@ -162,10 +143,10 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             coordinates.add(new OrbitalCoordinate(geoData, coordinateJulianDate, illumination, phaseName));
 
             //if date is before end date and next date would be after
-            if(coordinateJulianDate < currentSpan.pathJulianDateEnd && (coordinateJulianDate + dayIncrement) > currentSpan.pathJulianDateEnd)
+            if(coordinateJulianDate < pathJulianDateEnd && (coordinateJulianDate + dayIncrement) > pathJulianDateEnd)
             {
                 //set to increment before end date
-                coordinateJulianDate = currentSpan.pathJulianDateEnd - dayIncrement;
+                coordinateJulianDate = pathJulianDateEnd - dayIncrement;
             }
         }
 
@@ -185,28 +166,24 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         double dayIncrement = (Double)params[6];
         Context context = (Context)params[0];
         Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
-        CoordinateSpan[] satellitesPathSpan = (CoordinateSpan[])params[1];
+        Calculations.SatelliteObjectType[] satelliteObjects = (Calculations.SatelliteObjectType[])params[1];
         Current.Coordinates.Item[] savedCoordinateItems = (Current.Coordinates.Item[])params[2];
 
         //update progress
         onProgressChanged(Globals.ProgressType.Started, Integer.MAX_VALUE, null);
 
         //go through each orbital while not cancelled
-        for(index = 0; index < satellitesPathSpan.length && !this.isCancelled(); index++)
+        for(index = 0; index < satelliteObjects.length && !this.isCancelled(); index++)
         {
             //get current path and satellite
-            CoordinateSpan currentSpan = satellitesPathSpan[index];
+            Calculations.SatelliteObjectType currentSatellite = satelliteObjects[index];
             ArrayList<OrbitalCoordinate> coordinates;
 
             //update progress
             publishProgress(index, Globals.ProgressType.Started);
 
-            //set given dates
-            currentSpan.pathJulianDateStart = julianDateStart;
-            currentSpan.pathJulianDateEnd = julianDateEnd;
-
             //get coordinates
-            coordinates = getCoordinates(context, currentSpan, index, savedCoordinateItems, observer, dayIncrement);
+            coordinates = getCoordinates(context, currentSatellite, index, savedCoordinateItems, observer, julianDateStart, julianDateEnd, dayIncrement);
 
             //update progress
             onProgressChanged((!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), index, coordinates);

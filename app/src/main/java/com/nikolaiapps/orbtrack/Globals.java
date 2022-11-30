@@ -2408,6 +2408,12 @@ public abstract class Globals
         return(getDegreeString(az) + " " + getAzimuthDirection(res, az));
     }
 
+    //Gets illumination string
+    public static String getIlluminationString(double illumination)
+    {
+        return(Globals.getNumberString(illumination, 1, false) + "%");
+    }
+
     //Gets header text
     public static String getHeaderText(Context context, String satelliteName, double julianDateStart, double julianDateEnd, double intersection)
     {

@@ -1801,9 +1801,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void saveCalculateAnglesFile(OutputStream outStream, String separator) throws Exception
     {
         int index;
+        int index2;
+        int idCount;
+        int currentId;
+        boolean useMultiNorad;
         boolean isSun;
         boolean isMoon;
-        String line;
+        String currentNameSeparator;
+        StringBuilder lineString = new StringBuilder();
         Resources res = this.getResources();
         Current.ViewAngles.Item[] items;
 
@@ -1816,17 +1821,36 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 //show error
                 throw(new Exception(res.getString(R.string.text_no_items)));
             }
-            else
-            {
-                //remember if sun or moon
-                isSun = (items[0].id == Universe.IDs.Sun);
-                isMoon = (items[0].id == Universe.IDs.Moon);
-            }
 
-            //write column headers
-            line = res.getString(R.string.title_time) + separator + res.getString(R.string.title_azimuth) + separator + res.getString(R.string.title_elevation) + separator + res.getString(R.string.title_range) + " (" + Globals.getKmLabel(res) + ")" + (isMoon ? (separator + res.getString(R.string.title_illumination)) : "") + (isSun || isMoon ? (separator + res.getString(R.string.title_phase)) : "") + "\r\n";
+            //get ID count and if using multiple IDs
+            idCount = items[0].views.length;
+            useMultiNorad = (idCount > 1);
+
+            //build and write column headers
+            lineString.append(res.getString(R.string.title_time));
+            for(index = 0; index < idCount; index++)
+            {
+                //get current ID and name
+                currentId = items[0].views[index].noradId;
+                isSun = (currentId == Universe.IDs.Sun);
+                isMoon = (currentId == Universe.IDs.Moon);
+                currentNameSeparator = separator + (useMultiNorad ? ((new Database.SatelliteData(this, currentId)).getName() + " ") : "");
+
+                //add columns for current ID
+                lineString.append(currentNameSeparator).append(res.getString(R.string.title_azimuth)).append(currentNameSeparator).append(res.getString(R.string.title_elevation)).append(currentNameSeparator).append(res.getString(R.string.title_range)).append(" (").append(Globals.getKmLabel(res)).append(")");
+                if(isMoon)
+                {
+                    lineString.append(currentNameSeparator).append(res.getString(R.string.title_illumination));
+                }
+                if(isSun || isMoon)
+                {
+                    lineString.append(currentNameSeparator).append(res.getString(R.string.title_phase));
+                }
+            }
+            lineString.append("\r\n");
             //noinspection CharsetObjectCanBeUsed
-            outStream.write(line.getBytes(Globals.Encoding.UTF16));
+            outStream.write(lineString.toString().getBytes(Globals.Encoding.UTF16));
+            lineString.setLength(0);
 
             //go through each item
             for(index = 0; index < items.length; index++)
@@ -1835,9 +1859,30 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.ViewAngles.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.time) + separator + Globals.getNumberString(currentItem.azimuth, false) + separator + Globals.getNumberString(currentItem.elevation, false) + separator + String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentItem.rangeKm)) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                lineString.setLength(0);
+                lineString.append(Globals.getDateTimeString(currentItem.time));
+                for(index2 = 0; index2 < currentItem.views.length; index2++)
+                {
+                    //remember current view, ID, if moon, and if sun
+                    CalculateViewsTask.ViewData currentData = currentItem.views[index2];
+                    currentId = currentData.noradId;
+                    isSun = (currentId == Universe.IDs.Sun);
+                    isMoon = (currentId == Universe.IDs.Moon);
+
+                    //add data to line
+                    lineString.append(separator).append(Globals.getNumberString(currentData.azimuth, false)).append(separator).append(Globals.getNumberString(currentData.elevation, false)).append(separator).append(String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentData.rangeKm)));
+                    if(isMoon)
+                    {
+                        lineString.append(separator).append(Globals.getIlluminationString(currentData.illumination));
+                    }
+                    if(isSun || isMoon)
+                    {
+                        lineString.append(separator).append(currentData.phaseName);
+                    }
+                }
+                lineString.append("\r\n");
                 //noinspection CharsetObjectCanBeUsed
-                outStream.write(line.getBytes(Globals.Encoding.UTF16));
+                outStream.write(lineString.toString().getBytes(Globals.Encoding.UTF16));
             }
         }
         catch(Exception ex)
@@ -1888,7 +1933,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Passes.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + (isMoon ? (separator + Globals.getIlluminationString(currentItem.illumination)) : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
@@ -1909,7 +1954,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean useMultiNorad;
         boolean isSun;
         boolean isMoon;
-        String currentName;
+        String currentNameSeparator;
         StringBuilder lineString = new StringBuilder();
         Resources res = this.getResources();
         Current.Coordinates.Item[] items;
@@ -1936,23 +1981,22 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 currentId = items[0].coordinates[index].noradId;
                 isSun = (currentId == Universe.IDs.Sun);
                 isMoon = (currentId == Universe.IDs.Moon);
-                currentName = (useMultiNorad ? ((new Database.SatelliteData(this, currentId)).getName() + " ") : "");
+                currentNameSeparator = separator + (useMultiNorad ? ((new Database.SatelliteData(this, currentId)).getName() + " ") : "");
 
                 //add columns for current ID
-                lineString.append(separator).append(currentName).append(res.getString(R.string.title_latitude)).append(separator).append(currentName).append(res.getString(R.string.title_longitude)).append(separator).append(currentName).append(res.getString(R.string.abbrev_altitude)).append(" (").append(Globals.getKmLabel(res)).append(")");
+                lineString.append(currentNameSeparator).append(res.getString(R.string.title_latitude)).append(currentNameSeparator).append(res.getString(R.string.title_longitude)).append(currentNameSeparator).append(res.getString(R.string.abbrev_altitude)).append(" (").append(Globals.getKmLabel(res)).append(")");
                 if(isMoon)
                 {
-                    lineString.append(separator).append(currentName).append(res.getString(R.string.title_illumination));
+                    lineString.append(currentNameSeparator).append(res.getString(R.string.title_illumination));
                 }
                 if(isSun || isMoon)
                 {
-                    lineString.append(separator).append(currentName).append(res.getString(R.string.title_phase));
+                    lineString.append(currentNameSeparator).append(res.getString(R.string.title_phase));
                 }
             }
             lineString.append("\r\n");
             //noinspection CharsetObjectCanBeUsed
             outStream.write(lineString.toString().getBytes(Globals.Encoding.UTF16));
-            lineString.setLength(0);
 
             //go through each item
             for(index = 0; index < items.length; index++)
@@ -1965,7 +2009,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 lineString.append(Globals.getDateTimeString(currentItem.time));
                 for(index2 = 0; index2 < currentItem.coordinates.length; index2++)
                 {
-                    //remember current coordinates, id, if moon, and if sun
+                    //remember current coordinates, ID, if moon, and if sun
                     CalculateCoordinatesTask.CoordinateData currentData = currentItem.coordinates[index2];
                     currentId = currentData.noradId;
                     isSun = (currentId == Universe.IDs.Sun);
@@ -1975,7 +2019,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     lineString.append(separator).append(Globals.getNumberString(currentData.latitude, false)).append(separator).append(Globals.getNumberString(currentData.longitude, false)).append(separator).append(currentData.altitudeKm > 0 && currentData.altitudeKm != Float.MAX_VALUE ? String.format(Locale.US, "%.2f", Globals.getKmUnitValue(currentData.altitudeKm)) : "-");
                     if(isMoon)
                     {
-                        lineString.append(separator).append(Globals.getNumberString(currentItem.coordinates[0].illumination, 1, false)).append("%");
+                        lineString.append(separator).append(Globals.getIlluminationString(currentItem.coordinates[0].illumination));
                     }
                     if(isSun || isMoon)
                     {
@@ -2039,7 +2083,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Current.Passes.Item currentItem = items[index];
 
                 //save item to file
-                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + separator + Globals.getNumberString(currentItem.passClosestAz, false) + separator + Globals.getNumberString(currentItem.passClosestEl, false) + (isMoon ? (separator + Globals.getNumberString(currentItem.illumination, 1, false) + "%") : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
+                line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + separator + Globals.getNumberString(currentItem.passClosestAz, false) + separator + Globals.getNumberString(currentItem.passClosestEl, false) + (isMoon ? (separator + Globals.getIlluminationString(currentItem.illumination)) : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
                 //noinspection CharsetObjectCanBeUsed
                 outStream.write(line.getBytes(Globals.Encoding.UTF16));
             }
@@ -2480,7 +2524,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
                 if(params != null)
                 {
-                    setCalculateViewCalculations(true, new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId)), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
+                    multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                    setCalculateViewCalculations(true, (multiNoradId != null && multiNoradId.size() > 0 ? Database.SatelliteData.getSatellites(this, multiNoradId) : new Database.SatelliteData[]{new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId))}), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
                 }
             }
             if(onCalculatePassesNonInput)
@@ -3298,10 +3343,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 final Database.SatelliteData currentOrbital2 = (currentItem.satellite2 != null ? new Database.SatelliteData(activity, currentItem.satellite2.getSatelliteNum()) : null);
 
                                 //calculate views
-                                Calculate.calculateViews(activity, currentOrbital, null, observer, julianStartDate, julianEndDate, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
+                                Calculate.calculateViews(activity, new Database.SatelliteData[]{currentOrbital}, null, observer, julianStartDate, julianEndDate, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
                                 {
                                     @Override
-                                    public void onProgressChanged(int index, int progressType, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
+                                    public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
                                     {
                                         switch(progressType)
                                         {
@@ -3317,10 +3362,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                                         if(progressType == Globals.ProgressType.Success && pageType == Calculate.PageType.Intersection && currentOrbital2 != null)
                                                         {
                                                             //calculate remaining views
-                                                            Calculate.calculateViews(activity, currentOrbital2, null, observer, julianStartDate, julianEndDate, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
+                                                            Calculate.calculateViews(activity, new Database.SatelliteData[]{currentOrbital2}, null, observer, julianStartDate, julianEndDate, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
                                                             {
                                                                 @Override
-                                                                public void onProgressChanged(int index, int progressType, ArrayList<CalculateViewsTask.OrbitalView> path2Points)
+                                                                public void onProgressChanged(int progressType, int satelliteIndex, ArrayList<CalculateViewsTask.OrbitalView> path2Points)
                                                                 {
                                                                     switch(progressType)
                                                                     {
@@ -3398,6 +3443,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(params != null)
                                 {
                                     orbitalId = params.getInt(Calculate.ParamTypes.NoradId);
+                                    multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                                    if(orbitalId == Universe.IDs.Invalid &&  multiNoradId != null && multiNoradId.size() == 1)
+                                    {
+                                        orbitalId = multiNoradId.get(0);
+                                    }
                                     Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.View, orbitalId, Globals.getHeaderText(MainActivity.this, new Database.SatelliteData(MainActivity.this, orbitalId).getName(), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer)));
                                 }
 
@@ -3435,7 +3485,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(params != null)
                                 {
                                     orbitalId = params.getInt(Calculate.ParamTypes.NoradId);
-                                    Calculate.PageAdapter.notifyHeaderChanged(position, orbitalId, Globals.getHeaderText(MainActivity.this, new Database.SatelliteData(MainActivity.this, orbitalId).getName(), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), (forIntersection ? params.getDouble(Calculate.ParamTypes.IntersectionDegs, -Double.MAX_VALUE) : -Double.MAX_VALUE)));
+                                    Calculate.PageAdapter.notifyHeaderChanged(position, orbitalId, Globals.getHeaderText(MainActivity.this, (orbitalId != Universe.IDs.Invalid ? new Database.SatelliteData(MainActivity.this, orbitalId).getName() : null), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), (forIntersection ? params.getDouble(Calculate.ParamTypes.IntersectionDegs, -Double.MAX_VALUE) : -Double.MAX_VALUE)));
                                 }
 
                                 //recreate tasks
@@ -3544,7 +3594,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             case Calculate.PageType.View:
                                 //start calculating
-                                setCalculateViewCalculations(true, satellite, julianDateStart, julianDateEnd, dayIncrement);
+                                setCalculateViewCalculations(true, (multiNoradIdLength > 0 ? Database.SatelliteData.getSatellites(MainActivity.this, multiNoradId) : new Database.SatelliteData[]{satellite}), julianDateStart, julianDateEnd, dayIncrement);
                                 break;
 
                             case Calculate.PageType.Passes:
@@ -4129,13 +4179,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     if(currentItem != null)
                                     {
                                         //update values
-                                        currentItem.azimuth = (float)topographicData.azimuth;
-                                        currentItem.elevation = (float)topographicData.elevation;
-                                        currentItem.rangeKm = (float)topographicData.rangeKm;
-                                        currentItem.illumination = illumination;
+                                        currentItem.views[0].azimuth = (float)topographicData.azimuth;
+                                        currentItem.views[0].elevation = (float)topographicData.elevation;
+                                        currentItem.views[0].rangeKm = (float)topographicData.rangeKm;
+                                        currentItem.views[0].illumination = illumination;
                                         if(phaseName != null)
                                         {
-                                            currentItem.phaseName = phaseName;
+                                            currentItem.views[0].phaseName = phaseName;
                                         }
 
                                         //update list later
@@ -4372,8 +4422,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             public void run()
             {
                 int index;
+                int index2;
+                int noradId;
                 int playIndex;
+                int multiCount = 0;
                 double subProgressPercent;
+                String zoneId;
+                String timeString;
                 Bundle params;
                 Context context = MainActivity.this;
                 CameraLens cameraView = Current.getCameraView();
@@ -4388,6 +4443,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 CalculateViewsTask.OrbitalView[][] currentViews = null;
                 Current.Passes.Item[] passesItems;
                 Current.ViewAngles.Item[] angleItems;
+                ArrayList<Integer> multiNoradId = null;
 
                 //if lens exists
                 if(cameraView != null)
@@ -4396,24 +4452,36 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
                     {
                         //get items
+                        zoneId = observer.timeZone.getID();
                         angleItems = Calculate.PageAdapter.getViewAngleItems();
-                        views = new CalculateViewsTask.OrbitalView[angleItems.length];
-
-                        //go through each item
-                        for(index = 0; index < angleItems.length; index++)
+                        currentViews = new CalculateViewsTask.OrbitalView[angleItems.length > 0 ? angleItems[0].views.length : 0][angleItems.length];
+                        for(index = 0; index < angleItems[0].views.length; index++)
                         {
-                            //remember current item
-                            Current.ViewAngles.Item currentAngleItem = angleItems[index];
+                            //go through each item
+                            for(index2 = 0; index2 < angleItems.length; index2++)
+                            {
+                                //remember current item and possibly a previous time string
+                                Current.ViewAngles.Item currentAngleItem = angleItems[index2];
+                                CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? currentViews[index - 1][index2] : null);
+                                boolean havePrevious = (previousOrbitalItem != null);
 
-                            //set view
-                            views[index] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.azimuth, currentAngleItem.elevation, currentAngleItem.rangeKm, currentAngleItem.julianDate, observer.timeZone.getID(), currentAngleItem.illumination, currentAngleItem.phaseName);
+                                //set view
+                                currentViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
+                            }
                         }
 
                         //set params and current satellite
                         params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
                         if(params != null)
                         {
-                            currentSatellite1 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId));
+                            noradId = params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid);
+                            multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                            multiCount = (multiNoradId != null ? multiNoradId.size() : 0);
+                            if(noradId == Universe.IDs.Invalid && multiCount == 1)
+                            {
+                                noradId = multiNoradId.get(0);
+                            }
+                            currentSatellite1 = (multiCount > 1 ? null : (new Database.SatelliteData(context, noradId)));
                         }
                     }
 
@@ -4460,22 +4528,32 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             currentSatellite2 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid));
                         }
                     }
-                    if(currentSatellite1 != null && views != null)
+                    if(currentSatellite1 != null)
                     {
-                        if(currentSatellite2 != null && views2 != null)
+                        if(currentSatellite2 != null)
                         {
                             currentSatellites = new Database.SatelliteData[]{currentSatellite1, currentSatellite2};
-                            currentViews = new CalculateViewsTask.OrbitalView[][]{views, views2};
+                            if(views != null && views2 != null)
+                            {
+                                currentViews = new CalculateViewsTask.OrbitalView[][]{views, views2};
+                            }
                         }
                         else
                         {
                             currentSatellites = new Database.SatelliteData[]{currentSatellite1};
-                            currentViews = new CalculateViewsTask.OrbitalView[][]{views};
+                            if(views != null)
+                            {
+                                currentViews = new CalculateViewsTask.OrbitalView[][]{views};
+                            }
                         }
+                    }
+                    else if(multiCount > 0)
+                    {
+                        currentSatellites = Database.SatelliteData.getSatellites(context, multiNoradId);
                     }
 
                     //if satellites, views, and bar are set
-                    if(currentSatellites != null && cameraView.playBar != null)
+                    if(currentSatellites != null && currentViews != null && cameraView.playBar != null)
                     {
                         //get play index and progress and set topographic data
                         playIndex = cameraView.playBar.getValue();
@@ -4788,7 +4866,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             currentViewAnglesTask = Current.calculateViews(this, observer, julianDate, julianDate + 1, 0.2 / 24, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
-                public void onProgressChanged(final int index, final int progressType, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
+                public void onProgressChanged(final int progressType, final int satelliteIndex, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
                 {
                     Runnable progressRunnable = null;
 
@@ -4826,7 +4904,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     if(cameraView != null)
                                     {
                                         //set camera travel points
-                                        cameraView.setTravel(index, views);
+                                        cameraView.setTravel(satelliteIndex, views);
                                     }
                                 }
                             };
@@ -5033,10 +5111,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Starts/stops calculate view calculations
-    private void setCalculateViewCalculations(boolean run, final Database.SatelliteData satellite, final double julianDateStart, final double julianDateEnd, double dayIncrement)
+    private void setCalculateViewCalculations(boolean run, final Database.SatelliteData[] satellites, final double julianDateStart, final double julianDateEnd, double dayIncrement)
     {
+        boolean satelliteChanged;
+        int index;
+        int oldNoradId;
         Bundle params;
-        Database.SatelliteData listSatellite;
+        ArrayList<Integer> oldMultiNoradId = new ArrayList<>(0);
+        Database.SatelliteData firstSatellite;
         Current.ViewAngles.Item[] savedViewItems;
 
         //if task was running
@@ -5047,18 +5129,41 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //if want to run and have an item
-        if(run && satellite != null && satellite.database != null)
+        if(run && satellites != null && satellites.length > 0 && satellites[0] != null)
         {
-            //get any saved items and params
+            //get first satellite and any saved items and params
+            firstSatellite = satellites[0];
             savedViewItems = (Current.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.View);
             params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
 
             //check if params changed
             if(params != null && savedViewItems != null)
             {
-                //if satellite, start, end, or increment changed
-                listSatellite = new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId));
-                if(listSatellite.database != null && (listSatellite.database.noradId != satellite.database.noradId || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
+                //get old satellite data
+                oldNoradId = params.getInt(Calculate.ParamTypes.NoradIdOld, Universe.IDs.Invalid);
+                if(oldNoradId != Universe.IDs.Invalid)
+                {
+                    oldMultiNoradId.add(oldNoradId);
+                }
+                else
+                {
+                    oldMultiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld);
+                }
+
+                //look for satellite changes
+                satelliteChanged = (oldMultiNoradId == null || oldMultiNoradId.size() != satellites.length);
+                if(!satelliteChanged)
+                {
+                    //go through each satellite while no change detected
+                    for(index = 0; index < satellites.length && !satelliteChanged; index++)
+                    {
+                        //check for changed ID
+                        satelliteChanged = satellites[index].getSatelliteNum() != oldMultiNoradId.get(index);
+                    }
+                }
+
+                //if satellite(s), start, end, or increment changed
+                if(satelliteChanged || (Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || Calculate.getDayIncrement(params) != dayIncrement))
                 {
                     //ignore saved
                     savedViewItems = null;
@@ -5066,58 +5171,104 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             }
 
             //start task
-            calculateViewAnglesTask = Calculate.calculateViews(this, satellite, savedViewItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
+            calculateViewAnglesTask = Calculate.calculateViews(this, satellites, savedViewItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
             {
+                //items to use
+                Current.ViewAngles.Item[] items = null;
+
                 @Override
-                public void onProgressChanged(int index, int progressType, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
+                public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
                 {
-                    Runnable passAction = null;
+                    Runnable viewAction = null;
 
                     //handle based on progress
                     switch(progressType)
                     {
                         case Globals.ProgressType.Started:
-                            passAction = new Runnable()
+                            viewAction = new Runnable()
                             {
                                 @Override
                                 public synchronized void run()
                                 {
                                     //update header and menu
-                                    Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.View, satellite.getSatelliteNum(), Globals.getHeaderText(MainActivity.this, satellite.getName(), julianDateStart, julianDateEnd));
+                                    Calculate.PageAdapter.notifyHeaderChanged(Calculate.PageType.View, firstSatellite.getSatelliteNum(), Globals.getHeaderText(MainActivity.this, (satellites.length == 1 ? firstSatellite.getName() : null), julianDateStart, julianDateEnd));
                                     updateOptionsMenu();
                                 }
                             };
                             break;
 
-                        case Globals.ProgressType.Failed:
                         case Globals.ProgressType.Success:
-                            passAction = new Runnable()
+                            viewAction = new Runnable()
                             {
                                 @Override
                                 public synchronized void run()
                                 {
                                     int index;
-                                    Current.ViewAngles.Item[] items = new Current.ViewAngles.Item[pathPoints != null ? pathPoints.size() : 0];
+
+                                    //if items not setup yet
+                                    if(items == null)
+                                    {
+                                        //setup items
+                                        items = new Current.ViewAngles.Item[pathPoints.size()];
+
+                                        //go through each item
+                                        for(index = 0; index < items.length; index++)
+                                        {
+                                            //remember current item, view, and time
+                                            Current.ViewAngles.Item currentItem = new Current.ViewAngles.Item(index, satellites.length);
+                                            CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
+                                            Calendar time = Globals.getLocalTime(currentView.gmtTime, observer.timeZone);
+
+                                            //set shared values
+                                            currentItem.id = firstSatellite.getSatelliteNum();
+                                            currentItem.julianDate = currentView.julianDate;
+                                            currentItem.time = time;
+                                            items[index] = currentItem;
+                                        }
+                                    }
 
                                     //go through each item/view
                                     for(index = 0; index < items.length; index++)
                                     {
-                                        //remember current view, item, time, and if sun or moon
+                                        //remember current item, view, and data
+                                        Current.ViewAngles.Item currentItem = items[index];
                                         CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
-                                        Current.ViewAngles.Item currentItem = new Current.ViewAngles.Item(index, false);
-                                        Calendar time = Globals.getLocalTime(currentView.gmtTime, observer.timeZone);
+                                        CalculateViewsTask.ViewData currentData = new CalculateViewsTask.ViewData();
 
-                                        currentItem.id = satellite.getSatelliteNum();
-                                        currentItem.julianDate = currentView.julianDate;
-                                        currentItem.time = time;
-                                        currentItem.azimuth = (float)currentView.azimuth;
-                                        currentItem.elevation = (float)currentView.elevation;
-                                        currentItem.rangeKm = (float)currentView.rangeKm;
-                                        currentItem.illumination = currentView.illumination;
-                                        currentItem.phaseName =  currentView.phaseName;
-                                        items[index] = currentItem;
+                                        //if index is within range
+                                        if(satelliteIndex < currentItem.views.length)
+                                        {
+                                            //set current data
+                                            currentData.noradId = satellites[satelliteIndex].getSatelliteNum();
+                                            currentData.azimuth = (float)currentView.azimuth;
+                                            currentData.elevation = (float)currentView.elevation;
+                                            currentData.rangeKm = (float)currentView.rangeKm;
+                                            currentData.illumination = currentView.illumination;
+                                            currentData.phaseName =  currentView.phaseName;
+                                            currentItem.views[satelliteIndex] = currentData;
+                                        }
                                     }
+                                }
+                            };
+                            break;
 
+                        case Globals.ProgressType.Finished:
+                            //if params exist
+                            if(params != null)
+                            {
+                                //update params with previously used ID(s)
+                                params.putInt(Calculate.ParamTypes.NoradIdOld, params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid));
+                                params.putIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld, params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId));
+                                Calculate.PageAdapter.setParams(Calculate.PageType.View, params);
+                            }
+                            //fall through
+
+                        case Globals.ProgressType.Cancelled:
+                            viewAction = new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
                                     //update list and menu
                                     Calculate.PageAdapter.setViewItems(items);
                                     Calculate.PageAdapter.notifyItemsChanged(Calculate.PageType.View);
@@ -5127,11 +5278,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
                     }
 
-                    //if pass action is set
-                    if(passAction != null)
+                    //if view action is set
+                    if(viewAction != null)
                     {
                         //run action
-                        MainActivity.this.runOnUiThread(passAction);
+                        MainActivity.this.runOnUiThread(viewAction);
                     }
                 }
             });
@@ -5468,7 +5619,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
                     }
 
-                    //if pass action is set
+                    //if coordinate action is set
                     if(coordinateAction != null)
                     {
                         //run action

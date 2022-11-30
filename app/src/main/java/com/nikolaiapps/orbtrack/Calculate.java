@@ -62,6 +62,20 @@ public abstract class Calculate
         static final int Days = 3;
     }
 
+    public static class CalculateDataBase
+    {
+        public int noradId;
+        public double illumination;
+        public String phaseName;
+
+        public CalculateDataBase()
+        {
+            this.noradId = Universe.IDs.Invalid;
+            this.illumination = 0;
+            this.phaseName = null;
+        }
+    }
+
     public interface OnStartCalculationListener
     {
         void onStartCalculation(Bundle params);
@@ -139,6 +153,7 @@ public abstract class Calculate
             Context context = this.getContext();
             Selectable.ListBaseAdapter listAdapter;
             ArrayList<Integer> multiNoradId;
+            Database.SatelliteData[] selectedOrbitals;
 
             if(savedInstanceState == null)
             {
@@ -176,7 +191,7 @@ public abstract class Calculate
                             switch(subPage)
                             {
                                 case Globals.SubPageType.List:
-                                    listAdapter = new Current.ViewAngles.ItemListAdapter(context, savedItems);
+                                    listAdapter = new Current.ViewAngles.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0));
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
@@ -230,7 +245,6 @@ public abstract class Calculate
                         case Globals.SubPageType.List:
                         case Globals.SubPageType.Map:
                         case Globals.SubPageType.Globe:
-                            Database.SatelliteData[] selectedOrbitals;
                             Current.Coordinates.Item[] savedItems = (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(page);
 
                             switch(subPage)
@@ -423,11 +437,10 @@ public abstract class Calculate
             //handle specific page inputs
             switch(pageNumber)
             {
+                case PageType.View:
                 case PageType.Coordinates:
                     allowMultiNoradId = true;
-                    //fall through
 
-                case PageType.View:
                     //get units
                     unitType = viewUnitList.getSelectedValue("").toString();
                     unitValue = Globals.tryParseInt(viewUnitText.getText().toString());
@@ -731,7 +744,7 @@ public abstract class Calculate
             params.putInt(ParamTypes.NoradId, Integer.MAX_VALUE);
             params.putInt(ParamTypes.NoradId2, Universe.IDs.Invalid);
             params.putBooleanArray(ParamTypes.OrbitalIsSelected, null);
-            if(position == PageType.Coordinates)
+            if(position == PageType.View || position == PageType.Coordinates)
             {
                 params.putIntegerArrayList(ParamTypes.MultiNoradId, (haveSavedParams ? savedParams.getIntegerArrayList(ParamTypes.MultiNoradId) : null));
             }
@@ -1283,15 +1296,22 @@ public abstract class Calculate
     }
 
     //Begin calculating view information
-    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData satellite, Current.ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
+    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] satellites, Current.ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
+        int index;
         CalculateViewsTask task;
         Bundle params = PageAdapter.getParams(Calculate.PageType.View);
         int unitType = (params != null ? getUnitType(params) : IncrementType.Seconds);
+        Calculations.SatelliteObjectType[] satelliteObjects = new Calculations.SatelliteObjectType[satellites != null ? satellites.length : 0];
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, new CalculateViewsTask.OrbitalPathBase[]{new CalculateViewsTask.OrbitalPathBase(satellite)}, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
+        for(index = 0; index < satelliteObjects.length; index++)
+        {
+            //set views
+            satelliteObjects[index] = new Calculations.SatelliteObjectType(satellites[index].satellite);
+        }
+        task.execute(context, satelliteObjects, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
 
         //return task
         return(task);
@@ -1302,16 +1322,16 @@ public abstract class Calculate
     {
         int index;
         CalculateCoordinatesTask task;
-        CalculateCoordinatesTask.CoordinateSpan[] satellitesPathSpan = new CalculateCoordinatesTask.CoordinateSpan[satellites != null ? satellites.length : 0];
+        Calculations.SatelliteObjectType[] satelliteObjects = new Calculations.SatelliteObjectType[satellites != null ? satellites.length : 0];
 
         //start calculating for start and end dates with given increment
         task = new CalculateCoordinatesTask(listener);
-        for(index = 0; index < satellitesPathSpan.length; index++)
+        for(index = 0; index < satelliteObjects.length; index++)
         {
             //set coordinates
-            satellitesPathSpan[index] = new CalculateCoordinatesTask.CoordinateSpan(satellites[index]);
+            satelliteObjects[index] = new Calculations.SatelliteObjectType(satellites[index].satellite);
         }
-        task.execute(context, satellitesPathSpan, savedCoordinateItems, observer, julianStartDate, julianEndDate, dayIncrement, false, false);
+        task.execute(context, satelliteObjects, savedCoordinateItems, observer, julianStartDate, julianEndDate, dayIncrement, false, false);
 
         //return task
         return(task);
@@ -1463,7 +1483,7 @@ public abstract class Calculate
         int viewRowVisibility = View.VISIBLE;
         int intersectionRowVisibility = View.VISIBLE;
         final boolean onIntersection = (pageNumber == PageType.Intersection);
-        final boolean onCoordinates = (pageNumber == PageType.Coordinates);
+        final boolean usingMulti = (pageNumber == PageType.View || pageNumber == PageType.Coordinates);
         String text;
         Context context = page.getContext();
         Database.DatabaseSatellite[] orbitals;
@@ -1495,7 +1515,7 @@ public abstract class Calculate
         orbitals = Database.getOrbitals(context);
 
         //set orbital list items
-        page.orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitals, onCoordinates));
+        page.orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitals, usingMulti));
         if(backgroundColorDrawable != null)
         {
             page.orbitalList.setPopupBackgroundDrawable(backgroundColorDrawable);
@@ -1505,13 +1525,13 @@ public abstract class Calculate
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
             {
-                selectButtonLayout.setVisibility((onCoordinates && position == 0) ? View.VISIBLE : View.GONE);
+                selectButtonLayout.setVisibility((usingMulti && position == 0) ? View.VISIBLE : View.GONE);
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
-        if(onCoordinates)
+        if(usingMulti)
         {
             page.selectButton.setOnClickListener(new View.OnClickListener()
             {
@@ -1611,8 +1631,8 @@ public abstract class Calculate
                     noradId = inputParams.getInt(ParamTypes.NoradId, Universe.IDs.Invalid);
                     multiNoradId = inputParams.getIntegerArrayList(ParamTypes.MultiNoradId);
 
-                    //-not on coordinates or valid ID or valid multi IDs- or -not on intersection or different ID selections-
-                    if((!onCoordinates || (noradId != Universe.IDs.Invalid || (multiNoradId != null && multiNoradId.size() >= 1))) && (!onIntersection || noradId != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
+                    //-not using multi or valid ID or valid multi IDs- or -not on intersection or different ID selections-
+                    if((!usingMulti || (noradId != Universe.IDs.Invalid || (multiNoradId != null && multiNoradId.size() >= 1))) && (!onIntersection || noradId != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
                     {
                         //start calculation
                         page.startCalculation(inputParams);

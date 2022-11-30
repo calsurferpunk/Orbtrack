@@ -979,7 +979,7 @@ public abstract class Current
                                             break;
 
                                         case 18:
-                                            text = Globals.getNumberString(currentItem.illumination, 1) + "%";
+                                            text = Globals.getIlluminationString(currentItem.illumination);
                                             break;
                                     }
 
@@ -1055,10 +1055,11 @@ public abstract class Current
     public static abstract class ViewAngles
     {
         //Item
-        public static class Item extends CalculateViewsTask.ViewItemBase
+        public static class Item extends Selectable.ListItem
         {
-            private String name;
-            private String ownerCode;
+            private final String name;
+            private final String ownerCode;
+            public boolean isLoading;
             public final boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
@@ -1066,7 +1067,15 @@ public abstract class Current
             public AppCompatImageView nameImage;
             public TextView nameText;
             public TextView timeText;
-            public Calculations.SatelliteObjectType satellite;
+            public TextView azText;
+            public TextView elText;
+            public TextView rangeText;
+            public TextView phaseText;
+            public TextView illuminationText;
+            public ExpandingListView subList;
+            public LinearLayout dataGroup;
+            public LinearLayout progressGroup;
+            public CalculateViewsTask.ViewData[] views;
 
             public static class Comparer implements Comparator<Item>
             {
@@ -1083,13 +1092,13 @@ public abstract class Current
                     switch(sort)
                     {
                         case Items.SortBy.Azimuth:
-                            return(Float.compare(value1.azimuth, value2.azimuth));
+                            return(Float.compare(value1.views[0].azimuth, value2.views[0].azimuth));
 
                         case Items.SortBy.Elevation:
-                            return(Float.compare(value1.elevation, value2.elevation));
+                            return(Float.compare(value1.views[0].elevation, value2.views[0].elevation));
 
                         case Items.SortBy.Range:
-                            return(Float.compare(value1.rangeKm, value2.rangeKm));
+                            return(Float.compare(value1.views[0].rangeKm, value2.views[0].rangeKm));
 
                         default:
                         case Items.SortBy.Name:
@@ -1098,35 +1107,68 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, boolean tleAccurate)
+            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, int viewCount, boolean tleAccurate)
             {
-                super(index);
+                super(Integer.MAX_VALUE, index, false, false, false, false);
+
+                isLoading = (viewCount < 1);
+                if(isLoading)
+                {
+                    viewCount = 1;
+                }
+                views = new CalculateViewsTask.ViewData[viewCount];
+                for(index = 0; index < views.length; index++)
+                {
+                    views[index] = new CalculateViewsTask.ViewData();
+                }
                 icon = icn;
                 name = nm;
                 ownerCode = ownCd;
+                julianDate = Double.MAX_VALUE;
+                time = Globals.getCalendar(null, 0);
                 nameImage = null;
                 nameText = null;
-                satellite = currentSatellite;
-                if(satellite != null)
+                timeText = null;
+                azText = null;
+                elText = null;
+                rangeText = null;
+                phaseText = null;
+                illuminationText = null;
+                progressGroup = null;
+                dataGroup = null;
+                if(currentSatellite != null)
                 {
                     id = currentSatellite.getSatelliteNum();
                 }
                 tleIsAccurate = tleAccurate;
             }
-            public Item(int index, boolean loading)
+            public Item(int index, int viewCount)
             {
-                super(index, Float.MAX_VALUE, Float.MAX_VALUE, Float.MAX_VALUE);
-                julianDate = Double.MAX_VALUE;
-                time = Globals.getCalendar(null, 0);
-                timeText = null;
-                tleIsAccurate = false;
-                isLoading = loading;
+                this(index, null, null, null, null, viewCount, false);
             }
 
-            public void updateDisplays(Context context)
+            public void updateDisplays(Context context, int widthDp)
             {
-                super.updateDisplays();
-
+                if(azText != null)
+                {
+                    azText.setText(views[0].azimuth != Float.MAX_VALUE ? Globals.getDegreeString(views[0].azimuth) : "-");
+                }
+                if(elText != null)
+                {
+                    elText.setText(views[0].elevation != Float.MAX_VALUE ? Globals.getDegreeString(views[0].elevation) : "-");
+                }
+                if(rangeText != null)
+                {
+                    rangeText.setText(views[0].rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(views[0].rangeKm, 0) : "-");
+                }
+                if(phaseText != null)
+                {
+                    phaseText.setText(views[0].phaseName == null ? "-" : views[0].phaseName);
+                }
+                if(illuminationText != null)
+                {
+                    illuminationText.setText(Globals.getIlluminationString(views[0].illumination));
+                }
                 if(nameImage != null && icon != null)
                 {
                     nameImage.setBackgroundDrawable(icon);
@@ -1139,6 +1181,28 @@ public abstract class Current
                 {
                     timeText.setText(Globals.getDateTimeString(context, Globals.getLocalTime(time, time.getTimeZone()), true, true, false));
                 }
+                if(subList != null && context != null && views.length > 1)
+                {
+                    subList.setAdapter(new SubItemListAdapter(context, julianDate, views, widthDp));
+                }
+            }
+
+            public void setLoading(boolean loading, boolean tleIsAccurate)
+            {
+                isLoading = loading && tleIsAccurate;
+
+                if(progressGroup != null)
+                {
+                    progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                }
+                if(dataGroup != null)
+                {
+                    dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
+                if(subList != null)
+                {
+                    subList.setVisibility(loading ? View.GONE : View.VISIBLE);
+                }
             }
         }
 
@@ -1147,26 +1211,34 @@ public abstract class Current
         {
             public final TextView timeText;
             public final LinearLayout progressGroup;
+            public final ExpandingListView subList;
 
-            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int timeTextID, int outdatedTextID)
+            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int timeTextID, int outdatedTextID, int subListID)
             {
                 super(itemView, dataGroupTitlesID, dataGroupTitle1ID, azTextID, dataGroupTitle2ID, elTextID, dataGroupTitle3ID, rangeTextID, dataGroupTitle4ID, phaseTextID, dataGroupTitle5ID, illuminationTextID, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
+                subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
             public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, -1, -1, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, -1, outdatedTextID);
+                this(itemView, azTextID, elTextID, rangeTextID, -1, -1, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, -1, outdatedTextID, -1);
             }
             public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int timeTextID)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupTitle5ID, dataGroupID, -1, -1, -1, timeTextID, -1);
+                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupTitle5ID, dataGroupID, -1, -1, -1, timeTextID, -1, -1);
+            }
+            public ItemHolder(View itemView, int progressGroupID, int subListID)
+            {
+                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, subListID);
             }
         }
 
         //Item list adapter
         public static class ItemListAdapter extends ItemListAdapterBase
         {
+            private boolean haveSun;
+            private boolean haveMoon;
             private Items viewItems;
 
             private ItemListAdapter(Context context)
@@ -1174,6 +1246,7 @@ public abstract class Current
                 super(context, PageType.View);
 
                 Resources res = context.getResources();
+                haveSun = haveMoon = false;
 
                 //remember strings and layout ID
                 dataGroupTitle1String = res.getString(R.string.abbrev_azimuth) + ":";
@@ -1196,14 +1269,14 @@ public abstract class Current
                 for(index = 0; index < satellites.length; index++)
                 {
                     Database.SatelliteData currentSatellite = satellites[index];
-                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, currentSatellite.getTLEIsAccurate()));
+                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, satellites.length, currentSatellite.getTLEIsAccurate()));
                 }
                 viewItems.sort(currentContext, PageType.View);
 
                 hasItems = (viewItems.getCount() > 0);
                 forCalculation = false;
             }
-            public ItemListAdapter(Context context, Item[] savedItems)
+            public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
             {
                 this(context);
 
@@ -1221,9 +1294,17 @@ public abstract class Current
                 else
                 {
                     //set as empty
-                    viewItems.set(new Item[]{new Item(0, true)});
+                    viewItems.set(new Item[]{new Item(0, 0)});
                 }
                 viewItems.sort(currentContext, PageType.View);
+
+                //remember layout ID
+                forSubItems = (multiCount > 1);
+                if(forSubItems)
+                {
+                    this.itemsRefSubId = this.itemsRefID;
+                    this.itemsRefID = R.layout.current_multi_item;
+                }
             }
 
             @Override
@@ -1272,9 +1353,17 @@ public abstract class Current
 
                 if(forCalculation)
                 {
-                    timeText = listColumns.findViewById(R.id.Angles_Time_Text);
-                    timeText.setText(R.string.title_time);
-                    timeText.setVisibility(View.VISIBLE);
+                    if(!forSubItems)
+                    {
+                        timeText = listColumns.findViewById(R.id.Angles_Time_Text);
+                        timeText.setText(R.string.title_time);
+                        timeText.setVisibility(View.VISIBLE);
+                    }
+                    else
+                    {
+                        isSun = haveSun;
+                        isMoon = haveMoon;
+                    }
 
                     phaseText = listColumns.findViewById(R.id.Angles_Phase_Text);
                     phaseText.setText(R.string.title_phase);
@@ -1308,7 +1397,14 @@ public abstract class Current
 
                 if(forCalculation)
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Phase_Title, R.id.Angles_Illumination_Title, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
+                    if(forSubItems)
+                    {
+                        itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
+                    }
+                    else
+                    {
+                        itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Phase_Title, R.id.Angles_Illumination_Title, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
+                    }
                 }
                 else
                 {
@@ -1331,13 +1427,30 @@ public abstract class Current
                 if(forCalculation)
                 {
                     currentItem.timeText = itemHolder.timeText;
-                    currentItem.timeText.setVisibility(View.VISIBLE);
+                    if(currentItem.timeText != null)
+                    {
+                        currentItem.timeText.setVisibility(View.VISIBLE);
+                    }
+
+                    if(forSubItems)
+                    {
+                        isSun = haveSun;
+                        isMoon = haveMoon;
+                    }
 
                     currentItem.phaseText = itemHolder.dataGroup4Text;
-                    currentItem.phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                    if(currentItem.phaseText != null)
+                    {
+                        currentItem.phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                    }
 
                     currentItem.illuminationText = itemHolder.dataGroup5Text;
-                    currentItem.illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                    if(currentItem.illuminationText != null)
+                    {
+                        currentItem.illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                    }
+
+                    currentItem.subList = itemHolder.subList;
                 }
                 else
                 {
@@ -1364,7 +1477,7 @@ public abstract class Current
 
                 //update displays
                 currentItem.setLoading(!hasItems, forCalculation || currentItem.tleIsAccurate);
-                currentItem.updateDisplays(currentContext);
+                currentItem.updateDisplays(currentContext, widthDp);
             }
 
             @Override
@@ -1376,7 +1489,7 @@ public abstract class Current
                 final Resources res = currentContext.getResources();
 
                 //if not for calculation and range has been set
-                if(!forCalculation && currentItem.rangeKm != Float.MAX_VALUE)
+                if(!forCalculation && currentItem.views[0].rangeKm != Float.MAX_VALUE)
                 {
                     final TextView[] detailTexts;
 
@@ -1426,23 +1539,23 @@ public abstract class Current
                                         switch(index)
                                         {
                                             case 0:
-                                                text = (currentItem.azimuth != Float.MAX_VALUE ? Globals.getAzimuthDirectionString(res, currentItem.azimuth) : "-");
+                                                text = (currentItem.views[0].azimuth != Float.MAX_VALUE ? Globals.getAzimuthDirectionString(res, currentItem.views[0].azimuth) : "-");
                                                 break;
 
                                             case 1:
-                                                text = (currentItem.elevation != Float.MAX_VALUE ? Globals.getDegreeString(currentItem.elevation) : "-");
+                                                text = (currentItem.views[0].elevation != Float.MAX_VALUE ? Globals.getDegreeString(currentItem.views[0].elevation) : "-");
                                                 break;
 
                                             case 2:
-                                                text = (currentItem.rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(currentItem.rangeKm) : "-") + " " + kmUnit;
+                                                text = (currentItem.views[0].rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(currentItem.views[0].rangeKm) : "-") + " " + kmUnit;
                                                 break;
 
                                             case 3:
-                                                text = (currentItem.phaseName == null ? "-" : currentItem.phaseName);
+                                                text = (currentItem.views[0].phaseName == null ? "-" : currentItem.views[0].phaseName);
                                                 break;
 
                                             case 4:
-                                                text = Globals.getNumberString(currentItem.illumination, 1) + "%";
+                                                text = Globals.getIlluminationString(currentItem.views[0].illumination);
                                                 break;
                                         }
 
@@ -1463,8 +1576,89 @@ public abstract class Current
             //Updates status of having items
             public void updateHasItems()
             {
+                int index;
+                int index2;
+                int noradId;
                 int count = viewItems.getCount();
                 hasItems = (count > 1 || (count > 0 && !viewItems.getViewItem(0).isLoading));
+
+                //reset
+                haveSun = haveMoon = false;
+
+                //go through needed items while sun or moon not found
+                for(index = 0; index < (forSubItems ? 1 : count) && (!haveSun || !haveMoon); index++)
+                {
+                    //remember current item
+                    Item currentItem = viewItems.getViewItem(index);
+                    if(currentItem != null)
+                    {
+                        //if for sub items
+                        if(forSubItems)
+                        {
+                            //go through each view
+                            for(index2 = 0; index2 < currentItem.views.length && (!haveSun || !haveMoon); index2++)
+                            {
+                                //check if current is sun or moon
+                                noradId = currentItem.views[index2].noradId;
+                                haveSun = haveSun || (noradId == Universe.IDs.Sun);
+                                haveMoon = haveMoon || (noradId == Universe.IDs.Moon);
+                            }
+                        }
+                        else
+                        {
+                            //check if current is sun or moon
+                            noradId = currentItem.id;
+                            haveSun = haveSun || (noradId == Universe.IDs.Sun);
+                            haveMoon = haveMoon || (noradId == Universe.IDs.Moon);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Sub item list adapter
+        private static class SubItemListAdapter extends SubItemBaseListAdapter
+        {
+            public SubItemListAdapter(Context context, double julianDate, Calculate.CalculateDataBase[] items, int widthDp)
+            {
+                super(context, julianDate, items, R.layout.current_view_item, R.id.Angles_Title_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Divider, widthDp);
+            }
+
+            @Override
+            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
+            {
+                boolean isSun;
+                boolean isMoon;
+                boolean showPhase = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_SHORT_WIDTH_DP);
+                boolean showIllumination = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_2_SHORT_WIDTH_DP);
+                TextView phaseText;
+                TextView illuminationText;
+                Calculate.CalculateDataBase currentData = dataItems[childPosition];
+
+                convertView = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
+                if(currentData instanceof CalculateViewsTask.ViewData)
+                {
+                    CalculateViewsTask.ViewData currentViewData = (CalculateViewsTask.ViewData)currentData;
+                    isSun = (currentData.noradId == Universe.IDs.Sun);
+                    isMoon = (currentData.noradId == Universe.IDs.Moon);
+                    ((TextView)convertView.findViewById(R.id.Angles_Az_Text)).setText(Globals.getDegreeString(currentViewData.azimuth));
+                    ((TextView)convertView.findViewById(R.id.Angles_El_Text)).setText(Globals.getDegreeString(currentViewData.elevation));
+                    ((TextView)convertView.findViewById(R.id.Angles_Range_Text)).setText(Globals.getKmUnitValueString(currentViewData.rangeKm, 0));
+                    phaseText = convertView.findViewById(R.id.Angles_Phase_Text);
+                    if(phaseText != null)
+                    {
+                        phaseText.setText(currentViewData.phaseName);
+                        phaseText.setVisibility(showPhase && (isSun || isMoon) ? View.VISIBLE : View.INVISIBLE);
+                    }
+                    illuminationText = convertView.findViewById(R.id.Angles_Illumination_Text);
+                    if(illuminationText != null)
+                    {
+                        illuminationText.setText(Globals.getIlluminationString(currentViewData.illumination));
+                        illuminationText.setVisibility(showIllumination && isMoon ? View.VISIBLE : View.INVISIBLE);
+                    }
+                }
+
+                return(convertView);
             }
         }
     }
@@ -2073,7 +2267,7 @@ public abstract class Current
                                                 }
                                                 else
                                                 {
-                                                    text = Globals.getNumberString(currentItem.illumination, 1) + "%";
+                                                    text = Globals.getIlluminationString(currentItem.illumination);
                                                 }
                                                 break;
                                         }
@@ -2411,7 +2605,7 @@ public abstract class Current
 
                 //remember layout ID
                 forSubItems = (multiCount > 1);
-                this.itemsRefID = (forSubItems ? R.layout.current_coordinates_multi_item : R.layout.current_coordinates_item);
+                this.itemsRefID = (forSubItems ? R.layout.current_multi_item : R.layout.current_coordinates_item);
                 if(forSubItems)
                 {
                     this.itemsRefSubId = R.layout.current_coordinates_item;
@@ -2505,7 +2699,7 @@ public abstract class Current
                 {
                     if(forSubItems)
                     {
-                        itemHolder = new ItemHolder(itemView, R.id.Coordinate_Multi_Progress_Group, R.id.Coordinate_Multi_List);
+                        itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
                     }
                     else
                     {
@@ -2654,7 +2848,7 @@ public abstract class Current
                                                 break;
 
                                             case 5:
-                                                text = Globals.getNumberString(currentItem.coordinates[0].illumination, 1) + "%";
+                                                text = Globals.getIlluminationString(currentItem.coordinates[0].illumination);
                                                 break;
                                         }
 
@@ -2681,117 +2875,38 @@ public abstract class Current
         }
 
         //Sub item list adapter
-        public static class SubItemListAdapter extends BaseExpandableListAdapter
+        private static class SubItemListAdapter extends SubItemBaseListAdapter
         {
-            private final int widthDp;
-            private final double coordinatesJulianDate;
-            private final LayoutInflater listInflater;
-            private final CalculateCoordinatesTask.CoordinateData[] coordinateItems;
-
-            public SubItemListAdapter(Context context, double julianDate, CalculateCoordinatesTask.CoordinateData[] items, int widthDp)
+            public SubItemListAdapter(Context context, double julianDate, Calculate.CalculateDataBase[] items, int widthDp)
             {
-                this.listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                this.coordinatesJulianDate = julianDate;
-                this.coordinateItems = items;
-                this.widthDp = widthDp;
-            }
-
-            @Override
-            public int getGroupCount()
-            {
-                return(coordinatesJulianDate != Double.MAX_VALUE ? 1 : 0);
-            }
-
-            @Override
-            public int getChildrenCount(int groupPosition)
-            {
-                return(coordinateItems.length);
-            }
-
-            @Override
-            public Object getGroup(int groupPosition)
-            {
-                return(coordinatesJulianDate);
-            }
-
-            @Override
-            public Object getChild(int groupPosition, int childPosition)
-            {
-                return(coordinateItems[childPosition]);
-            }
-
-            @Override
-            public long getGroupId(int groupPosition)
-            {
-                return(-1);
-            }
-
-            @Override
-            public long getChildId(int groupPosition, int childPosition)
-            {
-                return(-1);
-            }
-
-            @Override
-            public boolean hasStableIds()
-            {
-                return(true);
-            }
-
-            @Override
-            public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
-            {
-                TextView groupTitleText;
-
-                if(convertView == null)
-                {
-                    convertView = listInflater.inflate(R.layout.side_menu_list_group, parent, false);
-                }
-                groupTitleText = convertView.findViewById(R.id.Group_Title_Text);
-                groupTitleText.setText(Globals.getDateString(parent.getContext(), Globals.julianDateToCalendar(coordinatesJulianDate), MainActivity.getTimeZone(), true).replace("\r\n", " "));
-                convertView.findViewById(R.id.Group_Divider).setVisibility(View.GONE);
-
-                return(convertView);
+                super(context, julianDate, items, R.layout.current_coordinates_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
             }
 
             @Override
             public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
             {
-                boolean showSpeed = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_WIDTH_DP);
                 Context context = parent.getContext();
                 Resources res = context.getResources();
-                TextView titleText;
+                boolean showSpeed = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_WIDTH_DP);
                 TextView speedText;
-                CalculateCoordinatesTask.CoordinateData currentData = coordinateItems[childPosition];
-                Database.DatabaseSatellite currentOrbital = Database.getOrbital(context, currentData.noradId);
+                Calculate.CalculateDataBase currentData = dataItems[childPosition];
 
-                if(convertView == null)
+                convertView = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
+                if(currentData instanceof CalculateCoordinatesTask.CoordinateData)
                 {
-                    convertView = listInflater.inflate(R.layout.current_coordinates_item, parent, false);
+                    CalculateCoordinatesTask.CoordinateData currentCoordinateData = (CalculateCoordinatesTask.CoordinateData)currentData;
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Latitude_Text)).setText(Globals.getLatitudeDirectionString(res, currentCoordinateData.latitude, 2));
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Longitude_Text)).setText(Globals.getLongitudeDirectionString(res, currentCoordinateData.longitude, 2));
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Altitude_Text)).setText(Globals.getKmUnitValueString(currentCoordinateData.altitudeKm, 0));
+                    speedText = convertView.findViewById(R.id.Coordinate_Speed_Text);
+                    if(speedText != null)
+                    {
+                        speedText.setText(Globals.getKmUnitValueString(currentCoordinateData.speedKms));
+                        speedText.setVisibility(showSpeed ? View.VISIBLE : View.GONE);
+                    }
                 }
-                titleText = convertView.findViewById(R.id.Coordinate_Title_Text);
-                titleText.setText(currentOrbital.getName());
-                titleText.setVisibility(View.VISIBLE);
-                convertView.findViewById(R.id.Coordinate_Progress_Group).setVisibility(View.GONE);
-                convertView.findViewById(R.id.Coordinate_Data_Group).setVisibility(View.VISIBLE);
-                ((TextView)convertView.findViewById(R.id.Coordinate_Latitude_Text)).setText(Globals.getLatitudeDirectionString(res, currentData.latitude, 2));
-                ((TextView)convertView.findViewById(R.id.Coordinate_Longitude_Text)).setText(Globals.getLongitudeDirectionString(res, currentData.longitude, 2));
-                ((TextView)convertView.findViewById(R.id.Coordinate_Altitude_Text)).setText(Globals.getKmUnitValueString(currentData.altitudeKm, 0));
-                speedText = convertView.findViewById(R.id.Coordinate_Speed_Text);
-                if(speedText != null)
-                {
-                    speedText.setText(Globals.getKmUnitValueString(currentData.speedKms));
-                    speedText.setVisibility(showSpeed ? View.VISIBLE : View.GONE);
-                }
-                convertView.findViewById(R.id.Coordinate_Divider).setVisibility(View.VISIBLE);
 
                 return(convertView);
-            }
-
-            @Override
-            public boolean isChildSelectable(int groupPosition, int childPosition)
-            {
-                return(true);
             }
         }
 
@@ -3752,6 +3867,119 @@ public abstract class Current
         }
     }
 
+    //Sub item base list adapter
+    public static class SubItemBaseListAdapter extends BaseExpandableListAdapter
+    {
+        protected final int widthDp;
+        private final int layoutId;
+        private final int titleId;
+        private final int progressId;
+        private final int dataId;
+        private final int dividerId;
+        private final double dataJulianDate;
+        private final LayoutInflater listInflater;
+        protected final Calculate.CalculateDataBase[] dataItems;
+
+        public SubItemBaseListAdapter(Context context, double julianDate, Calculate.CalculateDataBase[] items, int layoutId, int titleId, int progressId, int dataId, int dividerId, int widthDp)
+        {
+            this.listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.layoutId = layoutId;
+            this.titleId = titleId;
+            this.progressId = progressId;
+            this.dataId = dataId;
+            this.dividerId = dividerId;
+            this.dataJulianDate = julianDate;
+            this.dataItems = items;
+            this.widthDp = widthDp;
+        }
+
+        @Override
+        public int getGroupCount()
+        {
+            return(dataJulianDate != Double.MAX_VALUE ? 1 : 0);
+        }
+
+        @Override
+        public int getChildrenCount(int groupPosition)
+        {
+            return(dataItems.length);
+        }
+
+        @Override
+        public Object getGroup(int groupPosition)
+        {
+            return(dataJulianDate);
+        }
+
+        @Override
+        public Object getChild(int groupPosition, int childPosition)
+        {
+            return(dataItems[childPosition]);
+        }
+
+        @Override
+        public long getGroupId(int groupPosition)
+        {
+            return(-1);
+        }
+
+        @Override
+        public long getChildId(int groupPosition, int childPosition)
+        {
+            return(-1);
+        }
+
+        @Override
+        public boolean hasStableIds()
+        {
+            return(true);
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
+        {
+            TextView groupTitleText;
+
+            if(convertView == null)
+            {
+                convertView = listInflater.inflate(R.layout.side_menu_list_group, parent, false);
+            }
+            groupTitleText = convertView.findViewById(R.id.Group_Title_Text);
+            groupTitleText.setText(Globals.getDateString(parent.getContext(), Globals.julianDateToCalendar(dataJulianDate), MainActivity.getTimeZone(), true).replace("\r\n", " "));
+            convertView.findViewById(R.id.Group_Divider).setVisibility(View.GONE);
+
+            return(convertView);
+        }
+
+        @Override
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
+        {
+            Context context = parent.getContext();
+            TextView titleText;
+            Calculate.CalculateDataBase currentData = dataItems[childPosition];
+            Database.DatabaseSatellite currentOrbital = Database.getOrbital(context, currentData.noradId);
+
+            if(convertView == null)
+            {
+                convertView = listInflater.inflate(layoutId, parent, false);
+            }
+            titleText = convertView.findViewById(titleId);
+            titleText.setText(currentOrbital.getName());
+            titleText.setVisibility(View.VISIBLE);
+            convertView.findViewById(progressId).setVisibility(View.GONE);
+            convertView.findViewById(dataId).setVisibility(View.VISIBLE);
+            convertView.findViewById(dividerId).setVisibility(View.VISIBLE);
+
+            return(convertView);
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition)
+        {
+            return(true);
+        }
+    }
+
     //Page view
     public static class Page extends Selectable.ListFragment
     {
@@ -4112,7 +4340,7 @@ public abstract class Current
                         viewNoradIndex.clear();
                         for(index = 0; index < viewItems.length; index++)
                         {
-                            viewNoradIndex.add(new Items.NoradIndex(viewItems[index].satellite.getSatelliteNum(), index));
+                            viewNoradIndex.add(new Items.NoradIndex(viewItems[index].id, index));
                         }
                         Collections.sort(viewNoradIndex, new Items.NoradIndex.Comparer());
                     }
@@ -4399,7 +4627,7 @@ public abstract class Current
     public static long millisecondsPlayBar = 0;
     private static WeakReference<CameraLens> cameraViewReference;
     private static WeakReference<FloatingActionButton> fullscreenButtonReference;
-    public static CalculateViewsTask.OrbitalPathBase[] orbitalViews = new CalculateViewsTask.OrbitalPathBase[0];
+    public static Calculations.SatelliteObjectType[] orbitalViews = new Calculations.SatelliteObjectType[0];
 
     //Gets camera view
     public static CameraLens getCameraView()
@@ -4434,11 +4662,11 @@ public abstract class Current
 
         //get views
         satellites = MainActivity.getSatellites();
-        orbitalViews = new CalculateViewsTask.OrbitalPathBase[satellites.length];
+        orbitalViews = new Calculations.SatelliteObjectType[satellites.length];
         for(index = 0; index < satellites.length; index++)
         {
             //set view
-            orbitalViews[index] = new CalculateViewsTask.OrbitalPathBase(satellites[index]);
+            orbitalViews[index] = new Calculations.SatelliteObjectType(satellites[index].satellite);
         }
     }
 

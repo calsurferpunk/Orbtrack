@@ -171,6 +171,7 @@
     <string name="desc_time_zone_source">Localización zona horaria detección</string>
     <string name="desc_unit_size_error">Debe ser más grande (demasiados incrementos)</string>
     <string name="desc_update_now">Actualizar ahora</string>
+    <string name="desc_update_globe_map_list">Tasa para actualizar las pantallas de globo/mapa</string>
     <string name="desc_update_rate_lens">Tasa para actualizar la visualización de la lente</string>
     <string name="desc_update_rate_list">Tasa para actualizar la visualización de la lista</string>
     <string name="desc_use_camera">Mire a través de la cámara mientras mira</string>
@@ -357,6 +358,7 @@
     <string name="title_globe">Globo</string>
     <!--string name="title_globe_type">Tipo de Globo</string-->
     <string name="title_globe_view">Vista Globo</string>
+    <string name="title_globe_slash_map_view">Vista Globo/Mapa</string>
     <string name="title_golden_hour">Hora Dorada</string>
     <string name="title_green">Verde</string>
     <string name="title_grey">Gris</string>

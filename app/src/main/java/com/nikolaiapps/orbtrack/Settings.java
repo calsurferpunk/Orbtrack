@@ -82,6 +82,7 @@ public abstract class Settings
         static final String MapMarkerInfoLocation = "MapMarkerInfoLocation";
         static final String MapMarkerShowBackground = "MapMarkerShowBackground";
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
+        static final String MapUpdateDelay = "MapUpdateDelay";
         static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowFootprint = "MapShowFootprint";
         static final String MapFootprintType = "MapFootprintType";
@@ -2025,6 +2026,7 @@ public abstract class Settings
             case PreferenceName.LensUpdateDelay:
                 return(1000);
 
+            case PreferenceName.MapUpdateDelay:
             case PreferenceName.MapShowOrbitalDirectionLimit:
                 return(100);
 
@@ -2468,6 +2470,12 @@ public abstract class Settings
     public static int getListUpdateDelay(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.ListUpdateDelay));
+    }
+
+    //Gets map update delay
+    public static int getMapUpdateDelay(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapUpdateDelay));
     }
 
     //Gets lens update delay

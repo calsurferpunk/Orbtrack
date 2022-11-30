@@ -79,7 +79,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         public static final String LensView = "lensView";
         public static final String ListView = "listView";
         public static final String Locations = "locations";
-        public static final String MapView = "mapView";
+        public static final String GlobeMapView = "globeMapView";
         public static final String MapViewGlobe = "mapViewGlobe";
         public static final String MapViewMap = "mapViewMap";
         public static final String MapViewFootprint = "mapViewFootprint";
@@ -197,9 +197,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
                         SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
                         IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
+                        IconListPreference globeUpdateRateList = this.findPreference(Settings.PreferenceName.MapUpdateDelay);
 
                         //initialize values
                         Settings.Options.MapView.initValues(context);
+                        Settings.Options.Rates.initValues(context);
 
                         //setup displays
                         setupSwitch(showCloudsGlobeSwitch);
@@ -209,6 +211,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSlider(globeSensitivitySlider);
                         setupSlider(globeSpeedScaleSlider);
                         setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
+                        setupList(globeUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.MapViewMap:
@@ -217,9 +220,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SliderPreference mapSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map);
                         SliderPreference mapSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map);
                         IconListPreference mapTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map);
+                        IconListPreference mapUpdateRateList = this.findPreference(Settings.PreferenceName.MapUpdateDelay);
 
                         //initialize values
                         Settings.Options.MapView.initValues(context);
+                        Settings.Options.Rates.initValues(context);
 
                         //setup displays
                         setupSwitch(showCloudsMapSwitch);
@@ -227,6 +232,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSlider(mapSensitivitySlider);
                         setupSlider(mapSpeedScaleSlider);
                         setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsMapSwitch);
+                        setupList(mapUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.MapViewFootprint:
@@ -431,6 +437,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.ListUpdateDelay:
                             currentValue = Settings.getListUpdateDelay(context);
+                            break;
+
+                        case Settings.PreferenceName.MapUpdateDelay:
+                            currentValue = Settings.getMapUpdateDelay(context);
                             break;
 
                         case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe:
@@ -1304,9 +1314,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     break;
 
                 case ScreenKey.Display:
+                case ScreenKey.GlobeMapView:
                 case ScreenKey.LensView:
                 case ScreenKey.ListView:
-                case ScreenKey.MapView:
                 case ScreenKey.Updates:
                     startFragment = new SettingsSubFragment();
 
@@ -1501,6 +1511,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapFootprintType:
                         case Settings.PreferenceName.MapSelectedFootprintColor:
                         case Settings.PreferenceName.MapMarkerShowShadow:
+                        case Settings.PreferenceName.MapUpdateDelay:
                         case Settings.PreferenceName.MapShowStars:
                         case Settings.PreferenceName.MapShowSunlight:
                         case Settings.PreferenceName.MapShowGrid:

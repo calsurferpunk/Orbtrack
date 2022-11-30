@@ -171,6 +171,7 @@
     <string name="desc_time_zone_source">Location time zone detection</string>
     <string name="desc_unit_size_error">Must be larger (too many increments)</string>
     <string name="desc_update_now">Update now</string>
+    <string name="desc_update_globe_map_list">Rate to update globe/map displays</string>
     <string name="desc_update_rate_lens">Rate to update lens display</string>
     <string name="desc_update_rate_list">Rate to update list displays</string>
     <string name="desc_use_camera">Look through camera while viewing</string>
@@ -357,6 +358,7 @@
     <string name="title_globe">Globe</string>
     <!--string name="title_globe_type">Globe Type</string-->
     <string name="title_globe_view">Globe View</string>
+    <string name="title_globe_slash_map_view">Globe/Map View</string>
     <string name="title_golden_hour">Golden Hour</string>
     <string name="title_green">Green</string>
     <string name="title_grey">Grey</string>

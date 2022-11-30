@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private int[] calculateSubPage;
     private long timerDelay;
     private long listTimerDelay;
+    private long mapTimerDelay;
     private long lensTimerDelay;
     private ThreadTask<Void, Void, Void> timerTask;
     private Runnable timerRunnable;
@@ -1646,6 +1647,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void updateTimerDelays()
     {
         listTimerDelay = Settings.getListUpdateDelay(this);
+        mapTimerDelay = Settings.getMapUpdateDelay(this);
         lensTimerDelay = Settings.getLensUpdateDelay(this);
     }
 
@@ -3019,7 +3021,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Current.PageType.Passes:
                             case Current.PageType.Coordinates:
                             case Current.PageType.Combined:
-                                startScreenValue = (subPage == Globals.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.MapView);
+                                startScreenValue = (subPage == Globals.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.GlobeMapView);
                                 break;
                         }
 
@@ -4378,6 +4380,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                         //set to lens delay
                         timerDelay = lensTimerDelay;
+                    }
+                    else if(onMap && Current.Coordinates.getMapViewReady() && (onCoordinates || onCombined))
+                    {
+                        //set time map delay
+                        timerDelay = mapTimerDelay;
                     }
                     else
                     {

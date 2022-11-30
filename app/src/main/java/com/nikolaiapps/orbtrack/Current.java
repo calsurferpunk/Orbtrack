@@ -3355,14 +3355,19 @@ public abstract class Current
             final boolean singlePlaybackMarker = (usingMarkers && playbackMarkers.length == 1);
             final int min = 0;
             final int max = (usingPlaybackItems ? playbackItems.length : (int)(Calculations.SecondsPerDay * 1000)) - 1;
+            int mapTimerDelay;
             final int scaleType = (usingPlaybackItems ? PlayBar.ScaleType.Speed : PlayBar.ScaleType.Time);
 
             //if play bar exists
             if(playBar != null)
             {
+                //get timer delay
+                mapTimerDelay = Settings.getMapUpdateDelay(playBar.getContext());
+
+                //setup play bar
                 playBar.setMin(min);
                 playBar.setMax(max);
-                playBar.setPlayPeriod(usingPlaybackItems ? 1000 : Settings.getListUpdateDelay(playBar.getContext()));
+                playBar.setPlayPeriod(mapTimerDelay);
                 playBar.setPlayScaleType(scaleType);
                 playBar.setPlayActivity(activity);
                 playBar.setValueTextVisible(true);
@@ -3487,7 +3492,7 @@ public abstract class Current
                     if(playbackItems.length > 1)
                     {
                         //set speed increment to time between 2 points
-                        playBar.setPlayIndexIncrementUnits((playbackItems[1].time.getTimeInMillis() - playbackItems[0].time.getTimeInMillis()) / 1000.0);
+                        playBar.setPlayIndexIncrementUnits((playbackItems[1].time.getTimeInMillis() - playbackItems[0].time.getTimeInMillis()) / (double)mapTimerDelay);
                     }
                 }
                 else

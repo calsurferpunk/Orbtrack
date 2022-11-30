@@ -191,6 +191,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         backPressTime = Globals.getGMTTime();
         backPressTime.set(Calendar.YEAR, 0);
 
+        //setup bundles
+        calculateBundle = new Bundle();
+
         //set default sub pages
         currentSubPage = new int[Current.PageType.PageCount];
         for(index = 0; index < currentSubPage.length; index++)
@@ -200,11 +203,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         calculateSubPage = new int[Calculate.PageType.PageCount];
         for(index = 0; index < calculateSubPage.length; index++)
         {
+            calculateBundle.putBundle(ParamTypes.CalculatePageInputs + index, savedInstanceState.getBundle(ParamTypes.CalculatePageInputs + index));
             calculateSubPage[index] = savedInstanceState.getInt(ParamTypes.CalculateSubPage + index, Globals.SubPageType.Input);
         }
-
-        //setup bundles
-        calculateBundle = new Bundle();
 
         //setup displays
         mainDrawerLayout = this.findViewById(R.id.Main_Drawer_Layout);
@@ -268,6 +269,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         for(index = 0; index < Calculate.PageType.PageCount; index++)
         {
             outState.putInt(ParamTypes.CalculateSubPage + index, calculateSubPage[index]);
+
+            if(calculatePageAdapter != null)
+            {
+                Bundle savedItems = calculatePageAdapter.getSavedInputs(index);
+                outState.putBundle(ParamTypes.CalculatePageInputs + index, savedItems);
+            }
         }
         outState.putInt(ParamTypes.MainPagerItem, getMainPage());
 
@@ -537,7 +544,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             //set selected
                             //note: sets saved value to use when page resumes
-                            calculatePageAdapter.setSavedItem(calculatePage.getPageParam(), Calculate.ParamTypes.OrbitalIsSelected, orbitalIsSelected);
+                            calculatePageAdapter.setSavedInput(calculatePage.getPageParam(), Calculate.ParamTypes.OrbitalIsSelected, orbitalIsSelected);
                         }
                     }
                 }

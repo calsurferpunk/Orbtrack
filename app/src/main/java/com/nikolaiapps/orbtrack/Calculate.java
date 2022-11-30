@@ -1127,7 +1127,19 @@ public abstract class Calculate
             }
         }
 
-        public void setSavedItem(int pageNum, String paramName, Object value)
+        public Bundle getSavedInputs(int pageNum)
+        {
+            //if a valid page
+            if(pageNum >= 0 && pageNum < savedInputs.length)
+            {
+                return(savedInputs[pageNum]);
+            }
+
+            //invalid
+            return(null);
+        }
+
+        public void setSavedInput(int pageNum, String paramName, Object value)
         {
             //if a valid page
             if(pageNum >= 0 && pageNum < savedInputs.length)

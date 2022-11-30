@@ -4428,7 +4428,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 int multiCount = 0;
                 double subProgressPercent;
                 String zoneId;
-                String timeString;
                 Bundle params;
                 Context context = MainActivity.this;
                 CameraLens cameraView = Current.getCameraView();

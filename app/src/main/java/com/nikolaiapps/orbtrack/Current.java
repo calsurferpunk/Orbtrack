@@ -1147,7 +1147,7 @@ public abstract class Current
                 this(index, null, null, null, null, viewCount, false);
             }
 
-            public void updateDisplays(Context context, int widthDp)
+            public void updateDisplays(Context context, int widthDp, boolean haveSun, boolean haveMoon)
             {
                 if(azText != null)
                 {
@@ -1183,7 +1183,7 @@ public abstract class Current
                 }
                 if(subList != null && context != null && views.length > 1)
                 {
-                    subList.setAdapter(new SubItemListAdapter(context, julianDate, views, widthDp));
+                    subList.setAdapter(new SubItemListAdapter(context, julianDate, views, widthDp, haveSun, haveMoon));
                 }
             }
 
@@ -1273,14 +1273,12 @@ public abstract class Current
                 }
                 viewItems.sort(currentContext, PageType.View);
 
-                hasItems = (viewItems.getCount() > 0);
-                forCalculation = false;
+                updateHasItems();
             }
             public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
             {
                 this(context);
 
-                hasItems = false;
                 forCalculation = true;
                 viewItems = new Items(MainActivity.Groups.Calculate, PageType.View);
 
@@ -1289,7 +1287,6 @@ public abstract class Current
                 {
                     //set as saved items
                     viewItems.set(savedItems);
-                    hasItems = true;
                 }
                 else
                 {
@@ -1305,6 +1302,8 @@ public abstract class Current
                     this.itemsRefSubId = this.itemsRefID;
                     this.itemsRefID = R.layout.current_multi_item;
                 }
+
+                updateHasItems();
             }
 
             @Override
@@ -1477,7 +1476,7 @@ public abstract class Current
 
                 //update displays
                 currentItem.setLoading(!hasItems, forCalculation || currentItem.tleIsAccurate);
-                currentItem.updateDisplays(currentContext, widthDp);
+                currentItem.updateDisplays(currentContext, widthDp, haveSun, haveMoon);
             }
 
             @Override
@@ -1619,9 +1618,14 @@ public abstract class Current
         //Sub item list adapter
         private static class SubItemListAdapter extends SubItemBaseListAdapter
         {
-            public SubItemListAdapter(Context context, double julianDate, Calculate.CalculateDataBase[] items, int widthDp)
+            private final boolean haveSun;
+            private final boolean haveMoon;
+
+            public SubItemListAdapter(Context context, double julianDate, Calculate.CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
             {
                 super(context, julianDate, items, R.layout.current_view_item, R.id.Angles_Title_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Divider, widthDp);
+                this.haveSun = haveSun;
+                this.haveMoon = haveMoon;
             }
 
             @Override
@@ -1648,13 +1652,13 @@ public abstract class Current
                     if(phaseText != null)
                     {
                         phaseText.setText(currentViewData.phaseName);
-                        phaseText.setVisibility(showPhase && (isSun || isMoon) ? View.VISIBLE : View.INVISIBLE);
+                        phaseText.setVisibility(showPhase && (isSun || isMoon) ? View.VISIBLE : (showPhase && (haveSun || haveMoon)) ? View.INVISIBLE : View.GONE);
                     }
                     illuminationText = convertView.findViewById(R.id.Angles_Illumination_Text);
                     if(illuminationText != null)
                     {
                         illuminationText.setText(Globals.getIlluminationString(currentViewData.illumination));
-                        illuminationText.setVisibility(showIllumination && isMoon ? View.VISIBLE : View.INVISIBLE);
+                        illuminationText.setVisibility(showIllumination && isMoon ? View.VISIBLE : (showIllumination && haveMoon) ? View.INVISIBLE : View.GONE);
                     }
                 }
 

@@ -587,10 +587,18 @@ public abstract class Calculate
                 @Override @SuppressLint("NotifyDataSetChanged")
                 public void itemsChanged()
                 {
+                    View rootView;
+
                     //update displays
                     if(listAdapter instanceof Current.ViewAngles.ItemListAdapter)
                     {
+                        rootView = Page.this.getView();
+
                         ((Current.ViewAngles.ItemListAdapter)listAdapter).updateHasItems();
+                        if(rootView != null)
+                        {
+                            listAdapter.setColumnTitles(rootView.findViewById(listAdapter.itemsRootViewID), null, page);
+                        }
                     }
                     else if(listAdapter instanceof Current.Passes.ItemListAdapter)
                     {

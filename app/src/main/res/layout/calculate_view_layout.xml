@@ -63,10 +63,11 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.475"
+                android:gravity="center"
                 android:orientation="vertical">
                 <com.nikolaiapps.orbtrack.DateInputView
                     android:id="@+id/Calculate_Start_Date_Text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
@@ -82,7 +83,7 @@
 
                 <com.nikolaiapps.orbtrack.TimeInputView
                     android:id="@+id/Calculate_Start_Time_Text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
@@ -111,11 +112,12 @@
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="0.475"
+                android:gravity="center"
                 android:orientation="vertical">
 
                 <com.nikolaiapps.orbtrack.DateInputView
                     android:id="@+id/Calculate_End_Date_Text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
@@ -131,7 +133,7 @@
 
                 <com.nikolaiapps.orbtrack.TimeInputView
                     android:id="@+id/Calculate_End_Time_Text"
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"

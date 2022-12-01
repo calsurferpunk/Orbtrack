@@ -4277,7 +4277,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         if(currentOrbitalSelected)
                                         {
                                             //update showing selected footprint
-                                            currentMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
+                                            currentMarker.setShowSelectedFootprint(currentIsSatellite && Settings.usingMapShowSelectedFootprint());
 
                                             //if selection changed
                                             if(currentNoradId != lastNoradId)

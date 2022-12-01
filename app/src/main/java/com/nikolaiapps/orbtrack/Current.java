@@ -3455,7 +3455,7 @@ public abstract class Current
                                         if(singlePlaybackMarker)
                                         {
                                             //update showing selected footprint
-                                            currentMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
+                                            currentMarker.setShowSelectedFootprint(currentIsSatellite && Settings.usingMapShowSelectedFootprint());
                                         }
 
                                         //if marker is visible
@@ -3736,7 +3736,7 @@ public abstract class Current
 
                             //show info and selected footprint
                             playbackMarker.setInfoVisible(true);
-                            playbackMarker.setShowSelectedFootprint(Settings.usingMapShowSelectedFootprint());
+                            playbackMarker.setShowSelectedFootprint((firstPoint.noradId > 0) && Settings.usingMapShowSelectedFootprint());
                         }
                     }
 

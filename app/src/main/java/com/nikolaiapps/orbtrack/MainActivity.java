@@ -74,7 +74,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         static final String MainPagerItem = "mainPagerItem";
         static final String PassIndex = "passIndex";
         static final String GetPassItems = "getPassItems";
-        static final String CoordinateNoradId = "coordinateNoradId";
         static final String ForceShowPaths = "forceShowPaths";
         static final String PathDivisions = "pathDivisions";
         static final String SavedState = "savedState";
@@ -872,13 +871,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     public boolean onOptionsItemSelected(final MenuItem item)
     {
         int id = item.getItemId();
-        int previousId;
-        int previousSubPage;
+        int previousId = Universe.IDs.Invalid;
+        int previousSubPage = Globals.SubPageType.List;
         int selectedSubPage;
         int page = getMainPage();
-        boolean setDisplayGroup = false;
         boolean usingGrid = false;
-        boolean usingGlobe;
+        boolean usingGlobe = (id == R.id.menu_globe);
+        boolean setMapDisplay = false;
+        boolean setDisplayGroup = false;
+        boolean onCalculate = (mainGroup == Groups.Calculate);
 
         //if drawer handles
         if(mainDrawerToggle.onOptionsItemSelected(item))
@@ -945,8 +946,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //if not waiting on a location update
             if(!pendingLocationUpdate)
             {
-                usingGlobe = (id == R.id.menu_globe);
-
                 switch(mainGroup)
                 {
                     case Groups.Current:
@@ -954,41 +953,17 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             case Current.PageType.Coordinates:
                             case Current.PageType.Combined:
-                                //remember previous ID and page
-                                previousId = mapViewNoradID;
-                                previousSubPage = currentSubPage[page];
-
-                                //update sub page
-                                setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
-                                selectedSubPage = currentSubPage[page];
-
-                                //if switching between globe/map
-                                if((previousSubPage == Globals.SubPageType.Map && selectedSubPage == Globals.SubPageType.Globe) || (previousSubPage == Globals.SubPageType.Globe && selectedSubPage == Globals.SubPageType.Map))
-                                {
-                                    //restore ID
-                                    mapViewNoradID = previousId;
-                                }
-
-                                //update default display
-                                Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
-
                                 //continue updating
-                                setDisplayGroup = true;
+                                setMapDisplay = true;
                                 break;
                         }
                         break;
 
                     case Groups.Calculate:
-                        if(page == Current.PageType.Coordinates)
+                        if(page == Calculate.PageType.Coordinates)
                         {
-                            //update sub page
-                            setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
-
-                            //update default display
-                            Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
-
                             //continue updating
-                            setDisplayGroup = true;
+                            setMapDisplay = true;
                         }
                         break;
                 }
@@ -1104,6 +1079,39 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
                     break;
             }
+        }
+
+        //if setting map display
+        if(setMapDisplay)
+        {
+            //if not on calculate page
+            if(!onCalculate)
+            {
+                //remember previous ID and sub page
+                previousId = mapViewNoradID;
+                previousSubPage = currentSubPage[page];
+            }
+
+            //update sub page
+            setSubPage(mainGroup, page, (usingGlobe ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
+
+            //if not on calculate page
+            if(!onCalculate)
+            {
+                //remember selected sub page
+                selectedSubPage = currentSubPage[page];
+
+                //if switching between globe/map
+                if((previousSubPage == Globals.SubPageType.Map && selectedSubPage == Globals.SubPageType.Globe) || (previousSubPage == Globals.SubPageType.Globe && selectedSubPage == Globals.SubPageType.Map))
+                {
+                    //restore ID
+                    mapViewNoradID = previousId;
+                }
+            }
+
+            //update default display
+            Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
+            setDisplayGroup = true;
         }
 
         //if setting display group
@@ -4024,6 +4032,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(new Runnable()
         {
             private int lastNoradId = Universe.IDs.None;
+            private double lastJulianDate = Double.MAX_VALUE;
 
             @Override
             public void run()
@@ -4040,7 +4049,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean onCombined = (page == Current.PageType.Combined);
                 boolean allViewOrbitals = (viewLensNoradID == Integer.MAX_VALUE);
                 boolean allPassesOrbitals = (passesLensNoradID == Integer.MAX_VALUE);
-                boolean allMapOrbitals = (mapViewNoradID == Integer.MAX_VALUE);
+                boolean multiOrbitals = (mapViewNoradID == Integer.MAX_VALUE);
                 boolean onMap = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
                 boolean onList = (subPage == Globals.SubPageType.List);
                 boolean onLens = (subPage == Globals.SubPageType.Lens);
@@ -4256,8 +4265,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     //remember if current orbital is selected
                                     boolean currentOrbitalSelected = (mapViewNoradID == currentNoradId);
 
-                                    //if using all orbitals or current is selected
-                                    if(allMapOrbitals || currentOrbitalSelected)
+                                    //if using multiple orbitals or current is selected
+                                    if(multiOrbitals || currentOrbitalSelected)
                                     {
                                         //remember latitude, longitude, and if visible
                                         double currentLatitude = currentOrbital.geo.latitude;
@@ -4285,7 +4294,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             //refresh window and follow
                                             coordinateString = Globals.getCoordinateString(MainActivity.this, currentLatitude, currentLongitude, currentAltitudeKm);
                                             currentMarker.setText(coordinateString);
-                                            Current.Coordinates.mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !Current.Coordinates.mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm)  : Current.Coordinates.mapView.getCameraZoom()));
+
+                                            //if julian date changed
+                                            if(julianDate != lastJulianDate)
+                                            {
+                                                Current.Coordinates.mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !Current.Coordinates.mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm)  : Current.Coordinates.mapView.getCameraZoom()));
+                                            }
 
                                             //update last
                                             lastNoradId = currentNoradId;
@@ -4421,6 +4435,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
 
                     //update status
+                    lastJulianDate = julianDate;
                     firstRun.value = false;
                 }
             }

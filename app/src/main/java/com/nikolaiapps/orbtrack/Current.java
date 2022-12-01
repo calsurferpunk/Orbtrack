@@ -3254,9 +3254,10 @@ public abstract class Current
         }
 
         //Setup path button
-        private static void setupPathButton(final FloatingActionStateButton showPathButton, final int mapViewNoradId)
+        private static void setupPathButton(final FloatingActionStateButton showPathButton, Database.SatelliteData[] selectedOrbitals)
         {
-            final boolean allMapOrbitals = (mapViewNoradId == Integer.MAX_VALUE);
+            final int selectedCount = (selectedOrbitals != null ? selectedOrbitals.length : 0);
+            final Database.SatelliteData firstOrbital = (selectedCount > 0 ? selectedOrbitals[0] : null);
 
             showPathButton.setOnClickListener(new View.OnClickListener()
             {
@@ -3273,7 +3274,7 @@ public abstract class Current
                     //update visibility
                     for(index = 0; index < orbitalCount; index++)
                     {
-                        mapView.setPathVisible(index, (showPaths && (allMapOrbitals || mapViewNoradId == mapView.getOrbitalNoradId(index))));
+                        mapView.setPathVisible(index, (showPaths && ((selectedCount > 1) || (firstOrbital != null && firstOrbital.getSatelliteNum() == mapView.getOrbitalNoradId(index)))));
                     }
                 }
             });
@@ -3564,10 +3565,9 @@ public abstract class Current
             final IconSpinner searchList;
 
             //setup lists and status
-            final int mapViewNoradId = (savedInstanceState != null ? savedInstanceState.getInt(MainActivity.ParamTypes.CoordinateNoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE);
             final Item[] savedItems = (savedInstanceState != null ? (Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
-            final boolean allMapOrbitals = (mapViewNoradId == Integer.MAX_VALUE);
             final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
+            final boolean multiSelected = (haveSelected && selectedOrbitals.length > 1);
             final boolean useSavedPath = (page instanceof Calculate.Page && savedItems != null && savedItems.length > 0);
             final boolean useMultiNoradId = (useSavedPath && savedItems[0].coordinates.length > 1);
             final boolean rotateAllowed = Settings.getMapRotateAllowed(context);
@@ -3578,7 +3578,7 @@ public abstract class Current
             final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
             settingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
             final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Map_Fullscreen_Button);
-            final FloatingActionStateButton showToolbarsButton = (allMapOrbitals && !useSavedPath ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
+            final FloatingActionStateButton showToolbarsButton = (multiSelected ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
             final FloatingActionStateButton showZoomButton = settingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
             final FloatingActionStateButton showLatLonButton = settingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
             final FloatingActionStateButton showFootprintButton = (!useSavedPath || useMultiNoradId ? settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint) : null);
@@ -3596,7 +3596,7 @@ public abstract class Current
             args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
             mapView = (forGlobe ? new Whirly.GlobeFragment() : new Whirly.MapFragment());
             mapView.setArguments(args);
-            searchList = (allMapOrbitals && !useSavedPath ? (IconSpinner)rootView.findViewById(R.id.Map_Search_List) : null);
+            searchList = (multiSelected ? (IconSpinner)rootView.findViewById(R.id.Map_Search_List) : null);
             page.playBar = rootView.findViewById(R.id.Coordinate_Play_Bar);
             page.scaleBar = rootView.findViewById(R.id.Coordinate_Scale_Bar);
             page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
@@ -3609,7 +3609,7 @@ public abstract class Current
             }
 
             //setup search displays
-            setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, (!useSavedPath ? selectedOrbitals : null));
+            setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null));
 
             //if map info text exists and not using background
             if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))
@@ -3674,8 +3674,8 @@ public abstract class Current
                                 //close settings menu
                                 settingsMenu.close();
 
-                                //if not using saved path
-                                if(!useSavedPath)
+                                //if multiple orbitals
+                                if(multiSelected)
                                 {
                                     //deselect current
                                     mapView.deselectCurrent();
@@ -3720,50 +3720,6 @@ public abstract class Current
                     {
                         //add all orbitals
                         addOrbitals(context, MainActivity.getSatellites(), null);
-
-                        //select current location
-                        if(searchList != null)
-                        {
-                            searchList.setSelectedValue(Universe.IDs.CurrentLocation);
-                        }
-
-                        //send selection changes
-                        mapView.setOnItemSelectionChangedListener(new CoordinatesFragment.OnItemSelectionChangedListener()
-                        {
-                            private int lastNoradId = Universe.IDs.Invalid;
-
-                            @Override
-                            public void itemSelected(int noradId)
-                            {
-                                //if not a recursive call
-                                if(noradId != lastNoradId)
-                                {
-                                    //update last norad ID
-                                    lastNoradId = noradId;
-
-                                    //if list is set
-                                    if(searchList != null)
-                                    {
-                                        //if list being shown
-                                        if(showToolbars)
-                                        {
-                                            //update selection
-                                            searchList.setSelectedValue(noradId);
-                                        }
-                                        else
-                                        {
-                                            //update selection
-                                            selectOrbital(noradId);
-                                        }
-                                    }
-                                    //else if norad ID changing and exists
-                                    else if(noradId != Universe.IDs.None && noradId != mapView.getSelectedNoradId() && mapView.getSelectedNoradId() != -1)
-                                    {
-                                        mapView.selectOrbital(noradId);
-                                    }
-                                }
-                            }
-                        });
                     }
                     else
                     {
@@ -3784,8 +3740,52 @@ public abstract class Current
                         }
                     }
 
+                    //select current location
+                    if(searchList != null)
+                    {
+                        searchList.setSelectedValue(Universe.IDs.CurrentLocation);
+                    }
+
+                    //send selection changes
+                    mapView.setOnItemSelectionChangedListener(new CoordinatesFragment.OnItemSelectionChangedListener()
+                    {
+                        private int lastNoradId = Universe.IDs.Invalid;
+
+                        @Override
+                        public void itemSelected(int noradId)
+                        {
+                            //if not a recursive call
+                            if(noradId != lastNoradId)
+                            {
+                                //update last norad ID
+                                lastNoradId = noradId;
+
+                                //if list is set
+                                if(searchList != null)
+                                {
+                                    //if list being shown
+                                    if(showToolbars)
+                                    {
+                                        //update selection
+                                        searchList.setSelectedValue(noradId);
+                                    }
+                                    else
+                                    {
+                                        //update selection
+                                        selectOrbital(noradId);
+                                    }
+                                }
+                                //else if norad ID changing and exists
+                                else if(noradId != Universe.IDs.None && noradId != mapView.getSelectedNoradId() && mapView.getSelectedNoradId() != -1)
+                                {
+                                    mapView.selectOrbital(noradId);
+                                }
+                            }
+                        }
+                    });
+
                     //setup path button after markers have been added
-                    setupPathButton(showPathButton, mapViewNoradId);
+                    setupPathButton(showPathButton, selectedOrbitals);
 
                     //set current location
                     setCurrentLocation(page.getActivity(), currentLocation);
@@ -4127,8 +4127,7 @@ public abstract class Current
             else if(createMapView)
             {
                 //create view
-                savedInstanceState.putInt(MainActivity.ParamTypes.CoordinateNoradId, MainActivity.mapViewNoradID);
-                newView = Coordinates.onCreateMapView(this, inflater, container, MainActivity.getSatellites(), (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                newView = Coordinates.onCreateMapView(this, inflater, container, (MainActivity.mapViewNoradID == Integer.MAX_VALUE ? MainActivity.getSatellites() : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
             }
 
             //if view is not set yet

@@ -3035,6 +3035,32 @@ public abstract class Current
             return(task);
         }
 
+        //Select orbital with the given ID
+        private static void selectOrbital(int noradId)
+        {
+            boolean isNone = (noradId == Universe.IDs.None);
+            boolean isLocation = (noradId == Universe.IDs.CurrentLocation);
+
+            //if location or anything
+            if(isLocation || !isNone)
+            {
+                //select it
+                mapView.selectOrbital(noradId);
+
+                //if location
+                if(isLocation)
+                {
+                    //move to now since not updated later
+                    mapView.moveCamera(currentLocation.geo.latitude, currentLocation.geo.longitude);
+                }
+            }
+            else
+            {
+                //select nothing
+                mapView.deselectCurrent();
+            }
+        }
+
         //setup search
         private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals)
         {
@@ -3072,27 +3098,11 @@ public abstract class Current
                     @Override
                     public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                     {
-                        int noradId = (int)searchList.getSelectedValue(Universe.IDs.None);
-                        boolean isNone = (noradId == Universe.IDs.None);
-                        boolean isLocation = (noradId == Universe.IDs.CurrentLocation);
-
-                        //if location or anything
-                        if(isLocation || !isNone)
+                        //if list being shown
+                        if(showToolbars)
                         {
-                            //select it
-                            mapView.selectOrbital(noradId);
-
-                            //if location
-                            if(isLocation)
-                            {
-                                //move to now since not updated later
-                                mapView.moveCamera(currentLocation.geo.latitude, currentLocation.geo.longitude);
-                            }
-                        }
-                        else
-                        {
-                            //select nothing
-                            mapView.deselectCurrent();
+                            //update selection
+                            selectOrbital((int)searchList.getSelectedValue(Universe.IDs.None));
                         }
                     }
 
@@ -3124,6 +3134,13 @@ public abstract class Current
                         if(pagePlayBar != null)
                         {
                             pagePlayBar.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                        }
+
+                        //if search list and map exists and showing toolbars
+                        if(searchList != null && mapView != null && showToolbars)
+                        {
+                            //update selection
+                            searchList.setSelectedValue(mapView.getSelectedNoradId());
                         }
                     }
                 });
@@ -3713,19 +3730,37 @@ public abstract class Current
                         //send selection changes
                         mapView.setOnItemSelectionChangedListener(new CoordinatesFragment.OnItemSelectionChangedListener()
                         {
+                            private int lastNoradId = Universe.IDs.Invalid;
+
                             @Override
                             public void itemSelected(int noradId)
                             {
-                                //if list is set
-                                if(searchList != null)
+                                //if not a recursive call
+                                if(noradId != lastNoradId)
                                 {
-                                    //update selection
-                                    searchList.setSelectedValue(noradId);
-                                }
-                                //else if norad ID changing and exists
-                                else if(noradId != Universe.IDs.None && noradId != mapView.getSelectedNoradId() && mapView.getSelectedNoradId() != -1)
-                                {
-                                    mapView.selectOrbital(noradId);
+                                    //update last norad ID
+                                    lastNoradId = noradId;
+
+                                    //if list is set
+                                    if(searchList != null)
+                                    {
+                                        //if list being shown
+                                        if(showToolbars)
+                                        {
+                                            //update selection
+                                            searchList.setSelectedValue(noradId);
+                                        }
+                                        else
+                                        {
+                                            //update selection
+                                            selectOrbital(noradId);
+                                        }
+                                    }
+                                    //else if norad ID changing and exists
+                                    else if(noradId != Universe.IDs.None && noradId != mapView.getSelectedNoradId() && mapView.getSelectedNoradId() != -1)
+                                    {
+                                        mapView.selectOrbital(noradId);
+                                    }
                                 }
                             }
                         });

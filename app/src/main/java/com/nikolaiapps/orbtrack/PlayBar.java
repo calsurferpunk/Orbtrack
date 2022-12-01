@@ -51,6 +51,8 @@ public class PlayBar extends LinearLayout
     private TimeZone zone;
     private final Drawable pauseDrawable;
     private final Drawable playDrawable;
+    private final Drawable liveDrawable;
+    private final Drawable syncDrawable;
     private Timer playTimer;
     private FragmentActivity playActivity;
     private final AppCompatButton cancelButton;
@@ -105,12 +107,13 @@ public class PlayBar extends LinearLayout
         //get images
         playDrawable = Globals.getDrawable(context, R.drawable.ic_play_arrow_white, buttonColor, false);
         pauseDrawable = Globals.getDrawable(context, R.drawable.ic_pause_white, buttonColor, false);
+        liveDrawable = Globals.getDrawable(context, context.getString(R.string.title_live), 12, Color.WHITE, Color.TRANSPARENT);
+        syncDrawable = Globals.getDrawable(context, R.drawable.ic_sync_white, buttonColor, false);
 
         //set images
         playButton.setBackgroundDrawable(playDrawable);
         leftButton.setBackgroundDrawable(Globals.getDrawable(context, R.drawable.ic_arrow_left_white, buttonColor, false));
         rightButton.setBackgroundDrawable(Globals.getDrawable(context, R.drawable.ic_arrow_right_white, buttonColor, false));
-        syncButton.setBackgroundDrawable(Globals.getDrawable(context, R.drawable.ic_sync_white, buttonColor, false));
 
         //set colors
         valueText.setTextColor(textColor);
@@ -120,7 +123,7 @@ public class PlayBar extends LinearLayout
         //set defaults
         setValueTextVisible(false);
         resetPlayIncrements();
-        synced = false;
+        setSynced(false);
         playPeriodMs = 1000;
         playScaleType = ScaleType.Speed;
         playScaleFactor = 1;
@@ -168,7 +171,7 @@ public class PlayBar extends LinearLayout
             //update value and reset increments
             seekBar.setProgress(actualValue);
             resetPlayIncrements();
-            synced = false;
+            setSynced(false);
         }
     }
     public void setValue(int value)
@@ -292,6 +295,23 @@ public class PlayBar extends LinearLayout
         this.zone = zone;
     }
 
+    private void setSynced(boolean isSynced)
+    {
+        boolean showSynced;
+
+        //update status
+        synced = isSynced;
+        showSynced = (synced && playTimer != null);
+
+        //if button exists
+        if(syncButton != null)
+        {
+            //update background/image
+            syncButton.setBackgroundDrawable(showSynced ? null : syncDrawable);
+            syncButton.setImageDrawable(showSynced ? liveDrawable : null);
+        }
+    }
+
     public void setSyncButtonListener(OnClickListener listener)
     {
         //set listener
@@ -314,7 +334,7 @@ public class PlayBar extends LinearLayout
                     }
 
                     //update status
-                    synced = true;
+                    setSynced(true);
                 }
             });
 
@@ -371,7 +391,7 @@ public class PlayBar extends LinearLayout
                 {
                     //reset increments
                     resetPlayIncrements();
-                    synced = false;
+                    setSynced(false);
                 }
 
                 //if listener is set
@@ -439,7 +459,7 @@ public class PlayBar extends LinearLayout
         if(resetSynced)
         {
             //reset synced
-            synced = false;
+            setSynced(false);
         }
 
         //set button to play
@@ -524,7 +544,7 @@ public class PlayBar extends LinearLayout
                                             //set to start of next day
                                             progressValue = 0;
                                             setValues(progressValue, value2 + (long)(Calculations.SecondsPerDay * 1000));
-                                            synced = wasSynced;
+                                            setSynced(wasSynced);
                                             break;
                                     }
 
@@ -640,7 +660,7 @@ public class PlayBar extends LinearLayout
                 //update progress
                 playSubProgressPercent = 0;
                 seekBar.setProgress(progressValue);
-                synced = false;
+                setSynced(false);
             }
         });
     }

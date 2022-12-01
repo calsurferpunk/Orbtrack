@@ -406,6 +406,7 @@
     <string name="title_list_getting">Getting List</string>
     <string name="title_list_update">Update List</string>
     <string name="title_list_view">List View</string>
+    <string name="title_live">LIVE</string>
     <string name="title_loading">Loading</string>
     <string name="title_loading_dots">Loading…</string>
     <string name="title_local">Local</string>

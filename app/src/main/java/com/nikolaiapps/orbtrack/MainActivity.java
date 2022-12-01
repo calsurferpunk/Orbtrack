@@ -1223,16 +1223,31 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //if on view lens or map
                         switch(calculateSubPage[page])
                         {
-                            //go back to list
-                            case Globals.SubPageType.Lens:
                             case Globals.SubPageType.Map:
                             case Globals.SubPageType.Globe:
+                                //if able to close settings menu
+                                if(Current.Coordinates.closeSettingsMenu())
+                                {
+                                    closedSettings = true;
+                                    break;
+                                }
+                                //else fall through
+
+                                //go back to list
+                            case Globals.SubPageType.Lens:
                                 desiredSubPage = Globals.SubPageType.List;
                                 break;
                         }
                         //fall through
 
                     default:
+                        //if closed settings
+                        if(closedSettings)
+                        {
+                            //stop
+                            break;
+                        }
+
                         //stop any running task on page
                         stopPageTask();
 

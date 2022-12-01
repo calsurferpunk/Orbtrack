@@ -3583,7 +3583,7 @@ public abstract class Current
             final FloatingActionStateButton showToolbarsButton = (multiSelected ? settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
             final FloatingActionStateButton showZoomButton = settingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
             final FloatingActionStateButton showLatLonButton = settingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
-            final FloatingActionStateButton showFootprintButton = (!useSavedPath || useMultiNoradId ? settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint) : null);
+            final FloatingActionStateButton showFootprintButton = settingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint);
             final FloatingActionStateButton showPathButton = settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path);
             final FloatingActionStateButton iconScaleButton = settingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
             final FloatingActionButton zoomInButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_In_Button);

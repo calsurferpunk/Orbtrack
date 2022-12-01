@@ -884,7 +884,7 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         NotificationManagerCompat notifyManager;
 
         //if a valid location
-        if(lastLocation.geo.latitude != 0 || lastLocation.geo.longitude != 0 || lastLocation.geo.altitudeKm != 0)
+        if(lastLocation.geo.isSet())
         {
             //send last known
             sendLocation(lastLocation);

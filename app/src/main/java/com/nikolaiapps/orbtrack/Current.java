@@ -2350,7 +2350,6 @@ public abstract class Current
         private static CoordinatesFragment.OrbitalBase moonMarker = null;
 
         public static boolean showPaths = false;
-        public static boolean showFootprints = false;
         public static WeakReference<TextView> mapInfoTextReference;
         public static CoordinatesFragment mapView;
         public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
@@ -3241,14 +3240,14 @@ public abstract class Current
                     public void onClick(View view)
                     {
                         //reverse state
-                        showFootprints = !showFootprints;
+                        boolean showFootprints = !Settings.usingMapShowFootprint();
                         showFootprintButton.setChecked(showFootprints);
                         Settings.setMapShowFootprint(context, showFootprints);
                     }
                 });
 
                 //set to opposite then perform click to set it correctly
-                showFootprints = !Settings.getMapShowFootprint(context);
+                Settings.setMapShowFootprint(context, !Settings.usingMapShowFootprint());
                 showFootprintButton.performClick();
             }
         }
@@ -3449,14 +3448,12 @@ public abstract class Current
                                     if(currentMarker != null)
                                     {
                                         Database.SatelliteData currentOrbital = currentMarker.getData();
-                                        boolean currentIsSatellite = (currentOrbital.getSatelliteNum() > 0);
+                                        int currentNoradId = currentOrbital.getSatelliteNum();
+                                        boolean currentIsSatellite = (currentNoradId > 0);
+                                        boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == Current.Coordinates.mapView.getSelectedNoradId());
 
-                                        //if a single playback marker
-                                        if(singlePlaybackMarker)
-                                        {
-                                            //update showing selected footprint
-                                            currentMarker.setShowSelectedFootprint(currentIsSatellite && Settings.usingMapShowSelectedFootprint());
-                                        }
+                                        //update showing selected footprint
+                                        currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
 
                                         //if marker is visible
                                         if(currentMarker.getInfoVisible())
@@ -3478,9 +3475,14 @@ public abstract class Current
                                                 mapView.moveCamera(latitude, longitude);
                                             }
                                         }
+                                        else
+                                        {
+                                            //clear old text
+                                            currentMarker.setText(null);
+                                        }
 
                                         //move marker location and update status
-                                        currentMarker.setShowFootprint(currentIsSatellite && !singlePlaybackMarker && showFootprints);
+                                        currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Settings.usingMapShowFootprint());
                                         currentMarker.moveLocation(latitude, longitude, altitudeKm);
                                         currentMarker.setVisible(true);
                                     }
@@ -3689,6 +3691,7 @@ public abstract class Current
                     mapView.setMarkerShowBackground(Settings.getMapMarkerShowBackground(context));
                     mapView.setMarkerShowShadow(Settings.getMapMarkerShowShadow(context));
                     mapView.setInfoLocation(Settings.getMapMarkerInfoLocation(context));
+                    mapView.setShowTitlesAlways(Settings.getMapShowLabelAlways(context));
 
                     //if current location marker exists
                     if(currentLocationMarker != null)
@@ -3736,7 +3739,7 @@ public abstract class Current
 
                             //show info and selected footprint
                             playbackMarker.setInfoVisible(true);
-                            playbackMarker.setShowSelectedFootprint((firstPoint.noradId > 0) && Settings.usingMapShowSelectedFootprint());
+                            playbackMarker.setShowSelectedFootprint((firstPoint.noradId > 0) && Settings.usingMapFootprintAndSelected());
                         }
                     }
 

@@ -576,7 +576,7 @@ public interface CoordinatesFragment
             if(selectOrbital != null)
             {
                 //show/hide footprint and info window
-                selectOrbital.setShowSelectedFootprint(visible && (noradId > 0) && Settings.usingMapShowSelectedFootprint());
+                selectOrbital.setShowSelectedFootprint(visible && (noradId > 0) && Settings.usingMapFootprintAndSelected());
                 selectOrbital.setInfoVisible(visible);
             }
             //else if none selected and there are markers

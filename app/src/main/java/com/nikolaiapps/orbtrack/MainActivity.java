@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
         Settings.setAllowNumberCommas(this, Settings.getAllowNumberCommas(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
+        Settings.setMapShowFootprint(this, Settings.getMapShowFootprint(this));
         Settings.setMapShowSelectedFootprint(this, Settings.getMapShowSelectedFootprint(this));
         Settings.setUsingCurrentGridLayout(this, Settings.getCurrentGridLayout(this));
         setSaveFileData(null, "", "", -1, -1);
@@ -4263,7 +4264,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(currentMarker != null)
                                 {
                                     //remember if current orbital is selected
-                                    boolean currentOrbitalSelected = (mapViewNoradID == currentNoradId);
+                                    boolean singlePlaybackMarker = (mapViewNoradID == currentNoradId);
+                                    boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == Current.Coordinates.mapView.getSelectedNoradId());
 
                                     //if using multiple orbitals or current is selected
                                     if(multiOrbitals || currentOrbitalSelected)
@@ -4273,19 +4275,21 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         double currentLongitude = currentOrbital.geo.longitude;
                                         double currentAltitudeKm = currentOrbital.geo.altitudeKm;
 
-                                        //if current is selected
-                                        if(currentOrbitalSelected)
-                                        {
-                                            //update showing selected footprint
-                                            currentMarker.setShowSelectedFootprint(currentIsSatellite && Settings.usingMapShowSelectedFootprint());
+                                        //update showing selected footprint
+                                        currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
 
-                                            //if selection changed
-                                            if(currentNoradId != lastNoradId)
+                                        //if current is selected and selection changed
+                                        if(currentOrbitalSelected && currentNoradId != lastNoradId)
+                                        {
+                                            //if a single playback marker
+                                            if(singlePlaybackMarker)
                                             {
-                                                //make sure info is displayed
+                                                //keep selection
                                                 Current.Coordinates.mapView.selectOrbital(currentNoradId);
-                                                currentMarker.setInfoVisible(true);
                                             }
+
+                                            //make sure info is displayed
+                                            currentMarker.setInfoVisible(true);
                                         }
 
                                         //update coordinates display
@@ -4304,7 +4308,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             //update last
                                             lastNoradId = currentNoradId;
                                         }
-                                        currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Current.Coordinates.showFootprints);
+                                        else
+                                        {
+                                            //clear old text
+                                            currentMarker.setText(null);
+                                        }
+
+                                        //move marker location and update status
+                                        currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Settings.usingMapShowFootprint());
                                         currentMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
                                         currentMarker.setVisible(true);
                                     }
@@ -4971,7 +4982,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         ///if want to run, not waiting for location update, and have items
         havePasses = (onCurrent && !usingCombined && Current.PageAdapter.hasItems(Current.PageType.Passes));
         haveCombined = (onCurrent && usingCombined && Current.PageAdapter.hasItems(Current.PageType.Combined));
-        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.latitude != 0 || observer.geo.longitude != 0 || observer.geo.altitudeKm != 0) && (havePasses || haveCombined))
+        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.isSet()) && (havePasses || haveCombined))
         {
             //get items
             passItems = (havePasses ? Current.PageAdapter.getPassItems() : Current.PageAdapter.getCombinedItems());

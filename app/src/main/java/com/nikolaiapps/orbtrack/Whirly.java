@@ -1029,6 +1029,7 @@ class Whirly
         private boolean usingInfo;
         private boolean showingInfo;
         private boolean showingDirection;
+        private boolean firstBearing;
         private boolean lastShowingDirection;
         private boolean lastMoveWithinZoom;
         private final boolean tleIsAccurate;
@@ -1064,6 +1065,7 @@ class Whirly
             showFootprint = showSelectedFootprint = false;
             showBackground = usingBackground;
             showingDirection = usingDirection;
+            firstBearing = true;
             alwaysShowTitle = startWithTitleShown;
             usingInfo = (infoLocation == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
             showingInfo = lastShowingDirection = lastMoveWithinZoom = false;
@@ -1300,10 +1302,12 @@ class Whirly
             double deltaZ;
             double deltaPercent;
             boolean withinZoom;
+            boolean textChanged = (lastInfo == null && text != null) || (lastInfo != null && !lastInfo.equals(text));
+            boolean textCleared = (lastInfo != null && text == null);
             Bitmap infoImage;
 
-            //if showing info
-            if(showingInfo)
+            //if showing info or text was just cleared
+            if(showingInfo || textCleared)
             {
                 //remember last info
                 lastInfo = text;
@@ -1336,14 +1340,18 @@ class Whirly
                     }
                 }
 
-                //recreate board
-                infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
-
-                //set image
-                infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
-                if(orbitalBoard.boardImage != null)
+                //if -text changed and using it- or -text cleared-
+                if((textChanged && usingInfo && showingInfo) || textCleared)
                 {
-                    infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                    //recreate board
+                    infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
+
+                    //set image
+                    infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
+                    if(orbitalBoard.boardImage != null)
+                    {
+                        infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                    }
                 }
             }
         }
@@ -1580,6 +1588,7 @@ class Whirly
             boolean usedBearing = false;
             boolean canUseBearing = (showingDirection && noradId > 0);
             boolean canShowFootprint = (showFootprint && orbitalFootprint != null);
+            boolean showingDirectionChanged = (lastShowingDirection != showingDirection);
             boolean canShowSelectedFootprint = (showSelectedFootprint && orbitalSelectedFootprint != null);
             double currentZoom;
             double bearing;
@@ -1595,7 +1604,7 @@ class Whirly
             common.geo = new Calculations.GeodeticDataType(latitude, longitude, altitudeKm, 0, 0);
 
             //if can use bearing
-            canUseBearing = (canUseBearing && !common.geo.equals(common.lastBearingGeo));
+            canUseBearing = (canUseBearing && common.lastBearingGeo.isSet() && !common.geo.equals(common.lastBearingGeo));
             if(canUseBearing)
             {
                 //get bearing and delta
@@ -1609,8 +1618,8 @@ class Whirly
                 bearing = bearingDelta = orbitalRotationDelta = 0;
             }
 
-            //update bearing if -using and -enough to see or rotation changed-- or -changed showing direction-
-            updateBearing = (showingDirection && (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2)) || (lastShowingDirection != showingDirection);
+            //update bearing if -using and -first bearing, enough to see, or rotation changed-- or -changed showing direction-
+            updateBearing = (showingDirection && ((canUseBearing && firstBearing) || (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2))) || showingDirectionChanged;
             if(updateBearing)
             {
                 //update value
@@ -1705,6 +1714,13 @@ class Whirly
                 //update last rotation and showing direction
                 lastOrbitalRotation = orbitalRotation;
                 lastShowingDirection = showingDirection;
+
+                //if not updating from showing direction changing
+                if(!showingDirectionChanged)
+                {
+                    //got first bearing
+                    firstBearing = false;
+                }
             }
         }
 

@@ -442,7 +442,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             //update displays
                             updateDisplays();
                             onSettingChanged(context, PreferenceName.LocationName, widgetSettings.location.locationName);
-                            onAllowOkay(!isSearch || widgetSettings.location.searchObserver.geo.latitude != 0 || widgetSettings.location.searchObserver.geo.longitude != 0 || widgetSettings.location.searchObserver.geo.altitudeKm != 0);
+                            onAllowOkay(!isSearch || widgetSettings.location.searchObserver.geo.isSet());
                         }
 
                         @Override

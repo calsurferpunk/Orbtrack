@@ -1896,6 +1896,7 @@ public abstract class Settings
     private static boolean allowNumberCommas = true;
     private static boolean usingCurrentGridLayout = false;
     private static boolean mapMarkerInfoBottom = true;
+    private static boolean mapShowFootprint = false;
     private static boolean mapSelectedShowFootprint = false;
 
     //Gets read settings
@@ -2656,6 +2657,14 @@ public abstract class Settings
     public static void setMapShowFootprint(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.MapShowFootprint, show);
+        mapShowFootprint = show;
+    }
+
+    //Returns map showing orbital footprint
+    //note: faster than getting through preferences since called a lot
+    public static boolean usingMapShowFootprint()
+    {
+        return(mapShowFootprint);
     }
 
     //Returns map orbital footprint type
@@ -2683,11 +2692,11 @@ public abstract class Settings
         mapSelectedShowFootprint = show;
     }
 
-    //Returns map showing orbital footprint
-    //note: faster than getting through preferences since called a lot
-    public static boolean usingMapShowSelectedFootprint()
+    //Returns map showing footprint, normal and selected
+    //note: faster than getting through both preferences since called a lot
+    public static boolean usingMapFootprintAndSelected()
     {
-        return(mapSelectedShowFootprint);
+        return(mapShowFootprint && mapSelectedShowFootprint);
     }
 
     //Returns map showing orbital direction
@@ -2712,6 +2721,12 @@ public abstract class Settings
     public static void setMapShowOrbitalDirectionUseLimit(Context context, boolean use)
     {
         setPreferenceBoolean(context, PreferenceName.MapShowOrbitalDirectionUseLimit, use);
+    }
+
+    //Returns map showing labels always
+    public static boolean getMapShowLabelAlways(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapShowLabelsAlways));
     }
 
     //Returns map marker info location

@@ -3543,8 +3543,7 @@ public abstract class Current
 
                     //set time increment and begin
                     playBar.setPlayIndexIncrementUnits(1);
-                    playBar.sync();
-                    playBar.start();
+                    playBar.start(true);
                 }
                 playBar.setVisibility(usingPlaybackItems || Settings.getMapShowToolbars(playBar.getContext()) ? View.VISIBLE : View.GONE);
             }

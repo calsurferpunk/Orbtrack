@@ -472,7 +472,7 @@ public class PlayBar extends LinearLayout
     }
 
     //Starts the play timer
-    private void startPlayTimer()
+    private void startPlayTimer(boolean startSynced)
     {
         //stop any running timer
         stopPlayTimer(false);
@@ -492,8 +492,8 @@ public class PlayBar extends LinearLayout
             resetPlayIncrements();
         }
 
-        //if previously synced
-        if(synced)
+        //if starting synced
+        if(startSynced)
         {
             //sync again
             sync();
@@ -565,7 +565,15 @@ public class PlayBar extends LinearLayout
                     });
                 }
             }, 0, playPeriodMs);
+
+            //update status
+            setSynced(startSynced);
         }
+    }
+    private void startPlayTimer()
+    {
+        //start synced if previously synced
+        startPlayTimer(synced);
     }
 
     //Creates a play button on click listener
@@ -594,10 +602,15 @@ public class PlayBar extends LinearLayout
     }
 
     //Starts playing
-    public void start()
+    public void start(boolean startSynced)
     {
         //manually start timer
-        startPlayTimer();
+        startPlayTimer(startSynced);
+    }
+    public void start()
+    {
+        //start synced if previously synced
+        start(synced);
     }
 
     //Creates an on seek manual click listener

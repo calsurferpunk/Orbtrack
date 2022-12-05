@@ -198,6 +198,10 @@
                     app:icon="@drawable/ic_tablet_white"
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
                     <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_frame_rate"
+                            android:key="MapFrameRate"/>
+
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_icon_scale"
                             android:key="MapMarkerScale"

@@ -29,6 +29,10 @@
         <item quantity="one">Loading File</item>
         <item quantity="other">Loading Files</item>
     </plurals>
+    <plurals name="title_fps">
+        <item quantity="one">%d FPS</item>
+        <item quantity="other">%d FPS</item>
+    </plurals>
     <plurals name="title_locations">
         <item quantity="one">Location</item>
         <item quantity="other">Locations</item>
@@ -350,6 +354,7 @@
     <string name="title_footprint_color">Footprint Color</string>
     <string name="title_footprint_type">Footprint Type</string>
     <string name="title_force_rotate">Force Rotate</string>
+    <string name="title_frame_rate">Frame Rate</string>
     <string name="title_full">Full</string>
     <string name="title_full_moon_start">Full Moon Start</string>
     <string name="title_full_moon_end">Full Moon End</string>

@@ -271,6 +271,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchTextPreference showOrbitalDirectionLimit = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirectionLimit);
                         SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
                         SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
+                        IconListPreference mapFrameRateList = this.findPreference(Settings.PreferenceName.MapFrameRate);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+                        Settings.Options.Rates.initValues(context);
 
                         //setup displays
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
@@ -282,6 +287,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitchText(showOrbitalDirectionLimit);
                         setupSwitchButton(showGridSwitch);
                         setupSlider(iconScaleSlider);
+                        setupList(mapFrameRateList, Settings.Options.Rates.frameRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.Updates:
@@ -437,6 +443,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.ListUpdateDelay:
                             currentValue = Settings.getListUpdateDelay(context);
+                            break;
+
+                        case Settings.PreferenceName.MapFrameRate:
+                            currentValue = Settings.getMapFrameRate(context);
                             break;
 
                         case Settings.PreferenceName.MapUpdateDelay:
@@ -1511,6 +1521,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapFootprintType:
                         case Settings.PreferenceName.MapSelectedFootprintColor:
                         case Settings.PreferenceName.MapMarkerShowShadow:
+                        case Settings.PreferenceName.MapFrameRate:
                         case Settings.PreferenceName.MapUpdateDelay:
                         case Settings.PreferenceName.MapShowStars:
                         case Settings.PreferenceName.MapShowSunlight:

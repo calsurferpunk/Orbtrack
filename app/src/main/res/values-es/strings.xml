@@ -29,6 +29,10 @@
         <item quantity="one">Cargando Archivo</item>
         <item quantity="other">Cargando Archivos</item>
     </plurals>
+    <plurals name="title_fps">
+        <item quantity="one">%d FPS</item>
+        <item quantity="other">%d FPS</item>
+    </plurals>
     <plurals name="title_locations">
         <item quantity="one">Ubicación</item>
         <item quantity="other">Ubicaciones</item>
@@ -350,6 +354,7 @@
     <string name="title_footprint_color">Color Huella</string>
     <string name="title_footprint_type">Tipo Huella</string>
     <string name="title_force_rotate">Forzar Rotación</string>
+    <string name="title_frame_rate">Frecuencia Trama</string>
     <string name="title_full">Lleno</string>
     <string name="title_full_moon_start">Comienza Luna Llena</string>
     <string name="title_full_moon_end">Fin de Luna Llena</string>

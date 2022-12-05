@@ -83,6 +83,7 @@ public abstract class Settings
         static final String MapMarkerShowBackground = "MapMarkerShowBackground";
         static final String MapMarkerShowShadow = "MapMarkerShowShadow";
         static final String MapUpdateDelay = "MapUpdateDelay";
+        static final String MapFrameRate = "MapFrameRate";
         static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowFootprint = "MapShowFootprint";
         static final String MapFootprintType = "MapFootprintType";
@@ -897,6 +898,7 @@ public abstract class Settings
         public static abstract class Rates
         {
             //Update rates
+            public static IconSpinner.Item[] frameRateItems;
             public static IconSpinner.Item[] updateRateItems;
 
             //Initializes values
@@ -905,6 +907,18 @@ public abstract class Settings
                 Resources res = context.getResources();
 
                 //if values are not set
+                if(frameRateItems == null || frameRateItems.length == 0)
+                {
+                    //init frame rate items
+                    frameRateItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_very_slow), res.getQuantityString(R.plurals.title_fps, 10, 10), 10),
+                        new IconSpinner.Item(res.getString(R.string.title_slow), res.getQuantityString(R.plurals.title_fps, 24, 24), 24),
+                        new IconSpinner.Item(res.getString(R.string.title_average), res.getQuantityString(R.plurals.title_fps, 30, 30), 30),
+                        new IconSpinner.Item(res.getString(R.string.title_fast), res.getQuantityString(R.plurals.title_fps, 45, 45), 45),
+                        new IconSpinner.Item(res.getString(R.string.title_very_fast), res.getQuantityString(R.plurals.title_fps, 60, 60), 60)
+                    };
+                }
                 if(updateRateItems == null || updateRateItems.length == 0)
                 {
                     //init rate items
@@ -2027,6 +2041,9 @@ public abstract class Settings
             case PreferenceName.LensUpdateDelay:
                 return(1000);
 
+            case PreferenceName.MapFrameRate:
+                return(60);
+
             case PreferenceName.MapUpdateDelay:
             case PreferenceName.MapShowOrbitalDirectionLimit:
                 return(100);
@@ -2471,6 +2488,12 @@ public abstract class Settings
     public static int getListUpdateDelay(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.ListUpdateDelay));
+    }
+
+    //Gets map frame rate
+    public static int getMapFrameRate(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapFrameRate));
     }
 
     //Gets map update delay

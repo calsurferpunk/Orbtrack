@@ -1874,6 +1874,7 @@ class Whirly
             boolean useOrbitalDirection = Settings.getMapShowOrbitalDirection(activity);
             boolean useOrbitalDirectionLimit = Settings.getMapShowOrbitalDirectionUseLimit(activity);
             Bundle args = this.getArguments();
+            BaseController baseControl = getControl();
 
             if(args == null)
             {
@@ -1936,12 +1937,15 @@ class Whirly
                 }
             }
 
+            //set frame rate
+            baseControl.setTargetFPS(Settings.getMapFrameRate(activity));
+
             //set sensitivity and speed scale
             setSensitivityScale(Settings.getMapSensitivityScale(activity, !forMap));
             setSpeedScale(Settings.getMapSpeedScale(activity, !forMap));
 
             //set if showing orbital direction
-            gpuType = getControl().getRenderGpuType();
+            gpuType = baseControl.getRenderGpuType();
             switch(gpuType)
             {
                 case RenderGPUType.Mali:

@@ -106,7 +106,7 @@ public class Graph extends View
         public void setColor(int color)
         {
             this.color = color;
-            fillPaint.setColor(Color.argb(50, Color.red(color), Color.green(color), Color.blue(color)));
+            fillPaint.setColor(Globals.getColor(50, color));
             borderPaint.setColor(color);
             textPaint.setColor(color);
         }
@@ -276,7 +276,7 @@ public class Graph extends View
         {
             backgroundColorDrawable = (ColorDrawable)backgroundDrawable;
             backgroundColor = backgroundColorDrawable.getColor();
-            backgroundColor = Color.argb(220, Color.red(backgroundColor), Color.green(backgroundColor), Color.blue(backgroundColor));
+            backgroundColor = Globals.getColor(220, backgroundColor);
         }
         else
         {
@@ -1266,8 +1266,8 @@ public class Graph extends View
     {
         titleColor = textsColor;
         lineColor = dataColor;
-        fillColor = Color.argb(100, Color.red(dataColor), Color.green(dataColor), Color.blue(dataColor));
-        gridAxisColor = Color.argb(200, Color.red(dataColor), Color.green(dataColor), Color.blue(dataColor));
+        fillColor = Globals.getColor(100, dataColor);
+        gridAxisColor = Globals.getColor(200, dataColor);
 
         updateSelectedImage();
         this.refresh();

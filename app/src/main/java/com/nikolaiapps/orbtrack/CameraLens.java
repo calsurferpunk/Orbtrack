@@ -559,7 +559,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         textColor = (darkTheme ? Color.argb(160, 255, 255, 255) : Color.argb(160, 0, 0, 0));
         textBgColor = (darkTheme ? Color.argb(50, 0, 0, 0) : Color.argb(50, 255, 255, 255));
         horizonLineColor = Settings.getLensHorizonColor(context);
-        horizonColor = Globals.getColor(horizonLineColor, 70);
+        horizonColor = Globals.getColor(70, horizonLineColor);
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
@@ -787,7 +787,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(currentLookAngle != null || currentTravel != null)
                     {
                         //setup paint
-                        currentPaint.setColor(Globals.getColor(currentColor, (showCalibration && selectedOrbitalIndex == index ? 70 : 255)));
+                        currentPaint.setColor(Globals.getColor((showCalibration && selectedOrbitalIndex == index ? 70 : 255), currentColor));
                         currentPaint.setStrokeWidth(indicatorThickness);
                     }
 

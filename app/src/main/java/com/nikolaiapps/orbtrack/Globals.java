@@ -1595,7 +1595,7 @@ public abstract class Globals
     }
 
     //Gets the color with the given alpha
-    public static int getColor(int color, int alpha)
+    public static int getColor(int alpha, int color)
     {
         return(Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color)));
     }

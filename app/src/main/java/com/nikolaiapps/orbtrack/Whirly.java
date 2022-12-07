@@ -1216,7 +1216,7 @@ class Whirly
             if(drawOutline)
             {
                 //draw border
-                footprintPaint.setColor(Globals.getColor(color, Math.min(alpha, 245) + 10));
+                footprintPaint.setColor(Globals.getColor(Math.min(alpha, 245) + 10, color));
                 footprintPaint.setStyle(Paint.Style.STROKE);
                 footprintPaint.setStrokeWidth(10f);
                 footprintCanvas.drawCircle(800, 800, 795, footprintPaint);
@@ -1443,7 +1443,7 @@ class Whirly
                 else if(showFootprint && orbitalFootprint == null)
                 {
                     orbitalFootprint = new FlatObject(controller);
-                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(common.data.database.pathColor, Settings.getMapFootprintAlpha(currentContext))));
+                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(Settings.getMapFootprintAlpha(currentContext), common.data.database.pathColor)));
                 }
             }
         }

@@ -1443,7 +1443,7 @@ class Whirly
                 else if(showFootprint && orbitalFootprint == null)
                 {
                     orbitalFootprint = new FlatObject(controller);
-                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(common.data.database.pathColor, 60)));
+                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(common.data.database.pathColor, Settings.getMapFootprintAlpha(currentContext))));
                 }
             }
         }

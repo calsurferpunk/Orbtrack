@@ -86,6 +86,7 @@ public abstract class Settings
         static final String MapFrameRate = "MapFrameRate";
         static final String MapShowSunlight = "MapShowSunlight";
         static final String MapShowFootprint = "MapShowFootprint";
+        static final String MapFootprintAlpha = "MapFootprintAlpha";
         static final String MapFootprintType = "MapFootprintType";
         static final String MapShowSelectedFootprint = "MapShowSelectedFootprint";
         static final String MapSelectedFootprintColor = "MapSelectedFootprintColor";
@@ -2148,6 +2149,9 @@ public abstract class Settings
 
             case PreferenceName.MapMarkerScale:
                 return(0.65f);
+
+            case PreferenceName.MapFootprintAlpha:
+                return(0.35f);
         }
 
         if(Globals.startsWith(preferenceName,
@@ -2694,6 +2698,13 @@ public abstract class Settings
     public static int getMapFootprintType(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.MapFootprintType));
+    }
+
+    //Returns map footprint alpha
+    //note: converts from 0 - 1.0 to alpha 0 - 255
+    public static int getMapFootprintAlpha(Context context)
+    {
+        return((int)(getPreferenceFloat(context, PreferenceName.MapFootprintAlpha) * 255));
     }
 
     //Get map selected footprint color

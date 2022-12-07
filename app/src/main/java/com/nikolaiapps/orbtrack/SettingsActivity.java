@@ -238,6 +238,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case ScreenKey.MapViewFootprint:
                         SwitchPreference showFootprint = this.findPreference(Settings.PreferenceName.MapShowFootprint);
                         SwitchButtonPreference showSelectedFootprint = this.findPreference(Settings.PreferenceName.MapShowSelectedFootprint);
+                        SliderPreference footprintAlphaSlider = this.findPreference(Settings.PreferenceName.MapFootprintAlpha);
                         IconListPreference footprintTypeList = this.findPreference(Settings.PreferenceName.MapFootprintType);
 
                         //initialize values
@@ -246,6 +247,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(showFootprint);
                         setupSwitchButton(showSelectedFootprint);
+                        setupSlider(footprintAlphaSlider);
                         setupList(footprintTypeList, Settings.Options.MapView.footprintTypeItems, Settings.Options.MapView.FootprintTypeValues, null, null, null);
                         break;
 
@@ -746,6 +748,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case Settings.PreferenceName.MapMarkerScale:
                         min = Settings.IconScaleMin;
                         max = Settings.IconScaleMax;
+                        break;
+
+                    case Settings.PreferenceName.MapFootprintAlpha:
+                        min = 0;
+                        max = 100;
                         break;
                 }
 
@@ -1519,6 +1526,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
                         case Settings.PreferenceName.MapFootprintType:
+                        case Settings.PreferenceName.MapFootprintAlpha:
                         case Settings.PreferenceName.MapSelectedFootprintColor:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapFrameRate:
@@ -2309,15 +2317,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     @Override
                     public void onColorSelected(int color)
                     {
-                        int alpha = Color.alpha(color);
-
-                        //if selected footprint color with not enough transparency
-                        if(preferenceKey.equals(Settings.PreferenceName.MapSelectedFootprintColor) && alpha > 127)
-                        {
-                            //force more transparency
-                            color = Globals.getColor(color, 127);
-                        }
-
                         writeSettings.putInt(preferenceKey, color).apply();
                         v.setBackgroundColor(color);
                     }

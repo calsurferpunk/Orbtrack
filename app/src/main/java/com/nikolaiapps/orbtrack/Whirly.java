@@ -196,6 +196,7 @@ class Whirly
         private boolean isVisible;
         private final boolean tleIsAccurate;
         private double zValue;
+        private double rotateDegrees;
         private final BaseController controller;
         private Bitmap boardImage;
         private final Billboard board;
@@ -205,21 +206,20 @@ class Whirly
         private ComponentObject boardObject;
         final ArrayList<Billboard> billboardList;
 
-        Board(BaseController boardController, boolean tleIsAc, boolean visible)
+        private Board(BaseController boardController, Bitmap image, double imageRotateDegrees, float markerScale, boolean tleIsAc, boolean visible)
         {
             Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
 
             tleIsAccurate = tleIsAc;
             zValue = 0;
+            rotateDegrees = imageRotateDegrees;
             controller = boardController;
 
             board = new Billboard();
             boardInfo = new BillboardInfo();
-            boardScreen = new ScreenObject();
-            boardImage = null;
+            boardImage = image;
             boardTexture = null;
             boardObject = null;
-
             billboardList = new ArrayList<>(0);
 
             boardInfo.setDrawPriority(DrawPriority.BoardEye);
@@ -229,22 +229,33 @@ class Whirly
             {
                 boardInfo.setShader(eyeShader);
             }
-            board.setScreenObject(boardScreen);
+            if(image != null && imageRotateDegrees != Double.MAX_VALUE && markerScale != Float.MAX_VALUE)
+            {
+                rotateImage(imageRotateDegrees, markerScale);
+            }
+            else
+            {
+                boardScreen = new ScreenObject();
+                board.setScreenObject(boardScreen);
+            }
             board.setSelectable(false);
             billboardList.add(board);
 
             setVisible(visible);
         }
-        Board(BaseController boardController, Board copyFrom, boolean visible)
+        Board(BaseController boardController, boolean tleIsAc, boolean visible)
         {
-            this(boardController, copyFrom.tleIsAccurate, visible);
+            this(boardController, null, Double.MAX_VALUE, Float.MAX_VALUE, tleIsAc, visible);
+        }
+        Board(BaseController boardController, Board copyFrom, float markerScale, boolean visible)
+        {
+            this(boardController, copyFrom.boardImage, copyFrom.rotateDegrees, markerScale, copyFrom.tleIsAccurate, visible);
 
             copyFrom.remove();
-            boardImage = copyFrom.boardImage;
             board.setCenter(copyFrom.board.getCenter());
         }
 
-        private void updateImage(Bitmap image, double offsetX, double offsetY, double baseScale, double markerScale, double rotateDegrees)
+        private void updateImage(Bitmap image, double offsetX, double offsetY, double baseScale, double markerScale)
         {
             float width;
             float height;
@@ -293,16 +304,17 @@ class Whirly
 
         void setImage(Bitmap image, double offsetX, double offsetY, double baseScale, double markerScale)
         {
-            updateImage(image, offsetX, offsetY, baseScale, markerScale, Double.MAX_VALUE);
+            updateImage(image, offsetX, offsetY, baseScale, markerScale);
         }
         void setImage(Bitmap image, float markerScale)
         {
             setImage(image, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale);
         }
 
-        void rotateImage(double rotateDegrees, float markerScale)
+        private void rotateImage(double degrees, float markerScale)
         {
-            updateImage(boardImage, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale, rotateDegrees);
+            rotateDegrees = degrees;
+            updateImage(boardImage, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale);
         }
 
         public boolean getVisible()
@@ -1313,7 +1325,7 @@ class Whirly
                 if((textChanged && usingInfo && showingInfo) || textCleared)
                 {
                     //recreate board
-                    infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
+                    infoBoard = new Board(controller, infoBoard, markerScale, (showingInfo || alwaysShowTitle));
 
                     //set image
                     infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
@@ -1341,7 +1353,7 @@ class Whirly
             {
                 //recreate orbital
                 orbitalImage = orbitalBoard.boardImage.copy(orbitalBoard.boardImage.getConfig(), true);
-                orbitalBoard = new Board(controller, orbitalBoard, true);
+                orbitalBoard = new Board(controller, orbitalBoard, markerScale, true);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
                 //if showing shadow
@@ -1353,7 +1365,7 @@ class Whirly
 
                 //recreate info
                 infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? lastInfo : null));
-                infoBoard = new Board(controller, infoBoard, (showingInfo || alwaysShowTitle));
+                infoBoard = new Board(controller, infoBoard, markerScale, (showingInfo || alwaysShowTitle));
                 infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
             }
         }
@@ -1614,8 +1626,8 @@ class Whirly
                 if(updateBearing && orbitalBoard.boardImage != null)
                 {
                     //rotate image and recreate board
-                    orbitalBoard = new Board(controller, orbitalBoard, true);
-                    orbitalBoard.rotateImage(bearing + 135 + orbitalRotation, markerScale);
+                    orbitalBoard.rotateDegrees = (bearing + 135 + orbitalRotation);
+                    orbitalBoard = new Board(controller, orbitalBoard, markerScale, true);
                     usedBearing = true;
                 }
 

@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
@@ -3705,11 +3706,17 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         public void onClick(View v)
                         {
                             boolean setFullscreen;
-                            ActionBar pageActionBar;
-                            AppCompatActivity activity = MainActivity.this;
+                            ActionBar pageActionBar = null;
+                            FragmentActivity activity = page.getActivity();
 
-                             //get action bar
-                            pageActionBar = activity.getSupportActionBar();
+                            //if can get action bar
+                            if(activity instanceof AppCompatActivity)
+                            {
+                                //get action bar
+                                pageActionBar = ((AppCompatActivity)activity).getSupportActionBar();
+                            }
+
+                             //set action bar
                             if(pageActionBar != null)
                             {
                                 //get fullscreen status

@@ -21,8 +21,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import java.util.Calendar;
 import java.util.TimeZone;
-import java.util.Timer;
-import java.util.TimerTask;
 
 
 public class PlayBar extends LinearLayout
@@ -53,7 +51,7 @@ public class PlayBar extends LinearLayout
     private final Drawable playDrawable;
     private final Drawable liveDrawable;
     private final Drawable syncDrawable;
-    private Timer playTimer;
+    private ThreadTask<Void, Void, Void> playTask;
     private FragmentActivity playActivity;
     private final AppCompatButton cancelButton;
     private final AppCompatButton confirmButton;
@@ -124,6 +122,7 @@ public class PlayBar extends LinearLayout
         setValueTextVisible(false);
         resetPlayIncrements();
         setSynced(false);
+        playTask = null;
         playPeriodMs = 1000;
         playScaleType = ScaleType.Speed;
         playScaleFactor = 1;
@@ -266,7 +265,7 @@ public class PlayBar extends LinearLayout
         updatePlayScaleFactor();
 
         //if timer was running
-        if(playTimer != null)
+        if(playTask != null)
         {
             //restart it
             startPlayTimer();
@@ -301,7 +300,7 @@ public class PlayBar extends LinearLayout
 
         //update status
         synced = isSynced;
-        showSynced = (synced && playTimer != null);
+        showSynced = (synced && playTask != null);
 
         //if button exists
         if(syncButton != null)
@@ -446,12 +445,11 @@ public class PlayBar extends LinearLayout
         boolean stopped = false;
 
         //if timer exists
-        if(playTimer != null)
+        if(playTask != null)
         {
             //stop it
-            playTimer.cancel();
-            playTimer.purge();
-            playTimer = null;
+            playTask.cancel(true);
+            playTask = null;
             stopped = true;
         }
 
@@ -502,69 +500,113 @@ public class PlayBar extends LinearLayout
         //if using activity
         if(playActivity != null)
         {
-            //create and start timer
-            playTimer = new Timer();
-            playTimer.schedule(new TimerTask()
+            Runnable playRunnable;
+            Runnable incrementRunnable;
+
+            //create and start task
+            incrementRunnable = new Runnable()
             {
                 @Override
                 public void run()
                 {
-                    playActivity.runOnUiThread(new Runnable()
+                    int actualMaxValue = seekBar.getMax();
+                    int progressValue = seekBar.getProgress();
+                    int increments;
+                    boolean wasSynced = synced;
+
+                    //add to delay
+                    increments = updatePlayIncrements(true, false);
+
+                    //if there are increments
+                    if(increments > 0)
                     {
-                        @Override
-                        public void run()
+                        //add increments
+                        progressValue += increments;
+
+                        //if after end
+                        if(progressValue > actualMaxValue)
                         {
-                            int actualMaxValue = seekBar.getMax();
-                            int progressValue = seekBar.getProgress();
-                            int increments;
-                            boolean wasSynced = synced;
-
-                            //add to delay
-                            increments = updatePlayIncrements(true, false);
-
-                            //if there are increments
-                            if(increments > 0)
+                            //handle based on scale type
+                            switch(playScaleType)
                             {
-                                //add increments
-                                progressValue += increments;
+                                case ScaleType.Speed:
+                                    //set to end and stop
+                                    progressValue = actualMaxValue;
+                                    stopPlayTimer();
+                                    break;
 
-                                //if after end
-                                if(progressValue > actualMaxValue)
-                                {
-                                    //handle based on scale type
-                                    switch(playScaleType)
-                                    {
-                                        case ScaleType.Speed:
-                                            //set to end and stop
-                                            progressValue = actualMaxValue;
-                                            stopPlayTimer();
-                                            break;
-
-                                        case ScaleType.Time:
-                                            //set to start of next day
-                                            progressValue = 0;
-                                            setValues(progressValue, value2 + (long)(Calculations.SecondsPerDay * 1000));
-                                            setSynced(wasSynced);
-                                            break;
-                                    }
-
-                                    //reset increments
-                                    resetPlayIncrements();
-                                }
-
-                                //update progress
-                                seekBar.setProgress(progressValue);
+                                case ScaleType.Time:
+                                    //set to start of next day
+                                    progressValue = 0;
+                                    setValues(progressValue, value2 + (long)(Calculations.SecondsPerDay * 1000));
+                                    setSynced(wasSynced);
+                                    break;
                             }
-                            //else if listener exists
-                            else if(progressChangedListener != null)
+
+                            //reset increments
+                            resetPlayIncrements();
+                        }
+
+                        //update progress
+                        seekBar.setProgress(progressValue);
+                    }
+                    //else if listener exists
+                    else if(progressChangedListener != null)
+                    {
+                        //update sub progress
+                        progressChangedListener.onProgressChanged(PlayBar.this, progressValue + minValue, playSubProgressPercent, false);
+                    }
+
+                    //sync with calling thread
+                    synchronized(this)
+                    {
+                        //let waiting thread know this has completed
+                        this.notify();
+                    }
+                }
+            };
+            playRunnable = new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    long repeatMs;
+                    long startTimeMs = System.currentTimeMillis();
+
+                    //if task still exists
+                    if(playTask != null)
+                    {
+                        playActivity.runOnUiThread(incrementRunnable);
+                        try
+                        {
+                            //sync with increments
+                            synchronized(incrementRunnable)
                             {
-                                //update sub progress
-                                progressChangedListener.onProgressChanged(PlayBar.this, progressValue + minValue, playSubProgressPercent, false);
+                                //wait for increments to finish
+                                incrementRunnable.wait(2000);
+                            }
+
+                            //wait only as long as needed to match delay
+                            repeatMs = playPeriodMs - (System.currentTimeMillis() - startTimeMs);
+                            if(repeatMs < 1)
+                            {
+                                //make sure task keeps running
+                                repeatMs = 1;
                             }
                         }
-                    });
+                        catch(Exception ex)
+                        {
+                            //stop on error
+                            repeatMs = 0;
+                        }
+
+                        //update delay
+                        playTask.setRepeatMs(repeatMs);
+                    }
                 }
-            }, 0, playPeriodMs);
+            };
+            playTask = new ThreadTask<>(playRunnable, playPeriodMs);
+            playTask.execute();
 
             //update status
             setSynced(startSynced);
@@ -584,7 +626,7 @@ public class PlayBar extends LinearLayout
             @Override
             public void onClick(View view)
             {
-                boolean setRunning = (playTimer == null);
+                boolean setRunning = (playTask == null);
 
                 //if set running
                 if(setRunning)

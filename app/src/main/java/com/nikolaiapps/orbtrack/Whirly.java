@@ -367,10 +367,8 @@ class Whirly
         private boolean isVisible;
         private double flatScale;
         private double zoomScale;
-        private double flatRotationRads;
         private int imageId;
-        private int imageColor;
-        private Sticker flatSticker;
+        private final Sticker flatSticker;
         private final StickerInfo flatInfo;
         private MaplyTexture flatTexture;
         private ComponentObject flatObject;
@@ -395,23 +393,15 @@ class Whirly
             flatInfo.setDrawPriority(DrawPriority.BoardFlat);
             flatList.add(flatSticker);
             flatScale = zoomScale = 1;
-            flatRotationRads = 0;
             imageId = -1;
 
             setVisible(true);
         }
 
-        void setImage(Bitmap image, double rotateDegrees)
+        void setImage(Bitmap image)
         {
-            Bitmap rotatedImage = null;
-
             if(image != null)
             {
-                if(rotateDegrees != 0)
-                {
-                    rotatedImage = Globals.getBitmapRotated(image, rotateDegrees);
-                }
-
                 if(flatTexture != null)
                 {
                     controller.removeTexture(flatTexture, BaseController.ThreadMode.ThreadAny);
@@ -419,33 +409,22 @@ class Whirly
                     flatTexture = null;
                 }
 
-                flatTexture = controller.addTexture(rotatedImage != null ? rotatedImage : image, new BaseController.TextureSettings(), BaseController.ThreadMode.ThreadAny);
+                flatTexture = controller.addTexture(image, new BaseController.TextureSettings(), BaseController.ThreadMode.ThreadAny);
                 flatTextureList.add(flatTexture);
                 flatSticker.setTextures(flatTextureList);
             }
         }
-        void setImage(Context context, int id, int color, double rotateDegrees)
+        void setImage(Context context, int id, int color)
         {
             Bitmap image = (id > 0 ? Globals.getBitmap(context, id, color) : null);
 
             imageId = id;
-            imageColor = color;
-            setImage(image, rotateDegrees);
-        }
-        void setImage(Bitmap image)
-        {
-            imageId = imageColor = 0;
-            setImage(image, 0);
+            setImage(image);
         }
 
-        void rotateImage(Context context, double rotateDegrees)
+        void setRotation(double rotation)
         {
-            setImage(context, imageId, imageColor, rotateDegrees);
-        }
-
-        void setRotation(double rotationRads)
-        {
-            flatRotationRads = rotationRads;
+            flatSticker.setRotation(Math.toRadians(360 - rotation));
         }
 
         void setScale(double flatScaling)
@@ -487,10 +466,7 @@ class Whirly
             latitudeRads = Math.toRadians(latitude);
             longitudeRads = Math.toRadians(longitude);
 
-            //recreate sticker
-            flatSticker = new Sticker();
-            flatSticker.setRotation(flatRotationRads);
-            flatSticker.setTextures(flatTextureList);
+            //update sticker
             flatSticker.setLowerLeft(new Point2d(longitudeRads - halfLongitudeRadsWidth, latitudeRads - halfLatitudeRadsWidth));
             flatSticker.setUpperRight(new Point2d(longitudeRads + halfLongitudeRadsWidth, latitudeRads + halfLatitudeRadsWidth));
 
@@ -515,7 +491,6 @@ class Whirly
         {
             if(flatObject == null)
             {
-                flatList.add(flatSticker);
                 flatObject = controller.addStickers(flatList, flatInfo, BaseController.ThreadMode.ThreadAny);
             }
         }
@@ -525,7 +500,6 @@ class Whirly
             if(flatObject != null)
             {
                 controller.removeObject(flatObject, BaseController.ThreadMode.ThreadAny);
-                flatList.clear();
                 flatObject = null;
             }
         }
@@ -1216,7 +1190,7 @@ class Whirly
             if(drawOutline)
             {
                 //draw border
-                footprintPaint.setColor(Globals.getColor(Math.min(alpha, 245) + 10, color));
+                footprintPaint.setColor(Globals.getColor(Math.min(alpha, 240) + 15, color));
                 footprintPaint.setStyle(Paint.Style.STROKE);
                 footprintPaint.setStrokeWidth(10f);
                 footprintCanvas.drawCircle(800, 800, 795, footprintPaint);
@@ -1287,11 +1261,6 @@ class Whirly
         void setRotation(double rotationRads)
         {
             orbitalRotation = Math.toDegrees(rotationRads);
-
-            if(!forMap && showShadow && orbitalShadow != null)
-            {
-                orbitalShadow.setRotation(rotationRads);
-            }
         }
 
         @Override
@@ -1423,7 +1392,7 @@ class Whirly
                     noradId = common.data.getSatelliteNum();
 
                     orbitalShadow = new FlatObject(controller);
-                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(currentContext, noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0), 0);
+                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(currentContext, noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0));
                 }
             }
         }
@@ -1675,7 +1644,7 @@ class Whirly
                         if(updateBearing && orbitalShadow.imageId > 0)
                         {
                             //rotate image
-                            orbitalShadow.rotateImage(currentContext, bearing + 135);
+                            orbitalShadow.setRotation(bearing + 135);
                             usedBearing = true;
                         }
 

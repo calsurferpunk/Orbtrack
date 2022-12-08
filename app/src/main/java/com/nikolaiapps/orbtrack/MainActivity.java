@@ -127,7 +127,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private long mapTimerDelay;
     private long lensTimerDelay;
     private ThreadTask<Void, Void, Void> timerTask;
-    private Runnable timerRunnable;
     private Calendar backPressTime;
     private Globals.PendingFile pendingSaveFile;
     private CalculateViewsTask currentViewAnglesTask;
@@ -1439,7 +1438,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //set tasks
         timerTask = null;
-        timerRunnable = null;
         timerDelay = listTimerDelay;
         calculateCoordinatesTask = null;
 
@@ -4812,6 +4810,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //cancel it
             timerTask.cancel(true);
+            timerTask = null;
 
             //reset delay
             timerDelay = listTimerDelay;
@@ -4822,6 +4821,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             final Runnable currentRunnable = createCurrentRunnable();
             final Runnable calculateRunnable = createCalculateRunnable();
+            final Runnable timerRunnable;
 
             //create and start task
             timerRunnable = new Runnable()

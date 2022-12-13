@@ -1165,13 +1165,13 @@ public class LocationService extends Service implements GoogleApiClient.Connecti
         if(currentLocation != null)
         {
             //get last received location
-            lastLocation = Calculations.loadObserver(currentLocation.getLatitude(), currentLocation.getLongitude(), currentLocation.getAltitude() / 1000f, zoneId);
+            lastLocation = new Calculations.ObserverType(zoneId, currentLocation.getLatitude(), currentLocation.getLongitude(), currentLocation.getAltitude() / 1000f);
         }
         else
         {
             //try to get last saved location
             lastLocationSaved = Settings.getLastLocation(LocationService.this);
-            lastLocation = Calculations.loadObserver(lastLocationSaved.getLatitude(), lastLocationSaved.getLongitude(), lastLocationSaved.getAltitude() / 1000f, zoneId);
+            lastLocation = new Calculations.ObserverType(zoneId, lastLocationSaved.getLatitude(), lastLocationSaved.getLongitude(), lastLocationSaved.getAltitude() / 1000f);
         }
 
         //return last location

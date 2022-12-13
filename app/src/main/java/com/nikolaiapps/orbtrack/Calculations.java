@@ -762,6 +762,10 @@ public abstract class Calculations
             timeZone = (zoneId != null ? TimeZone.getTimeZone(zoneId) : TimeZone.getDefault());
             geo = new GeodeticDataType(g);
         }
+        ObserverType(String zoneId, double latitude, double longitude, double altitudeKm)
+        {
+            this(zoneId, new GeodeticDataType(latitude, longitude, altitudeKm, 0, 0));
+        }
 
         @Override
         public int describeContents()
@@ -1629,17 +1633,6 @@ public abstract class Calculations
             default:
                 return(Calculations.loadSatellite(currentSat));
         }
-    }
-
-    //Loads an observer with the given geodetic location
-    public static ObserverType loadObserver(double latitude, double longitude, double altitudeKm, String zoneId)
-    {
-        ObserverType observer = new ObserverType();
-        observer.geo.latitude = latitude;
-        observer.geo.longitude = longitude;
-        observer.geo.altitudeKm = altitudeKm;
-        observer.timeZone = (zoneId != null ? TimeZone.getTimeZone(zoneId) : TimeZone.getDefault());
-        return(observer);
     }
 
     //Sets the eci position for the given data

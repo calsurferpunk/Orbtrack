@@ -1758,7 +1758,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         //update location source and observer
         locationSource = selectedLocation.locationType;
-        observer = Calculations.loadObserver(selectedLocation.latitude, selectedLocation.longitude, selectedLocation.altitudeKM, selectedLocation.zoneId);
+        observer = new ObserverType(selectedLocation.zoneId, selectedLocation.latitude, selectedLocation.longitude, selectedLocation.altitudeKM);
 
         //if using current location
         if(locationSource == Database.LocationType.Current)

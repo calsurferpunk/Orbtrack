@@ -32,7 +32,7 @@
                     android:title="@string/title_numbers_have_commas"
                     android:key="AllowNumberCommas"/>
 
-                <PreferenceCategory android:title="@string/title_icons">
+                <PreferenceCategory android:title="@string/title_icons" android:key="IconsCategory">
                     <com.nikolaiapps.orbtrack.IconListPreference
                         app:titleText="@string/title_location"
                         android:key="MapMarkerLocationIcon"

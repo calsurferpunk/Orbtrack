@@ -129,6 +129,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         IconListPreference locationIconList = this.findPreference(Settings.PreferenceName.MapMarkerLocationIcon);
                         IconListPreference satelliteIconList = this.findPreference(Settings.PreferenceName.SatelliteIcon);
                         IconListPreference orbitalIconsList = this.findPreference(Settings.PreferenceName.OrbitalIcons);
+                        PreferenceCategory iconsCategory = this.findPreference("IconsCategory");
 
                         //always reset location icon items to update tint color
                         Settings.Options.Display.locationIconItems = null;
@@ -144,6 +145,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupList(locationIconList, Settings.Options.Display.locationIconItems, null, null, null, useLocationTintSwitch);
                         setupList(satelliteIconList, Settings.Options.Display.satelliteIconItems, null, null, null, null);
                         setupList(orbitalIconsList, Settings.Options.Display.orbitalIconsItems, null, null, null, null);
+                        setupCategory(iconsCategory);
                         break;
 
                     case ScreenKey.LensView:
@@ -368,6 +370,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case Settings.PreferenceName.InformationSource:
                 case Settings.PreferenceName.TranslateInformation:
                 case Settings.PreferenceName.ShareTranslations:
+                case Settings.PreferenceName.SatelliteIcon:
+                case Settings.PreferenceName.OrbitalIcons:
+                case Settings.PreferenceName.MapMarkerLocationIcon:
+                case Settings.PreferenceName.MapMarkerLocationIconUseTint:
                     return(!showSetup);
 
                 default:
@@ -779,60 +785,69 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final boolean allowOpacity;
                 final boolean isSelectedFootprint = (preferenceKey.equals(Settings.PreferenceName.MapShowSelectedFootprint));
 
-                //if lens horizon or show grid toggle
-                switch(preferenceKey)
+                //if preference should be visible
+                if(preferenceVisible(preferenceKey))
                 {
-                    case Settings.PreferenceName.LensUseHorizon:
-                    case Settings.PreferenceName.MapShowGrid:
-                    case Settings.PreferenceName.MapShowSelectedFootprint:
-                    case Settings.PreferenceName.MapMarkerLocationIconUseTint:
-                        BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
-                        float[] size = Globals.dpsToPixels(context, 60, 40);
-                        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
+                    //if lens horizon or show grid toggle
+                    switch(preferenceKey)
+                    {
+                        case Settings.PreferenceName.LensUseHorizon:
+                        case Settings.PreferenceName.MapShowGrid:
+                        case Settings.PreferenceName.MapShowSelectedFootprint:
+                        case Settings.PreferenceName.MapMarkerLocationIconUseTint:
+                            BorderButton switchButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null);
+                            float[] size = Globals.dpsToPixels(context, 60, 40);
+                            ViewGroup.LayoutParams params = new ViewGroup.LayoutParams((int)size[0], (int)size[1]);
 
-                        //get specific settings
-                        if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
-                        {
-                            titleId = R.string.title_horizon_color;
-                            buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
-                            allowOpacity = false;
-                        }
-                        else if(isSelectedFootprint)
-                        {
-                            titleId = R.string.title_footprint_color;
-                            buttonPreferenceKey = Settings.PreferenceName.MapSelectedFootprintColor;
-                            allowOpacity = true;
-                        }
-                        else if(preferenceKey.equals(Settings.PreferenceName.MapMarkerLocationIconUseTint))
-                        {
-                            titleId = R.string.title_tint_color;
-                            buttonPreferenceKey = Settings.PreferenceName.MapMarkerLocationIconTintColor;
-                            allowOpacity = false;
-                        }
-                        else
-                        {
-                            titleId = R.string.title_grid_color;
-                            buttonPreferenceKey = Settings.PreferenceName.MapGridColor;
-                            allowOpacity = true;
-                        }
-
-                        //setup button
-                        switchButton.setBackgroundColor(Settings.getPreferenceInt(context, buttonPreferenceKey));
-                        switchButton.setLayoutParams(params);
-                        preference.setButton(switchButton);
-                        preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, allowOpacity, writeSettings));
-                        if(isSelectedFootprint)
-                        {
-                            preference.setCheckedChangedListener(new SwitchButtonPreference.OnCheckedChangedListener()
+                            //get specific settings
+                            if(preferenceKey.equals(Settings.PreferenceName.LensUseHorizon))
                             {
-                                @Override
-                                public void onCheckedChanged(String preferenceName, boolean isChecked)
+                                titleId = R.string.title_horizon_color;
+                                buttonPreferenceKey = Settings.PreferenceName.LensHorizonColor;
+                                allowOpacity = false;
+                            }
+                            else if(isSelectedFootprint)
+                            {
+                                titleId = R.string.title_footprint_color;
+                                buttonPreferenceKey = Settings.PreferenceName.MapSelectedFootprintColor;
+                                allowOpacity = true;
+                            }
+                            else if(preferenceKey.equals(Settings.PreferenceName.MapMarkerLocationIconUseTint))
+                            {
+                                titleId = R.string.title_tint_color;
+                                buttonPreferenceKey = Settings.PreferenceName.MapMarkerLocationIconTintColor;
+                                allowOpacity = false;
+                            }
+                            else
+                            {
+                                titleId = R.string.title_grid_color;
+                                buttonPreferenceKey = Settings.PreferenceName.MapGridColor;
+                                allowOpacity = true;
+                            }
+
+                            //setup button
+                            switchButton.setBackgroundColor(Settings.getPreferenceInt(context, buttonPreferenceKey));
+                            switchButton.setLayoutParams(params);
+                            preference.setButton(switchButton);
+                            preference.setButtonOnClickListener(createOnColorButtonClickListener(context, buttonPreferenceKey, titleId, allowOpacity, writeSettings));
+                            if(isSelectedFootprint)
+                            {
+                                preference.setCheckedChangedListener(new SwitchButtonPreference.OnCheckedChangedListener()
                                 {
-                                    Settings.setMapShowSelectedFootprint(context, isChecked);
-                                }
-                            });
-                        }
-                        break;
+                                    @Override
+                                    public void onCheckedChanged(String preferenceName, boolean isChecked)
+                                    {
+                                        Settings.setMapShowSelectedFootprint(context, isChecked);
+                                    }
+                                });
+                            }
+                            break;
+                    }
+                }
+                else
+                {
+                    //hide preference
+                    preference.setVisible(false);
                 }
             }
         }

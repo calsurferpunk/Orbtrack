@@ -1483,7 +1483,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults)
     {
         boolean granted = (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED);
-        boolean retrying = (requestCode == Globals.PermissionType.LocationRetry);
+        boolean retrying = (requestCode == Globals.PermissionType.LocationRetry || requestCode == Globals.PermissionType.PostNotificationsRetry);
 
         //handle response
         switch(requestCode)
@@ -1506,6 +1506,27 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                 {
                     //show denied
                     LocationService.showDenied(WidgetBaseSetupActivity.this, parentView);
+                }
+                break;
+
+            case Globals.PermissionType.PostNotifications:
+            case Globals.PermissionType.PostNotificationsRetry:
+                //if granted
+                if(granted)
+                {
+                    //perform ok button click again
+                    okButton.callOnClick();
+                }
+                //else if not retrying
+                else if(!retrying)
+                {
+                    //ask permission again
+                    Globals.askPostNotificationsPermission(this, true);
+                }
+                else
+                {
+                    //show denied
+                    Globals.showDenied(parentView, this.getString(R.string.desc_permission_post_notifications_deny));
                 }
                 break;
         }
@@ -1559,6 +1580,23 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             {
                                 //show denied
                                 LocationService.showDenied(context, parentView);
+                            }
+
+                            //not done yet
+                            done = false;
+                        }
+                        else if(widgetSettings.location.source == Database.LocationType.Current && widgetSettings.location.useFollow && !Globals.havePostNotificationsPermission(context))
+                        {
+                            //if can ask for permission
+                            if(Globals.canAskPostNotificationsPermission)
+                            {
+                                //get permission
+                                Globals.askPostNotificationsPermission(context, false);
+                            }
+                            else
+                            {
+                                //show denied
+                                Globals.showDenied(parentView, context.getString(R.string.desc_permission_post_notifications_deny));
                             }
 
                             //not done yet

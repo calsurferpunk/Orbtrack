@@ -147,6 +147,7 @@
     <string name="desc_permission_location">At least rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
     <string name="desc_permission_location_deny">Location permission denied</string>
     <string name="desc_permission_post_notifications">Need permission to show notifications of background updates and desired user events.</string>
+    <string name="desc_permission_post_notifications_deny">Notifications permission denied</string>
     <string name="desc_permission_read_external_storage">Need access to external storage to read files.</string>
     <string name="desc_permission_read_external_storage_deny">Read from external storage denied</string>
     <string name="desc_permission_set_exact_alarm">Need access to set exact alarms, otherwise they may appear much later.</string>

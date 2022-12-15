@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
@@ -2033,13 +2032,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
 
             @Override
-            protected void onRestart(Context context, boolean close, boolean checkClose)
+            protected void onRestart(Context context, boolean checkClose)
             {
                 //if using current location
                 if(locationSource == Database.LocationType.Current)
                 {
                     //continue with restart
-                    super.onRestart(context, close, checkClose);
+                    super.onRestart(context, checkClose);
                 }
             }
 
@@ -2231,7 +2230,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         {
                             //show status and update location
                             Globals.showSnackBar(settingsLayout, context.getResources().getString(R.string.title_location_getting));
-                            LocationService.getCurrentLocation(context, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
+                            LocationService.getCurrentLocation(context, false, LocationService.PowerTypes.HighPowerThenBalanced);
                         }
                     }
                 }
@@ -2893,7 +2892,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case AddSelectListAdapter.LocationSourceType.Current:
                         //show dialog and wait for update
                         showAddCurrentLocationDialog(true);
-                        LocationService.getCurrentLocation(SettingsActivity.this, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
+                        LocationService.getCurrentLocation(SettingsActivity.this, false, LocationService.PowerTypes.HighPowerThenBalanced);
                         break;
 
                     case AddSelectListAdapter.LocationSourceType.Custom:

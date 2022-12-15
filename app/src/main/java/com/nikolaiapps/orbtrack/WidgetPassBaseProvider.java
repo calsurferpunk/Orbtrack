@@ -106,7 +106,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
                     case ACTION_UPDATE_LOCATION_ALARM:
                         //update location
-                        LocationService.getCurrentLocation(context, true, false, LocationService.PowerTypes.HighPowerThenBalanced);
+                        LocationService.getCurrentLocation(context, true, LocationService.PowerTypes.HighPowerThenBalanced);
                         break;
 
                     case ACTION_UPDATE_PASS_ALARM:
@@ -264,11 +264,11 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //get deleted widgets to exclude
             excludeIds = Globals.getList(widgetIds);
 
-            //if had following but don't anymore
-            if(hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).size() == 0)
+            //if location receiver exists and had following but don't anymore
+            if(locationReceiver != null && hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).size() == 0)
             {
                 //restart without being in foreground
-                LocationService.restart(context, false, false);
+                locationReceiver.onRestart(context, true);
             }
 
             //if had intervals but don't anymore
@@ -1123,7 +1123,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             locationReceiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | (runForeground ? LocationService.FLAG_START_RUN_FOREGROUND : LocationService.FLAG_START_NONE))
             {
                 @Override
-                protected void onRestart(Context context, boolean close, boolean checkClose)
+                protected void onRestart(Context context, boolean checkClose)
                 {
                     int index;
                     boolean usingFollow = false;
@@ -1139,18 +1139,11 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                         }
                     }
 
-                    //if forcing close and not using follow
-                    if(close && !usingFollow)
-                    {
-                        //remove starting in foreground
-                        startFlags &= ~LocationService.FLAG_START_RUN_FOREGROUND;
-                    }
-
                     //if any are using follow
                     if(usingFollow)
                     {
-                        //send restart
-                        super.onRestart(context, false, false);
+                        //continue restart
+                        super.onRestart(context, false);
                     }
                 }
 
@@ -1212,7 +1205,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             {
                 //get location
                 createLocationReceiver(context, WidgetBaseSetupActivity.getLocationFollow(context, widgetId), true);
-                LocationService.getCurrentLocation(context, true, WidgetBaseSetupActivity.getLocationFollow(context, widgetId), LocationService.PowerTypes.HighPowerThenBalanced);
+                LocationService.getCurrentLocation(context, true, LocationService.PowerTypes.HighPowerThenBalanced);
             }
             else
             {

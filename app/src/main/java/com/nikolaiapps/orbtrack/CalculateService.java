@@ -402,7 +402,7 @@ public class CalculateService extends NotifyService
 
             //update with current or existing locations
             firstUpdate = true;
-            updateNotifyLocations(context, null, (location.locationType == Database.LocationType.Current), true);
+            updateNotifyLocations(context, null, (location.locationType == Database.LocationType.Current), true, true);
         }
 
         @Override
@@ -866,13 +866,13 @@ public class CalculateService extends NotifyService
         }
 
         //Create location receiver
-        private static void createLocationReceiver(Context context, boolean use)
+        private static void createLocationReceiver(Context context, boolean use, boolean runForeground)
         {
             //if using and not set
             if(use && locationReceiver == null)
             {
                 //listen for location updates
-                locationReceiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | LocationService.FLAG_START_RUN_FOREGROUND)
+                locationReceiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | (runForeground ? LocationService.FLAG_START_RUN_FOREGROUND : LocationService.FLAG_START_NONE))
                 {
                     private boolean firstLocation = true;
                     private Calculations.ObserverType observer = null;
@@ -907,10 +907,10 @@ public class CalculateService extends NotifyService
         }
 
         //Update notify locations
-        public static void updateNotifyLocations(Context context, Calculations.ObserverType location, boolean useCurrentLocation, boolean usePastNotify)
+        public static void updateNotifyLocations(Context context, Calculations.ObserverType location, boolean useCurrentLocation, boolean usePastNotify, boolean runForeground)
         {
             //start/stop receiver
-            createLocationReceiver(context, useCurrentLocation);
+            createLocationReceiver(context, useCurrentLocation, runForeground);
 
             //update with known location
             updateNotify(context, location, usePastNotify);

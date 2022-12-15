@@ -19,7 +19,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
@@ -487,12 +486,11 @@ public class MapLocationInputActivity extends BaseInputActivity
                 @Override
                 protected View getParentView()
                 {
-                    //usually needs to be overridden
                     return(locationLayout);
                 }
 
                 @Override
-                protected void onConnected(Context context, GoogleApiClient locationClient, PlacesClient placesClient)
+                protected void onConnected(Context context, PlacesClient placesClient)
                 {
                     //setup name autocompletion
                     LocationService.setAutoCompletePlaces(nameText, context, placesClient, new LocationService.OnGotCoordinatesListener()

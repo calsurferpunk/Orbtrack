@@ -9,7 +9,6 @@ import android.content.IntentFilter;
 import android.content.res.Resources;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import android.view.View;
-import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.TimeZone;
 
@@ -44,21 +43,14 @@ public abstract class LocationReceiver extends BroadcastReceiver
     }
 
     //On connected
-    protected void onConnected(Context context, GoogleApiClient locationClient, PlacesClient placesClient)
+    protected void onConnected(Context context, PlacesClient placesClient)
     {
         //needs to be overridden
     }
 
     //On start location service
-    protected void onRestart(Context context, boolean close, boolean checkClose)
+    protected void onRestart(Context context, boolean checkClose)
     {
-        //if forcing close
-        if(close)
-        {
-            //remove starting in foreground
-            startFlags &= ~LocationService.FLAG_START_RUN_FOREGROUND;
-        }
-
         //if were starting with high power once
         if((startFlags & LocationService.FLAG_START_HIGH_POWER_ONCE) == LocationService.FLAG_START_HIGH_POWER_ONCE)
         {
@@ -126,8 +118,11 @@ public abstract class LocationReceiver extends BroadcastReceiver
 
                         default:
                         case AddressUpdateService.RESULT_FAIL:
-                            //show and send result
-                            Globals.showSnackBar(getParentView(), res.getString(isSuccess ? R.string.text_location_success : R.string.text_location_failed), !isSuccess);
+                            //show any error and send result
+                            if(!isSuccess)
+                            {
+                                Globals.showSnackBar(getParentView(), res.getString(R.string.text_location_failed), true);
+                            }
                             onSaveLocation(isSuccess);
                             break;
                     }
@@ -140,7 +135,6 @@ public abstract class LocationReceiver extends BroadcastReceiver
     public void onReceive(Context context, Intent intent)
     {
         byte messageType = intent.getByteExtra(LocationService.ParamTypes.MessageType, Byte.MAX_VALUE);
-        boolean close = intent.getBooleanExtra(LocationService.ParamTypes.ForceClose, false);
         boolean checkClose = intent.getBooleanExtra(LocationService.ParamTypes.CheckClose, false);
         Calculations.ObserverType observer = intent.getParcelableExtra(LocationService.ParamTypes.Observer);
         Activity activity;
@@ -180,12 +174,12 @@ public abstract class LocationReceiver extends BroadcastReceiver
 
             case LocationService.MessageTypes.Connected:
                 //call on connected
-                onConnected(context, LocationService.getGoogleLocationApiClient(), LocationService.getGooglePlacesClient());
+                onConnected(context, LocationService.getGooglePlacesClient());
                 break;
 
             case LocationService.MessageTypes.NeedRestart:
                 //call on restart
-                onRestart(context, close, checkClose);
+                onRestart(context, checkClose);
                 break;
 
             case LocationService.MessageTypes.Location:

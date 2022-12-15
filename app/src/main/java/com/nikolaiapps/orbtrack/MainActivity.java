@@ -1749,7 +1749,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         if(updateNotify)
         {
             //update notifications
-            CalculateService.NotifyReceiver.updateNotifyLocations(this, observer, usingCurrent, false);
+            CalculateService.NotifyReceiver.updateNotifyLocations(this, observer, usingCurrent, false, false);
         }
     }
 
@@ -1772,7 +1772,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     Globals.showSnackBar(mainDrawerLayout, this.getResources().getString(R.string.title_location_getting));
                 }
-                LocationService.getCurrentLocation(this, false, true, LocationService.PowerTypes.HighPowerThenBalanced);
+                LocationService.getCurrentLocation(this, false, LocationService.PowerTypes.HighPowerThenBalanced);
             }
             else
             {
@@ -2680,13 +2680,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             }
 
             @Override
-            protected void onRestart(Context context, boolean close, boolean checkClose)
+            protected void onRestart(Context context, boolean checkClose)
             {
                 //if using current location
                 if(locationSource == Database.LocationType.Current)
                 {
                     //continue with restart
-                    super.onRestart(context, close, checkClose);
+                    super.onRestart(context, checkClose);
                 }
             }
 

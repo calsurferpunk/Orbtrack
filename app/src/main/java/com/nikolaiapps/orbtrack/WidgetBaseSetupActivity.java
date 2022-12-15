@@ -36,7 +36,6 @@ import android.widget.CompoundButton;
 import android.widget.RadioGroup;
 import android.widget.TableRow;
 import android.widget.TextView;
-import com.google.android.gms.common.api.GoogleApiClient;
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -539,7 +538,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         }
 
                         @Override
-                        protected void onConnected(final Context context, GoogleApiClient locationClient, PlacesClient placesClient)
+                        protected void onConnected(final Context context, PlacesClient placesClient)
                         {
                             //setup name autocompletion
                             LocationService.setAutoCompletePlaces(searchText, context, placesClient, new LocationService.OnGotCoordinatesListener()

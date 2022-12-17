@@ -490,6 +490,7 @@ public class LocationService extends Service implements LocationListener
 
     //Status
     private static byte usePowerType = PowerTypes.Balanced;
+    private static byte runningPowerType = PowerTypes.Balanced;
     private static boolean pendingLowPower = false;
     private static boolean useLegacy = false;
     private static boolean testingAPI = false;
@@ -750,10 +751,22 @@ public class LocationService extends Service implements LocationListener
     {
         int priority = (usePowerType == PowerTypes.HighPower || usePowerType == PowerTypes.HighPowerThenBalanced ? Priority.PRIORITY_HIGH_ACCURACY : Priority.PRIORITY_BALANCED_POWER_ACCURACY);
 
-        //if not using legacy and location requester does not exist yet
-        if(!useLegacy && locationRequester == null)
+        //if not using legacy
+        if(!useLegacy)
         {
-            locationRequester = new LocationRequest.Builder(priority, LOCATION_UPDATE_RATE_MS).setMinUpdateIntervalMillis(LOCATION_UPDATE_RATE_MS / 4).build();
+            //if running PowerTypes.Balanced and need a higher PowerTypes
+            if(runningPowerType == PowerTypes.Balanced && (usePowerType == PowerTypes.HighPower || usePowerType == PowerTypes.HighPowerThenBalanced))
+            {
+                //stop current updates
+                stopLocationUpdates();
+            }
+
+            //if requester does not exist yet
+            if(locationRequester == null)
+            {
+                //create requester
+                locationRequester = new LocationRequest.Builder(priority, LOCATION_UPDATE_RATE_MS).setMinUpdateIntervalMillis(LOCATION_UPDATE_RATE_MS / 4).build();
+            }
         }
     }
 
@@ -885,12 +898,14 @@ public class LocationService extends Service implements LocationListener
         //if have permission to get location
         if(Globals.haveLocationPermission(this))
         {
+            //create location requester
+            createLocationRequester();
+
             //if not already getting updates
             if(!startedLocationUpdates)
             {
                 //start getting updates
                 startedLocationUpdates = true;
-                createLocationRequester();
                 try
                 {
                     //create listener
@@ -928,6 +943,9 @@ public class LocationService extends Service implements LocationListener
                             //start timeout timer
                             setTimeoutTimer(true);
                         }
+
+                        //update status
+                        runningPowerType = usePowerType;
                     }
                 }
                 catch(SecurityException ex)

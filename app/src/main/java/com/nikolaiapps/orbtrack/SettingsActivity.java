@@ -2032,13 +2032,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
 
             @Override
-            protected void onRestart(Context context, boolean checkClose)
+            protected void onRestart(Context context)
             {
                 //if using current location
                 if(locationSource == Database.LocationType.Current)
                 {
                     //continue with restart
-                    super.onRestart(context, checkClose);
+                    super.onRestart(context);
                 }
             }
 

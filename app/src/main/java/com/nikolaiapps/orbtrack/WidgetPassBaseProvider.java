@@ -267,8 +267,8 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //if location receiver exists and had following but don't anymore
             if(locationReceiver != null && hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).size() == 0)
             {
-                //restart without being in foreground
-                locationReceiver.onRestart(context, true);
+                //restart with changes
+                locationReceiver.onRestart(context);
             }
 
             //if had intervals but don't anymore
@@ -1123,27 +1123,23 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             locationReceiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | (runForeground ? LocationService.FLAG_START_RUN_FOREGROUND : LocationService.FLAG_START_NONE))
             {
                 @Override
-                protected void onRestart(Context context, boolean checkClose)
+                protected void onRestart(Context context)
                 {
                     int index;
                     boolean usingFollow = false;
 
-                    //if checking to close
-                    if(checkClose)
+                    //go through each widget class while none found using follow
+                    for(index = 0; index < widgetClasses.length && !usingFollow; index++)
                     {
-                        //go through each widget class while none found using follow
-                        for(index = 0; index < widgetClasses.length && !usingFollow; index++)
-                        {
-                            //check if any widgets of this class are using follow
-                            usingFollow = (getWidgetIdList(context, widgetClasses[index], null, FLAG_WIDGET_FOLLOW).size() > 0);
-                        }
+                        //check if any widgets of this class are using follow
+                        usingFollow = (getWidgetIdList(context, widgetClasses[index], null, FLAG_WIDGET_FOLLOW).size() > 0);
                     }
 
                     //if any are using follow
                     if(usingFollow)
                     {
                         //continue restart
-                        super.onRestart(context, false);
+                        super.onRestart(context);
                     }
                 }
 
@@ -1181,6 +1177,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         //else if not using and is set
         else if(!use && locationReceiver != null)
         {
+            //restart now that not using
+            locationReceiver.onRestart(context);
+
             //stop listening
             locationReceiver.unregister(context);
             locationReceiver = null;

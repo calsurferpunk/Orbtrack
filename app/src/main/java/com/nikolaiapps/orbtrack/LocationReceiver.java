@@ -49,7 +49,7 @@ public abstract class LocationReceiver extends BroadcastReceiver
     }
 
     //On start location service
-    protected void onRestart(Context context, boolean checkClose)
+    protected void onRestart(Context context)
     {
         //if were starting with high power once
         if((startFlags & LocationService.FLAG_START_HIGH_POWER_ONCE) == LocationService.FLAG_START_HIGH_POWER_ONCE)
@@ -135,7 +135,6 @@ public abstract class LocationReceiver extends BroadcastReceiver
     public void onReceive(Context context, Intent intent)
     {
         byte messageType = intent.getByteExtra(LocationService.ParamTypes.MessageType, Byte.MAX_VALUE);
-        boolean checkClose = intent.getBooleanExtra(LocationService.ParamTypes.CheckClose, false);
         Calculations.ObserverType observer = intent.getParcelableExtra(LocationService.ParamTypes.Observer);
         Activity activity;
 
@@ -179,7 +178,7 @@ public abstract class LocationReceiver extends BroadcastReceiver
 
             case LocationService.MessageTypes.NeedRestart:
                 //call on restart
-                onRestart(context, checkClose);
+                onRestart(context);
                 break;
 
             case LocationService.MessageTypes.Location:

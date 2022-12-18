@@ -67,7 +67,6 @@ public class LocationService extends Service implements LocationListener
         static final String GetLocation = "getLocation";
         static final String RunForeground = "runForeground";
         static final String PowerType = "powerType";
-        static final String CheckClose = "checkClose";
         static final String FromUser = "fromUser";
     }
 
@@ -470,7 +469,7 @@ public class LocationService extends Service implements LocationListener
             }
             else
             {
-                //restart without being in foreground
+                //restart from user
                 restart(context, true);
             }
 
@@ -495,6 +494,7 @@ public class LocationService extends Service implements LocationListener
     private static boolean useLegacy = false;
     private static boolean testingAPI = false;
     private static boolean needTestAPI = true;
+    private static boolean useForeground = false;
     private static boolean useLocationUpdates = false;
     private static boolean startedLocationUpdates = false;
     private static String legacyProvider = null;
@@ -568,6 +568,9 @@ public class LocationService extends Service implements LocationListener
                 {
                     Intent dismissIntent;
 
+                    //update status
+                    useForeground = true;
+
                     //create notification channel
                     Globals.createNotifyChannel(this, notifyChannelId);
 
@@ -580,8 +583,9 @@ public class LocationService extends Service implements LocationListener
                     dismissIntent.setAction(NotifyReceiver.DismissAction);
                     notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_stop), Globals.getPendingBroadcastIntent(this, NotifyReceiver.StopID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                 }
-                else
+                if(!useForeground)
                 {
+                    //close notification
                     notifyManager.cancel(Globals.ChannelIds.Location);
                 }
                 Globals.startForeground(this, Globals.ChannelIds.Location, notifyBuilder, runForeground);
@@ -600,7 +604,11 @@ public class LocationService extends Service implements LocationListener
             {
                 //stop and send need restart
                 stopSelf();
-                sendNeedRestart(fromUser);
+                useForeground = false;
+                if(!fromUser)
+                {
+                    sendNeedRestart();
+                }
             }
         }
 
@@ -659,14 +667,11 @@ public class LocationService extends Service implements LocationListener
     }
 
     //Sends a need restart
-    private void sendNeedRestart(boolean checkClose)
+    private void sendNeedRestart()
     {
-        Intent restartIntent = getBroadcastIntent(MessageTypes.NeedRestart);
-        restartIntent.putExtra(ParamTypes.CheckClose, checkClose);
-
         if(localBroadcast != null)
         {
-            localBroadcast.sendBroadcast(restartIntent);
+            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedRestart));
         }
     }
 
@@ -689,7 +694,7 @@ public class LocationService extends Service implements LocationListener
             {
                 //stop and send need restart
                 stopSelf();
-                sendNeedRestart(true);
+                sendNeedRestart();
             }
         }
     }

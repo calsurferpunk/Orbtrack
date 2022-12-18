@@ -1680,6 +1680,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             WidgetPassBaseProvider.updatePassAlarm(context, alarmReceiverClass, widgetId, null, null, false);
                             WidgetPassBaseProvider.updateWidget(context, widgetClass, alarmReceiverClass, widgetId, AppWidgetManager.getInstance(context), WidgetPassBaseProvider.getViews(context, widgetClass, widgetId), true);
 
+                            //restart location service with changes
+                            LocationService.restart(context, false);
+
                             //set result
                             result = RESULT_OK;
                         }

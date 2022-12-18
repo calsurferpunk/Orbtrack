@@ -264,11 +264,11 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //get deleted widgets to exclude
             excludeIds = Globals.getList(widgetIds);
 
-            //if location receiver exists and had following but don't anymore
-            if(locationReceiver != null && hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).size() == 0)
+            //if had following but don't anymore
+            if(hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).size() == 0)
             {
-                //restart with changes
-                locationReceiver.onRestart(context);
+                //restart location service with changes
+                LocationService.restart(context, false);
             }
 
             //if had intervals but don't anymore

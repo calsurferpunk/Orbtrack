@@ -67,7 +67,7 @@ public class LocationService extends Service implements LocationListener
         static final String GetLocation = "getLocation";
         static final String RunForeground = "runForeground";
         static final String PowerType = "powerType";
-        static final String FromUser = "fromUser";
+        static final String ForceStop = "forceStop";
     }
 
     //Power type
@@ -469,7 +469,7 @@ public class LocationService extends Service implements LocationListener
             }
             else
             {
-                //restart from user
+                //stop service
                 restart(context, true);
             }
 
@@ -523,7 +523,7 @@ public class LocationService extends Service implements LocationListener
         final Resources res = this.getResources();
         byte powerType = intent.getByteExtra(ParamTypes.PowerType, PowerTypes.Balanced);
         byte messageType = intent.getByteExtra(ParamTypes.MessageType, Byte.MAX_VALUE);
-        boolean fromUser = intent.getBooleanExtra(ParamTypes.FromUser, true);
+        boolean forceStop = intent.getBooleanExtra(ParamTypes.ForceStop, true);
         boolean gettingLocation = intent.getBooleanExtra(ParamTypes.GetLocation, false);
         String notifyChannelId = Globals.getChannelId(Globals.ChannelIds.Location);
         runForeground = intent.getBooleanExtra(ParamTypes.RunForeground, false);
@@ -603,9 +603,13 @@ public class LocationService extends Service implements LocationListener
             else
             {
                 //stop and send need restart
+                if(useForeground)
+                {
+                    stopForeground(true);
+                }
                 stopSelf();
                 useForeground = false;
-                if(!fromUser)
+                if(!forceStop)
                 {
                     sendNeedRestart();
                 }
@@ -866,7 +870,7 @@ public class LocationService extends Service implements LocationListener
                             notifyManager.notify(Globals.ChannelIds.Location, notifyBuilder.build());
                         }
 
-                        //restart
+                        //restart service
                         pendingLowPower = false;
                         restart(context, false);
                     }
@@ -1195,12 +1199,12 @@ public class LocationService extends Service implements LocationListener
         Globals.startService(context, startIntent, runForeground);
     }
 
-    //Stops the service and sends a need restart
-    private static void restart(Context context, boolean fromUser)
+    //Stops the service and restarts if allowed
+    public static void restart(Context context, boolean forceStop)
     {
         Intent restartIntent = getStartIntent(context, false, false, PowerTypes.Balanced);
         restartIntent.putExtra(ParamTypes.MessageType, MessageTypes.NeedRestart);
-        restartIntent.putExtra(ParamTypes.FromUser, fromUser);
+        restartIntent.putExtra(ParamTypes.ForceStop, forceStop);
         Globals.startService(context, restartIntent, false);
     }
 

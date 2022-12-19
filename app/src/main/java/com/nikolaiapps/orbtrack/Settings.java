@@ -1056,12 +1056,26 @@ public abstract class Settings
                 final Item currentItem = (Item)item;
                 final boolean haveContext = (currentContext != null);
                 final boolean isCurrent = (currentItem.locationType == Database.LocationType.Current);
-                final double latitude = currentItem.latitude;
-                final double longitude = currentItem.longitude;
-                final double altitudeM = currentItem.altitudeM;
+                double latitude = currentItem.latitude;
+                double longitude = currentItem.longitude;
+                double altitudeM = currentItem.altitudeM;
                 final Resources res = (haveContext ? currentContext.getResources() : null);
                 final TextView[] titles;
                 final TextView[] texts;
+
+                //if on current location and not set yet
+                if(isCurrent && (latitude == Double.MAX_VALUE || longitude == Double.MAX_VALUE || altitudeM == Double.MAX_VALUE))
+                {
+                    //try to use MainActivity location
+                    Calculations.ObserverType currentLocation = MainActivity.getObserver();
+                    if(currentLocation != null && currentLocation.geo.isSet())
+                    {
+                        Calculations.GeodeticDataType currentGeo = currentLocation.geo;
+                        latitude = currentGeo.latitude;
+                        longitude = currentGeo.longitude;
+                        altitudeM = currentGeo.altitudeKm / 1000;
+                    }
+                }
 
                 //if have context and -a valid latitude, longitude, or altitude-
                 if(haveContext && ((latitude != 0 && latitude >= -90 && latitude <= 90) || (longitude != 0 && longitude >= -180 && longitude <= 180) || (altitudeM != 0 && altitudeM != Double.MAX_VALUE)))

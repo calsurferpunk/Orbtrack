@@ -1686,7 +1686,7 @@ public class Database extends SQLiteOpenHelper
         {
             satelliteValues.put("[Launch_Date]", launchDate);
         }
-		if(tleLine1 != null)
+        if(tleLine1 != null)
         {
             satelliteValues.put("[TLE_Line1]", tleLine1);
         }
@@ -1928,8 +1928,19 @@ public class Database extends SQLiteOpenHelper
     }
     public static long saveSatellite(Context context, String name, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, byte orbitalType)
     {
+        int nextDefaultColor = Color.DKGRAY;
         DatabaseSatellite orbital = OrbitalsBuffer.getOrbital(context, noradId, false);
-        return(saveSatellite(context, name, null, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Color.DKGRAY, orbitalType, (orbital == null || orbital.isSelected)));
+        boolean haveOrbital = (orbital != null);
+
+        //if a new orbital and using next default color
+        if(!haveOrbital && Settings.usingSatelliteNextDefaultColor())
+        {
+            //get and generate next default color
+            nextDefaultColor = Settings.getSatelliteNextDefaultColor(context);
+            Settings.generateNextDefaultColor(context, nextDefaultColor);
+        }
+
+        return(saveSatellite(context, name, null, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, (haveOrbital ? orbital.pathColor : nextDefaultColor), orbitalType, (!haveOrbital || orbital.isSelected)));
     }
     public static void saveSatellite(Context context, int noradId, String userName, String ownerCode, long launchDate)
     {

@@ -247,6 +247,7 @@
     <string name="title_add">Añadir</string>
     <string name="title_add_debris">Añadir Escombros</string>
     <string name="title_add_rocket_bodies">Añadir Cuerpos Cohetes</string>
+    <string name="title_add_satellites_with_varying_colors">Agregar Satélites con Colores Variados</string>
     <string name="title_advanced">Avanzado</string>
     <string name="title_age">Edad</string>
     <string name="title_align">Alinear</string>

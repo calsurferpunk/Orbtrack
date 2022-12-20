@@ -125,6 +125,8 @@ public abstract class Settings
         static final String SatelliteSourceUseGP = "SatelliteSourceUseGP";
         static final String SatelliteDataSource = "SatelliteDataSource";
         static final String SatelliteSourceShared = "SatelliteSourceShared";
+        static final String SatelliteNextDefaultColor = "SatelliteNextDefaultColor";
+        static final String SatelliteUseNextDefaultColor = "SatelliteUseNextDefaultColor";
         static final String CatalogDebris = "CatalogDebris";
         static final String CatalogRocketBodies = "CatalogRocketBodies";
         static final String CatalogAutoUpdate = "CatalogAutoUpdate";
@@ -1920,13 +1922,14 @@ public abstract class Settings
         }
     }
 
-    //Status of using metric units, grid, map marker bottom info, and footprint
+    //Status of using metric units, grid, map marker bottom info, footprint, and default colors
     private static boolean usingMetric = true;
     private static boolean allowNumberCommas = true;
     private static boolean usingCurrentGridLayout = false;
     private static boolean mapMarkerInfoBottom = true;
     private static boolean mapShowFootprint = false;
     private static boolean mapSelectedShowFootprint = false;
+    private static boolean satelliteUseNextDefaultColor = true;
 
     //Gets read settings
     public static SharedPreferences getReadSettings(Context context)
@@ -1979,6 +1982,7 @@ public abstract class Settings
             case PreferenceName.ShowSatelliteClouds + SubPreferenceName.Globe:
             case PreferenceName.TranslateInformation:
             case PreferenceName.SatelliteSourceShared:
+            case PreferenceName.SatelliteUseNextDefaultColor:
             case PreferenceName.UseCombinedCurrentLayout:
                 return(true);
         }
@@ -2087,6 +2091,9 @@ public abstract class Settings
             case PreferenceName.SatelliteSource:
             case PreferenceName.SatelliteDataSource:
                 return(Database.UpdateSource.SpaceTrack);
+
+            case PreferenceName.SatelliteNextDefaultColor:
+                return(Color.rgb(68, 68, 68));
 
             case PreferenceName.TimeZoneSource:
                 return(LocationService.OnlineSource.Google);
@@ -3016,6 +3023,83 @@ public abstract class Settings
     public static boolean getSatelliteSourceShared(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.SatelliteSourceShared));
+    }
+
+    //Returns if using satellite next default color
+    public static boolean getSatelliteUseNextDefaultColor(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.SatelliteUseNextDefaultColor));
+    }
+
+    //Sets if using satellite next default color
+    public static void setSatelliteUseNextDefaultColor(Context context, boolean use)
+    {
+        setPreferenceBoolean(context, PreferenceName.SatelliteUseNextDefaultColor, use);
+        satelliteUseNextDefaultColor = use;
+    }
+
+    //Returns using satellite next default color
+    //note: faster than getting through preferences since called a lot
+    public static boolean usingSatelliteNextDefaultColor()
+    {
+        return(satelliteUseNextDefaultColor);
+    }
+
+    //Sets satellite next default color
+    public static void setSatelliteNextDefaultColor(Context context, int color)
+    {
+        setPreferenceInt(context, PreferenceName.SatelliteNextDefaultColor, color);
+    }
+
+    //Generates a new default color
+    public static void generateNextDefaultColor(Context context, int color)
+    {
+        int red = Color.red(color);
+        int green = Color.green(color);
+        int blue = Color.blue(color);
+        int start = 60;
+        int afterStart = start + 5;
+        int end = 230;
+
+        if(red > start)
+        {
+            green = blue = start;
+            red += 10;
+            if(red > end)
+            {
+                red = start;
+                green = afterStart;
+            }
+        }
+        else if(green > start)
+        {
+            red = blue = start;
+            green += 10;
+            if(green > end)
+            {
+                green = start;
+                blue = afterStart;
+            }
+        }
+        else
+        {
+            red = green = start;
+            blue += 10;
+            if(blue > end)
+            {
+                blue = start;
+                red = afterStart;
+            }
+        }
+
+        //set next default color
+        setSatelliteNextDefaultColor(context, Color.rgb(red, green, blue));
+    }
+
+    //Gets satellite next default color
+    public static int getSatelliteNextDefaultColor(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.SatelliteNextDefaultColor));
     }
 
     //Gets catalog debris usage

@@ -303,6 +303,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         SwitchPreference translateInformationSwitch = this.findPreference(Settings.PreferenceName.TranslateInformation);
                         SwitchPreference shareTranslateSwitch = this.findPreference(Settings.PreferenceName.ShareTranslations);
                         SwitchPreference sharedSourceSwitch = this.findPreference(Settings.PreferenceName.SatelliteSourceShared);
+                        SwitchPreference useDefaultNextColorSwitch = this.findPreference(Settings.PreferenceName.SatelliteUseNextDefaultColor);
                         IconListPreference satelliteSourceList = this.findPreference(Settings.PreferenceName.SatelliteSource);
                         IconListPreference satelliteDataList = this.findPreference(Settings.PreferenceName.SatelliteDataSource);
                         IconListPreference altitudeList = this.findPreference(Settings.PreferenceName.AltitudeSource);
@@ -313,6 +314,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         PreferenceCategory altitudeCategory = this.findPreference("AltitudeCategory");
                         PreferenceCategory timeZoneCategory = this.findPreference("TimeZoneCategory");
                         PreferenceCategory informationCategory = this.findPreference("InformationCategory");
+                        PreferenceCategory colorsCategory = this.findPreference("ColorsCategory");
 
                         //initialize values
                         Settings.Options.Updates.initValues(context);
@@ -326,6 +328,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupSwitch(translateInformationSwitch);
                         setupSwitch(shareTranslateSwitch);
                         setupSwitch(sharedSourceSwitch, satelliteDataList, satelliteSourceList);
+                        setupSwitch(useDefaultNextColorSwitch);
                         setupList(satelliteSourceList, Settings.Options.Updates.SatelliteSourceItems, Settings.Options.Updates.SatelliteSourceValues, Settings.Options.Updates.SatelliteSourceImageIds, Settings.Options.Updates.SatelliteSourceSubTexts, legacyDataSwitch);
                         setupList(satelliteDataList, Settings.Options.Updates.SatelliteDataSourceItems, Settings.Options.Updates.SatelliteDataSourceValues, Settings.Options.Updates.SatelliteDataSourceImageIds, Settings.Options.Updates.SatelliteDataSourceSubTexts, legacyDataSwitch);
                         setupList(altitudeList, Settings.Options.Updates.AltitudeSourceItems, Settings.Options.Updates.AltitudeSourceValues, Settings.Options.Updates.AltitudeSourceImageIds, null, null);
@@ -336,6 +339,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupCategory(altitudeCategory);
                         setupCategory(timeZoneCategory);
                         setupCategory(informationCategory);
+                        setupCategory(colorsCategory);
 
                         //if showing setup
                         if(showSetup)
@@ -669,6 +673,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                 {
                                     //apply changes
                                     Settings.setAutoUpdate(context, preferenceKey);
+                                }
+                                //else if satellite using next default color
+                                else if(preferenceKey.equals(Settings.PreferenceName.SatelliteUseNextDefaultColor))
+                                {
+                                    //apply changes
+                                    Settings.setSatelliteUseNextDefaultColor(context, checked);
                                 }
                             }
 

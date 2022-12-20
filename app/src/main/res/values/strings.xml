@@ -247,6 +247,7 @@
     <string name="title_add">Add</string>
     <string name="title_add_debris">Add Debris</string>
     <string name="title_add_rocket_bodies">Add Rocket Bodies</string>
+    <string name="title_add_satellites_with_varying_colors">Add Satellites with Varying Colors</string>
     <string name="title_advanced">Advanced</string>
     <string name="title_age">Age</string>
     <string name="title_align">Align</string>

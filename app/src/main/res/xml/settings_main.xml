@@ -459,6 +459,12 @@
                         android:title="@string/title_share_translations_online"
                         android:key="ShareTranslations"/>
                 </PreferenceCategory>
+
+                <PreferenceCategory android:title="@string/title_colors" android:key="ColorsCategory">
+                    <com.nikolaiapps.orbtrack.SwitchPreference
+                        android:title="@string/title_add_satellites_with_varying_colors"
+                        android:key="SatelliteUseNextDefaultColor"/>
+                </PreferenceCategory>
             </PreferenceCategory>
         </PreferenceScreen>
 

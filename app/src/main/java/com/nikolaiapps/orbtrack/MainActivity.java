@@ -187,6 +187,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Settings.setMapShowFootprint(this, Settings.getMapShowFootprint(this));
         Settings.setMapShowSelectedFootprint(this, Settings.getMapShowSelectedFootprint(this));
         Settings.setUsingCurrentGridLayout(this, Settings.getCurrentGridLayout(this));
+        Settings.setSatelliteUseNextDefaultColor(this, Settings.getSatelliteUseNextDefaultColor(this));
         setSaveFileData(null, "", "", -1, -1);
         backPressTime = Globals.getGMTTime();
         backPressTime.set(Calendar.YEAR, 0);

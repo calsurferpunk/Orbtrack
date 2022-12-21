@@ -1196,11 +1196,11 @@ public class Database extends SQLiteOpenHelper
                     {
                         //begin
                         db.beginTransaction();
-                        sqlStatement.clearBindings();
                     }
 
                     //add bind values
                     currentColumn = 0;
+                    sqlStatement.clearBindings();
                     for(bindIndex = 0; bindIndex < sqlBindTypes.length; bindIndex++)
                     {
                         //check if using constant
@@ -1225,7 +1225,7 @@ public class Database extends SQLiteOpenHelper
                             currentColumn++;
                         }
                     }
-                    sqlStatement.execute();
+                    sqlStatement.executeInsert();
 
                     //update progress
                     sendProgress(Globals.ProgressType.Running, res.getString(progressTitleId), index, rowCount);
@@ -2349,9 +2349,10 @@ public class Database extends SQLiteOpenHelper
             try
             {
                 //save satellite
+                sqlStatement.clearBindings();
                 sqlStatement.bindString(1, satelliteValues.getAsString("[Code]"));
                 sqlStatement.bindString(2, satelliteValues.getAsString("[Name]"));
-                sqlStatement.execute();
+                sqlStatement.executeInsert();
 
                 //if listener exists
                 if(listener != null)
@@ -2437,9 +2438,10 @@ public class Database extends SQLiteOpenHelper
             try
             {
                 //save satellite
+                sqlStatement.clearBindings();
                 sqlStatement.bindString(1, categoryValues.getAsString("[Name]"));
                 sqlStatement.bindLong(2, categoryValues.getAsLong("[Indx]"));
-                sqlStatement.execute();
+                sqlStatement.executeInsert();
 
                 //if listener exists
                 if(listener != null)
@@ -2524,9 +2526,10 @@ public class Database extends SQLiteOpenHelper
             try
             {
                 //save satellite
+                sqlStatement.clearBindings();
                 sqlStatement.bindLong(1, satelliteValues.getAsInteger("[Norad]"));
                 sqlStatement.bindLong(2, satelliteValues.getAsInteger("[Category_Index]"));
-                sqlStatement.execute();
+                sqlStatement.executeInsert();
 
                 //if listener exists
                 if(listener != null)
@@ -2584,11 +2587,12 @@ public class Database extends SQLiteOpenHelper
         try
         {
             //save information
+            sqlStatement.clearBindings();
             sqlStatement.bindLong(1, infoValues.getAsInteger("[Norad]"));
             sqlStatement.bindLong(2, infoValues.getAsInteger("[Source]"));
             sqlStatement.bindString(3, infoValues.getAsString("[Language]"));
             sqlStatement.bindString(4, infoValues.getAsString("[Info]"));
-            sqlStatement.execute();
+            sqlStatement.executeInsert();
         }
         catch(Exception ex)
         {
@@ -2695,11 +2699,12 @@ public class Database extends SQLiteOpenHelper
             try
             {
                 //save satellite
+                sqlStatement.clearBindings();
                 sqlStatement.bindLong(1, satelliteValues.getAsInteger("[Norad]"));
                 sqlStatement.bindString(2, satelliteValues.getAsString("[Name]"));
                 sqlStatement.bindString(3, satelliteValues.getAsString("[Owner_Code]"));
                 sqlStatement.bindString(4, satelliteValues.getAsString("[Launch_Date]"));
-                sqlStatement.execute();
+                sqlStatement.executeInsert();
 
                 //if listener exists
                 if(listener != null)

@@ -256,34 +256,34 @@ public abstract class NotifyService extends IntentService
     protected void sendMessage(byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int retryID, boolean showNotification, Bundle extraData)
     {
         boolean isGeneral = (messageType == MessageTypes.General);
-        boolean isDownload = (messageType == MessageTypes.Download);
+        boolean isStarted = (progressType == Globals.ProgressType.Started);
         boolean isFinished = (progressType == Globals.ProgressType.Finished);
-        boolean isUpdateSatellites = (serviceIndex == UpdateService.UpdateType.UpdateSatellites);
-        long limitMs = 0;
-        final long division = (showNotification ? 20 : 100);
-        final long baseInterval = (isDownload && !isUpdateSatellites ? Globals.WEB_READ_SIZE : (count / division));
-        final long intervals = (baseInterval <= 0 ? 1 : baseInterval > 2048 ? 2048 : baseInterval);
-        final long indexInterval = (index / intervals);
-        final long indexIntervalStep = (intervals / (intervals >= division ? division : 1));
-        boolean sendProgress = true;
         boolean haveSection = (section != null && !section.equals(""));
         boolean haveSubIndex = (subIndex >= 0);
-        boolean enoughProgress = (isFinished || intervals <= 33 || indexInterval == 0 || indexInterval == 1 || (count > 0 && index >= (count - 1)) || (indexInterval % indexIntervalStep == 0) || (haveSubIndex && subIndex % 4 == 0));      //if no count or less than update divisions, on first index, on last index, on an allowable index in between, or a 4% change
-        Intent intent;
+        boolean enoughProgress = (System.currentTimeMillis() - lastNotify.timeMs >= 250);
+        long limitMs = 0;
         NotificationCompat.Builder notifyBuilder = (showNotification ? Globals.createNotifyBuilder(this, notifyChannelId) : null);
 
         //update notification
         switch(progressType)
         {
-            case Globals.ProgressType.Cancelled:
+            case Globals.ProgressType.Started:
             case Globals.ProgressType.Failed:
-            case Globals.ProgressType.Denied:
             case Globals.ProgressType.Finished:
+            case Globals.ProgressType.Cancelled:
+            case Globals.ProgressType.Denied:
+                //always update
+                enoughProgress = true;
+
                 //if the main update
                 if(isGeneral)
                 {
-                    //set as done
-                    onClearIntent(serviceIndex);
+                    //if didn't start
+                    if(!isStarted)
+                    {
+                        //set as done
+                        onClearIntent(serviceIndex);
+                    }
 
                     //if showing notification
                     if(showNotification)
@@ -298,27 +298,31 @@ public abstract class NotifyService extends IntentService
                         dismissIntent.putExtra(serviceParam, serviceIndex);
 
                         //update message
-                        currentNotify.title = res.getString(isFinished ? R.string.title_finished : R.string.title_failed) + " " + titleDesc;
+                        currentNotify.title = res.getString(isStarted ? R.string.title_start : isFinished ? R.string.title_finished : R.string.title_failed) + " " + titleDesc;
                         currentNotify.message = "";
                         currentNotify.progress = 0;
                         currentNotify.maxProgress = 0;
                         currentNotify.indeterminate = false;
                         limitMs = 1000;     //make sure at least 1 second passed from last
 
-                        //if didn't finish
-                        if(!isFinished)
+                        //if didn't start
+                        if(!isStarted)
                         {
-                            //create retry intent
-                            retryIntent = new Intent(this, receiverClass);
-                            retryIntent.setAction(NotifyReceiver.RetryAction);
-                            retryIntent.putExtra(serviceParam, serviceIndex);
+                            //if didn't finish
+                            if(!isFinished)
+                            {
+                                //create retry intent
+                                retryIntent = new Intent(this, receiverClass);
+                                retryIntent.setAction(NotifyReceiver.RetryAction);
+                                retryIntent.putExtra(serviceParam, serviceIndex);
 
-                            //add retry button
-                            notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), Globals.getPendingBroadcastIntent(this, retryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                                //add retry button
+                                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), Globals.getPendingBroadcastIntent(this, retryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                            }
+
+                            //add dismiss button
+                            notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(this, dismissID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                         }
-
-                        //add dismiss button
-                        notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(this, dismissID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                         break;
                     }
                 }
@@ -334,19 +338,14 @@ public abstract class NotifyService extends IntentService
                     currentNotify.maxProgress = (int)(haveSubIndex ? 100 : count);
                     currentNotify.indeterminate = false;
                 }
-                else
-                {
-                    //don't send
-                    sendProgress = false;
-                }
                 break;
         }
 
-        //if still sending progress
-        if(sendProgress)
+        //if enough progress
+        if(enoughProgress)
         {
             //update broadcast
-            intent = new Intent(filter);
+            Intent intent = new Intent(filter);
             intent.putExtra(ParamTypes.MessageType, messageType);
             intent.putExtra(serviceParam, serviceIndex);
             if(haveSection)

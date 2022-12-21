@@ -492,7 +492,7 @@ public class EditValuesDialog
 
                         currentId = list2IconIds[index];
                         currentStringId = (list2SubValues != null && index < list2SubValues.length ? Integer.parseInt(list2SubValues[index]) : -1);
-                        if(currentId == R.drawable.ic_launcher && currentStringId != -1)
+                        if(currentId == R.drawable.ic_launcher_clear && currentStringId != -1)
                         {
                             if(currentStringId == R.string.title_name)
                             {

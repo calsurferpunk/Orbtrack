@@ -310,7 +310,7 @@ public abstract class Current
             }
             else    //R.string.title_name, R.string.title_pass_elevation, R.string.title_pass_start, or R.string.title_altitude
             {
-                return(R.drawable.ic_launcher);
+                return(R.drawable.ic_launcher_clear);
             }
         }
 

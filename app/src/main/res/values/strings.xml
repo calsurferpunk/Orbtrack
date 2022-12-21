@@ -168,7 +168,7 @@
     <string name="desc_show_orbital_direction">Orbitals point in path direction</string>
     <string name="desc_show_orbital_direction_limit">Show direction if within visible orbital count\nNote: Required for Mali and PowerVR GPUs</string>
     <string name="desc_show_selected_footprint">Show selected orbital visible area on surface</string>
-    <string name="desc_show_shadows">Show orbital shadows in globe view\nNote: Disabled for Mali and PowerVR GPUs</string>
+    <string name="desc_show_shadows">Show orbital shadows in globe view\nNote: Disabled for some Mali and PowerVR GPUs</string>
     <string name="desc_show_stars">Show stars in globe view</string>
     <string name="desc_show_sunlight">Show/hide current daylight on surface</string>
     <string name="desc_show_toolbars">Show toolbars on screen edges</string>

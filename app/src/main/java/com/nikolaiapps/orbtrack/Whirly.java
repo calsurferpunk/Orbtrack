@@ -1849,6 +1849,7 @@ class Whirly
             final Activity activity = this.getActivity();
             int mapLayerType;
             byte gpuType;
+            String gpuModel;
             boolean forMap = isMap();
             boolean forPreview = false;
             boolean useCompatibility;
@@ -1927,9 +1928,21 @@ class Whirly
 
             //set if showing orbital direction
             gpuType = baseControl.getRenderGpuType();
+            gpuModel = baseControl.getRenderGpuModel();
             switch(gpuType)
             {
                 case RenderGPUType.Mali:
+                    if(gpuModel != null)
+                    {
+                        gpuModel = gpuModel.toLowerCase();
+                        if(!gpuModel.startsWith("t") && !gpuModel.endsWith("mp"))
+                        {
+                            useCompatibility = false;
+                            break;
+                        }
+                    }
+                    //else fall through
+
                 case RenderGPUType.PowerVr:
                     useCompatibility = true;
                     break;

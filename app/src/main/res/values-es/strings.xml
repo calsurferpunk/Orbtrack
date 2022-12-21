@@ -168,7 +168,7 @@
     <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria</string>
     <string name="desc_show_orbital_direction_limit">Mostrar dirección si está dentro del conteo orbital visible\nNota: Obligatorio para las GPU Mali y PowerVR</string>
     <string name="desc_show_selected_footprint">Mostrar el área visible orbital seleccionada en la superficie</string>
-    <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo\nNota: Deshabilitado para GPU Mali y PowerVR</string>
+    <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo\nNota: Desactivado para algunas GPU Mali y PowerVR</string>
     <string name="desc_show_stars">Mostrar estrellas en vista de globo</string>
     <string name="desc_show_sunlight">Mostrar/ocultar la luz diurna actual en la superficie</string>
     <string name="desc_show_toolbars">Mostrar barras herramientas en los bordes de la pantalla</string>

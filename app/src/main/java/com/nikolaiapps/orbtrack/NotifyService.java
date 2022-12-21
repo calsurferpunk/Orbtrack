@@ -267,7 +267,8 @@ public abstract class NotifyService extends IntentService
         final long indexIntervalStep = (intervals / (intervals >= division ? division : 1));
         boolean sendProgress = true;
         boolean haveSection = (section != null && !section.equals(""));
-        boolean enoughProgress = (isFinished || intervals <= 33 || indexInterval == 0 || indexInterval == 1 || index >= (count - 1) || (indexInterval % indexIntervalStep) == 0);      //if no count or less than update divisions, on first index, on last index, or on an allowable index in between
+        boolean haveSubIndex = (subIndex >= 0);
+        boolean enoughProgress = (isFinished || intervals <= 33 || indexInterval == 0 || indexInterval == 1 || (count > 0 && index >= (count - 1)) || (indexInterval % indexIntervalStep == 0) || (haveSubIndex && subIndex % 4 == 0));      //if no count or less than update divisions, on first index, on last index, on an allowable index in between, or a 4% change
         Intent intent;
         NotificationCompat.Builder notifyBuilder = (showNotification ? Globals.createNotifyBuilder(this, notifyChannelId) : null);
 
@@ -328,9 +329,9 @@ public abstract class NotifyService extends IntentService
                 if(enoughProgress)
                 {
                     //update status
-                    currentNotify.message = ((haveSection ? section : "") + (count > 0 ? ("\r\n(" + (int)((index / (float)count) * 100) + "%)") : ""));
-                    currentNotify.progress = (int)index;
-                    currentNotify.maxProgress = (int)count;
+                    currentNotify.message = ((haveSection ? section : "") + (count > 0 ? (" (" + (int)((index / (float)count) * 100) + "%)") : ""));
+                    currentNotify.progress = (int)(haveSubIndex ? subIndex : index);
+                    currentNotify.maxProgress = (int)(haveSubIndex ? 100 : count);
                     currentNotify.indeterminate = false;
                 }
                 else

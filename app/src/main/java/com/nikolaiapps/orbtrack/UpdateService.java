@@ -876,7 +876,7 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, updateType, section, Globals.ProgressType.Started);
+        sendMessage(MessageTypes.General, updateType, section, 0, Globals.ProgressType.Started);
 
         //handle based on update type
         switch(updateType)
@@ -913,7 +913,7 @@ public class UpdateService extends NotifyService
 
             default:
                 //nothing to update
-                sendMessage(MessageTypes.General, updateType, section, Globals.ProgressType.Failed);
+                sendMessage(MessageTypes.General, updateType, section, 100, Globals.ProgressType.Failed);
                 break;
         }
 
@@ -1023,9 +1023,9 @@ public class UpdateService extends NotifyService
     {
         sendMessage(messageType, updateType, section, index, count, -1, progressType, null);
     }
-    private void sendMessage(byte messageType, byte updateType, String section, int progressType)
+    private void sendMessage(byte messageType, byte updateType, String section, long overall, int progressType)
     {
-        sendMessage(messageType, updateType, section, 0, 0, -1, progressType, null);
+        sendMessage(messageType, updateType, section, 0, 0, overall, progressType, null);
     }
 
     //Gets current intent
@@ -1315,7 +1315,7 @@ public class UpdateService extends NotifyService
     }
 
     //Tries to get a space track web page
-    private Globals.WebPageData[] getSpaceTrackWebPages(String[] urlStrings, String[] sections, String user, String pwd, Globals.OnProgressChangedListener[] listeners)
+    private Globals.WebPageData[] getSpaceTrackWebPages(String[] urlStrings, String[] sections, String user, String pwd, int overall, Globals.OnProgressChangedListener[] listeners)
     {
         int index;
         boolean loginFailed;
@@ -1330,14 +1330,14 @@ public class UpdateService extends NotifyService
         for(index = 0; index < urlStrings.length && !loginFailed && !cancelIntent[UpdateType.GetMasterList]; index++)
         {
             //update status
-            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, sections[index], Globals.ProgressType.Started);
+            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, sections[index], overall, Globals.ProgressType.Started);
 
             //get page data
             pages[index] = Globals.getWebPage(urlStrings[index], null, listeners[index]);
             loginFailed = pages[index].isDenied();
 
             //update status
-            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, sections[index], Globals.ProgressType.Finished);
+            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, sections[index], overall, Globals.ProgressType.Finished);
         }
         while(index < urlStrings.length)
         {
@@ -1642,6 +1642,7 @@ public class UpdateService extends NotifyService
         int index;
         int index2;
         int index3;
+        int overall = 0;
         boolean loginFailed;
         boolean loadDebris = Settings.getCatalogDebris(this);
         String section;
@@ -1672,11 +1673,12 @@ public class UpdateService extends NotifyService
             urls.add("https://www.space-track.org/basicspacedata/query/class/satcat/CURRENT/Y/favorites/" + SpaceTrackCategory.urls[index] + "/orderby/NORAD_CAT_ID/format/csv/emptyresult/show");
             localeNames[index] = Database.LocaleCategory.getCategory(res, SpaceTrackCategory.nameValues[index]);
             sections.add(SpaceTrackCategory.nameValues[index]);
-            listeners.add(createMasterListProgressListener(MessageTypes.Download, localeNames[index], 30 + (int)(((index + 1) / (float)SpaceTrackCategory.urls.length) * 35)));     //30 - 65%
+            overall = 30 + (int)(((index + 1) / (float)SpaceTrackCategory.urls.length) * 35);
+            listeners.add(createMasterListProgressListener(MessageTypes.Download, localeNames[index], overall));     //30 - 65%
         }
 
         //get pages
-        pages = getSpaceTrackWebPages(urls.toArray(new String[0]), sections.toArray(new String[0]), user, password, listeners.toArray(new Globals.OnProgressChangedListener[0]));
+        pages = getSpaceTrackWebPages(urls.toArray(new String[0]), sections.toArray(new String[0]), user, password, overall, listeners.toArray(new Globals.OnProgressChangedListener[0]));
 
         //if logged in
         loginFailed = pages[0].isDenied();
@@ -1686,7 +1688,7 @@ public class UpdateService extends NotifyService
             for(index = 0; index < pages.length; index++)
             {
                 //update status
-                sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, sections.get(index), index, pages.length, Globals.ProgressType.Started);
+                sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, sections.get(index), index, pages.length, overall, Globals.ProgressType.Started);
 
                 //if got page data
                 if(pages[index].gotData())
@@ -1732,7 +1734,8 @@ public class UpdateService extends NotifyService
                 }
 
                 //update status (65 - 75%)
-                sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, sections.get(index), index, pages.length, 65 + (int)((index + 1) / (float)pages.length * 10), Globals.ProgressType.Success);
+                overall = 65 + (int)((index + 1) / (float)pages.length * 10);
+                sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, sections.get(index), index, pages.length, overall, Globals.ProgressType.Success);
             }
         }
 
@@ -1869,7 +1872,7 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, UpdateType.GetMasterList, "", (status == Globals.ProgressType.Denied ? Globals.ProgressType.Denied : status == Globals.ProgressType.Finished && masterList.satellites.size() > 0 && !cancelIntent[UpdateType.GetMasterList] ? Globals.ProgressType.Finished : ranUpdate ? Globals.ProgressType.Failed : Globals.ProgressType.Cancelled));
+        sendMessage(MessageTypes.General, UpdateType.GetMasterList, "", 100, (status == Globals.ProgressType.Denied ? Globals.ProgressType.Denied : status == Globals.ProgressType.Finished && masterList.satellites.size() > 0 && !cancelIntent[UpdateType.GetMasterList] ? Globals.ProgressType.Finished : ranUpdate ? Globals.ProgressType.Failed : Globals.ProgressType.Cancelled));
     }
 
     //Gets master list and returns progress status
@@ -1891,6 +1894,8 @@ public class UpdateService extends NotifyService
         int firstNoradID = Integer.MAX_VALUE;
         int lastNoradID = 0;
         int status = Globals.ProgressType.Finished;
+        int lastOverall;
+        int currentOverall;
         int receivedPageLength;
         byte updateType = UpdateType.GetMasterList;
         boolean addLineEnds = false;
@@ -2024,7 +2029,7 @@ public class UpdateService extends NotifyService
         //if updating from space track
         if(updateSource == Database.UpdateSource.SpaceTrack)
         {
-            //get list
+            //get list (0 - 75%)
             spaceTrackData = getSpaceTrackList(user, pwd);
 
             //if logged in
@@ -2036,15 +2041,23 @@ public class UpdateService extends NotifyService
                     //set status
                     currentStatus = res.getString(R.string.title_satellites);
 
-                    //go through each satellite while not cancelled
+                    //go through each satellite while not cancelled (75 - 85%)
                     for(index = 0; index < spaceTrackData.satellites.length && !cancelIntent[updateType]; index++)
                     {
                         //remember current satellite
+                        boolean enoughProgress = (index == 0 || index == (spaceTrackData.satellites.length - 1) || index % 5000 == 0);
                         SpaceTrackSatellite currentSatellite = spaceTrackData.satellites[index];
                         MasterSatellite newSatellite;
 
-                        //update status
-                        sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, currentStatus, index, spaceTrackData.satellites.length, Globals.ProgressType.Started);
+                        //update overall status
+                        overall = 75 + (int)(((index + 1) / (float)spaceTrackData.satellites.length) * 10);
+
+                        //if enough progress
+                        if(enoughProgress)
+                        {
+                            //update status message
+                            sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, currentStatus, index, spaceTrackData.satellites.length, overall, Globals.ProgressType.Started);
+                        }
 
                         //if current satellite exists
                         if(currentSatellite != null)
@@ -2097,8 +2110,12 @@ public class UpdateService extends NotifyService
                             }
                         }
 
-                        //update status
-                        sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, currentStatus, index, spaceTrackData.satellites.length, Globals.ProgressType.Success);
+                        //if enough progress
+                        if(enoughProgress)
+                        {
+                            //update status message
+                            sendMessage(MessageTypes.LoadPercent, UpdateType.GetMasterList, currentStatus, index, spaceTrackData.satellites.length, overall, Globals.ProgressType.Success);
+                        }
                     }
                 }
                 else
@@ -2156,7 +2173,7 @@ public class UpdateService extends NotifyService
                         break;
                 }
             }
-            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, section, Globals.ProgressType.Started);
+            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, section, overall, Globals.ProgressType.Started);
 
             //get page
             receivedPage = Globals.getWebPage(urlMasterBase, true, createMasterListProgressListener(MessageTypes.Download, section, overall));
@@ -2165,13 +2182,16 @@ public class UpdateService extends NotifyService
             if(receivedPageLength > 0)
             {
                 //go through page while not cancelled
+                lastOverall = 0;
                 do
                 {
-                    //if updating celestrak and not categories
-                    if(updateSource == Database.UpdateSource.Celestrak && updateSubSource != UpdateSubSource.Category)
+                    //if updating celestrak, not categories, and at least 2% change
+                    currentOverall = (overall + (int)((pageOffset / (float)receivedPageLength) * 20));
+                    if(updateSource == Database.UpdateSource.Celestrak && updateSubSource != UpdateSubSource.Category && (currentOverall - lastOverall) >= 2)
                     {
                         //update status (overall - overall +20%)
-                        sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, (overall + (int)((pageOffset / (float)receivedPageLength) * 20)), Globals.ProgressType.Success);
+                        sendMessage(MessageTypes.Parse, UpdateType.GetMasterList, section + " " + parsingString, pageOffset, receivedPageLength, currentOverall, Globals.ProgressType.Success);
+                        lastOverall = currentOverall;
                     }
 
                     //find next txt file row start while not cancelled
@@ -2663,7 +2683,7 @@ public class UpdateService extends NotifyService
             }
 
             //update status
-            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, section, status);
+            sendMessage(MessageTypes.Download, UpdateType.GetMasterList, section, overall, status);
             return(status);
         }
     }
@@ -3426,12 +3446,13 @@ public class UpdateService extends NotifyService
     {
         int index;
         int index2;
+        int overall = 75;
         int satelliteCount = masterList.satellites.size();
         Resources res = this.getResources();
         String section = res.getString(R.string.title_categories);
 
         //update status
-        sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, Globals.ProgressType.Started);
+        sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, overall, Globals.ProgressType.Started);
 
         //go through each satellite
         for(index = 0; index < satelliteCount; index++)
@@ -3446,11 +3467,12 @@ public class UpdateService extends NotifyService
             }
 
             //update status (75 - 85%)
-            sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, index + 1, satelliteCount, 75 + (int)(((index +1) / (float)satelliteCount) * 10), Globals.ProgressType.Success);
+            overall = 75 + (int)(((index +1) / (float)satelliteCount) * 10);
+            sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, index + 1, satelliteCount, overall, Globals.ProgressType.Success);
         }
 
         //update status
-        sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, Globals.ProgressType.Finished);
+        sendMessage(MessageTypes.Load, UpdateType.GetMasterList, section, overall, Globals.ProgressType.Finished);
     }
 
 
@@ -3470,6 +3492,7 @@ public class UpdateService extends NotifyService
     private void saveMasterList(int updateSource)
     {
         int index;
+        int overall;
         int satelliteCount;
         int fileCount;
         Calendar timeNow;
@@ -3517,10 +3540,11 @@ public class UpdateService extends NotifyService
                             section = res.getString(R.string.abbrev_satellite) + " " + res.getString(R.string.title_categories);
                             break;
                     }
-                    saveListener = createMasterListProgressListener(MessageTypes.Save, section, 85 + (int)(((index + 1) / 4f) * 5));
+                    overall = 85 + (int)(((index + 1) / 4f) * 5);
+                    saveListener = createMasterListProgressListener(MessageTypes.Save, section, overall);
 
                     //update status
-                    sendMessage(MessageTypes.Save, UpdateType.GetMasterList, section, Globals.ProgressType.Started);
+                    sendMessage(MessageTypes.Save, UpdateType.GetMasterList, section, overall, Globals.ProgressType.Started);
 
                     //save owners, categories, and satellites
                     switch(index)
@@ -3543,7 +3567,7 @@ public class UpdateService extends NotifyService
                     }
 
                     //update status
-                    sendMessage(MessageTypes.Save, UpdateType.GetMasterList, section, Globals.ProgressType.Finished);
+                    sendMessage(MessageTypes.Save, UpdateType.GetMasterList, section, overall, Globals.ProgressType.Finished);
                 }
 
                 //set update time
@@ -3803,7 +3827,7 @@ public class UpdateService extends NotifyService
                 {
                     case Globals.ProgressType.Started:
                     case Globals.ProgressType.Finished:
-                        UpdateService.this.sendMessage(MessageTypes.General, UpdateType.BuildDatabase, section, progressType);
+                        UpdateService.this.sendMessage(MessageTypes.General, UpdateType.BuildDatabase, section, (progressType == Globals.ProgressType.Finished ? 100 : 0), progressType);
                         break;
 
                     case Globals.ProgressType.Running:

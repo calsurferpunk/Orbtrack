@@ -59,7 +59,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         for(index = 0; index < owners.size(); index++)
         {
             UpdateService.MasterOwner currentOwner = owners.get(index);
-            ownerItems.add(new IconSpinner.Item(currentOwner.name, currentOwner.code));
+            ownerItems.add(new IconSpinner.Item(Globals.getOwnerIconIDs(currentOwner.code), currentOwner.name, currentOwner.code));
         }
         Collections.sort(ownerItems, new IconSpinner.Item.Comparer());
         ownerItems.add(0, new IconSpinner.Item("", ""));

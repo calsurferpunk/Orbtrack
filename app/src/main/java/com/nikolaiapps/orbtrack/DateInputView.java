@@ -3,7 +3,6 @@ package com.nikolaiapps.orbtrack;
 
 import android.app.DatePickerDialog;
 import android.content.Context;
-import android.os.Build;
 import android.os.Parcelable;
 import androidx.appcompat.widget.AppCompatEditText;
 import android.util.AttributeSet;
@@ -20,7 +19,6 @@ public class DateInputView extends AppCompatEditText implements DatePickerDialog
         void onDateSet(DateInputView dateView, Calendar date);
     }
 
-    private int themeID;
     private Calendar currentDate;
     private TimeZone zone;
     private OnDateSetListener dateSetListener;
@@ -28,24 +26,23 @@ public class DateInputView extends AppCompatEditText implements DatePickerDialog
     public DateInputView(Context context)
     {
         super(context);
-        init(context);
+        init();
     }
 
     public DateInputView(Context context, AttributeSet attrs)
     {
         super(context, attrs);
-        init(context);
+        init();
     }
 
     public DateInputView(Context context, AttributeSet attrs, int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
-        init(context);
+        init();
     }
 
-    private void init(Context context)
+    private void init()
     {
-        themeID = Globals.getDialogThemeID(context);
         currentDate = Calendar.getInstance();
         zone = currentDate.getTimeZone();
         setDate(currentDate);

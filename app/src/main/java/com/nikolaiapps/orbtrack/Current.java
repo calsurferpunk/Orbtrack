@@ -1063,7 +1063,7 @@ public abstract class Current
             public final boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
-            public Drawable icon;
+            public final Drawable icon;
             public AppCompatImageView nameImage;
             public TextView nameText;
             public TextView timeText;
@@ -1075,7 +1075,7 @@ public abstract class Current
             public ExpandingListView subList;
             public LinearLayout dataGroup;
             public LinearLayout progressGroup;
-            public CalculateViewsTask.ViewData[] views;
+            public final CalculateViewsTask.ViewData[] views;
 
             public static class Comparer implements Comparator<Item>
             {
@@ -2363,7 +2363,7 @@ public abstract class Current
             private final String ownerCode;
             public double julianDate;
             public Calendar time;
-            public Drawable icon;
+            public final Drawable icon;
             public AppCompatImageView nameImage;
             public TextView nameText;
             public TextView speedText;
@@ -2374,7 +2374,7 @@ public abstract class Current
             public ExpandingListView subList;
             public LinearLayout dataGroup;
             public LinearLayout progressGroup;
-            public CalculateCoordinatesTask.CoordinateData[] coordinates;
+            public final CalculateCoordinatesTask.CoordinateData[] coordinates;
 
             public static class Comparer implements Comparator<Item>
             {

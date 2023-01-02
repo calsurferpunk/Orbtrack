@@ -331,14 +331,15 @@ class Whirly
         void moveLocation(double latitude, double longitude, double altitudeKm, boolean limitAltitude)
         {
             //get initial z value in scaled meters
-            double z = (altitudeKm * 1000 * CoordinatesFragment.WhirlyZScale);
+            boolean negativeAltitudeKm = (altitudeKm < 0);
+            double z = (negativeAltitudeKm ? 0 : (altitudeKm * 1000 * CoordinatesFragment.WhirlyZScale));
 
             remove();
 
             //normalize values
             latitude = Globals.normalizeLatitude(latitude);
             longitude = Globals.normalizeLongitude(longitude);
-            if(limitAltitude)
+            if(limitAltitude && !negativeAltitudeKm)
             {
                 if(z < CoordinatesFragment.MinDrawDistanceMeters)
                 {
@@ -353,7 +354,10 @@ class Whirly
             zValue = z;
             board.setCenter(new Point3d(Math.toRadians(longitude), Math.toRadians(latitude), zValue));
 
-            add();
+            if(!negativeAltitudeKm)
+            {
+                add();
+            }
         }
 
         private void add()
@@ -465,24 +469,28 @@ class Whirly
             flatInfo.setEnable(visible);
         }
 
-        private void move(double latitude, double longitude, double halfLatitudeRadsWidth, double halfLongitudeRadsWidth)
+        private void move(double latitude, double longitude, double halfLatitudeRadsWidth, double halfLongitudeRadsWidth, boolean show)
         {
             double latitudeRads;
             double longitudeRads;
 
             remove();
 
-            //normalize values
-            latitude = Globals.normalizeLatitude(latitude);
-            longitude = Globals.normalizeLongitude(longitude);
-            latitudeRads = Math.toRadians(latitude);
-            longitudeRads = Math.toRadians(longitude);
+            //if showing
+            if(show)
+            {
+                //normalize values
+                latitude = Globals.normalizeLatitude(latitude);
+                longitude = Globals.normalizeLongitude(longitude);
+                latitudeRads = Math.toRadians(latitude);
+                longitudeRads = Math.toRadians(longitude);
 
-            //update sticker
-            flatSticker.setLowerLeft(new Point2d(longitudeRads - halfLongitudeRadsWidth, latitudeRads - halfLatitudeRadsWidth));
-            flatSticker.setUpperRight(new Point2d(longitudeRads + halfLongitudeRadsWidth, latitudeRads + halfLatitudeRadsWidth));
+                //update sticker
+                flatSticker.setLowerLeft(new Point2d(longitudeRads - halfLongitudeRadsWidth, latitudeRads - halfLatitudeRadsWidth));
+                flatSticker.setUpperRight(new Point2d(longitudeRads + halfLongitudeRadsWidth, latitudeRads + halfLatitudeRadsWidth));
 
-            add();
+                add();
+            }
         }
 
         void moveLocation(double latitude, double longitude, double latitudeWidth, double longitudeWidth)
@@ -490,13 +498,13 @@ class Whirly
             double halfLatRadsWidth = Math.toRadians(latitudeWidth);
             double halfLonRadsWidth = Math.toRadians(longitudeWidth);
 
-            move(latitude, longitude, halfLatRadsWidth, halfLonRadsWidth);
+            move(latitude, longitude, halfLatRadsWidth, halfLonRadsWidth, true);
         }
-        void moveLocation(double latitude, double longitude)
+        void moveLocation(double latitude, double longitude, boolean show)
         {
             double halfRadsWidth = (DefaultImageScale / 3.0) * flatScale * Math.min(zoomScale, 1);
 
-            move(latitude, longitude, halfRadsWidth, halfRadsWidth);
+            move(latitude, longitude, halfRadsWidth, halfRadsWidth, show);
         }
 
         private void add()
@@ -951,6 +959,11 @@ class Whirly
 
             marker.loc = Point2d.FromDegrees(longitude, latitude);
             setInfoLocation();
+
+            if(altitudeKm < 0)
+            {
+                common.tleIsAccurate = false;
+            }
 
             add();
         }
@@ -1662,7 +1675,7 @@ class Whirly
 
                         //move shadow
                         orbitalShadow.setZoomScale(currentZoom);
-                        orbitalShadow.moveLocation(latitude, longitude);
+                        orbitalShadow.moveLocation(latitude, longitude, (altitudeKm > 0));
                     }
                 }
 

@@ -5,9 +5,10 @@ import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import android.view.View;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.TimeZone;
@@ -16,10 +17,12 @@ import java.util.TimeZone;
 public abstract class LocationReceiver extends BroadcastReceiver
 {
     int startFlags;
+    private Observer<Intent> observer;
 
     public LocationReceiver(int setStartFlags)
     {
         startFlags = setStartFlags;
+        observer = null;
     }
 
     //Get activity
@@ -75,15 +78,39 @@ public abstract class LocationReceiver extends BroadcastReceiver
     }
 
     //Register receiver
+    public void register(Context context, boolean forever)
+    {
+        MutableLiveData<Intent> localBroadcast = LocationService.getLocalBroadcast();
+
+        observer = new Observer<Intent>()
+        {
+            @Override
+            public void onChanged(Intent intent)
+            {
+                LocationReceiver.this.onReceive(context, intent);
+            }
+        };
+        if(forever)
+        {
+            localBroadcast.observeForever(observer);
+        }
+        else if(context instanceof LifecycleOwner)
+        {
+            localBroadcast.observe((LifecycleOwner)context, observer);
+        }
+    }
     public void register(Context context)
     {
-        LocalBroadcastManager.getInstance(context).registerReceiver(this, new IntentFilter(LocationService.LOCATION_FILTER));
+        register(context, false);
     }
 
     //Unregister receiver
     public void unregister(Context context)
     {
-        LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
+        if(observer != null)
+        {
+            LocationService.getLocalBroadcast().removeObserver(observer);
+        }
     }
 
     //Start location service

@@ -20,7 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.MutableLiveData;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationListener;
@@ -505,7 +505,7 @@ public class LocationService extends Service implements LocationListener
     private static LocationRequest locationRequester = null;
     private static android.location.LocationListener legacyListener = null;
     private static LocationCallback locationListener = null;
-    private static LocalBroadcastManager localBroadcast = null;
+    private static MutableLiveData<Intent> localBroadcast = null;
     private static FusedLocationProviderClient locationClient = null;
 
     private boolean runForeground;
@@ -590,12 +590,8 @@ public class LocationService extends Service implements LocationListener
                 }
                 Globals.startForeground(this, Globals.ChannelIds.Location, notifyBuilder, runForeground);
 
-                //if broadcaster does not exist yet
-                if(localBroadcast == null)
-                {
-                    //get broadcaster
-                    localBroadcast = LocalBroadcastManager.getInstance(this);
-                }
+                //setup local broadcast
+                getLocalBroadcast();
 
                 //make sure connected
                 connect(gettingLocation);
@@ -626,6 +622,18 @@ public class LocationService extends Service implements LocationListener
         super.onDestroy();
     }
 
+    //Gets local broadcast
+    public static MutableLiveData<Intent> getLocalBroadcast()
+    {
+        if(localBroadcast == null)
+        {
+            localBroadcast = new MutableLiveData<>();
+            localBroadcast.setValue(new Intent());
+        }
+
+        return(localBroadcast);
+    }
+
     //Gets a new broadcast intent
     private static Intent getBroadcastIntent(byte messageType)
     {
@@ -639,7 +647,7 @@ public class LocationService extends Service implements LocationListener
     {
         if(localBroadcast != null)
         {
-            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedEnable));
+            localBroadcast.setValue(getBroadcastIntent(MessageTypes.NeedEnable));
         }
     }
 
@@ -648,7 +656,7 @@ public class LocationService extends Service implements LocationListener
     {
         if(localBroadcast != null)
         {
-            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedPermission));
+            localBroadcast.setValue(getBroadcastIntent(MessageTypes.NeedPermission));
         }
     }
 
@@ -657,7 +665,7 @@ public class LocationService extends Service implements LocationListener
     {
         if(localBroadcast != null)
         {
-            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.Denied));
+            localBroadcast.setValue(getBroadcastIntent(MessageTypes.Denied));
         }
     }
 
@@ -666,7 +674,7 @@ public class LocationService extends Service implements LocationListener
     {
         if(localBroadcast != null)
         {
-            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.Connected));
+            localBroadcast.setValue(getBroadcastIntent(MessageTypes.Connected));
         }
     }
 
@@ -675,7 +683,7 @@ public class LocationService extends Service implements LocationListener
     {
         if(localBroadcast != null)
         {
-            localBroadcast.sendBroadcast(getBroadcastIntent(MessageTypes.NeedRestart));
+            localBroadcast.setValue(getBroadcastIntent(MessageTypes.NeedRestart));
         }
     }
 
@@ -690,7 +698,7 @@ public class LocationService extends Service implements LocationListener
             locationIntent.putExtra(ParamTypes.Observer, observer);
             if(localBroadcast != null)
             {
-                localBroadcast.sendBroadcast(locationIntent);
+                localBroadcast.setValue(locationIntent);
             }
 
             //if not getting location updates and not running in foreground

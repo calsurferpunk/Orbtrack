@@ -1172,7 +1172,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     }
                 }
             };
-            locationReceiver.register(context);
+            locationReceiver.register(context, true);
         }
         //else if not using and is set
         else if(!use && locationReceiver != null)

@@ -3,11 +3,9 @@ package com.nikolaiapps.orbtrack;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -21,7 +19,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.Observer;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
@@ -1341,7 +1339,7 @@ public abstract class Selectable
         protected OnPageSetListener pageSetListener;
         private OnPagePauseListener pagePauseListener;
         private OnPageResumeListener pageResumeListener;
-        private BroadcastReceiver updateReceiver;
+        private Observer<Intent> updateReceiver;
 
         private Menu actionMenu;
         private ActionMode actionModeMenu;
@@ -1378,7 +1376,7 @@ public abstract class Selectable
             updateReceiver = createLocalBroadcastReceiver();
             if(context != null)
             {
-                LocalBroadcastManager.getInstance(context).registerReceiver(updateReceiver, new IntentFilter(UpdateService.UPDATE_FILTER));
+                UpdateService.observe(context, updateReceiver);
             }
 
             this.setRetainInstance(true);       //keep adapter on orientation changes
@@ -1430,9 +1428,9 @@ public abstract class Selectable
                 playBarWasRunning = false;
             }
 
-            if(context != null)
+            if(updateReceiver != null)
             {
-                LocalBroadcastManager.getInstance(context).unregisterReceiver(updateReceiver);
+                UpdateService.removeObserver(updateReceiver);
             }
 
             super.onDestroy();
@@ -2125,13 +2123,20 @@ public abstract class Selectable
         }
 
         //Creates a local broadcast listener
-        private BroadcastReceiver createLocalBroadcastReceiver()
+        private Observer<Intent> createLocalBroadcastReceiver()
         {
-            return(new BroadcastReceiver()
+            return(new Observer<Intent>()
             {
                 @Override
-                public void onReceive(Context context, Intent intent)
+                public void onChanged(Intent intent)
                 {
+                    //if intent isn't set
+                    if(intent == null)
+                    {
+                        //stop
+                        return;
+                    }
+
                     int progressType = intent.getIntExtra(UpdateService.ParamTypes.ProgressType, Byte.MAX_VALUE);
 
                     switch(progressType)

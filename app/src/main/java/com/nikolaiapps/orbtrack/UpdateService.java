@@ -16,6 +16,9 @@ import android.os.Parcelable;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.Observer;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.File;
@@ -766,6 +769,7 @@ public class UpdateService extends NotifyService
     private static final long MIN_MASTER_LIST_UPDATE_TIME_MS = 86400000L;            //1 day
     private static final int CurrentYear = Calendar.getInstance().get(Calendar.YEAR);
     private static MasterListType masterList;
+    private static MutableLiveData<Intent> localBroadcast;
     private static final boolean[] cancelIntent = new boolean[UpdateType.UpdateCount];
     private static final boolean[] showNotification = new boolean[UpdateType.UpdateCount];
     private static final String[] currentError = new String[UpdateType.UpdateCount];
@@ -922,6 +926,37 @@ public class UpdateService extends NotifyService
         cancelIntent[updateType] = showNotification[updateType] = false;
     }
 
+    @NonNull
+    private static MutableLiveData<Intent> getLocalBroadcast()
+    {
+        if(localBroadcast == null)
+        {
+            localBroadcast = new MutableLiveData<>();
+            Globals.setBroadcastValue(localBroadcast, null);
+        }
+
+        return(localBroadcast);
+    }
+
+    public static void observe(Context context, Observer<Intent> observer)
+    {
+        if(context instanceof LifecycleOwner)
+        {
+            getLocalBroadcast().observe((LifecycleOwner)context, observer);
+        }
+    }
+
+    public static void removeObserver(Observer<Intent> observer)
+    {
+        if(observer != null)
+        {
+            MutableLiveData<Intent> localBroadcast = getLocalBroadcast();
+
+            localBroadcast.removeObserver(observer);
+            Globals.setBroadcastValue(localBroadcast, null);
+        }
+    }
+
     //Updates notification and it's visibility
     private void updateNotification(NotificationCompat.Builder notifyBuilder, byte updateType)
     {
@@ -1008,7 +1043,7 @@ public class UpdateService extends NotifyService
             }
         }
 
-        sendMessage(messageType, updateType, ParamTypes.UpdateType, Integer.MAX_VALUE, titleDesc, section, UPDATE_FILTER, NotifyReceiver.class, overall, 0, index, count, progressType, updateID, dismissID, retryID, showNotification[updateType], extraData);
+        sendMessage(getLocalBroadcast(), messageType, updateType, ParamTypes.UpdateType, Integer.MAX_VALUE, titleDesc, section, UPDATE_FILTER, NotifyReceiver.class, overall, 0, index, count, progressType, updateID, dismissID, retryID, showNotification[updateType], extraData);
     }
     private void sendMessage(byte messageType, byte updateType, String section, long index, long count, int progressType, Object data)
     {

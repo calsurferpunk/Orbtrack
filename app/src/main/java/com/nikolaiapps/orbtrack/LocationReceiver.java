@@ -2,19 +2,16 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import androidx.lifecycle.LifecycleOwner;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Observer;
 import android.view.View;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import java.util.TimeZone;
 
 
-public abstract class LocationReceiver extends BroadcastReceiver
+public abstract class LocationReceiver
 {
     int startFlags;
     private Observer<Intent> observer;
@@ -80,23 +77,35 @@ public abstract class LocationReceiver extends BroadcastReceiver
     //Register receiver
     public void register(Context context, boolean forever)
     {
-        MutableLiveData<Intent> localBroadcast = LocationService.getLocalBroadcast();
+        boolean needObserve = !forever;
 
         observer = new Observer<Intent>()
         {
             @Override
             public void onChanged(Intent intent)
             {
-                LocationReceiver.this.onReceive(context, intent);
+                if(intent != null)
+                {
+                    LocationReceiver.this.onReceive(context, intent);
+                }
             }
         };
+
         if(forever)
         {
-            localBroadcast.observeForever(observer);
+            try
+            {
+                LocationService.observeForever(observer);
+            }
+            catch(Exception ex)
+            {
+                needObserve = true;
+            }
         }
-        else if(context instanceof LifecycleOwner)
+
+        if(needObserve)
         {
-            localBroadcast.observe((LifecycleOwner)context, observer);
+            LocationService.observe(context, observer);
         }
     }
     public void register(Context context)
@@ -105,11 +114,11 @@ public abstract class LocationReceiver extends BroadcastReceiver
     }
 
     //Unregister receiver
-    public void unregister(Context context)
+    public void unregister()
     {
         if(observer != null)
         {
-            LocationService.getLocalBroadcast().removeObserver(observer);
+            LocationService.removeObserver(observer);
         }
     }
 
@@ -158,7 +167,6 @@ public abstract class LocationReceiver extends BroadcastReceiver
         }
     }
 
-    @Override
     public void onReceive(Context context, Intent intent)
     {
         byte messageType = intent.getByteExtra(LocationService.ParamTypes.MessageType, Byte.MAX_VALUE);

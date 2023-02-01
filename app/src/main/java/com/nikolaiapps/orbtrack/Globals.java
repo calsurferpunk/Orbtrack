@@ -51,6 +51,7 @@ import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.lifecycle.MutableLiveData;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -1492,6 +1493,37 @@ public abstract class Globals
             //launch activity
             launcher.launch(intent);
         }
+    }
+
+    //Sets a broadcast intent value
+    public static void setBroadcastValue(Context context, MutableLiveData<Intent> broadcaster, Intent value)
+    {
+        boolean needPost = false;
+
+        if(context instanceof Service)
+        {
+            needPost = true;
+        }
+        else
+        {
+            try
+            {
+                broadcaster.setValue(value);
+            }
+            catch(Exception ex)
+            {
+                needPost = true;
+            }
+        }
+
+        if(needPost)
+        {
+            broadcaster.postValue(value);
+        }
+    }
+    public static void setBroadcastValue(MutableLiveData<Intent> broadcaster, Intent value)
+    {
+        setBroadcastValue(null, broadcaster, value);
     }
 
     //Starts a service

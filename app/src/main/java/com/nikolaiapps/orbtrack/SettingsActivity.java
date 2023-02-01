@@ -1662,8 +1662,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         super.onDestroy();
 
         //remove receivers
-        locationReceiver.unregister(this);
-        localUpdateReceiver.unregister(this);
+        locationReceiver.unregister();
+        localUpdateReceiver.unregister();
 
         //stop listener
         if(preferences != null && preferenceChangeListener != null)

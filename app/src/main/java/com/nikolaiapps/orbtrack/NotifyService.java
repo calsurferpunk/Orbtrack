@@ -13,7 +13,7 @@ import android.os.PowerManager;
 import android.os.SystemClock;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.MutableLiveData;
 import java.util.Calendar;
 
 
@@ -253,7 +253,7 @@ public abstract class NotifyService extends IntentService
     }
 
     //Sends a message
-    protected void sendMessage(byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int retryID, boolean showNotification, Bundle extraData)
+    protected void sendMessage(MutableLiveData<Intent> localBroadcast, byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int retryID, boolean showNotification, Bundle extraData)
     {
         boolean isGeneral = (messageType == MessageTypes.General);
         boolean isStarted = (progressType == Globals.ProgressType.Started);
@@ -364,7 +364,10 @@ public abstract class NotifyService extends IntentService
             }
 
             //send intent and update notification
-            LocalBroadcastManager.getInstance(this).sendBroadcast(intent);
+            if(localBroadcast != null)
+            {
+                Globals.setBroadcastValue(this, localBroadcast, intent);
+            }
             updateNotification(notifyBuilder, updateID, limitMs, showNotification);
         }
     }

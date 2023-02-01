@@ -1,14 +1,12 @@
 package com.nikolaiapps.orbtrack;
 
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.os.Build;
 import android.os.Bundle;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.Observer;
 import android.text.Html;
 import android.text.Spanned;
 import android.view.View;
@@ -16,8 +14,10 @@ import java.io.File;
 import java.util.ArrayList;
 
 
-public abstract class UpdateReceiver extends BroadcastReceiver
+public abstract class UpdateReceiver
 {
+    private Observer<Intent> observer = null;
+
     //Returns parent view
     protected View getParentView()
     {
@@ -77,24 +77,26 @@ public abstract class UpdateReceiver extends BroadcastReceiver
     //Register receiver
     public void register(Context context)
     {
-        //if context is set
-        if(context != null)
+        observer = new Observer<Intent>()
         {
-            LocalBroadcastManager.getInstance(context).registerReceiver(this, new IntentFilter(UpdateService.UPDATE_FILTER));
-        }
+            @Override
+            public void onChanged(Intent intent)
+            {
+                if(intent != null)
+                {
+                    UpdateReceiver.this.onReceive(context, intent);
+                }
+            }
+        };
+        UpdateService.observe(context, observer);
     }
 
     //Unregister receiver
-    public void unregister(Context context)
+    public void unregister()
     {
-        //if context is set
-        if(context != null)
-        {
-            LocalBroadcastManager.getInstance(context).unregisterReceiver(this);
-        }
+        UpdateService.removeObserver(observer);
     }
 
-    @Override
     public void onReceive(Context context, Intent intent)
     {
         final byte updateType = intent.getByteExtra(UpdateService.ParamTypes.UpdateType, Byte.MAX_VALUE);

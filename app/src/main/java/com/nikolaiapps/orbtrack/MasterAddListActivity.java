@@ -3,17 +3,15 @@ package com.nikolaiapps.orbtrack;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
+import androidx.lifecycle.Observer;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -403,8 +401,8 @@ public class MasterAddListActivity extends BaseInputActivity
 
     //Data
     private byte requestCode;
-    private BroadcastReceiver updateReceiver;
-    private BroadcastReceiver listReceiver;
+    private Observer<Intent> updateReceiver;
+    private Observer<Intent> listReceiver;
 
     //Displays
     private int itemSelectedCount;
@@ -428,8 +426,9 @@ public class MasterAddListActivity extends BaseInputActivity
     private MasterListAdapter.OnItemCheckChangedListener checkChangedListener;
 
     //Creates local broadcast receiver
-    private BroadcastReceiver createLocalBroadcastReceiver(BroadcastReceiver oldReceiver, final MultiProgressDialog taskProgress, final OrbitalFilterList.Item[] selectedItems)
+    private Observer<Intent> createLocalBroadcastReceiver(Observer<Intent> oldReceiver, byte receiverUpdateType, final MultiProgressDialog taskProgress, final OrbitalFilterList.Item[] selectedItems)
     {
+        final Context context = this;
         final Resources res = this.getResources();
         final String overallString = res.getString(R.string.title_overall);
         final String savingString = res.getString(R.string.title_saving);
@@ -440,15 +439,22 @@ public class MasterAddListActivity extends BaseInputActivity
         if(oldReceiver != null)
         {
             //remove it
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(oldReceiver);
+            UpdateService.removeObserver(oldReceiver);
         }
 
         //create receiver
-        BroadcastReceiver updateReceiver = new BroadcastReceiver()
+        Observer<Intent> updateReceiver = new Observer<Intent>()
         {
             @Override
-            public void onReceive(final Context context, Intent intent)
+            public void onChanged(Intent intent)
             {
+                //if intent isn't set
+                if(intent == null)
+                {
+                    //stop
+                    return;
+                }
+
                 byte messageType = intent.getByteExtra(UpdateService.ParamTypes.MessageType, Byte.MAX_VALUE);
                 byte updateType = intent.getByteExtra(UpdateService.ParamTypes.UpdateType, Byte.MAX_VALUE);
                 boolean allowDismiss = true;
@@ -459,10 +465,19 @@ public class MasterAddListActivity extends BaseInputActivity
                 long updateValue = -1;
                 String section = intent.getStringExtra(UpdateService.ParamTypes.Section);
                 String message = "";
+                boolean isGeneral = (messageType == NotifyService.MessageTypes.General);
                 boolean isDownload = (messageType == NotifyService.MessageTypes.Download);
                 UpdateService.MasterListType masterList = null;
                 final Intent data = new Intent();
 
+                //if not the update type being watched
+                if(updateType != receiverUpdateType)
+                {
+                    //stop
+                    return;
+                }
+
+                //handle based on update type
                 switch(updateType)
                 {
                     case UpdateService.UpdateType.UpdateSatellites:
@@ -551,7 +566,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                 if(section != null)
                                 {
                                     //update progress
-                                    taskProgress.setMessage((messageType == UpdateService.MessageTypes.Save ? (savingString + " ") : messageType == UpdateService.MessageTypes.Load ? (loadingString + " ") :  !isDownload ? (gettingString + " ") : "") + section);
+                                    taskProgress.setMessage((messageType == NotifyService.MessageTypes.Save ? (savingString + " ") : messageType == NotifyService.MessageTypes.Load ? (loadingString + " ") :  !isDownload ? (gettingString + " ") : "") + section);
                                 }
                                 break;
 
@@ -562,8 +577,8 @@ public class MasterAddListActivity extends BaseInputActivity
                                     //update message based on message type
                                     switch(messageType)
                                     {
-                                        case UpdateService.MessageTypes.Save:
-                                        case UpdateService.MessageTypes.Load:
+                                        case NotifyService.MessageTypes.Save:
+                                        case NotifyService.MessageTypes.Load:
                                             updateValue = updateIndex + 1;
                                             message = res.getQuantityString(R.plurals.title_space_of_space, (int)updateCount, updateValue, updateCount);
                                             break;
@@ -613,7 +628,7 @@ public class MasterAddListActivity extends BaseInputActivity
                             case Globals.ProgressType.Finished:
                             case Globals.ProgressType.Failed:
                             case Globals.ProgressType.Denied:
-                                if(messageType == UpdateService.MessageTypes.General)
+                                if(isGeneral)
                                 {
                                     //get master list
                                     masterList = UpdateService.getMasterList();
@@ -691,7 +706,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                 //fall through
 
                             case Globals.ProgressType.Cancelled:
-                                if(messageType == UpdateService.MessageTypes.General)
+                                if(isGeneral)
                                 {
                                     //if allowing dismiss
                                     if(allowDismiss)
@@ -746,7 +761,7 @@ public class MasterAddListActivity extends BaseInputActivity
         };
 
         //register receiver
-        LocalBroadcastManager.getInstance(this).registerReceiver(updateReceiver, new IntentFilter(UpdateService.UPDATE_FILTER));
+        UpdateService.observe(context, updateReceiver);
 
         //return receiver
         return(updateReceiver);
@@ -968,12 +983,12 @@ public class MasterAddListActivity extends BaseInputActivity
         if(updateReceiver != null)
         {
             //remove it
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(updateReceiver);
+            UpdateService.removeObserver(updateReceiver);
         }
         if(listReceiver != null)
         {
             //remove it
-            LocalBroadcastManager.getInstance(this).unregisterReceiver(listReceiver);
+            UpdateService.removeObserver(listReceiver);
         }
 
         //if progress displays are visible
@@ -1087,7 +1102,7 @@ public class MasterAddListActivity extends BaseInputActivity
             }
 
             //get satellite TLE data
-            updateReceiver = createLocalBroadcastReceiver(updateReceiver, addProgress, selectedItems);
+            updateReceiver = createLocalBroadcastReceiver(updateReceiver, UpdateService.UpdateType.UpdateSatellites, addProgress, selectedItems);
             if(!UpdateService.updatingSatellites())
             {
                 UpdateService.updateSatellites(MasterAddListActivity.this, res.getString(R.string.title_satellites_adding), selectedSatellites, false);
@@ -1113,7 +1128,7 @@ public class MasterAddListActivity extends BaseInputActivity
         }
 
         //get list
-        listReceiver = createLocalBroadcastReceiver(listReceiver, downloadProgress, null);
+        listReceiver = createLocalBroadcastReceiver(listReceiver, UpdateService.UpdateType.GetMasterList, downloadProgress, null);
         if(!UpdateService.updatingMasterList())
         {
             //get update when desired

@@ -9,9 +9,11 @@ import android.content.res.Resources;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
+import androidx.lifecycle.MutableLiveData;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -902,7 +904,7 @@ public class CalculateService extends NotifyService
             else if(!use && locationReceiver != null)
             {
                 //stop listening
-                locationReceiver.unregister(context);
+                locationReceiver.unregister();
             }
         }
 
@@ -950,7 +952,6 @@ public class CalculateService extends NotifyService
             boolean applyRefraction = (boolean)params[9];
             boolean getAll = (calculateType == CalculateType.OrbitalPasses || calculateType == CalculateType.OrbitalIntersections);
             boolean hideSlow = (calculateType == CalculateType.OrbitalsPasses);
-            //boolean allowPastEnd = (calculateType == CalculateType.OrbitalPasses);
             ArrayList<PassData> items = new ArrayList<>();
 
             //if pass items are set
@@ -961,7 +962,7 @@ public class CalculateService extends NotifyService
             }
 
             //calculate paths
-            calculatePaths(null, task, context, calculateType, null, items, savedPassItems, observer, minEl, intersection, julianStart, julianEnd, applyRefraction, getAll, /*allowPastEnd*/ getAll, hideSlow, calculateListener);
+            calculatePaths(null, task, context, calculateType, null, items, savedPassItems, observer, minEl, intersection, julianStart, julianEnd, applyRefraction, getAll, getAll, hideSlow, calculateListener);
 
             //done
             return(null);
@@ -969,6 +970,7 @@ public class CalculateService extends NotifyService
     }
 
     private static boolean firstRun = true;
+    private static MutableLiveData<Intent> localBroadcast;
     private static final boolean[] cancelIntent = new boolean[CalculateType.CalculateCount];
     private static final boolean[] showNotification = new boolean[CalculateType.CalculateCount];
     public static final String CALCULATE_FILTER = "calculateServiceFilter";
@@ -1047,6 +1049,18 @@ public class CalculateService extends NotifyService
         cancelIntent[calculateType] = showNotification[calculateType] = false;
     }
 
+    @NonNull
+    private MutableLiveData<Intent> getLocalBroadcast()
+    {
+        if(localBroadcast == null)
+        {
+            localBroadcast = new MutableLiveData<>();
+            Globals.setBroadcastValue(localBroadcast, new Intent());
+        }
+
+        return(localBroadcast);
+    }
+
     //Updates notification and it's visibility
     private void updateNotification(NotificationCompat.Builder notifyBuilder, byte calculateType)
     {
@@ -1066,7 +1080,7 @@ public class CalculateService extends NotifyService
             extraData.putParcelable(ParamTypes.PassData, pass);
         }
 
-        sendMessage(messageType, calculateType, ParamTypes.CalculateType, id, titleDesc, section, CALCULATE_FILTER, NotifyReceiver.class, subIndex, subCount, index, count, progressType, updateID, NotifyReceiver.DismissPassesID, NotifyReceiver.RetryPassesID, showNotification[calculateType], extraData);
+        sendMessage(getLocalBroadcast(), messageType, calculateType, ParamTypes.CalculateType, id, titleDesc, section, CALCULATE_FILTER, NotifyReceiver.class, subIndex, subCount, index, count, progressType, updateID, NotifyReceiver.DismissPassesID, NotifyReceiver.RetryPassesID, showNotification[calculateType], extraData);
     }
 
     //Sends a load message

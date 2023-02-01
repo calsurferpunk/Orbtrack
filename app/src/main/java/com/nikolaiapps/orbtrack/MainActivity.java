@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.core.view.GravityCompat;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -327,15 +326,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         super.onDestroy();
 
-        LocalBroadcastManager manager = LocalBroadcastManager.getInstance(this);
-
+        //if receivers are set
         if(locationReceiver != null)
         {
-            manager.unregisterReceiver(locationReceiver);
+            //remove it
+            locationReceiver.unregister();
         }
         if(localUpdateReceiver != null)
         {
-            manager.unregisterReceiver(localUpdateReceiver);
+            //remove it
+            localUpdateReceiver.unregister();
         }
 
         //if progress display is visible
@@ -2660,7 +2660,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         if(oldReceiver != null)
         {
             //remove it
-            oldReceiver.unregister(this);
+            oldReceiver.unregister();
         }
 
         //create receiver
@@ -2750,7 +2750,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         if(oldReceiver != null)
         {
             //remove it
-            oldReceiver.unregister(this);
+            oldReceiver.unregister();
         }
 
         //create receiver

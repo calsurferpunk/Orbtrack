@@ -473,7 +473,7 @@ public class MapLocationInputActivity extends BaseInputActivity
         {
             if(locationReceiver != null)
             {
-                locationReceiver.unregister(this);
+                locationReceiver.unregister();
             }
             locationReceiver = new LocationReceiver(LocationService.FLAG_START_NONE)
             {
@@ -530,7 +530,7 @@ public class MapLocationInputActivity extends BaseInputActivity
 
         if(locationReceiver != null)
         {
-            locationReceiver.unregister(this);
+            locationReceiver.unregister();
         }
     }
 

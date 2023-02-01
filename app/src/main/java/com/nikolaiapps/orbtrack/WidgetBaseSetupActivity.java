@@ -820,7 +820,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
             if(locationReceiver != null)
             {
-                locationReceiver.unregister(this.getContext());
+                locationReceiver.unregister();
                 locationReceiver = null;
             }
         }

@@ -17,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -667,12 +666,12 @@ public abstract class Orbitals
                 if(updateReceiver != null)
                 {
                     //remove it
-                    LocalBroadcastManager.getInstance(context).unregisterReceiver(updateReceiver);
+                    updateReceiver.unregister();
                 }
                 if(saveReceiver != null)
                 {
                     //remove it
-                    LocalBroadcastManager.getInstance(context).unregisterReceiver(saveReceiver);
+                    saveReceiver.unregister();
                 }
             }
 
@@ -875,7 +874,7 @@ public abstract class Orbitals
             if(oldReceiver != null)
             {
                 //remove it
-                oldReceiver.unregister(context);
+                oldReceiver.unregister();
             }
 
             //create progress if using

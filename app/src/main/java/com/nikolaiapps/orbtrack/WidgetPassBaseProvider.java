@@ -1135,6 +1135,17 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                         usingFollow = (getWidgetIdList(context, widgetClasses[index], null, FLAG_WIDGET_FOLLOW).size() > 0);
                     }
 
+                    //possibly update starting flags
+                    if(usingFollow)
+                    {
+                        //add foreground flag
+                        locationReceiver.startFlags |= LocationService.FLAG_START_RUN_FOREGROUND;
+                    }
+                    else
+                    {
+                        locationReceiver.startFlags &= ~LocationService.FLAG_START_RUN_FOREGROUND;
+                    }
+
                     //if any are using follow
                     if(usingFollow)
                     {
@@ -1181,7 +1192,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             locationReceiver.onRestart(context);
 
             //stop listening
-            locationReceiver.unregister(context);
+            locationReceiver.unregister();
             locationReceiver = null;
         }
     }

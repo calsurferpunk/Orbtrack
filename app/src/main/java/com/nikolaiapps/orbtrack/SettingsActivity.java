@@ -1024,7 +1024,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         public SetupPageAdapter(FragmentManager fm, View parentView)
         {
-            super(fm, parentView, null, null, null, null, null, null, null, null, -1, null);
+            super(fm, parentView, null, null, null, null, null, null, null, -1, null);
         }
 
         @Override
@@ -1948,7 +1948,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(settingsPageAdapter == null)
         {
             //create adapter
-            settingsPageAdapter = new Settings.PageAdapter(manager, settingsLayout, null, createOnItemCheckChangedListener(), createOnSetAdapterListener(), createOnUpdateNeededListener(), null, createOnPageResumeListener(), new int[Settings.PageType.PageCount]);
+            settingsPageAdapter = new Settings.PageAdapter(manager, settingsLayout, null, createOnItemCheckChangedListener(), createOnSetAdapterListener(), createOnUpdateNeededListener(), createOnPageResumeListener(), new int[Settings.PageType.PageCount]);
         }
 
         //return page fragment

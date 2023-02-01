@@ -240,7 +240,6 @@ public class Graph extends View
     {
         Drawable backgroundDrawable;
         ColorDrawable backgroundColorDrawable;
-        TypedArray valueArray;
         float[] sizes;
 
         sizes = Globals.dpsToPixels(this.getContext(), 10, 15, 20, 14, 4, 4, 80);
@@ -267,8 +266,11 @@ public class Graph extends View
 
         if(attrs != null)
         {
-            valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.Graph, 0, 0);
-            textSizeSmall = valueArray.getDimension(R.styleable.Graph_dataTextSize, textSizeSmall);
+            try(TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.Graph, 0, 0))
+            {
+                textSizeSmall = valueArray.getDimension(R.styleable.Graph_dataTextSize, textSizeSmall);
+                valueArray.recycle();
+            }
         }
 
         backgroundDrawable = this.getBackground();
@@ -349,7 +351,7 @@ public class Graph extends View
         super.onConfigurationChanged(newConfig);
 
         deltaX = deltaY = 0;
-        setScrollX((int)deltaX, false);
+        setScrollX(0, false);
     }
 
     @Override
@@ -1749,7 +1751,7 @@ public class Graph extends View
         allowScroll = updateScrollDisplays = canScroll;
 
         //update display
-        setScrollX((int)deltaX, false);
+        setScrollX(0, false);
         this.refresh();
     }
 

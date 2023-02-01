@@ -15,14 +15,12 @@ import androidx.preference.PreferenceViewHolder;
 public class CustomPreference extends Preference
 {
     private float paddingLeft;
-    private String sharedName;
-    protected String titleText;
+    private String sharedName = null;
+    protected String titleText = null;
 
     public CustomPreference(@NonNull Context context, @Nullable @org.jetbrains.annotations.Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
         super(context, attrs, defStyleAttr, defStyleRes);
-
-        TypedArray valueArray;
 
         //set default
         paddingLeft = Globals.dpToPixels(context, 5);
@@ -30,10 +28,13 @@ public class CustomPreference extends Preference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CustomPreference, 0, 0);
-            paddingLeft = valueArray.getDimension(R.styleable.CustomPreference_paddingLeft, paddingLeft);
-            titleText = valueArray.getString(R.styleable.CustomPreference_titleText);
-            sharedName = valueArray.getString(R.styleable.CustomPreference_sharedName);
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CustomPreference, 0, 0))
+            {
+                paddingLeft = valueArray.getDimension(R.styleable.CustomPreference_paddingLeft, paddingLeft);
+                titleText = valueArray.getString(R.styleable.CustomPreference_titleText);
+                sharedName = valueArray.getString(R.styleable.CustomPreference_sharedName);
+                valueArray.recycle();
+            }
         }
 
         //set shared name

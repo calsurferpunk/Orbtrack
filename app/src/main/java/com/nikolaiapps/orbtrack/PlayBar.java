@@ -71,7 +71,6 @@ public class PlayBar extends LinearLayout
 
         int textColor;
         int buttonColor;
-        TypedArray valueArray;
         LinearLayout rootView;
         AppCompatImageButton leftButton;
         AppCompatImageButton rightButton;
@@ -83,9 +82,12 @@ public class PlayBar extends LinearLayout
         }
         else
         {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PlayBar, 0, 0);
-            textColor = valueArray.getColor(R.styleable.PlayBar_textColor, Color.WHITE);
-            buttonColor = valueArray.getColor(R.styleable.PlayBar_buttonColor, Color.WHITE);
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PlayBar, 0, 0))
+            {
+                textColor = valueArray.getColor(R.styleable.PlayBar_textColor, Color.WHITE);
+                buttonColor = valueArray.getColor(R.styleable.PlayBar_buttonColor, Color.WHITE);
+                valueArray.recycle();
+            }
         }
 
         //create displays

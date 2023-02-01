@@ -1293,7 +1293,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
         public TabAdapter(FragmentManager fm, View parentView, Class<?> setWidgetClass, Page.OnSettingChangedListener settingListener, Page.OnAllowOkayListener allowListener)
         {
-            super(fm, parentView, null, null, null, null, null, null, null, null, -1, null);
+            super(fm, parentView, null, null, null, null, null, null, null, -1, null);
 
             widgetClass = setWidgetClass;
             allowOkayListener = allowListener;
@@ -2022,11 +2022,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
     private static int getTextWeight(Context context, int widgetId, String preferenceName)
     {
         String weight = getPreferences(context).getString(preferenceName + getIdString(widgetId), FontWeight.Normal);
-
-        if(weight == null)
-        {
-            weight = "";
-        }
 
         switch(weight)
         {

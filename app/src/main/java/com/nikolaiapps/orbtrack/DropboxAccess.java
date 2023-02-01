@@ -28,7 +28,6 @@ import com.dropbox.core.v2.files.WriteMode;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -232,7 +231,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
                 final long totalBytes = fileName.length();
 
                 //upload file
-                inStream = new FileInputStream(fileName);
+                inStream = Globals.createFileInputStream(fileName);
                 dbClient.files().uploadBuilder(path + "/" + fileName.getName()).withMode(WriteMode.OVERWRITE).uploadAndFinish(inStream, new IOUtil.ProgressListener()
                 {
                     @Override

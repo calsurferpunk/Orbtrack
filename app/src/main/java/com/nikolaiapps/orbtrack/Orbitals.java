@@ -1234,7 +1234,7 @@ public abstract class Orbitals
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener)
         {
-            super(fm, parentView, null, updateListener, null, null,  detailListener, adapterListener, null, resumeListener, MainActivity.Groups.Orbitals, null);
+            super(fm, parentView, null, updateListener, null,  detailListener, adapterListener, null, resumeListener, MainActivity.Groups.Orbitals, null);
         }
 
         @Override

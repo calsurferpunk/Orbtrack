@@ -33,8 +33,6 @@ public class SliderPreference extends CustomPreference
         this.setPersistent(false);
         this.setLayoutResource(R.layout.slider_preference_layout);
 
-        TypedArray valueArray;
-
         //set defaults
         scaleType = ScaleType.Integer;
         minValue = 0;
@@ -43,11 +41,13 @@ public class SliderPreference extends CustomPreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SliderPreference, 0, 0);
-            scaleType = valueArray.getInt(R.styleable.SliderPreference_scaleType, ScaleType.Integer);
-            minValue = (int)valueArray.getFloat(R.styleable.SliderPreference_minValue, 0);
-            maxValue = (int)valueArray.getFloat(R.styleable.SliderPreference_maxValue, 100);
-            valueArray.recycle();
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SliderPreference, 0, 0))
+            {
+                scaleType = valueArray.getInt(R.styleable.SliderPreference_scaleType, ScaleType.Integer);
+                minValue = (int)valueArray.getFloat(R.styleable.SliderPreference_minValue, 0);
+                maxValue = (int)valueArray.getFloat(R.styleable.SliderPreference_maxValue, 100);
+                valueArray.recycle();
+            }
         }
     }
 

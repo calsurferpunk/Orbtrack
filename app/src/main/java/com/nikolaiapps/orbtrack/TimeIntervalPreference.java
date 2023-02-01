@@ -57,7 +57,6 @@ public class TimeIntervalPreference extends CustomPreference
         this.setPersistent(false);
         this.setLayoutResource(R.layout.time_interval_preference_layout);
 
-        TypedArray valueArray;
         Resources res = context.getResources();
 
         //set defaults
@@ -85,11 +84,13 @@ public class TimeIntervalPreference extends CustomPreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.TimeIntervalPreference, 0, 0);
-            hourKey = valueArray.getString(R.styleable.TimeIntervalPreference_hourKey);
-            minuteKey = valueArray.getString(R.styleable.TimeIntervalPreference_minuteKey);
-            intervalKey = valueArray.getString(R.styleable.TimeIntervalPreference_intervalKey);
-            valueArray.recycle();
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.TimeIntervalPreference, 0, 0))
+            {
+                hourKey = valueArray.getString(R.styleable.TimeIntervalPreference_hourKey);
+                minuteKey = valueArray.getString(R.styleable.TimeIntervalPreference_minuteKey);
+                intervalKey = valueArray.getString(R.styleable.TimeIntervalPreference_intervalKey);
+                valueArray.recycle();
+            }
         }
     }
     public TimeIntervalPreference(Context context, AttributeSet attrs, int defStyleAttr)

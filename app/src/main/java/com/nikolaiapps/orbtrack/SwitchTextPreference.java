@@ -39,8 +39,6 @@ public class SwitchTextPreference extends ValueTypePreference
 
         this.setLayoutResource(R.layout.switch_text_preference_layout);
 
-        TypedArray valueArray;
-
         //set defaults
         valueType = Integer.class;
         showSwitch = switchEnabled = true;
@@ -53,15 +51,17 @@ public class SwitchTextPreference extends ValueTypePreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwitchTextPreference, 0, 0);
-            showSwitch = valueArray.getBoolean(R.styleable.SwitchTextPreference_showSwitch, true);
-            reverseEnabled = valueArray.getBoolean(R.styleable.SwitchTextPreference_reverseEnabled, false);
-            switchKey = valueArray.getString(R.styleable.SwitchTextPreference_switchKey);
-            minValue = valueArray.getFloat(R.styleable.SwitchTextPreference_minValue, 0);
-            maxValue = valueArray.getFloat(R.styleable.SwitchTextPreference_maxValue, 100);
-            suffixText = valueArray.getString(R.styleable.SwitchTextPreference_suffixText);
-            setValueType(valueArray.getInt(R.styleable.SwitchTextPreference_valueType, ClassType.Integer));
-            valueArray.recycle();
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwitchTextPreference, 0, 0))
+            {
+                showSwitch = valueArray.getBoolean(R.styleable.SwitchTextPreference_showSwitch, true);
+                reverseEnabled = valueArray.getBoolean(R.styleable.SwitchTextPreference_reverseEnabled, false);
+                switchKey = valueArray.getString(R.styleable.SwitchTextPreference_switchKey);
+                minValue = valueArray.getFloat(R.styleable.SwitchTextPreference_minValue, 0);
+                maxValue = valueArray.getFloat(R.styleable.SwitchTextPreference_maxValue, 100);
+                suffixText = valueArray.getString(R.styleable.SwitchTextPreference_suffixText);
+                setValueType(valueArray.getInt(R.styleable.SwitchTextPreference_valueType, ClassType.Integer));
+                valueArray.recycle();
+            }
         }
     }
 

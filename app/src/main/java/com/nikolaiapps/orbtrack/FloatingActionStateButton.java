@@ -37,8 +37,6 @@ public class FloatingActionStateButton extends FloatingActionButton
 
     private void init(AttributeSet attrs)
     {
-        TypedArray valueArray;
-
         //if attributes are not set
         if(attrs == null)
         {
@@ -47,10 +45,12 @@ public class FloatingActionStateButton extends FloatingActionButton
         }
         else
         {
-            valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.FloatingActionStateButton, 0, 0);
-            normalTintColor = valueArray.getColor(R.styleable.FloatingActionStateButton_normalTint, Color.WHITE);
-            checkedTintColor = valueArray.getColor(R.styleable.FloatingActionStateButton_checkedTint, Color.GRAY);
-            valueArray.recycle();
+            try(TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.FloatingActionStateButton, 0, 0))
+            {
+                normalTintColor = valueArray.getColor(R.styleable.FloatingActionStateButton_normalTint, Color.WHITE);
+                checkedTintColor = valueArray.getColor(R.styleable.FloatingActionStateButton_checkedTint, Color.GRAY);
+                valueArray.recycle();
+            }
         }
 
         //force update

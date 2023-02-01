@@ -51,7 +51,6 @@ public class FloatingActionStateButtonMenu extends LinearLayout
 
     private void init(AttributeSet attrs)
     {
-        TypedArray valueArray;
         int spacingDp = (int)Globals.dpToPixels(getContext(), 3);
 
         subMenus = new ArrayList<>(0);
@@ -73,15 +72,17 @@ public class FloatingActionStateButtonMenu extends LinearLayout
         }
         else
         {
-            valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.FloatingActionStateButtonMenu, 0, 0);
-            imageTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_imageTint, Color.BLACK);
-            backgroundTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_backgroundTint, Color.WHITE);
-            checkedTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_checkedTint, Color.GRAY);
-            if(menuImageId == -1)
+            try(TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.FloatingActionStateButtonMenu, 0, 0))
             {
-                menuImageId = valueArray.getInt(R.styleable.FloatingActionStateButtonMenu_menuImageId, R.drawable.ic_settings_black);
+                imageTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_imageTint, Color.BLACK);
+                backgroundTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_backgroundTint, Color.WHITE);
+                checkedTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_checkedTint, Color.GRAY);
+                if(menuImageId == -1)
+                {
+                    menuImageId = valueArray.getInt(R.styleable.FloatingActionStateButtonMenu_menuImageId, R.drawable.ic_settings_black);
+                }
+                valueArray.recycle();
             }
-            valueArray.recycle();
         }
 
         setClipChildren(false);

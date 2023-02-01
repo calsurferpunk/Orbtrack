@@ -100,6 +100,7 @@ import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -2468,32 +2469,25 @@ public abstract class Globals
         int index;
         int[] ids = new int[resIDs.length];
         TypedValue values = new TypedValue();
-        TypedArray valueArray = null;
         Resources.Theme currentTheme = (context != null ? context.getTheme() : null);
 
         //go through each resource ID
         for(index = 0; index < resIDs.length; index++)
         {
+            //set default
+            ids[index] = -1;
+
             //if theme exists
             if(currentTheme != null)
             {
                 //resolve attribute ID
                 currentTheme.resolveAttribute(resIDs[index], values, true);
-                valueArray = context.obtainStyledAttributes(values.data, resIDs);
-                ids[index] = valueArray.getResourceId(index, -1);
+                try(TypedArray valueArray = context.obtainStyledAttributes(values.data, resIDs))
+                {
+                    ids[index] = valueArray.getResourceId(index, -1);
+                    valueArray.recycle();
+                }
             }
-            else
-            {
-                //can't resolve
-                ids[index] = -1;
-            }
-        }
-
-        //if value array was used
-        if(valueArray != null)
-        {
-            //recycle it
-            valueArray.recycle();
         }
 
         //return IDs
@@ -4499,6 +4493,19 @@ public abstract class Globals
         return(index >= 0 ? fileName.substring(index) : "");
     }
 
+    //Creates a file input stream
+    public static InputStream createFileInputStream(File file) throws IOException
+    {
+        if(Build.VERSION.SDK_INT >= 26)
+        {
+            return(Files.newInputStream(file.toPath()));
+        }
+        else
+        {
+            return(new FileInputStream(file));
+        }
+    }
+
     //Gets InputStreams from files within a zip file that match any extensions
     private static InputStream[] readZipFile(Context context, String filePath, InputStream fileStream, String[] extensionFilter, int depth)
     {
@@ -4564,7 +4571,7 @@ public abstract class Globals
                             if(depth <= ZIP_FILE_MAX_DEPTH)
                             {
                                 //add all filtered files inside
-                                inputList.addAll(Arrays.asList(readZipFile(context, filePath + "/" + currentFile.getName() + depth, new FileInputStream(currentFile), extensionFilter, depth++)));
+                                inputList.addAll(Arrays.asList(readZipFile(context, filePath + "/" + currentFile.getName() + depth, Globals.createFileInputStream(currentFile), extensionFilter, depth++)));
                             }
                         }
 
@@ -4572,7 +4579,7 @@ public abstract class Globals
                         if(useExtension)
                         {
                             //add input stream to list
-                            inputList.add(new FileInputStream(currentFile));
+                            inputList.add(Globals.createFileInputStream(currentFile));
                         }
                     }
                 }
@@ -4725,13 +4732,13 @@ public abstract class Globals
     //Reads a file
     public static byte[] readFile(File file)
     {
-        FileInputStream inputStream;
+        InputStream inputStream;
         byte[] data;
 
         try
         {
             data = new byte[(int)file.length()];
-            inputStream = new FileInputStream(file);
+            inputStream = Globals.createFileInputStream(file);
 
             //noinspection ResultOfMethodCallIgnored
             inputStream.read(data);

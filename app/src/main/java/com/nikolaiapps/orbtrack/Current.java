@@ -4257,7 +4257,7 @@ public abstract class Current
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg)
         {
-            super(fm, parentView, null, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, subPg);
+            super(fm, parentView, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, subPg);
         }
 
         @Override

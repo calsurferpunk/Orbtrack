@@ -31,7 +31,6 @@ public class RadioGroupPreference extends ValueTypePreference
         this.setLayoutResource(R.layout.radio_group_preference_layout);
 
         int resId;
-        TypedArray valueArray;
         Resources res = context.getResources();
 
         //set defaults
@@ -42,19 +41,21 @@ public class RadioGroupPreference extends ValueTypePreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RadioGroupPreference, 0, 0);
-            resId = valueArray.getResourceId(R.styleable.RadioGroupPreference_itemTexts, 0);
-            if(resId != 0)
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.RadioGroupPreference, 0, 0))
             {
-                itemTexts = res.getStringArray(resId);
+                resId = valueArray.getResourceId(R.styleable.RadioGroupPreference_itemTexts, 0);
+                if(resId != 0)
+                {
+                    itemTexts = res.getStringArray(resId);
+                }
+                resId = valueArray.getResourceId(R.styleable.RadioGroupPreference_itemValues, 0);
+                if(resId != 0)
+                {
+                    itemValues = res.getStringArray(resId);
+                }
+                setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, ClassType.String));
+                valueArray.recycle();
             }
-            resId = valueArray.getResourceId(R.styleable.RadioGroupPreference_itemValues, 0);
-            if(resId != 0)
-            {
-                itemValues = res.getStringArray(resId);
-            }
-            setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, ClassType.String));
-            valueArray.recycle();
         }
 
         //set to current preference value

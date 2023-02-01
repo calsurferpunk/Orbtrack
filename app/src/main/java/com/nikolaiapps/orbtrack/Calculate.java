@@ -659,7 +659,7 @@ public abstract class Calculate
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg, Bundle savedInstanceState)
         {
-            super(fm, parentView, null, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Calculate, subPg);
+            super(fm, parentView, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Calculate, subPg);
 
             int index;
 

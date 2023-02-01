@@ -21,9 +21,9 @@ import android.widget.Toast;
 import java.io.BufferedReader;
 import java.io.EOFException;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -1771,7 +1771,7 @@ public class Database extends SQLiteOpenHelper
     {
         Object currentObject;
         File satCache;
-        FileInputStream inputStream;
+        InputStream inputStream;
         ObjectInputStream objectInputStream;
         ArrayList<DatabaseSatellite> satellites = new ArrayList<>(0);
 
@@ -1784,7 +1784,7 @@ public class Database extends SQLiteOpenHelper
             try
             {
                 //read each satellite from file
-                inputStream = new FileInputStream(satCache);
+                inputStream = Globals.createFileInputStream(satCache);
                 objectInputStream = new ObjectInputStream(inputStream);
                 while((currentObject = objectInputStream.readObject()) != null)
                 {

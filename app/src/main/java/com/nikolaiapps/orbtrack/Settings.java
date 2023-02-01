@@ -1877,9 +1877,9 @@ public abstract class Settings
     //Page adapter
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
-        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemSelectedListener selectedListener, Selectable.ListFragment.OnItemCheckChangedListener checkChangedListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnUpdatePageListener updatePgListener, Selectable.ListFragment.OnPageResumeListener resumeListener, int[] subPg)
+        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemSelectedListener selectedListener, Selectable.ListFragment.OnItemCheckChangedListener checkChangedListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener, int[] subPg)
         {
-            super(fm, parentView, selectedListener, updateListener, updatePgListener, checkChangedListener, null, adapterListener, null, resumeListener, MainActivity.Groups.Settings, subPg);
+            super(fm, parentView, selectedListener, updateListener, checkChangedListener, null, adapterListener, null, resumeListener, MainActivity.Groups.Settings, subPg);
         }
 
         @Override

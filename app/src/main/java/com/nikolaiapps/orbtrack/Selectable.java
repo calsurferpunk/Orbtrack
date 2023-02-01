@@ -1335,7 +1335,6 @@ public abstract class Selectable
         private OnAdapterSetListener adapterSetListener;
         private OnItemSelectedListener itemSelectedListener;
         private OnUpdateNeededListener updateNeededListener;
-        private OnUpdatePageListener updatePageListener;
         protected OnPageSetListener pageSetListener;
         private OnPagePauseListener pagePauseListener;
         private OnPageResumeListener pageResumeListener;
@@ -1418,8 +1417,6 @@ public abstract class Selectable
         @Override
         public void onDestroy()
         {
-            Context context = this.getContext();
-
             cancelEditMode();
 
             if(playBar != null)
@@ -2183,12 +2180,6 @@ public abstract class Selectable
             updateNeededListener = listener;
         }
 
-        //Sets on update page listener
-        public void setOnUpdatePageListener(OnUpdatePageListener listener)
-        {
-            updatePageListener = listener;
-        }
-
         //Call on item selected listener
         public void onItemSelected(int group, int page, int subPage, int position, boolean selected)
         {
@@ -2204,15 +2195,6 @@ public abstract class Selectable
             if(updateNeededListener != null)
             {
                 updateNeededListener.updateNeeded();
-            }
-        }
-
-        //Call on page update listener
-        public void onUpdatePage(int page, int subPage)
-        {
-            if(updatePageListener != null)
-            {
-                updatePageListener.updatePage(page, subPage);
             }
         }
 
@@ -2271,14 +2253,13 @@ public abstract class Selectable
         private final View currentParentVIew;
         private final ListFragment.OnUpdateNeededListener updateNeededListener;
         private final ListFragment.OnItemSelectedListener itemSelectedListener;
-        private final ListFragment.OnUpdatePageListener updatePageListener;
         private final ListFragment.OnItemCheckChangedListener itemCheckChangedListener;
         private final ListFragment.OnItemDetailButtonClickListener itemDetailButtonClickListener;
         private final ListFragment.OnAdapterSetListener adapterSetListener;
         protected final Selectable.ListFragment.OnPageSetListener pageSetListener;
         private final ListFragment.OnPageResumeListener pageResumeListener;
 
-        public ListFragmentAdapter(FragmentManager fm, View parentView, ListFragment.OnItemSelectedListener selectedListener, ListFragment.OnUpdateNeededListener updateListener, ListFragment.OnUpdatePageListener updatePgListener, ListFragment.OnItemCheckChangedListener checkChangedListener, ListFragment.OnItemDetailButtonClickListener detailButtonClickListener, ListFragment.OnAdapterSetListener adapterListener, ListFragment.OnPageSetListener setListener, ListFragment.OnPageResumeListener resumeListener, int grp, int[] subPg)
+        public ListFragmentAdapter(FragmentManager fm, View parentView, ListFragment.OnItemSelectedListener selectedListener, ListFragment.OnUpdateNeededListener updateListener, ListFragment.OnItemCheckChangedListener checkChangedListener, ListFragment.OnItemDetailButtonClickListener detailButtonClickListener, ListFragment.OnAdapterSetListener adapterListener, ListFragment.OnPageSetListener setListener, ListFragment.OnPageResumeListener resumeListener, int grp, int[] subPg)
         {
             super(fm, BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
             currentParentVIew = parentView;
@@ -2287,7 +2268,6 @@ public abstract class Selectable
             subPage = subPg;
             itemSelectedListener = selectedListener;
             updateNeededListener = updateListener;
-            updatePageListener = updatePgListener;
             itemCheckChangedListener = checkChangedListener;
             itemDetailButtonClickListener = detailButtonClickListener;
             adapterSetListener = adapterListener;
@@ -2322,7 +2302,6 @@ public abstract class Selectable
             newPage.setParentView(currentParentVIew);
             newPage.setOnItemSelectedListener(itemSelectedListener);
             newPage.setOnUpdateNeededListener(updateNeededListener);
-            newPage.setOnUpdatePageListener(updatePageListener);
             newPage.setOnItemCheckChangedListener(itemCheckChangedListener);
             newPage.setOnDetailButtonClickListener(itemDetailButtonClickListener);
             newPage.setOnSetAdapterListener(adapterSetListener);

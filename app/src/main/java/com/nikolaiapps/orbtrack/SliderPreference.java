@@ -48,6 +48,10 @@ public class SliderPreference extends CustomPreference
                 maxValue = (int)valueArray.getFloat(R.styleable.SliderPreference_maxValue, 100);
                 valueArray.recycle();
             }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
     }
 

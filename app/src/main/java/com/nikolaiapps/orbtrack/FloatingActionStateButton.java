@@ -51,6 +51,10 @@ public class FloatingActionStateButton extends FloatingActionButton
                 checkedTintColor = valueArray.getColor(R.styleable.FloatingActionStateButton_checkedTint, Color.GRAY);
                 valueArray.recycle();
             }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
 
         //force update

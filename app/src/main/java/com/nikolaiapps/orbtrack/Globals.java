@@ -2487,6 +2487,10 @@ public abstract class Globals
                     ids[index] = valueArray.getResourceId(index, -1);
                     valueArray.recycle();
                 }
+                catch(Exception ex)
+                {
+                    //do nothing
+                }
             }
         }
 

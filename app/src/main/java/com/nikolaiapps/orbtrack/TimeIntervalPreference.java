@@ -91,6 +91,10 @@ public class TimeIntervalPreference extends CustomPreference
                 intervalKey = valueArray.getString(R.styleable.TimeIntervalPreference_intervalKey);
                 valueArray.recycle();
             }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
     }
     public TimeIntervalPreference(Context context, AttributeSet attrs, int defStyleAttr)

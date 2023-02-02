@@ -83,6 +83,10 @@ public class FloatingActionStateButtonMenu extends LinearLayout
                 }
                 valueArray.recycle();
             }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
 
         setClipChildren(false);

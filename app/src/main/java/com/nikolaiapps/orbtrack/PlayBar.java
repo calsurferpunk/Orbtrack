@@ -75,18 +75,21 @@ public class PlayBar extends LinearLayout
         AppCompatImageButton leftButton;
         AppCompatImageButton rightButton;
 
+        //set defaults
+        textColor = buttonColor = Color.WHITE;
+
         //if attributes are set
-        if(attrs == null)
-        {
-            textColor = buttonColor = Color.WHITE;
-        }
-        else
+        if(attrs != null)
         {
             try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PlayBar, 0, 0))
             {
                 textColor = valueArray.getColor(R.styleable.PlayBar_textColor, Color.WHITE);
                 buttonColor = valueArray.getColor(R.styleable.PlayBar_buttonColor, Color.WHITE);
                 valueArray.recycle();
+            }
+            catch(Exception ex)
+            {
+                //do nothing
             }
         }
 

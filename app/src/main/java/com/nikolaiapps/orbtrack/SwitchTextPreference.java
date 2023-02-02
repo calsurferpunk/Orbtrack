@@ -62,6 +62,10 @@ public class SwitchTextPreference extends ValueTypePreference
                 setValueType(valueArray.getInt(R.styleable.SwitchTextPreference_valueType, ClassType.Integer));
                 valueArray.recycle();
             }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
     }
 

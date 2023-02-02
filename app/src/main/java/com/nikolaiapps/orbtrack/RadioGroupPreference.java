@@ -56,6 +56,10 @@ public class RadioGroupPreference extends ValueTypePreference
                 setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, ClassType.String));
                 valueArray.recycle();
             }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
 
         //set to current preference value

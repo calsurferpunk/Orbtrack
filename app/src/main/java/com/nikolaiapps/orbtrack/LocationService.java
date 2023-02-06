@@ -902,7 +902,7 @@ public class LocationService extends Service implements LocationListener
                             retryIntent.setAction(NotifyReceiver.RetryAction);
                             notifyBuilder.setContentText(res.getString(R.string.text_location_failed));
                             notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), Globals.getPendingBroadcastIntent(context, NotifyReceiver.RetryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
-                            notifyManager.notify(Globals.ChannelIds.Location, notifyBuilder.build());
+                            Globals.showNotification(context, Globals.ChannelIds.Location, notifyBuilder.build());
                         }
 
                         //restart service

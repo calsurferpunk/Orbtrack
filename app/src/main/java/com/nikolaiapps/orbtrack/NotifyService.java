@@ -242,7 +242,7 @@ public abstract class NotifyService extends IntentService
                 lastNotify = new NotifySettings(currentNotify);
 
                 //show notification
-                notifyManger.notify(updateID, notifyBuilder.build());
+                Globals.showNotification(this, updateID, notifyBuilder.build());
             }
         }
         else

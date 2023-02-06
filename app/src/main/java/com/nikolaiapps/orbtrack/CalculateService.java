@@ -507,7 +507,7 @@ public class CalculateService extends NotifyService
                 notifyBuilder.setContentTitle(notifyTitle).setContentText(notifyMessage).setStyle(new NotificationCompat.BigTextStyle().bigText(notifyDetails));
                 notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_settings), Globals.getPendingBroadcastIntent(context, getSettingsID(noradId), settingsIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                 notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(context, getDismissID(noradId, notifyType), dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
-                notifyManager.notify(getNotifyID(noradId, notifyType), notifyBuilder.build());
+                Globals.showNotification(context, getNotifyID(noradId, notifyType), notifyBuilder.build());
 
                 //if for this pass only
                 if(notifySettings.nextOnly)

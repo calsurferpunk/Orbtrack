@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
 import android.app.Dialog;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -50,6 +51,7 @@ import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
@@ -80,6 +82,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -1583,6 +1586,52 @@ public abstract class Globals
     public static NotificationCompat.Builder createNotifyBuilder(Context context, String notifyChannelId)
     {
         return(createNotifyBuilder(context, notifyChannelId, R.drawable.ic_launcher_clear));
+    }
+
+    //Tries to show a notification
+    public static void showNotification(Context context, int channelId, Notification notification)
+    {
+        boolean showError = false;
+        NotificationManagerCompat notifyManager = NotificationManagerCompat.from(context);
+
+        //if have permission to use notifications
+        if(havePostNotificationsPermission(context))
+        {
+            try
+            {
+                //try to show notification
+                notifyManager.notify(channelId, notification);
+            }
+            catch(SecurityException ex)
+            {
+                //show error
+                showError = true;
+            }
+        }
+        else if(canAskPostNotificationsPermission && context instanceof ContextWrapper)
+        {
+            //ask permission again
+            askPostNotificationsPermission(((ContextWrapper)context).getBaseContext(), false);
+        }
+        else
+        {
+            //show error
+            showError = true;
+        }
+
+        //if need to show error
+        if(showError)
+        {
+            //try to show permission error
+            try
+            {
+                Toast.makeText(context, R.string.desc_permission_post_notifications, Toast.LENGTH_SHORT).show();
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
+        }
     }
 
     //Sets an exact alarm

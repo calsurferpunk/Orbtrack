@@ -3441,6 +3441,7 @@ public class UpdateService extends NotifyService
     }
 
     //Return if running satellite update
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean updatingSatellites()
     {
         return(isRunning(UpdateType.UpdateSatellites));
@@ -3453,6 +3454,7 @@ public class UpdateService extends NotifyService
     }
 
     //Return if running save file
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
     public static boolean savingFile()
     {
         return(isRunning(UpdateType.SaveFile));

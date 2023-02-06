@@ -863,6 +863,7 @@ public class ChooseColorDialog
     }
 
     //gets extreme (min or max) value in components
+    @SuppressWarnings("SameParameterValue")
     private float getExtremeRGB(boolean max)
     {
         int index;

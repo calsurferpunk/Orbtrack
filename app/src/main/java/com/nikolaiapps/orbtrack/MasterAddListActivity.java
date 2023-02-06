@@ -1217,6 +1217,8 @@ public class MasterAddListActivity extends BaseInputActivity
     {
         sendResult(data, -1, -1, progressType);
     }
+
+    @SuppressWarnings("SameParameterValue")
     private void sendResult(int resultCode)
     {
         Intent data = new Intent();

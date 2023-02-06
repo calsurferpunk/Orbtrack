@@ -244,10 +244,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                 @Override
                 public void onClick(View view)
                 {
-                    if(itemClickedListener != null)
-                    {
-                        itemClickedListener.onItemClicked(view, itemHolder.getAdapterPosition());
-                    }
+                    itemClickedListener.onItemClicked(view, itemHolder.getAdapterPosition());
                 }
             });
 
@@ -392,6 +389,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                     }
 
                     //if root dir not allowed and in list
+                    //noinspection RedundantCollectionOperation
                     if(!allowRootItem && fileList.contains(rootDir))
                     {
                         //remove it
@@ -404,12 +402,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                     {
                         Arrays.sort(files, 1, files.length, fileComparer);
                     }
-
-                    //if path changed listener is set
-                    if(pathChangedListener != null)
-                    {
-                        pathChangedListener.onPathChanged(currentDir.getPath());
-                    }
+                    pathChangedListener.onPathChanged(currentDir.getPath());
 
                     //update list
                     currentContext.runOnUiThread(new Runnable()

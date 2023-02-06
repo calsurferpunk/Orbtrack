@@ -971,7 +971,6 @@ public class CalculateService extends NotifyService
 
     private static boolean firstRun = true;
     private static MutableLiveData<Intent> localBroadcast;
-    private static final boolean[] cancelIntent = new boolean[CalculateType.CalculateCount];
     private static final boolean[] showNotification = new boolean[CalculateType.CalculateCount];
     public static final String CALCULATE_FILTER = "calculateServiceFilter";
 
@@ -987,8 +986,8 @@ public class CalculateService extends NotifyService
             //go through each status
             for(index = 0; index < CalculateType.CalculateCount; index++)
             {
-                //don't cancel or show
-                cancelIntent[index] = showNotification[index] = false;
+                //don't show
+                showNotification[index] = false;
             }
 
             //update status
@@ -1018,7 +1017,6 @@ public class CalculateService extends NotifyService
 
         //update intent and status
         showNotification[calculateType] = runForeground;
-        cancelIntent[calculateType] = false;
 
         //update notification
         currentNotify.title = notifyTitle;
@@ -1045,8 +1043,7 @@ public class CalculateService extends NotifyService
         }
 
         //reset
-        //currentIntent[calculateType] = null;
-        cancelIntent[calculateType] = showNotification[calculateType] = false;
+        showNotification[calculateType] = false;
     }
 
     @NonNull
@@ -1098,17 +1095,6 @@ public class CalculateService extends NotifyService
     {
         sendMessage(MessageTypes.General, calculateType, Integer.MAX_VALUE, null, 0, 0, 0, 0, progressType, null);
     }
-
-    /*//Sets cancel
-    public static void cancel(byte calculateType)
-    {
-        //if a valid calculate type
-        if(calculateType < cancelIntent.length)
-        {
-            //cancel
-            cancelIntent[calculateType] = true;
-        }
-    }*/
 
     //Gets position for given satellite
     private static Calculations.TopographicDataType getPosition(Calculations.SatelliteObjectType currentSatellite, Calculations.ObserverType observer, Calendar gmtTime, boolean applyRefraction)
@@ -1345,7 +1331,7 @@ public class CalculateService extends NotifyService
             if(currentItem.satellite != null && neededTLEsAccurate)
             {
                 //while not done and not cancelled
-                while(!doneWithPath && !(usingTask ? task.isCancelled() : cancelIntent[calculateType]))
+                while(!doneWithPath && !(usingTask && task.isCancelled()))
                 {
                     //get position and phase for the current time
                     pointData1 = getPosition(satellite1, observer, currentGMT, applyRefraction);
@@ -1528,17 +1514,17 @@ public class CalculateService extends NotifyService
             }
 
             //if done with pass, not cancelled, and pass end found
-            if(doneWithPath && !(usingTask ? task.isCancelled() : cancelIntent[calculateType]) && pathEndGMT != null)
+            if(doneWithPath && !(usingTask && task.isCancelled()) && pathEndGMT != null)
             {
                 //go forward up to 15 minutes/seconds to find ending second
                 updateTimeInPath(calculateType, satellite1, satellite2, observer, intersection, 1, (extendedSearch ? (15 * 60) : 15), pathEndGMT, true, applyRefraction);
             }
 
             //if done with pass or cancelled
-            if(doneWithPath || (usingTask ? task.isCancelled() : cancelIntent[calculateType]))
+            if(doneWithPath || (usingTask && task.isCancelled()))
             {
                 //if pass start is set and not cancelled
-                if(pathStartGMT != null && !(usingTask ? task.isCancelled() : cancelIntent[calculateType]))
+                if(pathStartGMT != null && !(usingTask && task.isCancelled()))
                 {
                     //update status
                     currentItem.passAzStart = (azTravel2 > azTravel ? azStart2 : azStart);
@@ -1667,7 +1653,7 @@ public class CalculateService extends NotifyService
         }
 
         //go through each item while not cancelled
-        for(index = 0; index < pathItemCount && !(usingTask ? task.isCancelled() : cancelIntent[calculateType]); index++)
+        for(index = 0; index < pathItemCount && !(usingTask && task.isCancelled()); index++)
         {
             //remember current item
             PassData currentItem = (usingSavedItems ? new PassData(savedPassItems[index]) : pathItems.get(index));
@@ -1779,14 +1765,14 @@ public class CalculateService extends NotifyService
                     firstPath = false;
 
                   //continue if calculating all paths, not canceling, another is found, and before end time
-                } while(getAll && !usingSavedItems && !(usingTask ? task.isCancelled() : cancelIntent[calculateType]) && currentItem.passCalculated && currentItem.passTimeEnd != null && !currentGMT.after(endGMT));
+                } while(getAll && !usingSavedItems && !(usingTask && task.isCancelled()) && currentItem.passCalculated && currentItem.passTimeEnd != null && !currentGMT.after(endGMT));
             }
         }
 
         //update progress
         if(service != null)
         {
-            service.sendGeneralMessage(calculateType, (cancelIntent[calculateType] ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
+            service.sendGeneralMessage(calculateType, ((usingTask && task.isCancelled()) ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
         }
         if(listener != null)
         {

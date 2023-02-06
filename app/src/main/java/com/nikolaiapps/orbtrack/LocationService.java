@@ -895,7 +895,6 @@ public class LocationService extends Service implements LocationListener
                         if(notifyBuilder != null)
                         {
                             Resources res = context.getResources();
-                            NotificationManagerCompat notifyManager = NotificationManagerCompat.from(context);
 
                             //show retry
                             Intent retryIntent = new Intent(context, NotifyReceiver.class);

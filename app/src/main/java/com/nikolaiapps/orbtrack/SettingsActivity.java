@@ -2358,6 +2358,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     //Gets the desired fragment
+    @SuppressWarnings("SameParameterValue")
     private Fragment getFragment(int setupPageType)
     {
         List<Fragment> pages = manager.getFragments();

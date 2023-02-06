@@ -453,6 +453,7 @@ class Whirly
             zoomScale = zoomScaling;
         }
 
+        @SuppressWarnings("SameParameterValue")
         void setDrawPriority(int priority)
         {
             flatInfo.setDrawPriority(priority);

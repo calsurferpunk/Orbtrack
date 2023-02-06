@@ -1176,6 +1176,7 @@ public abstract class Orbitals
                                 else
                                 {
                                     //save file if not already
+                                    //noinspection ConstantConditions
                                     saveReceiver = createLocalUpdateReceiver(saveReceiver, updateType, satellites, listIndexes, showProgress);
                                     if(!UpdateService.savingFile() && activity != null)
                                     {
@@ -1205,6 +1206,7 @@ public abstract class Orbitals
                         else
                         {
                             //update satellites
+                            //noinspection ConstantConditions
                             updateReceiver = createLocalUpdateReceiver(updateReceiver, updateType, satellites, listIndexes, showProgress);
                             if(!UpdateService.updatingSatellites())
                             {
@@ -1271,6 +1273,7 @@ public abstract class Orbitals
         }
 
         //Gets if items are loading on page
+        @SuppressWarnings("BooleanMethodIsAlwaysInverted")
         public boolean isPageLoadingItems(ViewGroup container, int pageNum)
         {
             Page page = (Page)getPage(container, pageNum);

@@ -232,6 +232,7 @@ public class TimeIntervalPreference extends CustomPreference
     }
 
     //Sets the time value
+    @SuppressWarnings("unused")
     public void setTime(int hour, int minute)
     {
         timeView.setTime(hour, minute);

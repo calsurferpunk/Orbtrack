@@ -640,6 +640,7 @@ public interface CoordinatesFragment
             textSpScale = res.getDisplayMetrics().scaledDensity;
         }
 
+        @SuppressWarnings("SameParameterValue")
         Bitmap getLatitudeLongitudeTile(int x, int y, int zoom, int sideLength, int thickness, boolean forGlobe)
         {
             int index;
@@ -745,6 +746,7 @@ public interface CoordinatesFragment
             });
         }
 
+        @SuppressWarnings("ManualMinMaxCalculation")
         static double getZoom(double altitudeKm)
         {
             double z = altitudeKm * 100;

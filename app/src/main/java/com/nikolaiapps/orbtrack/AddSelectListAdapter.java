@@ -330,16 +330,7 @@ public class AddSelectListAdapter extends BaseAdapter
                 break;
 
             case SelectType.Filter:
-                switch(position)
-                {
-                    case FilterType.Sorting:
-                        imageId = R.drawable.ic_list_white;
-                        break;
-
-                    default:
-                        imageId = R.drawable.ic_remove_red_eye_white;
-                        break;
-                }
+                imageId = (position == FilterType.Sorting ? R.drawable.ic_list_white : R.drawable.ic_remove_red_eye_white);
                 break;
 
             case SelectType.Settings:

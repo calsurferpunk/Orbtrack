@@ -177,7 +177,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
 
                     case ScreenKey.ListView:
-                        SwitchPreference combinedSwitch = this.findPreference(Settings.PreferenceName.UseCombinedCurrentLayout);
                         SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
                         IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
 
@@ -185,7 +184,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         Settings.Options.Rates.initValues(context);
 
                         //setup displays
-                        setupSwitch(combinedSwitch);
                         setupSwitch(pathProgressSwitch);
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
@@ -1563,11 +1561,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.MapMarkerLocationIcon:
                             //map needs recreate
                             setMapRecreateNeeded();
-                            break;
-
-                        case Settings.PreferenceName.UseCombinedCurrentLayout:
-                            //combined layout needed update
-                            setUpdateCombinedLayoutNeeded();
                             break;
                     }
                 }

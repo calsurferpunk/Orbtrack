@@ -719,7 +719,7 @@ public class EditValuesDialog
     public void getSortBy(String titleText, int page)
     {
         int index;
-        int[] listIds = Current.Items.getSortByIds(page);
+        int[] listIds = Current.Items.getSortByIds();
         int[] imageIds = new int[listIds.length];
         String[] listValues = new String[listIds.length];
         String[] listSubValues = new String[listIds.length];
@@ -733,7 +733,7 @@ public class EditValuesDialog
             listSubValues[index] = String.valueOf(listIds[index]);
         }
 
-        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext, page)}, null, null, null, false);
+        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext)}, null, null, null, false);
     }
     public void getEditColors(String titleText, int color1, int color2)
     {

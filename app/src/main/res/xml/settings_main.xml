@@ -349,11 +349,6 @@
             android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
             <PreferenceCategory android:title="@string/title_list_view">
                 <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_combine_lists"
-                    android:key="UseCombinedCurrentLayout"
-                    android:summary="@string/desc_combine_lists"/>
-
-                <com.nikolaiapps.orbtrack.SwitchPreference
                     android:title="@string/title_pass_progress"
                     android:key="ListShowPassProgress"
                     android:summary="@string/desc_show_path_progress"/>

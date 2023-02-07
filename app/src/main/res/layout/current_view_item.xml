@@ -24,28 +24,6 @@
         android:padding="5dp"
         android:orientation="horizontal"
         android:gravity="center">
-        <LinearLayout
-            android:id="@+id/Angles_Name_Group"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.3"
-            android:orientation="horizontal"
-            android:visibility="gone">
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/Angles_Name_Image"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"/>
-
-            <TextView
-                android:id="@+id/Angles_Name_Text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"/>
-        </LinearLayout>
-
         <TextView
             android:id="@+id/Angles_Time_Text"
             android:layout_width="0dp"
@@ -115,16 +93,6 @@
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 style="@style/ProgressCircleSmall"/>
         </LinearLayout>
-
-        <TextView
-            android:id="@+id/Angles_Outdated_Text"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="0.5"
-            android:gravity="center"
-            android:text="@string/text_outdated"
-            android:textColor="?attr/defaultTextColor"
-            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/Angles_Data_Group"

@@ -49,7 +49,6 @@ public abstract class Current
     public static abstract class PageType
     {
         static final int View = 0;
-        static final int Passes = 1;
         static final int Coordinates = 2;
         static final int Combined = 3;
         static final int PageCount = 4;
@@ -95,9 +94,6 @@ public abstract class Current
         }
 
         public static final int[] sortByCombinedIds = new int[]{Settings.getSortByStringId(SortBy.Name), Settings.getSortByStringId(SortBy.Azimuth), Settings.getSortByStringId(SortBy.Elevation), Settings.getSortByStringId(SortBy.Range), Settings.getSortByStringId(SortBy.PassStartTime), Settings.getSortByStringId(SortBy.PassDuration), Settings.getSortByStringId(SortBy.MaxElevation), Settings.getSortByStringId(SortBy.Latitude), Settings.getSortByStringId(SortBy.Longitude), Settings.getSortByStringId(SortBy.Altitude)};
-        public static final int[] sortByViewIds = new int[]{sortByCombinedIds[SortBy.Name], sortByCombinedIds[SortBy.Azimuth], sortByCombinedIds[SortBy.Elevation], sortByCombinedIds[SortBy.Range]};
-        public static final int[] sortByPassesIds = new int[]{sortByCombinedIds[SortBy.Name], sortByCombinedIds[SortBy.PassStartTime], sortByCombinedIds[SortBy.PassDuration], sortByCombinedIds[SortBy.MaxElevation]};
-        public static final int[] sortByCoordinateIds = new int[]{sortByCombinedIds[SortBy.Name], sortByCombinedIds[SortBy.Latitude], sortByCombinedIds[SortBy.Longitude], sortByCombinedIds[SortBy.Altitude]};
         private final int group;
         private final int page;
 
@@ -112,25 +108,7 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    switch(page)
-                    {
-                        case PageType.View:
-                            PageAdapter.setViewItems((ViewAngles.Item[])items);
-                            break;
-
-                        case PageType.Passes:
-                            PageAdapter.setPassItems((Passes.Item[])items);
-                            break;
-
-                        case PageType.Coordinates:
-                            PageAdapter.setCoordinateItems((Coordinates.Item[])items);
-                            break;
-
-                        default:
-                        case PageType.Combined:
-                            PageAdapter.setCombinedItems((Combined.Item[])items);
-                            break;
-                    }
+                    PageAdapter.setCombinedItems((Combined.Item[])items);
                     break;
 
                 case MainActivity.Groups.Calculate:
@@ -160,25 +138,7 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    switch(page)
-                    {
-                        case PageType.View:
-                            PageAdapter.setViewItem(index, (ViewAngles.Item)newItem);
-                            break;
-
-                        case PageType.Passes:
-                            PageAdapter.setPassItem(index, (Passes.Item)newItem);
-                            break;
-
-                        case PageType.Coordinates:
-                            PageAdapter.setCoordinateItem(index, (Coordinates.Item)newItem);
-                            break;
-
-                        default:
-                        case PageType.Combined:
-                            PageAdapter.setCombinedItem(index, (Combined.Item)newItem);
-                            break;
-                    }
+                    PageAdapter.setCombinedItem(index, (Combined.Item)newItem);
                     break;
 
                 case MainActivity.Groups.Calculate:
@@ -208,7 +168,7 @@ public abstract class Current
         {
             if(group == MainActivity.Groups.Current)
             {
-                PageAdapter.sortItems(page, Settings.getCurrentSortBy(context, page));
+                PageAdapter.sortItems(page, Settings.getCurrentSortBy(context));
             }
         }
 
@@ -217,21 +177,7 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    switch(page)
-                    {
-                        case PageType.View:
-                            return(PageAdapter.getViewAngleItem(index));
-
-                        case PageType.Passes:
-                            return(PageAdapter.getPassItem(index));
-
-                        case PageType.Coordinates:
-                            return(PageAdapter.getCoordinatesItem(index));
-
-                        case PageType.Combined:
-                            return(PageAdapter.getCombinedItem(index));
-                    }
-                    break;
+                    return(PageAdapter.getCombinedItem(index));
 
                 case MainActivity.Groups.Calculate:
                     switch(page)
@@ -314,23 +260,9 @@ public abstract class Current
             }
         }
 
-        public static int[] getSortByIds(int page)
+        public static int[] getSortByIds()
         {
-            switch(page)
-            {
-                case PageType.View:
-                    return(sortByViewIds);
-
-                case PageType.Passes:
-                    return(sortByPassesIds);
-
-                case PageType.Coordinates:
-                    return(sortByCoordinateIds);
-
-                case PageType.Combined:
-                default:
-                    return(sortByCombinedIds);
-            }
+            return(sortByCombinedIds);
         }
     }
 
@@ -383,11 +315,8 @@ public abstract class Current
     //Item list adapter
     private static abstract class ItemListAdapterBase extends Selectable.ListBaseAdapter
     {
-        private final int columnTextColor;
-        private final int columnBackgroundColorId;
         protected boolean hasItems;
         protected boolean forCalculation;
-        protected final boolean usingGrid;
         protected String dataGroupTitle1String;
         protected String dataGroupTitle2String;
         protected String dataGroupTitle3String;
@@ -396,14 +325,11 @@ public abstract class Current
 
         public abstract void onBindViewHolder(@NonNull ItemHolderBase holder, int position);
 
-        public ItemListAdapterBase(Context context, int page)
+        public ItemListAdapterBase(Context context)
         {
             super(context);
 
-            columnTextColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
-            columnBackgroundColorId = Globals.resolveAttributeID(context, R.attr.viewPagerBackground);
             hasItems = forCalculation = false;
-            usingGrid = Settings.getUsingCurrentGridLayout(page);
             dataGroupTitle1String = dataGroupTitle2String = dataGroupTitle3String = dataGroupTitle4String = dataGroupTitle5String = null;
         }
 
@@ -416,42 +342,6 @@ public abstract class Current
             if(!forCalculation)
             {
                 itemHolder.nameGroup.setVisibility(View.VISIBLE);
-                if(usingGrid)
-                {
-                    if(!itemHolder.movedName)
-                    {
-                        itemHolder.nameGroup.removeView(itemHolder.nameText);
-                        itemHolder.rootView.addView(itemHolder.nameText, 0);
-                        itemHolder.movedName = true;
-                        itemHolder.nameText.setTextColor(columnTextColor);
-                        itemHolder.nameText.setBackgroundResource(columnBackgroundColorId);
-                    }
-                    itemHolder.dataGroup.setOrientation(LinearLayout.VERTICAL);
-                    itemHolder.dataGroupTitle1Text.setText(dataGroupTitle1String);
-                    itemHolder.dataGroupTitle2Text.setText(dataGroupTitle2String);
-                    if(itemHolder.dataGroupTitle3Text != null)
-                    {
-                        itemHolder.dataGroupTitle3Text.setText(dataGroupTitle3String);
-                    }
-                    if(itemHolder.dataGroupTitle4Text != null)
-                    {
-                        itemHolder.dataGroupTitle4Text.setText(dataGroupTitle4String);
-                    }
-                    if(itemHolder.dataGroupTitle5Text != null)
-                    {
-                        itemHolder.dataGroupTitle5Text.setText(dataGroupTitle5String);
-                    }
-                    Globals.setLayoutWidth(itemHolder.dataGroup1Text, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    Globals.setLayoutWidth(itemHolder.dataGroup2Text, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    if(itemHolder.dataGroup3Text != null)
-                    {
-                        Globals.setLayoutWidth(itemHolder.dataGroup3Text, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    }
-                    if(itemHolder.dataGroup4Text != null)
-                    {
-                        Globals.setLayoutWidth(itemHolder.dataGroup4Text, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    }
-                }
             }
 
             //finish binding
@@ -1058,7 +948,6 @@ public abstract class Current
         public static class Item extends Selectable.ListItem
         {
             private final String name;
-            private final String ownerCode;
             public boolean isLoading;
             public final boolean tleIsAccurate;
             public double julianDate;
@@ -1107,7 +996,7 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, int viewCount, boolean tleAccurate)
+            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, int viewCount, boolean tleAccurate)
             {
                 super(Integer.MAX_VALUE, index, false, false, false, false);
 
@@ -1123,7 +1012,6 @@ public abstract class Current
                 }
                 icon = icn;
                 name = nm;
-                ownerCode = ownCd;
                 julianDate = Double.MAX_VALUE;
                 time = Globals.getCalendar(null, 0);
                 nameImage = null;
@@ -1144,7 +1032,7 @@ public abstract class Current
             }
             public Item(int index, int viewCount)
             {
-                this(index, null, null, null, null, viewCount, false);
+                this(index, null, null, null, viewCount, false);
             }
 
             public void updateDisplays(Context context, int widthDp, boolean haveSun, boolean haveMoon)
@@ -1220,10 +1108,6 @@ public abstract class Current
                 timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
                 subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
-            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
-            {
-                this(itemView, azTextID, elTextID, rangeTextID, -1, -1, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, -1, outdatedTextID, -1);
-            }
             public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int timeTextID)
             {
                 this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupTitle5ID, dataGroupID, -1, -1, -1, timeTextID, -1, -1);
@@ -1243,7 +1127,7 @@ public abstract class Current
 
             private ItemListAdapter(Context context)
             {
-                super(context, PageType.View);
+                super(context);
 
                 Resources res = context.getResources();
                 haveSun = haveMoon = false;
@@ -1256,24 +1140,6 @@ public abstract class Current
 
                 //ID stays the same
                 this.setHasStableIds(true);
-            }
-            public ItemListAdapter(Context context, Database.SatelliteData[] satellites)
-            {
-                this(context);
-
-                int index;
-
-                //setup items
-                viewItems = new Items(MainActivity.Groups.Current, PageType.View);
-                viewItems.set(new Item[satellites.length]);
-                for(index = 0; index < satellites.length; index++)
-                {
-                    Database.SatelliteData currentSatellite = satellites[index];
-                    viewItems.set(index, new Item(index, Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, satellites.length, currentSatellite.getTLEIsAccurate()));
-                }
-                viewItems.sort(currentContext, PageType.View);
-
-                updateHasItems();
             }
             public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
             {
@@ -1322,27 +1188,26 @@ public abstract class Current
             public long getItemId(int position)
             {
                 Item currentItem = viewItems.getViewItem(position);
-                return(currentItem != null ? (forCalculation ? currentItem.listIndex : currentItem.id) : Integer.MIN_VALUE);
+                return(currentItem != null ? currentItem.listIndex : Integer.MIN_VALUE);
             }
 
             @Override
             protected void setHeader(View header)
             {
                 super.setHeader(header);
-                header.setVisibility(forCalculation ? View.VISIBLE : View.GONE);
+                header.setVisibility(View.VISIBLE);
             }
 
             @Override
             protected boolean showColumnTitles(int page)
             {
-                return(forCalculation || !Settings.getUsingCurrentGridLayout(page));
+                return(true);
             }
 
             @Override
             protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
-                TextView nameText;
                 TextView timeText;
                 TextView phaseText;
                 TextView illuminationText;
@@ -1350,34 +1215,25 @@ public abstract class Current
                 boolean isSun = (dataID == Universe.IDs.Sun);
                 boolean isMoon = (dataID == Universe.IDs.Moon);
 
-                if(forCalculation)
+                if(!forSubItems)
                 {
-                    if(!forSubItems)
-                    {
-                        timeText = listColumns.findViewById(R.id.Angles_Time_Text);
-                        timeText.setText(R.string.title_time);
-                        timeText.setVisibility(View.VISIBLE);
-                    }
-                    else
-                    {
-                        isSun = haveSun;
-                        isMoon = haveMoon;
-                    }
-
-                    phaseText = listColumns.findViewById(R.id.Angles_Phase_Text);
-                    phaseText.setText(R.string.title_phase);
-                    phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
-
-                    illuminationText = listColumns.findViewById(R.id.Angles_Illumination_Text);
-                    illuminationText.setText(R.string.abbrev_illumination);
-                    illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                    timeText = listColumns.findViewById(R.id.Angles_Time_Text);
+                    timeText.setText(R.string.title_time);
+                    timeText.setVisibility(View.VISIBLE);
                 }
                 else
                 {
-                    nameText = listColumns.findViewById(R.id.Angles_Name_Text);
-                    nameText.setText(R.string.title_name);
-                    listColumns.findViewById(R.id.Angles_Name_Group).setVisibility(View.VISIBLE);
+                    isSun = haveSun;
+                    isMoon = haveMoon;
                 }
+
+                phaseText = listColumns.findViewById(R.id.Angles_Phase_Text);
+                phaseText.setText(R.string.title_phase);
+                phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+
+                illuminationText = listColumns.findViewById(R.id.Angles_Illumination_Text);
+                illuminationText.setText(R.string.abbrev_illumination);
+                illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
                 listColumns.findViewById(R.id.Angles_Progress_Group).setVisibility(View.GONE);
                 listColumns.findViewById(R.id.Angles_Data_Group).setVisibility(View.VISIBLE);
                 ((TextView)listColumns.findViewById(R.id.Angles_Az_Text)).setText(R.string.title_azimuth);
@@ -1394,20 +1250,13 @@ public abstract class Current
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder;
 
-                if(forCalculation)
+                if(forSubItems)
                 {
-                    if(forSubItems)
-                    {
-                        itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
-                    }
-                    else
-                    {
-                        itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Phase_Title, R.id.Angles_Illumination_Title, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
-                    }
+                    itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Data_Group, R.id.Angles_Name_Group, R.id.Angles_Name_Image, R.id.Angles_Name_Text, R.id.Angles_Outdated_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Phase_Title, R.id.Angles_Illumination_Title, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
                 }
 
                 setViewClickListeners(itemView, itemHolder);
@@ -1423,43 +1272,35 @@ public abstract class Current
                 boolean isMoon = (currentItem.id == Universe.IDs.Moon);
 
                 //get displays
-                if(forCalculation)
+                currentItem.timeText = itemHolder.timeText;
+                if(currentItem.timeText != null)
                 {
-                    currentItem.timeText = itemHolder.timeText;
-                    if(currentItem.timeText != null)
-                    {
-                        currentItem.timeText.setVisibility(View.VISIBLE);
-                    }
-
-                    if(forSubItems)
-                    {
-                        isSun = haveSun;
-                        isMoon = haveMoon;
-                    }
-
-                    currentItem.phaseText = itemHolder.dataGroup4Text;
-                    if(currentItem.phaseText != null)
-                    {
-                        currentItem.phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
-                    }
-
-                    currentItem.illuminationText = itemHolder.dataGroup5Text;
-                    if(currentItem.illuminationText != null)
-                    {
-                        currentItem.illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
-                    }
-
-                    currentItem.subList = itemHolder.subList;
+                    currentItem.timeText.setVisibility(View.VISIBLE);
                 }
-                else
+
+                if(forSubItems)
                 {
-                    currentItem.nameImage = itemHolder.nameImage;
-                    currentItem.nameText = itemHolder.nameText;
+                    isSun = haveSun;
+                    isMoon = haveMoon;
                 }
+
+                currentItem.phaseText = itemHolder.dataGroup4Text;
+                if(currentItem.phaseText != null)
+                {
+                    currentItem.phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                }
+
+                currentItem.illuminationText = itemHolder.dataGroup5Text;
+                if(currentItem.illuminationText != null)
+                {
+                    currentItem.illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                }
+
+                currentItem.subList = itemHolder.subList;
                 currentItem.progressGroup = itemHolder.progressGroup;
                 if(itemHolder.outdatedText != null)
                 {
-                    itemHolder.outdatedText.setVisibility(forCalculation || currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                    itemHolder.outdatedText.setVisibility(View.GONE);
                 }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -1468,109 +1309,19 @@ public abstract class Current
                 }
                 if(itemHolder.dataGroupTitles != null)
                 {
-                    itemHolder.dataGroupTitles.setVisibility(usingGrid && currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                    itemHolder.dataGroupTitles.setVisibility(View.GONE);
                 }
                 currentItem.azText = itemHolder.dataGroup1Text;
                 currentItem.elText = itemHolder.dataGroup2Text;
                 currentItem.rangeText = itemHolder.dataGroup3Text;
 
                 //update displays
-                currentItem.setLoading(!hasItems, forCalculation || currentItem.tleIsAccurate);
+                currentItem.setLoading(!hasItems, true);
                 currentItem.updateDisplays(currentContext, widthDp, haveSun, haveMoon);
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
-            {
-                final Item currentItem = (Item)item;
-                final boolean isSun = (currentItem.id == Universe.IDs.Sun);
-                final boolean isMoon = (currentItem.id == Universe.IDs.Moon);
-                final Resources res = currentContext.getResources();
-
-                //if not for calculation and range has been set
-                if(!forCalculation && currentItem.views[0].rangeKm != Float.MAX_VALUE)
-                {
-                    final TextView[] detailTexts;
-
-                    //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
-                    detailDialog.addGroup(R.string.title_location, R.string.title_azimuth, R.string.title_elevation, R.string.title_range);
-                    if(isSun || isMoon)
-                    {
-                        detailDialog.addGroup(R.string.title_phase, R.string.title_name, (isMoon ? R.string.title_illumination : R.string.empty));
-                    }
-
-                    detailTexts = detailDialog.getDetailTexts();
-                    detailDialog.addButton(PageType.View, item.id, currentItem, DetailButtonType.LensView).setVisibility(SensorUpdate.havePositionSensors(currentContext) ? View.VISIBLE : View.GONE);
-                    detailDialog.addButton(PageType.View, item.id, currentItem, DetailButtonType.Notify);
-                    if(have3dPreview(item.id))
-                    {
-                        detailDialog.addButton(PageType.View, item.id, currentItem, DetailButtonType.Preview3d);
-                    }
-                    detailDialog.addButton(PageType.View, item.id, currentItem, DetailButtonType.Info);
-                    detailDialog.show();
-
-                    //start timer
-                    detailDialog.setUpdateTask(new TimerTask()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            ((Activity)currentContext).runOnUiThread(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    int index;
-                                    String text;
-                                    String kmUnit = Globals.getKmLabel(res);
-
-                                    //go through each display
-                                    for(index = 0; index < detailTexts.length; index++)
-                                    {
-                                        //remember current detail text
-                                        TextView currentDetailText = detailTexts[index];
-
-                                        //reset text and title
-                                        text = null;
-
-                                        //get text
-                                        switch(index)
-                                        {
-                                            case 0:
-                                                text = (currentItem.views[0].azimuth != Float.MAX_VALUE ? Globals.getAzimuthDirectionString(res, currentItem.views[0].azimuth) : "-");
-                                                break;
-
-                                            case 1:
-                                                text = (currentItem.views[0].elevation != Float.MAX_VALUE ? Globals.getDegreeString(currentItem.views[0].elevation) : "-");
-                                                break;
-
-                                            case 2:
-                                                text = (currentItem.views[0].rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(currentItem.views[0].rangeKm) : "-") + " " + kmUnit;
-                                                break;
-
-                                            case 3:
-                                                text = (currentItem.views[0].phaseName == null ? "-" : currentItem.views[0].phaseName);
-                                                break;
-
-                                            case 4:
-                                                text = Globals.getIlluminationString(currentItem.views[0].illumination);
-                                                break;
-                                        }
-
-                                        //if display exists and text is set
-                                        if(currentDetailText != null && text != null)
-                                        {
-                                            //set text
-                                            currentDetailText.setText(text);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
+            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum) { }
 
             //Updates status of having items
             public void updateHasItems()
@@ -1921,15 +1672,12 @@ public abstract class Current
         {
             private final Items pathItems;
 
-            public ItemListAdapter(Context context, int page, Item[] savedItems, Database.SatelliteData[] satellites, boolean forCalc)
+            public ItemListAdapter(Context context, int page, Item[] savedItems, Database.SatelliteData[] satellites)
             {
-                super(context, page);
+                super(context);
 
-                int index;
-                boolean usePathProgress = (!forCalculation && Settings.getListPathProgress(context));
-
-                forCalculation = forCalc;
-                pathItems = new Items((forCalculation ? MainActivity.Groups.Calculate : MainActivity.Groups.Current), page);
+                forCalculation = true;
+                pathItems = new Items(MainActivity.Groups.Calculate, page);
 
                 //if there are saved items
                 if(savedItems != null && savedItems.length > 0)
@@ -1943,21 +1691,8 @@ public abstract class Current
                     //if satellites are not set
                     hasItems = (satellites != null);
 
-                    //if for calculation
-                    if(forCalculation)
-                    {
-                        //set as empty
-                        pathItems.set(new Item[]{new Item(context, 0, null, true)});
-                    }
-                    else if(hasItems)
-                    {
-                        //setup items
-                        pathItems.set(new Item[satellites.length]);
-                        for(index = 0; index < satellites.length; index++)
-                        {
-                            pathItems.set(index, new Item(context, index, satellites[index], usePathProgress, false));
-                        }
-                    }
+                    //set as empty
+                    pathItems.set(new Item[]{new Item(context, 0, null, true)});
                 }
                 pathItems.sort(currentContext, page);
 
@@ -1987,35 +1722,30 @@ public abstract class Current
             public long getItemId(int position)
             {
                 Item currentItem = pathItems.getPassItem(position);
-                return(currentItem != null ? (forCalculation ? currentItem.listIndex : currentItem.id) : Integer.MIN_VALUE);
+                return(currentItem != null ? currentItem.listIndex : Integer.MIN_VALUE);
             }
 
             @Override
             protected void setHeader(View header)
             {
                 super.setHeader(header);
-                header.setVisibility(forCalculation ? View.VISIBLE : View.GONE);
+                header.setVisibility(View.VISIBLE);
             }
 
             @Override
             protected boolean showColumnTitles(int page)
             {
-                return(forCalculation || !Settings.getUsingCurrentGridLayout(page));
+                return(true);
             }
 
             @Override
             protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
-                boolean showEnd = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                boolean showEnd = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 TextView passTimeEndText;
                 Resources res = currentContext.getResources();
 
-                if(!forCalculation)
-                {
-                    ((TextView)listColumns.findViewById(R.id.Pass_Name_Text)).setText(R.string.title_name);
-                    listColumns.findViewById(R.id.Pass_Name_Group).setVisibility(View.VISIBLE);
-                }
                 listColumns.findViewById(R.id.Pass_Data_Group).setVisibility(View.VISIBLE);
                 ((TextView)listColumns.findViewById(R.id.Pass_Time_Start_Text)).setText(R.string.title_start);
                 passTimeEndText = listColumns.findViewById(R.id.Pass_Time_End_Text);
@@ -2045,26 +1775,19 @@ public abstract class Current
             @Override
             public void onBindViewHolder(@NonNull ItemHolderBase holder, int position)
             {
-                boolean showEnd = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                boolean showEnd = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 Item currentItem = pathItems.getPassItem(position);
                 ItemHolder itemHolder = (ItemHolder)holder;
 
                 //get displays
                 currentItem.nameImage = itemHolder.nameImage;
                 currentItem.nameText = itemHolder.nameText;
-                if(forCalculation)
-                {
-                    itemHolder.calculateProgressBar.setVisibility(View.VISIBLE);
-                }
-                else
-                {
-                    itemHolder.currentProgressLoadingBar.setVisibility(View.VISIBLE);
-                }
-                currentItem.progressBar = (forCalculation ? itemHolder.calculateProgressBar : itemHolder.currentProgressLoadingBar);
-                currentItem.progressStatusBar = (forCalculation ? null : itemHolder.currentProgressBar);
+                itemHolder.calculateProgressBar.setVisibility(View.VISIBLE);
+                currentItem.progressBar = itemHolder.calculateProgressBar;
+                currentItem.progressStatusBar = null;
                 if(itemHolder.outdatedText != null)
                 {
-                    itemHolder.outdatedText.setVisibility(forCalculation || currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                    itemHolder.outdatedText.setVisibility(View.GONE);
                 }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -2073,14 +1796,9 @@ public abstract class Current
                 }
                 if(itemHolder.dataGroupTitles != null)
                 {
-                    itemHolder.dataGroupTitles.setVisibility(usingGrid && currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                    itemHolder.dataGroupTitles.setVisibility(View.GONE);
                 }
                 currentItem.timeStartText = itemHolder.dataGroup1Text;
-                if(!forCalculation && usingGrid)
-                {
-                    Globals.setLayoutWidth(itemHolder.timeStartLayout, ViewGroup.LayoutParams.WRAP_CONTENT);
-                    Globals.setLayoutWidth(itemHolder.elMaxLayout, ViewGroup.LayoutParams.WRAP_CONTENT);
-                }
                 currentItem.timeStartUnder = itemHolder.timeStartUnder;
                 currentItem.timeStartTitleText = itemHolder.dataGroupTitle1Text;
                 currentItem.timeDurationText = itemHolder.dataGroup2Text;
@@ -2091,10 +1809,10 @@ public abstract class Current
                 }
                 currentItem.elMaxText = itemHolder.dataGroup4Text;
                 currentItem.elMaxUnder = itemHolder.elMaxUnder;
-                currentItem.elMaxUnder.setVisibility(!forCalculation ? View.VISIBLE : View.GONE);
+                currentItem.elMaxUnder.setVisibility(View.GONE);
 
                 //set displays
-                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, forCalculation || currentItem.tleIsAccurate);
+                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, true);
                 currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
             }
 
@@ -2360,7 +2078,6 @@ public abstract class Current
             public boolean isLoading;
             public final boolean tleIsAccurate;
             private final String name;
-            private final String ownerCode;
             public double julianDate;
             public Calendar time;
             public final Drawable icon;
@@ -2406,7 +2123,7 @@ public abstract class Current
                 }
             }
 
-            public Item(int index, Drawable icn, String nm, String ownCd, SatelliteObjectType currentSatellite, int coordinateCount, boolean tleAccurate)
+            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, int coordinateCount, boolean tleAccurate)
             {
                 super(Integer.MAX_VALUE, index, false, false, false, false);
 
@@ -2424,7 +2141,6 @@ public abstract class Current
                 tleIsAccurate = tleAccurate;
                 icon = icn;
                 name = nm;
-                ownerCode = ownCd;
                 julianDate = Double.MAX_VALUE;
                 time = Globals.julianDateToCalendar(julianDate);
                 nameImage = null;
@@ -2443,12 +2159,7 @@ public abstract class Current
             }
             public Item(int index, int coordinateCount)
             {
-                this(index, null, null, null, null, coordinateCount, false);
-            }
-
-            public boolean haveGeo()
-            {
-                return((coordinates[0].latitude != 0 || coordinates[0].longitude != 0 || coordinates[0].altitudeKm != 0) && (coordinates[0].latitude != Float.MAX_VALUE && coordinates[0].longitude != Float.MAX_VALUE && coordinates[0].altitudeKm != Float.MAX_VALUE));
+                this(index, null, null, null, coordinateCount, false);
             }
 
             public void updateDisplays(TimeZone zone, int widthDp)
@@ -2532,10 +2243,6 @@ public abstract class Current
                 timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
                 subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
-            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
-            {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupID, nameGroupID, nameImageID, nameTextID, speedTextID, -1, outdatedTextID, -1);
-            }
             public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int timeTextID)
             {
                 this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, dataGroupID, -1, -1, -1, speedTextID, timeTextID, -1, -1);
@@ -2552,40 +2259,9 @@ public abstract class Current
             private final TimeZone currentZone;
             private final Items coordinateItems;
 
-            public ItemListAdapter(Context context, Database.SatelliteData[] satellites, ObserverType location)
-            {
-                super(context, PageType.Coordinates);
-
-                int index;
-                Resources res = context.getResources();
-
-                currentZone = location.timeZone;
-                coordinateItems = new Items(MainActivity.Groups.Current, PageType.Coordinates);
-
-                //setup items
-                coordinateItems.set(new Item[satellites.length]);
-                for(index = 0; index < satellites.length; index++)
-                {
-                    Database.SatelliteData currentSatellite = satellites[index];
-                    coordinateItems.set(index, new Item(index, Globals.getOrbitalIcon(context, location, currentSatellite.getSatelliteNum(), currentSatellite.getOrbitalType()), currentSatellite.getName(""), currentSatellite.getOwnerCode(), currentSatellite.satellite, 1, currentSatellite.getTLEIsAccurate()));
-                }
-                coordinateItems.sort(currentContext, PageType.Coordinates);
-
-                updateHasItems();
-                forCalculation = false;
-
-                //remember strings and layout ID
-                dataGroupTitle1String = res.getString(R.string.abbrev_latitude) + ":";
-                dataGroupTitle2String = res.getString(R.string.abbrev_longitude) + ":";
-                dataGroupTitle3String = Globals.getKmLabel(res) + ":";
-                this.itemsRefID = R.layout.current_coordinates_item;
-
-                //ID stays the same
-                this.setHasStableIds(true);
-            }
             public ItemListAdapter(Context context, Item[] savedItems, int multiCount, TimeZone zone)
             {
-                super(context, PageType.Coordinates);
+                super(context);
 
                 hasItems = false;
                 forCalculation = true;
@@ -2634,46 +2310,36 @@ public abstract class Current
             public long getItemId(int position)
             {
                 Item currentItem = coordinateItems.getCoordinateItem(position);
-                return(currentItem != null ? (forCalculation ? currentItem.listIndex : currentItem.id) : Integer.MIN_VALUE);
+                return(currentItem != null ? currentItem.listIndex : Integer.MIN_VALUE);
             }
 
             @Override
             protected void setHeader(View header)
             {
                 super.setHeader(header);
-                header.setVisibility(forCalculation ? View.VISIBLE : View.GONE);
+                header.setVisibility(View.VISIBLE);
             }
 
             @Override
             protected boolean showColumnTitles(int page)
             {
-                return(forCalculation || !Settings.getUsingCurrentGridLayout(page));
+                return(true);
             }
 
             @Override
             protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
-                boolean showSpeed = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
-                TextView nameText;
+                boolean showSpeed = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 TextView timeText;
                 TextView speedText;
                 Resources res = currentContext.getResources();
 
-                if(forCalculation)
+                if(!forSubItems)
                 {
-                    if(!forSubItems)
-                    {
-                        timeText = listColumns.findViewById(R.id.Coordinate_Time_Text);
-                        timeText.setText(R.string.title_time);
-                        timeText.setVisibility(View.VISIBLE);
-                    }
-                }
-                else
-                {
-                    nameText = listColumns.findViewById(R.id.Coordinate_Name_Text);
-                    nameText.setText(R.string.title_name);
-                    listColumns.findViewById(R.id.Coordinate_Name_Group).setVisibility(View.VISIBLE);
+                    timeText = listColumns.findViewById(R.id.Coordinate_Time_Text);
+                    timeText.setText(R.string.title_time);
+                    timeText.setVisibility(View.VISIBLE);
                 }
                 speedText = listColumns.findViewById(R.id.Coordinate_Speed_Text);
                 if(speedText != null)
@@ -2698,20 +2364,13 @@ public abstract class Current
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder;
 
-                if(forCalculation)
+                if(forSubItems)
                 {
-                    if(forSubItems)
-                    {
-                        itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
-                    }
-                    else
-                    {
-                        itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group_Titles, R.id.Coordinate_Latitude_Title, R.id.Coordinate_Longitude_Title, R.id.Coordinate_Altitude_Title, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
-                    }
+                    itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group_Titles, R.id.Coordinate_Latitude_Title, R.id.Coordinate_Longitude_Title, R.id.Coordinate_Altitude_Title, R.id.Coordinate_Speed_Title, R.id.Coordinate_Data_Group, R.id.Coordinate_Name_Group, R.id.Coordinate_Name_Image, R.id.Coordinate_Name_Text, R.id.Coordinate_Outdated_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group_Titles, R.id.Coordinate_Latitude_Title, R.id.Coordinate_Longitude_Title, R.id.Coordinate_Altitude_Title, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
                 }
 
                 setViewClickListeners(itemView, itemHolder);
@@ -2721,30 +2380,22 @@ public abstract class Current
             @Override
             public void onBindViewHolder(@NonNull ItemHolderBase holder, int position)
             {
-                boolean showSpeed = (!usingGrid && widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                boolean showSpeed = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 Item currentItem = coordinateItems.getCoordinateItem(position);
                 ItemHolder itemHolder = (ItemHolder)holder;
 
                 //get displays
-                if(forCalculation)
+                currentItem.timeText = itemHolder.timeText;
+                if(currentItem.timeText != null)
                 {
-                    currentItem.timeText = itemHolder.timeText;
-                    if(currentItem.timeText != null)
-                    {
-                        currentItem.timeText.setVisibility(View.VISIBLE);
-                    }
+                    currentItem.timeText.setVisibility(View.VISIBLE);
+                }
 
-                    currentItem.subList = itemHolder.subList;
-                }
-                else
-                {
-                    currentItem.nameImage = itemHolder.nameImage;
-                    currentItem.nameText = itemHolder.nameText;
-                }
+                currentItem.subList = itemHolder.subList;
                 currentItem.progressGroup = itemHolder.progressGroup;
                 if(itemHolder.outdatedText != null)
                 {
-                    itemHolder.outdatedText.setVisibility(forCalculation || currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                    itemHolder.outdatedText.setVisibility(View.GONE);
                 }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -2753,7 +2404,7 @@ public abstract class Current
                 }
                 if(itemHolder.dataGroupTitles != null)
                 {
-                    itemHolder.dataGroupTitles.setVisibility(usingGrid && currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                    itemHolder.dataGroupTitles.setVisibility(View.GONE);
                 }
                 currentItem.latitudeText = itemHolder.dataGroup1Text;
                 currentItem.longitudeText = itemHolder.dataGroup2Text;
@@ -2765,109 +2416,12 @@ public abstract class Current
                 }
 
                 //update displays
-                currentItem.setLoading(!hasItems, forCalculation || currentItem.tleIsAccurate);
+                currentItem.setLoading(!hasItems, true);
                 currentItem.updateDisplays(currentZone, widthDp);
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
-            {
-                final Item currentItem = (Item)item;
-
-                //if not for calculation and altitude has been set
-                if(!forCalculation && currentItem.coordinates[0].altitudeKm != Float.MAX_VALUE)
-                {
-                    final int mapDisplayType = Settings.getMapDisplayType(currentContext);
-                    final boolean isSun = (item.id == Universe.IDs.Sun);
-                    final boolean isMoon = (item.id == Universe.IDs.Moon);
-                    final Resources res = currentContext.getResources();
-                    final TextView[] detailTexts;
-
-                    //create dialog
-                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.name, currentItem.ownerCode, currentItem.icon, itemDetailButtonClickListener);
-                    detailDialog.addGroup(R.string.title_coordinates, R.string.title_latitude, R.string.title_longitude, R.string.title_altitude, R.string.abbrev_velocity);
-                    if(isSun || isMoon)
-                    {
-                        detailDialog.addGroup(R.string.title_phase, R.string.title_name, (isMoon ? R.string.title_illumination : R.string.empty));
-                    }
-
-                    detailTexts = detailDialog.getDetailTexts();
-                    detailDialog.addButton(PageType.Coordinates, item.id, currentItem, DetailButtonType.MapView).setVisibility(mapDisplayType == CoordinatesFragment.MapDisplayType.Map ? View.VISIBLE : View.GONE);
-                    detailDialog.addButton(PageType.Coordinates, item.id, currentItem, DetailButtonType.GlobeView).setVisibility(mapDisplayType == CoordinatesFragment.MapDisplayType.Globe ? View.VISIBLE : View.GONE);
-                    detailDialog.addButton(PageType.Coordinates, item.id, currentItem, DetailButtonType.Notify);
-                    if(have3dPreview(item.id))
-                    {
-                        detailDialog.addButton(PageType.Coordinates, item.id, currentItem, DetailButtonType.Preview3d);
-                    }
-                    detailDialog.addButton(PageType.Coordinates, item.id, currentItem, DetailButtonType.Info);
-                    detailDialog.show();
-
-                    //start timer
-                    detailDialog.setUpdateTask(new TimerTask()
-                    {
-                        @Override
-                        public void run()
-                        {
-                            ((Activity)currentContext).runOnUiThread(new Runnable()
-                            {
-                                @Override
-                                public void run()
-                                {
-                                    int index;
-                                    boolean haveGeo = currentItem.haveGeo();
-                                    String text;
-                                    String kmUnit = Globals.getKmLabel(res);
-
-                                    //go through each display
-                                    for(index = 0; index < detailTexts.length; index++)
-                                    {
-                                        //remember current detail text
-                                        TextView currentDetailText = detailTexts[index];
-
-                                        //reset text and title
-                                        text = null;
-
-                                        //get text
-                                        switch(index)
-                                        {
-                                            case 0:
-                                                text = (haveGeo ? Globals.getLatitudeDirectionString(res, currentItem.coordinates[0].latitude, 4) : "-");
-                                                break;
-
-                                            case 1:
-                                                text = (haveGeo ? Globals.getLongitudeDirectionString(res, currentItem.coordinates[0].longitude, 4) : "-");
-                                                break;
-
-                                            case 2:
-                                                text = (haveGeo ? Globals.getKmUnitValueString(currentItem.coordinates[0].altitudeKm) : "-") + " " + kmUnit;
-                                                break;
-
-                                            case 3:
-                                                text = (currentItem.coordinates[0].speedKms != Double.MAX_VALUE ? Globals.getKmUnitValueString(currentItem.coordinates[0].speedKms) : "-") + " " + kmUnit + "/" + res.getString(R.string.abbrev_seconds_lower);
-                                                break;
-
-                                            case 4:
-                                                text = (currentItem.coordinates[0].phaseName == null ? "-" : currentItem.coordinates[0].phaseName);
-                                                break;
-
-                                            case 5:
-                                                text = Globals.getIlluminationString(currentItem.coordinates[0].illumination);
-                                                break;
-                                        }
-
-                                        //if display exists and text is set
-                                        if(currentDetailText != null && text != null)
-                                        {
-                                            //set text
-                                            currentDetailText.setText(text);
-                                        }
-                                    }
-                                }
-                            });
-                        }
-                    });
-                }
-            }
+            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum) { }
 
             //Updates status of having items
             public void updateHasItems()
@@ -4045,7 +3599,7 @@ public abstract class Current
             }
 
             //return desired column count
-            return(page != PageType.Combined && Settings.getCurrentGridLayout(context) ? (widthDp >=  600 ? (((widthDp - 600) / 200) + 3) : 2) : 1);
+            return(1);
         }
 
         @Override
@@ -4054,11 +3608,12 @@ public abstract class Current
             int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
-            boolean createLens = false;
-            boolean createMapView = false;
+            boolean createLens;
+            boolean createMapView;
             View newView = null;
             Context context = this.getContext();
-            final Selectable.ListBaseAdapter listAdapter;
+            Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems(page);
+            final Selectable.ListBaseAdapter listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites());
 
             //set default
             actionButton = null;
@@ -4067,54 +3622,9 @@ public abstract class Current
                 savedInstanceState = new Bundle();
             }
 
-            //set list adapter based on page
-            switch(page)
-            {
-                case PageType.View:
-                case PageType.Passes:
-                    switch(page)
-                    {
-                        case PageType.Passes:
-                            Passes.Item[] savedItems = (Passes.Item[])Current.PageAdapter.getSavedItems(page);
-                            listAdapter = new Passes.ItemListAdapter(context, page, savedItems, MainActivity.getSatellites(), false);
-
-                            if(subPage == Globals.SubPageType.Lens)
-                            {
-                                savedInstanceState.putInt(MainActivity.ParamTypes.PathDivisions, 8);
-                                savedInstanceState.putBoolean(MainActivity.ParamTypes.ForceShowPaths, true);
-                            }
-                            break;
-
-                        default:
-                        case PageType.View:
-                            listAdapter = new ViewAngles.ItemListAdapter(context, MainActivity.getSatellites());
-                            break;
-                    }
-
-                    //set if need to create lens
-                    createLens = (subPage == Globals.SubPageType.Lens);
-                    break;
-
-                case PageType.Coordinates:
-                    listAdapter = new Coordinates.ItemListAdapter(context, MainActivity.getSatellites(), MainActivity.getObserver());
-
-                    //set if need to create map view
-                    createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
-                    break;
-
-                case PageType.Combined:
-                    Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems(page);
-                    listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites());
-
-                    //set if need to create lens/map view
-                    createLens = (subPage == Globals.SubPageType.Lens);
-                    createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
-                    break;
-
-                default:
-                    listAdapter = null;
-                    break;
-            }
+            //set if need to create lens/map view
+            createLens = (subPage == Globals.SubPageType.Lens);
+            createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
 
             //if need to create lens
             if(createLens)
@@ -4133,7 +3643,7 @@ public abstract class Current
             }
 
             //if view is not set yet
-            if(newView == null && listAdapter != null)
+            if(newView == null)
             {
                 //create view
                 newView = this.onCreateView(inflater, container, listAdapter, group, page);
@@ -4204,7 +3714,7 @@ public abstract class Current
                     public void itemsChanged()
                     {
                         FragmentActivity activity = Page.this.getActivity();
-                        int sortBy = Settings.getCurrentSortBy(activity, page);
+                        int sortBy = Settings.getCurrentSortBy(activity);
 
                         //if not a constant value for sorting
                         if(sortBy != Items.SortBy.Name && sortBy != Items.SortBy.PassStartTime && sortBy != Items.SortBy.PassDuration && sortBy != Items.SortBy.MaxElevation)
@@ -4240,14 +3750,8 @@ public abstract class Current
     {
         private static final boolean[] pendingSort = new boolean[PageType.PageCount];
         private static Combined.Item[] combinedItems;
-        private static ViewAngles.Item[] viewItems;
-        private static Passes.Item[] passItems;
-        private static Coordinates.Item[] coordinateItems;
         private static final Items.NoradIndex.Comparer noradIndexComparer = new Items.NoradIndex.Comparer();
         private static ArrayList<Items.NoradIndex> combinedNoradIndex;
-        private static ArrayList<Items.NoradIndex> viewNoradIndex;
-        private static ArrayList<Items.NoradIndex> passNoradIndex;
-        private static ArrayList<Items.NoradIndex> coordinateNoradIndex;
         private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnItemsChangedListener[] itemsChangedListeners = new Selectable.ListFragment.OnItemsChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnGraphChangedListener[] graphChangedListeners = new Selectable.ListFragment.OnGraphChangedListener[PageType.PageCount];
@@ -4263,7 +3767,7 @@ public abstract class Current
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            int subPosition = (Settings.getCombinedCurrentLayout(currentContext) ? PageType.Combined : position);
+            int subPosition = PageType.Combined;
             return(this.getItem(group, position, subPage[subPosition], new Page()));
         }
 
@@ -4290,70 +3794,14 @@ public abstract class Current
         @Override
         public int getCount()
         {
-            return(Settings.getCombinedCurrentLayout(currentContext) ? 1 : (PageType.PageCount - 1));
+            return(1);
         }
 
         @Override
         public CharSequence getPageTitle(int position)
         {
             Resources res = currentContext.getResources();
-
-            switch(position)
-            {
-                case PageType.View:
-                    return(res.getString(R.string.title_view));
-
-                case PageType.Passes:
-                    return(res.getString(R.string.title_passes));
-
-                case PageType.Coordinates:
-                    return(res.getString(R.string.title_coordinates));
-
-                default                 :
-                    return(res.getString(R.string.title_invalid));
-            }
-        }
-
-        //Sets view item(s)
-        public static void setViewItems(ViewAngles.Item[] items)
-        {
-            viewItems = items;
-            viewNoradIndex = new ArrayList<>(0);
-        }
-        public static void setViewItem(int index, ViewAngles.Item newItem)
-        {
-            if(viewItems != null && index >= 0 && index < viewItems.length)
-            {
-                viewItems[index] = newItem;
-            }
-        }
-
-        //Sets pass item(s)
-        public static void setPassItems(Passes.Item[] items)
-        {
-            passItems = items;
-            passNoradIndex = new ArrayList<>(0);
-        }
-        public static void setPassItem(int index, Passes.Item newItem)
-        {
-            if(passItems != null && index >= 0 && index < passItems.length)
-            {
-                passItems[index] = newItem;
-            }
-        }
-
-        //Sets coordinate item(s)
-        public static void setCoordinateItems(Coordinates.Item[] items)
-        {
-            coordinateItems = items;
-            coordinateNoradIndex = new ArrayList<>(0);
-        }
-        public static void setCoordinateItem(int index, Coordinates.Item newItem)
-        {
-            if(coordinateItems != null && index >= 0 && index < coordinateItems.length)
-            {
-                coordinateItems[index] = newItem;
-            }
+            return(res.getString(R.string.title_invalid));
         }
 
         //Sets combined item(s)
@@ -4375,85 +3823,23 @@ public abstract class Current
         {
             int index;
 
-            switch(page)
+            if(combinedItems != null && combinedNoradIndex != null)
             {
-                case PageType.View:
-                    if(viewItems != null)
-                    {
-                        Arrays.sort(viewItems, new ViewAngles.Item.Comparer(sortBy));
+                Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
 
-                        viewNoradIndex.clear();
-                        for(index = 0; index < viewItems.length; index++)
-                        {
-                            viewNoradIndex.add(new Items.NoradIndex(viewItems[index].id, index));
-                        }
-                        Collections.sort(viewNoradIndex, new Items.NoradIndex.Comparer());
-                    }
-                    break;
-
-                case PageType.Passes:
-                    if(passItems != null && passNoradIndex != null)
-                    {
-                        Arrays.sort(passItems, new Passes.Item.Comparer(sortBy));
-
-                        passNoradIndex.clear();
-                        for(index = 0; index < passItems.length; index++)
-                        {
-                            passNoradIndex.add(new Items.NoradIndex(passItems[index].satellite.getSatelliteNum(), index));
-                        }
-                        Collections.sort(passNoradIndex, new Items.NoradIndex.Comparer());
-                    }
-                    break;
-
-                case PageType.Coordinates:
-                    if(coordinateItems != null && coordinateNoradIndex != null)
-                    {
-                        Arrays.sort(coordinateItems, new Coordinates.Item.Comparer(sortBy));
-
-                        coordinateNoradIndex.clear();
-                        for(index = 0; index < coordinateItems.length; index++)
-                        {
-                            coordinateNoradIndex.add(new Items.NoradIndex(coordinateItems[index].id, index));
-                        }
-                        Collections.sort(coordinateNoradIndex, new Items.NoradIndex.Comparer());
-                    }
-                    break;
-
-                default:
-                case PageType.Combined:
-                    if(combinedItems != null && combinedNoradIndex != null)
-                    {
-                        Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
-
-                        combinedNoradIndex.clear();
-                        for(index = 0; index < combinedItems.length; index++)
-                        {
-                            combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
-                        }
-                        Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
-                    }
-                    break;
+                combinedNoradIndex.clear();
+                for(index = 0; index < combinedItems.length; index++)
+                {
+                    combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                }
+                Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
             }
         }
 
         //Gets count of items in given page
         public static int getCount(int page)
         {
-            switch(page)
-            {
-                case PageType.View:
-                    return(viewItems == null ? 0 : viewItems.length);
-
-                case PageType.Passes:
-                    return(passItems == null ? 0 : passItems.length);
-
-                case PageType.Coordinates:
-                    return(coordinateItems == null ? 0 : coordinateItems.length);
-
-                default:
-                case PageType.Combined:
-                    return(combinedItems == null ? 0 : combinedItems.length);
-            }
+            return(combinedItems == null ? 0 : combinedItems.length);
         }
 
         //Returns true if given page has items
@@ -4475,43 +3861,6 @@ public abstract class Current
         {
             int index = Globals.divideFind(new Items.NoradIndex(noradId, -1), combinedNoradIndex, noradIndexComparer)[0];
             return(getCombinedItem(index >= 0 ? combinedNoradIndex.get(index).displayIndex : -1));
-        }
-
-        //Get view angle item(s)
-        public static ViewAngles.Item getViewAngleItem(int index)
-        {
-            return(viewItems != null && index >= 0 && index < viewItems.length ? viewItems[index] : null);
-        }
-        public static ViewAngles.Item getViewAngleItemByNorad(int noradId)
-        {
-            int index = Globals.divideFind(new Items.NoradIndex(noradId, -1), viewNoradIndex, noradIndexComparer)[0];
-            return(getViewAngleItem(index >= 0 ? viewNoradIndex.get(index).displayIndex : -1));
-        }
-
-        //Gets pass item(s)
-        public static Passes.Item[] getPassItems()
-        {
-            return(passItems);
-        }
-        public static Passes.Item getPassItem(int index)
-        {
-            return(passItems != null && index >= 0 && index < passItems.length ? passItems[index] : null);
-        }
-        public static Passes.Item getPassItemByNorad(int noradId)
-        {
-            int index = Globals.divideFind(new Items.NoradIndex(noradId, -1), passNoradIndex, noradIndexComparer)[0];
-            return(getPassItem(index >= 0 ? passNoradIndex.get(index).displayIndex : -1));
-        }
-
-        //Gets coordinate item(s)
-        public static Coordinates.Item getCoordinatesItem(int index)
-        {
-            return(coordinateItems != null && index >= 0 && index < coordinateItems.length ? coordinateItems[index] : null);
-        }
-        public static Coordinates.Item getCoordinatesItemByNorad(int noradId)
-        {
-            int index = Globals.divideFind(new Items.NoradIndex(noradId, -1), coordinateNoradIndex, noradIndexComparer)[0];
-            return(getCoordinatesItem(index >= 0 ? coordinateNoradIndex.get(index).displayIndex : -1));
         }
 
         //Set pending

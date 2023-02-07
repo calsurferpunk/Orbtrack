@@ -94,8 +94,6 @@ public abstract class Settings
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
         static final String MapShowToolbars = "MapShowToolbars";
-        static final String UseCombinedCurrentLayout = "UseCombinedCurrentLayout";
-        static final String UseCurrentGridLayout = "UseCurrentGridLayout";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
         static final String CurrentViewSortBy = "CurrentViewSortBy";
         static final String CurrentPassesSortBy = "CurrentPassesSortBy";
@@ -1925,7 +1923,6 @@ public abstract class Settings
     //Status of using metric units, grid, map marker bottom info, footprint, and default colors
     private static boolean usingMetric = true;
     private static boolean allowNumberCommas = true;
-    private static boolean usingCurrentGridLayout = false;
     private static boolean mapMarkerInfoBottom = true;
     private static boolean mapShowFootprint = false;
     private static boolean mapSelectedShowFootprint = false;
@@ -1983,7 +1980,6 @@ public abstract class Settings
             case PreferenceName.TranslateInformation:
             case PreferenceName.SatelliteSourceShared:
             case PreferenceName.SatelliteUseNextDefaultColor:
-            case PreferenceName.UseCombinedCurrentLayout:
                 return(true);
         }
 
@@ -2822,50 +2818,10 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.MapMarkerShowShadow, show);
     }
 
-    //Gets if using combined current layout
-    public static boolean getCombinedCurrentLayout(Context context)
-    {
-        return(getPreferenceBoolean(context, PreferenceName.UseCombinedCurrentLayout));
-    }
-
-    //Gets current grid layout setting
-    public static boolean getCurrentGridLayout(Context context)
-    {
-        return(getPreferenceBoolean(context, PreferenceName.UseCurrentGridLayout));
-    }
-
-    //Sets using current grid layout
-    public static void setUsingCurrentGridLayout(Context context, boolean use)
-    {
-        setPreferenceBoolean(context, PreferenceName.UseCurrentGridLayout, use);
-        usingCurrentGridLayout = use;
-    }
-
-    //Returns if using current grid layout
-    //note: faster than getting through preferences since called a lot
-    public static boolean getUsingCurrentGridLayout(int page)
-    {
-        return(page < Current.PageType.PageCount && usingCurrentGridLayout);
-    }
-
     //Gets sort by preference name for given page
-    private static String getCurrentSortByName(int page)
+    private static String getCurrentSortByName()
     {
-        switch(page)
-        {
-            case Current.PageType.View:
-                return(PreferenceName.CurrentViewSortBy);
-
-            case Current.PageType.Passes:
-                return(PreferenceName.CurrentPassesSortBy);
-
-            case Current.PageType.Coordinates:
-                return(PreferenceName.CurrentCoordinatesSortBy);
-
-            default:
-            case Current.PageType.Combined:
-                return(PreferenceName.CurrentCombinedSortBy);
-        }
+        return(PreferenceName.CurrentCombinedSortBy);
     }
 
     //Gets sort by string id for given sort by value
@@ -2928,23 +2884,23 @@ public abstract class Settings
     }
 
     //Gets current sort by for given page
-    public static int getCurrentSortBy(Context context, int page)
+    public static int getCurrentSortBy(Context context)
     {
-        return(getPreferenceInt(context, getCurrentSortByName(page)));
+        return(getPreferenceInt(context, getCurrentSortByName()));
     }
-    public static String getCurrentSortByString(Context context, int page)
+    public static String getCurrentSortByString(Context context)
     {
-        return(context.getString(getSortByStringId(getCurrentSortBy(context, page))));
+        return(context.getString(getSortByStringId(getCurrentSortBy(context))));
     }
 
     //Sets current sort by for given page
-    public static void setCurrentSortBy(Context context, int page, int sortBy)
+    public static void setCurrentSortBy(Context context, int sortBy)
     {
-        setPreferenceInt(context, getCurrentSortByName(page), sortBy);
+        setPreferenceInt(context, getCurrentSortByName(), sortBy);
     }
-    public static void setCurrentSortBy(Context context, int page, String sortByString)
+    public static void setCurrentSortBy(Context context, String sortByString)
     {
-        setCurrentSortBy(context, page, getSortBy(context, sortByString));
+        setCurrentSortBy(context, getSortBy(context, sortByString));
     }
 
     //Gets last location

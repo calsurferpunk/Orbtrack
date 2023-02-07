@@ -185,7 +185,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
         Settings.setMapShowFootprint(this, Settings.getMapShowFootprint(this));
         Settings.setMapShowSelectedFootprint(this, Settings.getMapShowSelectedFootprint(this));
-        Settings.setUsingCurrentGridLayout(this, Settings.getCurrentGridLayout(this));
         Settings.setSatelliteUseNextDefaultColor(this, Settings.getSatelliteUseNextDefaultColor(this));
         setSaveFileData(null, "", "", -1, -1);
         backPressTime = Globals.getGMTTime();
@@ -363,14 +362,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         switch(mainGroup)
         {
             case Groups.Current:
-                switch(page)
-                {
-                    case Current.PageType.View:
-                    case Current.PageType.Passes:
-                    case Current.PageType.Combined:
-                        restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
-                        break;
-                }
+                restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
 
                 //update columns on all pages
                 for(index = 0; index < Current.PageType.PageCount; index++)
@@ -754,23 +746,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean onOrbitals = (mainGroup == Groups.Orbitals);
         int subPage = getSubPage();
         int mapDisplayType = Settings.getMapDisplayType(this);
-        boolean usingCurrentViewGrid = Settings.getUsingCurrentGridLayout(Current.PageType.View);
-        boolean usingCurrentPassesGrid = Settings.getUsingCurrentGridLayout(Current.PageType.Passes);
-        boolean usingCurrentCoordinatesGrid = Settings.getUsingCurrentGridLayout(Current.PageType.Coordinates);
         boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
         boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
         boolean onSubPageList = (subPage == Globals.SubPageType.List);
         boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
         boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
         boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
-        boolean onCurrentView = (onCurrent && page == Current.PageType.View);
-        boolean onCurrentViewList = (onCurrentView && onSubPageList);
-        boolean onCurrentPasses = (onCurrent && page == Current.PageType.Passes);
-        boolean onCurrentPassesList = (onCurrentPasses && onSubPageList);
-        boolean onCurrentCoordinates = (onCurrent && page == Current.PageType.Coordinates);
-        boolean onCurrentCoordinatesList = (onCurrentCoordinates && onSubPageList);
-        boolean onCurrentCoordinateMap = (onCurrentCoordinates && onSubPageMap);
-        boolean onCurrentCoordinateGlobe = (onCurrentCoordinates && onSubPageGlobe);
         boolean onCurrentCombined = (onCurrent && page == Current.PageType.Combined);
         boolean onCurrentCombinedList = (onCurrentCombined && onSubPageList);
         boolean onCurrentCombinedMap = (onCurrentCombined && onSubPageMap);
@@ -795,16 +776,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean calculatingPasses = (calculatePassesTask != null && calculatePassesTask.isRunning());
         boolean calculatingCoordinates = (calculateCoordinatesTask != null && calculateCoordinatesTask.calculatingCoordinates);
         boolean calculatingIntersection = (calculateIntersectionsTask != null && calculateIntersectionsTask.isRunning());
-        boolean showLens = onCurrentViewList || onCurrentPassesList || onCurrentCombinedList || (onCalculateViewList && !calculatingViews);
-        boolean showList = ((onCurrentView && onCurrentViewList == usingCurrentViewGrid) || (onCurrentPasses && onCurrentPassesList == usingCurrentPassesGrid) || (onCurrentCoordinates && onCurrentCoordinatesList == usingCurrentCoordinatesGrid)) || (onCurrentCombined && !onSubPageList) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
-        boolean showGrid = ((onCurrentView && onCurrentViewList != usingCurrentViewGrid) || (onCurrentPasses && onCurrentPassesList != usingCurrentPassesGrid) || (onCurrentCoordinates && onCurrentCoordinatesList != usingCurrentCoordinatesGrid));
-        boolean showMap = (onCurrentCoordinates && ((usingMapDisplay && onCurrentCoordinatesList) || onCurrentCoordinateGlobe)) || (onCurrentCombined && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
-        boolean showGlobe = (onCurrentCoordinates && ((usingGlobeDisplay && onCurrentCoordinatesList) || onCurrentCoordinateMap)) || (onCurrentCombined && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
-        boolean onCurrentNoSelected = ((onCurrentView && viewLensNoradID == Integer.MAX_VALUE) || (onCurrentPasses && passesLensNoradID == Integer.MAX_VALUE) || (onCurrentCoordinates && mapViewNoradID == Integer.MAX_VALUE) || (onCurrentCombined && viewLensNoradID == Integer.MAX_VALUE && passesLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE));
+        boolean showLens = onCurrentCombinedList || (onCalculateViewList && !calculatingViews);
+        boolean showList = (onCurrentCombined && !onSubPageList) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
+        boolean showMap = (onCurrentCombined && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
+        boolean showGlobe = (onCurrentCombined && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
+        boolean onCurrentNoSelected = (onCurrentCombined && viewLensNoradID == Integer.MAX_VALUE && passesLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
         menu.findItem(R.id.menu_list).setVisible(showList);
-        menu.findItem(R.id.menu_grid).setVisible(showGrid);
+        menu.findItem(R.id.menu_grid).setVisible(false);
         menu.findItem(R.id.menu_map).setVisible(showMap);
         menu.findItem(R.id.menu_globe).setVisible(showGlobe);
         menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(this));
@@ -877,7 +857,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         int previousSubPage = Globals.SubPageType.List;
         int selectedSubPage;
         int page = getMainPage();
-        boolean usingGrid = false;
         boolean usingGlobe = (id == R.id.menu_globe);
         boolean setMapDisplay = false;
         boolean setDisplayGroup = false;
@@ -889,44 +868,17 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             return(true);
         }
 
-        //get status based on group
-        if(mainGroup == Groups.Current)
-        {
-            //if not combined
-            if(page != Current.PageType.Combined)
-            {
-                usingGrid = Settings.getUsingCurrentGridLayout(page);
-            }
-        }
-
         //handle item
-        if(id == R.id.menu_list || id == R.id.menu_grid)
+        if(id == R.id.menu_list)
         {
             switch(mainGroup)
             {
                 case Groups.Current:
-                    switch(page)
-                    {
-                        case Current.PageType.View:
-                        case Current.PageType.Passes:
-                        case Current.PageType.Coordinates:
-                        case Current.PageType.Combined:
-                            //if --using grid and list menu or- -not using grid and grid menu-- and on list
-                            if(((usingGrid && id == R.id.menu_list) || (!usingGrid && id == R.id.menu_grid)) && currentSubPage[page] == Globals.SubPageType.List)
-                            {
-                                //stop using grid
-                                Settings.setUsingCurrentGridLayout(this, (id == R.id.menu_grid));
-                            }
-                            else
-                            {
-                                //set sub page
-                                setSubPage(Groups.Current, page, Globals.SubPageType.List);
-                            }
+                    //set sub page
+                    setSubPage(Groups.Current, page, Globals.SubPageType.List);
 
-                            //update display
-                            setDisplayGroup = true;
-                            break;
-                    }
+                    //update display
+                    setDisplayGroup = true;
                     break;
 
                 case Groups.Calculate:
@@ -951,14 +903,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
-                        switch(page)
-                        {
-                            case Current.PageType.Coordinates:
-                            case Current.PageType.Combined:
-                                //continue updating
-                                setMapDisplay = true;
-                                break;
-                        }
+                        //continue updating
+                        setMapDisplay = true;
                         break;
 
                     case Groups.Calculate:
@@ -984,15 +930,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
-                        switch(page)
-                        {
-                            case Current.PageType.View:
-                            case Current.PageType.Passes:
-                            case Current.PageType.Combined:
-                                setSubPage(mainGroup, page, Globals.SubPageType.Lens);
-                                setDisplayGroup = true;
-                                break;
-                        }
+                        setSubPage(mainGroup, page, Globals.SubPageType.Lens);
+                        setDisplayGroup = true;
                         break;
 
                     case Groups.Calculate:
@@ -1598,7 +1537,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         if(sideMenu != null)
         {
-            groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, Settings.getCombinedCurrentLayout(this) ? (new Item[]{new Item(statusString, viewDrawable)}) : (new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable)})));
+            groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, new Item[]{new Item(statusString, viewDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_calculate), R.drawable.ic_calculator_black, new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable), new Item(intersectionString, intersectionDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_display), displayDrawable), new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_all), allDrawable)}));
@@ -1687,36 +1626,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         int page = getMainPage();
 
-        switch(page)
+        if(currentViewAnglesTask != null && currentSubPage[page] == Globals.SubPageType.Lens)
         {
-            case Current.PageType.View:
-            case Current.PageType.Combined:
-                if(currentViewAnglesTask != null && currentSubPage[page] == Globals.SubPageType.Lens)
-                {
-                    currentViewAnglesTask.needViews = true;
-                }
-
-                //if not combined
-                if(page != Current.PageType.Combined)
-                {
-                    //stop
-                    break;
-                }
-                //else fall through
-
-            case Current.PageType.Coordinates:
-                if(currentCoordinatesTask != null)
-                {
-                    currentCoordinatesTask.needCoordinates = true;
-                }
-                break;
+            currentViewAnglesTask.needViews = true;
         }
     }
 
     //Updates the observer usage
     private void updateObserverUsage(boolean updateNotify)
     {
-        boolean usingCombined;
         boolean usingCurrent = (locationSource == Database.LocationType.Current);
         CameraLens cameraView = Current.getCameraView();
 
@@ -1730,11 +1648,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         if(mainGroup == Groups.Current)
         {
             //if there are pass items
-            usingCombined = Settings.getCombinedCurrentLayout(this);
-            if(Current.PageAdapter.hasItems(usingCombined ? Current.PageType.Combined : Current.PageType.Passes))
+            if(Current.PageAdapter.hasItems(Current.PageType.Combined))
             {
                 //go through each pass item
-                CalculateService.PassData[] passItems = (usingCombined ? Current.PageAdapter.getCombinedItems() : Current.PageAdapter.getPassItems());
+                CalculateService.PassData[] passItems = (Current.PageAdapter.getCombinedItems());
                 for(CalculateService.PassData currentItem : passItems)
                 {
                     //clear pass
@@ -2315,7 +2232,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(currentPageAdapter != null)
             {
                 //save items if not viewing list
-                currentPageAdapter.setSavedItems(Current.PageType.Passes, (saveItems && currentSubPage[Current.PageType.Passes] != Globals.SubPageType.List ? Current.PageAdapter.getPassItems() : null));
                 currentPageAdapter.setSavedItems(Current.PageType.Combined, (saveItems && currentSubPage[Current.PageType.Combined] != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
             }
         }
@@ -2468,9 +2384,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //update titles and swiping status to allow if not on current/calculate with map/globe
-        allowingPagerSwipe = !((showCurrent && (page == Current.PageType.Coordinates || page == Current.PageType.Combined) && (currentSubPage[page] == Globals.SubPageType.Map || currentSubPage[page] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe)));
+        allowingPagerSwipe = !((showCurrent && (page == Current.PageType.Combined) && (currentSubPage[page] == Globals.SubPageType.Map || currentSubPage[page] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe)));
         mainPager.setSwipeEnabled(allowingPagerSwipe);
-        showingPagerTitles = !(showCurrent && Settings.getCombinedCurrentLayout(this.getBaseContext()));
+        showingPagerTitles = !showCurrent;
         mainPagerTitles.setVisibility(showingPagerTitles ? View.VISIBLE : View.GONE);
     }
     private void updateMainPagerAdapter(boolean groupChanged, boolean saveItems)
@@ -2512,7 +2428,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Gets main page
     private int getMainPage()
     {
-        return(mainGroup == Groups.Current && Settings.getCombinedCurrentLayout(this) ? Current.PageType.Combined : mainPager.getCurrentItem());
+        return(mainGroup == Groups.Current ? Current.PageType.Combined : mainPager.getCurrentItem());
     }
 
     //Updates main page
@@ -2531,8 +2447,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         boolean onCurrent = (mainGroup == Groups.Current);
         boolean onCalculate = (mainGroup == Groups.Calculate);
-        boolean onCurrentCombined = (onCurrent && getMainPage() == Current.PageType.Combined);
-        boolean onCurrentList = ((!onCurrentCombined && currentSubPage[Current.PageType.Passes] == Globals.SubPageType.List) || (onCurrentCombined && currentSubPage[Current.PageType.Combined] == Globals.SubPageType.List));
+        boolean onCurrentList = (onCurrent && currentSubPage[Current.PageType.Combined] == Globals.SubPageType.List);
         boolean onCalculateViewNonInput = (onCalculate && calculateSubPage[Calculate.PageType.View] != Globals.SubPageType.Input);
         boolean onCalculateViewLens = (onCalculate && calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens);
         boolean onCalculatePassesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Passes] != Globals.SubPageType.Input);
@@ -3010,7 +2925,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                             {
                                 //update current sort by for page and set pending
-                                Settings.setCurrentSortBy(MainActivity.this, page, list2Value);
+                                Settings.setCurrentSortBy(MainActivity.this, list2Value);
                                 Current.PageAdapter.setPendingSort(page, true);
                             }
                         }).getSortBy(res.getString(R.string.title_sort_by), page);
@@ -3043,18 +2958,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     case AddSelectListAdapter.SettingsType.Settings:
                         Intent startIntent = new Intent(activity, SettingsActivity.class);
-                        String startScreenValue = "";
-
-                        //get start screen value
-                        switch(page)
-                        {
-                            case Current.PageType.View:
-                            case Current.PageType.Passes:
-                            case Current.PageType.Coordinates:
-                            case Current.PageType.Combined:
-                                startScreenValue = (subPage == Globals.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.GlobeMapView);
-                                break;
-                        }
+                        String startScreenValue = (subPage == Globals.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.GlobeMapView);
 
                         //start settings activity
                         startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
@@ -3277,23 +3181,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         switch(group)
                         {
                             case Groups.Current:
-                                switch(pageType)
-                                {
-                                    case Current.PageType.View:
-                                    case Current.PageType.Combined:
-                                        //update sub page and norad ID
-                                        setSubPage(group, pageType, Globals.SubPageType.Lens);
-                                        viewLensNoradID = itemID;
-                                        setMainGroup(mainGroup, true);
-                                        break;
-
-                                    case Current.PageType.Passes:
-                                        //update sub page and norad ID
-                                        setSubPage(group, pageType, Globals.SubPageType.Lens);
-                                        passesLensNoradID = itemID;
-                                        setMainGroup(mainGroup, true);
-                                        break;
-                                }
+                                //update sub page and norad ID
+                                setSubPage(group, pageType, Globals.SubPageType.Lens);
+                                viewLensNoradID = itemID;
+                                setMainGroup(mainGroup, true);
                                 break;
 
                             case Groups.Calculate:
@@ -3322,16 +3213,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     case Selectable.ListBaseAdapter.DetailButtonType.GlobeView:
                         if(group == Groups.Current)
                         {
-                            switch(pageType)
-                            {
-                                case Current.PageType.Coordinates:
-                                case Current.PageType.Combined:
-                                    //update sub page and norad ID
-                                    setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
-                                    mapViewNoradID = itemID;
-                                    setMainGroup(mainGroup, true);
-                                    break;
-                            }
+                            //update sub page and norad ID
+                            setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
+                            mapViewNoradID = itemID;
+                            setMainGroup(mainGroup, true);
                         }
                         break;
 
@@ -3443,14 +3328,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(group)
                 {
                     case Groups.Current:
-                        switch(position)
-                        {
-                            case Current.PageType.Passes:
-                            case Current.PageType.Combined:
-                                //get passes
-                                setCurrentPassCalculations(true);
-                                break;
-                        }
+                        //get passes
+                        setCurrentPassCalculations(true);
                         break;
 
                     case Groups.Calculate:
@@ -3769,43 +3648,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
-                        switch(lastPosition)
+                        //if now using camera
+                        if(currentSubPage[position] == Globals.SubPageType.Lens)
                         {
-                            case Current.PageType.View:
-                            case Current.PageType.Passes:
-                                //if were using camera
-                                if(currentSubPage[lastPosition] == Globals.SubPageType.Lens)
-                                {
-                                    //make sure camera stops
-                                    stopCamera = true;
-                                }
-                                break;
-                        }
-
-                        switch(position)
-                        {
-                            case Current.PageType.View:
-                            case Current.PageType.Passes:
-                            case Current.PageType.Combined:
-                                //if now using camera
-                                if(currentSubPage[position] == Globals.SubPageType.Lens)
-                                {
-                                    //start camera
-                                    startCamera = true;
-                                }
-
-                                //if not combined
-                                if(position != Current.PageType.Combined)
-                                {
-                                    //stop
-                                    break;
-                                }
-                                //else fall through
-
-                            case Current.PageType.Coordinates:
-                                //don't allow swiping if on map/globe
-                                allowSwipe = (currentSubPage[position] != Globals.SubPageType.Map && currentSubPage[position] != Globals.SubPageType.Globe);
-                                break;
+                            //start camera
+                            startCamera = true;
                         }
 
                         //update current calculation status
@@ -4065,12 +3912,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 int subPage = currentSubPage[page];
                 boolean currentIsSatellite;
                 boolean updateElapsed = false;
-                boolean onView = (page == Current.PageType.View);
-                boolean onPasses = (page == Current.PageType.Passes);
-                boolean onCoordinates = (page == Current.PageType.Coordinates);
-                boolean onCombined = (page == Current.PageType.Combined);
                 boolean allViewOrbitals = (viewLensNoradID == Integer.MAX_VALUE);
-                boolean allPassesOrbitals = (passesLensNoradID == Integer.MAX_VALUE);
                 boolean multiOrbitals = (mapViewNoradID == Integer.MAX_VALUE);
                 boolean onMap = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
                 boolean onList = (subPage == Globals.SubPageType.List);
@@ -4078,7 +3920,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean[] updateList = new boolean[Current.PageType.PageCount];
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
-                double phase;
                 double julianDate;
                 String coordinateString = null;
                 TextView mapInfoText = Current.Coordinates.getMapInfoText();
@@ -4136,8 +3977,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             //get current satellite, location, and look angle
                             boolean changedEnough = false;
-                            double illumination = 0;
-                            String phaseName = null;
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
 
                             currentNoradId = currentOrbital.getSatelliteNum();
@@ -4145,27 +3984,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
                             topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
 
-                            //if the moon
-                            if(currentNoradId == Universe.IDs.Moon)
-                            {
-                                //get phase and name
-                                phase = Universe.Moon.getPhase(System.currentTimeMillis());
-                                illumination = Universe.Moon.getIllumination(phase);
-                                phaseName = Universe.Moon.getPhaseName(MainActivity.this, phase);
-                            }
-                            //else if the sun
-                            else if(currentNoradId == Universe.IDs.Sun)
+                            //if the sun
+                            if(currentNoradId == Universe.IDs.Sun)
                             {
                                 //if have last elevation
                                 if(sunLastEl.value != Double.MAX_VALUE)
                                 {
                                     //if changed enough
                                     changedEnough = (Math.abs(topographicData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
-                                    if(changedEnough)
-                                    {
-                                        //get phase name
-                                        phaseName = Universe.Sun.getPhaseName(MainActivity.this, topographicData.elevation, (topographicData.elevation > sunLastEl.value));
-                                    }
                                 }
 
                                 //if -had no last elevation- or -changed enough-
@@ -4196,7 +4022,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
 
                             //if not using all satellites and satellite number matches
-                            if(((onView || onCombined) && !allViewOrbitals && currentNoradId == viewLensNoradID) || (onPasses && !allPassesOrbitals && currentNoradId == passesLensNoradID))
+                            if((!allViewOrbitals && currentNoradId == viewLensNoradID))
                             {
                                 //set array with current satellite
                                 selectedSatellites = new Database.SatelliteData[currentSatellites.length];
@@ -4211,30 +4037,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 //remember look angle
                                 lookAngles[index] = topographicData;
 
-                                //if status angles list exists and showing list
-                                if(onView && onList && Current.PageAdapter.hasItems(Current.PageType.View))
-                                {
-                                    //get current item
-                                    Current.ViewAngles.Item currentItem = Current.PageAdapter.getViewAngleItemByNorad(currentNoradId);
-                                    if(currentItem != null)
-                                    {
-                                        //update values
-                                        currentItem.views[0].azimuth = (float)topographicData.azimuth;
-                                        currentItem.views[0].elevation = (float)topographicData.elevation;
-                                        currentItem.views[0].rangeKm = (float)topographicData.rangeKm;
-                                        currentItem.views[0].illumination = illumination;
-                                        if(phaseName != null)
-                                        {
-                                            currentItem.views[0].phaseName = phaseName;
-                                        }
-
-                                        //update list later
-                                        updateList[Current.PageType.View] = true;
-                                    }
-                                }
-
                                 //if combined list exists and showing list
-                                if(onCombined && onList && Current.PageAdapter.hasItems(Current.PageType.Combined))
+                                if(onList && Current.PageAdapter.hasItems(Current.PageType.Combined))
                                 {
                                     //get current item
                                     Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);
@@ -4251,28 +4055,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                                         //update list later
                                         updateList[Current.PageType.Combined] = true;
-                                    }
-                                }
-                            }
-
-                            //if on passes list
-                            if(onPasses && Current.PageAdapter.hasItems(Current.PageType.Passes))
-                            {
-                                //get current item
-                                Current.Passes.Item currentItem = Current.PageAdapter.getPassItemByNorad(currentNoradId);
-                                if(currentItem != null)
-                                {
-                                    //if lens exists, showing lens, and -not viewing a specific pass or on that pass-
-                                    if(onLens && cameraView != null && (allPassesOrbitals || currentNoradId == passesLensNoradID))
-                                    {
-                                        //set look angles
-                                        cameraView.setTravel(index, currentItem.passViews);
-                                    }
-                                    //else if showing list and pass calculated
-                                    else if(onList && currentItem.passCalculated)
-                                    {
-                                        //update list later
-                                        updateList[Current.PageType.Passes] = true;
                                     }
                                 }
                             }
@@ -4346,29 +4128,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     }
                                 }
                             }
-
-                            //if coordinates list exists and showing list
-                            if(onCoordinates && onList && Current.PageAdapter.hasItems(Current.PageType.Coordinates))
-                            {
-                                //get current item
-                                Current.Coordinates.Item currentItem = Current.PageAdapter.getCoordinatesItemByNorad(currentNoradId);
-                                if(currentItem != null)
-                                {
-                                    //update values
-                                    currentItem.coordinates[0].latitude = (float)currentOrbital.geo.latitude;
-                                    currentItem.coordinates[0].longitude = (float)currentOrbital.geo.longitude;
-                                    currentItem.coordinates[0].altitudeKm = (float)currentOrbital.geo.altitudeKm;
-                                    currentItem.coordinates[0].speedKms = currentOrbital.geo.speedKmS;
-                                    currentItem.coordinates[0].illumination = illumination;
-                                    if(phaseName != null)
-                                    {
-                                        currentItem.coordinates[0].phaseName = phaseName;
-                                    }
-
-                                    //update list later
-                                    updateList[Current.PageType.Coordinates] = true;
-                                }
-                            }
                         }
                     }
 
@@ -4406,7 +4165,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             //try to sort page and notify of change
                             try
                             {
-                                Current.PageAdapter.sortItems(index, Settings.getCurrentSortBy(MainActivity.this, index));
+                                Current.PageAdapter.sortItems(index, Settings.getCurrentSortBy(MainActivity.this));
                                 Current.PageAdapter.setPendingSort(index, false);
                                 updateList[index] = true;
                             }
@@ -4426,7 +4185,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     Current.Coordinates.handleMarkerScale();
 
                     //update camera view
-                    if(onLens && cameraView != null && (onView || onPasses || onCombined))
+                    if(onLens && cameraView != null)
                     {
                         //update positions
                         cameraView.updatePositions((selectedSatellites != null ? selectedSatellites : currentSatellites), (selectedLookAngles != null ? selectedLookAngles : lookAngles), true);
@@ -4434,7 +4193,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //set to lens delay
                         timerDelay = lensTimerDelay;
                     }
-                    else if(onMap && Current.Coordinates.getMapViewReady() && (onCoordinates || onCombined))
+                    else if(onMap && Current.Coordinates.getMapViewReady())
                     {
                         //set time map delay
                         timerDelay = mapTimerDelay;
@@ -4704,55 +4463,20 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     viewLensNoradID = Integer.MAX_VALUE;
                     passesLensNoradID = Integer.MAX_VALUE;
 
-                    switch(page)
+                    //if changing to lens view
+                    if(subPage == Globals.SubPageType.Lens)
                     {
-                        case Current.PageType.View:
-                        case Current.PageType.Passes:
-                        case Current.PageType.Combined:
-                            //if changing to lens view
-                            if(subPage == Globals.SubPageType.Lens)
+                        //go through each sub page
+                        for(index = 0; index < Current.PageType.PageCount; index++)
+                        {
+                            //if on other page
+                            if(index != page)
                             {
-                                //go through each sub page
-                                for(index = 0; index < Current.PageType.PageCount; index++)
-                                {
-                                    //if on other page
-                                    if(index != page)
-                                    {
-                                        //make sure other page is not using lens view
-                                        currentSubPage[index] = Globals.SubPageType.List;
-                                    }
-                                }
+                                //make sure other page is not using lens view
+                                currentSubPage[index] = Globals.SubPageType.List;
                             }
-
-                            //if not on combined
-                            if(page != Current.PageType.Combined)
-                            {
-                                //stop
-                                break;
-                            }
-                            //else fall through
-
-                        case Current.PageType.Coordinates:
-                            //clear any selected map
-                            mapViewNoradID = Integer.MAX_VALUE;
-
-                            //if changing to map/globe view
-                            if(subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe)
-                            {
-                                //go through each sub page
-                                for(index = 0; index < Current.PageType.PageCount; index++)
-                                {
-                                    //if on other page
-                                    if(index != page)
-                                    {
-                                        //make sure other page is not using map/globe view
-                                        currentSubPage[index] = Globals.SubPageType.List;
-                                    }
-                                }
-                            }
-                            break;
+                        }
                     }
-                    return;
                 }
                 break;
 
@@ -4794,7 +4518,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
                             break;
                     }
-                    return;
                 }
                 break;
         }
@@ -4988,10 +4711,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void setCurrentPassCalculations(boolean run)
     {
         int index;
-        boolean havePasses;
         boolean haveCombined;
         boolean onCurrent = (mainGroup == Groups.Current);
-        boolean usingCombined = (Settings.getCombinedCurrentLayout(this));
         CalculateService.PassData[] selectedItems = null;
         CalculateService.PassData[] passItems;
 
@@ -5003,12 +4724,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         ///if want to run, not waiting for location update, and have items
-        havePasses = (onCurrent && !usingCombined && Current.PageAdapter.hasItems(Current.PageType.Passes));
-        haveCombined = (onCurrent && usingCombined && Current.PageAdapter.hasItems(Current.PageType.Combined));
-        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.isSet()) && (havePasses || haveCombined))
+        haveCombined = (onCurrent && Current.PageAdapter.hasItems(Current.PageType.Combined));
+        if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.isSet()) && haveCombined)
         {
             //get items
-            passItems = (havePasses ? Current.PageAdapter.getPassItems() : Current.PageAdapter.getCombinedItems());
+            passItems = Current.PageAdapter.getCombinedItems();
 
             //if not for all orbitals
             if(passesLensNoradID != Integer.MAX_VALUE)
@@ -5036,7 +4756,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     if(pass != null)
                     {
                         Activity activity = MainActivity.this;
-                        int sortBy = Settings.getCurrentSortBy(activity, (haveCombined ? Current.PageType.Combined : Current.PageType.Passes));
+                        int sortBy = Settings.getCurrentSortBy(activity);
 
                         //if a sort is needed
                         switch(sortBy)
@@ -5044,29 +4764,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Current.Items.SortBy.PassStartTime:
                             case Current.Items.SortBy.PassDuration:
                             case Current.Items.SortBy.MaxElevation:
-                                //if there are pass items
-                                if(Current.PageAdapter.hasItems(Current.PageType.Passes))
-                                {
-                                    //remember current item
-                                    final Current.Passes.Item currentItem = (pass instanceof Current.Passes.Item ? (Current.Passes.Item)pass : null);
-                                    if(currentItem != null && observer != null)
-                                    {
-                                        activity.runOnUiThread(new Runnable()
-                                        {
-                                            @Override
-                                            public void run()
-                                            {
-                                                //update displays
-                                                currentItem.setLoading(false, currentItem.tleIsAccurate);
-                                                currentItem.updateDisplays(activity, observer.timeZone);
-
-                                                //set pending sort
-                                                Current.PageAdapter.setPendingSort(Current.PageType.Passes, true);
-                                            }
-                                        });
-                                    }
-                                }
-
                                 //if there are combined items
                                 if(Current.PageAdapter.hasItems(Current.PageType.Combined))
                                 {

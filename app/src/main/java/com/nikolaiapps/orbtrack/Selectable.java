@@ -2289,7 +2289,7 @@ public abstract class Selectable
                 params = new Bundle();
             }
             params.putInt(ParamTypes.Group, group);
-            params.putInt(ParamTypes.PageNumber, (group == MainActivity.Groups.Current && Settings.getCombinedCurrentLayout(currentContext) ? Current.PageType.Combined : position));
+            params.putInt(ParamTypes.PageNumber, (group == MainActivity.Groups.Current ? Current.PageType.Combined : position));
             params.putInt(ParamTypes.SubPageNumber, subPosition);
 
             newPage.setArguments(params);

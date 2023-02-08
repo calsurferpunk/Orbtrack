@@ -1617,6 +1617,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             currentViewAnglesTask.needViews = true;
         }
+        if(currentCoordinatesTask != null && (currentSubPage == Globals.SubPageType.Map || currentSubPage == Globals.SubPageType.Globe))
+        {
+            currentCoordinatesTask.needCoordinates = true;
+        }
     }
 
     //Updates the observer usage
@@ -2893,7 +2897,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Shows a filter dialog
     public void showFilterDialog()
     {
-        final int page = getMainPage();
         final Resources res = this.getResources();
 
         Globals.showSelectDialog(this, res.getString(R.string.title_select_filter), AddSelectListAdapter.SelectType.Filter, new AddSelectListAdapter.OnItemClickListener()

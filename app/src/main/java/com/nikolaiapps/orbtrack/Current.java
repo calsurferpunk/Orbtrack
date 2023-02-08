@@ -48,10 +48,7 @@ public abstract class Current
 {
     public static abstract class PageType
     {
-        static final int View = 0;
-        static final int Coordinates = 2;
-        static final int Combined = 3;
-        static final int PageCount = 4;
+        static final int Combined = 0;
     }
 
     public static class Items
@@ -164,11 +161,11 @@ public abstract class Current
             }
         }
 
-        public void sort(Context context, int page)
+        public void sort(Context context)
         {
             if(group == MainActivity.Groups.Current)
             {
-                PageAdapter.sortItems(page, Settings.getCurrentSortBy(context));
+                PageAdapter.sortItems(Settings.getCurrentSortBy(context));
             }
         }
 
@@ -222,7 +219,7 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    return(PageAdapter.getCount(page));
+                    return(PageAdapter.getItemCount());
 
                 case MainActivity.Groups.Calculate:
                     return(Calculate.PageAdapter.getCount(page));
@@ -268,84 +265,29 @@ public abstract class Current
 
     private static class ItemHolderBase extends RecyclerView.ViewHolder
     {
-        public boolean movedName;
-        public final View outdatedText;
-        public final ViewGroup rootView;
         public final TextView nameText;
         public final TextView dataGroup1Text;
         public final TextView dataGroup2Text;
         public final TextView dataGroup3Text;
         public final TextView dataGroup4Text;
         public final TextView dataGroup5Text;
-        public final TextView dataGroupTitle1Text;
-        public final TextView dataGroupTitle2Text;
-        public final TextView dataGroupTitle3Text;
-        public final TextView dataGroupTitle4Text;
-        public final TextView dataGroupTitle5Text;
-        public final LinearLayout dataGroupTitles;
+        public final TextView dataGroupTitleText;
         public final LinearLayout dataGroup;
-        public final LinearLayout nameGroup;
         public final AppCompatImageView nameImage;
 
-        public ItemHolderBase(View itemView, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroup1TextID, int dataGroupTitle2ID, int dataGroup2TextID, int dataGroupTitle3ID, int dataGroup3TextID, int dataGroupTitle4ID, int dataGroup4TextID, int dataGroupTitle5ID, int dataGroup5TextID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int outdatedTextID)
+        public ItemHolderBase(View itemView, int dataGroupTitleID, int dataGroup1TextID, int dataGroup2TextID, int dataGroup3TextID, int dataGroup4TextID, int dataGroup5TextID, int dataGroupID, int nameImageID, int nameTextID)
         {
             super(itemView);
 
-            movedName = false;
-            rootView = (ViewGroup)itemView;
-            outdatedText = (outdatedTextID > -1 ? itemView.findViewById(outdatedTextID) : null);
             dataGroup1Text = itemView.findViewById(dataGroup1TextID);
             dataGroup2Text = itemView.findViewById(dataGroup2TextID);
             dataGroup3Text = (dataGroup3TextID > -1 ? (TextView)itemView.findViewById(dataGroup3TextID) : null);
             dataGroup4Text = (dataGroup4TextID > -1 ? (TextView)itemView.findViewById(dataGroup4TextID) : null);
             dataGroup5Text = (dataGroup5TextID > -1 ? (TextView)itemView.findViewById(dataGroup5TextID) : null);
-            dataGroupTitle1Text = itemView.findViewById(dataGroupTitle1ID);
-            dataGroupTitle2Text = itemView.findViewById(dataGroupTitle2ID);
-            dataGroupTitle3Text = (dataGroupTitle3ID > - 1 ? (TextView)itemView.findViewById(dataGroupTitle3ID) : null);
-            dataGroupTitle4Text = (dataGroupTitle4ID > - 1 ? (TextView)itemView.findViewById(dataGroupTitle4ID) : null);
-            dataGroupTitle5Text = (dataGroupTitle5ID > - 1 ? (TextView)itemView.findViewById(dataGroupTitle5ID) : null);
-            dataGroupTitles = itemView.findViewById(dataGroupTitlesID);
+            dataGroupTitleText = itemView.findViewById(dataGroupTitleID);
             dataGroup = itemView.findViewById(dataGroupID);
-            nameGroup = (nameGroupID > -1 ? (LinearLayout)itemView.findViewById(nameGroupID) : null);
             nameImage = (nameImageID > -1 ? (AppCompatImageView)itemView.findViewById(nameImageID) : null);
             nameText = (nameTextID > - 1 ? (TextView)itemView.findViewById(nameTextID) : null);
-        }
-    }
-
-    //Item list adapter
-    private static abstract class ItemListAdapterBase extends Selectable.ListBaseAdapter
-    {
-        protected boolean hasItems;
-        protected boolean forCalculation;
-        protected String dataGroupTitle1String;
-        protected String dataGroupTitle2String;
-        protected String dataGroupTitle3String;
-        protected String dataGroupTitle4String;
-        protected final String dataGroupTitle5String;
-
-        public abstract void onBindViewHolder(@NonNull ItemHolderBase holder, int position);
-
-        public ItemListAdapterBase(Context context)
-        {
-            super(context);
-
-            hasItems = forCalculation = false;
-            dataGroupTitle1String = dataGroupTitle2String = dataGroupTitle3String = dataGroupTitle4String = dataGroupTitle5String = null;
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
-        {
-            ItemHolderBase itemHolder = (ItemHolderBase)holder;
-
-            //update displays
-            if(!forCalculation)
-            {
-                itemHolder.nameGroup.setVisibility(View.VISIBLE);
-            }
-
-            //finish binding
-            onBindViewHolder(itemHolder, position);
         }
     }
 
@@ -622,7 +564,7 @@ public abstract class Current
                         combinedItems.set(index, new Item(context, index, orbitals[index], usePathProgress));
                     }
                 }
-                combinedItems.sort(currentContext, PageType.Combined);
+                combinedItems.sort(currentContext);
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -631,7 +573,7 @@ public abstract class Current
             @Override
             public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
-                View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.combined_current_item, parent, false);
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.current_combined_item, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView);
 
                 setViewClickListeners(itemView, itemHolder);
@@ -947,14 +889,9 @@ public abstract class Current
         //Item
         public static class Item extends Selectable.ListItem
         {
-            private final String name;
             public boolean isLoading;
-            public final boolean tleIsAccurate;
             public double julianDate;
             public Calendar time;
-            public final Drawable icon;
-            public AppCompatImageView nameImage;
-            public TextView nameText;
             public TextView timeText;
             public TextView azText;
             public TextView elText;
@@ -966,37 +903,7 @@ public abstract class Current
             public LinearLayout progressGroup;
             public final CalculateViewsTask.ViewData[] views;
 
-            public static class Comparer implements Comparator<Item>
-            {
-                final int sort;
-
-                public Comparer(int sortBy)
-                {
-                    sort = sortBy;
-                }
-
-                @Override
-                public int compare(Item value1, Item value2)
-                {
-                    switch(sort)
-                    {
-                        case Items.SortBy.Azimuth:
-                            return(Float.compare(value1.views[0].azimuth, value2.views[0].azimuth));
-
-                        case Items.SortBy.Elevation:
-                            return(Float.compare(value1.views[0].elevation, value2.views[0].elevation));
-
-                        case Items.SortBy.Range:
-                            return(Float.compare(value1.views[0].rangeKm, value2.views[0].rangeKm));
-
-                        default:
-                        case Items.SortBy.Name:
-                            return(Globals.stringCompare(value1.name, value2.name));
-                    }
-                }
-            }
-
-            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, int viewCount, boolean tleAccurate)
+            public Item(int index, int viewCount)
             {
                 super(Integer.MAX_VALUE, index, false, false, false, false);
 
@@ -1010,12 +917,8 @@ public abstract class Current
                 {
                     views[index] = new CalculateViewsTask.ViewData();
                 }
-                icon = icn;
-                name = nm;
                 julianDate = Double.MAX_VALUE;
                 time = Globals.getCalendar(null, 0);
-                nameImage = null;
-                nameText = null;
                 timeText = null;
                 azText = null;
                 elText = null;
@@ -1024,15 +927,6 @@ public abstract class Current
                 illuminationText = null;
                 progressGroup = null;
                 dataGroup = null;
-                if(currentSatellite != null)
-                {
-                    id = currentSatellite.getSatelliteNum();
-                }
-                tleIsAccurate = tleAccurate;
-            }
-            public Item(int index, int viewCount)
-            {
-                this(index, null, null, null, viewCount, false);
             }
 
             public void updateDisplays(Context context, int widthDp, boolean haveSun, boolean haveMoon)
@@ -1056,14 +950,6 @@ public abstract class Current
                 if(illuminationText != null)
                 {
                     illuminationText.setText(Globals.getIlluminationString(views[0].illumination));
-                }
-                if(nameImage != null && icon != null)
-                {
-                    nameImage.setBackgroundDrawable(icon);
-                }
-                if(nameText != null)
-                {
-                    nameText.setText(name);
                 }
                 if(timeText != null && time != null && context != null)
                 {
@@ -1101,52 +987,43 @@ public abstract class Current
             public final LinearLayout progressGroup;
             public final ExpandingListView subList;
 
-            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int timeTextID, int outdatedTextID, int subListID)
+            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitle1ID, int dataGroupID, int timeTextID, int subListID)
             {
-                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, azTextID, dataGroupTitle2ID, elTextID, dataGroupTitle3ID, rangeTextID, dataGroupTitle4ID, phaseTextID, dataGroupTitle5ID, illuminationTextID, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
+                super(itemView, dataGroupTitle1ID, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, dataGroupID, -1, -1);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
                 subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
-            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupTitle5ID, int dataGroupID, int timeTextID)
+            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, dataGroupTitle4ID, dataGroupTitle5ID, dataGroupID, -1, -1, -1, timeTextID, -1, -1);
+                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, -1, dataGroupID, timeTextID, -1);
             }
             public ItemHolder(View itemView, int progressGroupID, int subListID)
             {
-                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, subListID);
+                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, -1, subListID);
             }
         }
 
         //Item list adapter
-        public static class ItemListAdapter extends ItemListAdapterBase
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
             private boolean haveSun;
             private boolean haveMoon;
-            private Items viewItems;
+            private final Items viewItems;
 
-            private ItemListAdapter(Context context)
+            public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
             {
                 super(context);
 
-                Resources res = context.getResources();
                 haveSun = haveMoon = false;
 
                 //remember strings and layout ID
-                dataGroupTitle1String = res.getString(R.string.abbrev_azimuth) + ":";
-                dataGroupTitle2String = res.getString(R.string.abbrev_elevation) + ":";
-                dataGroupTitle3String = Globals.getKmLabel(res) + ":";
                 this.itemsRefID = R.layout.current_view_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
-            }
-            public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
-            {
-                this(context);
 
-                forCalculation = true;
-                viewItems = new Items(MainActivity.Groups.Calculate, PageType.View);
+                viewItems = new Items(MainActivity.Groups.Calculate, Calculate.PageType.View);
 
                 //if there are saved items
                 if(savedItems != null && savedItems.length > 0)
@@ -1159,7 +1036,6 @@ public abstract class Current
                     //set as empty
                     viewItems.set(new Item[]{new Item(0, 0)});
                 }
-                viewItems.sort(currentContext, PageType.View);
 
                 //remember layout ID
                 forSubItems = (multiCount > 1);
@@ -1256,7 +1132,7 @@ public abstract class Current
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group_Titles, R.id.Angles_Az_Title, R.id.Angles_El_Title, R.id.Angles_Range_Title, R.id.Angles_Phase_Title, R.id.Angles_Illumination_Title, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
                 }
 
                 setViewClickListeners(itemView, itemHolder);
@@ -1264,7 +1140,7 @@ public abstract class Current
             }
 
             @Override
-            public void onBindViewHolder(@NonNull ItemHolderBase holder, int position)
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
             {
                 Item currentItem = viewItems.getViewItem(position);
                 ItemHolder itemHolder = (ItemHolder)holder;
@@ -1298,18 +1174,10 @@ public abstract class Current
 
                 currentItem.subList = itemHolder.subList;
                 currentItem.progressGroup = itemHolder.progressGroup;
-                if(itemHolder.outdatedText != null)
-                {
-                    itemHolder.outdatedText.setVisibility(View.GONE);
-                }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
                 {
-                    currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
-                }
-                if(itemHolder.dataGroupTitles != null)
-                {
-                    itemHolder.dataGroupTitles.setVisibility(View.GONE);
+                    currentItem.dataGroup.setVisibility(View.GONE);
                 }
                 currentItem.azText = itemHolder.dataGroup1Text;
                 currentItem.elText = itemHolder.dataGroup2Text;
@@ -1441,36 +1309,6 @@ public abstract class Current
             public LinearProgressIndicator progressStatusBar;
             public LinearLayout dataGroup;
 
-            public static class Comparer implements Comparator<Item>
-            {
-                final int sort;
-
-                public Comparer(int sortBy)
-                {
-                    sort = sortBy;
-                }
-
-                @Override
-                public int compare(Item value1, Item value2)
-                {
-                    switch(sort)
-                    {
-                        case Items.SortBy.PassStartTime:
-                            return(Globals.passTimeCompare(value1.passTimeStart, value1.passTimeEnd, value2.passTimeStart, value2.passTimeEnd));
-
-                        case Items.SortBy.PassDuration:
-                            return(Globals.passDurationCompare(value1.passTimeStart, value1.passTimeEnd, value2.passTimeStart, value2.passTimeEnd));
-
-                        case Items.SortBy.MaxElevation:
-                            return(Globals.passMaxElevationCompare(value1.passElMax, value2.passElMax));
-
-                        default:
-                        case Items.SortBy.Name:
-                            return(Globals.stringCompare(value1.name, value2.name));
-                    }
-                }
-            }
-
             private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
             {
                 super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
@@ -1533,11 +1371,6 @@ public abstract class Current
                 orbital2Type = passData.orbital2Type;
                 illumination = passData.illumination;
                 phaseName = passData.phaseName;
-            }
-
-            public boolean equals(Item otherItem)
-            {
-                return(id == otherItem.id);
             }
 
             public void setLoading(boolean loading, boolean tleIsAccurate)
@@ -1646,29 +1479,21 @@ public abstract class Current
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public final LinearProgressIndicator currentProgressBar;
-            public final LinearProgressIndicator currentProgressLoadingBar;
             public final LinearProgressIndicator calculateProgressBar;
-            public final LinearLayout timeStartLayout;
-            public final LinearLayout elMaxLayout;
             public final View timeStartUnder;
             public final View elMaxUnder;
 
-            public ItemHolder(View itemView, int nameImageID, int nameTextID, int timeStartLayoutID, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxLayoutID, int elMaxTextID, int elMaxUnderID, int nameGroupID, int currentProgressBarID, int currentProgressLoadingBarID, int calculateProgressBarID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int outdatedTextID)
+            public ItemHolder(View itemView, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxTextID, int elMaxUnderID, int calculateProgressBarID, int dataGroupID)
             {
-                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, timeStartTextID, dataGroupTitle2ID, timeDurationTextID, dataGroupTitle3ID, timeEndTextID, dataGroupTitle4ID, elMaxTextID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
-                currentProgressBar = itemView.findViewById(currentProgressBarID);
-                currentProgressLoadingBar = itemView.findViewById(currentProgressLoadingBarID);
+                super(itemView, -1, timeStartTextID, timeDurationTextID, timeEndTextID, elMaxTextID, -1, dataGroupID, -1, -1);
                 calculateProgressBar = itemView.findViewById(calculateProgressBarID);
-                timeStartLayout = itemView.findViewById(timeStartLayoutID);
                 timeStartUnder = itemView.findViewById(timeStartUnderID);
-                elMaxLayout = itemView.findViewById(elMaxLayoutID);
                 elMaxUnder = itemView.findViewById(elMaxUnderID);
             }
         }
 
         //Item list adapter
-        public static class ItemListAdapter extends ItemListAdapterBase
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
             private final Items pathItems;
 
@@ -1676,7 +1501,6 @@ public abstract class Current
             {
                 super(context);
 
-                forCalculation = true;
                 pathItems = new Items(MainActivity.Groups.Calculate, page);
 
                 //if there are saved items
@@ -1694,12 +1518,8 @@ public abstract class Current
                     //set as empty
                     pathItems.set(new Item[]{new Item(context, 0, null, true)});
                 }
-                pathItems.sort(currentContext, page);
 
                 //remember strings and layout ID
-                dataGroupTitle1String = Globals.Symbols.Up;
-                dataGroupTitle2String = Globals.Symbols.Time;
-                dataGroupTitle4String = Globals.Symbols.Elevating;
                 this.itemsRefID = R.layout.current_pass_item;
 
                 //ID stays the same
@@ -1766,14 +1586,14 @@ public abstract class Current
             public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Name_Image, R.id.Pass_Name_Text, R.id.Pass_Time_Start_Layout, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Layout, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Name_Group, R.id.Pass_Current_Progress_Bar, R.id.Pass_Current_Progress_Loading_Bar, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group_Titles, R.id.Pass_Time_Start_Title, R.id.Pass_Time_Duration_Title, R.id.Pass_Time_End_Title, R.id.Pass_El_Max_Title, R.id.Pass_Data_Group, R.id.Pass_Outdated_Text);
+                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group);
 
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
 
             @Override
-            public void onBindViewHolder(@NonNull ItemHolderBase holder, int position)
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
             {
                 boolean showEnd = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 Item currentItem = pathItems.getPassItem(position);
@@ -1785,22 +1605,14 @@ public abstract class Current
                 itemHolder.calculateProgressBar.setVisibility(View.VISIBLE);
                 currentItem.progressBar = itemHolder.calculateProgressBar;
                 currentItem.progressStatusBar = null;
-                if(itemHolder.outdatedText != null)
-                {
-                    itemHolder.outdatedText.setVisibility(View.GONE);
-                }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
                 {
                     currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
                 }
-                if(itemHolder.dataGroupTitles != null)
-                {
-                    itemHolder.dataGroupTitles.setVisibility(View.GONE);
-                }
                 currentItem.timeStartText = itemHolder.dataGroup1Text;
                 currentItem.timeStartUnder = itemHolder.timeStartUnder;
-                currentItem.timeStartTitleText = itemHolder.dataGroupTitle1Text;
+                currentItem.timeStartTitleText = itemHolder.dataGroupTitleText;
                 currentItem.timeDurationText = itemHolder.dataGroup2Text;
                 currentItem.timeEndText = itemHolder.dataGroup3Text;
                 if(currentItem.timeEndText != null)
@@ -2076,13 +1888,8 @@ public abstract class Current
         public static class Item extends Selectable.ListItem
         {
             public boolean isLoading;
-            public final boolean tleIsAccurate;
-            private final String name;
             public double julianDate;
             public Calendar time;
-            public final Drawable icon;
-            public AppCompatImageView nameImage;
-            public TextView nameText;
             public TextView speedText;
             public TextView timeText;
             public TextView latitudeText;
@@ -2093,37 +1900,7 @@ public abstract class Current
             public LinearLayout progressGroup;
             public final CalculateCoordinatesTask.CoordinateData[] coordinates;
 
-            public static class Comparer implements Comparator<Item>
-            {
-                final int sort;
-
-                public Comparer(int sortBy)
-                {
-                    sort = sortBy;
-                }
-
-                @Override
-                public int compare(Item value1, Item value2)
-                {
-                    switch(sort)
-                    {
-                        case Items.SortBy.Latitude:
-                            return(Float.compare(value1.coordinates[0].latitude, value2.coordinates[0].latitude));
-
-                        case Items.SortBy.Longitude:
-                            return(Float.compare(value1.coordinates[0].longitude, value2.coordinates[0].longitude));
-
-                        case Items.SortBy.Altitude:
-                            return(Float.compare(value1.coordinates[0].altitudeKm, value2.coordinates[0].altitudeKm));
-
-                        default:
-                        case Items.SortBy.Name:
-                            return(Globals.stringCompare(value1.name, value2.name));
-                    }
-                }
-            }
-
-            public Item(int index, Drawable icn, String nm, SatelliteObjectType currentSatellite, int coordinateCount, boolean tleAccurate)
+            public Item(int index, int coordinateCount)
             {
                 super(Integer.MAX_VALUE, index, false, false, false, false);
 
@@ -2138,13 +1915,8 @@ public abstract class Current
                     coordinates[index] = new CalculateCoordinatesTask.CoordinateData();
                 }
 
-                tleIsAccurate = tleAccurate;
-                icon = icn;
-                name = nm;
                 julianDate = Double.MAX_VALUE;
                 time = Globals.julianDateToCalendar(julianDate);
-                nameImage = null;
-                nameText = null;
                 speedText = null;
                 timeText = null;
                 latitudeText = null;
@@ -2152,14 +1924,6 @@ public abstract class Current
                 altitudeText = null;
                 dataGroup = null;
                 progressGroup = null;
-                if(currentSatellite != null)
-                {
-                    id = currentSatellite.getSatelliteNum();
-                }
-            }
-            public Item(int index, int coordinateCount)
-            {
-                this(index, null, null, null, coordinateCount, false);
             }
 
             public void updateDisplays(TimeZone zone, int widthDp)
@@ -2179,14 +1943,6 @@ public abstract class Current
                 if(altitudeText != null)
                 {
                     altitudeText.setText(coordinates[0].altitudeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(coordinates[0].altitudeKm, 0) : "-");
-                }
-                if(nameImage != null && icon != null)
-                {
-                    nameImage.setBackgroundDrawable(icon);
-                }
-                if(nameText != null)
-                {
-                    nameText.setText(name);
                 }
                 if(speedText != null)
                 {
@@ -2236,25 +1992,25 @@ public abstract class Current
             public final LinearLayout progressGroup;
             public final ExpandingListView subList;
 
-            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupTitle4ID, int dataGroupID, int nameGroupID, int nameImageID, int nameTextID, int speedTextID, int timeTextID, int outdatedTextID, int subListID)
+            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitle1ID, int dataGroupID, int speedTextID, int timeTextID, int subListID)
             {
-                super(itemView, dataGroupTitlesID, dataGroupTitle1ID, latTextID, dataGroupTitle2ID, lonTextID, dataGroupTitle3ID, altTextID, dataGroupTitle4ID, speedTextID, -1, -1, dataGroupID, nameGroupID, nameImageID, nameTextID, outdatedTextID);
+                super(itemView, dataGroupTitle1ID, latTextID, lonTextID, altTextID, speedTextID, -1, dataGroupID, -1, -1);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
                 subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
-            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupTitlesID, int dataGroupTitle1ID, int dataGroupTitle2ID, int dataGroupTitle3ID, int dataGroupID, int timeTextID)
+            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupID, int timeTextID)
             {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupTitlesID, dataGroupTitle1ID, dataGroupTitle2ID, dataGroupTitle3ID, -1, dataGroupID, -1, -1, -1, speedTextID, timeTextID, -1, -1);
+                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, -1, dataGroupID, speedTextID, timeTextID, -1);
             }
             public ItemHolder(View itemView, int progressGroupID, int subListID)
             {
-                this(itemView, -1, -1, -1, progressGroupID, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, subListID);
+                this(itemView, -1, -1, -1, progressGroupID, -1, -1, -1, -1, subListID);
             }
         }
 
         //Item list adapter
-        public static class ItemListAdapter extends ItemListAdapterBase
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
             private final TimeZone currentZone;
             private final Items coordinateItems;
@@ -2264,9 +2020,8 @@ public abstract class Current
                 super(context);
 
                 hasItems = false;
-                forCalculation = true;
                 currentZone = zone;
-                coordinateItems = new Items(MainActivity.Groups.Calculate, PageType.Coordinates);
+                coordinateItems = new Items(MainActivity.Groups.Calculate, Calculate.PageType.Coordinates);
 
                 //if there are saved items
                 if(savedItems != null && savedItems.length > 0)
@@ -2280,7 +2035,6 @@ public abstract class Current
                     //set as empty
                     coordinateItems.set(new Item[]{new Coordinates.Item(0, 0)});
                 }
-                coordinateItems.sort(currentContext, PageType.Coordinates);
 
                 //remember layout ID
                 forSubItems = (multiCount > 1);
@@ -2370,7 +2124,7 @@ public abstract class Current
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group_Titles, R.id.Coordinate_Latitude_Title, R.id.Coordinate_Longitude_Title, R.id.Coordinate_Altitude_Title, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
                 }
 
                 setViewClickListeners(itemView, itemHolder);
@@ -2378,7 +2132,7 @@ public abstract class Current
             }
 
             @Override
-            public void onBindViewHolder(@NonNull ItemHolderBase holder, int position)
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
             {
                 boolean showSpeed = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 Item currentItem = coordinateItems.getCoordinateItem(position);
@@ -2393,18 +2147,10 @@ public abstract class Current
 
                 currentItem.subList = itemHolder.subList;
                 currentItem.progressGroup = itemHolder.progressGroup;
-                if(itemHolder.outdatedText != null)
-                {
-                    itemHolder.outdatedText.setVisibility(View.GONE);
-                }
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
                 {
-                    currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
-                }
-                if(itemHolder.dataGroupTitles != null)
-                {
-                    itemHolder.dataGroupTitles.setVisibility(View.GONE);
+                    currentItem.dataGroup.setVisibility(View.GONE);
                 }
                 currentItem.latitudeText = itemHolder.dataGroup1Text;
                 currentItem.longitudeText = itemHolder.dataGroup2Text;
@@ -3342,6 +3088,10 @@ public abstract class Current
 
                     //setup path button after markers have been added
                     setupPathButton(showPathButton, selectedOrbitals);
+                    if(page instanceof Current.Page)
+                    {
+                        ((Page)page).actionButton = showPathButton;
+                    }
 
                     //set current location
                     setCurrentLocation(page.getActivity(), currentLocation);
@@ -3612,7 +3362,7 @@ public abstract class Current
             boolean createMapView;
             View newView = null;
             Context context = this.getContext();
-            Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems(page);
+            Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems();
             final Selectable.ListBaseAdapter listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites());
 
             //set default
@@ -3694,7 +3444,7 @@ public abstract class Current
         {
             if(selectList != null)
             {
-                PageAdapter.setOrientationChangedListener(page, new OnOrientationChangedListener()
+                PageAdapter.setOrientationChangedListener(new OnOrientationChangedListener()
                 {
                     @Override
                     public void orientationChanged()
@@ -3708,7 +3458,7 @@ public abstract class Current
             }
             if(listAdapter != null)
             {
-                PageAdapter.setItemChangedListener(page, new OnItemsChangedListener()
+                PageAdapter.setItemChangedListener(new OnItemsChangedListener()
                 {
                     @Override @SuppressLint("NotifyDataSetChanged")
                     public void itemsChanged()
@@ -3720,7 +3470,7 @@ public abstract class Current
                         if(sortBy != Items.SortBy.Name && sortBy != Items.SortBy.PassStartTime && sortBy != Items.SortBy.PassDuration && sortBy != Items.SortBy.MaxElevation)
                         {
                             //set pending sort
-                            PageAdapter.setPendingSort(pageNum, true);
+                            PageAdapter.setPendingSort(true);
                         }
 
                         //if able to get activity
@@ -3738,9 +3488,9 @@ public abstract class Current
                         }
                     }
                 });
-                PageAdapter.setGraphChangedListener(page, createOnGraphChangedListener(listAdapter));
-                PageAdapter.setPreview3dChangedListener(page, createOnPreview3dChangedListener(listAdapter));
-                PageAdapter.setInformationChangedListener(page, createOnInformationChangedListener(listAdapter));
+                PageAdapter.setGraphChangedListener(createOnGraphChangedListener(listAdapter));
+                PageAdapter.setPreview3dChangedListener(createOnPreview3dChangedListener(listAdapter));
+                PageAdapter.setInformationChangedListener(createOnInformationChangedListener(listAdapter));
             }
         }
     }
@@ -3748,27 +3498,26 @@ public abstract class Current
     //Page adapter
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
-        private static final boolean[] pendingSort = new boolean[PageType.PageCount];
+        private static boolean pendingSort;
         private static Combined.Item[] combinedItems;
         private static final Items.NoradIndex.Comparer noradIndexComparer = new Items.NoradIndex.Comparer();
         private static ArrayList<Items.NoradIndex> combinedNoradIndex;
-        private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnItemsChangedListener[] itemsChangedListeners = new Selectable.ListFragment.OnItemsChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnGraphChangedListener[] graphChangedListeners = new Selectable.ListFragment.OnGraphChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnPreview3dChangedListener[] preview3dChangedListeners = new Selectable.ListFragment.OnPreview3dChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
-        private static final Object[][] savedItems = new Object[PageType.PageCount][];
+        private static Selectable.ListFragment.OnOrientationChangedListener orientationChangedListener = null;
+        private static Selectable.ListFragment.OnItemsChangedListener itemsChangedListener = null;
+        private static Selectable.ListFragment.OnGraphChangedListener graphChangedListener = null;
+        private static Selectable.ListFragment.OnPreview3dChangedListener preview3dChangedListener = null;
+        private static Selectable.ListFragment.OnInformationChangedListener informationChangedListener = null;
+        private static Object[] savedItems = null;
 
-        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg)
+        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int subPg)
         {
-            super(fm, parentView, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, subPg);
+            super(fm, parentView, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, new int[]{subPg});
         }
 
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            int subPosition = PageType.Combined;
-            return(this.getItem(group, position, subPage[subPosition], new Page()));
+            return(this.getItem(group, position, subPage[PageType.Combined], new Page()));
         }
 
         @Override
@@ -3819,7 +3568,7 @@ public abstract class Current
         }
 
         //Sort item(s)
-        public static void sortItems(int page, int sortBy)
+        public static void sortItems(int sortBy)
         {
             int index;
 
@@ -3837,15 +3586,15 @@ public abstract class Current
         }
 
         //Gets count of items in given page
-        public static int getCount(int page)
+        public static int getItemCount()
         {
             return(combinedItems == null ? 0 : combinedItems.length);
         }
 
         //Returns true if given page has items
-        public static boolean hasItems(int page)
+        public static boolean hasItems()
         {
-            return(getCount(page) > 0);
+            return(getItemCount() > 0);
         }
 
         //Gets combined item(s)
@@ -3864,153 +3613,117 @@ public abstract class Current
         }
 
         //Set pending
-        public static void setPendingSort(int pageNum, boolean pending)
+        public static void setPendingSort(boolean pending)
         {
-            //if a valid page
-            if(pageNum >= 0 && pageNum < pendingSort.length)
-            {
-                //set pending status
-                pendingSort[pageNum] = pending;
-            }
+            pendingSort = pending;
         }
 
         //Returns if pending sort for given page
-        public static boolean hasPendingSort(int pageNum)
+        public static boolean hasPendingSort()
         {
-            return(pageNum < pendingSort.length && pendingSort[pageNum]);
+            return(pendingSort);
         }
 
         //Get saved items
-        public static Object[] getSavedItems(int pageNum)
+        public static Object[] getSavedItems()
         {
-            //if a valid page
-            if(pageNum >= 0 && pageNum < savedItems.length)
-            {
-                //get saved items
-                return(savedItems[pageNum]);
-            }
-
-            return(null);
+            return(savedItems);
         }
 
         //Set saved items
-        public void setSavedItems(int pageNum, Object[] saveItems)
+        public void setSavedItems(Object[] saveItems)
         {
-            //if a valid page
-            if(pageNum >= 0 && pageNum < savedItems.length)
-            {
-                //set saved items
-                savedItems[pageNum] = saveItems;
-            }
+            //set saved items
+            savedItems = saveItems;
         }
 
-        //Sets orientation changed listener for the given page
-        public static void setOrientationChangedListener(int position, Selectable.ListFragment.OnOrientationChangedListener listener)
+        //Sets orientation changed listener
+        public static void setOrientationChangedListener(Selectable.ListFragment.OnOrientationChangedListener listener)
         {
-            //if a valid page
-            if(position < PageType.PageCount)
-            {
-                //set listener
-                orientationChangedListeners[position] = listener;
-            }
+            //set listener
+            orientationChangedListener = listener;
         }
 
-        //Sets item changed listener for the given page
-        public static void setItemChangedListener(int position, Selectable.ListFragment.OnItemsChangedListener listener)
+        //Sets item changed listener
+        public static void setItemChangedListener(Selectable.ListFragment.OnItemsChangedListener listener)
         {
-            //if a valid page
-            if(position < PageType.PageCount)
-            {
-                //set listener
-                itemsChangedListeners[position] = listener;
-            }
+            //set listener
+            itemsChangedListener = listener;
         }
 
-        //Sets graph changed listener for the given page
-        public static void setGraphChangedListener(int position, Selectable.ListFragment.OnGraphChangedListener listener)
+        //Sets graph changed listener
+        public static void setGraphChangedListener(Selectable.ListFragment.OnGraphChangedListener listener)
         {
-            //if a valid page
-            if(position < PageType.PageCount)
-            {
-                //set listener
-                graphChangedListeners[position] = listener;
-            }
+            //set listener
+            graphChangedListener = listener;
         }
 
-        //Sets preview 3d changed listener for the given page
-        public static void setPreview3dChangedListener(int position, Selectable.ListFragment.OnPreview3dChangedListener listener)
+        //Sets preview 3d changed listener
+        public static void setPreview3dChangedListener(Selectable.ListFragment.OnPreview3dChangedListener listener)
         {
-            //if a valid page
-            if(position < PageType.PageCount)
-            {
-                //set listener
-                preview3dChangedListeners[position] = listener;
-            }
+            //set listener
+            preview3dChangedListener = listener;
         }
 
-        //Sets information changed listener for the given page
-        public static void setInformationChangedListener(int position, Selectable.ListFragment.OnInformationChangedListener listener)
+        //Sets information changed listener
+        public static void setInformationChangedListener(Selectable.ListFragment.OnInformationChangedListener listener)
         {
-            //if a valid page
-            if(position < PageType.PageCount)
-            {
-                //set listener
-                informationChangedListeners[position] = listener;
-            }
+            //set listener
+            informationChangedListener = listener;
         }
 
-        //Calls orientation changed listener for the given page
-        public static void notifyOrientationChangedListener(int position)
+        //Calls orientation changed listener
+        public static void notifyOrientationChangedListener()
         {
-            //if a valid page and listener exists
-            if(position < PageType.PageCount && orientationChangedListeners[position] != null)
+            //if listener exists
+            if(orientationChangedListener != null)
             {
                 //call listener
-                orientationChangedListeners[position].orientationChanged();
+                orientationChangedListener.orientationChanged();
             }
         }
 
-        //Calls item changed listener for the given page
-        public static void notifyItemsChanged(int position)
+        //Calls item changed listener
+        public static void notifyItemsChanged()
         {
-            //if a valid page and listener exists
-            if(position < PageType.PageCount && itemsChangedListeners[position] != null)
+            //if listener exists
+            if(itemsChangedListener != null)
             {
                 //call listener
-                itemsChangedListeners[position].itemsChanged();
+                itemsChangedListener.itemsChanged();
             }
         }
 
-        //Call graph changed listener for the given page
-        public static void notifyGraphChanged(int position, Database.SatelliteData orbital, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
+        //Call graph changed listener
+        public static void notifyGraphChanged(Database.SatelliteData orbital, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
         {
-            //if a valid page and listener exists
-            if(position < PageType.PageCount && graphChangedListeners[position] != null)
+            //if listener exists
+            if(graphChangedListener != null)
             {
                 //call listener
-                graphChangedListeners[position].graphChanged(orbital, pathPoints, null, null);
+                graphChangedListener.graphChanged(orbital, pathPoints, null, null);
             }
         }
 
-        //Call preview 3d changed listener for the given page
-        public static void notifyPreview3dChanged(int position, int noradId)
+        //Call preview 3d changed listener
+        public static void notifyPreview3dChanged(int noradId)
         {
-            //if a valid page and listener exists
-            if(position < Current.PageType.PageCount && preview3dChangedListeners[position] != null)
+            //if listener exists
+            if(preview3dChangedListener != null)
             {
                 //call listener
-                preview3dChangedListeners[position].preview3dChanged(noradId);
+                preview3dChangedListener.preview3dChanged(noradId);
             }
         }
 
-        //Calls information changed listener for the given page
-        public static void notifyInformationChanged(int position, Spanned text)
+        //Calls information changed listener
+        public static void notifyInformationChanged(Spanned text)
         {
-            //if a valid page and listener exists
-            if(position < PageType.PageCount && informationChangedListeners[position] != null)
+            //if listener exists
+            if(informationChangedListener != null)
             {
                 //call listener
-                informationChangedListeners[position].informationChanged(text);
+                informationChangedListener.informationChanged(text);
             }
         }
     }

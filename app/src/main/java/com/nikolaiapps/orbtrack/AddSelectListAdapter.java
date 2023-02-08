@@ -126,17 +126,7 @@ public class AddSelectListAdapter extends BaseAdapter
                 break;
 
             case SelectType.Settings:
-                selections = new String[]{null, res.getString(R.string.title_visible)};
-                switch(extra)
-                {
-                    case Current.PageType.Combined:
-                        selections[0] = res.getString(extra2 == Globals.SubPageType.Lens ? R.string.title_lens_view : R.string.title_globe_slash_map_view);
-                        break;
-
-                    default:
-                        selections[0] = res.getString(R.string.title_settings);
-                        break;
-                }
+                selections = new String[]{res.getString(extra2 == Globals.SubPageType.Lens ? R.string.title_lens_view : R.string.title_globe_slash_map_view), res.getString(R.string.title_visible)};
                 break;
 
             case SelectType.Edit:

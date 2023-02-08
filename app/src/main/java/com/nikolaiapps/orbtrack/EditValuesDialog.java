@@ -716,7 +716,7 @@ public class EditValuesDialog
         boolean createOnly = (list2Title == null);
         show(EditType.Login, titleText, null, textValueTitle, textValues, textValue2Title, text2Values, textRowValues, textRow2Values, null, null, null, null, null, null, list2Title, (createOnly ? null : Settings.Options.Updates.SatelliteSourceImageIds), (createOnly ? null : Settings.Options.Updates.SatelliteSourceItems), null, (createOnly ? null : new String[]{Settings.Options.Sources.SpaceTrack}), null, null, null, false);
     }
-    public void getSortBy(String titleText, int page)
+    public void getSortBy(String titleText)
     {
         int index;
         int[] listIds = Current.Items.getSortByIds();

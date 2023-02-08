@@ -1255,7 +1255,7 @@ public abstract class Calculate
         public static void notifyGraphChanged(int position, Database.SatelliteData orbital1, ArrayList<CalculateViewsTask.OrbitalView> pathPoints, Database.SatelliteData orbital2, ArrayList<CalculateViewsTask.OrbitalView> path2Points)
         {
             //if a valid page and listener exists
-            if(position >= 0 && position < Current.PageType.PageCount && graphChangedListeners[position] != null)
+            if(position >= 0 && position < PageType.PageCount && graphChangedListeners[position] != null)
             {
                 //call listener
                 graphChangedListeners[position].graphChanged(orbital1, pathPoints, orbital2, path2Points);

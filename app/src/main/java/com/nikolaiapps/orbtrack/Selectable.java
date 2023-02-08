@@ -939,6 +939,7 @@ public abstract class Selectable
             }
         }
 
+        protected boolean hasItems;
         protected boolean forSubItems;
         protected boolean loadingItems;
         private boolean enableItemClicks;
@@ -963,7 +964,7 @@ public abstract class Selectable
             categoryTitle = null;
             currentContext = context;
             listInflater = (currentContext != null ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
-            forSubItems = loadingItems = false;
+            hasItems = forSubItems = loadingItems = false;
             enableItemClicks = true;
         }
         public ListBaseAdapter(Context context, String categoryTitle)

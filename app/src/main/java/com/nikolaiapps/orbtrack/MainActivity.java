@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private static int passesPassIndex = Integer.MAX_VALUE;
     private static int intersectionPassIndex = Integer.MAX_VALUE;
     private static int lastSideMenuPosition = -1;
-    private int[] currentSubPage;
+    private int currentSubPage;
     private int[] calculateSubPage;
     private long timerDelay;
     private long listTimerDelay;
@@ -194,11 +194,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         calculateBundle = new Bundle();
 
         //set default sub pages
-        currentSubPage = new int[Current.PageType.PageCount];
-        for(index = 0; index < currentSubPage.length; index++)
-        {
-            currentSubPage[index] = savedInstanceState.getInt(ParamTypes.CurrentSubPage + index, Globals.SubPageType.List);
-        }
+        currentSubPage = savedInstanceState.getInt(ParamTypes.CurrentSubPage, Globals.SubPageType.List);
         calculateSubPage = new int[Calculate.PageType.PageCount];
         for(index = 0; index < calculateSubPage.length; index++)
         {
@@ -261,10 +257,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //save status
         outState.putBoolean(ParamTypes.SavedState, true);
         outState.putInt(ParamTypes.MainGroup, mainGroup);
-        for(index = 0; index < Current.PageType.PageCount; index++)
-        {
-            outState.putInt(ParamTypes.CurrentSubPage + index, currentSubPage[index]);
-        }
+        outState.putInt(ParamTypes.CurrentSubPage, currentSubPage);
         for(index = 0; index < Calculate.PageType.PageCount; index++)
         {
             outState.putInt(ParamTypes.CalculateSubPage + index, calculateSubPage[index]);
@@ -362,13 +355,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         switch(mainGroup)
         {
             case Groups.Current:
-                restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
+                restartCamera = (currentSubPage == Globals.SubPageType.Lens);
 
-                //update columns on all pages
-                for(index = 0; index < Current.PageType.PageCount; index++)
-                {
-                    Current.PageAdapter.notifyOrientationChangedListener(index);
-                }
+                //update columns on page
+                Current.PageAdapter.notifyOrientationChangedListener();
                 break;
 
             case Groups.Calculate:
@@ -382,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
 
                 //update columns on all pages
-                for(index = 0; index < Current.PageType.PageCount; index++)
+                for(index = 0; index < Calculate.PageType.PageCount; index++)
                 {
                     Calculate.PageAdapter.notifyOrientationChangedListener(index);
                 }
@@ -752,10 +742,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
         boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
         boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
-        boolean onCurrentCombined = (onCurrent && page == Current.PageType.Combined);
-        boolean onCurrentCombinedList = (onCurrentCombined && onSubPageList);
-        boolean onCurrentCombinedMap = (onCurrentCombined && onSubPageMap);
-        boolean onCurrentCombinedGlobe = (onCurrentCombined && onSubPageGlobe);
+        boolean onCurrentCombinedList = (onCurrent && onSubPageList);
+        boolean onCurrentCombinedMap = (onCurrent && onSubPageMap);
+        boolean onCurrentCombinedGlobe = (onCurrent && onSubPageGlobe);
         boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
         boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
         boolean onCalculateCoordinates = (onCalculate && page == Calculate.PageType.Coordinates);
@@ -777,10 +766,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean calculatingCoordinates = (calculateCoordinatesTask != null && calculateCoordinatesTask.calculatingCoordinates);
         boolean calculatingIntersection = (calculateIntersectionsTask != null && calculateIntersectionsTask.isRunning());
         boolean showLens = onCurrentCombinedList || (onCalculateViewList && !calculatingViews);
-        boolean showList = (onCurrentCombined && !onSubPageList) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
-        boolean showMap = (onCurrentCombined && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
-        boolean showGlobe = (onCurrentCombined && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
-        boolean onCurrentNoSelected = (onCurrentCombined && viewLensNoradID == Integer.MAX_VALUE && passesLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
+        boolean showList = (onCurrent && !onSubPageList) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
+        boolean showMap = (onCurrent && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
+        boolean showGlobe = (onCurrent && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
+        boolean onCurrentNoSelected = (onCurrent && viewLensNoradID == Integer.MAX_VALUE && passesLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
         menu.findItem(R.id.menu_list).setVisible(showList);
@@ -1030,7 +1019,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 //remember previous ID and sub page
                 previousId = mapViewNoradID;
-                previousSubPage = currentSubPage[page];
+                previousSubPage = currentSubPage;
             }
 
             //update sub page
@@ -1040,7 +1029,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(!onCalculate)
             {
                 //remember selected sub page
-                selectedSubPage = currentSubPage[page];
+                selectedSubPage = currentSubPage;
 
                 //if switching between globe/map
                 if((previousSubPage == Globals.SubPageType.Map && selectedSubPage == Globals.SubPageType.Globe) || (previousSubPage == Globals.SubPageType.Globe && selectedSubPage == Globals.SubPageType.Map))
@@ -1103,7 +1092,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
 
                 //handle based on sub page
-                switch(currentSubPage[page])
+                switch(currentSubPage)
                 {
                     case Globals.SubPageType.Lens:
                         //if camera view exists
@@ -1128,7 +1117,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     case Globals.SubPageType.Map:
                     case Globals.SubPageType.Globe:
                         //if not on lens and able to close settings menu
-                        if(currentSubPage[page] != Globals.SubPageType.Lens && Current.Coordinates.closeSettingsMenu())
+                        if(currentSubPage != Globals.SubPageType.Lens && Current.Coordinates.closeSettingsMenu())
                         {
                             closedSettings = true;
                         }
@@ -1624,9 +1613,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Updates current calculations
     private void updateCurrentCalculations()
     {
-        int page = getMainPage();
-
-        if(currentViewAnglesTask != null && currentSubPage[page] == Globals.SubPageType.Lens)
+        if(currentViewAnglesTask != null && currentSubPage == Globals.SubPageType.Lens)
         {
             currentViewAnglesTask.needViews = true;
         }
@@ -1648,7 +1635,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         if(mainGroup == Groups.Current)
         {
             //if there are pass items
-            if(Current.PageAdapter.hasItems(Current.PageType.Combined))
+            if(Current.PageAdapter.hasItems())
             {
                 //go through each pass item
                 CalculateService.PassData[] passItems = (Current.PageAdapter.getCombinedItems());
@@ -2232,7 +2219,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(currentPageAdapter != null)
             {
                 //save items if not viewing list
-                currentPageAdapter.setSavedItems(Current.PageType.Combined, (saveItems && currentSubPage[Current.PageType.Combined] != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
+                currentPageAdapter.setSavedItems((saveItems && currentSubPage != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
             }
         }
         //else if showing calculate
@@ -2384,7 +2371,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //update titles and swiping status to allow if not on current/calculate with map/globe
-        allowingPagerSwipe = !((showCurrent && (page == Current.PageType.Combined) && (currentSubPage[page] == Globals.SubPageType.Map || currentSubPage[page] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe)));
+        allowingPagerSwipe = !((showCurrent && (currentSubPage == Globals.SubPageType.Map || currentSubPage == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe)));
         mainPager.setSwipeEnabled(allowingPagerSwipe);
         showingPagerTitles = !showCurrent;
         mainPagerTitles.setVisibility(showingPagerTitles ? View.VISIBLE : View.GONE);
@@ -2428,7 +2415,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Gets main page
     private int getMainPage()
     {
-        return(mainGroup == Groups.Current ? Current.PageType.Combined : mainPager.getCurrentItem());
+        return(mainPager.getCurrentItem());
     }
 
     //Updates main page
@@ -2447,7 +2434,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         boolean onCurrent = (mainGroup == Groups.Current);
         boolean onCalculate = (mainGroup == Groups.Calculate);
-        boolean onCurrentList = (onCurrent && currentSubPage[Current.PageType.Combined] == Globals.SubPageType.List);
+        boolean onCurrentList = (onCurrent && currentSubPage == Globals.SubPageType.List);
         boolean onCalculateViewNonInput = (onCalculate && calculateSubPage[Calculate.PageType.View] != Globals.SubPageType.Input);
         boolean onCalculateViewLens = (onCalculate && calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens);
         boolean onCalculatePassesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Passes] != Globals.SubPageType.Input);
@@ -2765,7 +2752,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     switch(index)
                     {
                         case Groups.Current:
-                            Current.PageAdapter.notifyInformationChanged(page, infoText);
+                            Current.PageAdapter.notifyInformationChanged(infoText);
                             break;
 
                         case Groups.Calculate:
@@ -2926,9 +2913,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             {
                                 //update current sort by for page and set pending
                                 Settings.setCurrentSortBy(MainActivity.this, list2Value);
-                                Current.PageAdapter.setPendingSort(page, true);
+                                Current.PageAdapter.setPendingSort(true);
                             }
-                        }).getSortBy(res.getString(R.string.title_sort_by), page);
+                        }).getSortBy(res.getString(R.string.title_sort_by));
                         break;
 
                     case AddSelectListAdapter.FilterType.Visibility:
@@ -3243,7 +3230,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 switch(group)
                                 {
                                     case Groups.Current:
-                                        Current.PageAdapter.notifyPreview3dChanged(pageType, itemID);
+                                        Current.PageAdapter.notifyPreview3dChanged(itemID);
                                         break;
 
                                     case Groups.Orbitals:
@@ -3273,7 +3260,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                                 switch(group)
                                                 {
                                                     case Groups.Current:
-                                                        Current.PageAdapter.notifyGraphChanged(pageType, currentOrbital, pathPoints);
+                                                        Current.PageAdapter.notifyGraphChanged(currentOrbital, pathPoints);
                                                         break;
 
                                                     case Groups.Calculate:
@@ -3649,7 +3636,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     case Groups.Current:
                         //if now using camera
-                        if(currentSubPage[position] == Globals.SubPageType.Lens)
+                        if(currentSubPage == Globals.SubPageType.Lens)
                         {
                             //start camera
                             startCamera = true;
@@ -3908,16 +3895,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 int index;
                 int currentNoradId;
-                int page = getMainPage();
-                int subPage = currentSubPage[page];
                 boolean currentIsSatellite;
                 boolean updateElapsed = false;
                 boolean allViewOrbitals = (viewLensNoradID == Integer.MAX_VALUE);
                 boolean multiOrbitals = (mapViewNoradID == Integer.MAX_VALUE);
-                boolean onMap = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
-                boolean onList = (subPage == Globals.SubPageType.List);
-                boolean onLens = (subPage == Globals.SubPageType.Lens);
-                boolean[] updateList = new boolean[Current.PageType.PageCount];
+                boolean onMap = (currentSubPage == Globals.SubPageType.Map || currentSubPage == Globals.SubPageType.Globe);
+                boolean onList = (currentSubPage == Globals.SubPageType.List);
+                boolean onLens = (currentSubPage == Globals.SubPageType.Lens);
+                boolean updateList = false;
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 double julianDate;
@@ -3928,13 +3913,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 TopographicDataType[] selectedLookAngles = null;
                 Database.SatelliteData[] selectedSatellites = null;
-
-                //go through each page
-                for(index = 0; index < Current.PageType.PageCount; index++)
-                {
-                    //setup
-                    updateList[index] = false;
-                }
 
                 //if not waiting on location update
                 if(!pendingLocationUpdate)
@@ -4038,7 +4016,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 lookAngles[index] = topographicData;
 
                                 //if combined list exists and showing list
-                                if(onList && Current.PageAdapter.hasItems(Current.PageType.Combined))
+                                if(onList && Current.PageAdapter.hasItems())
                                 {
                                     //get current item
                                     Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);
@@ -4054,7 +4032,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
 
                                         //update list later
-                                        updateList[Current.PageType.Combined] = true;
+                                        updateList = true;
                                     }
                                 }
                             }
@@ -4156,31 +4134,27 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         });
                     }
 
-                    //go through any needed updates
-                    for(index = 0; index < Current.PageType.PageCount; index++)
+                    //if there is a pending sort
+                    if(Current.PageAdapter.hasPendingSort())
                     {
-                        //if there is a pending sort
-                        if(Current.PageAdapter.hasPendingSort(index))
+                        //try to sort page and notify of change
+                        try
                         {
-                            //try to sort page and notify of change
-                            try
-                            {
-                                Current.PageAdapter.sortItems(index, Settings.getCurrentSortBy(MainActivity.this));
-                                Current.PageAdapter.setPendingSort(index, false);
-                                updateList[index] = true;
-                            }
-                            catch(Exception ex)
-                            {
-                                //try again later
-                            }
+                            Current.PageAdapter.sortItems(Settings.getCurrentSortBy(MainActivity.this));
+                            Current.PageAdapter.setPendingSort(false);
+                            updateList = true;
                         }
+                        catch(Exception ex)
+                        {
+                            //try again later
+                        }
+                    }
 
-                        //if update needed
-                        if(updateList[index])
-                        {
-                            //update list
-                            Current.PageAdapter.notifyItemsChanged(index);
-                        }
+                    //if update needed
+                    if(updateList)
+                    {
+                        //update list
+                        Current.PageAdapter.notifyItemsChanged();
                     }
                     Current.Coordinates.handleMarkerScale();
 
@@ -4442,41 +4416,24 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private int getSubPage()
     {
         int page = getMainPage();
-        return(mainGroup == Groups.Current ? currentSubPage[page] : mainGroup == Groups.Calculate ? calculateSubPage[page] : 0);
+        return(mainGroup == Groups.Current ? currentSubPage : mainGroup == Groups.Calculate ? calculateSubPage[page] : 0);
     }
 
     //Sets the sub page for the given group
     private void setSubPage(int group, int page, int subPage)
     {
-        int index;
-
         //handle based on group
         switch(group)
         {
             case Groups.Current:
-                if(page < currentSubPage.length && currentPageAdapter != null)
+                if(currentPageAdapter != null)
                 {
-                    currentSubPage[page] = subPage;
+                    currentSubPage = subPage;
                     currentPageAdapter.setSubPage(page, subPage);
 
                     //clear any selected lens
                     viewLensNoradID = Integer.MAX_VALUE;
                     passesLensNoradID = Integer.MAX_VALUE;
-
-                    //if changing to lens view
-                    if(subPage == Globals.SubPageType.Lens)
-                    {
-                        //go through each sub page
-                        for(index = 0; index < Current.PageType.PageCount; index++)
-                        {
-                            //if on other page
-                            if(index != page)
-                            {
-                                //make sure other page is not using lens view
-                                currentSubPage[index] = Globals.SubPageType.List;
-                            }
-                        }
-                    }
                 }
                 break;
 
@@ -4553,7 +4510,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 @Override
                 public void run()
                 {
-                    int index;
                     int page = getMainPage();
                     boolean pendingSort = false;
                     boolean onCurrent = (mainGroup == Groups.Current);
@@ -4572,12 +4528,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             //if on current
                             if(onCurrent)
                             {
-                                //go through each page
-                                for(index = 0; index < Current.PageType.PageCount; index++)
-                                {
-                                    //update if pending sort
-                                    pendingSort = pendingSort || Current.PageAdapter.hasPendingSort(index);
-                                }
+                                //update if pending sort
+                                pendingSort = Current.PageAdapter.hasPendingSort();
                             }
 
                             //if -no pending sort- and -on calculate but not showing any lens--
@@ -4612,13 +4564,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Gets current page action button
-    private FloatingActionStateButton getCurrentActionButton(int pageType)
+    private FloatingActionStateButton getCurrentActionButton()
     {
         //if page adapter is set
         if(currentPageAdapter != null)
         {
             //if page is set and a Current.Page
-            Selectable.ListFragment page = currentPageAdapter.getPage(mainPager, pageType);
+            Selectable.ListFragment page = currentPageAdapter.getPage(mainPager, Current.PageType.Combined);
             if(page instanceof Current.Page)
             {
                 //get button
@@ -4643,7 +4595,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //get action button
-        actionButton = getCurrentActionButton(Current.PageType.View);
+        actionButton = getCurrentActionButton();
 
         //if want to run and have items
         if(run && Current.orbitalViews != null && Current.orbitalViews.length > 0)
@@ -4724,7 +4676,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         ///if want to run, not waiting for location update, and have items
-        haveCombined = (onCurrent && Current.PageAdapter.hasItems(Current.PageType.Combined));
+        haveCombined = (onCurrent && Current.PageAdapter.hasItems());
         if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.isSet()) && haveCombined)
         {
             //get items
@@ -4755,38 +4707,44 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //if pass it set and not none
                     if(pass != null)
                     {
+                        boolean pendingSort = false;
                         Activity activity = MainActivity.this;
                         int sortBy = Settings.getCurrentSortBy(activity);
+                        final Current.Combined.Item currentItem = (pass instanceof Current.Combined.Item ? (Current.Combined.Item)pass : null);
 
-                        //if a sort is needed
-                        switch(sortBy)
+                        //if current item and observer are set
+                        if(currentItem != null && observer != null)
                         {
-                            case Current.Items.SortBy.PassStartTime:
-                            case Current.Items.SortBy.PassDuration:
-                            case Current.Items.SortBy.MaxElevation:
-                                //if there are combined items
-                                if(Current.PageAdapter.hasItems(Current.PageType.Combined))
-                                {
-                                    //remember current item
-                                    final Current.Combined.Item currentItem = (pass instanceof Current.Combined.Item ? (Current.Combined.Item)pass : null);
-                                    if(currentItem != null && observer != null)
-                                    {
-                                        activity.runOnUiThread(new Runnable()
-                                        {
-                                            @Override
-                                            public void run()
-                                            {
-                                                //update displays
-                                                currentItem.setLoading(false);
-                                                currentItem.updateDisplays(activity, observer.timeZone);
+                            //handle by any needed sort
+                            switch(sortBy)
+                            {
+                                case Current.Items.SortBy.PassStartTime:
+                                case Current.Items.SortBy.PassDuration:
+                                case Current.Items.SortBy.MaxElevation:
+                                    pendingSort = true;
+                                    //fall through
 
+                                default:
+                                    final boolean needSort = pendingSort;
+                                    activity.runOnUiThread(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            //update displays
+                                            currentItem.setLoading(false);
+                                            currentItem.updateDisplays(activity, observer.timeZone);
+
+                                            //if need to sort
+                                            if(needSort)
+                                            {
                                                 //set pending sort
-                                                Current.PageAdapter.setPendingSort(Current.PageType.Combined, true);
+                                                Current.PageAdapter.setPendingSort(true);
                                             }
-                                        });
-                                    }
-                                }
-                                break;
+                                        }
+                                    });
+                                    break;
+                            }
                         }
                     }
                 }
@@ -4807,7 +4765,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //get action button
-        actionButton = getCurrentActionButton(Current.PageType.Coordinates);
+        actionButton = getCurrentActionButton();
 
         //if want to run and have items
         if(run && Current.Coordinates.getMapViewReady() && Current.Coordinates.mapView.getOrbitalCount() > 0)

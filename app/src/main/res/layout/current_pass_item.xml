@@ -12,98 +12,11 @@
         android:padding="5dp"
         android:orientation="horizontal"
         android:gravity="center">
-        <LinearLayout
-            android:id="@+id/Pass_Name_Group"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.3"
-            android:orientation="horizontal"
-            android:visibility="gone">
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/Pass_Name_Image"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:layout_gravity="center"/>
-
-            <TextView
-                android:id="@+id/Pass_Name_Text"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/Pass_Data_Group_Titles"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.1"
-            android:gravity="end"
-            android:orientation="vertical"
-            android:visibility="gone">
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp">
-                <TextView
-                    android:id="@+id/Pass_Time_Start_Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:textColor="?attr/defaultTextColor"
-                    android:text="@string/empty"/>
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/Pass_Time_End_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/empty"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/Pass_Time_Duration_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/empty"/>
-
-            <TextView
-                android:id="@+id/Pass_El_Max_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/empty"/>
-        </LinearLayout>
-
-        <com.google.android.material.progressindicator.LinearProgressIndicator
-            android:id="@+id/Pass_Current_Progress_Loading_Bar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.7"
-            android:visibility="gone"/>
-
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Pass_Calculate_Progress_Bar"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.7"
-            android:visibility="gone"/>
-
-        <TextView
-            android:id="@+id/Pass_Outdated_Text"
-            android:layout_width="0dp"
-            android:layout_height="36dp"
-            android:layout_weight="0.6"
-            android:gravity="center"
-            android:text="@string/text_outdated"
-            android:textColor="?attr/defaultTextColor"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -179,9 +92,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/Pass_Current_Progress_Bar"
-        style="@style/ProgressLineSmall"
-        android:visibility="gone"/>
 </LinearLayout>

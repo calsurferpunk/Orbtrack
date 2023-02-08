@@ -34,57 +34,6 @@
             android:visibility="gone"/>
 
         <LinearLayout
-            android:id="@+id/Angles_Data_Group_Titles"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.2"
-            android:gravity="end"
-            android:orientation="vertical"
-            android:visibility="gone">
-            <TextView
-                android:id="@+id/Angles_Az_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/abbrev_azimuth"/>
-
-            <TextView
-                android:id="@+id/Angles_El_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/abbrev_elevation"/>
-
-            <TextView
-                android:id="@+id/Angles_Range_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/abbrev_kilometers_lower"/>
-
-            <TextView
-                android:id="@+id/Angles_Phase_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/abbrev_phase"
-                android:visibility="gone"/>
-
-            <TextView
-                android:id="@+id/Angles_Illumination_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
-                android:text="@string/abbrev_illumination"
-                android:visibility="gone"/>
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/Angles_Progress_Group"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

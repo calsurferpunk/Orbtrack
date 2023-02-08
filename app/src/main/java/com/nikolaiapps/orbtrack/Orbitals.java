@@ -1332,7 +1332,7 @@ public abstract class Orbitals
         public static void notifyPreview3dChanged(int position, int noradId)
         {
             //if a valid page and listener exists
-            if(position < Current.PageType.PageCount && preview3dChangedListeners[position] != null)
+            if(position < PageType.PageCount && preview3dChangedListeners[position] != null)
             {
                 //call listener
                 preview3dChangedListeners[position].preview3dChanged(noradId);

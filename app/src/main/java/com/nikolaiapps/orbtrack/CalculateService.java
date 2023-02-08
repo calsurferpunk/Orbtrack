@@ -258,11 +258,6 @@ public class CalculateService extends NotifyService
             dest.writeBundle(bundle);
         }
 
-        public boolean equals(PassData otherItem)
-        {
-            return(otherItem != null && id == otherItem.id && ((satellite2 == null && otherItem.satellite2 == null) || (satellite2 != null && otherItem.satellite2 != null && satellite2.getSatelliteNum() == otherItem.satellite2.getSatelliteNum())));
-        }
-
         private CalculateViewsTask.OrbitalView[] copyViewArray(CalculateViewsTask.OrbitalView[] copyFrom)
         {
             int index;

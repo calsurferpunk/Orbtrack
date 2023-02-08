@@ -56,7 +56,7 @@ public abstract class Settings
     {
         static final String FirstRun = "FirstRun";
         static final String AcceptedPrivacy = "AcceptedPrivacy";
-        static final String CombinedNotice = "CombinedNotice";
+        static final String MaterialDesignNotice = "MaterialDesignNotice";
         static final String DarkTheme = "DarkTheme";
         static final String ColorTheme = "ColorTheme";
         static final String MetricUnits = "MetricUnits";
@@ -2250,16 +2250,16 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.AcceptedPrivacy, accepted);
     }
 
-    //Gets if combined notice shown
-    public static boolean getCombinedShown(Context context)
+    //Gets if material design notice shown
+    public static boolean getMaterialDesignShown(Context context)
     {
-        return(getPreferenceBoolean(context, PreferenceName.CombinedNotice));
+        return(getPreferenceBoolean(context, PreferenceName.MaterialDesignNotice));
     }
 
-    //Sets if combined noticed shown
-    public static void setCombinedShown(Context context, boolean shown)
+    //Sets if material design notice shown
+    public static void setMaterialDesignShown(Context context, boolean shown)
     {
-        setPreferenceBoolean(context, PreferenceName.CombinedNotice, shown);
+        setPreferenceBoolean(context, PreferenceName.MaterialDesignNotice, shown);
     }
 
     //Gets satellite icon type

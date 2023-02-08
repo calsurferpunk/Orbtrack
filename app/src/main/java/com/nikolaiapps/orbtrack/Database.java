@@ -1492,17 +1492,17 @@ public class Database extends SQLiteOpenHelper
     {
         Resources res = context.getResources();
 
-        //if changed to newer version and combined notice not shown
-        if(previousVersion <= 2 && DB_VERSION > 2 && !Settings.getCombinedShown(context))
+        //if changed to newer version and material design notice not shown
+        if(previousVersion <= 29 && DB_VERSION > 29 && !Settings.getMaterialDesignShown(context))
         {
             //show notice
-            Globals.showConfirmDialog(context, res.getQuantityString(R.plurals.title_updates, 1), res.getString(R.string.desc_combine_lists_notice), res.getString(R.string.title_ok), null, true, null, null, new DialogInterface.OnDismissListener()
+            Globals.showConfirmDialog(context, res.getQuantityString(R.plurals.title_updates, 1), res.getString(R.string.desc_material_design_notice), res.getString(R.string.title_ok), null, true, null, null, new DialogInterface.OnDismissListener()
             {
                 @Override
                 public void onDismiss(DialogInterface dialog)
                 {
                     //remember shown
-                    Settings.setCombinedShown(context, true);
+                    Settings.setMaterialDesignShown(context, true);
                 }
             });
         }

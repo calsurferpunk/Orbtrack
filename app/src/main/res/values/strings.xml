@@ -126,8 +126,6 @@
     <string name="desc_auto_height">Retrieve height from hardware</string>
     <string name="desc_auto_width">Retrieve width from hardware</string>
     <string name="desc_azimuth_offset">Compass true north adjustment</string>
-    <string name="desc_combine_lists">Show view, passes, and coordinates in a single display</string>
-    <string name="desc_combine_lists_notice">Current status information is now on a single display. If you wish to view separate pages, you can revert back by going to Settings > Other > List View.</string>
     <string name="desc_compass_align">For highest accuracy in a new location, it may help to align the compass with a visible orbital. The sun and moon are the best to use.</string>
     <string name="desc_compass_error">Calibrate compass by moving your device in a figure 8 pattern, or move away from interference.</string>
     <string name="desc_finished_setup">All done! If you wish to change anything later, look under settings in the main menu.</string>
@@ -137,6 +135,7 @@
     <string name="desc_information_source">Descriptions and details of satellites</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
+    <string name="desc_material_design_notice">Material design is now the default layout. If you wish to view the legacy design, you can revert back by going to Settings > Other > Material View.</string>
     <string name="desc_metric">Metric (km/m)</string>
     <string name="desc_need_updating">The data is too old and inaccurate. Please update to use.</string>
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
@@ -302,7 +301,6 @@
     <string name="title_color">Color</string>
     <string name="title_colors">Colors</string>
     <string name="title_color_theme">Color Theme</string>
-    <string name="title_combine_lists">Combine Lists</string>
     <string name="title_compass_align">Compass Align</string>
     <string name="title_compass_calibrate">Calibrate Compass</string>
     <string name="title_compass_inaccurate_fix">Compass Inaccurate [Fix]</string>

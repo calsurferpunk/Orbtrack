@@ -1258,7 +1258,7 @@ public class CalculateService extends NotifyService
         double pathDayIncrement;
         double phase;
         long spanMs;
-        long firstTimeMs;
+        long firstTimeMs = 0;
         long startTimeMs = startGMT.getTimeInMillis();
         String section;
         Calendar currentGMT = Globals.getGMTTime(startTimeMs);
@@ -1469,6 +1469,12 @@ public class CalculateService extends NotifyService
                         {
                             //look ahead 15 minutes for next calculation
                             currentGMT.add(Calendar.MINUTE, 15);
+                        }
+                        //else if a satellite searching before pass start with a full circular az travel
+                        else if(currentItem.id > 0 && currentGMT.getTimeInMillis() < firstTimeMs && azTravel >= 360)
+                        {
+                            //look ahead 5 minutes for next calculation
+                            currentGMT.add(Calendar.MINUTE, 5);
                         }
                         else
                         {

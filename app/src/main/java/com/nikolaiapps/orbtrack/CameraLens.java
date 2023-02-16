@@ -563,7 +563,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_PT, 8, metrics);
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, metrics);
         textOffset = textSize / 1.5f;
         textPadding = (textSize * 0.15f);
         indicatorThickness = dpPixels[0];

@@ -107,7 +107,6 @@
     <string name="abbrev_north_east">NE</string>
     <string name="abbrev_north_north_east">NNE</string>
     <string name="abbrev_north_north_west">NNW</string>
-    <string name="abbrev_phase">Phase</string>
     <string name="abbrev_north_west">NW</string>
     <string name="abbrev_satellite">Sat</string>
     <string name="abbrev_seconds_lower">s</string>
@@ -135,7 +134,7 @@
     <string name="desc_information_source">Descriptions and details of satellites</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
-    <string name="desc_material_design_notice">Material design is now the default layout. If you wish to view the legacy design, you can revert back by going to Settings > Other > Material View.</string>
+    <string name="desc_material_design_notice">Material design is now the default layout. If you wish to view the legacy design, you can revert back by going to Settings > Display > Theme > Material Theme.</string>
     <string name="desc_metric">Metric (km/m)</string>
     <string name="desc_need_updating">The data is too old and inaccurate. Please update to use.</string>
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
@@ -197,7 +196,6 @@
     <string name="text_at">at</string>
     <string name="text_camera_error">Error using camera</string>
     <string name="text_download_failed">Download failed</string>
-    <!--string name="text_file_error_loading">Error loading file</string-->
     <string name="text_file_error_saving">Error saving file</string>
     <string name="text_file_error_using">Unable to use file(s)</string>
     <string name="text_file_saved">File saved</string>
@@ -282,11 +280,9 @@
     <string name="title_brown">Brown</string>
     <string name="title_bytes">Bytes</string>
     <string name="title_calculate">Calculate</string>
-    <!--string name="title_calculating">Calculating</string-->
     <string name="title_calculating_passes">Calculating Passes</string>
     <string name="title_camera">Camera</string>
     <string name="title_cancel">Cancel</string>
-    <!--string name="title_cancelled">Cancelled</string-->
     <string name="title_catalog">Catalog</string>
     <string name="title_categories">Categories</string>
     <string name="title_caution">Caution</string>
@@ -428,9 +424,9 @@
     <string name="title_low">Low</string>
     <string name="title_manual">Manual</string>
     <string name="title_map">Map</string>
-    <!--string name="title_map_type">Map Type</string-->
     <string name="title_map_view">Map View</string>
     <string name="title_mars">Mars</string>
+    <string name="title_material_theme">Material Theme</string>
     <string name="title_max">Max</string>
     <string name="title_mean_anomaly">Mean Anomaly</string>
     <string name="title_mean_motion">Mean Motion (Revolutions per Day)</string>
@@ -514,9 +510,7 @@
     <string name="title_save">Save</string>
     <string name="title_save_file">Save File</string>
     <string name="title_save_format">Save Format</string>
-    <!--string name="title_saved">Saved</string-->
     <string name="title_saving">Saving</string>
-    <!--string name="title_saving_file">Saving File</string-->
     <string name="title_screen_bottom">Screen Bottom</string>
     <string name="title_sd_card">SD Card</string>
     <string name="title_search">Search</string>
@@ -524,7 +518,6 @@
     <string name="title_seconds">Seconds</string>
     <string name="title_select">Select</string>
     <string name="title_select_color">Select Color</string>
-    <!--string name="title_select_file">Select File</string-->
     <string name="title_select_file_or_files">Select File(s)</string>
     <string name="title_select_filter">Select Filter</string>
     <string name="title_select_folder">Select Folder</string>
@@ -550,7 +543,6 @@
     <string name="title_show_footprint">Show Footprint</string>
     <string name="title_show_grid">Show Grid</string>
     <string name="title_show_horizon">Show Horizon</string>
-    <!--string name="title_show_label_background">Show Label Background</string-->
     <string name="title_show_labels_always">Show Labels Always</string>
     <string name="title_show_latitude_longitude">Show Latitude/Longitude</string>
     <string name="title_show_notifications">Show Notifications</string>
@@ -582,8 +574,8 @@
     <string name="title_sun">Sun</string>
     <string name="title_sunrise">Sunrise</string>
     <string name="title_sunset">Sunset</string>
-    <!--string name="title_terrain">Terrain</string-->
     <string name="title_text">Text</string>
+    <string name="title_theme">Theme</string>
     <string name="title_this_year">This Year</string>
     <string name="title_time">Time</string>
     <string name="title_time_interval">Time Interval</string>

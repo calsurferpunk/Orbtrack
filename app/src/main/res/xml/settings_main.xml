@@ -10,10 +10,14 @@
             android:key="display"
             android:icon="@drawable/ic_tablet_white"
             android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-            <PreferenceCategory android:title="@string/title_color">
+            <PreferenceCategory android:title="@string/title_theme">
                 <com.nikolaiapps.orbtrack.SwitchPreference
                     android:title="@string/title_dark_theme"
                     android:key="DarkTheme"/>
+
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_material_theme"
+                    android:key="MaterialTheme"/>
 
                 <com.nikolaiapps.orbtrack.IconListPreference
                     app:titleText="@string/title_color_theme"

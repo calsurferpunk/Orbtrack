@@ -167,9 +167,10 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="0.45"
                     android:orientation="horizontal">
-                    <TextView
+                    <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/Combined_Item_Start_Title"
-                        style="@style/CombinedTitleText"/>
+                        style="@style/CombinedImage"
+                        app:srcCompat="@drawable/ic_clock_black"/>
 
                     <TextView
                         android:id="@+id/Combined_Item_Start_Text"

@@ -175,7 +175,6 @@ public abstract class Globals
         static final String Up = "▲";
         static final String Down = "▼";
         static final String Elevating = "◢";
-        //static final String Speed = "⇢";
         static final String Time = "\uD83D\uDD54";
         static final String Star = "★";
         static final String Lock = "\uD83D\uDD12";
@@ -2943,6 +2942,10 @@ public abstract class Globals
 
         //return scaled image
         return(scaledDrawable);
+    }
+    public static Drawable getDrawable(Context context, int resId, int width, int height, boolean useThemeTint, boolean dpSize)
+    {
+        return(getDrawable(context, resId, width, height, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : 0), dpSize));
     }
     public static Drawable getDrawable(Context context, int xStackOffsets, int yStackOffsets, boolean stacked, Drawable ...images)
     {

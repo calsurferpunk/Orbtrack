@@ -89,6 +89,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private static boolean pendingOldSatelliteMessage = false;
     private boolean savedState;
     private boolean finishedSetup;
+    private boolean usingMaterial;
     private boolean allowingPagerSwipe = false;
     private boolean showingPagerTitles = false;
     private Bundle calculateBundle;
@@ -114,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Current
     private int mainGroup;
     private static int viewLensNoradID = Integer.MAX_VALUE;
-    private static int passesLensNoradID = Integer.MAX_VALUE;
     public static int mapViewNoradID = Integer.MAX_VALUE;
     private static int passesPassIndex = Integer.MAX_VALUE;
     private static int intersectionPassIndex = Integer.MAX_VALUE;
@@ -164,6 +164,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Resources res = this.getResources();
         final Bundle stateCopy;
 
+        usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
         this.setContentView(R.layout.main_layout);
 
@@ -180,6 +181,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         mainGroup = savedInstanceState.getInt(ParamTypes.MainGroup, Groups.Current);
         inEditMode = pendingLocationUpdate = false;
         observer = null;
+        Settings.setCurrentSortBy(this, Settings.getCurrentSortBy(this));
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
         Settings.setAllowNumberCommas(this, Settings.getAllowNumberCommas(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
@@ -769,7 +771,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean showList = (onCurrent && !onSubPageList) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
         boolean showMap = (onCurrent && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
         boolean showGlobe = (onCurrent && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
-        boolean onCurrentNoSelected = (onCurrent && viewLensNoradID == Integer.MAX_VALUE && passesLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
+        boolean onCurrentNoSelected = (onCurrent && viewLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
         menu.findItem(R.id.menu_list).setVisible(showList);
@@ -1531,6 +1533,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_display), displayDrawable), new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_all), allDrawable)}));
 
+            if(usingMaterial)
+            {
+                sideMenu.setGroupIndicator(null);
+            }
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
             sideMenu.setOnChildClickListener(createOnSideMenuChildClickListener());
             sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener());
@@ -2330,7 +2336,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 case Groups.Current:
                 case Groups.Orbitals:
-                    items.add(new Item(res.getString(R.string.title_add) + " " + res.getQuantityString(R.plurals.title_satellites, 1), Globals.getDrawable(this, R.drawable.ic_add_white, true)));
+                    items.add(new Item(res.getString(R.string.title_add) + " " + res.getQuantityString(R.plurals.title_satellites, 1), Globals.getDrawable(this, (usingMaterial ? R.drawable.ic_add_circle_black : R.drawable.ic_add_white), true)));
                     break;
             }
 
@@ -4143,7 +4149,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //try to sort page and notify of change
                         try
                         {
-                            Current.PageAdapter.sortItems(Settings.getCurrentSortBy(MainActivity.this));
+                            Current.PageAdapter.sortItems(Settings.getCurrentSortBy());
                             Current.PageAdapter.setPendingSort(false);
                             updateList = true;
                         }
@@ -4436,7 +4442,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                     //clear any selected lens
                     viewLensNoradID = Integer.MAX_VALUE;
-                    passesLensNoradID = Integer.MAX_VALUE;
                 }
                 break;
 
@@ -4668,7 +4673,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         int index;
         boolean haveCombined;
         boolean onCurrent = (mainGroup == Groups.Current);
-        CalculateService.PassData[] selectedItems = null;
         CalculateService.PassData[] passItems;
 
         //if task was running
@@ -4678,31 +4682,24 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             currentPassesTask.cancel(true);
         }
 
-        ///if want to run, not waiting for location update, and have items
+        //if want to run, not waiting for location update, and have items
         haveCombined = (onCurrent && Current.PageAdapter.hasItems());
         if(run && (!pendingLocationUpdate || locationSource != Database.LocationType.Current) && observer != null && observer.geo != null && (observer.geo.isSet()) && haveCombined)
         {
             //get items
             passItems = Current.PageAdapter.getCombinedItems();
-
-            //if not for all orbitals
-            if(passesLensNoradID != Integer.MAX_VALUE)
+            if(passItems != null)
             {
-                //go through each item while no match
-                for(index = 0; index < passItems.length && selectedItems == null; index++)
+                //go through each item
+                for(index = 0; index < passItems.length; index++)
                 {
-                    //if a match
-                    if(passItems[index].satellite.getSatelliteNum() == passesLensNoradID)
-                    {
-                        //remember selected items
-                        selectedItems = new CalculateService.PassData[passItems.length];
-                        selectedItems[index] = passItems[index];
-                    }
+                    //reset calculating status
+                    passItems[index].clearPass();
                 }
             }
 
             //start task
-            currentPassesTask = CalculateService.calculateOrbitalsPasses(this, (selectedItems != null ? selectedItems : passItems), observer, 0, Globals.getGMTTime(), new CalculateService.CalculateListener()
+            currentPassesTask = CalculateService.calculateOrbitalsPasses(this, passItems, observer, 0, Globals.getGMTTime(), new CalculateService.CalculateListener()
             {
                 @Override
                 public void onCalculated(int progressType, final CalculateService.PassData pass)
@@ -4712,7 +4709,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     {
                         boolean pendingSort = false;
                         Activity activity = MainActivity.this;
-                        int sortBy = Settings.getCurrentSortBy(activity);
+                        int sortBy = Settings.getCurrentSortBy();
                         final Current.Combined.Item currentItem = (pass instanceof Current.Combined.Item ? (Current.Combined.Item)pass : null);
 
                         //if current item and observer are set

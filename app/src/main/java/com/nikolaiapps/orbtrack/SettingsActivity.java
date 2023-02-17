@@ -122,6 +122,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     case ScreenKey.Display:
                         SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
+                        SwitchPreference materialThemeSwitch = this.findPreference(Settings.PreferenceName.MaterialTheme);
                         SwitchPreference allowNumberCommasSwitch = this.findPreference(Settings.PreferenceName.AllowNumberCommas);
                         SwitchButtonPreference useLocationTintSwitch = this.findPreference(Settings.PreferenceName.MapMarkerLocationIconUseTint);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
@@ -138,6 +139,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(darkThemeSwitch);
+                        setupSwitch(materialThemeSwitch);
                         setupSwitch(allowNumberCommasSwitch);
                         setupSwitchButton(useLocationTintSwitch);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
@@ -1469,6 +1471,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     {
                         case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.DarkTheme:
+                        case Settings.PreferenceName.MaterialTheme:
                         case Settings.PreferenceName.SatelliteIcon:
                         case Settings.PreferenceName.OrbitalIcons:
                             recreateThis = true;

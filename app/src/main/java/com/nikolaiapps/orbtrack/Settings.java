@@ -10,6 +10,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -58,6 +59,7 @@ public abstract class Settings
         static final String AcceptedPrivacy = "AcceptedPrivacy";
         static final String MaterialDesignNotice = "MaterialDesignNotice";
         static final String DarkTheme = "DarkTheme";
+        static final String MaterialTheme = "MaterialTheme";
         static final String ColorTheme = "ColorTheme";
         static final String MetricUnits = "MetricUnits";
         static final String AllowNumberCommas = "AllowNumberCommas";
@@ -95,9 +97,6 @@ public abstract class Settings
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
         static final String MapShowToolbars = "MapShowToolbars";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
-        static final String CurrentViewSortBy = "CurrentViewSortBy";
-        static final String CurrentPassesSortBy = "CurrentPassesSortBy";
-        static final String CurrentCoordinatesSortBy = "CurrentCoordinatesSortBy";
         static final String LensFirstRun = "LensFirstRun";
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
@@ -1468,9 +1467,11 @@ public abstract class Settings
             //Sets notify text
             private void setNotifyText(TextView notifyText, boolean up, boolean nextOnly)
             {
-                notifyText.setText(up ? Globals.Symbols.Up : Globals.Symbols.Down);
+                Drawable clockImage = Globals.getDrawable(currentContext, R.drawable.ic_clock_black, 18, 18, true, true);
+                Drawable noImage = (up ? null : Globals.getDrawable(currentContext, R.drawable.ic_no, 18, 18, true, true));
+
                 notifyText.setVisibility(View.VISIBLE);
-                notifyText.setCompoundDrawablesWithIntrinsicBounds(null, null, Globals.getDrawable(currentContext, nextOnly ? R.drawable.ic_repeat_one_white : R.drawable.ic_repeat_white, true), null);
+                notifyText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(currentContext, 0, 0, true, clockImage, noImage), null, Globals.getDrawable(currentContext, (nextOnly ? R.drawable.ic_repeat_one_white : R.drawable.ic_repeat_white), 18, 18, true, true), null);
             }
         }
     }
@@ -1920,13 +1921,14 @@ public abstract class Settings
         }
     }
 
-    //Status of using metric units, grid, map marker bottom info, footprint, and default colors
+    //Status of using metric units, grid, map marker bottom info, footprint, default colors, and sort by
     private static boolean usingMetric = true;
     private static boolean allowNumberCommas = true;
     private static boolean mapMarkerInfoBottom = true;
     private static boolean mapShowFootprint = false;
     private static boolean mapSelectedShowFootprint = false;
     private static boolean satelliteUseNextDefaultColor = true;
+    private static int currentCombinedSortBy = Current.Items.SortBy.Name;
 
     //Gets read settings
     public static SharedPreferences getReadSettings(Context context)
@@ -1972,6 +1974,7 @@ public abstract class Settings
             case PreferenceName.MapShowStars:
             case PreferenceName.MapShowSunlight:
             case PreferenceName.MapShowToolbars:
+            case PreferenceName.MaterialTheme:
             case PreferenceName.MetricUnits:
             case PreferenceName.AllowNumberCommas:
             case PreferenceName.ShareTranslations:
@@ -2019,11 +2022,8 @@ public abstract class Settings
             case PreferenceName.TLEAutoUpdateHour:
                 return(12);
 
-            case PreferenceName.CurrentViewSortBy:
-            case PreferenceName.CurrentPassesSortBy:
-            case PreferenceName.CurrentCoordinatesSortBy:
             case PreferenceName.CurrentCombinedSortBy:
-                return(Current.Items.SortBy.Name);
+                return(currentCombinedSortBy);
 
             case PreferenceName.ColorTheme:
                 return(Options.Display.ThemeIndex.Cyan);
@@ -2349,6 +2349,12 @@ public abstract class Settings
     public static boolean getDarkTheme(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.DarkTheme));
+    }
+
+    //Gets material theme value
+    public static boolean getMaterialTheme(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MaterialTheme));
     }
 
     //Gets color theme value
@@ -2818,12 +2824,6 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.MapMarkerShowShadow, show);
     }
 
-    //Gets sort by preference name for given page
-    private static String getCurrentSortByName()
-    {
-        return(PreferenceName.CurrentCombinedSortBy);
-    }
-
     //Gets sort by string id for given sort by value
     public static int getSortByStringId(int sortBy)
     {
@@ -2886,17 +2886,22 @@ public abstract class Settings
     //Gets current sort by for given page
     public static int getCurrentSortBy(Context context)
     {
-        return(getPreferenceInt(context, getCurrentSortByName()));
+        return(getPreferenceInt(context, PreferenceName.CurrentCombinedSortBy));
+    }
+    public static int getCurrentSortBy()
+    {
+        return(currentCombinedSortBy);
     }
     public static String getCurrentSortByString(Context context)
     {
-        return(context.getString(getSortByStringId(getCurrentSortBy(context))));
+        return(context.getString(getSortByStringId(getCurrentSortBy())));
     }
 
     //Sets current sort by for given page
     public static void setCurrentSortBy(Context context, int sortBy)
     {
-        setPreferenceInt(context, getCurrentSortByName(), sortBy);
+        setPreferenceInt(context, PreferenceName.CurrentCombinedSortBy, sortBy);
+        currentCombinedSortBy = sortBy;
     }
     public static void setCurrentSortBy(Context context, String sortByString)
     {

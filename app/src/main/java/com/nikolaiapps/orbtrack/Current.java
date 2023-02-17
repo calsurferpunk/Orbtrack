@@ -161,11 +161,11 @@ public abstract class Current
             }
         }
 
-        public void sort(Context context)
+        public void sort()
         {
             if(group == MainActivity.Groups.Current)
             {
-                PageAdapter.sortItems(Settings.getCurrentSortBy(context));
+                PageAdapter.sortItems(Settings.getCurrentSortBy());
             }
         }
 
@@ -271,11 +271,10 @@ public abstract class Current
         public final TextView dataGroup3Text;
         public final TextView dataGroup4Text;
         public final TextView dataGroup5Text;
-        public final TextView dataGroupTitleText;
         public final LinearLayout dataGroup;
         public final AppCompatImageView nameImage;
 
-        public ItemHolderBase(View itemView, int dataGroupTitleID, int dataGroup1TextID, int dataGroup2TextID, int dataGroup3TextID, int dataGroup4TextID, int dataGroup5TextID, int dataGroupID, int nameImageID, int nameTextID)
+        public ItemHolderBase(View itemView, int dataGroup1TextID, int dataGroup2TextID, int dataGroup3TextID, int dataGroup4TextID, int dataGroup5TextID, int dataGroupID, int nameImageID, int nameTextID)
         {
             super(itemView);
 
@@ -284,7 +283,6 @@ public abstract class Current
             dataGroup3Text = (dataGroup3TextID > -1 ? (TextView)itemView.findViewById(dataGroup3TextID) : null);
             dataGroup4Text = (dataGroup4TextID > -1 ? (TextView)itemView.findViewById(dataGroup4TextID) : null);
             dataGroup5Text = (dataGroup5TextID > -1 ? (TextView)itemView.findViewById(dataGroup5TextID) : null);
-            dataGroupTitleText = itemView.findViewById(dataGroupTitleID);
             dataGroup = itemView.findViewById(dataGroupID);
             nameImage = (nameImageID > -1 ? (AppCompatImageView)itemView.findViewById(nameImageID) : null);
             nameText = (nameTextID > - 1 ? (TextView)itemView.findViewById(nameTextID) : null);
@@ -315,7 +313,6 @@ public abstract class Current
             private TextView rangeText;
             private TextView speedText;
             private TextView startText;
-            private TextView startTitle;
             private TextView elMaxText;
             private TextView elMaxTitle;
             private TextView durationText;
@@ -324,6 +321,8 @@ public abstract class Current
             private LinearProgressIndicator passProgress;
             private CircularProgressIndicator passLoadingProgress;
             private LinearLayout passLayout;
+            private LinearLayout passStartLayout;
+            private LinearLayout passDurationLayout;
             private AppCompatImageView azImage;
             private AppCompatImageView elImage;
             private AppCompatImageView nameImage;
@@ -398,13 +397,23 @@ public abstract class Current
 
             public void setLoading(boolean loading)
             {
+                int passVisibility = (loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
+
                 if(passLoadingProgress != null)
                 {
-                    passLoadingProgress.setVisibility(loading ? View.VISIBLE : View.GONE);
+                    passLoadingProgress.setVisibility(loading && tleIsAccurate ? View.VISIBLE : View.GONE);
                 }
                 if(passLayout != null)
                 {
-                    passLayout.setVisibility(loading ? View.GONE : View.VISIBLE);
+                    passLayout.setVisibility(passVisibility);
+                }
+                if(passStartLayout != null)
+                {
+                    passStartLayout.setVisibility(passVisibility);
+                }
+                if(passDurationLayout != null)
+                {
+                    passDurationLayout.setVisibility(passVisibility);
                 }
             }
 
@@ -483,11 +492,6 @@ public abstract class Current
                     longitudeText.setText(haveGeo ? Globals.getLongitudeDirectionString(res, longitude, 2) : "-");
                 }
 
-                if(startTitle != null)
-                {
-                    startTitle.setText(Globals.Symbols.Up);
-                }
-
                 if(startText != null)
                 {
                     startText.setText(inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
@@ -495,7 +499,7 @@ public abstract class Current
 
                 if(durationText != null)
                 {
-                    durationText.setText(!passStartFound ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
+                    durationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
                 }
 
                 if(elMaxTitle != null)
@@ -538,6 +542,7 @@ public abstract class Current
         //Item list adapter
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
+            private final boolean usingMaterial;
             private final Items combinedItems;
 
             public ItemListAdapter(Context context, Combined.Item[] savedItems, Database.SatelliteData[] orbitals)
@@ -546,6 +551,10 @@ public abstract class Current
 
                 int index;
                 boolean usePathProgress = Settings.getListPathProgress(context);
+
+                //remember using material and layout ID
+                usingMaterial = Settings.getMaterialTheme(context);
+                this.itemsRefID = (usingMaterial ? R.layout.current_combined_material_item : R.layout.current_combined_item);
 
                 combinedItems = new Items(MainActivity.Groups.Current, PageType.Combined);
 
@@ -564,7 +573,7 @@ public abstract class Current
                         combinedItems.set(index, new Item(context, index, orbitals[index], usePathProgress));
                     }
                 }
-                combinedItems.sort(currentContext);
+                combinedItems.sort();
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -573,7 +582,7 @@ public abstract class Current
             @Override
             public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
-                View itemView = LayoutInflater.from(parent.getContext()).inflate(R.layout.current_combined_item, parent, false);
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView);
 
                 setViewClickListeners(itemView, itemHolder);
@@ -583,12 +592,26 @@ public abstract class Current
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
             {
+                int sortBy = Settings.getCurrentSortBy();
+                int visibility;
                 Item currentItem = combinedItems.getCombinedItem(position);
                 View itemView = holder.itemView;
                 View dataLayout;
                 View outdatedText;
+                LinearLayout azLayout;
+                LinearLayout elLayout;
+                LinearLayout latitudeLayout;
+                LinearLayout longitudeLayout;
+                LinearLayout rangeLayout;
+                LinearLayout speedLayout;
 
                 dataLayout = itemView.findViewById(R.id.Combined_Item_Data_Layout);
+                azLayout = itemView.findViewById(R.id.Combined_Item_Az_Layout);
+                elLayout = itemView.findViewById(R.id.Combined_Item_El_Layout);
+                latitudeLayout = itemView.findViewById(R.id.Combined_Item_Latitude_Layout);
+                longitudeLayout = itemView.findViewById(R.id.Combined_Item_Longitude_Layout);
+                rangeLayout = itemView.findViewById(R.id.Combined_Item_Range_Layout);
+                speedLayout = itemView.findViewById(R.id.Combined_Item_Speed_Layout);
                 outdatedText = itemView.findViewById(R.id.Combined_Item_Outdated_Text);
                 currentItem.azImage = itemView.findViewById(R.id.Combined_Item_Az_Image);
                 currentItem.azText = itemView.findViewById(R.id.Combined_Item_Az_Text);
@@ -598,7 +621,6 @@ public abstract class Current
                 currentItem.speedText = itemView.findViewById(R.id.Combined_Item_Speed_Text);
                 currentItem.speedImage = itemView.findViewById(R.id.Combined_Item_Speed_Image);
                 currentItem.startText = itemView.findViewById(R.id.Combined_Item_Start_Text);
-                currentItem.startTitle = itemView.findViewById(R.id.Combined_Item_Start_Title);
                 currentItem.elMaxText = itemView.findViewById(R.id.Combined_Item_El_Max_Text);
                 currentItem.elMaxTitle = itemView.findViewById(R.id.Combined_Item_El_Max_Title);
                 currentItem.elMaxUnder = itemView.findViewById(R.id.Combined_Item_El_Max_Under);
@@ -608,6 +630,8 @@ public abstract class Current
                 currentItem.passProgress = itemView.findViewById(R.id.Combined_Item_Pass_Progress);
                 currentItem.passLoadingProgress = itemView.findViewById(R.id.Combined_Item_Pass_Loading_Progress);
                 currentItem.passLayout = itemView.findViewById(R.id.Combined_Item_Pass_Layout);
+                currentItem.passStartLayout = itemView.findViewById(R.id.Combined_Item_Pass_Start_Layout);
+                currentItem.passDurationLayout = itemView.findViewById(R.id.Combined_Item_Pass_Duration_Layout);
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);
                 currentItem.longitudeText = itemView.findViewById(R.id.Combined_Item_Longitude_Text);
 
@@ -618,6 +642,38 @@ public abstract class Current
                 if(outdatedText != null)
                 {
                     outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
+                if(usingMaterial)
+                {
+                    visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Name || sortBy == Items.SortBy.Azimuth || sortBy == Items.SortBy.Elevation || sortBy == Items.SortBy.PassStartTime || sortBy == Items.SortBy.PassDuration || sortBy == Items.SortBy.MaxElevation) ? View.VISIBLE : View.INVISIBLE);
+                    if(azLayout != null)
+                    {
+                        azLayout.setVisibility(visibility);
+                    }
+                    if(elLayout != null)
+                    {
+                        elLayout.setVisibility(visibility);
+                    }
+
+                    visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Latitude || sortBy == Items.SortBy.Longitude) ? View.VISIBLE : View.GONE);
+                    if(latitudeLayout != null)
+                    {
+                        latitudeLayout.setVisibility(visibility);
+                    }
+                    if(longitudeLayout != null)
+                    {
+                        longitudeLayout.setVisibility(visibility);
+                    }
+
+                    visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Range || sortBy == Items.SortBy.Altitude) ? View.VISIBLE : View.GONE);
+                    if(rangeLayout != null)
+                    {
+                        rangeLayout.setVisibility(visibility);
+                    }
+                    if(speedLayout != null)
+                    {
+                        speedLayout.setVisibility(visibility);
+                    }
                 }
                 currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
@@ -987,20 +1043,20 @@ public abstract class Current
             public final LinearLayout progressGroup;
             public final ExpandingListView subList;
 
-            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupTitle1ID, int dataGroupID, int timeTextID, int subListID)
+            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID, int subListID)
             {
-                super(itemView, dataGroupTitle1ID, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, dataGroupID, -1, -1);
+                super(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, dataGroupID, -1, -1);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
                 subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
             public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, -1, dataGroupID, timeTextID, -1);
+                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupID, timeTextID, -1);
             }
             public ItemHolder(View itemView, int progressGroupID, int subListID)
             {
-                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, -1, subListID);
+                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, subListID);
             }
         }
 
@@ -1301,7 +1357,6 @@ public abstract class Current
             public AppCompatImageView nameImage;
             public TextView nameText;
             public TextView timeStartText;
-            public TextView timeStartTitleText;
             public TextView timeEndText;
             public TextView timeDurationText;
             public TextView elMaxText;
@@ -1321,7 +1376,6 @@ public abstract class Current
                 this.dataGroup = null;
                 this.timeStartText = null;
                 this.timeStartUnder = null;
-                this.timeStartTitleText = null;
                 this.timeEndText = null;
                 this.timeDurationText = null;
                 this.elMaxText = null;
@@ -1413,28 +1467,6 @@ public abstract class Current
                     if(timeStartText != null)
                     {
                         timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
-
-                        if(timeStartTitleText != null)
-                        {
-                            timeStartText.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener()
-                            {
-                                @Override
-                                public void onGlobalLayout()
-                                {
-                                    int height = timeStartText.getHeight();
-
-                                    //if height is known
-                                    if(height > 0)
-                                    {
-                                        //remove listener
-                                        timeStartText.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-
-                                        //update height
-                                        Globals.setLayoutHeight(timeStartTitleText, height);
-                                    }
-                                }
-                            });
-                        }
                     }
 
                     if(timeStartUnder != null)
@@ -1450,7 +1482,7 @@ public abstract class Current
 
                     if(timeDurationText != null)
                     {
-                        timeDurationText.setText(!passStartFound ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
+                        timeDurationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
                     }
 
                     if(elMaxText != null)
@@ -1485,7 +1517,7 @@ public abstract class Current
 
             public ItemHolder(View itemView, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxTextID, int elMaxUnderID, int calculateProgressBarID, int dataGroupID)
             {
-                super(itemView, -1, timeStartTextID, timeDurationTextID, timeEndTextID, elMaxTextID, -1, dataGroupID, -1, -1);
+                super(itemView, timeStartTextID, timeDurationTextID, timeEndTextID, elMaxTextID, -1, dataGroupID, -1, -1);
                 calculateProgressBar = itemView.findViewById(calculateProgressBarID);
                 timeStartUnder = itemView.findViewById(timeStartUnderID);
                 elMaxUnder = itemView.findViewById(elMaxUnderID);
@@ -1612,7 +1644,6 @@ public abstract class Current
                 }
                 currentItem.timeStartText = itemHolder.dataGroup1Text;
                 currentItem.timeStartUnder = itemHolder.timeStartUnder;
-                currentItem.timeStartTitleText = itemHolder.dataGroupTitleText;
                 currentItem.timeDurationText = itemHolder.dataGroup2Text;
                 currentItem.timeEndText = itemHolder.dataGroup3Text;
                 if(currentItem.timeEndText != null)
@@ -1992,20 +2023,20 @@ public abstract class Current
             public final LinearLayout progressGroup;
             public final ExpandingListView subList;
 
-            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupTitle1ID, int dataGroupID, int speedTextID, int timeTextID, int subListID)
+            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupID, int speedTextID, int timeTextID, int subListID)
             {
-                super(itemView, dataGroupTitle1ID, latTextID, lonTextID, altTextID, speedTextID, -1, dataGroupID, -1, -1);
+                super(itemView, latTextID, lonTextID, altTextID, speedTextID, -1, dataGroupID, -1, -1);
                 progressGroup = itemView.findViewById(progressGroupID);
                 timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
                 subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
             }
             public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupID, int timeTextID)
             {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, -1, dataGroupID, speedTextID, timeTextID, -1);
+                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupID, speedTextID, timeTextID, -1);
             }
             public ItemHolder(View itemView, int progressGroupID, int subListID)
             {
-                this(itemView, -1, -1, -1, progressGroupID, -1, -1, -1, -1, subListID);
+                this(itemView, -1, -1, -1, progressGroupID, -1, -1, -1, subListID);
             }
         }
 
@@ -3396,7 +3427,7 @@ public abstract class Current
             if(newView == null)
             {
                 //create view
-                newView = this.onCreateView(inflater, container, listAdapter, group, page);
+                newView = this.onCreateView(inflater, container, listAdapter, group, page, false);
             }
 
             //set change listeners
@@ -3464,7 +3495,7 @@ public abstract class Current
                     public void itemsChanged()
                     {
                         FragmentActivity activity = Page.this.getActivity();
-                        int sortBy = Settings.getCurrentSortBy(activity);
+                        int sortBy = Settings.getCurrentSortBy();
 
                         //if not a constant value for sorting
                         if(sortBy != Items.SortBy.Name && sortBy != Items.SortBy.PassStartTime && sortBy != Items.SortBy.PassDuration && sortBy != Items.SortBy.MaxElevation)

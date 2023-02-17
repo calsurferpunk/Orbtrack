@@ -108,7 +108,6 @@
     <string name="abbrev_north_north_east">NNE</string>
     <string name="abbrev_north_north_west">NNO</string>
     <string name="abbrev_north_west">NO</string>
-    <string name="abbrev_phase">Fase</string>
     <string name="abbrev_satellite">Sat</string>
     <string name="abbrev_seconds_lower">s</string>
     <string name="abbrev_south">S</string>
@@ -135,7 +134,7 @@
     <string name="desc_information_source">Descripciones y detalles de satélites.</string>
     <string name="desc_location_disable">Los servicios de ubicación están deshabilitados. ¿Desea cambiar la configuración?</string>
     <string name="desc_location_icon">Ícono a usar para mostrar la ubicación del mapa</string>
-    <string name="desc_material_design_notice">El diseño de materiales ahora es el diseño predeterminado. Si desea ver el diseño heredado, puede volver atrás yendo a Configuración > Otro > Vista Material.</string>
+    <string name="desc_material_design_notice">El diseño de materiales ahora es el diseño predeterminado. Si desea ver el diseño heredado, puede volver atrás yendo a Ajustes > Pantalla > Tema > Tema Material.</string>
     <string name="desc_metric">Métrico (km/m)</string>
     <string name="desc_need_updating">Los datos son demasiado antiguos e inexactos. Actualice para usar.</string>
     <string name="desc_no_connection">Es posible que no tenga una conexión a Internet. ¿Intentar de todos modos?</string>
@@ -197,7 +196,6 @@
     <string name="text_at">a</string>
     <string name="text_camera_error">Error al usar la cámara</string>
     <string name="text_download_failed">Descarga fracasó</string>
-    <!--string name="text_file_error_loading">Error al cargar el archivo</string-->
     <string name="text_file_error_saving">Error al guardar el archivo</string>
     <string name="text_file_error_using">No se puede usar archivo</string>
     <string name="text_file_saved">Archivo guardado</string>
@@ -282,11 +280,9 @@
     <string name="title_brown">Marrón</string>
     <string name="title_bytes">Bytes</string>
     <string name="title_calculate">Calcular</string>
-    <!--string name="title_calculating">Calculador</string-->
     <string name="title_calculating_passes">Cálculo De Pases</string>
     <string name="title_camera">Cámara</string>
     <string name="title_cancel">Cancelar</string>
-    <!--string name="title_cancelled">Cancelado</string-->
     <string name="title_catalog">Catalogar</string>
     <string name="title_categories">Categorías</string>
     <string name="title_caution">Precaución</string>
@@ -428,9 +424,9 @@
     <string name="title_low">Bajo</string>
     <string name="title_manual">Manual</string>
     <string name="title_map">Mapa</string>
-    <!--string name="title_map_type">Tipo de Mapa</string-->
     <string name="title_map_view">Vista Mapa</string>
     <string name="title_mars">Marte</string>
+    <string name="title_material_theme">Tema Material</string>
     <string name="title_max">Max</string>
     <string name="title_mean_anomaly">Anomalía Media</string>
     <string name="title_mean_motion">Movimiento Medio (Revoluciones por Día)</string>
@@ -514,9 +510,7 @@
     <string name="title_save">Guardar</string>
     <string name="title_save_file">Guardar Archivo</string>
     <string name="title_save_format">Guardar Formato</string>
-    <!--string name="title_saved">Salvado</string-->
     <string name="title_saving">Ahorro</string>
-    <!--string name="title_saving_file">Guardando Archivo</string-->
     <string name="title_screen_bottom">Pantalla Inferior</string>
     <string name="title_sd_card">Tarjeta SD</string>
     <string name="title_search">Buscar</string>
@@ -524,7 +518,6 @@
     <string name="title_seconds">Segundos</string>
     <string name="title_select">Seleccionar</string>
     <string name="title_select_color">Seleccionar Color</string>
-    <!--string name="title_select_file">Seleccione Archivo</string-->
     <string name="title_select_file_or_files">Seleccione Archivo(s)</string>
     <string name="title_select_filter">Seleccionar Filtro</string>
     <string name="title_select_folder">Seleccione Carpeta</string>
@@ -550,7 +543,6 @@
     <string name="title_show_footprint">Mostrar Huella</string>
     <string name="title_show_grid">Mostrar Cuadrícula</string>
     <string name="title_show_horizon">Mostrar Horizonte</string>
-    <!--string name="title_show_label_background">Mostrar Fondo Etiqueta</string-->
     <string name="title_show_labels_always">Mostrar Etiquetas Siempre</string>
     <string name="title_show_latitude_longitude">Mostrar Latitud/Longitud</string>
     <string name="title_show_notifications">Mostrar Notificaciones</string>
@@ -582,8 +574,8 @@
     <string name="title_sun">Sol</string>
     <string name="title_sunrise">Amanecer</string>
     <string name="title_sunset">Puesta de Sol</string>
-    <!--string name="title_terrain">Terreno</string-->
     <string name="title_text">Texto</string>
+    <string name="title_theme">Tema</string>
     <string name="title_this_year">Este Año</string>
     <string name="title_time">Tiempo</string>
     <string name="title_time_interval">Intervalo de Tiempo</string>

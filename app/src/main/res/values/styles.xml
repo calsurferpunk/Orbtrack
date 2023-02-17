@@ -330,7 +330,7 @@
         <item name="colorAccent">@color/yellow_700</item>
         <item name="colorControlNormal">@color/yellow_700</item>
         <item name="actionBarBackground">@color/yellow_900</item>
-        <item name="pageTitleBackground">@color/yellow_800</item>
+        <item name="pageTitleBackground">@color/yellow_800</item>vi
         <item name="columnTitleTextColor">@color/yellow_100</item>
         <item name="columnTitleTextSelectColor">@color/yellow_300</item>
         <item name="columnBackground">@color/yellow_700</item>
@@ -343,6 +343,9 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">2dp</item>
         <item name="android:background">?attr/dividerLineColor</item>
+    </style>
+    <style name="DividerMaterial" parent="Divider">
+        <item name="android:background">@color/transparent</item>
     </style>
 
     <style name="DividerThin" parent="Divider">
@@ -364,10 +367,18 @@
     </style>
 
     <!-- Detail Views -->
+    <style name="DetailTableMaterial">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
     <style name="DetailTableRow">
         <item name="android:padding">1dp</item>
         <item name="android:gravity">center</item>
         <item name="android:background">?attr/pageBackground</item>
+    </style>
+    <style name="DetailTableRowMaterial" parent="DetailTableRow">
+        <item name="android:background">@color/transparent</item>
     </style>
 
     <style name="DetailText">
@@ -376,6 +387,10 @@
         <item name="android:layout_gravity">top</item>
         <item name="android:padding">1dp</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="DetailTextMaterial" parent="DetailText">
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="DetailTitle" parent="DetailText">
@@ -397,6 +412,10 @@
         <item name="android:layout_marginRight">1dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:background">?attr/dividerLineColor</item>
+    </style>
+    <style name="DetailVerticalDividerMaterial">
+        <item name="android:layout_width">12dp</item>
+        <item name="android:background">@color/transparent</item>
     </style>
 
     <!--Edit Dialog -->
@@ -450,6 +469,18 @@
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
+    <!--Combined Layout-->
+    <style name="CombinedLayoutMaterial">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:paddingRight">15dp</item>
+    </style>
+    <style name="CombinedLayoutStartMaterial" parent="CombinedLayoutMaterial">
+        <item name="android:minWidth">154dp</item>
+    </style>
+
     <!--Combined Image-->
     <style name="CombinedImage">
         <item name="android:layout_width">20dp</item>
@@ -459,6 +490,10 @@
         <item name="android:gravity">center</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="tint">?attr/defaultTextColor</item>
+    </style>
+    <style name="CombinedImageMaterial" parent="CombinedImage">
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
     </style>
 
     <!--Combined Title Text-->
@@ -477,6 +512,14 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">0.5</item>
         <item name="android:padding">2dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="CombinedTextMaterial">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">4dp</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
@@ -624,8 +667,7 @@
     </style>
 
     <style name="NotifyItemText" parent="NotifyItemTitle">
-        <item name="android:paddingLeft">0dp</item>
-        <item name="android:paddingRight">0dp</item>
+        <item name="android:paddingRight">3dp</item>
     </style>
 
     <!--Widgets-->

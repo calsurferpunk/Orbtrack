@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:ignore="ContentDescription"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:background="?attr/pageBackground">
+    <LinearLayout
+        android:id="@+id/Item_Detail_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/viewPagerBackground"
+        android:padding="6dp"
+        android:orientation="vertical">
+        <TextView
+            android:id="@+id/Item_Detail_Title_Text"
+            style="@style/DetailTextMaterial"/>
+
+        <LinearLayout
+            android:id="@+id/Item_Detail_Cards_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="0dp"/>
+
+        <LinearLayout
+            android:id="@+id/Item_Detail_Graph_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="gone">
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/Item_Detail_Graph_Progress"
+                style="@style/ProgressCircle"/>
+
+            <com.nikolaiapps.orbtrack.Graph
+                android:id="@+id/Item_Detail_Graph"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Item_Detail_3d_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:visibility="gone">
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/Item_Detail_3d_Progress"
+                style="@style/ProgressCircle"/>
+
+            <FrameLayout
+                android:id="@+id/Item_Detail_3d_Frame"
+                android:layout_width="match_parent"
+                android:layout_height="260dp">
+                <androidx.fragment.app.FragmentContainerView
+                    android:id="@+id/Item_Detail_3d_View"
+                    android:name="com.nikolaiapps.orbtrack.Whirly$PreviewFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:tag="itemDetail3dView"/>
+
+                <FrameLayout
+                    android:id="@+id/Item_Detail_3d_Close_Frame"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="end|top">
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/Item_Detail_3d_Close_Button"
+                        style="@style/FloatingButton"
+                        android:alpha="0.5"
+                        app:backgroundTint="@color/transparent"
+                        app:srcCompat="@drawable/ic_close_white"
+                        app:fabSize="mini"/>
+                </FrameLayout>
+
+                <com.google.android.material.floatingactionbutton.FloatingActionButton
+                    android:id="@+id/Item_Detail_3d_Fullscreen_Button"
+                    style="@style/FloatingButton"
+                    android:layout_gravity="end|bottom"
+                    android:alpha="0.5"
+                    app:backgroundTint="@color/transparent"
+                    app:srcCompat="@drawable/ic_fullscreen_white"
+                    app:fabSize="mini"/>
+            </FrameLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Item_Detail_Info_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:visibility="gone">
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/Item_Detail_Info_Progress"
+                style="@style/ProgressCircle"/>
+
+            <com.nikolaiapps.orbtrack.ScrollTextView
+                style="@style/DetailText"
+                android:id="@+id/Item_Detail_Info_Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:maxLines="10"
+                android:scrollbars="vertical"
+                android:text="@string/title_loading_dots"
+                android:autoLink="web"
+                android:visibility="gone"/>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/DetailTableRowMaterial"
+            android:id="@+id/Item_Detail_Progress_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/Item_Detail_Progress"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                app:indicatorColor="?attr/colorAccent"/>
+            <TextView
+                style="@style/DetailText"
+                android:id="@+id/Item_Detail_Progress_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"/>
+        </LinearLayout>
+
+        <View style="@style/DividerMaterial" android:id="@+id/Item_Detail_Button_Divider" android:visibility="gone"/>
+
+        <LinearLayout
+            style="@style/DetailTableRowMaterial"
+            android:id="@+id/Item_Detail_Button_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Item_Detail_Button7"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="8dp"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

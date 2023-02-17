@@ -22,7 +22,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TableRow;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Map;
@@ -1047,11 +1046,17 @@ public abstract class Settings
                 super.setColumnTitles(listColumns, categoryText, page);
             }
 
+            private void setText(TextView view, String text)
+            {
+                if(view != null)
+                {
+                    view.setText(text);
+                }
+            }
+
             @Override
             protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
             {
-                int offset = 0;
-                String text;
                 final Item currentItem = (Item)item;
                 final boolean haveContext = (currentContext != null);
                 final boolean isCurrent = (currentItem.locationType == Database.LocationType.Current);
@@ -1059,7 +1064,6 @@ public abstract class Settings
                 double longitude = currentItem.longitude;
                 double altitudeM = currentItem.altitudeM;
                 final Resources res = (haveContext ? currentContext.getResources() : null);
-                final TextView[] titles;
                 final TextView[] texts;
 
                 //if on current location and not set yet
@@ -1082,75 +1086,55 @@ public abstract class Settings
                     //create dialog
                     final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, Universe.IDs.None, currentItem.name, null, Globals.getDrawable(currentContext, Globals.getLocationIcon(currentItem.locationType), true), itemDetailButtonClickListener);
 
+                    //add titles
+                    detailDialog.addGroup(res.getString(R.string.title_name), null,
+                                                     res.getString(R.string.title_latitude), res.getString(R.string.title_altitude),
+                                                     res.getString(R.string.title_longitude), null,
+                                                     res.getString(R.string.title_time_zone));
+
                     //get displays
-                    titles = detailDialog.getItemDetailTitles();
-                    texts = detailDialog.getItemDetailTexts();
-
-                    //
-                    //update displays
-                    //
-                    text = res.getString(R.string.title_name) + ":";
-                    titles[offset].setText(text);
-                    TableRow.LayoutParams viewParams = (TableRow.LayoutParams)texts[offset].getLayoutParams();
-                    viewParams.span = 4;
-                    detailDialog.hideVerticalItemDetailDivider(offset);
-                    texts[offset++].setLayoutParams(viewParams);
-                    offset++;
-
-                    text = res.getString(R.string.title_latitude) + ":";
-                    titles[offset].setText(text);
-                    texts[offset++].setText(Globals.getLatitudeDirectionString(res, latitude, 4));
-
-                    text = res.getString(R.string.title_altitude) + ":";
-                    titles[offset].setText(text);
-                    text = Globals.getNumberString(Globals.getMetersUnitValue(altitudeM)) + " " + Globals.getMetersLabel(res);
-                    texts[offset++].setText(text);
-
-                    text = res.getString(R.string.title_longitude) + ":";
-                    titles[offset].setText(text);
-                    texts[offset++].setText(Globals.getLongitudeDirectionString(res, longitude, 4));
-                    offset++;
-
-                    text = res.getString(R.string.title_time_zone) + ":";
-                    titles[offset].setText(text);
-                    viewParams = (TableRow.LayoutParams)texts[offset].getLayoutParams();
-                    viewParams.span = 4;
-                    detailDialog.hideVerticalItemDetailDivider(offset);
-                    texts[offset++].setLayoutParams(viewParams);
-
-                    //get location name
-                    if(isCurrent && (currentContext instanceof Activity))
+                    texts = detailDialog.getDetailTexts();
+                    if(texts != null && texts.length > 6)
                     {
-                        //resolve location
-                        AddressUpdateService.getResolvedLocation(currentContext, latitude, longitude, new AddressUpdateService.OnLocationResolvedListener()
+                        //update displays
+                        setText(texts[2], Globals.getLatitudeDirectionString(res, latitude, 4));
+                        setText(texts[3], Globals.getNumberString(Globals.getMetersUnitValue(altitudeM)) + " " + Globals.getMetersLabel(res));
+                        setText(texts[4], Globals.getLongitudeDirectionString(res, longitude, 4));
+
+                        //get location name
+                        if(isCurrent && (currentContext instanceof Activity))
                         {
-                            @Override
-                            public void onLocationResolved(final String locationString, final int resultCode)
+                            //resolve location
+                            AddressUpdateService.getResolvedLocation(currentContext, latitude, longitude, new AddressUpdateService.OnLocationResolvedListener()
                             {
-                                ((Activity)currentContext).runOnUiThread(new Runnable()
+                                @Override
+                                public void onLocationResolved(final String locationString, final int resultCode)
                                 {
-                                    @Override
-                                    public void run()
+                                    ((Activity)currentContext).runOnUiThread(new Runnable()
                                     {
-                                        boolean success = (resultCode == AddressUpdateService.RESULT_SUCCESS) ;
-                                        final String unknown = Globals.getUnknownString(currentContext);
+                                        @Override
+                                        public void run()
+                                        {
+                                            boolean success = (resultCode == AddressUpdateService.RESULT_SUCCESS) ;
+                                            final String unknown = Globals.getUnknownString(currentContext);
 
-                                        texts[0].setText(success ? locationString : unknown);
-                                        texts[6].setText(success ? currentItem.zone.getDisplayName() : unknown);
-                                    }
-                                });
-                            }
-                        }, false);
-                    }
-                    else
-                    {
-                        //use existing name
-                        texts[0].setText(currentItem.name);
-                        texts[6].setText(currentItem.zone.getDisplayName());
+                                            //set name and timezone
+                                            setText(texts[0], (success ? locationString : unknown));
+                                            setText(texts[6], (success ? currentItem.zone.getDisplayName() : unknown));
+                                        }
+                                    });
+                                }
+                            }, false);
+                        }
+                        else
+                        {
+                            //use existing name and timezone
+                            setText(texts[0], currentItem.name);
+                            setText(texts[6], currentItem.zone.getDisplayName());
+                        }
                     }
 
                     //update display visibilities
-                    detailDialog.showItemDetailRows(offset, 0, isCurrent);
                     detailDialog.show();
                 }
             }

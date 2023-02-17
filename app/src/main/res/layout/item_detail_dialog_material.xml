@@ -11,10 +11,6 @@
         android:background="?attr/viewPagerBackground"
         android:padding="6dp"
         android:orientation="vertical">
-        <TextView
-            android:id="@+id/Item_Detail_Title_Text"
-            style="@style/DetailTextMaterial"/>
-
         <LinearLayout
             android:id="@+id/Item_Detail_Cards_Layout"
             android:layout_width="match_parent"

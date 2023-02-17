@@ -387,17 +387,20 @@ public abstract class Selectable
                 }
             }
 
-            public void addGroup(int groupId, int ...titleIds)
+            private void addGroup(int groupId, String[] titleStrings, int[] titleIds)
             {
+                boolean addedRow = false;
+                boolean usingGroupTitle = (groupId != R.string.empty);
+                boolean usingTitleStrings = (titleStrings != null);
                 int row = 0;
                 int column = 0;
                 int dpPixels;
                 int titleIndex;
-                int titleCount = titleIds.length;
-                boolean addedRow = false;
+                int titleCount = (usingTitleStrings ? titleStrings.length : titleIds.length);
                 String text;
                 Resources res = currentContext.getResources();
 
+                //if can show display
                 if(canShow)
                 {
                     MaterialCardView groupCard = (usingMaterial ? new MaterialCardView(currentContext) : null);
@@ -408,125 +411,133 @@ public abstract class Selectable
                     TableRow.LayoutParams groupParams = new TableRow.LayoutParams();
                     TableRow[] detailRows = new TableRow[(titleCount / 2) + (titleCount % 2)];
 
-                    //if using group
-                    if(groupId != R.string.empty)
+                    //if using material
+                    if(usingMaterial)
                     {
-                        if(!usingMaterial)
-                        {
-                            //add divider
-                            addDivider(currentDetailTable, false);
-                        }
+                        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-                        //setup and add group text
+                        //setup group card
+                        dpPixels = (int)Globals.dpToPixels(currentContext, 6);
+                        cardParams.setMargins(0, 0, 0, dpPixels);
+                        groupCard.setCardBackgroundColor(Globals.resolveColorID(currentContext, R.attr.pageBackground));
+                        groupCard.setContentPadding(dpPixels, dpPixels, dpPixels , dpPixels);
+                        groupCard.setRadius(dpPixels);
+                        groupCard.setLayoutParams(cardParams);
+                        groupCard.setPreventCornerOverlap(true);
+                    }
+                    else
+                    {
+                        //add divider and set row color
+                        addDivider(currentDetailTable, false);
+                        groupRow.setBackgroundColor(Globals.resolveColorID(currentContext, R.attr.viewPagerBackground));
+                    }
+
+                    //if using group title
+                    if(usingGroupTitle)
+                    {
+                        //add group text
                         groupParams.span = 5;
                         groupParams.gravity = Gravity.CENTER;
                         groupText.setLayoutParams(groupParams);
                         groupText.setText(groupId);
-                        if(usingMaterial)
-                        {
-                            LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        groupRow.addView(groupText);
+                        currentDetailTable.addView(groupRow);
+                    }
 
-                            dpPixels = (int)Globals.dpToPixels(currentContext, 6);
-                            cardParams.setMargins(0, 0, 0, dpPixels);
-                            groupCard.setCardBackgroundColor(Globals.resolveColorID(currentContext, R.attr.pageBackground));
-                            groupCard.setContentPadding(dpPixels, dpPixels, dpPixels , dpPixels);
-                            groupCard.setRadius(dpPixels);
-                            groupCard.setLayoutParams(cardParams);
-                            groupCard.setPreventCornerOverlap(true);
+                    //add each title
+                    for(titleIndex = 0; titleIndex < titleCount; titleIndex++)
+                    {
+                        boolean usingPrevious = (titleIndex > 0) && (usingTitleStrings ? (titleStrings[titleIndex - 1] != null) : (titleIds[titleIndex - 1] != R.string.empty));
+                        boolean usingCurrent = (usingTitleStrings ? (titleStrings[titleIndex] != null) : (titleIds[titleIndex] != R.string.empty));
+                        boolean usingNext = (titleIndex + 1 < titleCount) && (usingTitleStrings ? (titleStrings[titleIndex + 1] != null) : (titleIds[titleIndex + 1] != R.string.empty));
+                        boolean extendColumn = false;
+                        TextView currentTitleText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailTitle));
+                        TextView currentDetailText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailText));
+
+                        //if need to start a new row
+                        if(column == 0)
+                        {
+                            //if not an empty row
+                            if(usingCurrent || usingNext)
+                            {
+                                //add divider
+                                addDivider(currentDetailTable, false);
+                            }
+
+                            //create row
+                            detailRows[row] = new TableRow(new ContextThemeWrapper(currentContext, R.style.DetailTableRow));
+                        }
+
+                        //set title and text
+                        text = (usingTitleStrings ? titleStrings[titleIndex] : res.getString(titleIds[titleIndex])) + ":";
+                        currentTitleText.setText(text);
+                        currentTitleText.setVisibility(usingCurrent ? View.VISIBLE : View.GONE);
+                        currentDetailText.setText("-");
+                        currentDetailText.setVisibility(usingCurrent ? View.VISIBLE : View.GONE);
+
+                        //add current title and text
+                        detailRows[row].addView(currentTitleText);
+                        detailRows[row].addView(currentDetailText);
+
+                        //if done with row or on last title
+                        if(++column >= 2 || titleIndex + 1 >= titleCount)
+                        {
+                            //update row and column
+                            if(column < 2)
+                            {
+                                extendColumn = true;
+                            }
+                            detailRows[row].setVisibility(usingPrevious || usingCurrent ? View.VISIBLE : View.GONE);
+                            addedRow = addedRow || (detailRows[row].getVisibility() == View.VISIBLE);
+                            currentDetailTable.addView(detailRows[row++]);
+                            column = 0;
                         }
                         else
                         {
-                            groupRow.setBackgroundColor(Globals.resolveColorID(currentContext, R.attr.viewPagerBackground));
-                        }
-                        groupRow.addView(groupText);
-                        currentDetailTable.addView(groupRow);
-
-                        //add each title
-                        for(titleIndex = 0; titleIndex < titleCount; titleIndex++)
-                        {
-                            int currentTitleId = titleIds[titleIndex];
-                            int previousTitleId = (titleIndex > 0 ? titleIds[titleIndex - 1] : R.string.empty);
-                            int nextTitleId = (titleIndex + 1 < titleCount ? titleIds[titleIndex + 1] : R.string.empty);
-                            boolean usingCurrent = (currentTitleId != R.string.empty);
-                            boolean extendColumn = false;
-                            TextView currentTitleText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailTitle));
-                            TextView currentDetailText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailText));
-
-                            //if need to start a new row
-                            if(column == 0)
+                            //add divider and update column
+                            if(usingNext)
                             {
-                                //if not an empty row
-                                if(usingCurrent || nextTitleId != R.string.empty)
-                                {
-                                    //add divider
-                                    addDivider(currentDetailTable, false);
-                                }
-
-                                //create row
-                                detailRows[row] = new TableRow(new ContextThemeWrapper(currentContext, R.style.DetailTableRow));
-                            }
-
-                            //set title and text
-                            text = res.getString(currentTitleId) + ":";
-                            currentTitleText.setText(text);
-                            currentTitleText.setVisibility(usingCurrent ? View.VISIBLE : View.GONE);
-                            currentDetailText.setText("-");
-                            currentDetailText.setVisibility(usingCurrent ? View.VISIBLE : View.GONE);
-
-                            //add current title and text
-                            detailRows[row].addView(currentTitleText);
-                            detailRows[row].addView(currentDetailText);
-
-                            //if done with row or on last title
-                            if(++column >= 2 || titleIndex + 1 >= titleCount)
-                            {
-                                //update row and column
-                                if(column < 2)
-                                {
-                                    extendColumn = true;
-                                }
-                                detailRows[row].setVisibility(previousTitleId != R.string.empty || usingCurrent ? View.VISIBLE : View.GONE);
-                                addedRow = addedRow || (detailRows[row].getVisibility() == View.VISIBLE);
-                                currentDetailTable.addView(detailRows[row++]);
-                                column = 0;
+                                addDivider(detailRows[row], true);
                             }
                             else
                             {
-                                //add divider and update column
-                                if(nextTitleId != R.string.empty)
-                                {
-                                    addDivider(detailRows[row], true);
-                                }
-                                else
-                                {
-                                    extendColumn = true;
-                                }
-                                column++;
+                                extendColumn = true;
                             }
-
-                            //if need to extend column
-                            if(extendColumn)
-                            {
-                                detailParams = (TableRow.LayoutParams)currentDetailText.getLayoutParams();
-                                detailParams.span = 4;
-                                currentDetailText.setLayoutParams(detailParams);
-                            }
-
-                            //add detail title and text
-                            this.detailTitles.add(currentTitleText);
-                            this.detailTexts.add(currentDetailText);
+                            column++;
                         }
 
-                        if(usingMaterial)
+                        //if need to extend column
+                        if(extendColumn)
                         {
-                            groupCard.addView(currentDetailTable);
-                            itemDetailCardsLayout.addView(groupCard);
+                            detailParams = (TableRow.LayoutParams)currentDetailText.getLayoutParams();
+                            detailParams.span = 4;
+                            currentDetailText.setLayoutParams(detailParams);
                         }
 
-                        //update group title visibility
-                        groupRow.setVisibility(addedRow ? View.VISIBLE : View.GONE);
+                        //add detail title and text
+                        this.detailTitles.add(currentTitleText);
+                        this.detailTexts.add(currentDetailText);
                     }
+
+                    //if using material
+                    if(usingMaterial)
+                    {
+                        //add group card
+                        groupCard.addView(currentDetailTable);
+                        itemDetailCardsLayout.addView(groupCard);
+                    }
+
+                    //update group title visibility
+                    groupRow.setVisibility(addedRow ? View.VISIBLE : View.GONE);
                 }
+            }
+            public void addGroup(String ...titleStrings)
+            {
+                addGroup(R.string.empty, titleStrings, null);
+            }
+            public void addGroup(int groupId, int ...titleIds)
+            {
+                addGroup(groupId, null, titleIds);
             }
 
             public void addOnDismissListener(DialogInterface.OnDismissListener listener)
@@ -804,100 +815,6 @@ public abstract class Selectable
                 return(button);
             }
 
-            //Hides vertical item detail divider at given offset
-            public void hideVerticalItemDetailDivider(int offset)
-            {
-                if(canShow)
-                {
-                    View verticalDivider = itemDetailsGroup.findViewWithTag("vd" + offset);
-
-                    if(verticalDivider != null)
-                    {
-                        verticalDivider.setVisibility(View.GONE);
-                    }
-                }
-            }
-
-            //Shows item detail row up to offset if non skip index or ignoring skip
-            public void showItemDetailRows(int offset, int skipIndex, boolean ignoreSkip)
-            {
-                int index;
-                boolean setAny = false;
-
-                if(!canShow)
-                {
-                    return;
-                }
-
-                //go through unused displays
-                for(index = 0; index < (offset + 1) / 2; index++)
-                {
-                    View currentView = itemDetailsGroup.findViewWithTag(String.valueOf(index));
-                    View horizontalDivider = itemDetailsGroup.findViewWithTag("hd" + index);
-
-                    //set row to visible if exists and want to show
-                    if(currentView != null && (index != skipIndex || ignoreSkip))
-                    {
-                        //show it
-                        currentView.setVisibility(View.VISIBLE);
-
-                        //if divider exists
-                        if(horizontalDivider != null)
-                        {
-                            //show it
-                            horizontalDivider.setVisibility(View.VISIBLE);
-                        }
-
-                        //update status
-                        setAny = true;
-                    }
-                }
-
-                //if set any
-                if(setAny)
-                {
-                    View buttonDivider = itemDetailsGroup.findViewById(R.id.Item_Detail_Button_Divider);
-
-                    //if divider exists
-                    if(buttonDivider != null)
-                    {
-                        //show it
-                        buttonDivider.setVisibility(View.VISIBLE);
-                    }
-                }
-
-                itemDetailsGroup.findViewById(R.id.Item_Detail_Button_Layout).setVisibility(View.VISIBLE);
-
-            }
-            public void showItemDetailRows(int offset)
-            {
-                showItemDetailRows(offset, -1, true);
-            }
-
-            //Gets item detail titles
-            public TextView[] getItemDetailTitles()
-            {
-                TextView[] titles = new TextView[12];
-
-                if(canShow)
-                {
-                    titles[0] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title1);
-                    titles[1] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title2);
-                    titles[2] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title3);
-                    titles[3] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title4);
-                    titles[4] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title5);
-                    titles[5] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title6);
-                    titles[6] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title7);
-                    titles[7] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title8);
-                    titles[8] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title9);
-                    titles[9] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title10);
-                    titles[10] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title11);
-                    titles[11] = itemDetailsGroup.findViewById(R.id.Item_Detail_Title12);
-                }
-
-                return(titles);
-            }
-
             //Get detail titles
             public TextView[] getDetailTitles()
             {
@@ -908,30 +825,6 @@ public abstract class Selectable
             public TextView[] getDetailTexts()
             {
                 return(detailTexts.toArray(new TextView[0]));
-            }
-
-            //Gets item detail texts
-            public TextView[] getItemDetailTexts()
-            {
-                TextView[] texts = new TextView[12];
-
-                if(canShow)
-                {
-                    texts[0] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text1);
-                    texts[1] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text2);
-                    texts[2] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text3);
-                    texts[3] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text4);
-                    texts[4] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text5);
-                    texts[5] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text6);
-                    texts[6] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text7);
-                    texts[7] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text8);
-                    texts[8] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text9);
-                    texts[9] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text10);
-                    texts[10] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text11);
-                    texts[11] = itemDetailsGroup.findViewById(R.id.Item_Detail_Text12);
-                }
-
-                return(texts);
             }
 
             //Gets item detail buttons

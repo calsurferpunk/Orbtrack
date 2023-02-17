@@ -281,7 +281,6 @@ public abstract class Orbitals
         @Override
         protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
         {
-            int offset = 0;
             final Item currentItem = (Item)item;
             final Calculations.OrbitDataType currentOrbit = currentItem.satelliteObject.orbit;
             final Calculations.TLEDataType currentTLE = currentItem.satelliteObject.tle;
@@ -294,7 +293,6 @@ public abstract class Orbitals
             final Drawable itemIcon = (haveContext ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType) : null);
             final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.getOwnerCode(), itemIcon, itemDetailButtonClickListener);
             final Resources res = (haveContext ? currentContext.getResources() : null);
-            final TextView[] titles;
             final TextView[] texts;
             final AppCompatImageButton[] buttons;
 
@@ -320,61 +318,30 @@ public abstract class Orbitals
             //if on a satellite
             if(onSatellite)
             {
-                //
+                //add titles
+                detailDialog.addGroup(res.getString(R.string.title_owner), null,
+                                                 res.getString(R.string.title_norad) + " " + res.getString(R.string.title_id), res.getString(R.string.abbrev_international) + " " + res.getString(R.string.title_code),
+                                                 res.getString(R.string.title_launch_date), res.getString(R.string.title_perigee),
+                                                 res.getString(R.string.title_launch_number), res.getString(R.string.title_apogee),
+                                                 res.getString(R.string.title_inclination), res.getString(R.string.title_period),
+                                                 res.getString(R.string.title_semi_major_axis));
+
                 //get displays
-                //
-                titles = detailDialog.getItemDetailTitles();
-                texts = detailDialog.getItemDetailTexts();
-                setText(titles[offset], res.getString(R.string.title_owner) + ":");
-                detailDialog.hideVerticalItemDetailDivider(offset);
-                TextView ownerText = texts[offset++];
-                TableRow.LayoutParams viewParams = (ownerText != null ? (TableRow.LayoutParams)ownerText.getLayoutParams() : null);
-
-                if(viewParams != null)
+                texts = detailDialog.getDetailTexts();
+                if(texts != null && texts.length > 10)
                 {
-                    viewParams.span = 4;
-                    ownerText.setLayoutParams(viewParams);
+                    //update displays
+                    setText(texts[0], currentItem.getOwner(currentContext));
+                    setText(texts[2], String.valueOf(currentTLE.satelliteNum));
+                    setText(texts[3], currentTLE.internationalCode);
+                    setText(texts[4], String.valueOf(currentTLE.launchYear));
+                    setText(texts[5], Globals.getKmUnitValueString(currentOrbit.perigee) + " " + Globals.getKmLabel(res));
+                    setText(texts[6], String.valueOf(currentTLE.launchNum));
+                    setText(texts[7], Globals.getKmUnitValueString(currentOrbit.apogee) + " " + Globals.getKmLabel(res));
+                    setText(texts[8], Globals.getNumberString(currentTLE.inclinationDeg));
+                    setText(texts[9], Globals.getNumberString(currentOrbit.periodMinutes) + " " + res.getString(R.string.abbrev_minutes_lower));
+                    setText(texts[10], Globals.getKmUnitValueString(currentOrbit.semiMajorAxisKm) + " " + Globals.getKmLabel(res));
                 }
-                offset++;
-
-                setText(titles[offset], res.getString(R.string.title_norad) + " " + res.getString(R.string.title_id) + ":");
-                TextView noradText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.abbrev_international) + " " + res.getString(R.string.title_code) + ":");
-                TextView internationalText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_launch_date) + ":");
-                TextView launchDateText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_perigee) + ":");
-                TextView perigeeText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_launch_number) + ":");
-                TextView launchNumberText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_apogee) + ":");
-                TextView apogeeText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_inclination) + ":");
-                TextView inclinationText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_period) + ":");
-                TextView periodText = texts[offset++];
-
-                setText(titles[offset], res.getString(R.string.title_semi_major_axis) + ":");
-                TextView majorText = texts[offset++];
-
-                //update displays
-                setText(ownerText, currentItem.getOwner(currentContext));
-                setText(noradText, String.valueOf(currentTLE.satelliteNum));
-                setText(internationalText, currentTLE.internationalCode);
-                setText(perigeeText, Globals.getKmUnitValueString(currentOrbit.perigee) + " " + Globals.getKmLabel(res));
-                setText(apogeeText, Globals.getKmUnitValueString(currentOrbit.apogee) + " " + Globals.getKmLabel(res));
-                setText(inclinationText, Globals.getNumberString(currentTLE.inclinationDeg));
-                setText(periodText, Globals.getNumberString(currentOrbit.periodMinutes) + " " + res.getString(R.string.abbrev_minutes_lower));
-                setText(majorText, Globals.getKmUnitValueString(currentOrbit.semiMajorAxisKm) + " " + Globals.getKmLabel(res));
-                setText(launchDateText, String.valueOf(currentTLE.launchYear));
-                setText(launchNumberText, String.valueOf(currentTLE.launchNum));
             }
             //else if info button exists
             else if(infoButton != null)
@@ -384,7 +351,6 @@ public abstract class Orbitals
             }
 
             //update display visibilities
-            detailDialog.showItemDetailRows(offset);
             if(notifyButton != null)
             {
                 notifyButton.setVisibility(!forSetup ? View.VISIBLE : View.GONE);

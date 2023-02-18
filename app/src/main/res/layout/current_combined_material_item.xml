@@ -6,7 +6,8 @@
     android:paddingLeft="16dp"
     android:paddingTop="12dp"
     android:paddingRight="16dp"
-    android:paddingBottom="0dp">
+    android:paddingBottom="0dp"
+    android:background="?attr/itemSelect">
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/Combined_Item_Name_Image"
         android:layout_width="32dp"

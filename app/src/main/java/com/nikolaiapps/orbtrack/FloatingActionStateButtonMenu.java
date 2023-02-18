@@ -83,6 +83,10 @@ public class FloatingActionStateButtonMenu extends LinearLayout
                 }
                 valueArray.recycle();
             }
+            catch(NoSuchMethodError noMethod)
+            {
+                //do nothing
+            }
             catch(Exception ex)
             {
                 //do nothing

@@ -35,6 +35,10 @@ public class CustomPreference extends Preference
                 sharedName = valueArray.getString(R.styleable.CustomPreference_sharedName);
                 valueArray.recycle();
             }
+            catch(NoSuchMethodError noMethod)
+            {
+                //do nothing
+            }
             catch(Exception ex)
             {
                 //do nothing

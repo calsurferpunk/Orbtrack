@@ -2535,6 +2535,10 @@ public abstract class Globals
                     ids[index] = valueArray.getResourceId(index, -1);
                     valueArray.recycle();
                 }
+                catch(NoSuchMethodError noMethod)
+                {
+                    //do nothing
+                }
                 catch(Exception ex)
                 {
                     //do nothing

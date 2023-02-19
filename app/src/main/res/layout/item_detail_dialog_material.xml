@@ -127,8 +127,6 @@
                 android:layout_marginEnd="6dp"/>
         </LinearLayout>
 
-        <View style="@style/DividerMaterial" android:id="@+id/Item_Detail_Button_Divider" android:visibility="gone"/>
-
         <LinearLayout
             style="@style/DetailTableRowMaterial"
             android:id="@+id/Item_Detail_Button_Layout"

@@ -344,29 +344,33 @@ public abstract class Selectable
 
             private void addDivider(ViewGroup view, int index, boolean vertical)
             {
+                TextView emptyText;
                 TableRow.LayoutParams params;
                 float[] dpPixels;
 
-                TextView emptyText = new TextView(new ContextThemeWrapper(currentContext, vertical ? (usingMaterial ? R.style.DetailVerticalDividerMaterial : R.style.DetailVerticalDivider) : (usingMaterial ? R.style.DividerMaterial : R.style.Divider)));
-                if(vertical)
+                if(!usingMaterial)
                 {
-                    dpPixels = Globals.dpsToPixels(currentContext, 2, 5);
-                    params = new TableRow.LayoutParams();
-                    params.width = (int)dpPixels[0];
-                    params.leftMargin = params.rightMargin = (int)dpPixels[1];
-                    emptyText.setLayoutParams(params);
-                }
-                else
-                {
-                    emptyText.setTextSize(1);
-                }
-                if(index >= 0)
-                {
-                    view.addView(emptyText, index);
-                }
-                else
-                {
-                    view.addView(emptyText);
+                    emptyText = new TextView(new ContextThemeWrapper(currentContext, (vertical ? R.style.DetailVerticalDivider : R.style.Divider)));
+                    if(vertical)
+                    {
+                        dpPixels = Globals.dpsToPixels(currentContext, 2, 5);
+                        params = new TableRow.LayoutParams();
+                        params.width = (int)dpPixels[0];
+                        params.leftMargin = params.rightMargin = (int)dpPixels[1];
+                        emptyText.setLayoutParams(params);
+                    }
+                    else
+                    {
+                        emptyText.setTextSize(1);
+                    }
+                    if(index >= 0)
+                    {
+                        view.addView(emptyText, index);
+                    }
+                    else
+                    {
+                        view.addView(emptyText);
+                    }
                 }
             }
             private void addDivider(ViewGroup view, boolean vertical)

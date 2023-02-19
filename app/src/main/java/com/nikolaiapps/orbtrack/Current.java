@@ -3327,7 +3327,6 @@ public abstract class Current
             }
             groupTitleText = convertView.findViewById(R.id.Group_Title_Text);
             groupTitleText.setText(Globals.getDateString(parent.getContext(), Globals.julianDateToCalendar(dataJulianDate), MainActivity.getTimeZone(), true).replace("\r\n", " "));
-            convertView.findViewById(R.id.Group_Divider).setVisibility(View.GONE);
 
             return(convertView);
         }

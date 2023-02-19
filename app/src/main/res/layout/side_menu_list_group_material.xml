@@ -3,38 +3,36 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:paddingRight="12dp"
+    android:paddingEnd="12dp"
     android:background="?attr/pageHighlightBackground">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="16dp"
         android:orientation="horizontal"
         android:gravity="center">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Group_Title_Image"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:scaleType="fitXY"
-            android:layout_marginLeft="12dp"
-            android:layout_marginStart="12dp"
-            android:layout_marginRight="2dp"
-            android:layout_marginEnd="2dp"/>
+            android:layout_marginRight="12dp"
+            android:layout_marginEnd="12dp"/>
 
         <TextView
             android:id="@+id/Group_Title_Text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="10dp"
             android:textColor="?attr/defaultTextColor"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Group_Indicator_Image"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginRight="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginLeft="12dp"
+            android:layout_marginStart="12dp"
             android:scaleType="fitXY"/>
     </LinearLayout>
-
-    <View android:id="@+id/Group_Divider" style="@style/DividerMaterial"/>
 </LinearLayout>

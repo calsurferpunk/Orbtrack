@@ -3,20 +3,22 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
+    android:paddingLeft="16dp"
+    android:paddingStart="16dp"
+    android:paddingRight="12dp"
+    android:paddingEnd="12dp"
     android:background="?attr/itemSelect">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="10dp"
+        android:padding="16dp"
         android:orientation="horizontal"
         android:gravity="center">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Item_Title_Image"
-            android:layout_width="16dp"
-            android:layout_height="16dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
             android:scaleType="fitXY"
-            android:layout_marginLeft="28dp"
-            android:layout_marginStart="28dp"
             android:layout_marginRight="12dp"
             android:layout_marginEnd="12dp"/>
         <TextView
@@ -26,6 +28,4 @@
             android:layout_weight="1"
             android:textColor="?attr/defaultTextColor"/>
     </LinearLayout>
-
-    <View style="@style/DividerMaterial"/>
 </LinearLayout>

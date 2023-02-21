@@ -294,7 +294,6 @@ public abstract class Orbitals
             final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.getOwnerCode(), itemIcon, itemDetailButtonClickListener);
             final Resources res = (haveContext ? currentContext.getResources() : null);
             final TextView[] texts;
-            final AppCompatImageButton[] buttons;
 
             //if no context
             if(!haveContext)
@@ -303,17 +302,10 @@ public abstract class Orbitals
                 return;
             }
 
-            //get info displays
-            buttons = detailDialog.getItemDetailButtons();
-            notifyButton = buttons[DetailButtonType.Notify];
-            preview3dButton = buttons[DetailButtonType.Preview3d];
-            infoButton = buttons[DetailButtonType.Info];
-            detailDialog.setupItemDetailButton(notifyButton, PageListAdapter.this, pageNum, currentItem.id, currentItem, DetailButtonType.Notify);
-            if(use3dPreview)
-            {
-                detailDialog.setupItemDetailButton(preview3dButton, PageListAdapter.this, pageNum, currentItem.id, currentItem, DetailButtonType.Preview3d);
-            }
-            detailDialog.setupItemDetailButton(infoButton, PageListAdapter.this, pageNum, currentItem.id, currentItem, DetailButtonType.Info);
+            //get buttons
+            notifyButton = detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Notify);
+            preview3dButton = detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Preview3d);
+            infoButton = detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Info);
 
             //if on a satellite
             if(onSatellite)

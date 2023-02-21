@@ -831,25 +831,6 @@ public abstract class Selectable
                 return(detailTexts.toArray(new TextView[0]));
             }
 
-            //Gets item detail buttons
-            public AppCompatImageButton[] getItemDetailButtons()
-            {
-                AppCompatImageButton[] buttons = new AppCompatImageButton[7];
-
-                if(canShow)
-                {
-                    buttons[0] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button1);
-                    buttons[1] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button2);
-                    buttons[2] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button3);
-                    buttons[3] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button4);
-                    buttons[4] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button5);
-                    buttons[5] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button6);
-                    buttons[6] = itemDetailsGroup.findViewById(R.id.Item_Detail_Button7);
-                }
-
-                return(buttons);
-            }
-
             //Gets a view from the item group
             public <T extends View> T findViewById(@IdRes int id)
             {

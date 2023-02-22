@@ -106,8 +106,8 @@
         <item name="columnTitleTextColor">@color/blue_50</item>
         <item name="columnTitleTextSelectColor">@color/blue_300</item>
         <item name="columnBackground">@color/blue_700</item>
-        <item name="itemSelect">@drawable/item_select_light_blue</item>
-        <item name="itemSelected">@drawable/item_selected_light_blue</item>
+        <item name="itemSelectColor">@color/blue_100</item>
+        <item name="itemSelectedColor">@color/blue_300</item>
     </style>
 
     <style name="DarkBlue" parent="DarkBase">
@@ -118,8 +118,8 @@
         <item name="columnTitleTextColor">@color/blue_50</item>
         <item name="columnTitleTextSelectColor">@color/blue_300</item>
         <item name="columnBackground">@color/blue_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_blue</item>
-        <item name="itemSelected">@drawable/item_selected_dark_blue</item>
+        <item name="itemSelectColor">@color/blue_800</item>
+        <item name="itemSelectedColor">@color/blue_900</item>
     </style>
 
     <style name="LightBrown" parent="LightBase">
@@ -130,8 +130,8 @@
         <item name="columnTitleTextColor">@color/brown_50</item>
         <item name="columnTitleTextSelectColor">@color/brown_300</item>
         <item name="columnBackground">@color/brown_700</item>
-        <item name="itemSelect">@drawable/item_select_light_brown</item>
-        <item name="itemSelected">@drawable/item_selected_light_brown</item>
+        <item name="itemSelectColor">@color/brown_100</item>
+        <item name="itemSelectedColor">@color/brown_300</item>
     </style>
 
     <style name="DarkBrown" parent="DarkBase">
@@ -142,8 +142,8 @@
         <item name="columnTitleTextColor">@color/brown_50</item>
         <item name="columnTitleTextSelectColor">@color/brown_300</item>
         <item name="columnBackground">@color/brown_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_brown</item>
-        <item name="itemSelected">@drawable/item_selected_dark_brown</item>
+        <item name="itemSelectColor">@color/brown_800</item>
+        <item name="itemSelectedColor">@color/brown_900</item>
     </style>
     
     <style name="LightCyan" parent="LightBase">
@@ -154,8 +154,8 @@
         <item name="columnTitleTextColor">@color/cyan_50</item>
         <item name="columnTitleTextSelectColor">@color/cyan_300</item>
         <item name="columnBackground">@color/cyan_700</item>
-        <item name="itemSelect">@drawable/item_select_light_cyan</item>
-        <item name="itemSelected">@drawable/item_selected_light_cyan</item>
+        <item name="itemSelectColor">@color/cyan_100</item>
+        <item name="itemSelectedColor">@color/cyan_300</item>
     </style>
 
     <style name="DarkCyan" parent="DarkBase">
@@ -166,8 +166,8 @@
         <item name="columnTitleTextColor">@color/cyan_50</item>
         <item name="columnTitleTextSelectColor">@color/cyan_300</item>
         <item name="columnBackground">@color/cyan_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_cyan</item>
-        <item name="itemSelected">@drawable/item_selected_dark_cyan</item>
+        <item name="itemSelectColor">@color/cyan_800</item>
+        <item name="itemSelectedColor">@color/cyan_900</item>
     </style>
 
     <style name="LightGreen" parent="LightBase">
@@ -178,8 +178,8 @@
         <item name="columnTitleTextColor">@color/green_50</item>
         <item name="columnTitleTextSelectColor">@color/green_300</item>
         <item name="columnBackground">@color/green_700</item>
-        <item name="itemSelect">@drawable/item_select_light_green</item>
-        <item name="itemSelected">@drawable/item_selected_light_green</item>
+        <item name="itemSelectColor">@color/green_100</item>
+        <item name="itemSelectedColor">@color/green_300</item>
     </style>
 
     <style name="DarkGreen" parent="DarkBase">
@@ -190,8 +190,8 @@
         <item name="columnTitleTextColor">@color/green_50</item>
         <item name="columnTitleTextSelectColor">@color/green_300</item>
         <item name="columnBackground">@color/green_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_green</item>
-        <item name="itemSelected">@drawable/item_selected_dark_green</item>
+        <item name="itemSelectColor">@color/green_800</item>
+        <item name="itemSelectedColor">@color/green_900</item>
     </style>
 
     <style name="LightGrey" parent="LightBase">
@@ -202,8 +202,8 @@
         <item name="columnTitleTextColor">@color/grey_50</item>
         <item name="columnTitleTextSelectColor">@color/grey_300</item>
         <item name="columnBackground">@color/grey_700</item>
-        <item name="itemSelect">@drawable/item_select_light_grey</item>
-        <item name="itemSelected">@drawable/item_selected_light_grey</item>
+        <item name="itemSelectColor">@color/grey_100</item>
+        <item name="itemSelectedColor">@color/grey_300</item>
     </style>
 
     <style name="DarkGrey" parent="DarkBase">
@@ -214,8 +214,8 @@
         <item name="columnTitleTextColor">@color/grey_50</item>
         <item name="columnTitleTextSelectColor">@color/grey_300</item>
         <item name="columnBackground">@color/grey_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_grey</item>
-        <item name="itemSelected">@drawable/item_selected_dark_grey</item>
+        <item name="itemSelectColor">@color/grey_800</item>
+        <item name="itemSelectedColor">@color/grey_900</item>
     </style>
 
     <style name="LightOrange" parent="LightBase">
@@ -226,8 +226,8 @@
         <item name="columnTitleTextColor">@color/orange_50</item>
         <item name="columnTitleTextSelectColor">@color/orange_300</item>
         <item name="columnBackground">@color/orange_700</item>
-        <item name="itemSelect">@drawable/item_select_light_orange</item>
-        <item name="itemSelected">@drawable/item_selected_light_orange</item>
+        <item name="itemSelectColor">@color/orange_100</item>
+        <item name="itemSelectedColor">@color/orange_300</item>
     </style>
 
     <style name="DarkOrange" parent="DarkBase">
@@ -238,8 +238,8 @@
         <item name="columnTitleTextColor">@color/orange_50</item>
         <item name="columnTitleTextSelectColor">@color/orange_300</item>
         <item name="columnBackground">@color/orange_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_orange</item>
-        <item name="itemSelected">@drawable/item_selected_dark_orange</item>
+        <item name="itemSelectColor">@color/orange_800</item>
+        <item name="itemSelectedColor">@color/orange_900</item>
     </style>
 
     <style name="LightPink" parent="LightBase">
@@ -250,8 +250,8 @@
         <item name="columnTitleTextColor">@color/pink_50</item>
         <item name="columnTitleTextSelectColor">@color/pink_300</item>
         <item name="columnBackground">@color/pink_700</item>
-        <item name="itemSelect">@drawable/item_select_light_pink</item>
-        <item name="itemSelected">@drawable/item_selected_light_pink</item>
+        <item name="itemSelectColor">@color/pink_100</item>
+        <item name="itemSelectedColor">@color/pink_300</item>
     </style>
 
     <style name="DarkPink" parent="DarkBase">
@@ -262,8 +262,8 @@
         <item name="columnTitleTextColor">@color/pink_50</item>
         <item name="columnTitleTextSelectColor">@color/pink_300</item>
         <item name="columnBackground">@color/pink_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_pink</item>
-        <item name="itemSelected">@drawable/item_selected_dark_pink</item>
+        <item name="itemSelectColor">@color/pink_800</item>
+        <item name="itemSelectedColor">@color/pink_900</item>
     </style>
 
     <style name="LightRed" parent="LightBase">
@@ -274,8 +274,8 @@
         <item name="columnTitleTextColor">@color/red_50</item>
         <item name="columnTitleTextSelectColor">@color/red_300</item>
         <item name="columnBackground">@color/red_700</item>
-        <item name="itemSelect">@drawable/item_select_light_red</item>
-        <item name="itemSelected">@drawable/item_selected_light_red</item>
+        <item name="itemSelectColor">@color/red_100</item>
+        <item name="itemSelectedColor">@color/red_300</item>
     </style>
 
     <style name="DarkRed" parent="DarkBase">
@@ -286,8 +286,8 @@
         <item name="columnTitleTextColor">@color/red_50</item>
         <item name="columnTitleTextSelectColor">@color/red_300</item>
         <item name="columnBackground">@color/red_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_red</item>
-        <item name="itemSelected">@drawable/item_selected_dark_red</item>
+        <item name="itemSelectColor">@color/red_800</item>
+        <item name="itemSelectedColor">@color/red_900</item>
     </style>
 
     <style name="LightPurple" parent="LightBase">
@@ -298,8 +298,8 @@
         <item name="columnTitleTextColor">@color/purple_50</item>
         <item name="columnTitleTextSelectColor">@color/purple_300</item>
         <item name="columnBackground">@color/purple_700</item>
-        <item name="itemSelect">@drawable/item_select_light_purple</item>
-        <item name="itemSelected">@drawable/item_selected_light_purple</item>
+        <item name="itemSelectColor">@color/purple_100</item>
+        <item name="itemSelectedColor">@color/purple_300</item>
     </style>
 
     <style name="DarkPurple" parent="DarkBase">
@@ -310,8 +310,8 @@
         <item name="columnTitleTextColor">@color/purple_50</item>
         <item name="columnTitleTextSelectColor">@color/purple_300</item>
         <item name="columnBackground">@color/purple_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_purple</item>
-        <item name="itemSelected">@drawable/item_selected_dark_purple</item>
+        <item name="itemSelectColor">@color/purple_800</item>
+        <item name="itemSelectedColor">@color/purple_900</item>
     </style>
 
     <style name="LightYellow" parent="LightBase">
@@ -322,20 +322,20 @@
         <item name="columnTitleTextColor">@color/yellow_100</item>
         <item name="columnTitleTextSelectColor">@color/yellow_300</item>
         <item name="columnBackground">@color/yellow_700</item>
-        <item name="itemSelect">@drawable/item_select_light_yellow</item>
-        <item name="itemSelected">@drawable/item_selected_light_yellow</item>
+        <item name="itemSelectColor">@color/yellow_100</item>
+        <item name="itemSelectedColor">@color/yellow_300</item>
     </style>
 
     <style name="DarkYellow" parent="DarkBase">
         <item name="colorAccent">@color/yellow_700</item>
         <item name="colorControlNormal">@color/yellow_700</item>
         <item name="actionBarBackground">@color/yellow_900</item>
-        <item name="pageTitleBackground">@color/yellow_800</item>vi
+        <item name="pageTitleBackground">@color/yellow_800</item>
         <item name="columnTitleTextColor">@color/yellow_100</item>
         <item name="columnTitleTextSelectColor">@color/yellow_300</item>
         <item name="columnBackground">@color/yellow_700</item>
-        <item name="itemSelect">@drawable/item_select_dark_yellow</item>
-        <item name="itemSelected">@drawable/item_selected_dark_yellow</item>
+        <item name="itemSelectColor">@color/yellow_800</item>
+        <item name="itemSelectedColor">@color/yellow_900</item>
     </style>
 
     <!--Divider-->
@@ -655,6 +655,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingLeft">3dp</item>
         <item name="android:gravity">center_vertical</item>
+        <item name="android:background">@color/transparent</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
         <item name="android:visibility">gone</item>
     </style>

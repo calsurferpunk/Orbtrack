@@ -4,8 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center"
-    android:background="?attr/itemSelect">
+    android:gravity="center">
     <View android:id="@+id/Angles_Divider" style="@style/DividerThin" android:visibility="gone"/>
 
     <TextView

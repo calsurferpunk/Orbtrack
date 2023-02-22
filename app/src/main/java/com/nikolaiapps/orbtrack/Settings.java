@@ -621,6 +621,7 @@ public abstract class Settings
                     View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                     ItemHolder itemHolder = new ItemHolder(itemView);
 
+                    setItemSelector(itemView);
                     setViewClickListeners(itemView, itemHolder);
                     return(itemHolder);
                 }
@@ -1145,6 +1146,7 @@ public abstract class Settings
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView, R.id.Location_Item_CheckBox, R.id.Location_Item_Image, R.id.Location_Item_Text);
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -1329,6 +1331,7 @@ public abstract class Settings
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView, R.id.Notify_Item_Image, R.id.Notify_Item_Name_Text, R.id.Notify_Item_Pass_Text, R.id.Notify_Item_Pass_Start_Text, R.id.Notify_Item_Pass_End_Text, R.id.Notify_Item_Full_Text, R.id.Notify_Item_Full_Start_Text, R.id.Notify_Item_Full_End_Text);
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -1581,6 +1584,7 @@ public abstract class Settings
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView, R.id.Widget_Item_Image, R.id.Widget_Item_Name_Text, R.id.Widget_Item_Location_Text);
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }

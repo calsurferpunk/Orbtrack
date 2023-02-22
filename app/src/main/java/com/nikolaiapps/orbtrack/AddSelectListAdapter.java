@@ -211,6 +211,7 @@ public class AddSelectListAdapter extends BaseAdapter
         {
             convertView = listInflater.inflate(R.layout.list_add_select_item, parent, false);
         }
+        convertView.setBackground(Globals.getListItemStateSelector(context));
         addSourceItemImage = convertView.findViewById(R.id.Add_Select_Item_Image);
         addSourceItemText = convertView.findViewById(R.id.Add_Select_Item_Text);
 

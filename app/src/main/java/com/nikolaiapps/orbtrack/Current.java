@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.FrameLayout;
@@ -585,6 +584,7 @@ public abstract class Current
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView);
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -675,6 +675,7 @@ public abstract class Current
                         speedLayout.setVisibility(visibility);
                     }
                 }
+
                 currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
                 currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
             }
@@ -1191,6 +1192,7 @@ public abstract class Current
                     itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
                 }
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -1243,9 +1245,6 @@ public abstract class Current
                 currentItem.setLoading(!hasItems, true);
                 currentItem.updateDisplays(currentContext, widthDp, haveSun, haveMoon);
             }
-
-            @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum) { }
 
             //Updates status of having items
             public void updateHasItems()
@@ -1620,6 +1619,7 @@ public abstract class Current
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group);
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -2158,6 +2158,7 @@ public abstract class Current
                     itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
                 }
 
+                setItemSelector(itemView);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -2196,9 +2197,6 @@ public abstract class Current
                 currentItem.setLoading(!hasItems, true);
                 currentItem.updateDisplays(currentZone, widthDp);
             }
-
-            @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum) { }
 
             //Updates status of having items
             public void updateHasItems()

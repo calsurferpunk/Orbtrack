@@ -31,7 +31,12 @@ import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.LayerDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.graphics.drawable.VectorDrawable;
+import android.graphics.drawable.shapes.RectShape;
+import android.graphics.drawable.shapes.RoundRectShape;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -2512,7 +2517,7 @@ public abstract class Globals
     }
 
     //Resolves attribute IDs
-    public static int[] resolveAttributeIDs(Context context, int[] resIDs)
+    public static int[] resolveAttributeIDs(Context context, int ...resIDs)
     {
         int index;
         int[] ids = new int[resIDs.length];
@@ -2553,7 +2558,7 @@ public abstract class Globals
     //Resolves an attribute
     public static int resolveAttributeID(Context context, int resAttr)
     {
-        return(resolveAttributeIDs(context, new int[]{resAttr})[0]);
+        return(resolveAttributeIDs(context, resAttr)[0]);
     }
 
     //Gets screen orientation value
@@ -2692,6 +2697,24 @@ public abstract class Globals
     public static int getDialogThemeID(Context context)
     {
         return(resolveAttributeID(context, R.attr.dialogStyle));
+    }
+
+    //Resolves color attributes
+    public static int[] resolveColorIDs(Context context, int ...colorAttrs)
+    {
+        int index;
+        int[] ids = resolveAttributeIDs(context, colorAttrs);
+        int[] colors = new int[ids.length];
+
+        //go through each ID
+        for(index = 0; index < ids.length; index++)
+        {
+            //set color
+            colors[index] = (context != null ? ContextCompat.getColor(context, ids[index]) : Color.BLACK);
+        }
+
+        //return colors
+        return(colors);
     }
 
     //Resolves a color attribute
@@ -3196,6 +3219,64 @@ public abstract class Globals
         rotatedImage = (haveImage && width > 0 && height > 0 ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
 
         return(rotatedImage != null ? Bitmap.createBitmap(rotatedImage, (rotatedImage.getWidth() - width) / 2, (rotatedImage.getHeight() - height) / 2, width, height) : null);
+    }
+
+    //Gets a selector image
+    private static Drawable getSelectorImage(int touchColor, int backgroundColor, int radiusPx)
+    {
+        boolean usingRadius = (radiusPx > 0);
+        ShapeDrawable roundShape = null;
+        ShapeDrawable rectangleShape = new ShapeDrawable(new RectShape());
+
+        if(usingRadius)
+        {
+            roundShape = new ShapeDrawable(new RoundRectShape(new float[]{radiusPx, radiusPx, radiusPx, radiusPx, radiusPx, radiusPx, radiusPx, radiusPx}, null, null));
+            roundShape.setAlpha(200);
+            roundShape.getPaint().setColor(touchColor);
+        }
+        rectangleShape.getPaint().setColor(usingRadius ? backgroundColor : touchColor);
+
+        return(usingRadius ? new LayerDrawable(new Drawable[]{rectangleShape, roundShape}) : rectangleShape);
+    }
+
+    //Gets a selector background
+    private static StateListDrawable getSelector(Context context, int pressedColor, int selectedColor, int backgroundColor, int radiusDp)
+    {
+        int radiusPx;
+        StateListDrawable selector = new StateListDrawable();
+
+        radiusPx = (radiusDp > 0 ? (int)dpToPixels(context, radiusDp) : 0);
+        selector.addState(new int[]{android.R.attr.state_pressed}, getSelectorImage(pressedColor, backgroundColor, radiusPx));
+        selector.addState(new int[]{android.R.attr.state_selected}, getSelectorImage(selectedColor, backgroundColor, radiusPx));
+        selector.addState(new int[]{}, getSelectorImage(backgroundColor, backgroundColor, 0));
+
+        return(selector);
+    }
+
+    //Gets an item state selector
+    private static StateListDrawable getItemStateSelector(Context context, boolean rounded)
+    {
+        int[] colors = resolveColorIDs(context, R.attr.itemSelectColor, R.attr.itemSelectedColor, R.attr.viewPagerBackground);
+        return(getSelector(context, colors[0], colors[1], colors[2], (rounded ? 36 : 0)));
+    }
+
+    //Gets an item selected state
+    public static Drawable getItemSelectedState(Context context, boolean rounded)
+    {
+        int[] colors = resolveColorIDs(context, R.attr.itemSelectedColor, R.attr.viewPagerBackground);
+        return(getSelectorImage(colors[0], colors[1], (rounded ? 36 : 0)));
+    }
+
+    //Gets menu item selector
+    public static StateListDrawable getMenuItemStateSelector(Context context)
+    {
+        return(getItemStateSelector(context, Settings.getMaterialTheme(context)));
+    }
+
+    //Gets list item selector
+    public static StateListDrawable getListItemStateSelector(Context context)
+    {
+        return(getItemStateSelector(context, false));
     }
 
     //Get visible icon for given state

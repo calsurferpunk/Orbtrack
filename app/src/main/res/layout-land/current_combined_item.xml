@@ -5,8 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center"
-    android:background="?attr/itemSelect">
+    android:gravity="center">
     <TextView
         android:id="@+id/Combined_Item_Name_Text"
         android:layout_width="match_parent"

@@ -163,7 +163,6 @@ public abstract class Selectable
             private final Context currentContext;
             private ViewGroup itemDetailsGroup;
             private TableLayout itemDetailTable;
-            private LinearLayout itemDetailLayout;
             private LinearLayout itemDetailCardsLayout;
             private AlertDialog dialog;
             private final Timer updateTimer = new Timer();
@@ -201,7 +200,6 @@ public abstract class Selectable
                     return;
                 }
 
-                itemDetailLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Layout);
                 itemDetailCardsLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Cards_Layout);
                 itemDetailTable = itemDetailsGroup.findViewById(R.id.Item_Detail_Table);
                 itemDetail3dFrame = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Frame);
@@ -346,17 +344,23 @@ public abstract class Selectable
             {
                 TextView emptyText;
                 TableRow.LayoutParams params;
-                float[] dpPixels;
+                LinearLayout dividerHolder = null;
+                float dpPixels;
 
                 if(!usingMaterial)
                 {
                     emptyText = new TextView(new ContextThemeWrapper(currentContext, (vertical ? R.style.DetailVerticalDivider : R.style.Divider)));
                     if(vertical)
                     {
-                        dpPixels = Globals.dpsToPixels(currentContext, 2, 5);
+                        dividerHolder = new LinearLayout(currentContext);
                         params = new TableRow.LayoutParams();
-                        params.width = (int)dpPixels[0];
-                        params.leftMargin = params.rightMargin = (int)dpPixels[1];
+                        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        dividerHolder.setLayoutParams(params);
+
+                        dpPixels = Globals.dpToPixels(currentContext, 2);
+                        params = new TableRow.LayoutParams();
+                        params.width = (int)dpPixels;
+                        params.gravity = Gravity.CENTER;
                         emptyText.setLayoutParams(params);
                     }
                     else
@@ -365,11 +369,27 @@ public abstract class Selectable
                     }
                     if(index >= 0)
                     {
-                        view.addView(emptyText, index);
+                        if(dividerHolder != null)
+                        {
+                            dividerHolder.addView(emptyText);
+                            view.addView(dividerHolder, index);
+                        }
+                        else
+                        {
+                            view.addView(emptyText, index);
+                        }
                     }
                     else
                     {
-                        view.addView(emptyText);
+                        if(dividerHolder != null)
+                        {
+                            dividerHolder.addView(emptyText);
+                            view.addView(dividerHolder);
+                        }
+                        else
+                        {
+                            view.addView(emptyText);
+                        }
                     }
                 }
             }
@@ -382,7 +402,7 @@ public abstract class Selectable
             {
                 if(canShow)
                 {
-                    ViewGroup detailGroup = (usingMaterial ? itemDetailLayout : itemDetailTable);
+                    ViewGroup detailGroup = (usingMaterial ? itemDetailCardsLayout : itemDetailTable);
                     final View passProgressLayout = this.findViewById(R.id.Item_Detail_Progress_Layout);
 
                     addDivider(detailGroup, false);
@@ -435,6 +455,7 @@ public abstract class Selectable
                         addDivider(currentDetailTable, false);
                         groupRow.setBackgroundColor(Globals.resolveColorID(currentContext, R.attr.viewPagerBackground));
                     }
+                    currentDetailTable.setStretchAllColumns(true);
 
                     //if using group title
                     if(usingGroupTitle)
@@ -800,6 +821,7 @@ public abstract class Selectable
                 if(canShow)
                 {
                     LinearLayout buttonLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Button_Layout);
+                    LinearLayout itemDetailLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Layout);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
                     if(this.detailButtons.size() == 0)
@@ -927,7 +949,7 @@ public abstract class Selectable
         protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
         {
             boolean haveContext = (currentContext != null);
-            int[] colors = (haveContext ? Globals.resolveAttributeIDs(currentContext, new int[]{R.attr.columnBackground, R.attr.columnTitleTextColor}) : new int[]{Color.BLACK, Color.WHITE});
+            int[] colors = (haveContext ? Globals.resolveAttributeIDs(currentContext, R.attr.columnBackground, R.attr.columnTitleTextColor) : new int[]{Color.BLACK, Color.WHITE});
             colors[1] = (haveContext ? currentContext.getResources().getColor(colors[1]) : colors[1]);
 
             if(showColumnTitles(page))
@@ -960,43 +982,24 @@ public abstract class Selectable
             enableItemClicks = enable;
         }
 
-        //Sets item background
-        private void setItemBackground(View itemView, int bgId)
+        //Sets item selector
+        protected void setItemSelector(View itemView)
         {
-            int index;
+            itemView.setBackground(Globals.getListItemStateSelector(currentContext));
+        }
+
+        //Sets item background
+        public void setItemBackground(View itemView, boolean isSelected)
+        {
             boolean haveItem = (itemView != null);
             Object tag = (haveItem ? itemView.getTag() : null);
             boolean setBackground = (haveItem && (tag == null || !tag.equals("keepBg")) && !(itemView instanceof AppCompatButton));
 
-            //if setting background
-            if(setBackground)
+            //if setting background and and context exists
+            if(setBackground && currentContext != null)
             {
-                //set view background
-                itemView.setBackgroundResource(bgId);
-            }
-
-            //if a view group
-            if(itemView instanceof ViewGroup)
-            {
-                //go through each child
-                ViewGroup itemGroup = (ViewGroup)itemView;
-                for(index = 0; index < itemGroup.getChildCount(); index++)
-                {
-                    //set child background
-                    setItemBackground(itemGroup.getChildAt(index), bgId);
-                }
-            }
-        }
-        public void setItemBackground(View itemView, boolean isSelected)
-        {
-            int[] ids;
-
-            //if view and context exist
-            if(itemView != null && currentContext != null)
-            {
-                //get around compiler bug by storing result in array
-                ids = new int[]{Globals.resolveAttributeID(currentContext, (isSelected ? R.attr.itemSelected : R.attr.itemSelect))};
-                setItemBackground(itemView, ids[0]);
+                //set background according to selected state
+                itemView.setBackground(isSelected ? Globals.getItemSelectedState(currentContext, false) : Globals.getListItemStateSelector(currentContext));
             }
         }
 

@@ -136,6 +136,7 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
         }
         titleImage = childView.findViewById(R.id.Item_Title_Image);
         titleTextLbl = childView.findViewById(R.id.Item_Title_Text);
+        childView.setBackground(Globals.getMenuItemStateSelector(menuInflater.getContext()));
         item = groups.get(groupPosition).items[childPosition];
 
         titleImage.setBackgroundDrawable(item.icon);

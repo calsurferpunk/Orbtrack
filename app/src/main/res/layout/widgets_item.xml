@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="start|center_vertical"
-    android:padding="5dp"
-    android:background="?attr/itemSelect">
+    android:padding="5dp">
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/Widget_Item_Image"
         android:layout_width="36dp"
         android:layout_height="36dp"
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
+        android:background="@color/transparent"
         android:tint="?attr/defaultTextColor"/>
 
     <TextView
@@ -21,6 +21,7 @@
         android:layout_weight="0.3"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
+        android:background="@color/transparent"
         android:textColor="?attr/defaultTextColor"/>
 
     <TextView
@@ -30,5 +31,6 @@
         android:layout_weight="0.7"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
+        android:background="@color/transparent"
         android:textColor="?attr/defaultTextColor"/>
 </LinearLayout>

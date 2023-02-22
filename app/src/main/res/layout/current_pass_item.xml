@@ -4,14 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:gravity="center"
-    android:background="?attr/itemSelect">
+    android:gravity="center">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:padding="5dp"
         android:orientation="horizontal"
-        android:gravity="center">
+        android:gravity="center"
+        tools:ignore="UselessParent">
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Pass_Calculate_Progress_Bar"
             android:layout_width="0dp"

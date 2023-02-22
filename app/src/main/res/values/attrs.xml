@@ -14,8 +14,8 @@
     <attr name="dividerLineColor" format="reference"/>
     <attr name="dividerTextBackground" format="color"/>
     <attr name="dialogStyle" format="reference"/>
-    <attr name="itemSelect" format="reference"/>
-    <attr name="itemSelected" format="reference"/>
+    <attr name="itemSelectColor" format="color"/>
+    <attr name="itemSelectedColor" format="color"/>
     <attr name="normalTint" format="color"/>
     <attr name="checkedTint" format="color"/>
     <attr name="minValue" format="float"/>

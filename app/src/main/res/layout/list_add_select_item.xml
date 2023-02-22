@@ -4,8 +4,7 @@
     android:padding="5dp"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_vertical"
-    android:background="?attr/itemSelect">
+    android:gravity="center_vertical">
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/Add_Select_Item_Image"
         android:layout_width="42dp"

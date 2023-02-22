@@ -364,6 +364,7 @@ public abstract class Orbitals
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
             PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Layout, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
 
+            setItemSelector(itemView);
             setViewClickListeners(itemView, itemHolder);
             return(itemHolder);
         }

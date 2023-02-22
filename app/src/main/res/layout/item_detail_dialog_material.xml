@@ -19,6 +19,27 @@
             android:padding="0dp"/>
 
         <LinearLayout
+            style="@style/DetailTableRowMaterial"
+            android:id="@+id/Item_Detail_Progress_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <com.google.android.material.progressindicator.LinearProgressIndicator
+                android:id="@+id/Item_Detail_Progress"
+                android:layout_width="180dp"
+                android:layout_height="wrap_content"
+                app:indicatorColor="?attr/colorAccent"/>
+            <TextView
+                style="@style/DetailText"
+                android:id="@+id/Item_Detail_Progress_Text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"/>
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/Item_Detail_Graph_Layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -104,27 +125,6 @@
                 android:text="@string/title_loading_dots"
                 android:autoLink="web"
                 android:visibility="gone"/>
-        </LinearLayout>
-
-        <LinearLayout
-            style="@style/DetailTableRowMaterial"
-            android:id="@+id/Item_Detail_Progress_Layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:visibility="gone">
-            <com.google.android.material.progressindicator.LinearProgressIndicator
-                android:id="@+id/Item_Detail_Progress"
-                android:layout_width="180dp"
-                android:layout_height="wrap_content"
-                app:indicatorColor="?attr/colorAccent"/>
-            <TextView
-                style="@style/DetailText"
-                android:id="@+id/Item_Detail_Progress_Text"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="6dp"
-                android:layout_marginEnd="6dp"/>
         </LinearLayout>
 
         <LinearLayout

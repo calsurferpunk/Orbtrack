@@ -7,6 +7,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -17,6 +18,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -143,10 +146,73 @@ public class IconSpinner extends AppCompatSpinner
         {
             return(usingIconColors(icon3Color, icon3SelectedColor));
         }
+
+        @Override @NonNull
+        public String toString()
+        {
+            return(text != null ? text : value instanceof Integer ? String.valueOf((int)value) : value.toString());
+        }
     }
 
-    public static class CustomAdapter extends BaseAdapter
+    public static class CustomAdapter extends BaseAdapter implements Filterable
     {
+        private class ItemFilter extends Filter
+        {
+            private boolean useFilter;
+
+            public ItemFilter(boolean allowFilter)
+            {
+                useFilter = allowFilter;
+            }
+
+            @Override
+            protected FilterResults performFiltering(CharSequence constraint)
+            {
+                FilterResults results = new FilterResults();
+
+                //if using filter and constraint is set
+                if(useFilter && constraint != null && constraint.length() > 1)
+                {
+                    String constraintValue = constraint.toString().toLowerCase();
+                    ArrayList<Item> resultItems = new ArrayList<>();
+
+                    //go through each item
+                    for(Item currentItem : items)
+                    {
+                        //remember current value
+                        String currentValue = (currentItem.text != null ? currentItem.text.toLowerCase() : "");
+
+                        //if value contains constraint
+                        if(currentValue.contains(constraintValue))
+                        {
+                            //add item to results
+                            resultItems.add(currentItem);
+                        }
+                    }
+
+                    //set results
+                    results.count = resultItems.size();
+                    results.values = resultItems.toArray(new Item[0]);
+                }
+                else
+                {
+                    //set results
+                    results.count = items.length;
+                    results.values = items;
+                }
+
+                //return results
+                return(results);
+            }
+
+            @Override
+            protected void publishResults(CharSequence constraint, FilterResults results)
+            {
+                items = (Item[])results.values;
+                notifyDataSetChanged();
+            }
+        }
+
         //On load items listener
         public interface OnLoadItemsListener
         {
@@ -223,7 +289,9 @@ public class IconSpinner extends AppCompatSpinner
         private boolean usingIcon1;
         private boolean usingIcon3;
         private boolean usingIcon3Only;
+        private boolean usingMaterial;
         private boolean loadingItems = false;
+        private ItemFilter filter;
         private LayoutInflater listInflater;
         private Item[] items;
 
@@ -234,6 +302,7 @@ public class IconSpinner extends AppCompatSpinner
             textColor = textSelectedColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
             backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
+            usingMaterial = Settings.getMaterialTheme(context);
 
             updateUsing();
         }
@@ -430,6 +499,20 @@ public class IconSpinner extends AppCompatSpinner
         }
 
         @Override
+        public Filter getFilter()
+        {
+            //if filter is not set yet
+            if(filter == null)
+            {
+                //set it
+                filter = new ItemFilter(false);
+            }
+
+            //return filter
+            return(filter);
+        }
+
+        @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
             int sizePx;
@@ -450,7 +533,7 @@ public class IconSpinner extends AppCompatSpinner
             //set view
             if(convertView == null)
             {
-                convertView = (listInflater != null ? listInflater.inflate(R.layout.icon_spinner_item, parent, false) : new View(null));
+                convertView = (listInflater != null ? listInflater.inflate((usingMaterial ? R.layout.icon_spinner_item_material : R.layout.icon_spinner_item), parent, false) : new View(null));
             }
             context = convertView.getContext();
             icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);

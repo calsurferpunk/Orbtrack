@@ -39,7 +39,7 @@
             android:layout_marginLeft="18dp"
             android:layout_marginStart="18dp"
             android:layout_marginBottom="10dp"
-            android:text="@string/title_orbital"
+            android:text="@string/title_orbital2"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
             android:textColor="?attr/defaultTextColor"
             android:visibility="gone"/>

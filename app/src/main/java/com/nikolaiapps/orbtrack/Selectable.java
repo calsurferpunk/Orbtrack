@@ -347,14 +347,16 @@ public abstract class Selectable
                 LinearLayout dividerHolder = null;
                 float dpPixels;
 
-                if(!usingMaterial)
+                if(vertical || !usingMaterial)
                 {
-                    emptyText = new TextView(new ContextThemeWrapper(currentContext, (vertical ? R.style.DetailVerticalDivider : R.style.Divider)));
+                    emptyText = new TextView(new ContextThemeWrapper(currentContext, (vertical ? (usingMaterial ? R.style.DetailVerticalDividerMaterial : R.style.DetailVerticalDivider) : R.style.Divider)));
                     if(vertical)
                     {
                         dividerHolder = new LinearLayout(currentContext);
                         params = new TableRow.LayoutParams();
+                        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
                         params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                        params.gravity = Gravity.CENTER;
                         dividerHolder.setLayoutParams(params);
 
                         dpPixels = Globals.dpToPixels(currentContext, 2);

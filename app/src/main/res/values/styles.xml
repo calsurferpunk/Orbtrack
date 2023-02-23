@@ -380,9 +380,11 @@
 
     <style name="DetailText">
         <item name="android:layout_width">wrap_content</item>
+        <item name="android:minWidth">46dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">top</item>
         <item name="android:padding">1dp</item>
+        <item name="android:maxLines">1</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
@@ -409,6 +411,10 @@
         <item name="android:layout_marginRight">1dp</item>
         <item name="android:layout_height">match_parent</item>
         <item name="android:background">?attr/dividerLineColor</item>
+    </style>
+
+    <style name="DetailVerticalDividerMaterial" parent="DetailVerticalDivider">
+        <item name="android:background">@color/transparent</item>
     </style>
 
     <!--Edit Dialog -->
@@ -460,6 +466,21 @@
         <item name="android:gravity">center</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="CalculateTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="boxBackgroundColor">?attr/pageBackground</item>
+        <item name="android:textColorHint">?attr/defaultTextColor</item>
+    </style>
+
+    <style name="CalculateAutoCompleteTextView">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:inputType">none</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+        <item name="android:textColorHint">@color/transparent</item>
     </style>
 
     <!--Combined Layout-->

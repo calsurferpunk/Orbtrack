@@ -158,7 +158,7 @@ public class IconSpinner extends AppCompatSpinner
     {
         private class ItemFilter extends Filter
         {
-            private boolean useFilter;
+            private final boolean useFilter;
 
             public ItemFilter(boolean allowFilter)
             {
@@ -293,7 +293,7 @@ public class IconSpinner extends AppCompatSpinner
         private boolean loadingItems = false;
         private ItemFilter filter;
         private LayoutInflater listInflater;
-        private Item[] items;
+        private Item[] items = new Item[0];
 
         private void BaseConstructor(Context context)
         {
@@ -360,7 +360,7 @@ public class IconSpinner extends AppCompatSpinner
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
+        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId, OnLoadItemsListener listener)
         {
             BaseConstructor(context);
 
@@ -387,17 +387,21 @@ public class IconSpinner extends AppCompatSpinner
                             }
                         });
                     }
+                    if(listener != null)
+                    {
+                        listener.onLoaded(loadedItems);
+                    }
                 }
             });
             loadItems.execute(context, satellites, addMulti, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti)
+        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, OnLoadItemsListener listener)
         {
-            this(context, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0);
+            this(context, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0, listener);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
-            this(context, satellites, false);
+            this(context, satellites, false, null);
         }
 
         private void updateUsing()
@@ -439,7 +443,7 @@ public class IconSpinner extends AppCompatSpinner
         @Override
         public Object getItem(int position)
         {
-            return(loadingItems ? null : items[position]);
+            return(loadingItems || (position >= items.length) ? null : items[position]);
         }
 
         @Override

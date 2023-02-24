@@ -2946,11 +2946,11 @@ public abstract class Globals
     {
         return(getDrawable(context, resId, 0));
     }
-    public static Drawable getDrawable(Context context, int resId, int width, int height, int tintColor, boolean dpSize)
+    public static Drawable getDrawable(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
     {
-        float[] dpPixels = (dpSize ? dpsToPixels(context, width, height) : null);
-        int widthPixels = (dpSize ? (int)dpPixels[0] : width);
-        int heightPixels = (dpSize ? (int)dpPixels[1] : height);
+        float[] dpPixels = (isDpSize ? dpsToPixels(context, width, height) : null);
+        int widthPixels = (isDpSize ? (int)dpPixels[0] : width);
+        int heightPixels = (isDpSize ? (int)dpPixels[1] : height);
         int[] imageSize;
         Bitmap imageBitmap;
         BitmapDrawable scaledDrawable;
@@ -2970,9 +2970,9 @@ public abstract class Globals
         //return scaled image
         return(scaledDrawable);
     }
-    public static Drawable getDrawable(Context context, int resId, int width, int height, boolean useThemeTint, boolean dpSize)
+    public static Drawable getDrawable(Context context, int resId, int size, boolean useThemeTint, boolean isDpSize)
     {
-        return(getDrawable(context, resId, width, height, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : 0), dpSize));
+        return(getDrawable(context, resId, size, size, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : 0), isDpSize));
     }
     public static Drawable getDrawable(Context context, int xStackOffsets, int yStackOffsets, boolean stacked, Drawable ...images)
     {
@@ -3219,6 +3219,15 @@ public abstract class Globals
         rotatedImage = (haveImage && width > 0 && height > 0 ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
 
         return(rotatedImage != null ? Bitmap.createBitmap(rotatedImage, (rotatedImage.getWidth() - width) / 2, (rotatedImage.getHeight() - height) / 2, width, height) : null);
+    }
+
+    //Gets an image with/without a "no" drawable
+    public static Drawable getYesNoDrawable(Context context, int resId, int size, boolean useThemeTint, boolean isDpSize, boolean isYes)
+    {
+        Drawable image = getDrawable(context, resId, size, useThemeTint, isDpSize);
+        Drawable noImage = (isYes ? null : getDrawable(context, R.drawable.ic_no, size, useThemeTint, isDpSize));
+
+        return(getDrawable(context, 0, 0, true, image, noImage));
     }
 
     //Gets a selector image

@@ -362,6 +362,10 @@
         <item name="backgroundTint">?attr/pageHighlightBackground</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
+    <style name="MaterialButtonRound" parent="MaterialButton">
+        <item name="cornerRadius">18dp</item>
+        <item name="backgroundTint">?attr/colorAccent</item>
+    </style>
 
     <!-- Detail Views -->
     <style name="DetailTableMaterial">
@@ -433,6 +437,14 @@
         <item name="android:orientation">vertical</item>
     </style>
 
+    <style name="CalculateEditRowMaterial">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginBottom">8dp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
     <style name="CalculateEditLayout">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -452,6 +464,19 @@
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
+    <style name="CalculateEditTextMaterial" parent="CalculateEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:gravity">left</item>
+    </style>
+
+    <style name="CalculateDateTimeText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+    </style>
+
     <style name="CalculateEditUnitTitle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
@@ -468,15 +493,31 @@
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
-    <style name="CalculateTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-        <item name="android:layout_width">wrap_content</item>
+    <style name="CalculateEditValueTitleMaterial" parent="CalculateEditUnitTitle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">0.5</item>
+    </style>
+
+    <style name="CalculateListInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="boxBackgroundColor">?attr/pageBackground</item>
+        <item name="android:layout_gravity">center</item>
         <item name="android:textColorHint">?attr/defaultTextColor</item>
+        <item name="boxBackgroundColor">?attr/pageBackground</item>
+    </style>
+
+    <style name="CalculateTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">0.5</item>
+        <item name="android:minWidth">126dp</item>
+        <item name="android:textColorHint">?attr/defaultTextColor</item>
+        <item name="boxBackgroundColor">?attr/pageBackground</item>
+        <item name="startIconTint">?attr/defaultTextColor</item>
     </style>
 
     <style name="CalculateAutoCompleteTextView">
-        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">none</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
@@ -603,7 +644,9 @@
     <!--Result button-->
     <style name="ResultButton" parent="MaterialButton">
         <item name="android:layout_width">130dp</item>
-        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="ResultButtonRound" parent="MaterialButtonRound">
+        <item name="android:layout_width">130dp</item>
     </style>
 
     <style name="ResultButtonLayout">

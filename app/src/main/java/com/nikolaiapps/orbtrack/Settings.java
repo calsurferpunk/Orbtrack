@@ -1454,11 +1454,8 @@ public abstract class Settings
             //Sets notify text
             private void setNotifyText(TextView notifyText, boolean up, boolean nextOnly)
             {
-                Drawable clockImage = Globals.getDrawable(currentContext, R.drawable.ic_clock_black, 18, 18, true, true);
-                Drawable noImage = (up ? null : Globals.getDrawable(currentContext, R.drawable.ic_no, 18, 18, true, true));
-
                 notifyText.setVisibility(View.VISIBLE);
-                notifyText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawable(currentContext, 0, 0, true, clockImage, noImage), null, Globals.getDrawable(currentContext, (nextOnly ? R.drawable.ic_repeat_one_white : R.drawable.ic_repeat_white), 18, 18, true, true), null);
+                notifyText.setCompoundDrawablesWithIntrinsicBounds(Globals.getYesNoDrawable(currentContext, R.drawable.ic_clock_black, 18, true, true, !up), null, Globals.getDrawable(currentContext, (nextOnly ? R.drawable.ic_repeat_one_white : R.drawable.ic_repeat_white), 18, true, true), null);
             }
         }
     }

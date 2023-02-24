@@ -2415,7 +2415,7 @@ public abstract class Current
             //setup search list
             if(usingSearchList)
             {
-                searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+                searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black), null));
                 searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
                 searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
                 searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));

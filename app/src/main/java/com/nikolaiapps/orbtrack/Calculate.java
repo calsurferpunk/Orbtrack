@@ -128,8 +128,9 @@ public abstract class Calculate
         public TimeInputView startTimeText;
         public TimeInputView endTimeText;
         public MaterialButton selectButton;
-        public AutoCompleteTextView orbitalText;
-        public AutoCompleteTextView orbital2Text;
+        public AutoCompleteTextView orbitalTextList;
+        public AutoCompleteTextView orbital2TextList;
+        public AutoCompleteTextView viewUnitTextList;
         private OnStartCalculationListener startCalculationListener;
         private boolean[] orbitalIsSelected;
 
@@ -395,7 +396,7 @@ public abstract class Calculate
             double daysBetween;
             double elMin;
             double intersection;
-            String unitType;
+            String unitType = "";
             Context context = this.getContext();
             Calendar startTime = Calendar.getInstance();
             Calendar endTime = Calendar.getInstance();
@@ -451,7 +452,14 @@ public abstract class Calculate
                     allowMultiNoradId = true;
 
                     //get units
-                    unitType = viewUnitList.getSelectedValue("").toString();
+                    if(viewUnitList != null)
+                    {
+                        unitType = viewUnitList.getSelectedValue("").toString();
+                    }
+                    if(viewUnitTextList != null)
+                    {
+                        unitType = viewUnitTextList.getText().toString();
+                    }
                     unitValue = Globals.tryParseInt(viewUnitText.getText().toString());
                     if(unitValue == Integer.MAX_VALUE || unitValue <= 0)
                     {
@@ -512,23 +520,23 @@ public abstract class Calculate
             if(validInputs)
             {
                 //add values to params
-                if(orbitalText != null && orbitalText.getTag() instanceof Integer)
-                {
-                    noradId = (int)orbitalText.getTag();
-                }
                 if(orbitalList != null)
                 {
                     noradId = (int)orbitalList.getSelectedValue(Universe.IDs.Invalid);
                 }
+                if(orbitalTextList != null && orbitalTextList.getTag() instanceof Integer)
+                {
+                    noradId = (int) orbitalTextList.getTag();
+                }
                 if(pageNumber == PageType.Intersection)
                 {
-                    if(orbital2Text != null && orbital2Text.getTag() instanceof Integer)
-                    {
-                        noradId2 = (int)orbital2Text.getTag();
-                    }
                     if(orbital2List != null)
                     {
                         noradId2 = (int)orbital2List.getSelectedValue(Universe.IDs.Invalid);
+                    }
+                    if(orbital2TextList != null && orbital2TextList.getTag() instanceof Integer)
+                    {
+                        noradId2 = (int) orbital2TextList.getTag();
                     }
                 }
                 pageParams.putInt(Selectable.ParamTypes.PageNumber, pageNumber);
@@ -1384,20 +1392,20 @@ public abstract class Calculate
         return(task);
     }
 
-    //Sets orbital text value from given norad ID
-    private static void setOrbitalText(Context context, AutoCompleteTextView orbitalText, int noradId)
+    //Sets orbital text list value from given norad ID
+    private static void setOrbitalTextList(Context context, AutoCompleteTextView orbitalTextList, int noradId)
     {
-        if(orbitalText != null)
+        if(orbitalTextList != null)
         {
             Database.DatabaseSatellite orbital = Database.getOrbital(context, noradId);
-            ListAdapter adapter = orbitalText.getAdapter();
+            ListAdapter adapter = orbitalTextList.getAdapter();
             Object firstItem = (adapter != null ? adapter.getItem(0) : null);
             boolean haveOrbital = (orbital != null);
             boolean canUseFirst = (firstItem instanceof String);
 
             if(haveOrbital || canUseFirst)
             {
-                orbitalText.setText((haveOrbital ? orbital.getName() : (String)firstItem), false);
+                orbitalTextList.setText((haveOrbital ? orbital.getName() : (String)firstItem), false);
             }
         }
     }
@@ -1416,7 +1424,6 @@ public abstract class Calculate
         Calendar dateNow = Calendar.getInstance();
         Calendar dateLater = Calendar.getInstance();
         boolean[] orbitalIsSelected = null;
-        String multipleString = (context != null ? context.getString(R.string.title_multiple) : "");
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
 
         //if there is a saved state
@@ -1425,14 +1432,14 @@ public abstract class Calculate
             try
             {
                 //get values
-                orbitalId = savedInstanceState.getInt(ParamTypes.NoradId);
+                orbitalId = savedInstanceState.getInt(ParamTypes.NoradId, orbitalId);
                 orbitalId2 = savedInstanceState.getInt(ParamTypes.NoradId2, orbitalId2);
                 orbitalIsSelected = savedInstanceState.getBooleanArray(ParamTypes.OrbitalIsSelected);
                 pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
                 dateNow.setTimeInMillis(savedInstanceState.getLong(ParamTypes.StartDateMs));
                 dateLater.setTimeInMillis(savedInstanceState.getLong(ParamTypes.EndDateMs));
-                incrementUnit = savedInstanceState.getInt(ParamTypes.IncrementUnit);
-                incrementType = savedInstanceState.getInt(ParamTypes.IncrementType);
+                incrementUnit = savedInstanceState.getInt(ParamTypes.IncrementUnit, incrementUnit);
+                incrementType = savedInstanceState.getInt(ParamTypes.IncrementType, incrementType);
                 elMin = savedInstanceState.getDouble(ParamTypes.ElevationMinDegs, elMin);
                 intersectionDegrees = savedInstanceState.getDouble(ParamTypes.IntersectionDegs, intersectionDegrees);
             }
@@ -1445,11 +1452,11 @@ public abstract class Calculate
             if(orbitalId != Integer.MAX_VALUE)
             {
                 //set orbital
-                setOrbitalText(context, page.orbitalText, orbitalId);
                 if(page.orbitalList != null)
                 {
                     page.orbitalList.setSelectedValue(orbitalId);
                 }
+                setOrbitalTextList(context, page.orbitalTextList, orbitalId);
             }
             if(orbitalIsSelected != null)
             {
@@ -1491,6 +1498,10 @@ public abstract class Calculate
                         {
                             page.viewUnitList.setSelectedValue(incrementTypeArray[incrementType], incrementTypeArray[IncrementType.Minutes]);
                         }
+                        if(page.viewUnitTextList != null)
+                        {
+                            page.viewUnitTextList.setText(incrementTypeArray[incrementType]);
+                        }
                     }
                     break;
 
@@ -1499,11 +1510,11 @@ public abstract class Calculate
                     if(orbitalId2 != Universe.IDs.Invalid)
                     {
                         //set orbital 2
-                        setOrbitalText(context, page.orbital2Text, orbitalId2);
                         if(page.orbital2List != null)
                         {
                             page.orbital2List.setSelectedValue(orbitalId2);
                         }
+                        setOrbitalTextList(context, page.orbital2TextList, orbitalId2);
                     }
                     //fall through
 
@@ -1549,54 +1560,56 @@ public abstract class Calculate
         }
     }
 
-    //Creates an orbital text changed listener
-    private static TextWatcher createOrbitalTextChangedListener(View orbitalText, Database.DatabaseSatellite[] orbitals)
+    //Sets up given orbital text list
+    private static void setupOrbitalTextList(AutoCompleteTextView orbitalTextList, IconSpinner.CustomAdapter orbitalAdapter, Drawable background, Database.DatabaseSatellite[] orbitals, View selectButtonLayout, boolean usingMulti)
     {
-        return(new TextWatcher()
+        //if text exists
+        if(orbitalTextList != null)
         {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
+            //set adapter, background, and listener
+            orbitalTextList.setAdapter(orbitalAdapter);
+            if(background != null)
             {
-                int index;
-                int noradId = Universe.IDs.Invalid;
+                orbitalTextList.setDropDownBackgroundDrawable(background);
+            }
+            orbitalTextList.setText(orbitals[0].getName(), false);
+            orbitalTextList.addTextChangedListener(new TextWatcher()
+            {
+                @Override
+                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
 
-                //go through each orbital
-                for(index = 0; index < orbitals.length && noradId == Universe.IDs.Invalid; index++)
+                @Override
+                public void onTextChanged(CharSequence s, int start, int before, int count)
                 {
-                    //if current orbital matches text
-                    Database.DatabaseSatellite currentOrbital = orbitals[index];
-                    if(currentOrbital.getName().equals(s.toString()))
+                    int index;
+                    int noradId = Universe.IDs.Invalid;
+
+                    //go through each orbital
+                    for(index = 0; index < orbitals.length && noradId == Universe.IDs.Invalid; index++)
                     {
-                        //set norad ID
-                        noradId = currentOrbital.noradId;
+                        //if current orbital matches text
+                        Database.DatabaseSatellite currentOrbital = orbitals[index];
+                        if(currentOrbital.getName().equals(s.toString()))
+                        {
+                            //set norad ID
+                            noradId = currentOrbital.noradId;
+                        }
+                    }
+
+                    //set tag
+                    orbitalTextList.setTag(noradId);
+
+                    //if select button layout exists
+                    if(selectButtonLayout != null)
+                    {
+                        //update visibility
+                        selectButtonLayout.setVisibility((usingMulti && noradId == Universe.IDs.Invalid) ? View.VISIBLE : View.GONE);
                     }
                 }
 
-                //set tag
-                orbitalText.setTag(noradId);
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-    }
-
-    //Sets up given orbital text
-    private static void setupOrbitalText(AutoCompleteTextView orbitalText, IconSpinner.CustomAdapter orbitalAdapter, Drawable background, Database.DatabaseSatellite[] orbitals)
-    {
-        //if text exists
-        if(orbitalText != null)
-        {
-            //set adapter, background, and listener
-            orbitalText.setAdapter(orbitalAdapter);
-            if(background != null)
-            {
-                orbitalText.setDropDownBackgroundDrawable(background);
-            }
-            orbitalText.addTextChangedListener(createOrbitalTextChangedListener(orbitalText, orbitals));
+                @Override
+                public void afterTextChanged(Editable s) {}
+            });
         }
     }
 
@@ -1638,6 +1651,10 @@ public abstract class Calculate
         View elevationMinRow = rootView.findViewById(R.id.Calculate_Elevation_Min_Row);
         View selectButtonLayout = rootView.findViewById(R.id.Calculate_Select_Layout);
         TextView orbital2ListTitle = rootView.findViewById(R.id.Calculate_Orbital2_List_Title);
+        TextInputLayout endDateLayout = rootView.findViewById(R.id.Calculate_End_Date_Layout);
+        TextInputLayout endTimeLayout = rootView.findViewById(R.id.Calculate_End_Time_Layout);
+        TextInputLayout startDateLayout = rootView.findViewById(R.id.Calculate_Start_Date_Layout);
+        TextInputLayout startTimeLayout = rootView.findViewById(R.id.Calculate_Start_Time_Layout);
         TextInputLayout orbital2TextLayout = rootView.findViewById(R.id.Calculate_Orbital2_Text_Layout);
         MaterialButton startButton = rootView.findViewById(R.id.Calculate_Start_Button);
         IconSpinner.CustomAdapter orbitalAdapter;
@@ -1649,11 +1666,12 @@ public abstract class Calculate
         page.viewUnitText = rootView.findViewById(R.id.Calculate_View_Unit_Text);
         page.intersectionUnitText = rootView.findViewById(R.id.Calculate_Intersection_Unit_Text);
         page.elevationMinUnitText = rootView.findViewById(R.id.Calculate_Elevation_Min_Unit_Text);
-        page.orbitalText = rootView.findViewById(R.id.Calculate_Orbital_Text);
         page.orbitalList = rootView.findViewById(R.id.Calculate_Orbital_List);
-        page.orbital2Text = rootView.findViewById(R.id.Calculate_Orbital2_Text);
+        page.orbitalTextList = rootView.findViewById(R.id.Calculate_Orbital_Text_List);
         page.orbital2List = rootView.findViewById(R.id.Calculate_Orbital2_List);
+        page.orbital2TextList = rootView.findViewById(R.id.Calculate_Orbital2_Text_List);
         page.viewUnitList = rootView.findViewById(R.id.Calculate_View_Unit_List);
+        page.viewUnitTextList = rootView.findViewById(R.id.Calculate_View_Unit_Text_List);
         page.startDateText = rootView.findViewById(R.id.Calculate_Start_Date_Text);
         page.endDateText = rootView.findViewById(R.id.Calculate_End_Date_Text);
         page.startTimeText = rootView.findViewById(R.id.Calculate_Start_Time_Text);
@@ -1664,8 +1682,26 @@ public abstract class Calculate
         orbitals = Database.getOrbitals(context);
 
         //set orbital list items
-        orbitalAdapter = new IconSpinner.CustomAdapter(context, orbitals, usingMulti);
-        setupOrbitalText(page.orbitalText, orbitalAdapter, backgroundColorDrawable, orbitals);
+        orbitalAdapter = new IconSpinner.CustomAdapter(context, orbitals, usingMulti, new IconSpinner.CustomAdapter.OnLoadItemsListener()
+        {
+            @Override
+            public void onLoaded(IconSpinner.Item[] loadedItems)
+            {
+                if(loadedItems.length > 0)
+                {
+                    String firstValue = loadedItems[0].toString();
+
+                    if(page.orbitalTextList != null)
+                    {
+                        page.orbitalTextList.setText(firstValue, false);
+                    }
+                    if(page.orbital2TextList != null)
+                    {
+                        page.orbital2TextList.setText(firstValue, false);
+                    }
+                }
+            }
+        });
         setupOrbitalList(page.orbitalList, orbitalAdapter, backgroundColorDrawable, new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -1677,6 +1713,7 @@ public abstract class Calculate
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
         });
+        setupOrbitalTextList(page.orbitalTextList, orbitalAdapter, backgroundColorDrawable, orbitals, selectButtonLayout, usingMulti);
         if(usingMulti)
         {
             page.selectButton.setOnClickListener(new View.OnClickListener()
@@ -1697,20 +1734,36 @@ public abstract class Calculate
         }
         if(onIntersection)
         {
-            setupOrbitalText(page.orbital2Text, orbitalAdapter, backgroundColorDrawable, orbitals);
             setupOrbitalList(page.orbital2List, orbitalAdapter, backgroundColorDrawable, null);
-        }
-        if(orbital2TextLayout != null)
-        {
-            orbital2TextLayout.setVisibility(intersectionVisibility);
+            setupOrbitalTextList(page.orbital2TextList, orbitalAdapter, backgroundColorDrawable, orbitals, null, false);
         }
         if(page.orbital2List != null)
         {
             page.orbital2List.setVisibility(intersectionVisibility);
         }
+        if(orbital2TextLayout != null)
+        {
+            orbital2TextLayout.setVisibility(intersectionVisibility);
+        }
         if(orbital2ListTitle != null)
         {
             orbital2ListTitle.setVisibility(intersectionVisibility);
+        }
+        if(startDateLayout != null)
+        {
+            startDateLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_calendar_month_white, 24, true, true, true));
+        }
+        if(startTimeLayout != null)
+        {
+            startTimeLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_clock_black, 24, true, true, true));
+        }
+        if(endDateLayout != null)
+        {
+            endDateLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_calendar_month_white, 24, true, true, false));
+        }
+        if(endTimeLayout != null)
+        {
+            endTimeLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_clock_black, 24, true, true, false));
         }
 
         //setup date and time listeners
@@ -1743,7 +1796,15 @@ public abstract class Calculate
                 {
                     //set unit adapter
                     incrementAdapter = new IconSpinner.CustomAdapter(context, incrementTypeArray);
-                    page.viewUnitList.setAdapter(incrementAdapter);
+                    if(page.viewUnitList != null)
+                    {
+                        page.viewUnitList.setAdapter(incrementAdapter);
+                    }
+                    if(page.viewUnitTextList != null)
+                    {
+                        page.viewUnitTextList.setAdapter(incrementAdapter);
+                        page.viewUnitTextList.setDropDownBackgroundDrawable(backgroundColorDrawable);
+                    }
                 }
 
                 //set visibility

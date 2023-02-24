@@ -513,6 +513,7 @@
         <item name="android:minWidth">126dp</item>
         <item name="android:textColorHint">?attr/defaultTextColor</item>
         <item name="boxBackgroundColor">?attr/pageBackground</item>
+        <item name="helperTextTextColor">?attr/defaultTextColor</item>
         <item name="startIconTint">?attr/defaultTextColor</item>
     </style>
 

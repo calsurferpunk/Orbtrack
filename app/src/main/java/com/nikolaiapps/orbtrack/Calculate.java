@@ -1640,15 +1640,16 @@ public abstract class Calculate
         final boolean onIntersection = (pageNumber == PageType.Intersection);
         final boolean usingMulti = (pageNumber == PageType.View || pageNumber == PageType.Coordinates);
         final boolean usingMaterial = Settings.getMaterialTheme(context);
-        int elRowVisibility = View.VISIBLE;
         int viewRowVisibility = View.VISIBLE;
+        int elevationMinVisibility = View.VISIBLE;
         int intersectionVisibility = (onIntersection ? View.VISIBLE : View.GONE);
-        int intersectionRowVisibility = View.VISIBLE;
         final Database.DatabaseSatellite[] orbitals;
         ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.calculate_view_layout_material : R.layout.calculate_view_layout), container, false);
         View viewRow = rootView.findViewById(R.id.Calculate_View_Row);
         View intersectionRow = rootView.findViewById(R.id.Calculate_Intersection_Row);
+        View intersectionUnitLayout = rootView.findViewById(R.id.Calculate_Intersection_Unit_Layout);
         View elevationMinRow = rootView.findViewById(R.id.Calculate_Elevation_Min_Row);
+        View elevationMinUnitLayout = rootView.findViewById(R.id.Calculate_Elevation_Min_Unit_Layout);
         View selectButtonLayout = rootView.findViewById(R.id.Calculate_Select_Layout);
         TextView orbital2ListTitle = rootView.findViewById(R.id.Calculate_Orbital2_List_Title);
         TextInputLayout endDateLayout = rootView.findViewById(R.id.Calculate_End_Date_Layout);
@@ -1808,22 +1809,32 @@ public abstract class Calculate
                 }
 
                 //set visibility
-                elRowVisibility = intersectionRowVisibility = View.GONE;
+                elevationMinVisibility = View.GONE;
                 break;
 
             case PageType.Passes:
-                //set visibility
-                intersectionRowVisibility = View.GONE;
-                //fall through
-
             case PageType.Intersection:
                 //set visibility
                 viewRowVisibility = View.GONE;
                 break;
         }
         viewRow.setVisibility(viewRowVisibility);
-        intersectionRow.setVisibility(intersectionRowVisibility);
-        elevationMinRow.setVisibility(elRowVisibility);
+        if(intersectionRow != null)
+        {
+            intersectionRow.setVisibility(intersectionVisibility);
+        }
+        if(intersectionUnitLayout != null)
+        {
+            intersectionUnitLayout.setVisibility(intersectionVisibility);
+        }
+        if(elevationMinRow != null)
+        {
+            elevationMinRow.setVisibility(elevationMinVisibility);
+        }
+        if(elevationMinUnitLayout != null)
+        {
+            elevationMinUnitLayout.setVisibility(elevationMinVisibility);
+        }
 
         //setup button
         startButton.setOnClickListener(new View.OnClickListener()

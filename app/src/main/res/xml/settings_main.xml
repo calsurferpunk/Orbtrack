@@ -357,6 +357,11 @@
                     android:key="ListShowPassProgress"
                     android:summary="@string/desc_show_path_progress"/>
 
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_pass_quality"
+                    android:key="ListShowPassQuality"
+                    android:summary="@string/desc_show_pass_quality"/>
+
                 <PreferenceCategory android:title="@string/title_rates">
                     <com.nikolaiapps.orbtrack.IconListPreference
                         app:titleText="@string/title_update_rate"

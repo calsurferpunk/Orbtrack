@@ -305,7 +305,7 @@ public abstract class Current
             private String name;
             private String ownerCode;
             private Drawable icon;
-            private View elMaxUnder;
+            private View passQualityView;
             private TextView azText;
             private TextView elText;
             private TextView nameText;
@@ -375,9 +375,9 @@ public abstract class Current
                 }
             }
 
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathProgress)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathProgress, boolean usePathQuality)
             {
-                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
+                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePathQuality, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
 
                 azimuth = elevation = rangeKm = speedKms = latitude = longitude = altitudeKm = Float.MAX_VALUE;
 
@@ -512,9 +512,9 @@ public abstract class Current
                     elMaxText.setText(isKnownPassElevationMax() ? Globals.getDegreeString(passElMax) : "");
                 }
 
-                if(elMaxUnder != null)
+                if(passQualityView != null)
                 {
-                    elMaxUnder.setBackgroundColor(!isKnownPassElevationMax() ? Color.TRANSPARENT : passElMax >= 60 ? Color.GREEN : passElMax >= 30 ? Color.YELLOW : Color.RED);
+                    passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : passElMax >= 70 ? Color.CYAN : passElMax >= 45 ? Color.GREEN : passElMax >= 20 ? Color.YELLOW : Color.RED);
                 }
 
                 if(passProgress != null)
@@ -550,6 +550,7 @@ public abstract class Current
 
                 int index;
                 boolean usePathProgress = Settings.getListPathProgress(context);
+                boolean usePassQuality = Settings.getListPassQuality(context);
 
                 //remember using material and layout ID
                 usingMaterial = Settings.getMaterialTheme(context);
@@ -569,7 +570,7 @@ public abstract class Current
                     combinedItems.set(new Item[orbitals.length]);
                     for(index = 0; index < orbitals.length; index++)
                     {
-                        combinedItems.set(index, new Item(context, index, orbitals[index], usePathProgress));
+                        combinedItems.set(index, new Item(context, index, orbitals[index], usePathProgress, usePassQuality));
                     }
                 }
                 combinedItems.sort();
@@ -623,7 +624,6 @@ public abstract class Current
                 currentItem.startText = itemView.findViewById(R.id.Combined_Item_Start_Text);
                 currentItem.elMaxText = itemView.findViewById(R.id.Combined_Item_El_Max_Text);
                 currentItem.elMaxTitle = itemView.findViewById(R.id.Combined_Item_El_Max_Title);
-                currentItem.elMaxUnder = itemView.findViewById(R.id.Combined_Item_El_Max_Under);
                 currentItem.durationText = itemView.findViewById(R.id.Combined_Item_Duration_Text);
                 currentItem.nameImage = itemView.findViewById(R.id.Combined_Item_Name_Image);
                 currentItem.nameText = itemView.findViewById(R.id.Combined_Item_Name_Text);
@@ -632,6 +632,7 @@ public abstract class Current
                 currentItem.passLayout = itemView.findViewById(R.id.Combined_Item_Pass_Layout);
                 currentItem.passStartLayout = itemView.findViewById(R.id.Combined_Item_Pass_Start_Layout);
                 currentItem.passDurationLayout = itemView.findViewById(R.id.Combined_Item_Pass_Duration_Layout);
+                currentItem.passQualityView = itemView.findViewById(R.id.Combined_Item_Pass_Quality_View);
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);
                 currentItem.longitudeText = itemView.findViewById(R.id.Combined_Item_Longitude_Text);
 
@@ -1363,9 +1364,9 @@ public abstract class Current
             public LinearProgressIndicator progressStatusBar;
             public LinearLayout dataGroup;
 
-            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
+            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
             {
-                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
+                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, usePassQuality, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
                 this.isLoading = false;
                 this.icon = null;
                 this.nameImage = null;
@@ -1381,9 +1382,9 @@ public abstract class Current
                 this.elMaxUnder = null;
                 this.tleIsAccurate = tleAccurate;
             }
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathProgress, boolean loading)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathProgress, boolean usePassQuality, boolean loading)
             {
-                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null, false);
+                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePassQuality, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null, false);
                 isLoading = loading;
 
                 if(currentSatellite != null)
@@ -1402,21 +1403,17 @@ public abstract class Current
                     orbital2Type = currentSatellite2.getOrbitalType();
                 }
             }
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathProgress, boolean loading)
-            {
-                this(context, index, currentSatellite, null, usePathProgress, loading);
-            }
             public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean loading)
             {
-                this(context, index, currentSatellite, currentSatellite2, false, loading);
+                this(context, index, currentSatellite, currentSatellite2, false, false, loading);
             }
             public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean loading)
             {
-                this(context, index, currentSatellite, null, false, loading);
+                this(context, index, currentSatellite, null, false, false, loading);
             }
             public Item(CalculateService.PassData passData)
             {
-                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
+                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.showPassQuality, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
                 name = passData.name;
                 ownerCode = passData.ownerCode;
                 owner2Code = passData.owner2Code;

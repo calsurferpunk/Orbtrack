@@ -180,6 +180,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     case ScreenKey.ListView:
                         SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
+                        SwitchPreference passQualitySwitch = this.findPreference(Settings.PreferenceName.ListShowPassQuality);
                         IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
 
                         //initialize values
@@ -187,6 +188,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(pathProgressSwitch);
+                        setupSwitch(passQualitySwitch);
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
@@ -1478,6 +1480,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             //fall through
 
                         case Settings.PreferenceName.ListShowPassProgress:
+                        case Settings.PreferenceName.ListShowPassQuality:
                         case Settings.PreferenceName.MetricUnits:
                         case Settings.PreferenceName.AllowNumberCommas:
                             //recreate activity

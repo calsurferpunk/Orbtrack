@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -99,6 +98,7 @@ public abstract class Settings
         static final String LensFirstRun = "LensFirstRun";
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
+        static final String ListShowPassQuality = "ListShowPassQuality";
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
         static final String LensIndicator = "LensIndicator";
@@ -1949,6 +1949,7 @@ public abstract class Settings
             case PreferenceName.LensUseCamera:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.ListShowPassProgress:
+            case PreferenceName.ListShowPassQuality:
             case PreferenceName.MapMarkerShowShadow:
             case PreferenceName.MapMarkerLocationIconUseTint:
             case PreferenceName.MapRotateAllowed:
@@ -2494,6 +2495,12 @@ public abstract class Settings
     public static boolean getListPathProgress(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.ListShowPassProgress));
+    }
+
+    //Gets list pass quality being shown
+    public static boolean getListPassQuality(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.ListShowPassQuality));
     }
 
     //Gets list update delay

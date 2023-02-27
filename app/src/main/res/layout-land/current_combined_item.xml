@@ -206,7 +206,7 @@
                                 android:textColor="?attr/defaultTextColor"/>
 
                             <View
-                                android:id="@+id/Combined_Item_El_Max_Under"
+                                android:id="@+id/Combined_Item_Pass_Quality_View"
                                 android:layout_width="42dp"
                                 android:layout_height="1dp"
                                 android:background="@color/blue"/>

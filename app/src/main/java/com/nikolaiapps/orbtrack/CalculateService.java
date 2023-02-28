@@ -942,7 +942,7 @@ public class CalculateService extends NotifyService
             Context context = (Context)params[0];
             CalculatePathsTask task = (CalculatePathsTask)params[1];
             PassData[] passItems = (PassData[])params[2];
-            Current.Passes.Item[] savedPassItems = (Current.Passes.Item[])params[3];
+            Calculate.Passes.Item[] savedPassItems = (Calculate.Passes.Item[])params[3];
             Calculations.ObserverType observer = (Calculations.ObserverType)params[4];
             double minEl = (double)params[5];
             double intersection = (double)params[6];
@@ -1637,7 +1637,7 @@ public class CalculateService extends NotifyService
     }
 
     //Calculates paths for given items
-    private static void calculatePaths(@Nullable CalculateService service, CalculatePathsTask task, Context context, byte calculateType, @Nullable int[] ids, ArrayList<PassData> pathItems, Current.Passes.Item[] savedPassItems, Calculations.ObserverType observer, double minEl, double intersection, double julianStart, double julianEnd, boolean applyRefraction, boolean getAll, boolean allowPastEnd, boolean hideSlow, @Nullable CalculateListener listener)
+    private static void calculatePaths(@Nullable CalculateService service, CalculatePathsTask task, Context context, byte calculateType, @Nullable int[] ids, ArrayList<PassData> pathItems, Calculate.Passes.Item[] savedPassItems, Calculations.ObserverType observer, double minEl, double intersection, double julianStart, double julianEnd, boolean applyRefraction, boolean getAll, boolean allowPastEnd, boolean hideSlow, @Nullable CalculateListener listener)
     {
         boolean usingTask = (task != null);
         boolean usingSavedItems = (savedPassItems != null && savedPassItems.length > 0 && !savedPassItems[0].isLoading);
@@ -1786,7 +1786,7 @@ public class CalculateService extends NotifyService
     }
 
     //Calculate paths for orbital(s)
-    public static CalculatePathsTask calculateOrbitalPaths(Context context, byte calculateType, PassData passItem, Current.Passes.Item[] savedPassItems, Calculations.ObserverType observer, double minEl, double intersection, double julianStart, double julianEnd, boolean applyRefraction, CalculateListener listener)
+    public static CalculatePathsTask calculateOrbitalPaths(Context context, byte calculateType, PassData passItem, Calculate.Passes.Item[] savedPassItems, Calculations.ObserverType observer, double minEl, double intersection, double julianStart, double julianEnd, boolean applyRefraction, CalculateListener listener)
     {
         CalculatePathsTask task = new CalculatePathsTask(calculateType, listener);
 

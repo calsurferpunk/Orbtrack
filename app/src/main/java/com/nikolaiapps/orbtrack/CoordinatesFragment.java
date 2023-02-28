@@ -741,7 +741,10 @@ public interface CoordinatesFragment
                 @Override
                 public void onClick(View v)
                 {
-                    mapView.zoom(zoomIn);
+                    if(mapView != null)
+                    {
+                        mapView.zoom(zoomIn);
+                    }
                 }
             });
         }

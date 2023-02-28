@@ -131,10 +131,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private CalculateViewsTask currentViewAnglesTask;
     private CalculateViewsTask calculateViewAnglesTask;
     private CalculateCoordinatesTask calculateCoordinatesTask;
+    private Current.CalculatePathTask currentCoordinatesTask;
     private CalculateService.CalculatePathsTask currentPassesTask;
     private CalculateService.CalculatePathsTask calculatePassesTask;
     private CalculateService.CalculatePathsTask calculateIntersectionsTask;
-    private Current.Coordinates.CalculatePathTask currentCoordinatesTask;
     private static final ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
     private static Database.SatelliteData[] currentSatellites = new Database.SatelliteData[0];
     //
@@ -1101,7 +1101,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         if(cameraView != null)
                         {
                             //if calibrating
-                            if(Current.showCalibration)
+                            if(Current.lensShowCalibration)
                             {
                                 cancelCalibration = true;
                                 break;
@@ -1119,7 +1119,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     case Globals.SubPageType.Map:
                     case Globals.SubPageType.Globe:
                         //if not on lens and able to close settings menu
-                        if(currentSubPage != Globals.SubPageType.Lens && Current.Coordinates.closeSettingsMenu())
+                        if(currentSubPage != Globals.SubPageType.Lens && Current.closeMapSettingsMenu())
                         {
                             closedSettings = true;
                         }
@@ -1157,7 +1157,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Globals.SubPageType.Map:
                             case Globals.SubPageType.Globe:
                                 //if able to close settings menu
-                                if(Current.Coordinates.closeSettingsMenu())
+                                if(Current.closeMapSettingsMenu())
                                 {
                                     closedSettings = true;
                                     break;
@@ -1636,7 +1636,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         CameraLens cameraView = Current.getCameraView();
 
         //update displays and calculations
-        Current.Coordinates.setCurrentLocation(this, observer);
+        Current.setCurrentLocation(this, observer);
         if(cameraView != null)
         {
             //update camera view
@@ -1757,7 +1757,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         String currentNameSeparator;
         StringBuilder lineString = new StringBuilder();
         Resources res = this.getResources();
-        Current.ViewAngles.Item[] items;
+        Calculate.ViewAngles.Item[] items;
 
         try
         {
@@ -1803,7 +1803,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             for(index = 0; index < items.length; index++)
             {
                 //get current item
-                Current.ViewAngles.Item currentItem = items[index];
+                Calculate.ViewAngles.Item currentItem = items[index];
 
                 //save item to file
                 lineString.setLength(0);
@@ -1850,7 +1850,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         String startString = res.getString(R.string.title_start);
         String endString = res.getString(R.string.title_end);
         String timeString = res.getString(R.string.title_time);
-        Current.Passes.Item[] items;
+        Calculate.Passes.Item[] items;
 
         try
         {
@@ -1877,7 +1877,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             for(index = 0; index < items.length; index++)
             {
                 //get current item
-                Current.Passes.Item currentItem = items[index];
+                Calculate.Passes.Item currentItem = items[index];
 
                 //save item to file
                 line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + (isMoon ? (separator + Globals.getIlluminationString(currentItem.illumination)) : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
@@ -1904,7 +1904,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         String currentNameSeparator;
         StringBuilder lineString = new StringBuilder();
         Resources res = this.getResources();
-        Current.Coordinates.Item[] items;
+        Calculate.Coordinates.Item[] items;
 
         try
         {
@@ -1949,7 +1949,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             for(index = 0; index < items.length; index++)
             {
                 //get current item
-                Current.Coordinates.Item currentItem = items[index];
+                Calculate.Coordinates.Item currentItem = items[index];
 
                 //save item to file
                 lineString.setLength(0);
@@ -1998,8 +1998,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         String endString = res.getString(R.string.title_end);
         String timeString = res.getString(R.string.title_time);
         String closestIntersectionString = res.getString(R.string.title_closest_intersection_delta);
-        Current.Passes.Item firstItem;
-        Current.Passes.Item[] items;
+        Calculate.Passes.Item firstItem;
+        Calculate.Passes.Item[] items;
 
         try
         {
@@ -2027,7 +2027,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             for(index = 0; index < items.length; index++)
             {
                 //get current item
-                Current.Passes.Item currentItem = items[index];
+                Calculate.Passes.Item currentItem = items[index];
 
                 //save item to file
                 line = Globals.getDateTimeString(currentItem.passTimeStart) + separator + Globals.getDateTimeString(currentItem.passTimeEnd) + separator + currentItem.passDuration + separator + Globals.getNumberString(currentItem.passAzStart, false) + separator + Globals.getNumberString(currentItem.passAzEnd, false) + separator + Globals.getNumberString(currentItem.passAzTravel, false) + separator + Globals.getNumberString(currentItem.passElMax, false) + separator + Globals.getNumberString(currentItem.passClosestAz, false) + separator + Globals.getNumberString(currentItem.passClosestEl, false) + (isMoon ? (separator + Globals.getIlluminationString(currentItem.illumination)) : "") + (isSun || isMoon ? (separator + currentItem.phaseName) : "") + "\r\n";
@@ -2243,7 +2243,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Input)
                 {
                     //remove items when starting again
-                    Calculate.PageAdapter.setViewItems(new Current.ViewAngles.Item[0]);
+                    Calculate.PageAdapter.setViewItems(new Calculate.ViewAngles.Item[0]);
                 }
 
                 //save inputs
@@ -2252,7 +2252,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setSavedItems(Calculate.PageType.Passes, null);
-                    Calculate.PageAdapter.setPassItems(new Current.Passes.Item[0]);
+                    Calculate.PageAdapter.setPassItems(new Calculate.Passes.Item[0]);
                 }
 
                 //save items if viewing input
@@ -2260,7 +2260,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 if(calculateSubPage[Calculate.PageType.Coordinates] == Globals.SubPageType.Input)
                 {
                     //remove items when starting again
-                    Calculate.PageAdapter.setCoordinateItems(new Current.Coordinates.Item[0]);
+                    Calculate.PageAdapter.setCoordinateItems(new Calculate.Coordinates.Item[0]);
                 }
 
                 //save inputs
@@ -2269,7 +2269,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setSavedItems(Calculate.PageType.Intersection, null);
-                    Calculate.PageAdapter.setIntersectionItems(new Current.Passes.Item[0]);
+                    Calculate.PageAdapter.setIntersectionItems(new Calculate.Passes.Item[0]);
                 }
             }
         }
@@ -3335,7 +3335,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         switch(position)
                         {
                             case Calculate.PageType.View:
-                                Current.ViewAngles.Item[] viewItems = null;
+                                Calculate.ViewAngles.Item[] viewItems = null;
                                 params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
 
                                 //if adapter already exists
@@ -3369,7 +3369,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
                                 boolean forIntersection = (position == Calculate.PageType.Intersection);
-                                Current.Passes.Item[] passItems = null;
+                                Calculate.Passes.Item[] passItems = null;
                                 params = Calculate.PageAdapter.getParams(position);
 
                                 //if adapter already exists
@@ -3384,12 +3384,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 {
                                     if(forIntersection)
                                     {
-                                        Calculate.PageAdapter.setIntersectionItems(new Current.Passes.Item[0]);
+                                        Calculate.PageAdapter.setIntersectionItems(new Calculate.Passes.Item[0]);
                                         Calculate.PageAdapter.addIntersectionItems(passItems, 0);
                                     }
                                     else
                                     {
-                                        Calculate.PageAdapter.setPassItems(new Current.Passes.Item[0]);
+                                        Calculate.PageAdapter.setPassItems(new Calculate.Passes.Item[0]);
                                         Calculate.PageAdapter.addPassItems(passItems, 0);
                                     }
                                 }
@@ -3404,7 +3404,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 break;
 
                             case Calculate.PageType.Coordinates:
-                                Current.Coordinates.Item[] coordinateItems = null;
+                                Calculate.Coordinates.Item[] coordinateItems = null;
                                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Coordinates);
 
                                 //if adapter already exists
@@ -3919,8 +3919,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 double julianDate;
                 String coordinateString = null;
-                TextView mapInfoText = Current.Coordinates.getMapInfoText();
+                TextView mapInfoText = Current.getMapInfoText();
                 CameraLens cameraView = Current.getCameraView();
+                CoordinatesFragment mapView = Current.getMapViewIfReady();
                 TopographicDataType topographicData;
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 TopographicDataType[] selectedLookAngles = null;
@@ -3932,7 +3933,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //if on map
                     if(onMap)
                     {
-                        julianDate = Calculations.julianDateCalendar(Globals.getGMTTime(Current.millisecondsPlayBar));
+                        julianDate = Calculations.julianDateCalendar(Globals.getGMTTime(Current.mapMillisecondsPlayBar));
                     }
                     else
                     {
@@ -3948,12 +3949,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
 
                     //if showing current location on map
-                    if(onMap && Current.Coordinates.currentLocationMarker != null && Current.Coordinates.currentLocationMarker.getInfoVisible())
+                    if(onMap && Current.currentLocationMarker != null && Current.currentLocationMarker.getInfoVisible())
                     {
                         //update info display
                         coordinateString = Globals.getCoordinateString(MainActivity.this, observer.geo.latitude, observer.geo.longitude, observer.geo.altitudeKm);
-                        Current.Coordinates.currentLocationMarker.setInfoLocation();
-                        Current.Coordinates.currentLocationMarker.setInfoVisible(true);
+                        Current.currentLocationMarker.setInfoLocation();
+                        Current.currentLocationMarker.setInfoVisible(true);
                     }
 
                     //go through each satellite
@@ -4050,15 +4051,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
 
                             //if the orbital markers exist and showing map/globe
-                            if(onMap && Current.Coordinates.getMapViewReady() && Current.Coordinates.mapView.getOrbitalCount() > 0)
+                            if(onMap && mapView != null && mapView.getOrbitalCount() > 0)
                             {
                                 //get current marker
-                                final CoordinatesFragment.OrbitalBase currentMarker = Current.Coordinates.mapView.getOrbital(index);
+                                final CoordinatesFragment.OrbitalBase currentMarker = mapView.getOrbital(index);
                                 if(currentMarker != null)
                                 {
                                     //remember if current orbital is selected
                                     boolean singlePlaybackMarker = (mapViewNoradID == currentNoradId);
-                                    boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == Current.Coordinates.mapView.getSelectedNoradId());
+                                    boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapView.getSelectedNoradId());
 
                                     //if using multiple orbitals or current is selected
                                     if(multiOrbitals || currentOrbitalSelected)
@@ -4078,7 +4079,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             if(singlePlaybackMarker)
                                             {
                                                 //keep selection
-                                                Current.Coordinates.mapView.selectOrbital(currentNoradId);
+                                                mapView.selectOrbital(currentNoradId);
                                             }
 
                                             //make sure info is displayed
@@ -4095,7 +4096,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             //if julian date changed
                                             if(julianDate != lastJulianDate)
                                             {
-                                                Current.Coordinates.mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !Current.Coordinates.mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm)  : Current.Coordinates.mapView.getCameraZoom()));
+                                                mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm) : mapView.getCameraZoom()));
                                             }
 
                                             //update last
@@ -4168,7 +4169,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //update list
                         Current.PageAdapter.notifyItemsChanged();
                     }
-                    Current.Coordinates.handleMarkerScale();
+                    Current.handleMarkerScale();
 
                     //update camera view
                     if(onLens && cameraView != null)
@@ -4179,7 +4180,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //set to lens delay
                         timerDelay = lensTimerDelay;
                     }
-                    else if(onMap && Current.Coordinates.getMapViewReady())
+                    else if(onMap && mapView != null)
                     {
                         //set time map delay
                         timerDelay = mapTimerDelay;
@@ -4198,7 +4199,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
 
                     //if trying to show coordinate path and not calculated yet
-                    if(Current.Coordinates.getMapViewReady() && Current.Coordinates.showPaths && (currentCoordinatesTask == null || (currentCoordinatesTask.needCoordinates && !currentCoordinatesTask.isRunning())))
+                    if(mapView != null && Current.mapShowPaths && (currentCoordinatesTask == null || (currentCoordinatesTask.needCoordinates && !currentCoordinatesTask.isRunning())))
                     {
                         //start calculating locations
                         setCurrentCoordinateCalculations(true, julianDate);
@@ -4246,8 +4247,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 CalculateViewsTask.OrbitalView[] views = null;
                 CalculateViewsTask.OrbitalView[] views2 = null;
                 CalculateViewsTask.OrbitalView[][] currentViews = null;
-                Current.Passes.Item[] passesItems;
-                Current.ViewAngles.Item[] angleItems;
+                Calculate.Passes.Item[] passesItems;
+                Calculate.ViewAngles.Item[] angleItems;
                 ArrayList<Integer> multiNoradId = null;
 
                 //if lens exists
@@ -4266,7 +4267,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             for(index2 = 0; index2 < angleItems.length; index2++)
                             {
                                 //remember current item and possibly a previous time string
-                                Current.ViewAngles.Item currentAngleItem = angleItems[index2];
+                                Calculate.ViewAngles.Item currentAngleItem = angleItems[index2];
                                 CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? currentViews[index - 1][index2] : null);
                                 boolean havePrevious = (previousOrbitalItem != null);
 
@@ -4759,6 +4760,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void setCurrentCoordinateCalculations(boolean run, double julianDate)
     {
         final FloatingActionStateButton actionButton;
+        final CoordinatesFragment mapView = Current.getMapViewIfReady();
 
         //if task was running
         if(currentCoordinatesTask != null)
@@ -4771,9 +4773,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         actionButton = getCurrentActionButton();
 
         //if want to run and have items
-        if(run && Current.Coordinates.getMapViewReady() && Current.Coordinates.mapView.getOrbitalCount() > 0)
+        if(run && mapView != null && mapView.getOrbitalCount() > 0)
         {
-            currentCoordinatesTask = Current.Coordinates.calculateCoordinates(observer, julianDate, new Current.Coordinates.CalculatePathTask.OnProgressChangedListener()
+            currentCoordinatesTask = Current.calculateCoordinates(observer, julianDate, new Current.CalculatePathTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(final int index, final int progressType, final ArrayList<CoordinatesFragment.Coordinate> pathPoints)
@@ -4807,13 +4809,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 @Override
                                 public synchronized void run()
                                 {
-                                    //if map is ready
-                                    if(Current.Coordinates.getMapViewReady())
-                                    {
-                                        //update location points
-                                        Current.Coordinates.mapView.setPath(index, pathPoints);
-                                        Current.Coordinates.mapView.setPathVisible(index, (mapViewNoradID == Integer.MAX_VALUE || mapViewNoradID == Current.Coordinates.mapView.getOrbitalNoradId(index)));
-                                    }
+                                    //update location points
+                                    mapView.setPath(index, pathPoints);
+                                    mapView.setPathVisible(index, (mapViewNoradID == Integer.MAX_VALUE || mapViewNoradID == mapView.getOrbitalNoradId(index)));
                                 }
                             };
                             break;
@@ -4839,7 +4837,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Bundle params;
         ArrayList<Integer> oldMultiNoradId = new ArrayList<>(0);
         Database.SatelliteData firstSatellite;
-        Current.ViewAngles.Item[] savedViewItems;
+        Calculate.ViewAngles.Item[] savedViewItems;
 
         //if task was running
         if(calculateViewAnglesTask != null)
@@ -4853,7 +4851,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //get first satellite and any saved items and params
             firstSatellite = satellites[0];
-            savedViewItems = (Current.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.View);
+            savedViewItems = (Calculate.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.View);
             params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
 
             //check if params changed
@@ -4894,7 +4892,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             calculateViewAnglesTask = Calculate.calculateViews(this, satellites, savedViewItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
             {
                 //items to use
-                Current.ViewAngles.Item[] items = null;
+                Calculate.ViewAngles.Item[] items = null;
 
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
@@ -4929,13 +4927,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     if(items == null)
                                     {
                                         //setup items
-                                        items = new Current.ViewAngles.Item[pathPoints.size()];
+                                        items = new Calculate.ViewAngles.Item[pathPoints.size()];
 
                                         //go through each item
                                         for(index = 0; index < items.length; index++)
                                         {
                                             //remember current item, view, and time
-                                            Current.ViewAngles.Item currentItem = new Current.ViewAngles.Item(index, satellites.length);
+                                            Calculate.ViewAngles.Item currentItem = new Calculate.ViewAngles.Item(index, satellites.length);
                                             CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
                                             Calendar time = Globals.getLocalTime(currentView.gmtTime, observer.timeZone);
 
@@ -4951,7 +4949,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     for(index = 0; index < items.length; index++)
                                     {
                                         //remember current item, view, and data
-                                        Current.ViewAngles.Item currentItem = items[index];
+                                        Calculate.ViewAngles.Item currentItem = items[index];
                                         CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
                                         CalculateViewsTask.ViewData currentData = new CalculateViewsTask.ViewData();
 
@@ -5013,10 +5011,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private CalculateService.CalculatePathsTask setCalculatePathCalculations(boolean run, CalculateService.CalculatePathsTask task, byte calculateType, final Database.SatelliteData satellite1, final Database.SatelliteData satellite2, double julianDateStart, double julianDateEnd, double intersection, double minEl)
     {
         Bundle params;
-        Current.Passes.Item currentItem = (satellite1 != null ? new Current.Passes.Item(MainActivity.this, 0, satellite1, satellite2, true) : null);
+        Calculate.Passes.Item currentItem = (satellite1 != null ? new Calculate.Passes.Item(MainActivity.this, 0, satellite1, satellite2, true) : null);
         final boolean forIntersections = (calculateType == CalculateService.CalculateType.OrbitalIntersections);
         final int pageType = (forIntersections ? Calculate.PageType.Intersection : Calculate.PageType.Passes);
-        Current.Passes.Item[] savedPassItems;
+        Calculate.Passes.Item[] savedPassItems;
 
         //if task was running
         if(task != null)
@@ -5029,7 +5027,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         if(run && currentItem != null)
         {
             //get any saved items and params
-            savedPassItems = (Current.Passes.Item[])Calculate.PageAdapter.getSavedItems(pageType);
+            savedPassItems = (Calculate.Passes.Item[])Calculate.PageAdapter.getSavedItems(pageType);
             params = Calculate.PageAdapter.getParams(pageType);
 
             //check if params changed
@@ -5073,13 +5071,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             Calculate.PageAdapter.notifyHeaderChanged(pageType, satellite1.getSatelliteNum(), Globals.getHeaderText(MainActivity.this, satellite1.getName() + (satellite2 != null ? (", " + satellite2.getName()) : ""), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), (forIntersections ? params.getDouble(Calculate.ParamTypes.IntersectionDegs, -Double.MAX_VALUE) : -Double.MAX_VALUE)));
                                             if(forIntersections)
                                             {
-                                                Calculate.PageAdapter.setIntersectionItems(new Current.Passes.Item[0]);
-                                                Calculate.PageAdapter.addIntersectionItem(new Current.Passes.Item(null, 0, null, true));
+                                                Calculate.PageAdapter.setIntersectionItems(new Calculate.Passes.Item[0]);
+                                                Calculate.PageAdapter.addIntersectionItem(new Calculate.Passes.Item(null, 0, null, true));
                                             }
                                             else
                                             {
-                                                Calculate.PageAdapter.setPassItems(new Current.Passes.Item[0]);
-                                                Calculate.PageAdapter.addPassItem(new Current.Passes.Item(null, 0, null, true));
+                                                Calculate.PageAdapter.setPassItems(new Calculate.Passes.Item[0]);
+                                                Calculate.PageAdapter.addPassItem(new Calculate.Passes.Item(null, 0, null, true));
                                             }
                                         }
                                         updateOptionsMenu();
@@ -5096,7 +5094,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     public void run()
                                     {
                                         int count = Calculate.PageAdapter.getCount(pageType);
-                                        Current.Passes.Item lastItem;
+                                        Calculate.Passes.Item lastItem;
 
                                         //remove loading item and update menu
                                         if(forIntersections)
@@ -5135,11 +5133,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 //add current pass
                                 if(forIntersections)
                                 {
-                                    Calculate.PageAdapter.addIntersectionItem(new Current.Passes.Item(pass));
+                                    Calculate.PageAdapter.addIntersectionItem(new Calculate.Passes.Item(pass));
                                 }
                                 else
                                 {
-                                    Calculate.PageAdapter.addPassItem(new Current.Passes.Item(pass));
+                                    Calculate.PageAdapter.addPassItem(new Calculate.Passes.Item(pass));
                                 }
                             }
                         };
@@ -5179,7 +5177,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Bundle params;
         ArrayList<Integer> oldMultiNoradId = new ArrayList<>(0);
         Database.SatelliteData firstSatellite;
-        Current.Coordinates.Item[] savedCoordinateItems;
+        Calculate.Coordinates.Item[] savedCoordinateItems;
 
         //if task was running
         if(calculateCoordinatesTask != null)
@@ -5193,7 +5191,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //get first satellite and any saved items and params
             firstSatellite = satellites[0];
-            savedCoordinateItems = (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates);
+            savedCoordinateItems = (Calculate.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates);
             params = Calculate.PageAdapter.getParams(Calculate.PageType.Coordinates);
 
             //check if params changed
@@ -5234,7 +5232,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             calculateCoordinatesTask = Calculate.calculateCoordinates(this, satellites, savedCoordinateItems, observer, julianDateStart, julianDateEnd, dayIncrement, new CalculateCoordinatesTask.OnProgressChangedListener()
             {
                 //items to use
-                private Current.Coordinates.Item[] items = null;
+                private Calculate.Coordinates.Item[] items = null;
 
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
@@ -5269,13 +5267,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     if(items == null)
                                     {
                                         //setup items
-                                        items = new Current.Coordinates.Item[pathPoints.size()];
+                                        items = new Calculate.Coordinates.Item[pathPoints.size()];
 
                                         //go through each item
                                         for(index = 0; index < items.length; index++)
                                         {
                                             //remember current item, coordinate, and time
-                                            Current.Coordinates.Item currentItem = new Current.Coordinates.Item(index, satellites.length);
+                                            Calculate.Coordinates.Item currentItem = new Calculate.Coordinates.Item(index, satellites.length);
                                             CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
                                             Calendar time = Globals.getLocalTime(currentCoordinate.time, observer.timeZone);
 
@@ -5291,7 +5289,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     for(index = 0; index < items.length; index++)
                                     {
                                         //remember current item, coordinate, and data
-                                        Current.Coordinates.Item currentItem = items[index];
+                                        Calculate.Coordinates.Item currentItem = items[index];
                                         CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
                                         CalculateCoordinatesTask.CoordinateData currentData = new CalculateCoordinatesTask.CoordinateData();
 

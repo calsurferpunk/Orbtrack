@@ -62,7 +62,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         calculatingCoordinates = false;
     }
 
-    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, Calculations.SatelliteObjectType currentSatellite, int satelliteIndex, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement)
+    private ArrayList<OrbitalCoordinate> getCoordinates(Context context, Calculations.SatelliteObjectType currentSatellite, int satelliteIndex, Calculate.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement)
     {
         int index = 0;
         double phase;
@@ -88,7 +88,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
             if(savedCoordinateItems != null && index < savedCoordinateItems.length && satelliteIndex < savedCoordinateItems[index].coordinates.length && coordinateJulianDate == savedCoordinateItems[index].julianDate)
             {
                 //remember current item
-                Current.Coordinates.Item currentItem = savedCoordinateItems[index];
+                Calculate.Coordinates.Item currentItem = savedCoordinateItems[index];
 
                 //set next coordinate
                 geoData.latitude = currentItem.coordinates[satelliteIndex].latitude;
@@ -167,7 +167,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         Context context = (Context)params[0];
         Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
         Calculations.SatelliteObjectType[] satelliteObjects = (Calculations.SatelliteObjectType[])params[1];
-        Current.Coordinates.Item[] savedCoordinateItems = (Current.Coordinates.Item[])params[2];
+        Calculate.Coordinates.Item[] savedCoordinateItems = (Calculate.Coordinates.Item[])params[2];
 
         //update progress
         onProgressChanged(Globals.ProgressType.Started, Integer.MAX_VALUE, null);

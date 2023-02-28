@@ -5,12 +5,16 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.recyclerview.widget.RecyclerView;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.Spanned;
 import android.text.TextWatcher;
@@ -21,14 +25,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
+import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.TimeZone;
+import java.util.TimerTask;
 
 
 public abstract class Calculate
@@ -79,6 +88,1429 @@ public abstract class Calculate
             this.noradId = Universe.IDs.Invalid;
             this.illumination = 0;
             this.phaseName = null;
+        }
+    }
+
+    private static class ItemHolderBase extends RecyclerView.ViewHolder
+    {
+        public final TextView nameText;
+        public final TextView dataGroup1Text;
+        public final TextView dataGroup2Text;
+        public final TextView dataGroup3Text;
+        public final TextView dataGroup4Text;
+        public final TextView dataGroup5Text;
+        public final LinearLayout dataGroup;
+        public final AppCompatImageView nameImage;
+
+        public ItemHolderBase(View itemView, int dataGroup1TextID, int dataGroup2TextID, int dataGroup3TextID, int dataGroup4TextID, int dataGroup5TextID, int dataGroupID, int nameImageID, int nameTextID)
+        {
+            super(itemView);
+
+            dataGroup1Text = itemView.findViewById(dataGroup1TextID);
+            dataGroup2Text = itemView.findViewById(dataGroup2TextID);
+            dataGroup3Text = (dataGroup3TextID > -1 ? (TextView)itemView.findViewById(dataGroup3TextID) : null);
+            dataGroup4Text = (dataGroup4TextID > -1 ? (TextView)itemView.findViewById(dataGroup4TextID) : null);
+            dataGroup5Text = (dataGroup5TextID > -1 ? (TextView)itemView.findViewById(dataGroup5TextID) : null);
+            dataGroup = itemView.findViewById(dataGroupID);
+            nameImage = (nameImageID > -1 ? (AppCompatImageView)itemView.findViewById(nameImageID) : null);
+            nameText = (nameTextID > - 1 ? (TextView)itemView.findViewById(nameTextID) : null);
+        }
+    }
+
+    //Angles
+    public static abstract class ViewAngles
+    {
+        //Item
+        public static class Item extends Selectable.ListItem
+        {
+            public boolean isLoading;
+            public double julianDate;
+            public Calendar time;
+            public TextView timeText;
+            public TextView azText;
+            public TextView elText;
+            public TextView rangeText;
+            public TextView phaseText;
+            public TextView illuminationText;
+            public ExpandingListView subList;
+            public LinearLayout dataGroup;
+            public LinearLayout progressGroup;
+            public final CalculateViewsTask.ViewData[] views;
+
+            public Item(int index, int viewCount)
+            {
+                super(Integer.MAX_VALUE, index, false, false, false, false);
+
+                isLoading = (viewCount < 1);
+                if(isLoading)
+                {
+                    viewCount = 1;
+                }
+                views = new CalculateViewsTask.ViewData[viewCount];
+                for(index = 0; index < views.length; index++)
+                {
+                    views[index] = new CalculateViewsTask.ViewData();
+                }
+                julianDate = Double.MAX_VALUE;
+                time = Globals.getCalendar(null, 0);
+                timeText = null;
+                azText = null;
+                elText = null;
+                rangeText = null;
+                phaseText = null;
+                illuminationText = null;
+                progressGroup = null;
+                dataGroup = null;
+            }
+
+            public void updateDisplays(Context context, int widthDp, boolean haveSun, boolean haveMoon)
+            {
+                if(azText != null)
+                {
+                    azText.setText(views[0].azimuth != Float.MAX_VALUE ? Globals.getDegreeString(views[0].azimuth) : "-");
+                }
+                if(elText != null)
+                {
+                    elText.setText(views[0].elevation != Float.MAX_VALUE ? Globals.getDegreeString(views[0].elevation) : "-");
+                }
+                if(rangeText != null)
+                {
+                    rangeText.setText(views[0].rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(views[0].rangeKm, 0) : "-");
+                }
+                if(phaseText != null)
+                {
+                    phaseText.setText(views[0].phaseName == null ? "-" : views[0].phaseName);
+                }
+                if(illuminationText != null)
+                {
+                    illuminationText.setText(Globals.getIlluminationString(views[0].illumination));
+                }
+                if(timeText != null && time != null && context != null)
+                {
+                    timeText.setText(Globals.getDateTimeString(context, Globals.getLocalTime(time, time.getTimeZone()), true, true, false));
+                }
+                if(subList != null && context != null && views.length > 1)
+                {
+                    subList.setAdapter(new SubItemListAdapter(context, julianDate, views, widthDp, haveSun, haveMoon));
+                }
+            }
+
+            public void setLoading(boolean loading, boolean tleIsAccurate)
+            {
+                isLoading = loading && tleIsAccurate;
+
+                if(progressGroup != null)
+                {
+                    progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                }
+                if(dataGroup != null)
+                {
+                    dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
+                if(subList != null)
+                {
+                    subList.setVisibility(loading ? View.GONE : View.VISIBLE);
+                }
+            }
+        }
+
+        //Item holder
+        public static class ItemHolder extends ItemHolderBase
+        {
+            public final TextView timeText;
+            public final LinearLayout progressGroup;
+            public final ExpandingListView subList;
+
+            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID, int subListID)
+            {
+                super(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, dataGroupID, -1, -1);
+                progressGroup = itemView.findViewById(progressGroupID);
+                timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
+                subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
+            }
+            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID)
+            {
+                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupID, timeTextID, -1);
+            }
+            public ItemHolder(View itemView, int progressGroupID, int subListID)
+            {
+                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, subListID);
+            }
+        }
+
+        //Item list adapter
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
+        {
+            private boolean haveSun;
+            private boolean haveMoon;
+            private final Current.Items viewItems;
+
+            public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
+            {
+                super(context);
+
+                haveSun = haveMoon = false;
+
+                //remember strings and layout ID
+                this.itemsRefID = R.layout.current_view_item;
+
+                //ID stays the same
+                this.setHasStableIds(true);
+
+                viewItems = new Current.Items(MainActivity.Groups.Calculate, PageType.View);
+
+                //if there are saved items
+                if(savedItems != null && savedItems.length > 0)
+                {
+                    //set as saved items
+                    viewItems.set(savedItems);
+                }
+                else
+                {
+                    //set as empty
+                    viewItems.set(new Item[]{new Item(0, 0)});
+                }
+
+                //remember layout ID
+                forSubItems = (multiCount > 1);
+                if(forSubItems)
+                {
+                    this.itemsRefSubId = this.itemsRefID;
+                    this.itemsRefID = R.layout.current_multi_item;
+                }
+
+                updateHasItems();
+            }
+
+            @Override
+            public int getItemCount()
+            {
+                return(viewItems.getCount());
+            }
+
+            @Override
+            public Item getItem(int position)
+            {
+                return(viewItems.getViewItem(position));
+            }
+
+            @Override
+            public long getItemId(int position)
+            {
+                Item currentItem = viewItems.getViewItem(position);
+                return(currentItem != null ? currentItem.listIndex : Integer.MIN_VALUE);
+            }
+
+            @Override
+            protected void setHeader(View header)
+            {
+                super.setHeader(header);
+                header.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected boolean showColumnTitles(int page)
+            {
+                return(true);
+            }
+
+            @Override
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
+            {
+                String text;
+                TextView timeText;
+                TextView phaseText;
+                TextView illuminationText;
+                Resources res = currentContext.getResources();
+                boolean isSun = (dataID == Universe.IDs.Sun);
+                boolean isMoon = (dataID == Universe.IDs.Moon);
+
+                if(!forSubItems)
+                {
+                    timeText = listColumns.findViewById(R.id.Angles_Time_Text);
+                    timeText.setText(R.string.title_time);
+                    timeText.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    isSun = haveSun;
+                    isMoon = haveMoon;
+                }
+
+                phaseText = listColumns.findViewById(R.id.Angles_Phase_Text);
+                phaseText.setText(R.string.title_phase);
+                phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+
+                illuminationText = listColumns.findViewById(R.id.Angles_Illumination_Text);
+                illuminationText.setText(R.string.abbrev_illumination);
+                illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                listColumns.findViewById(R.id.Angles_Progress_Group).setVisibility(View.GONE);
+                listColumns.findViewById(R.id.Angles_Data_Group).setVisibility(View.VISIBLE);
+                ((TextView)listColumns.findViewById(R.id.Angles_Az_Text)).setText(R.string.title_azimuth);
+                ((TextView)listColumns.findViewById(R.id.Angles_El_Text)).setText(R.string.title_elevation);
+                text = res.getString(R.string.title_range) + " (" + Globals.getKmLabel(res) + ")";
+                ((TextView)listColumns.findViewById(R.id.Angles_Range_Text)).setText(text);
+
+                super.setColumnTitles(listColumns, categoryText, page);
+            }
+
+            @Override
+            public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+            {
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
+                ItemHolder itemHolder;
+
+                if(forSubItems)
+                {
+                    itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
+                }
+                else
+                {
+                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
+                }
+
+                setItemSelector(itemView);
+                setViewClickListeners(itemView, itemHolder);
+                return(itemHolder);
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
+            {
+                Item currentItem = viewItems.getViewItem(position);
+                ItemHolder itemHolder = (ItemHolder)holder;
+                boolean isSun =  (currentItem.id == Universe.IDs.Sun);
+                boolean isMoon = (currentItem.id == Universe.IDs.Moon);
+
+                //get displays
+                currentItem.timeText = itemHolder.timeText;
+                if(currentItem.timeText != null)
+                {
+                    currentItem.timeText.setVisibility(View.VISIBLE);
+                }
+
+                if(forSubItems)
+                {
+                    isSun = haveSun;
+                    isMoon = haveMoon;
+                }
+
+                currentItem.phaseText = itemHolder.dataGroup4Text;
+                if(currentItem.phaseText != null)
+                {
+                    currentItem.phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                }
+
+                currentItem.illuminationText = itemHolder.dataGroup5Text;
+                if(currentItem.illuminationText != null)
+                {
+                    currentItem.illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
+                }
+
+                currentItem.subList = itemHolder.subList;
+                currentItem.progressGroup = itemHolder.progressGroup;
+                currentItem.dataGroup = itemHolder.dataGroup;
+                if(currentItem.dataGroup != null)
+                {
+                    currentItem.dataGroup.setVisibility(View.GONE);
+                }
+                currentItem.azText = itemHolder.dataGroup1Text;
+                currentItem.elText = itemHolder.dataGroup2Text;
+                currentItem.rangeText = itemHolder.dataGroup3Text;
+
+                //update displays
+                currentItem.setLoading(!hasItems, true);
+                currentItem.updateDisplays(currentContext, widthDp, haveSun, haveMoon);
+            }
+
+            //Updates status of having items
+            public void updateHasItems()
+            {
+                int index;
+                int index2;
+                int noradId;
+                int count = viewItems.getCount();
+                hasItems = (count > 1 || (count > 0 && !viewItems.getViewItem(0).isLoading));
+
+                //reset
+                haveSun = haveMoon = false;
+
+                //go through needed items while sun or moon not found
+                for(index = 0; index < (forSubItems ? 1 : count) && (!haveSun || !haveMoon); index++)
+                {
+                    //remember current item
+                    Item currentItem = viewItems.getViewItem(index);
+                    if(currentItem != null)
+                    {
+                        //if for sub items
+                        if(forSubItems)
+                        {
+                            //go through each view
+                            for(index2 = 0; index2 < currentItem.views.length && (!haveSun || !haveMoon); index2++)
+                            {
+                                //check if current is sun or moon
+                                noradId = currentItem.views[index2].noradId;
+                                haveSun = haveSun || (noradId == Universe.IDs.Sun);
+                                haveMoon = haveMoon || (noradId == Universe.IDs.Moon);
+                            }
+                        }
+                        else
+                        {
+                            //check if current is sun or moon
+                            noradId = currentItem.id;
+                            haveSun = haveSun || (noradId == Universe.IDs.Sun);
+                            haveMoon = haveMoon || (noradId == Universe.IDs.Moon);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Sub item list adapter
+        private static class SubItemListAdapter extends SubItemBaseListAdapter
+        {
+            private final boolean haveSun;
+            private final boolean haveMoon;
+
+            public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
+            {
+                super(context, julianDate, items, R.layout.current_view_item, R.id.Angles_Title_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Divider, widthDp);
+                this.haveSun = haveSun;
+                this.haveMoon = haveMoon;
+            }
+
+            @Override
+            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
+            {
+                boolean isSun;
+                boolean isMoon;
+                boolean showPhase = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_SHORT_WIDTH_DP);
+                boolean showIllumination = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_2_SHORT_WIDTH_DP);
+                TextView phaseText;
+                TextView illuminationText;
+                CalculateDataBase currentData = dataItems[childPosition];
+
+                convertView = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
+                if(currentData instanceof CalculateViewsTask.ViewData)
+                {
+                    CalculateViewsTask.ViewData currentViewData = (CalculateViewsTask.ViewData)currentData;
+                    isSun = (currentData.noradId == Universe.IDs.Sun);
+                    isMoon = (currentData.noradId == Universe.IDs.Moon);
+                    ((TextView)convertView.findViewById(R.id.Angles_Az_Text)).setText(Globals.getDegreeString(currentViewData.azimuth));
+                    ((TextView)convertView.findViewById(R.id.Angles_El_Text)).setText(Globals.getDegreeString(currentViewData.elevation));
+                    ((TextView)convertView.findViewById(R.id.Angles_Range_Text)).setText(Globals.getKmUnitValueString(currentViewData.rangeKm, 0));
+                    phaseText = convertView.findViewById(R.id.Angles_Phase_Text);
+                    if(phaseText != null)
+                    {
+                        phaseText.setText(currentViewData.phaseName);
+                        phaseText.setVisibility(showPhase && (isSun || isMoon) ? View.VISIBLE : (showPhase && (haveSun || haveMoon)) ? View.INVISIBLE : View.GONE);
+                    }
+                    illuminationText = convertView.findViewById(R.id.Angles_Illumination_Text);
+                    if(illuminationText != null)
+                    {
+                        illuminationText.setText(Globals.getIlluminationString(currentViewData.illumination));
+                        illuminationText.setVisibility(showIllumination && isMoon ? View.VISIBLE : (showIllumination && haveMoon) ? View.INVISIBLE : View.GONE);
+                    }
+                }
+
+                return(convertView);
+            }
+        }
+    }
+
+    //Passes
+    public static abstract class Passes
+    {
+        //Item
+        public static class Item extends CalculateService.PassData
+        {
+            private Drawable icon;
+
+            public boolean isLoading;
+            public boolean tleIsAccurate;
+            public View timeStartUnder;
+            public View elMaxUnder;
+            public AppCompatImageView nameImage;
+            public TextView nameText;
+            public TextView timeStartText;
+            public TextView timeEndText;
+            public TextView timeDurationText;
+            public TextView elMaxText;
+            public LinearProgressIndicator progressBar;
+            public LinearProgressIndicator progressStatusBar;
+            public LinearLayout dataGroup;
+
+            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
+            {
+                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, usePassQuality, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
+                this.isLoading = false;
+                this.icon = null;
+                this.nameImage = null;
+                this.nameText = null;
+                this.progressBar = null;
+                this.progressStatusBar = null;
+                this.dataGroup = null;
+                this.timeStartText = null;
+                this.timeStartUnder = null;
+                this.timeEndText = null;
+                this.timeDurationText = null;
+                this.elMaxText = null;
+                this.elMaxUnder = null;
+                this.tleIsAccurate = tleAccurate;
+            }
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathProgress, boolean usePassQuality, boolean loading)
+            {
+                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePassQuality, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null, false);
+                isLoading = loading;
+
+                if(currentSatellite != null)
+                {
+                    id = currentSatellite.getSatelliteNum();
+                    orbitalType = orbital2Type = currentSatellite.getOrbitalType();
+                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, orbitalType);
+                    name = currentSatellite.getName();
+                    ownerCode = currentSatellite.getOwnerCode();
+                    satellite = currentSatellite.satellite;
+                    tleIsAccurate = currentSatellite.getTLEIsAccurate();
+                }
+                if(currentSatellite2 != null)
+                {
+                    satellite2 = currentSatellite2.satellite;
+                    orbital2Type = currentSatellite2.getOrbitalType();
+                }
+            }
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean loading)
+            {
+                this(context, index, currentSatellite, currentSatellite2, false, false, loading);
+            }
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean loading)
+            {
+                this(context, index, currentSatellite, null, false, false, loading);
+            }
+            public Item(CalculateService.PassData passData)
+            {
+                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.showPassQuality, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
+                name = passData.name;
+                ownerCode = passData.ownerCode;
+                owner2Code = passData.owner2Code;
+                orbitalType = passData.orbitalType;
+                orbital2Type = passData.orbital2Type;
+                illumination = passData.illumination;
+                phaseName = passData.phaseName;
+            }
+
+            public void setLoading(boolean loading, boolean tleIsAccurate)
+            {
+                isLoading = loading && tleIsAccurate;
+
+                if(progressBar != null)
+                {
+                    progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                }
+                if(dataGroup != null)
+                {
+                    dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
+            }
+
+            public boolean inUnknownPassTimeStartNow()
+            {
+                Calendar timeNow = Globals.getGMTTime();
+                return(!passStartFound && passTimeStart != null && timeNow.after(passTimeStart) && (passTimeEnd == null || timeNow.before(passTimeEnd)));
+            }
+
+            public void updateDisplays(Context context, TimeZone zone)
+            {
+                long timeMs;
+                float elapsedPercent;
+
+                if(context != null)
+                {
+                    if(nameImage != null && icon != null)
+                    {
+                        nameImage.setBackgroundDrawable(icon);
+                    }
+
+                    if(nameText != null)
+                    {
+                        nameText.setText(name);
+                    }
+
+                    if(timeStartText != null)
+                    {
+                        timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
+                    }
+
+                    if(timeStartUnder != null)
+                    {
+                        timeMs = System.currentTimeMillis();
+                        timeStartUnder.setVisibility(inUnknownPassTimeStartNow() || (passTimeStart != null && passStartFound && timeMs >= passTimeStart.getTimeInMillis() && (passTimeEnd == null || timeMs <= passTimeEnd.getTimeInMillis())) ? View.VISIBLE : View.GONE);
+                    }
+
+                    if(timeEndText != null)
+                    {
+                        timeEndText.setText(!passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeEnd, zone, true, false));
+                    }
+
+                    if(timeDurationText != null)
+                    {
+                        timeDurationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
+                    }
+
+                    if(elMaxText != null)
+                    {
+                        elMaxText.setText(isKnownPassElevationMax() ? Globals.getDegreeString(passElMax) : "");
+                    }
+
+                    if(elMaxUnder != null)
+                    {
+                        elMaxUnder.setBackgroundColor(passElMax == Double.MAX_VALUE ? Color.TRANSPARENT : passElMax >= 60 ? Color.GREEN : passElMax >= 30 ? Color.YELLOW : Color.RED);
+                    }
+
+                    if(progressStatusBar != null)
+                    {
+                        elapsedPercent = (showPathProgress ? getPassProgressPercent(Globals.getGMTTime()) : Float.MAX_VALUE);
+                        progressStatusBar.setVisibility(elapsedPercent != Float.MAX_VALUE ? View.VISIBLE : View.GONE);
+                        if(elapsedPercent != Float.MAX_VALUE)
+                        {
+                            progressStatusBar.setProgress((int)elapsedPercent);
+                        }
+                    }
+                }
+            }
+        }
+
+        //Item holder
+        public static class ItemHolder extends ItemHolderBase
+        {
+            public final LinearProgressIndicator calculateProgressBar;
+            public final View timeStartUnder;
+            public final View elMaxUnder;
+
+            public ItemHolder(View itemView, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxTextID, int elMaxUnderID, int calculateProgressBarID, int dataGroupID)
+            {
+                super(itemView, timeStartTextID, timeDurationTextID, timeEndTextID, elMaxTextID, -1, dataGroupID, -1, -1);
+                calculateProgressBar = itemView.findViewById(calculateProgressBarID);
+                timeStartUnder = itemView.findViewById(timeStartUnderID);
+                elMaxUnder = itemView.findViewById(elMaxUnderID);
+            }
+        }
+
+        //Item list adapter
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
+        {
+            private final Current.Items pathItems;
+
+            public ItemListAdapter(Context context, int page, Item[] savedItems, Database.SatelliteData[] satellites)
+            {
+                super(context);
+
+                pathItems = new Current.Items(MainActivity.Groups.Calculate, page);
+
+                //if there are saved items
+                if(savedItems != null && savedItems.length > 0)
+                {
+                    //set as saved items
+                    pathItems.set(savedItems);
+                    hasItems = true;
+                }
+                else
+                {
+                    //if satellites are not set
+                    hasItems = (satellites != null);
+
+                    //set as empty
+                    pathItems.set(new Item[]{new Item(context, 0, null, true)});
+                }
+
+                //remember strings and layout ID
+                this.itemsRefID = R.layout.current_pass_item;
+
+                //ID stays the same
+                this.setHasStableIds(true);
+            }
+
+            @Override
+            public int getItemCount()
+            {
+                return(pathItems.getCount());
+            }
+
+            @Override
+            public Item getItem(int position)
+            {
+                return(pathItems.getPassItem(position));
+            }
+
+            @Override
+            public long getItemId(int position)
+            {
+                Item currentItem = pathItems.getPassItem(position);
+                return(currentItem != null ? currentItem.listIndex : Integer.MIN_VALUE);
+            }
+
+            @Override
+            protected void setHeader(View header)
+            {
+                super.setHeader(header);
+                header.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected boolean showColumnTitles(int page)
+            {
+                return(true);
+            }
+
+            @Override
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
+            {
+                String text;
+                boolean showEnd = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                TextView passTimeEndText;
+                Resources res = currentContext.getResources();
+
+                listColumns.findViewById(R.id.Pass_Data_Group).setVisibility(View.VISIBLE);
+                ((TextView)listColumns.findViewById(R.id.Pass_Time_Start_Text)).setText(R.string.title_start);
+                passTimeEndText = listColumns.findViewById(R.id.Pass_Time_End_Text);
+                if(passTimeEndText != null)
+                {
+                    passTimeEndText.setText(R.string.title_end);
+                    passTimeEndText.setVisibility(showEnd ? View.VISIBLE : View.GONE);
+                }
+                ((TextView)listColumns.findViewById(R.id.Pass_Time_Duration_Text)).setText(R.string.title_duration);
+                text = res.getString(R.string.abbrev_elevation) + " " + res.getString(R.string.title_max);
+                ((TextView)listColumns.findViewById(R.id.Pass_El_Max_Text)).setText(text);
+                listColumns.findViewById(R.id.Pass_El_Max_Under).setVisibility(View.GONE);
+
+                super.setColumnTitles(listColumns, categoryText, page);
+            }
+
+            @Override
+            public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+            {
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
+                ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group);
+
+                setItemSelector(itemView);
+                setViewClickListeners(itemView, itemHolder);
+                return(itemHolder);
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
+            {
+                boolean showEnd = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                Item currentItem = pathItems.getPassItem(position);
+                ItemHolder itemHolder = (ItemHolder)holder;
+
+                //get displays
+                currentItem.nameImage = itemHolder.nameImage;
+                currentItem.nameText = itemHolder.nameText;
+                itemHolder.calculateProgressBar.setVisibility(View.VISIBLE);
+                currentItem.progressBar = itemHolder.calculateProgressBar;
+                currentItem.progressStatusBar = null;
+                currentItem.dataGroup = itemHolder.dataGroup;
+                if(currentItem.dataGroup != null)
+                {
+                    currentItem.dataGroup.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
+                }
+                currentItem.timeStartText = itemHolder.dataGroup1Text;
+                currentItem.timeStartUnder = itemHolder.timeStartUnder;
+                currentItem.timeDurationText = itemHolder.dataGroup2Text;
+                currentItem.timeEndText = itemHolder.dataGroup3Text;
+                if(currentItem.timeEndText != null)
+                {
+                    currentItem.timeEndText.setVisibility(showEnd ? View.VISIBLE : View.GONE);
+                }
+                currentItem.elMaxText = itemHolder.dataGroup4Text;
+                currentItem.elMaxUnder = itemHolder.elMaxUnder;
+                currentItem.elMaxUnder.setVisibility(View.GONE);
+
+                //set displays
+                currentItem.setLoading(!hasItems || !currentItem.passCalculateFinished, true);
+                currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
+            }
+
+            @Override
+            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+            {
+                final Item currentItem = (Item)item;
+
+                //if pass has been calculated
+                if(currentItem.passCalculated)
+                {
+                    final TimeZone defaultZone = TimeZone.getDefault();
+                    final TimeZone currentZone = MainActivity.getTimeZone();
+                    final long midPassTimeMs = currentItem.getMidPass();
+                    final long currentTimeMs = System.currentTimeMillis();
+                    final long passDurationMs = (currentItem.passTimeStart != null && currentItem.passTimeEnd != null ? (currentItem.passTimeEnd.getTimeInMillis() - currentItem.passTimeStart.getTimeInMillis()) : 0);
+                    final boolean haveSatellite2 = (currentItem.satellite2 != null);
+                    final boolean isSun = (item.id == Universe.IDs.Sun || (haveSatellite2 && currentItem.satellite2.getSatelliteNum() == Universe.IDs.Sun));
+                    final boolean isMoon = (item.id == Universe.IDs.Moon || (haveSatellite2 && currentItem.satellite2.getSatelliteNum() == Universe.IDs.Moon));
+                    final boolean useLocalZone = (!defaultZone.equals(currentZone) && defaultZone.getOffset(currentTimeMs) != currentZone.getOffset(currentTimeMs));
+                    final Calculations.ObserverType location = MainActivity.getObserver();
+                    final Resources res = currentContext.getResources();
+                    final String unknownString = Globals.getUnknownString(currentContext);
+                    final String azAbbrevString = res.getString(R.string.abbrev_azimuth);
+                    final String startString = res.getString(R.string.title_start);
+                    final String endString = res.getString(R.string.title_end);
+                    final String localString = res.getString(R.string.title_local);
+                    final String azTravelString = azAbbrevString + " " + res.getString(R.string.title_travel);
+                    final String elMaxString = res.getString(R.string.abbrev_elevation) + " " + res.getString(R.string.title_max);
+                    final Drawable orbital1Icon = Globals.getOrbitalIcon(currentContext, location, currentItem.id, currentItem.orbitalType, midPassTimeMs, 0);
+                    final Drawable orbital2Icon = (haveSatellite2 ? Globals.getOrbitalIcon(currentContext, location, currentItem.satellite2.getSatelliteNum(), currentItem.orbital2Type, 0) : null);
+                    final TextView[] detailTexts;
+                    final TextView[] detailTitles;
+
+                    //create dialog
+                    final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, new int[]{currentItem.id, currentItem.id2}, currentItem.name, new String[]{currentItem.ownerCode, currentItem.owner2Code}, new Drawable[]{orbital1Icon, orbital2Icon}, itemDetailButtonClickListener);
+                    final View passProgressLayout = detailDialog.findViewById(R.id.Item_Detail_Progress_Layout);
+                    final LinearProgressIndicator passProgress = detailDialog.findViewById(R.id.Item_Detail_Progress);
+                    final TextView passProgressText = detailDialog.findViewById(R.id.Item_Detail_Progress_Text);
+                    final Graph elevationGraph = detailDialog.findViewById(R.id.Item_Detail_Graph);
+                    detailDialog.addGroup(R.string.title_pass, R.string.title_time_until, R.string.title_duration, R.string.title_placeholder, R.string.title_placeholder, (useLocalZone ? R.string.title_placeholder : R.string.empty), (useLocalZone ? R.string.title_placeholder : R.string.empty), R.string.title_placeholder, R.string.title_placeholder, R.string.title_placeholder, R.string.title_placeholder);
+                    detailDialog.moveProgress();
+                    if(haveSatellite2)
+                    {
+                        detailDialog.addGroup(R.string.title_closest_intersection_delta, R.string.abbrev_azimuth, R.string.abbrev_elevation);
+                    }
+                    if(isSun || isMoon)
+                    {
+                        detailDialog.addGroup(R.string.title_phase, R.string.title_name, (isMoon ? R.string.title_illumination : R.string.empty));
+                    }
+
+                    detailTexts = detailDialog.getDetailTexts();
+                    detailTitles = detailDialog.getDetailTitles();
+                    if(passDurationMs > 0)
+                    {
+                        detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Graph);
+                    }
+                    detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.LensView).setVisibility(SensorUpdate.havePositionSensors(currentContext) ? View.VISIBLE : View.GONE);
+                    if(!haveSatellite2)
+                    {
+                        detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Notify);
+                        if(have3dPreview(item.id))
+                        {
+                            detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Preview3d);
+                        }
+                        detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Info);
+                    }
+                    detailDialog.show();
+
+                    //start timer
+                    detailDialog.setUpdateTask(new TimerTask()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            ((Activity)currentContext).runOnUiThread(new Runnable()
+                            {
+                                @Override
+                                public void run()
+                                {
+                                    int index;
+                                    long elapsedMs;
+                                    float elapsedPercent;
+                                    String text;
+                                    String title;
+                                    Calendar timeNow = Globals.getGMTTime();
+
+                                    //go through each display
+                                    for(index = 0; index < detailTexts.length; index++)
+                                    {
+                                        //remember current detail text
+                                        TextView currentDetailText = detailTexts[index];
+                                        TextView currentTitleText = detailTitles[index];
+
+                                        //reset text and title
+                                        text = null;
+                                        title = null;
+
+                                        //get text
+                                        switch(index)
+                                        {
+                                            case 0:
+                                                title = Globals.getTimeUntilDescription(res, timeNow, currentItem.passTimeStart, currentItem.passTimeEnd);
+                                                text = Globals.getTimeUntil(currentContext, res, timeNow, currentItem.passTimeStart, currentItem.passTimeEnd);
+                                                break;
+
+                                            case 1:
+                                                text = (!currentItem.passDuration.equals("") ? currentItem.passDuration : unknownString);
+                                                break;
+
+                                            case 2:
+                                                title = startString;
+                                                text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, currentZone, false));
+                                                break;
+
+                                            case 3:
+                                                title = endString;
+                                                text = Globals.getDateString(currentContext, currentItem.passTimeEnd, currentZone, false);
+                                                break;
+
+                                            case 4:
+                                                if(useLocalZone)
+                                                {
+                                                    title = localString + " " + startString;
+                                                    text = (currentItem.inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : Globals.getDateString(currentContext, currentItem.passTimeStart, defaultZone, false));
+                                                }
+                                                break;
+
+                                            case 5:
+                                                if(useLocalZone)
+                                                {
+                                                    title = localString + " " + endString;
+                                                    text = Globals.getDateString(currentContext, currentItem.passTimeEnd, defaultZone, false);
+                                                }
+                                                break;
+
+                                            case 6:
+                                                title = azAbbrevString + " " + startString;
+                                                text = (currentItem.passTimeStart != null ? Globals.getAzimuthDirectionString(res, currentItem.passAzStart) : unknownString);
+                                                break;
+
+                                            case 7:
+                                                title = azAbbrevString + " " + endString;
+                                                text = (currentItem.passTimeEnd != null ? Globals.getAzimuthDirectionString(res, currentItem.passAzEnd) : unknownString);
+                                                break;
+
+                                            case 8:
+                                                title = azTravelString;
+                                                text = (currentItem.passTimeEnd != null ? Globals.getDegreeString(currentItem.passAzTravel) : unknownString);
+                                                break;
+
+                                            case 9:
+                                                title = elMaxString;
+                                                text = (currentItem.passElMax != Double.MAX_VALUE ? Globals.getDegreeString(currentItem.passElMax) : unknownString);
+                                                break;
+
+                                            case 10:
+                                            case 12:
+                                                if(haveSatellite2 && index == 10)
+                                                {
+                                                    text = (currentItem.passClosestAz != Double.MAX_VALUE ? Globals.getDegreeString(currentItem.passClosestAz) : unknownString);
+                                                }
+                                                else
+                                                {
+                                                    text = (currentItem.phaseName == null ? "-" : currentItem.phaseName);
+                                                }
+                                                break;
+
+                                            case 11:
+                                            case 13:
+                                                if(haveSatellite2 && index == 11)
+                                                {
+                                                    text = (currentItem.passClosestEl != Double.MAX_VALUE ? Globals.getDegreeString(currentItem.passClosestEl) : unknownString);
+                                                }
+                                                else
+                                                {
+                                                    text = Globals.getIlluminationString(currentItem.illumination);
+                                                }
+                                                break;
+                                        }
+
+                                        //if display exists and text is set
+                                        if(currentDetailText != null && text != null)
+                                        {
+                                            //set text
+                                            currentDetailText.setText(text);
+                                        }
+
+                                        //if display exists and title is set
+                                        if(currentTitleText != null && title != null)
+                                        {
+                                            //set title
+                                            title += ":";
+                                            currentTitleText.setText(title);
+                                        }
+                                    }
+
+                                    //if progress layout exists
+                                    if(passProgressLayout != null)
+                                    {
+                                        passProgressLayout.setVisibility(passDurationMs > 0 && timeNow.after(currentItem.passTimeStart) ? View.VISIBLE : View.GONE);
+                                    }
+
+                                    //if start time is set, progress displays exist, and duration set
+                                    if(currentItem.passTimeStart != null && timeNow.after(currentItem.passTimeStart) && passProgress != null && passProgressText != null && passDurationMs > 0)
+                                    {
+                                        //if before end
+                                        if(timeNow.before(currentItem.passTimeEnd))
+                                        {
+                                            elapsedMs = currentItem.passTimeEnd.getTimeInMillis() - timeNow.getTimeInMillis(); //currentTimeMs;
+                                            elapsedPercent = (100 - ((elapsedMs / (float)passDurationMs) * 100));
+                                        }
+                                        else
+                                        {
+                                            elapsedPercent = 100;
+                                        }
+
+                                        passProgress.setProgress((int)elapsedPercent);
+                                        text = Globals.getNumberString(elapsedPercent, 1) + "%";
+                                        passProgressText.setText(text);
+                                    }
+
+                                    //update graph
+                                    if(elevationGraph != null)
+                                    {
+                                        elevationGraph.setSelectedX(Calculations.julianDateCalendar(timeNow));
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+
+            //Updates status of having items
+            public void updateHasItems()
+            {
+                hasItems = (pathItems.getCount() > 0);
+            }
+        }
+    }
+
+    //Coordinates
+    public static abstract class Coordinates
+    {
+        //Item
+        public static class Item extends Selectable.ListItem
+        {
+            public boolean isLoading;
+            public double julianDate;
+            public Calendar time;
+            public TextView speedText;
+            public TextView timeText;
+            public TextView latitudeText;
+            public TextView longitudeText;
+            public TextView altitudeText;
+            public ExpandingListView subList;
+            public LinearLayout dataGroup;
+            public LinearLayout progressGroup;
+            public final CalculateCoordinatesTask.CoordinateData[] coordinates;
+
+            public Item(int index, int coordinateCount)
+            {
+                super(Integer.MAX_VALUE, index, false, false, false, false);
+
+                isLoading = (coordinateCount < 1);
+                if(isLoading)
+                {
+                    coordinateCount = 1;
+                }
+                coordinates = new CalculateCoordinatesTask.CoordinateData[coordinateCount];
+                for(index = 0; index < coordinates.length; index++)
+                {
+                    coordinates[index] = new CalculateCoordinatesTask.CoordinateData();
+                }
+
+                julianDate = Double.MAX_VALUE;
+                time = Globals.julianDateToCalendar(julianDate);
+                speedText = null;
+                timeText = null;
+                latitudeText = null;
+                longitudeText = null;
+                altitudeText = null;
+                dataGroup = null;
+                progressGroup = null;
+            }
+
+            public void updateDisplays(TimeZone zone, int widthDp)
+            {
+                String text;
+                Context context = (latitudeText != null ? latitudeText.getContext() : longitudeText != null ? longitudeText.getContext() : subList != null ? subList.getContext() : null);
+                Resources res = (context != null ? context.getResources() : null);
+
+                if(latitudeText != null)
+                {
+                    latitudeText.setText(coordinates[0].latitude != Float.MAX_VALUE ? Globals.getLatitudeDirectionString(res, coordinates[0].latitude, 2) : "-");
+                }
+                if(longitudeText != null)
+                {
+                    longitudeText.setText(coordinates[0].longitude != Float.MAX_VALUE ? Globals.getLongitudeDirectionString(res, coordinates[0].longitude, 2) : "-");
+                }
+                if(altitudeText != null)
+                {
+                    altitudeText.setText(coordinates[0].altitudeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(coordinates[0].altitudeKm, 0) : "-");
+                }
+                if(speedText != null)
+                {
+                    text = (coordinates[0].speedKms != Double.MAX_VALUE ? Globals.getKmUnitValueString(coordinates[0].speedKms) : "-");
+                    speedText.setText(text);
+                }
+                if(timeText != null)
+                {
+                    if(isLoading)
+                    {
+                        timeText.setText("");
+                    }
+                    else if(time != null)
+                    {
+                        timeText.setText(Globals.getDateString(timeText.getContext(), time, zone, true));
+                    }
+                }
+                if(subList != null && context != null && coordinates.length > 1)
+                {
+                    subList.setAdapter(new SubItemListAdapter(context, julianDate, coordinates, widthDp));
+                }
+            }
+
+            public void setLoading(boolean loading, boolean tleIsAccurate)
+            {
+                isLoading = loading && tleIsAccurate;
+
+                if(progressGroup != null)
+                {
+                    progressGroup.setVisibility(isLoading ? View.VISIBLE : View.GONE);
+                }
+                if(dataGroup != null)
+                {
+                    dataGroup.setVisibility(loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
+                }
+                if(subList != null)
+                {
+                    subList.setVisibility(loading ? View.GONE : View.VISIBLE);
+                }
+            }
+        }
+
+        //Item holder
+        public static class ItemHolder extends ItemHolderBase
+        {
+            public final TextView timeText;
+            public final LinearLayout progressGroup;
+            public final ExpandingListView subList;
+
+            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupID, int speedTextID, int timeTextID, int subListID)
+            {
+                super(itemView, latTextID, lonTextID, altTextID, speedTextID, -1, dataGroupID, -1, -1);
+                progressGroup = itemView.findViewById(progressGroupID);
+                timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
+                subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
+            }
+            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupID, int timeTextID)
+            {
+                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupID, speedTextID, timeTextID, -1);
+            }
+            public ItemHolder(View itemView, int progressGroupID, int subListID)
+            {
+                this(itemView, -1, -1, -1, progressGroupID, -1, -1, -1, subListID);
+            }
+        }
+
+        //Item list adapter
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
+        {
+            private final TimeZone currentZone;
+            private final Current.Items coordinateItems;
+
+            public ItemListAdapter(Context context, Item[] savedItems, int multiCount, TimeZone zone)
+            {
+                super(context);
+
+                hasItems = false;
+                currentZone = zone;
+                coordinateItems = new Current.Items(MainActivity.Groups.Calculate, PageType.Coordinates);
+
+                //if there are saved items
+                if(savedItems != null && savedItems.length > 0)
+                {
+                    //set as saved items
+                    coordinateItems.set(savedItems);
+                    hasItems = true;
+                }
+                else
+                {
+                    //set as empty
+                    coordinateItems.set(new Item[]{new Coordinates.Item(0, 0)});
+                }
+
+                //remember layout ID
+                forSubItems = (multiCount > 1);
+                this.itemsRefID = (forSubItems ? R.layout.current_multi_item : R.layout.current_coordinates_item);
+                if(forSubItems)
+                {
+                    this.itemsRefSubId = R.layout.current_coordinates_item;
+                }
+
+                //ID stays the same
+                this.setHasStableIds(true);
+            }
+
+            @Override
+            public int getItemCount()
+            {
+                return(coordinateItems.getCount());
+            }
+
+            @Override
+            public Item getItem(int position)
+            {
+                return(coordinateItems.getCoordinateItem(position));
+            }
+
+            @Override
+            public long getItemId(int position)
+            {
+                Item currentItem = coordinateItems.getCoordinateItem(position);
+                return(currentItem != null ? currentItem.listIndex : Integer.MIN_VALUE);
+            }
+
+            @Override
+            protected void setHeader(View header)
+            {
+                super.setHeader(header);
+                header.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            protected boolean showColumnTitles(int page)
+            {
+                return(true);
+            }
+
+            @Override
+            protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
+            {
+                String text;
+                boolean showSpeed = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                TextView timeText;
+                TextView speedText;
+                Resources res = currentContext.getResources();
+
+                if(!forSubItems)
+                {
+                    timeText = listColumns.findViewById(R.id.Coordinate_Time_Text);
+                    timeText.setText(R.string.title_time);
+                    timeText.setVisibility(View.VISIBLE);
+                }
+                speedText = listColumns.findViewById(R.id.Coordinate_Speed_Text);
+                if(speedText != null)
+                {
+                    text = res.getString(R.string.abbrev_velocity) + " (" + Globals.getKmLabel(res) + "/" + res.getString(R.string.abbrev_seconds_lower) + ")";
+                    speedText.setText(text);
+                    speedText.setVisibility(showSpeed ? View.VISIBLE : View.GONE);
+                }
+                listColumns.findViewById(R.id.Coordinate_Progress_Group).setVisibility(View.GONE);
+                listColumns.findViewById(R.id.Coordinate_Data_Group).setVisibility(View.VISIBLE);
+                ((TextView)listColumns.findViewById(R.id.Coordinate_Latitude_Text)).setText(R.string.abbrev_latitude);
+                ((TextView)listColumns.findViewById(R.id.Coordinate_Longitude_Text)).setText(R.string.abbrev_longitude);
+                text = res.getString(R.string.abbrev_altitude) + " (" + Globals.getKmLabel(res) + ")";
+                ((TextView)listColumns.findViewById(R.id.Coordinate_Altitude_Text)).setText(text);
+
+                super.setColumnTitles(listColumns, categoryText, page);
+            }
+
+            @Override
+            public @NonNull Coordinates.ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+            {
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
+                ItemHolder itemHolder;
+
+                if(forSubItems)
+                {
+                    itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
+                }
+                else
+                {
+                    itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
+                }
+
+                setItemSelector(itemView);
+                setViewClickListeners(itemView, itemHolder);
+                return(itemHolder);
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
+            {
+                boolean showSpeed = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
+                Item currentItem = coordinateItems.getCoordinateItem(position);
+                ItemHolder itemHolder = (ItemHolder)holder;
+
+                //get displays
+                currentItem.timeText = itemHolder.timeText;
+                if(currentItem.timeText != null)
+                {
+                    currentItem.timeText.setVisibility(View.VISIBLE);
+                }
+
+                currentItem.subList = itemHolder.subList;
+                currentItem.progressGroup = itemHolder.progressGroup;
+                currentItem.dataGroup = itemHolder.dataGroup;
+                if(currentItem.dataGroup != null)
+                {
+                    currentItem.dataGroup.setVisibility(View.GONE);
+                }
+                currentItem.latitudeText = itemHolder.dataGroup1Text;
+                currentItem.longitudeText = itemHolder.dataGroup2Text;
+                currentItem.altitudeText = itemHolder.dataGroup3Text;
+                currentItem.speedText = itemHolder.dataGroup4Text;
+                if(currentItem.speedText != null)
+                {
+                    currentItem.speedText.setVisibility(showSpeed ? View.VISIBLE : View.GONE);
+                }
+
+                //update displays
+                currentItem.setLoading(!hasItems, true);
+                currentItem.updateDisplays(currentZone, widthDp);
+            }
+
+            //Updates status of having items
+            public void updateHasItems()
+            {
+                int count = coordinateItems.getCount();
+                hasItems = (count > 1 || (count > 0 && !coordinateItems.getCoordinateItem(0).isLoading));
+            }
+        }
+
+        //Sub item list adapter
+        private static class SubItemListAdapter extends SubItemBaseListAdapter
+        {
+            public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp)
+            {
+                super(context, julianDate, items, R.layout.current_coordinates_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
+            }
+
+            @Override
+            public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
+            {
+                Context context = parent.getContext();
+                Resources res = context.getResources();
+                boolean showSpeed = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_WIDTH_DP);
+                TextView speedText;
+                CalculateDataBase currentData = dataItems[childPosition];
+
+                convertView = super.getChildView(groupPosition, childPosition, isLastChild, convertView, parent);
+                if(currentData instanceof CalculateCoordinatesTask.CoordinateData)
+                {
+                    CalculateCoordinatesTask.CoordinateData currentCoordinateData = (CalculateCoordinatesTask.CoordinateData)currentData;
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Latitude_Text)).setText(Globals.getLatitudeDirectionString(res, currentCoordinateData.latitude, 2));
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Longitude_Text)).setText(Globals.getLongitudeDirectionString(res, currentCoordinateData.longitude, 2));
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Altitude_Text)).setText(Globals.getKmUnitValueString(currentCoordinateData.altitudeKm, 0));
+                    speedText = convertView.findViewById(R.id.Coordinate_Speed_Text);
+                    if(speedText != null)
+                    {
+                        speedText.setText(Globals.getKmUnitValueString(currentCoordinateData.speedKms));
+                        speedText.setVisibility(showSpeed ? View.VISIBLE : View.GONE);
+                    }
+                }
+
+                return(convertView);
+            }
+        }
+    }
+
+    //Sub item base list adapter
+    public static class SubItemBaseListAdapter extends BaseExpandableListAdapter
+    {
+        protected final int widthDp;
+        private final int layoutId;
+        private final int titleId;
+        private final int progressId;
+        private final int dataId;
+        private final int dividerId;
+        private final double dataJulianDate;
+        private final LayoutInflater listInflater;
+        protected final CalculateDataBase[] dataItems;
+
+        public SubItemBaseListAdapter(Context context, double julianDate, CalculateDataBase[] items, int layoutId, int titleId, int progressId, int dataId, int dividerId, int widthDp)
+        {
+            this.listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            this.layoutId = layoutId;
+            this.titleId = titleId;
+            this.progressId = progressId;
+            this.dataId = dataId;
+            this.dividerId = dividerId;
+            this.dataJulianDate = julianDate;
+            this.dataItems = items;
+            this.widthDp = widthDp;
+        }
+
+        @Override
+        public int getGroupCount()
+        {
+            return(dataJulianDate != Double.MAX_VALUE ? 1 : 0);
+        }
+
+        @Override
+        public int getChildrenCount(int groupPosition)
+        {
+            return(dataItems.length);
+        }
+
+        @Override
+        public Object getGroup(int groupPosition)
+        {
+            return(dataJulianDate);
+        }
+
+        @Override
+        public Object getChild(int groupPosition, int childPosition)
+        {
+            return(dataItems[childPosition]);
+        }
+
+        @Override
+        public long getGroupId(int groupPosition)
+        {
+            return(-1);
+        }
+
+        @Override
+        public long getChildId(int groupPosition, int childPosition)
+        {
+            return(-1);
+        }
+
+        @Override
+        public boolean hasStableIds()
+        {
+            return(true);
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
+        {
+            TextView groupTitleText;
+
+            if(convertView == null)
+            {
+                convertView = listInflater.inflate(R.layout.side_menu_list_group, parent, false);
+            }
+            groupTitleText = convertView.findViewById(R.id.Group_Title_Text);
+            groupTitleText.setText(Globals.getDateString(parent.getContext(), Globals.julianDateToCalendar(dataJulianDate), MainActivity.getTimeZone(), true).replace("\r\n", " "));
+
+            return(convertView);
+        }
+
+        @Override
+        public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
+        {
+            Context context = parent.getContext();
+            TextView titleText;
+            CalculateDataBase currentData = dataItems[childPosition];
+            Database.DatabaseSatellite currentOrbital = Database.getOrbital(context, currentData.noradId);
+
+            if(convertView == null)
+            {
+                convertView = listInflater.inflate(layoutId, parent, false);
+            }
+            titleText = convertView.findViewById(titleId);
+            titleText.setText(currentOrbital.getName());
+            titleText.setVisibility(View.VISIBLE);
+            convertView.findViewById(progressId).setVisibility(View.GONE);
+            convertView.findViewById(dataId).setVisibility(View.VISIBLE);
+            convertView.findViewById(dividerId).setVisibility(View.VISIBLE);
+
+            return(convertView);
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition)
+        {
+            return(true);
         }
     }
 
@@ -195,12 +1627,12 @@ public abstract class Calculate
 
                         case Globals.SubPageType.List:
                         case Globals.SubPageType.Lens:
-                            Current.ViewAngles.Item[] savedItems = (Current.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(page);
+                            ViewAngles.Item[] savedItems = (ViewAngles.Item[])PageAdapter.getSavedItems(page);
 
                             switch(subPage)
                             {
                                 case Globals.SubPageType.List:
-                                    listAdapter = new Current.ViewAngles.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0));
+                                    listAdapter = new ViewAngles.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0));
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
@@ -222,12 +1654,12 @@ public abstract class Calculate
                     {
                         case Globals.SubPageType.List:
                         case Globals.SubPageType.Lens:
-                            Current.Passes.Item[] savedItems = (Current.Passes.Item[])Calculate.PageAdapter.getSavedItems(page);
+                            Passes.Item[] savedItems = (Passes.Item[])PageAdapter.getSavedItems(page);
 
                             switch(subPage)
                             {
                                 case Globals.SubPageType.List:
-                                    listAdapter = new Current.Passes.ItemListAdapter(context, page, savedItems, null);
+                                    listAdapter = new Passes.ItemListAdapter(context, page, savedItems, null);
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
@@ -254,12 +1686,12 @@ public abstract class Calculate
                         case Globals.SubPageType.List:
                         case Globals.SubPageType.Map:
                         case Globals.SubPageType.Globe:
-                            Current.Coordinates.Item[] savedItems = (Current.Coordinates.Item[])Calculate.PageAdapter.getSavedItems(page);
+                            Coordinates.Item[] savedItems = (Coordinates.Item[])PageAdapter.getSavedItems(page);
 
                             switch(subPage)
                             {
                                 case Globals.SubPageType.List:
-                                    listAdapter = new Current.Coordinates.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0), MainActivity.getTimeZone());
+                                    listAdapter = new Coordinates.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0), MainActivity.getTimeZone());
                                     setChangeListeners(listAdapter, page);
                                     newView = this.onCreateView(inflater, container, listAdapter, group, page);
                                     break;
@@ -267,7 +1699,7 @@ public abstract class Calculate
                                 case Globals.SubPageType.Map:
                                 case Globals.SubPageType.Globe:
                                     selectedOrbitals = (multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : (savedItems != null && savedItems.length > 0) ? (new Database.SatelliteData[]{new Database.SatelliteData(context, savedItems[0].id)}) : null);
-                                    newView = Current.Coordinates.onCreateMapView(this, inflater, container, selectedOrbitals, (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                                    newView = Current.onCreateMapView(this, inflater, container, selectedOrbitals, (subPage == Globals.SubPageType.Globe), savedInstanceState);
                                     break;
                             }
                             break;
@@ -625,23 +2057,23 @@ public abstract class Calculate
                     View rootView;
 
                     //update displays
-                    if(listAdapter instanceof Current.ViewAngles.ItemListAdapter)
+                    if(listAdapter instanceof ViewAngles.ItemListAdapter)
                     {
                         rootView = Page.this.getView();
 
-                        ((Current.ViewAngles.ItemListAdapter)listAdapter).updateHasItems();
+                        ((ViewAngles.ItemListAdapter)listAdapter).updateHasItems();
                         if(rootView != null)
                         {
                             listAdapter.setColumnTitles(rootView.findViewById(listAdapter.itemsRootViewID), null, page);
                         }
                     }
-                    else if(listAdapter instanceof Current.Passes.ItemListAdapter)
+                    else if(listAdapter instanceof Passes.ItemListAdapter)
                     {
-                        ((Current.Passes.ItemListAdapter)listAdapter).updateHasItems();
+                        ((Passes.ItemListAdapter)listAdapter).updateHasItems();
                     }
                     else //if(listAdapter instanceof Current.Coordinates.ItemListAdapter)
                     {
-                        ((Current.Coordinates.ItemListAdapter)listAdapter).updateHasItems();
+                        ((Coordinates.ItemListAdapter)listAdapter).updateHasItems();
                     }
                     listAdapter.notifyDataSetChanged();
                 }
@@ -678,10 +2110,10 @@ public abstract class Calculate
     //Page adapter
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
-        private static Current.ViewAngles.Item[] viewItems;
-        private static Current.Passes.Item[] passItems;
-        private static Current.Coordinates.Item[] coordinateItems;
-        private static Current.Passes.Item[] intersectionItems;
+        private static ViewAngles.Item[] viewItems;
+        private static Passes.Item[] passItems;
+        private static Coordinates.Item[] coordinateItems;
+        private static Passes.Item[] intersectionItems;
         private static final Bundle[] params = new Bundle[PageType.PageCount];
         private final Bundle[] savedInputs;
         private final Bundle[] savedSubInputs;
@@ -868,11 +2300,11 @@ public abstract class Calculate
         }
 
         //Sets items
-        public static void setViewItems(Current.ViewAngles.Item[] items)
+        public static void setViewItems(ViewAngles.Item[] items)
         {
             viewItems = items;
         }
-        public static void setViewItem(int index, Current.ViewAngles.Item newItem)
+        public static void setViewItem(int index, ViewAngles.Item newItem)
         {
             if(viewItems != null && index < viewItems.length)
             {
@@ -881,11 +2313,11 @@ public abstract class Calculate
         }
 
         //Sets pass item(s)
-        public static synchronized void setPassItems(Current.Passes.Item[] items)
+        public static synchronized void setPassItems(Passes.Item[] items)
         {
             passItems = items;
         }
-        public static synchronized void setPassItem(int index, Current.Passes.Item newItem)
+        public static synchronized void setPassItem(int index, Passes.Item newItem)
         {
             if(passItems != null && index < passItems.length)
             {
@@ -894,11 +2326,11 @@ public abstract class Calculate
         }
 
         //Sets intersection item(s)
-        public static synchronized void setIntersectionItems(Current.Passes.Item[] items)
+        public static synchronized void setIntersectionItems(Passes.Item[] items)
         {
             intersectionItems = items;
         }
-        public static synchronized void setIntersectionItem(int index, Current.Passes.Item newItem)
+        public static synchronized void setIntersectionItem(int index, Passes.Item newItem)
         {
             if(intersectionItems != null && index < intersectionItems.length)
             {
@@ -907,11 +2339,11 @@ public abstract class Calculate
         }
 
         //Adds pass item(s)
-        public static synchronized void addPassItems(Current.Passes.Item[] newItems, int insertIndex)
+        public static synchronized void addPassItems(Passes.Item[] newItems, int insertIndex)
         {
             int index;
             int addLength = newItems.length;
-            Current.Passes.Item[] newItemArray = new Current.Passes.Item[passItems.length + addLength];
+            Passes.Item[] newItemArray = new Passes.Item[passItems.length + addLength];
 
             //go from start to insert index
             for(index = 0; index < insertIndex; index++)
@@ -937,14 +2369,14 @@ public abstract class Calculate
             //update
             notifyItemsChanged(PageType.Passes);
         }
-        public static synchronized void addPassItem(Current.Passes.Item newItem)
+        public static synchronized void addPassItem(Passes.Item newItem)
         {
             int itemCount = passItems.length;
-            ArrayList<Current.Passes.Item> itemList = new ArrayList<>(Arrays.asList(passItems));
+            ArrayList<Passes.Item> itemList = new ArrayList<>(Arrays.asList(passItems));
 
             //add new item
             itemList.add((itemCount > 0 ? (itemCount - 1) : 0), newItem);
-            setPassItems(itemList.toArray(new Current.Passes.Item[0]));
+            setPassItems(itemList.toArray(new Passes.Item[0]));
 
             //update
             notifyItemsChanged(PageType.Passes);
@@ -953,7 +2385,7 @@ public abstract class Calculate
         //Removes a pass item
         protected static synchronized void removePassItem(int index)
         {
-            ArrayList<Current.Passes.Item> itemList;
+            ArrayList<Passes.Item> itemList;
 
             //if a valid index
             if(passItems != null && index >= 0 && index < passItems.length)
@@ -961,7 +2393,7 @@ public abstract class Calculate
                 //remove item
                 itemList = new ArrayList<>(Arrays.asList(passItems));
                 itemList.remove(index);
-                passItems = itemList.toArray(new Current.Passes.Item[0]);
+                passItems = itemList.toArray(new Passes.Item[0]);
 
                 //update
                 notifyItemsChanged(PageType.Passes);
@@ -969,11 +2401,11 @@ public abstract class Calculate
         }
 
         //Sets coordinate item(s)
-        public static void setCoordinateItems(Current.Coordinates.Item[] items)
+        public static void setCoordinateItems(Coordinates.Item[] items)
         {
             coordinateItems = items;
         }
-        public static void setCoordinateItem(int index, Current.Coordinates.Item newItem)
+        public static void setCoordinateItem(int index, Coordinates.Item newItem)
         {
             if(coordinateItems != null && index < coordinateItems.length)
             {
@@ -982,11 +2414,11 @@ public abstract class Calculate
         }
 
         //Adds intersection item(s)
-        public static synchronized void addIntersectionItems(Current.Passes.Item[] newItems, int insertIndex)
+        public static synchronized void addIntersectionItems(Passes.Item[] newItems, int insertIndex)
         {
             int index;
             int addLength = newItems.length;
-            Current.Passes.Item[] newItemArray = new Current.Passes.Item[intersectionItems.length + addLength];
+            Passes.Item[] newItemArray = new Passes.Item[intersectionItems.length + addLength];
 
             //go from start to insert index
             for(index = 0; index < insertIndex; index++)
@@ -1012,14 +2444,14 @@ public abstract class Calculate
             //update
             notifyItemsChanged(PageType.Intersection);
         }
-        public static synchronized void addIntersectionItem(Current.Passes.Item newItem)
+        public static synchronized void addIntersectionItem(Passes.Item newItem)
         {
             int itemCount = intersectionItems.length;
-            ArrayList<Current.Passes.Item> itemList = new ArrayList<>(Arrays.asList(intersectionItems));
+            ArrayList<Passes.Item> itemList = new ArrayList<>(Arrays.asList(intersectionItems));
 
             //add new item
             itemList.add((itemCount > 0 ? (itemCount - 1) : 0), newItem);
-            setIntersectionItems(itemList.toArray(new Current.Passes.Item[0]));
+            setIntersectionItems(itemList.toArray(new Passes.Item[0]));
 
             //update
             notifyItemsChanged(PageType.Intersection);
@@ -1028,7 +2460,7 @@ public abstract class Calculate
         //Removes an intersection item
         protected static synchronized void removeInterSectionItem(int index)
         {
-            ArrayList<Current.Passes.Item> itemList;
+            ArrayList<Passes.Item> itemList;
 
             //if a valid index
             if(intersectionItems != null && index >= 0 && index < intersectionItems.length)
@@ -1036,7 +2468,7 @@ public abstract class Calculate
                 //remove item
                 itemList = new ArrayList<>(Arrays.asList(intersectionItems));
                 itemList.remove(index);
-                intersectionItems = itemList.toArray(new Current.Passes.Item[0]);
+                intersectionItems = itemList.toArray(new Passes.Item[0]);
 
                 //update
                 notifyItemsChanged(PageType.Intersection);
@@ -1044,41 +2476,41 @@ public abstract class Calculate
         }
 
         //Get view angle item(s)
-        public static Current.ViewAngles.Item[] getViewAngleItems()
+        public static ViewAngles.Item[] getViewAngleItems()
         {
             return(viewItems);
         }
-        public static Current.ViewAngles.Item getViewAngleItem(int index)
+        public static ViewAngles.Item getViewAngleItem(int index)
         {
             return(viewItems != null && index >= 0 && index < viewItems.length ? viewItems[index] : null);
         }
 
         //Gets pass item(s)
-        public static synchronized Current.Passes.Item[] getPassItems()
+        public static synchronized Passes.Item[] getPassItems()
         {
             return(passItems);
         }
-        public static synchronized Current.Passes.Item getPassItem(int index)
+        public static synchronized Passes.Item getPassItem(int index)
         {
             return(passItems != null && index >= 0 && index < passItems.length ? passItems[index] : null);
         }
 
         //Gets coordinate item(s)
-        public static Current.Coordinates.Item[] getCoordinatesItems()
+        public static Coordinates.Item[] getCoordinatesItems()
         {
             return(coordinateItems);
         }
-        public static Current.Coordinates.Item getCoordinatesItem(int index)
+        public static Coordinates.Item getCoordinatesItem(int index)
         {
             return(coordinateItems != null && index >= 0 && index < coordinateItems.length ? coordinateItems[index] : null);
         }
 
         //Gets intersection item(s)
-        public static synchronized Current.Passes.Item[] getIntersectionItems()
+        public static synchronized Passes.Item[] getIntersectionItems()
         {
             return(intersectionItems);
         }
-        public static synchronized Current.Passes.Item getIntersectionItem(int index)
+        public static synchronized Passes.Item getIntersectionItem(int index)
         {
             return(intersectionItems != null && index >= 0 && index < intersectionItems.length ? intersectionItems[index] : null);
         }
@@ -1351,11 +2783,11 @@ public abstract class Calculate
     }
 
     //Begin calculating view information
-    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] satellites, Current.ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
+    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] satellites, ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
         int index;
         CalculateViewsTask task;
-        Bundle params = PageAdapter.getParams(Calculate.PageType.View);
+        Bundle params = PageAdapter.getParams(PageType.View);
         int unitType = (params != null ? getUnitType(params) : IncrementType.Seconds);
         Calculations.SatelliteObjectType[] satelliteObjects = new Calculations.SatelliteObjectType[satellites != null ? satellites.length : 0];
 
@@ -1373,7 +2805,7 @@ public abstract class Calculate
     }
 
     //Begin calculating view information
-    public static CalculateCoordinatesTask calculateCoordinates(Context context, Database.SatelliteData[] satellites, Current.Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateCoordinatesTask.OnProgressChangedListener listener)
+    public static CalculateCoordinatesTask calculateCoordinates(Context context, Database.SatelliteData[] satellites, Coordinates.Item[] savedCoordinateItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateCoordinatesTask.OnProgressChangedListener listener)
     {
         int index;
         CalculateCoordinatesTask task;

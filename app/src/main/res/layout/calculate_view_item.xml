@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/View_Item_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center">
+    <View android:id="@+id/View_Item_Divider" style="@style/DividerThin" android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/View_Title_Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:padding="2dp"
+        android:background="?attr/viewPagerBackground"
+        android:textColor="?attr/defaultTextColor"
+        android:visibility="gone"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="5dp"
+        android:orientation="horizontal"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/View_Time_Text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.15"
+            android:padding="2dp"
+            android:textColor="?attr/defaultTextColor"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/View_Progress_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.7"
+            android:gravity="center">
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                style="@style/ProgressCircleSmall"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/View_Data_Group"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.5"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/View_Az_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                tools:ignore="NestedWeights" />
+
+            <TextView
+                android:id="@+id/View_El_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <TextView
+                android:id="@+id/View_Range_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.4"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <TextView
+                android:id="@+id/View_Phase_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/View_Illumination_Text"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.3"
+                android:layout_gravity="center_vertical"
+                android:gravity="end"
+                android:padding="2dp"
+                android:textColor="?attr/defaultTextColor"
+                android:visibility="gone"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

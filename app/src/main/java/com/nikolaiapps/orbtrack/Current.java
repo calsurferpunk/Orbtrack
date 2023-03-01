@@ -1385,7 +1385,7 @@ public abstract class Current
         final Context context = pageFragment.getContext();
         final Resources res = (context != null ? context.getResources() : null);
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
-        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.lens_view, container, false);
+        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_lens_view, container, false);
         FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
         int page = pageFragment.getPageParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
@@ -2450,7 +2450,7 @@ public abstract class Current
 
         //get context, main views, and lists
         final Context context = page.getContext();
-        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.coordinates_map_layout, container, false);
+        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_map_layout, container, false);
         final FrameLayout mapFrameLayout = rootView.findViewById(R.id.Map_Frame_Layout);
         final LinearLayout searchListLayout = rootView.findViewById(R.id.Map_Search_List_Layout);
         final IconSpinner searchList;
@@ -2481,7 +2481,7 @@ public abstract class Current
 
         //get displays
         Bundle args = new Bundle();
-        final TextView mapInfoText = rootView.findViewById(R.id.Coordinate_Info_Text);
+        final TextView mapInfoText = rootView.findViewById(R.id.Map_Coordinate_Info_Text);
         final CoordinatesFragment mapView = (forGlobe ? new Whirly.GlobeFragment() : new Whirly.MapFragment());
         mapViewReference = new WeakReference<>(mapView);
         mapInfoTextReference = new WeakReference<>(mapInfoText);
@@ -2489,8 +2489,8 @@ public abstract class Current
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
         mapView.setArguments(args);
         searchList = (multiSelected ? (IconSpinner)rootView.findViewById(R.id.Map_Search_List) : null);
-        page.playBar = rootView.findViewById(R.id.Coordinate_Play_Bar);
-        page.scaleBar = rootView.findViewById(R.id.Coordinate_Scale_Bar);
+        page.playBar = rootView.findViewById(R.id.Map_Coordinate_Play_Bar);
+        page.scaleBar = rootView.findViewById(R.id.Map_Coordinate_Scale_Bar);
         page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
 
         //if search list layout exists
@@ -2514,7 +2514,7 @@ public abstract class Current
         if(useSavedPath)
         {
             //setup header
-            TextView header = (TextView)Globals.replaceView(R.id.Coordinate_Header, R.layout.header_text_view, inflater, rootView);
+            TextView header = (TextView)Globals.replaceView(R.id.Map_Header, R.layout.header_text_view, inflater, rootView);
             header.setTag(Globals.getHeaderText(context, (currentSatellite != null ? currentSatellite.getName() : null), savedItems[0].time, savedItems[savedItems.length - 1].time));
             Calculate.setOrientationHeaderText(header);
         }

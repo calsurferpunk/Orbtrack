@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center">
     <com.nikolaiapps.orbtrack.ExpandingListView
-        android:id="@+id/Current_Multi_Item_List"
+        android:id="@+id/Multi_Item_List"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:divider="@android:color/transparent"
@@ -14,7 +14,7 @@
         android:visibility="gone"/>
 
     <LinearLayout
-        android:id="@+id/Current_Multi_Item_Progress_Group"
+        android:id="@+id/Multi_Item_Progress_Group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">

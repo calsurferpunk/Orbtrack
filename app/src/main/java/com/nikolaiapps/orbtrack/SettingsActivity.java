@@ -974,7 +974,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         {
             int page = this.getPageParam();
             boolean onWelcome = (page == SetupPageType.Welcome);
-            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.setup_view, container, false);
+            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.setup_page_view, container, false);
 
             //handle display based on page
             switch(page)

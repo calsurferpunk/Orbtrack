@@ -120,7 +120,7 @@ class Whirly
             if(snippetLayout == null)
             {
                 //get layout
-                snippetLayout = LayoutInflater.from(context).inflate(R.layout.current_map_snippet, null).findViewById(R.id.Snippet_Layout);
+                snippetLayout = LayoutInflater.from(context).inflate(R.layout.map_info_snippet, null).findViewById(R.id.Map_Snippet_Layout);
                 snippetLayout.setLayoutParams(new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT));
             }
 
@@ -128,7 +128,7 @@ class Whirly
             if(snippetTitle == null)
             {
                 //get title
-                snippetTitle = snippetLayout.findViewById(R.id.Snippet_Title_Text);
+                snippetTitle = snippetLayout.findViewById(R.id.Map_Snippet_Title_Text);
                 snippetTitle.setVisibility(View.VISIBLE);
             }
 
@@ -139,7 +139,7 @@ class Whirly
             if(snippetText == null)
             {
                 //get text
-                snippetText = snippetLayout.findViewById(R.id.Snippet_Text);
+                snippetText = snippetLayout.findViewById(R.id.Map_Snippet_Text);
             }
 
             //if using text

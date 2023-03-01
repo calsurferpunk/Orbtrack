@@ -484,7 +484,7 @@ public abstract class Settings
 
                         //setup items
                         initItems();
-                        this.itemsRefID = R.layout.accounts_item;
+                        this.itemsRefID = R.layout.settings_accounts_item;
                     }
                 }
 
@@ -994,7 +994,7 @@ public abstract class Settings
                 knownAltitude = Double.MAX_VALUE;
                 columnTitleStringId = titleStringId;
 
-                this.itemsRefID = R.layout.location_item;
+                this.itemsRefID = R.layout.settings_location_item;
             }
             public ItemListAdapter(View parentView, String title)
             {
@@ -1504,7 +1504,7 @@ public abstract class Settings
             {
                 super(parentView, title);
 
-                this.itemsRefID = R.layout.widgets_item;
+                this.itemsRefID = R.layout.settings_widgets_item;
             }
 
             @Override

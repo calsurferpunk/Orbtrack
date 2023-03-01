@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" tools:ignore="Overdraw"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?attr/pageBackground">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingLeft="7dp"
+        android:paddingRight="7dp"
+        android:orientation="vertical"
+        android:background="?attr/pageBackground">
+        <com.nikolaiapps.orbtrack.IconSpinner
+            android:id="@+id/Calculate_Orbital_List"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <TextView
+            android:id="@+id/Calculate_Orbital_List_Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginBottom="10dp"
+            android:text="@string/title_orbital"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+            android:textColor="?attr/defaultTextColor"/>
+
+        <com.nikolaiapps.orbtrack.IconSpinner
+            android:id="@+id/Calculate_Orbital2_List"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/Calculate_Orbital2_List_Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="18dp"
+            android:layout_marginStart="18dp"
+            android:layout_marginBottom="10dp"
+            android:text="@string/title_orbital2"
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+            android:textColor="?attr/defaultTextColor"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Calculate_Select_Layout"
+            style="@style/ResultButtonLayout"
+            android:visibility="gone">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Calculate_Select_Button"
+                style="@style/ResultButton"
+                android:text="@string/title_select"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.475"
+                android:gravity="center"
+                android:orientation="vertical">
+                <com.nikolaiapps.orbtrack.DateInputView
+                    android:id="@+id/Calculate_Start_Date_Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/title_start_date"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.TimeInputView
+                    android:id="@+id/Calculate_Start_Time_Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/title_start_time"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="?attr/defaultTextColor"/>
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.05"
+                android:gravity="center"
+                android:text="@string/text_to"
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.475"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <com.nikolaiapps.orbtrack.DateInputView
+                    android:id="@+id/Calculate_End_Date_Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/title_end_date"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <com.nikolaiapps.orbtrack.TimeInputView
+                    android:id="@+id/Calculate_End_Time_Text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+                    android:textColor="?attr/defaultTextColor"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@string/title_end_time"
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
+                    android:textColor="?attr/defaultTextColor"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Calculate_View_Row"
+            style="@style/CalculateEditRow">
+            <LinearLayout
+                style="@style/CalculateEditLayout">
+                <EditText
+                    android:id="@+id/Calculate_View_Unit_Text"
+                    style="@style/CalculateEditText"
+                    android:inputType="number"
+                    android:maxLength="3"
+                    android:autofillHints="@string/empty"
+                    android:hint="@string/empty"/>
+                <com.nikolaiapps.orbtrack.IconSpinner
+                    android:id="@+id/Calculate_View_Unit_List"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <TextView
+                style="@style/CalculateEditValueTitle"
+                android:text="@string/title_time_interval"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Calculate_Intersection_Row"
+            style="@style/CalculateEditRow">
+            <LinearLayout
+                style="@style/CalculateEditLayout">
+                <EditText
+                    android:id="@+id/Calculate_Intersection_Unit_Text"
+                    style="@style/CalculateEditText"
+                    android:autofillHints="@string/empty"
+                    android:hint="@string/empty"/>
+                <TextView
+                    android:id="@+id/Calculate_Intersection_Unit_Title"
+                    style="@style/CalculateEditUnitTitle"
+                    android:text="@string/title_degs"/>
+            </LinearLayout>
+
+            <TextView
+                style="@style/CalculateEditValueTitle"
+                android:text="@string/title_within"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Calculate_Elevation_Min_Row"
+            style="@style/CalculateEditRow">
+            <LinearLayout
+                style="@style/CalculateEditLayout">
+                <EditText
+                    android:id="@+id/Calculate_Elevation_Min_Unit_Text"
+                    style="@style/CalculateEditText"
+                    android:autofillHints="@string/empty"
+                    android:hint="@string/empty"/>
+                <TextView
+                    android:id="@+id/Calculate_Elevation_Min_Unit_Title"
+                    style="@style/CalculateEditUnitTitle"
+                    android:text="@string/title_degs"/>
+            </LinearLayout>
+
+            <TextView
+                style="@style/CalculateEditValueTitle"
+                android:text="@string/title_elevation_minimum"/>
+        </LinearLayout>
+
+        <LinearLayout style="@style/ResultButtonLayout">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Calculate_Start_Button"
+                style="@style/ResultButton"
+                android:text="@string/title_start"/>
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

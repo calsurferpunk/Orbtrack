@@ -252,7 +252,7 @@ public abstract class Calculate
                 haveSun = haveMoon = false;
 
                 //remember strings and layout ID
-                this.itemsRefID = R.layout.current_view_item;
+                this.itemsRefID = R.layout.calculate_view_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -276,7 +276,7 @@ public abstract class Calculate
                 if(forSubItems)
                 {
                     this.itemsRefSubId = this.itemsRefID;
-                    this.itemsRefID = R.layout.current_multi_item;
+                    this.itemsRefID = R.layout.calculate_multi_item;
                 }
 
                 updateHasItems();
@@ -327,7 +327,7 @@ public abstract class Calculate
 
                 if(!forSubItems)
                 {
-                    timeText = listColumns.findViewById(R.id.Angles_Time_Text);
+                    timeText = listColumns.findViewById(R.id.View_Time_Text);
                     timeText.setText(R.string.title_time);
                     timeText.setVisibility(View.VISIBLE);
                 }
@@ -337,19 +337,19 @@ public abstract class Calculate
                     isMoon = haveMoon;
                 }
 
-                phaseText = listColumns.findViewById(R.id.Angles_Phase_Text);
+                phaseText = listColumns.findViewById(R.id.View_Phase_Text);
                 phaseText.setText(R.string.title_phase);
                 phaseText.setVisibility((isSun || isMoon) && widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
 
-                illuminationText = listColumns.findViewById(R.id.Angles_Illumination_Text);
+                illuminationText = listColumns.findViewById(R.id.View_Illumination_Text);
                 illuminationText.setText(R.string.abbrev_illumination);
                 illuminationText.setVisibility(isMoon && widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP ? View.VISIBLE : View.GONE);
-                listColumns.findViewById(R.id.Angles_Progress_Group).setVisibility(View.GONE);
-                listColumns.findViewById(R.id.Angles_Data_Group).setVisibility(View.VISIBLE);
-                ((TextView)listColumns.findViewById(R.id.Angles_Az_Text)).setText(R.string.title_azimuth);
-                ((TextView)listColumns.findViewById(R.id.Angles_El_Text)).setText(R.string.title_elevation);
+                listColumns.findViewById(R.id.View_Progress_Group).setVisibility(View.GONE);
+                listColumns.findViewById(R.id.View_Data_Group).setVisibility(View.VISIBLE);
+                ((TextView)listColumns.findViewById(R.id.View_Az_Text)).setText(R.string.title_azimuth);
+                ((TextView)listColumns.findViewById(R.id.View_El_Text)).setText(R.string.title_elevation);
                 text = res.getString(R.string.title_range) + " (" + Globals.getKmLabel(res) + ")";
-                ((TextView)listColumns.findViewById(R.id.Angles_Range_Text)).setText(text);
+                ((TextView)listColumns.findViewById(R.id.View_Range_Text)).setText(text);
 
                 super.setColumnTitles(listColumns, categoryText, page);
             }
@@ -362,11 +362,11 @@ public abstract class Calculate
 
                 if(forSubItems)
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
+                    itemHolder = new ItemHolder(itemView, R.id.Multi_Item_Progress_Group, R.id.Multi_Item_List);
                 }
                 else
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Angles_Az_Text, R.id.Angles_El_Text, R.id.Angles_Range_Text, R.id.Angles_Phase_Text, R.id.Angles_Illumination_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Time_Text);
+                    itemHolder = new ItemHolder(itemView, R.id.View_Az_Text, R.id.View_El_Text, R.id.View_Range_Text, R.id.View_Phase_Text, R.id.View_Illumination_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Time_Text);
                 }
 
                 setItemSelector(itemView);
@@ -474,7 +474,7 @@ public abstract class Calculate
 
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
             {
-                super(context, julianDate, items, R.layout.current_view_item, R.id.Angles_Title_Text, R.id.Angles_Progress_Group, R.id.Angles_Data_Group, R.id.Angles_Divider, widthDp);
+                super(context, julianDate, items, R.layout.calculate_view_item, R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Item_Divider, widthDp);
                 this.haveSun = haveSun;
                 this.haveMoon = haveMoon;
             }
@@ -496,16 +496,16 @@ public abstract class Calculate
                     CalculateViewsTask.ViewData currentViewData = (CalculateViewsTask.ViewData)currentData;
                     isSun = (currentData.noradId == Universe.IDs.Sun);
                     isMoon = (currentData.noradId == Universe.IDs.Moon);
-                    ((TextView)convertView.findViewById(R.id.Angles_Az_Text)).setText(Globals.getDegreeString(currentViewData.azimuth));
-                    ((TextView)convertView.findViewById(R.id.Angles_El_Text)).setText(Globals.getDegreeString(currentViewData.elevation));
-                    ((TextView)convertView.findViewById(R.id.Angles_Range_Text)).setText(Globals.getKmUnitValueString(currentViewData.rangeKm, 0));
-                    phaseText = convertView.findViewById(R.id.Angles_Phase_Text);
+                    ((TextView)convertView.findViewById(R.id.View_Az_Text)).setText(Globals.getDegreeString(currentViewData.azimuth));
+                    ((TextView)convertView.findViewById(R.id.View_El_Text)).setText(Globals.getDegreeString(currentViewData.elevation));
+                    ((TextView)convertView.findViewById(R.id.View_Range_Text)).setText(Globals.getKmUnitValueString(currentViewData.rangeKm, 0));
+                    phaseText = convertView.findViewById(R.id.View_Phase_Text);
                     if(phaseText != null)
                     {
                         phaseText.setText(currentViewData.phaseName);
                         phaseText.setVisibility(showPhase && (isSun || isMoon) ? View.VISIBLE : (showPhase && (haveSun || haveMoon)) ? View.INVISIBLE : View.GONE);
                     }
-                    illuminationText = convertView.findViewById(R.id.Angles_Illumination_Text);
+                    illuminationText = convertView.findViewById(R.id.View_Illumination_Text);
                     if(illuminationText != null)
                     {
                         illuminationText.setText(Globals.getIlluminationString(currentViewData.illumination));
@@ -724,7 +724,7 @@ public abstract class Calculate
                 }
 
                 //remember strings and layout ID
-                this.itemsRefID = R.layout.current_pass_item;
+                this.itemsRefID = R.layout.calculate_pass_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -1228,10 +1228,10 @@ public abstract class Calculate
 
                 //remember layout ID
                 forSubItems = (multiCount > 1);
-                this.itemsRefID = (forSubItems ? R.layout.current_multi_item : R.layout.current_coordinates_item);
+                this.itemsRefID = (forSubItems ? R.layout.calculate_multi_item : R.layout.calculate_coordinates_item);
                 if(forSubItems)
                 {
-                    this.itemsRefSubId = R.layout.current_coordinates_item;
+                    this.itemsRefSubId = R.layout.calculate_coordinates_item;
                 }
 
                 //ID stays the same
@@ -1310,7 +1310,7 @@ public abstract class Calculate
 
                 if(forSubItems)
                 {
-                    itemHolder = new ItemHolder(itemView, R.id.Current_Multi_Item_Progress_Group, R.id.Current_Multi_Item_List);
+                    itemHolder = new ItemHolder(itemView, R.id.Multi_Item_Progress_Group, R.id.Multi_Item_List);
                 }
                 else
                 {
@@ -1370,7 +1370,7 @@ public abstract class Calculate
         {
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp)
             {
-                super(context, julianDate, items, R.layout.current_coordinates_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
+                super(context, julianDate, items, R.layout.calculate_coordinates_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
             }
 
             @Override
@@ -3076,7 +3076,7 @@ public abstract class Calculate
         int elevationMinVisibility = View.VISIBLE;
         int intersectionVisibility = (onIntersection ? View.VISIBLE : View.GONE);
         final Database.DatabaseSatellite[] orbitals;
-        ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.calculate_view_layout_material : R.layout.calculate_view_layout), container, false);
+        ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.calculate_input_layout_material : R.layout.calculate_input_layout), container, false);
         View viewRow = rootView.findViewById(R.id.Calculate_View_Row);
         View intersectionRow = rootView.findViewById(R.id.Calculate_Intersection_Row);
         View intersectionUnitLayout = rootView.findViewById(R.id.Calculate_Intersection_Unit_Layout);

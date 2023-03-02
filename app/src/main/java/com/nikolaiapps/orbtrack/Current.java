@@ -513,7 +513,6 @@ public abstract class Current
         //Item list adapter
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
-            private final boolean usingMaterial;
             private final Items combinedItems;
 
             public ItemListAdapter(Context context, Combined.Item[] savedItems, Database.SatelliteData[] orbitals)
@@ -525,7 +524,6 @@ public abstract class Current
                 boolean usePassQuality = Settings.getListPassQuality(context);
 
                 //remember using material and layout ID
-                usingMaterial = Settings.getMaterialTheme(context);
                 this.itemsRefID = (usingMaterial ? R.layout.current_combined_material_item : R.layout.current_combined_item);
 
                 combinedItems = new Items(MainActivity.Groups.Current, PageType.Combined);

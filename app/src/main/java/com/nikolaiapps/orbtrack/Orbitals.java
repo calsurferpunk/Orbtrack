@@ -289,14 +289,14 @@ public abstract class Orbitals
             final AppCompatImageButton infoButton;
             final boolean onSatellite = (currentItem.id > 0);
             final boolean use3dPreview = have3dPreview(currentItem.id);
-            final boolean haveContext = (currentContext != null);
-            final Drawable itemIcon = (haveContext ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType) : null);
+            final boolean usingContext = haveContext();
+            final Drawable itemIcon = (usingContext ? Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType) : null);
             final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, currentItem.id, currentItem.text, currentItem.getOwnerCode(), itemIcon, itemDetailButtonClickListener);
-            final Resources res = (haveContext ? currentContext.getResources() : null);
+            final Resources res = (usingContext ? currentContext.getResources() : null);
             final TextView[] texts;
 
             //if no context
-            if(!haveContext)
+            if(!usingContext)
             {
                 //stop
                 return;
@@ -373,7 +373,7 @@ public abstract class Orbitals
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
         {
             boolean onSatellites = (currentPage == PageType.Satellites);
-            final Resources res = (currentContext != null ? currentContext.getResources() : null);
+            final Resources res = (haveContext() ? currentContext.getResources() : null);
             final PageListItemHolder itemHolder = (PageListItemHolder)holder;
             final OrbitalFilterList.Item filterItem = (position < displayedItems.size() ? displayedItems.get(position) : null);
             final Item currentItem = (loadingItems || !(filterItem instanceof Item) ? new Item(currentContext, 0, new Database.DatabaseSatellite("", Universe.IDs.Invalid, "", Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Satellite), false, false) : (Item)filterItem);

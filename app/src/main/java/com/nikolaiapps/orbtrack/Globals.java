@@ -2854,22 +2854,6 @@ public abstract class Globals
         }
     }
 
-    //Sets layout width of given view
-    public static void setLayoutWidth(View view, int width)
-    {
-        ViewGroup.LayoutParams params = view.getLayoutParams();
-        params.width = width;
-        view.setLayoutParams(params);
-    }
-
-    //Sets layout height of given view
-    public static void setLayoutHeight(View view, int height)
-    {
-        ViewGroup.LayoutParams params = view.getLayoutParams();
-        params.height = height;
-        view.setLayoutParams(params);
-    }
-
     //Gets an image width and height
     private static int[] getImageWidthHeight(Drawable image)
     {
@@ -3263,9 +3247,9 @@ public abstract class Globals
     }
 
     //Gets an item state selector
-    private static StateListDrawable getItemStateSelector(Context context, boolean rounded)
+    private static StateListDrawable getItemStateSelector(Context context, int bgAttrId, boolean rounded)
     {
-        int[] colors = resolveColorIDs(context, R.attr.itemSelectColor, R.attr.itemSelectedColor, R.attr.viewPagerBackground);
+        int[] colors = resolveColorIDs(context, R.attr.itemSelectColor, R.attr.itemSelectedColor, bgAttrId);
         return(getSelector(context, colors[0], colors[1], colors[2], (rounded ? 36 : 0)));
     }
 
@@ -3279,13 +3263,13 @@ public abstract class Globals
     //Gets menu item selector
     public static StateListDrawable getMenuItemStateSelector(Context context)
     {
-        return(getItemStateSelector(context, Settings.getMaterialTheme(context)));
+        return(getItemStateSelector(context, (Settings.getDarkTheme(context) ? R.attr.viewPagerBackground : R.attr.pageBackground), Settings.getMaterialTheme(context)));
     }
 
     //Gets list item selector
     public static StateListDrawable getListItemStateSelector(Context context)
     {
-        return(getItemStateSelector(context, false));
+        return(getItemStateSelector(context, (Settings.getDarkTheme(context) ? R.attr.viewPagerBackground : R.attr.pageBackground), false));
     }
 
     //Get visible icon for given state

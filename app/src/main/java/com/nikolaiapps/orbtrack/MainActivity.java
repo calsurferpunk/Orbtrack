@@ -1533,10 +1533,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_display), displayDrawable), new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_all), allDrawable)}));
 
-            if(usingMaterial)
-            {
-                sideMenu.setGroupIndicator(null);
-            }
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
             sideMenu.setOnChildClickListener(createOnSideMenuChildClickListener());
             sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener());

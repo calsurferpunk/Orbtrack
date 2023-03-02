@@ -1059,12 +1059,12 @@ public abstract class Settings
             protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
             {
                 final Item currentItem = (Item)item;
-                final boolean haveContext = (currentContext != null);
+                final boolean usingContext = haveContext();
                 final boolean isCurrent = (currentItem.locationType == Database.LocationType.Current);
                 double latitude = currentItem.latitude;
                 double longitude = currentItem.longitude;
                 double altitudeM = currentItem.altitudeM;
-                final Resources res = (haveContext ? currentContext.getResources() : null);
+                final Resources res = (usingContext ? currentContext.getResources() : null);
                 final TextView[] texts;
 
                 //if on current location and not set yet
@@ -1082,7 +1082,7 @@ public abstract class Settings
                 }
 
                 //if have context and -a valid latitude, longitude, or altitude-
-                if(haveContext && ((latitude != 0 && latitude >= -90 && latitude <= 90) || (longitude != 0 && longitude >= -180 && longitude <= 180) || (altitudeM != 0 && altitudeM != Double.MAX_VALUE)))
+                if(usingContext && ((latitude != 0 && latitude >= -90 && latitude <= 90) || (longitude != 0 && longitude >= -180 && longitude <= 180) || (altitudeM != 0 && altitudeM != Double.MAX_VALUE)))
                 {
                     //create dialog
                     final ItemDetailDialog detailDialog = new ItemDetailDialog(currentContext, listInflater, Universe.IDs.None, currentItem.name, null, Globals.getDrawable(currentContext, Globals.getLocationIcon(currentItem.locationType), true), itemDetailButtonClickListener);
@@ -1414,12 +1414,13 @@ public abstract class Settings
             @SuppressLint("NotifyDataSetChanged")
             public void reload()
             {
-                Resources res = (currentContext != null ? currentContext.getResources() : null);
+                boolean usingContext = haveContext();
+                Resources res = (usingContext ? currentContext.getResources() : null);
                 Database.DatabaseSatellite[] orbitals = Database.getOrbitals(currentContext);
                 ArrayList<Item> notifyList = new ArrayList<>(0);
 
                 //if context is set
-                if(currentContext != null)
+                if(usingContext)
                 {
                     //go through each orbital
                     for(Database.DatabaseSatellite currentOrbital : orbitals)
@@ -1440,7 +1441,7 @@ public abstract class Settings
                     //set items and layout ID
                     if(notifyList.size() == 0)
                     {
-                        notifyList.add(new Item(Integer.MIN_VALUE, res.getString(R.string.title_none), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
+                        notifyList.add(new Item(Integer.MIN_VALUE, (res != null ? res.getString(R.string.title_none) : ""), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
                     }
                 }
 

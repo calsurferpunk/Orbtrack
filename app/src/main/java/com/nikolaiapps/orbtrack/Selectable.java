@@ -880,6 +880,7 @@ public abstract class Selectable
         protected boolean hasItems;
         protected boolean forSubItems;
         protected boolean loadingItems;
+        protected boolean usingMaterial;
         private boolean enableItemClicks;
         protected int dataID = Integer.MAX_VALUE;
         protected int itemsRefID = -1;
@@ -899,9 +900,12 @@ public abstract class Selectable
 
         public ListBaseAdapter(Context context)
         {
+            boolean haveContext = (context != null);
+
             categoryTitle = null;
             currentContext = context;
-            listInflater = (currentContext != null ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
+            listInflater = (haveContext ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
+            usingMaterial = Settings.getMaterialTheme(currentContext);
             hasItems = forSubItems = loadingItems = false;
             enableItemClicks = true;
         }
@@ -941,6 +945,12 @@ public abstract class Selectable
             informationGroup = information;
         }
 
+        //Returns if using context
+        protected boolean haveContext()
+        {
+            return(currentContext != null);
+        }
+
         //Returns if showing column titles
         protected boolean showColumnTitles(int page)
         {
@@ -950,13 +960,13 @@ public abstract class Selectable
         //Sets column titles
         protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
         {
-            boolean haveContext = (currentContext != null);
-            int[] colors = (haveContext ? Globals.resolveAttributeIDs(currentContext, R.attr.columnBackground, R.attr.columnTitleTextColor) : new int[]{Color.BLACK, Color.WHITE});
-            colors[1] = (haveContext ? currentContext.getResources().getColor(colors[1]) : colors[1]);
+            boolean usingContext = haveContext();
+            int[] colors = (usingContext ? Globals.resolveAttributeIDs(currentContext, R.attr.columnBackground, R.attr.columnTitleTextColor) : new int[]{Color.BLACK, Color.WHITE});
+            colors[1] = (usingContext ? currentContext.getResources().getColor(colors[1]) : colors[1]);
 
             if(showColumnTitles(page))
             {
-                if(haveContext)
+                if(usingContext)
                 {
                     listColumns.setBackgroundResource(colors[0]);
                 }
@@ -998,7 +1008,7 @@ public abstract class Selectable
             boolean setBackground = (haveItem && (tag == null || !tag.equals("keepBg")) && !(itemView instanceof AppCompatButton));
 
             //if setting background and and context exists
-            if(setBackground && currentContext != null)
+            if(setBackground && haveContext())
             {
                 //set background according to selected state
                 itemView.setBackground(isSelected ? Globals.getItemSelectedState(currentContext, false) : Globals.getListItemStateSelector(currentContext));

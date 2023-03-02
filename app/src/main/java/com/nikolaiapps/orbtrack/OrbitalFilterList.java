@@ -206,7 +206,7 @@ public class OrbitalFilterList
         protected void showViews(String ownerCode, String categoryName, long currentMs, int ageValue, String searchString)
         {
             int index;
-            String listAllString = (currentContext != null ? currentContext.getString(R.string.title_list_all) : null);
+            String listAllString = (haveContext() ? currentContext.getString(R.string.title_list_all) : null);
             String searchStringInsensitive = searchString.trim().toLowerCase();
 
             //clear current items
@@ -288,7 +288,7 @@ public class OrbitalFilterList
         private void setupOwnerList(IconSpinner ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
             int index;
-            String listAllString = (currentContext != null ? currentContext.getString(R.string.title_list_all) : null);
+            String listAllString = (haveContext() ? currentContext.getString(R.string.title_list_all) : null);
             String unknown = Globals.getUnknownString(currentContext);
             IconSpinner.Item[] owners;
 
@@ -320,7 +320,7 @@ public class OrbitalFilterList
             ArrayList<String> groups;
 
             groups = usedCategories;
-            groups.add(0, (currentContext != null ? currentContext.getString(R.string.title_list_all) : null));
+            groups.add(0, (haveContext() ? currentContext.getString(R.string.title_list_all) : null));
             groupList.setAdapter(new IconSpinner.CustomAdapter(currentContext, groups.toArray(new String[0])));
             groupList.setBackgroundColor(listBgColor);
             groupList.setBackgroundItemColor(listBgItemColor);
@@ -334,7 +334,7 @@ public class OrbitalFilterList
         //Sets up age list
         private void setupAgeList(IconSpinner ageList, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
-            Resources res = (currentContext != null ? currentContext.getResources() : null);
+            Resources res = (haveContext() ? currentContext.getResources() : null);
             String lastString = (res != null ? res.getString(R.string.title_last_plural) : null);
             String daysString = (res != null ? res.getString(R.string.title_days) : null);
             String monthsString = (res != null ? res.getString(R.string.title_months) : null);

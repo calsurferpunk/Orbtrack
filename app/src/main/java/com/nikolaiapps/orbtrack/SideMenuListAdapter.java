@@ -178,7 +178,6 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             Context context = parent.getContext();
-            boolean usingMaterial = Settings.getMaterialTheme(context);
             View itemView = LayoutInflater.from(context).inflate((usingMaterial ? R.layout.side_menu_list_group_material : R.layout.side_menu_list_group), parent, false);
             ItemHolder itemHolder = new ItemHolder(itemView, R.id.Group_Title_Image, R.id.Group_Title_Text);
 

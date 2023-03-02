@@ -584,8 +584,10 @@ public class IconSpinner extends AppCompatSpinner
                 itemImage2.setBackgroundDrawable(icon2);
                 if(icon2 != null)
                 {
+                    LayoutParams viewParams = itemImage1.getLayoutParams();
+                    viewParams.width = itemImage2.getLayoutParams().width;
+                    itemImage1.setLayoutParams(viewParams);
                     itemImage2.setVisibility(View.VISIBLE);
-                    Globals.setLayoutWidth(itemImage1, itemImage2.getLayoutParams().width);
                 }
                 if(currentItem.usingIcon3Colors())
                 {

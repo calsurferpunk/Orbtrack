@@ -93,6 +93,8 @@ public abstract class Calculate
 
     private static class ItemHolderBase extends RecyclerView.ViewHolder
     {
+        public final View progressGroup;
+        public final TextView timeText;
         public final TextView nameText;
         public final TextView dataGroup1Text;
         public final TextView dataGroup2Text;
@@ -100,20 +102,29 @@ public abstract class Calculate
         public final TextView dataGroup4Text;
         public final TextView dataGroup5Text;
         public final LinearLayout dataGroup;
+        public final ExpandingListView subList;
         public final AppCompatImageView nameImage;
 
-        public ItemHolderBase(View itemView, int dataGroup1TextID, int dataGroup2TextID, int dataGroup3TextID, int dataGroup4TextID, int dataGroup5TextID, int dataGroupID, int nameImageID, int nameTextID)
+        public ItemHolderBase(View itemView, int dataGroup1TextId, int dataGroup2TextId, int dataGroup3TextId, int dataGroup4TextId, int dataGroup5TextId, int dataGroupId, int nameImageId, int timeTextId, int nameTextId, int progressGroupId, int subListId)
         {
             super(itemView);
 
-            dataGroup1Text = itemView.findViewById(dataGroup1TextID);
-            dataGroup2Text = itemView.findViewById(dataGroup2TextID);
-            dataGroup3Text = (dataGroup3TextID > -1 ? (TextView)itemView.findViewById(dataGroup3TextID) : null);
-            dataGroup4Text = (dataGroup4TextID > -1 ? (TextView)itemView.findViewById(dataGroup4TextID) : null);
-            dataGroup5Text = (dataGroup5TextID > -1 ? (TextView)itemView.findViewById(dataGroup5TextID) : null);
-            dataGroup = itemView.findViewById(dataGroupID);
-            nameImage = (nameImageID > -1 ? (AppCompatImageView)itemView.findViewById(nameImageID) : null);
-            nameText = (nameTextID > - 1 ? (TextView)itemView.findViewById(nameTextID) : null);
+            dataGroup1Text = itemView.findViewById(dataGroup1TextId);
+            dataGroup2Text = itemView.findViewById(dataGroup2TextId);
+            dataGroup3Text = (dataGroup3TextId > -1 ? (TextView)itemView.findViewById(dataGroup3TextId) : null);
+            dataGroup4Text = (dataGroup4TextId > -1 ? (TextView)itemView.findViewById(dataGroup4TextId) : null);
+            dataGroup5Text = (dataGroup5TextId > -1 ? (TextView)itemView.findViewById(dataGroup5TextId) : null);
+            dataGroup = itemView.findViewById(dataGroupId);
+            progressGroup = itemView.findViewById(progressGroupId);
+            subList = (subListId > -1 ? itemView.findViewById(subListId) : null);
+            timeText = (timeTextId > -1 ? (TextView)itemView.findViewById(timeTextId) : null);
+            nameImage = (nameImageId > -1 ? (AppCompatImageView)itemView.findViewById(nameImageId) : null);
+            nameText = (nameTextId > - 1 ? (TextView)itemView.findViewById(nameTextId) : null);
+
+            if(subList != null && Settings.getMaterialTheme(subList.getContext()))
+            {
+                subList.setGroupIndicator(null);
+            }
         }
     }
 
@@ -126,6 +137,7 @@ public abstract class Calculate
             public boolean isLoading;
             public double julianDate;
             public Calendar time;
+            public View progressGroup;
             public TextView timeText;
             public TextView azText;
             public TextView elText;
@@ -134,7 +146,6 @@ public abstract class Calculate
             public TextView illuminationText;
             public ExpandingListView subList;
             public LinearLayout dataGroup;
-            public LinearLayout progressGroup;
             public final CalculateViewsTask.ViewData[] views;
 
             public Item(int index, int viewCount)
@@ -217,24 +228,17 @@ public abstract class Calculate
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public final TextView timeText;
-            public final LinearLayout progressGroup;
-            public final ExpandingListView subList;
-
-            private ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID, int subListID)
+            private ItemHolder(View itemView, int azTextId, int elTextId, int rangeTextId, int phaseTextId, int illuminationTextId, int progressGroupId, int dataGroupId, int timeTextId, int subListId)
             {
-                super(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, dataGroupID, -1, -1);
-                progressGroup = itemView.findViewById(progressGroupID);
-                timeText = (timeTextID > - 1 ? (TextView)itemView.findViewById(timeTextID) : null);
-                subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
+                super(itemView, azTextId, elTextId, rangeTextId, phaseTextId, illuminationTextId, dataGroupId, -1, timeTextId, -1, progressGroupId, subListId);
             }
-            public ItemHolder(View itemView, int azTextID, int elTextID, int rangeTextID, int phaseTextID, int illuminationTextID, int progressGroupID, int dataGroupID, int timeTextID)
+            public ItemHolder(View itemView, int azTextId, int elTextId, int rangeTextId, int phaseTextId, int illuminationTextId, int progressGroupId, int dataGroupId, int timeTextId)
             {
-                this(itemView, azTextID, elTextID, rangeTextID, phaseTextID, illuminationTextID, progressGroupID, dataGroupID, timeTextID, -1);
+                this(itemView, azTextId, elTextId, rangeTextId, phaseTextId, illuminationTextId, progressGroupId, dataGroupId, timeTextId, -1);
             }
-            public ItemHolder(View itemView, int progressGroupID, int subListID)
+            public ItemHolder(View itemView, int progressGroupId, int subListId)
             {
-                this(itemView, -1, -1, -1, -1, -1, progressGroupID, -1, -1, subListID);
+                this(itemView, -1, -1, -1, -1, -1, progressGroupId, -1, -1, subListId);
             }
         }
 
@@ -252,7 +256,7 @@ public abstract class Calculate
                 haveSun = haveMoon = false;
 
                 //remember strings and layout ID
-                this.itemsRefID = R.layout.calculate_view_item;
+                this.itemsRefID = (usingMaterial ? R.layout.calculate_view_item_material : R.layout.calculate_view_item);
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -474,7 +478,7 @@ public abstract class Calculate
 
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
             {
-                super(context, julianDate, items, R.layout.calculate_view_item, R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Item_Divider, widthDp);
+                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_view_item_material : R.layout.calculate_view_item), R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Item_Divider, widthDp);
                 this.haveSun = haveSun;
                 this.haveMoon = haveMoon;
             }
@@ -530,13 +534,13 @@ public abstract class Calculate
             public boolean tleIsAccurate;
             public View timeStartUnder;
             public View elMaxUnder;
+            public View progressBar;
             public AppCompatImageView nameImage;
             public TextView nameText;
             public TextView timeStartText;
             public TextView timeEndText;
             public TextView timeDurationText;
             public TextView elMaxText;
-            public LinearProgressIndicator progressBar;
             public LinearProgressIndicator progressStatusBar;
             public LinearLayout dataGroup;
 
@@ -683,16 +687,14 @@ public abstract class Calculate
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public final LinearProgressIndicator calculateProgressBar;
-            public final View timeStartUnder;
             public final View elMaxUnder;
+            public final View timeStartUnder;
 
-            public ItemHolder(View itemView, int timeStartTextID, int timeStartUnderID, int timeEndTextID, int timeDurationTextID, int elMaxTextID, int elMaxUnderID, int calculateProgressBarID, int dataGroupID)
+            public ItemHolder(View itemView, int timeStartTextId, int timeStartUnderId, int timeEndTextId, int timeDurationTextId, int elMaxTextId, int elMaxUnderId, int calculateProgressBarId, int dataGroupId)
             {
-                super(itemView, timeStartTextID, timeDurationTextID, timeEndTextID, elMaxTextID, -1, dataGroupID, -1, -1);
-                calculateProgressBar = itemView.findViewById(calculateProgressBarID);
-                timeStartUnder = itemView.findViewById(timeStartUnderID);
-                elMaxUnder = itemView.findViewById(elMaxUnderID);
+                super(itemView, timeStartTextId, timeDurationTextId, timeEndTextId, elMaxTextId, -1, dataGroupId, -1, -1, -1, calculateProgressBarId, -1);
+                elMaxUnder = itemView.findViewById(elMaxUnderId);
+                timeStartUnder = itemView.findViewById(timeStartUnderId);
             }
         }
 
@@ -724,7 +726,7 @@ public abstract class Calculate
                 }
 
                 //remember strings and layout ID
-                this.itemsRefID = R.layout.calculate_pass_item;
+                this.itemsRefID = (usingMaterial ? R.layout.calculate_pass_item_material : R.layout.calculate_pass_item);
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -807,8 +809,8 @@ public abstract class Calculate
                 //get displays
                 currentItem.nameImage = itemHolder.nameImage;
                 currentItem.nameText = itemHolder.nameText;
-                itemHolder.calculateProgressBar.setVisibility(View.VISIBLE);
-                currentItem.progressBar = itemHolder.calculateProgressBar;
+                itemHolder.progressGroup.setVisibility(View.VISIBLE);
+                currentItem.progressBar = itemHolder.progressGroup;
                 currentItem.progressStatusBar = null;
                 currentItem.dataGroup = itemHolder.dataGroup;
                 if(currentItem.dataGroup != null)
@@ -1080,6 +1082,7 @@ public abstract class Calculate
             public boolean isLoading;
             public double julianDate;
             public Calendar time;
+            public View progressGroup;
             public TextView speedText;
             public TextView timeText;
             public TextView latitudeText;
@@ -1087,7 +1090,6 @@ public abstract class Calculate
             public TextView altitudeText;
             public ExpandingListView subList;
             public LinearLayout dataGroup;
-            public LinearLayout progressGroup;
             public final CalculateCoordinatesTask.CoordinateData[] coordinates;
 
             public Item(int index, int coordinateCount)
@@ -1178,24 +1180,17 @@ public abstract class Calculate
         //Item holder
         public static class ItemHolder extends ItemHolderBase
         {
-            public final TextView timeText;
-            public final LinearLayout progressGroup;
-            public final ExpandingListView subList;
-
-            private ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int progressGroupID, int dataGroupID, int speedTextID, int timeTextID, int subListID)
+            private ItemHolder(View itemView, int latTextId, int lonTextId, int altTextId, int progressGroupId, int dataGroupId, int speedTextId, int timeTextId, int subListId)
             {
-                super(itemView, latTextID, lonTextID, altTextID, speedTextID, -1, dataGroupID, -1, -1);
-                progressGroup = itemView.findViewById(progressGroupID);
-                timeText = (timeTextID > -1 ? (TextView)itemView.findViewById(timeTextID) : null);
-                subList = (subListID > -1 ? itemView.findViewById(subListID) : null);
+                super(itemView, latTextId, lonTextId, altTextId, speedTextId, -1, dataGroupId, -1, timeTextId, -1, progressGroupId, subListId);
             }
-            public ItemHolder(View itemView, int latTextID, int lonTextID, int altTextID, int speedTextID, int progressGroupID, int dataGroupID, int timeTextID)
+            public ItemHolder(View itemView, int latTextId, int lonTextId, int altTextId, int speedTextId, int progressGroupId, int dataGroupId, int timeTextId)
             {
-                this(itemView, latTextID, lonTextID, altTextID, progressGroupID, dataGroupID, speedTextID, timeTextID, -1);
+                this(itemView, latTextId, lonTextId, altTextId, progressGroupId, dataGroupId, speedTextId, timeTextId, -1);
             }
-            public ItemHolder(View itemView, int progressGroupID, int subListID)
+            public ItemHolder(View itemView, int progressGroupId, int subListId)
             {
-                this(itemView, -1, -1, -1, progressGroupID, -1, -1, -1, subListID);
+                this(itemView, -1, -1, -1, progressGroupId, -1, -1, -1, subListId);
             }
         }
 
@@ -1208,6 +1203,8 @@ public abstract class Calculate
             public ItemListAdapter(Context context, Item[] savedItems, int multiCount, TimeZone zone)
             {
                 super(context);
+
+                int itemId = (usingMaterial ? R.layout.calculate_coordinates_item_material : R.layout.calculate_coordinates_item);
 
                 hasItems = false;
                 currentZone = zone;
@@ -1228,10 +1225,10 @@ public abstract class Calculate
 
                 //remember layout ID
                 forSubItems = (multiCount > 1);
-                this.itemsRefID = (forSubItems ? R.layout.calculate_multi_item : R.layout.calculate_coordinates_item);
+                this.itemsRefID = (forSubItems ? R.layout.calculate_multi_item : itemId);
                 if(forSubItems)
                 {
-                    this.itemsRefSubId = R.layout.calculate_coordinates_item;
+                    this.itemsRefSubId = itemId;
                 }
 
                 //ID stays the same
@@ -1370,7 +1367,7 @@ public abstract class Calculate
         {
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp)
             {
-                super(context, julianDate, items, R.layout.calculate_coordinates_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
+                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_coordinates_item_material : R.layout.calculate_coordinates_item), R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
             }
 
             @Override
@@ -1406,6 +1403,7 @@ public abstract class Calculate
     public static class SubItemBaseListAdapter extends BaseExpandableListAdapter
     {
         protected final int widthDp;
+        private final boolean usingMaterial;
         private final int layoutId;
         private final int titleId;
         private final int progressId;
@@ -1417,6 +1415,7 @@ public abstract class Calculate
 
         public SubItemBaseListAdapter(Context context, double julianDate, CalculateDataBase[] items, int layoutId, int titleId, int progressId, int dataId, int dividerId, int widthDp)
         {
+            this.usingMaterial = Settings.getMaterialTheme(context);
             this.listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.layoutId = layoutId;
             this.titleId = titleId;
@@ -1474,13 +1473,25 @@ public abstract class Calculate
         public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent)
         {
             TextView groupTitleText;
+            AppCompatImageView groupTitleImage;
+            AppCompatImageView groupIndicatorImage;
 
             if(convertView == null)
             {
-                convertView = listInflater.inflate(R.layout.side_menu_list_group, parent, false);
+                convertView = listInflater.inflate((usingMaterial ? R.layout.side_menu_list_group_material : R.layout.side_menu_list_group), parent, false);
+            }
+            groupTitleImage = convertView.findViewById(R.id.Group_Title_Image);
+            if(usingMaterial && groupTitleImage != null)
+            {
+                groupTitleImage.setVisibility(View.GONE);
             }
             groupTitleText = convertView.findViewById(R.id.Group_Title_Text);
             groupTitleText.setText(Globals.getDateString(parent.getContext(), Globals.julianDateToCalendar(dataJulianDate), MainActivity.getTimeZone(), true).replace("\r\n", " "));
+            groupIndicatorImage = convertView.findViewById(R.id.Group_Indicator_Image);
+            if(usingMaterial && groupIndicatorImage != null)
+            {
+                groupIndicatorImage.setImageDrawable(Globals.getDrawable(listInflater.getContext(), (isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more), true));
+            }
 
             return(convertView);
         }
@@ -1489,6 +1500,7 @@ public abstract class Calculate
         public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent)
         {
             Context context = parent.getContext();
+            View dividerView;
             TextView titleText;
             CalculateDataBase currentData = dataItems[childPosition];
             Database.DatabaseSatellite currentOrbital = Database.getOrbital(context, currentData.noradId);
@@ -1498,11 +1510,15 @@ public abstract class Calculate
                 convertView = listInflater.inflate(layoutId, parent, false);
             }
             titleText = convertView.findViewById(titleId);
-            titleText.setText(currentOrbital.getName());
+            titleText.setText(currentOrbital != null ? currentOrbital.getName() : null);
             titleText.setVisibility(View.VISIBLE);
             convertView.findViewById(progressId).setVisibility(View.GONE);
             convertView.findViewById(dataId).setVisibility(View.VISIBLE);
-            convertView.findViewById(dividerId).setVisibility(View.VISIBLE);
+            dividerView = convertView.findViewById(dividerId);
+            if(dividerView != null)
+            {
+                dividerView.setVisibility(View.VISIBLE);
+            }
 
             return(convertView);
         }
@@ -1592,7 +1608,7 @@ public abstract class Calculate
             View newView = null;
             Bundle params = this.getArguments();
             Context context = this.getContext();
-            Selectable.ListBaseAdapter listAdapter;
+            Selectable.ListBaseAdapter listAdapter = null;
             ArrayList<Integer> multiNoradId;
             Database.SatelliteData[] selectedOrbitals;
 
@@ -1712,6 +1728,13 @@ public abstract class Calculate
             {
                 //create view
                 newView = Calculate.onCreateView(this, inflater, container, savedInstanceState);
+            }
+
+            //if list set, adapter set, and using material
+            if(selectList != null && listAdapter != null && listAdapter.usingMaterial)
+            {
+                //set background
+                selectList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
             }
 
             //if listener is set

@@ -6,6 +6,7 @@
         android:id="@+id/Combined_Item_Pass_Quality_View"
         android:layout_width="1dp"
         android:layout_height="0dp"
+        android:alpha="0.65"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"

@@ -784,7 +784,9 @@ public class MasterAddListActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.master_list_layout);
+
+        boolean usingMaterial = Settings.getMaterialTheme(this);
+        setContentView(usingMaterial ? R.layout.master_list_layout_material : R.layout.master_list_layout);
 
         //get intent, source, and displays
         Intent addIntent = this.getIntent();

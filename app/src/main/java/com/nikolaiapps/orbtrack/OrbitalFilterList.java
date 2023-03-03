@@ -304,14 +304,17 @@ public class OrbitalFilterList
                 int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
                 owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
             }
-            ownerList.setAdapter(new IconSpinner.CustomAdapter(currentContext, owners));
-            ownerList.setBackgroundColor(listBgColor);
-            ownerList.setBackgroundItemColor(listBgItemColor);
-            ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
-            ownerList.setTextColor(listTextColor);
-            ownerList.setTextSelectedColor(listTextSelectedColor);
-            ownerList.setOnItemSelectedListener(itemSelectedListener);
-            ownerList.setEnabled(true);
+            if(ownerList != null)
+            {
+                ownerList.setAdapter(new IconSpinner.CustomAdapter(currentContext, owners));
+                ownerList.setBackgroundColor(listBgColor);
+                ownerList.setBackgroundItemColor(listBgItemColor);
+                ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
+                ownerList.setTextColor(listTextColor);
+                ownerList.setTextSelectedColor(listTextSelectedColor);
+                ownerList.setOnItemSelectedListener(itemSelectedListener);
+                ownerList.setEnabled(true);
+            }
         }
 
         //Sets up group list
@@ -321,14 +324,17 @@ public class OrbitalFilterList
 
             groups = usedCategories;
             groups.add(0, (haveContext() ? currentContext.getString(R.string.title_list_all) : null));
-            groupList.setAdapter(new IconSpinner.CustomAdapter(currentContext, groups.toArray(new String[0])));
-            groupList.setBackgroundColor(listBgColor);
-            groupList.setBackgroundItemColor(listBgItemColor);
-            groupList.setBackgroundItemSelectedColor(listBgSelectedColor);
-            groupList.setTextColor(listTextColor);
-            groupList.setTextSelectedColor(listTextSelectedColor);
-            groupList.setOnItemSelectedListener(itemSelectedListener);
-            groupList.setEnabled(true);
+            if(groupList != null)
+            {
+                groupList.setAdapter(new IconSpinner.CustomAdapter(currentContext, groups.toArray(new String[0])));
+                groupList.setBackgroundColor(listBgColor);
+                groupList.setBackgroundItemColor(listBgItemColor);
+                groupList.setBackgroundItemSelectedColor(listBgSelectedColor);
+                groupList.setTextColor(listTextColor);
+                groupList.setTextSelectedColor(listTextSelectedColor);
+                groupList.setOnItemSelectedListener(itemSelectedListener);
+                groupList.setEnabled(true);
+            }
         }
 
         //Sets up age list
@@ -339,25 +345,28 @@ public class OrbitalFilterList
             String daysString = (res != null ? res.getString(R.string.title_days) : null);
             String monthsString = (res != null ? res.getString(R.string.title_months) : null);
 
-            ageList.setAdapter(new IconSpinner.CustomAdapter(currentContext, res != null ? (new IconSpinner.Item[]
+            if(ageList != null)
             {
-                new IconSpinner.Item(res.getString(R.string.title_any), -1),
-                new IconSpinner.Item(res.getString(R.string.title_today), 0),
-                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + daysString, 3),
-                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_7) + " " + daysString, 7),
-                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_14) + " " + daysString, 14),
-                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_30) + " " + daysString, 30),
-                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + monthsString, 93),
-                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_6) + " " + monthsString, 183),
-                new IconSpinner.Item(res.getString(R.string.title_this_year), 366)
-            }) : new IconSpinner.Item[0]));
-            ageList.setBackgroundColor(listBgColor);
-            ageList.setBackgroundItemColor(listBgItemColor);
-            ageList.setBackgroundItemSelectedColor(listBgSelectedColor);
-            ageList.setTextColor(listTextColor);
-            ageList.setTextSelectedColor(listTextSelectedColor);
-            ageList.setOnItemSelectedListener(itemSelectedListener);
-            ageList.setEnabled(true);
+                ageList.setAdapter(new IconSpinner.CustomAdapter(currentContext, res != null ? (new IconSpinner.Item[]
+                {
+                    new IconSpinner.Item(res.getString(R.string.title_any), -1),
+                    new IconSpinner.Item(res.getString(R.string.title_today), 0),
+                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + daysString, 3),
+                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_7) + " " + daysString, 7),
+                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_14) + " " + daysString, 14),
+                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_30) + " " + daysString, 30),
+                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + monthsString, 93),
+                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_6) + " " + monthsString, 183),
+                    new IconSpinner.Item(res.getString(R.string.title_this_year), 366)
+                }) : new IconSpinner.Item[0]));
+                ageList.setBackgroundColor(listBgColor);
+                ageList.setBackgroundItemColor(listBgItemColor);
+                ageList.setBackgroundItemSelectedColor(listBgSelectedColor);
+                ageList.setTextColor(listTextColor);
+                ageList.setTextSelectedColor(listTextSelectedColor);
+                ageList.setOnItemSelectedListener(itemSelectedListener);
+                ageList.setEnabled(true);
+            }
         }
 
         //Shows/hides search inputs
@@ -406,7 +415,10 @@ public class OrbitalFilterList
                 public void afterTextChanged(Editable s)
                 {
                     //update visible items
-                    OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), s.toString());
+                    if(ownerList != null && groupList != null && ageList != null)
+                    {
+                        OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), s.toString());
+                    }
                 }
             };
 
@@ -423,7 +435,10 @@ public class OrbitalFilterList
             setupAgeList(ageList, itemSelectedListener);
 
             //update age row visibility
-            ageRow.setVisibility(hasLaunchDates ? View.VISIBLE : View.GONE);
+            if(ageRow != null)
+            {
+                ageRow.setVisibility(hasLaunchDates ? View.VISIBLE : View.GONE);
+            }
 
             //setup name text
             searchText.addTextChangedListener(textChangedListener);
@@ -435,7 +450,10 @@ public class OrbitalFilterList
                 @Override
                 public void onClick(View v)
                 {
-                    showSearchInputs(searchTable.getVisibility() == View.GONE);
+                    if(searchTable != null)
+                    {
+                        showSearchInputs(searchTable.getVisibility() == View.GONE);
+                    }
                 }
             });
         }

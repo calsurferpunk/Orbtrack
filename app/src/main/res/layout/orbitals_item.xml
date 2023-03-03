@@ -61,11 +61,6 @@
             style="@style/VisibleButton"
             android:layout_marginLeft="5dp"
             android:layout_marginStart="5dp"/>
-
-        <View
-            android:id="@+id/Object_Color_Button_Replace"
-            style="@style/ColorButton"
-            android:visibility="gone"/>
     </LinearLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator

@@ -9,6 +9,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
@@ -198,7 +199,7 @@ public abstract class Orbitals
             columnTitleStringId = titleStringId;
             simple = isSimple;
             forSetup = (columnTitleStringId > 0);
-            this.itemsRefID = R.layout.orbitals_item;
+            this.itemsRefID = (usingMaterial ? R.layout.orbitals_item_material : R.layout.orbitals_item);
 
             //set load items task
             loadItems = new LoadItemsTask(new OrbitalFilterList.OnLoadItemsListener()
@@ -253,18 +254,30 @@ public abstract class Orbitals
             }
             else
             {
-                int nonNameVisibility = (currentPage == PageType.Satellites && !forSetup ? View.VISIBLE : View.GONE);
+                boolean usingContext = haveContext();
+                boolean onSatellites = (currentPage == PageType.Satellites);
+                int nonNameVisibility = (onSatellites && !forSetup ? View.VISIBLE : View.GONE);
+                String ageString = (usingContext ? currentContext.getString(R.string.title_tle_age) : "");
+                String nameString = (usingContext ? currentContext.getString(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name) : "");
+                TextView itemText = listColumns.findViewById(R.id.Object_Item_Text);
                 TextView tleDateText = listColumns.findViewById(R.id.Object_TLE_Age_Text);
                 BorderButton colorButton = listColumns.findViewById(R.id.Object_Color_Button);
                 AppCompatButton visibleButton = listColumns.findViewById(R.id.Object_Visible_Button);
 
-                ((TextView)listColumns.findViewById(R.id.Object_Item_Text)).setText(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name);
-                visibleButton.setVisibility(View.INVISIBLE);
-                tleDateText.setText(R.string.title_tle_age);
+                if(usingMaterial && onSatellites)
+                {
+                    itemText.setVisibility(View.GONE);
+                }
+                else
+                {
+                    itemText.setText(nameString);
+                    itemText.setTypeface(null, Typeface.NORMAL);
+                }
+                tleDateText.setText(usingMaterial ? (nameString + "/" + ageString) : ageString);
                 tleDateText.setVisibility(nonNameVisibility);
                 listColumns.findViewById(R.id.Object_TLE_Age_Under).setVisibility(View.GONE);
-                colorButton.setVisibility(View.GONE);
-                listColumns.findViewById(R.id.Object_Color_Button_Replace).setVisibility(View.VISIBLE);
+                visibleButton.setVisibility(View.INVISIBLE);
+                colorButton.setVisibility(View.INVISIBLE);
             }
 
             super.setColumnTitles(listColumns, categoryText, page);
@@ -372,18 +385,31 @@ public abstract class Orbitals
         @Override
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
         {
-            boolean onSatellites = (currentPage == PageType.Satellites);
+            final boolean onSatellites = (currentPage == PageType.Satellites);
             final Resources res = (haveContext() ? currentContext.getResources() : null);
+            final boolean haveRes = (res != null);
             final PageListItemHolder itemHolder = (PageListItemHolder)holder;
             final OrbitalFilterList.Item filterItem = (position < displayedItems.size() ? displayedItems.get(position) : null);
             final Item currentItem = (loadingItems || !(filterItem instanceof Item) ? new Item(currentContext, 0, new Database.DatabaseSatellite("", Universe.IDs.Invalid, "", Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Satellite), false, false) : (Item)filterItem);
             double ageDays = (System.currentTimeMillis() - currentItem.tleDateMs) / Calculations.MsPerDay;
-            String dayText = Globals.getNumberString(ageDays, 1) + " " + (res != null ? res.getString(R.string.title_days) : "");
+            String dayText = Globals.getNumberString(ageDays, 1) + " " + (haveRes ? res.getString(R.string.title_days) : "");
             Drawable itemIcon;
 
-            //set visibility
-            itemHolder.itemLayout.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
-            itemHolder.progress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
+            //if holder is a ViewGroup
+            if(itemHolder.itemView instanceof ViewGroup)
+            {
+                int index;
+                ViewGroup itemView = (ViewGroup)itemHolder.itemView;
+
+                //go through each child view
+                for(index = 0; index < itemView.getChildCount(); index++)
+                {
+                    //set visibility
+                    View currentView = itemView.getChildAt(index);
+                    boolean isProgress = currentView.equals(itemHolder.progress);
+                    currentView.setVisibility(loadingItems ? (isProgress ? View.VISIBLE : View.GONE) : (isProgress ? View.GONE : View.VISIBLE));
+                }
+            }
 
             //if not loading items
             if(!loadingItems)
@@ -392,23 +418,19 @@ public abstract class Orbitals
                 itemIcon = Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType);
                 itemHolder.itemImage.setImageDrawable(itemIcon);
                 itemHolder.itemText.setText(currentItem.text);
+                if(itemHolder.tleAgeLayout != null)
+                {
+                    itemHolder.tleAgeLayout.setVisibility(onSatellites ? View.VISIBLE : View.GONE);
+                }
+                itemHolder.tleAgeText.setVisibility(onSatellites ? View.VISIBLE : View.GONE);
+                itemHolder.tleUnder.setVisibility(onSatellites && ageDays > 2 ? View.VISIBLE : View.GONE);
                 if(onSatellites)
                 {
                     itemHolder.tleAgeText.setText(dayText);
-                    if(ageDays <= 2)
-                    {
-                        itemHolder.tleUnder.setVisibility(View.GONE);
-                    }
-                    else
+                    if(ageDays > 2)
                     {
                         itemHolder.tleUnder.setBackgroundColor(ageDays >= 14 ? Color.RED : ageDays >= 7 ? 0xFFFFA500 : Color.YELLOW);
-                        itemHolder.tleUnder.setVisibility(View.VISIBLE);
-                        itemHolder.tleAgeLayout.setVisibility(View.VISIBLE);
                     }
-                }
-                else
-                {
-                    itemHolder.tleAgeLayout.setVisibility(View.GONE);
                 }
                 itemHolder.colorButton.setBackgroundColor(currentItem.color);
                 itemHolder.visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, currentItem.isVisible));
@@ -449,7 +471,7 @@ public abstract class Orbitals
                             }
                         });
                         colorDialog.setIcon(itemIcon);
-                        colorDialog.setTitle(res != null ? (res.getString(R.string.title_select) + " " + currentItem.text + " " + res.getString(R.string.title_color)) : currentItem.text);
+                        colorDialog.setTitle(haveRes ? (res.getString(R.string.title_select) + " " + currentItem.text + " " + res.getString(R.string.title_color)) : currentItem.text);
                         colorDialog.show(currentContext);
                     }
                 });

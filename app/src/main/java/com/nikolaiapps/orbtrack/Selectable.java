@@ -1270,6 +1270,7 @@ public abstract class Selectable
         private OnPageResumeListener pageResumeListener;
         private Observer<Intent> updateReceiver;
 
+        private boolean usingMaterial;
         private Menu actionMenu;
         private ActionMode actionModeMenu;
         private ListBaseAdapter selectListAdapter;
@@ -1302,6 +1303,7 @@ public abstract class Selectable
 
             Context context = this.getContext();
 
+            usingMaterial = Settings.getMaterialTheme(context);
             updateReceiver = createLocalBroadcastReceiver();
             if(context != null)
             {
@@ -1387,7 +1389,6 @@ public abstract class Selectable
             int currentColumns;
             int dividerInsetPx;
             boolean darkTheme;
-            boolean usingMaterial;
             Object tagObject;
             DividerItemDecoration verticalDivider;
             DividerItemDecoration horizontalDivider;
@@ -1398,7 +1399,6 @@ public abstract class Selectable
             {
                 //get theme, desired columns, and sizes
                 darkTheme = Settings.getDarkTheme(context);
-                usingMaterial = Settings.getMaterialTheme(context);
                 columns = getListColumns(context, page);
 
                 //if there are existing columns
@@ -1460,7 +1460,7 @@ public abstract class Selectable
             View header;
             View listColumns;
             Context context = this.getContext();
-            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.list_view, container, false);
+            ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_view_material : R.layout.list_view), container, false);
 
             //remember group and page
             group = grp;

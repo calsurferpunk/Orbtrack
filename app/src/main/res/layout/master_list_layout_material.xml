@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Master_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true"
+    android:background="?attr/viewPagerBackground">
+    <include layout="@layout/orbital_search_layout_material" android:visibility="gone"/>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/Master_Add_List"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:background="?attr/pageBackground"
+        android:scrollbars="vertical"
+        android:choiceMode="multipleChoice"/>
+
+    <LinearLayout style="@style/ResultButtonLayout">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/Master_Cancel_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_cancel"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/Master_Add_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_add"/>
+    </LinearLayout>
+</LinearLayout>

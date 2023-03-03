@@ -525,6 +525,16 @@
         <item name="android:textColorHint">@color/transparent</item>
     </style>
 
+    <!--Orbital Search Layout-->
+    <style name="OrbitalSearchTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColorHint">@color/white</item>
+        <item name="boxBackgroundColor">?attr/pageTitleBackground</item>
+        <item name="helperTextTextColor">@color/white</item>
+        <item name="startIconTint">@color/white</item>
+    </style>
+
     <!--Combined Layout-->
     <style name="CombinedLayoutMaterial">
         <item name="android:layout_width">wrap_content</item>

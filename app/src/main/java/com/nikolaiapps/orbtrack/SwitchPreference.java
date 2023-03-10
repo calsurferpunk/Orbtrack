@@ -10,22 +10,26 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.SwitchCompat;
 import androidx.preference.PreferenceViewHolder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 
 public class SwitchPreference extends CustomPreference
 {
     private boolean isChecked;
+    private final boolean usingMaterial;
     private String subKey;
     private SwitchCompat switchView;
+    private MaterialSwitch switchMaterialView;
 
     public SwitchPreference(@NonNull Context context, @Nullable @org.jetbrains.annotations.Nullable AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        usingMaterial = Settings.getMaterialTheme(context);
         this.persistBoolean(false);
-        this.setLayoutResource(R.layout.switch_preference_layout);
+        this.setLayoutResource(usingMaterial ? R.layout.switch_preference_material_layout : R.layout.switch_preference_layout);
 
-        //set default
+        //set defaults
         isChecked = false;
         subKey = "";
     }
@@ -46,14 +50,19 @@ public class SwitchPreference extends CustomPreference
     {
         super.onBindViewHolder(holder);
 
+        final CharSequence title = this.getTitle();
         final CharSequence summary = this.getSummary();
+        final TextView titleView;
         final TextView summaryView;
         final ViewGroup rootView;
+        final CompoundButton.OnCheckedChangeListener checkedChangeListener;
 
         //get displays
         rootView = (ViewGroup)holder.itemView;
+        titleView = rootView.findViewById(R.id.Switch_Preference_Title);
         summaryView = rootView.findViewById(R.id.Switch_Preference_Summary);
         switchView = holder.itemView.findViewById(R.id.Switch_Preference_Switch);
+        switchMaterialView = holder.itemView.findViewById(R.id.Switch_Preference_Material_Switch);
 
         //set displays
         if(summary != null && summary.length() > 0)
@@ -61,8 +70,7 @@ public class SwitchPreference extends CustomPreference
             summaryView.setText(summary);
             summaryView.setVisibility(ViewGroup.VISIBLE);
         }
-        switchView.setText(this.getTitle());
-        switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        checkedChangeListener = new CompoundButton.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
@@ -70,8 +78,22 @@ public class SwitchPreference extends CustomPreference
                 isChecked = checked;
                 callOnPreferenceChangeListener();
             }
-        });
-        switchView.setChecked(isChecked);
+        };
+        if(switchView != null)
+        {
+            switchView.setText(title);
+            switchView.setOnCheckedChangeListener(checkedChangeListener);
+            switchView.setChecked(isChecked);
+        }
+        if(titleView != null)
+        {
+            titleView.setText(title);
+        }
+        if(switchMaterialView != null)
+        {
+            switchMaterialView.setOnCheckedChangeListener(checkedChangeListener);
+            switchMaterialView.setChecked(isChecked);
+        }
     }
 
     //Sets sub key
@@ -102,13 +124,27 @@ public class SwitchPreference extends CustomPreference
     {
         isChecked = checked;
 
-        if(switchView == null)
+        if(usingMaterial)
         {
-            callOnPreferenceChangeListener();
+            if(switchMaterialView != null)
+            {
+                switchMaterialView.setChecked(isChecked);
+            }
+            else
+            {
+                callOnPreferenceChangeListener();
+            }
         }
         else
         {
-            switchView.setChecked(isChecked);
+            if(switchView != null)
+            {
+                switchView.setChecked(isChecked);
+            }
+            else
+            {
+                callOnPreferenceChangeListener();
+            }
         }
     }
 }

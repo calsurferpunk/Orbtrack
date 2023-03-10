@@ -192,7 +192,7 @@ public abstract class Selectable
 
                 try
                 {
-                    itemDetailsGroup = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.item_detail_dialog_material : R.layout.item_detail_dialog), null);
+                    itemDetailsGroup = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.item_detail_material_dialog : R.layout.item_detail_dialog), null);
                 }
                 catch(Exception ex)
                 {
@@ -207,7 +207,7 @@ public abstract class Selectable
                 itemDetailButtonLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Button_Layout);
                 itemDetail3dCloseButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Close_Button);
                 itemDetail3dFullscreenButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Fullscreen_Button);
-                itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeID(currentContext), usingMaterial);
+                itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeID(currentContext), usingMaterial, false);
                 fm = (currentContext instanceof FragmentActivity ? ((FragmentActivity)currentContext).getSupportFragmentManager() : null);
                 itemDetailButtonClickListener = listener;
                 dismissListeners = new ArrayList<>(0);
@@ -1270,7 +1270,7 @@ public abstract class Selectable
         private OnPageResumeListener pageResumeListener;
         private Observer<Intent> updateReceiver;
 
-        private boolean usingMaterial;
+        protected boolean usingMaterial;
         private Menu actionMenu;
         private ActionMode actionModeMenu;
         private ListBaseAdapter selectListAdapter;
@@ -1310,7 +1310,7 @@ public abstract class Selectable
                 UpdateService.observe(context, updateReceiver);
             }
 
-            this.setRetainInstance(true);       //keep adapter on orientation changes
+            //this.setRetainInstance(true);       //keep adapter on orientation changes
             this.setHasOptionsMenu(true);
         }
 
@@ -1460,7 +1460,7 @@ public abstract class Selectable
             View header;
             View listColumns;
             Context context = this.getContext();
-            ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_view_material : R.layout.list_view), container, false);
+            ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_material_view : R.layout.list_view), container, false);
 
             //remember group and page
             group = grp;

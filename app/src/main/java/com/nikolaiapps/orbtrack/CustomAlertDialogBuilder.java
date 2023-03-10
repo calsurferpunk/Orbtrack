@@ -4,8 +4,10 @@ package com.nikolaiapps.orbtrack;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
@@ -16,16 +18,17 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
 {
     private TextView titleText = null;
 
-    public CustomAlertDialogBuilder(@NonNull Context context, int themeResId, boolean useMaterial)
+    public CustomAlertDialogBuilder(@NonNull Context context, int themeResId, boolean useMaterial, boolean forSelection)
     {
         super(context, themeResId);
-        setTitleView(context, useMaterial);
+        setTitleView(context, useMaterial, forSelection);
     }
 
     @SuppressLint("InflateParams")
-    private void setTitleView(Context context, boolean useMaterial)
+    private void setTitleView(Context context, boolean useMaterial, boolean forSelection)
     {
-        View titleView = LayoutInflater.from(context).inflate((useMaterial ? R.layout.dialog_title_view_material : R.layout.dialog_title_view), null, false);
+        FrameLayout.LayoutParams params;
+        View titleView = LayoutInflater.from(context).inflate((useMaterial ? R.layout.dialog_title_material_view : R.layout.dialog_title_view), null, false);
 
         if(titleView instanceof TextView)
         {
@@ -34,6 +37,19 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
         else if(titleView instanceof LinearLayout)
         {
             titleText = titleView.findViewById(R.id.Dialog_Title_Text);
+            if(forSelection)
+            {
+                params = (FrameLayout.LayoutParams)titleText.getLayoutParams();
+                if(params != null)
+                {
+                    params.gravity = Gravity.LEFT;
+                    titleText.setLayoutParams(params);
+                }
+            }
+        }
+        if(forSelection)
+        {
+            titleView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageBackground));
         }
 
         setCustomTitle(titleView);

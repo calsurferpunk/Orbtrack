@@ -1264,7 +1264,7 @@ public abstract class Settings
             {
                 super(parentView, title);
 
-                this.itemsRefID = R.layout.notify_item;
+                this.itemsRefID = R.layout.settings_notify_item;
             }
 
             @Override

@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
-        this.setContentView(usingMaterial ? R.layout.main_layout_material : R.layout.main_layout);
+        this.setContentView(usingMaterial ? R.layout.main_material_layout : R.layout.main_layout);
 
         //look for web protocol updates
         Globals.updateWebProtocols(this);
@@ -474,20 +474,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             //reload observer
                             loadObserver();
-                        }
-
-                        //if need to update combined layout
-                        if(data.getBooleanExtra(SettingsActivity.EXTRA_UPDATE_COMBINED_LAYOUT, false))
-                        {
-                            //if on current
-                            if(mainGroup == Groups.Current)
-                            {
-                                //update pager
-                                updateMainPagerAdapter(true, false);
-                            }
-
-                            //update side menu
-                            updateSideMenu();
                         }
                     }
                 }
@@ -1553,7 +1539,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //update pager
-        updateMainPagerAdapter(false, saveItems);
+        updateMainPagerAdapter(saveItems);
         setMainPage(page);
 
         //if reloaded orbitals
@@ -2385,9 +2371,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         showingPagerTitles = !showCurrent;
         mainPagerTitles.setVisibility(showingPagerTitles ? View.VISIBLE : View.GONE);
     }
-    private void updateMainPagerAdapter(boolean groupChanged, boolean saveItems)
+    private void updateMainPagerAdapter(boolean saveItems)
     {
-        updateMainPagerAdapter(getMainPage(), groupChanged, saveItems);
+        updateMainPagerAdapter(getMainPage(), false, saveItems);
     }
 
     //Sets main group

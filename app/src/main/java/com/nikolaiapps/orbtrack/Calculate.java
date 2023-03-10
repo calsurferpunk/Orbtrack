@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
@@ -15,20 +14,16 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Parcelable;
-import android.text.Editable;
 import android.text.Spanned;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.AutoCompleteTextView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -256,7 +251,7 @@ public abstract class Calculate
                 haveSun = haveMoon = false;
 
                 //remember strings and layout ID
-                this.itemsRefID = (usingMaterial ? R.layout.calculate_view_item_material : R.layout.calculate_view_item);
+                this.itemsRefID = (usingMaterial ? R.layout.calculate_view_material_item : R.layout.calculate_view_item);
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -478,7 +473,7 @@ public abstract class Calculate
 
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
             {
-                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_view_item_material : R.layout.calculate_view_item), R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Item_Divider, widthDp);
+                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_view_material_item : R.layout.calculate_view_item), R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Item_Divider, widthDp);
                 this.haveSun = haveSun;
                 this.haveMoon = haveMoon;
             }
@@ -726,7 +721,7 @@ public abstract class Calculate
                 }
 
                 //remember strings and layout ID
-                this.itemsRefID = (usingMaterial ? R.layout.calculate_pass_item_material : R.layout.calculate_pass_item);
+                this.itemsRefID = (usingMaterial ? R.layout.calculate_pass_material_item : R.layout.calculate_pass_item);
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -1204,7 +1199,7 @@ public abstract class Calculate
             {
                 super(context);
 
-                int itemId = (usingMaterial ? R.layout.calculate_coordinates_item_material : R.layout.calculate_coordinates_item);
+                int itemId = (usingMaterial ? R.layout.calculate_coordinates_material_item : R.layout.calculate_coordinates_item);
 
                 hasItems = false;
                 currentZone = zone;
@@ -1367,7 +1362,7 @@ public abstract class Calculate
         {
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp)
             {
-                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_coordinates_item_material : R.layout.calculate_coordinates_item), R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
+                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_coordinates_material_item : R.layout.calculate_coordinates_item), R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
             }
 
             @Override
@@ -1478,7 +1473,7 @@ public abstract class Calculate
 
             if(convertView == null)
             {
-                convertView = listInflater.inflate((usingMaterial ? R.layout.side_menu_list_group_material : R.layout.side_menu_list_group), parent, false);
+                convertView = listInflater.inflate((usingMaterial ? R.layout.side_menu_list_material_group : R.layout.side_menu_list_group), parent, false);
             }
             groupTitleImage = convertView.findViewById(R.id.Group_Title_Image);
             if(usingMaterial && groupTitleImage != null)
@@ -1576,9 +1571,9 @@ public abstract class Calculate
         public TimeInputView startTimeText;
         public TimeInputView endTimeText;
         public MaterialButton selectButton;
-        public AutoCompleteTextView orbitalTextList;
-        public AutoCompleteTextView orbital2TextList;
-        public AutoCompleteTextView viewUnitTextList;
+        public SelectableAutoCompleteTextView orbitalTextList;
+        public SelectableAutoCompleteTextView orbital2TextList;
+        public SelectableAutoCompleteTextView viewUnitTextList;
         private OnStartCalculationListener startCalculationListener;
         private boolean[] orbitalIsSelected;
 
@@ -1979,9 +1974,9 @@ public abstract class Calculate
                 {
                     noradId = (int)orbitalList.getSelectedValue(Universe.IDs.Invalid);
                 }
-                if(orbitalTextList != null && orbitalTextList.getTag() instanceof Integer)
+                if(orbitalTextList != null)
                 {
-                    noradId = (int) orbitalTextList.getTag();
+                    noradId = (int)orbitalTextList.getSelectedValue(Universe.IDs.Invalid);
                 }
                 if(pageNumber == PageType.Intersection)
                 {
@@ -1989,9 +1984,9 @@ public abstract class Calculate
                     {
                         noradId2 = (int)orbital2List.getSelectedValue(Universe.IDs.Invalid);
                     }
-                    if(orbital2TextList != null && orbital2TextList.getTag() instanceof Integer)
+                    if(orbital2TextList != null)
                     {
-                        noradId2 = (int) orbital2TextList.getTag();
+                        noradId2 = (int)orbital2TextList.getSelectedValue(Universe.IDs.Invalid);
                     }
                 }
                 pageParams.putInt(Selectable.ParamTypes.PageNumber, pageNumber);
@@ -2847,24 +2842,6 @@ public abstract class Calculate
         return(task);
     }
 
-    //Sets orbital text list value from given norad ID
-    private static void setOrbitalTextList(Context context, AutoCompleteTextView orbitalTextList, int noradId)
-    {
-        if(orbitalTextList != null)
-        {
-            Database.DatabaseSatellite orbital = Database.getOrbital(context, noradId);
-            ListAdapter adapter = orbitalTextList.getAdapter();
-            Object firstItem = (adapter != null ? adapter.getItem(0) : null);
-            boolean haveOrbital = (orbital != null);
-            boolean canUseFirst = (firstItem instanceof String);
-
-            if(haveOrbital || canUseFirst)
-            {
-                orbitalTextList.setText((haveOrbital ? orbital.getName() : (String)firstItem), false);
-            }
-        }
-    }
-
     //Set page input values from saved state
     private static void setPageInputValues(Page page, Bundle savedInstanceState)
     {
@@ -2911,7 +2888,10 @@ public abstract class Calculate
                 {
                     page.orbitalList.setSelectedValue(orbitalId);
                 }
-                setOrbitalTextList(context, page.orbitalTextList, orbitalId);
+                if(page.orbitalTextList != null)
+                {
+                    page.orbitalTextList.setSelectedValue(orbitalId);
+                }
             }
             if(orbitalIsSelected != null)
             {
@@ -2969,7 +2949,10 @@ public abstract class Calculate
                         {
                             page.orbital2List.setSelectedValue(orbitalId2);
                         }
-                        setOrbitalTextList(context, page.orbital2TextList, orbitalId2);
+                        if(page.orbital2TextList != null)
+                        {
+                            page.orbital2TextList.setSelectedValue(orbitalId2);
+                        }
                     }
                     //fall through
 
@@ -3015,71 +2998,15 @@ public abstract class Calculate
         }
     }
 
-    //Sets up given orbital text list
-    private static void setupOrbitalTextList(AutoCompleteTextView orbitalTextList, IconSpinner.CustomAdapter orbitalAdapter, Drawable background, Database.DatabaseSatellite[] orbitals, View selectButtonLayout, boolean usingMulti)
-    {
-        //if text exists
-        if(orbitalTextList != null)
-        {
-            //set adapter, background, and listener
-            orbitalTextList.setAdapter(orbitalAdapter);
-            if(background != null)
-            {
-                orbitalTextList.setDropDownBackgroundDrawable(background);
-            }
-            orbitalTextList.setText(orbitals[0].getName(), false);
-            orbitalTextList.addTextChangedListener(new TextWatcher()
-            {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count)
-                {
-                    int index;
-                    int noradId = Universe.IDs.Invalid;
-
-                    //go through each orbital
-                    for(index = 0; index < orbitals.length && noradId == Universe.IDs.Invalid; index++)
-                    {
-                        //if current orbital matches text
-                        Database.DatabaseSatellite currentOrbital = orbitals[index];
-                        if(currentOrbital.getName().equals(s.toString()))
-                        {
-                            //set norad ID
-                            noradId = currentOrbital.noradId;
-                        }
-                    }
-
-                    //set tag
-                    orbitalTextList.setTag(noradId);
-
-                    //if select button layout exists
-                    if(selectButtonLayout != null)
-                    {
-                        //update visibility
-                        selectButtonLayout.setVisibility((usingMulti && noradId == Universe.IDs.Invalid) ? View.VISIBLE : View.GONE);
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable s) {}
-            });
-        }
-    }
-
     //Sets up given orbital list
-    private static void setupOrbitalList(IconSpinner orbitalList, IconSpinner.CustomAdapter orbitalAdapter, Drawable background, AdapterView.OnItemSelectedListener listener)
+    private static void setupOrbitalList(SelectListInterface orbitalList, IconSpinner.CustomAdapter orbitalAdapter, int backgroundColor, AdapterView.OnItemSelectedListener listener)
     {
         //if list exists
         if(orbitalList != null)
         {
             //set adapter, background, and listener
             orbitalList.setAdapter(orbitalAdapter);
-            if(background != null)
-            {
-                orbitalList.setPopupBackgroundDrawable(background);
-            }
+            orbitalList.setBackgroundColor(backgroundColor);
             if(listener != null)
             {
                 orbitalList.setOnItemSelectedListener(listener);
@@ -3092,6 +3019,7 @@ public abstract class Calculate
     {
         Context context = page.getContext();
         final int pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
+        final int backgroundColor = Globals.resolveColorID(context, R.attr.pageBackground);
         final boolean onIntersection = (pageNumber == PageType.Intersection);
         final boolean usingMulti = (pageNumber == PageType.View || pageNumber == PageType.Coordinates);
         final boolean usingMaterial = Settings.getMaterialTheme(context);
@@ -3099,7 +3027,7 @@ public abstract class Calculate
         int elevationMinVisibility = View.VISIBLE;
         int intersectionVisibility = (onIntersection ? View.VISIBLE : View.GONE);
         final Database.DatabaseSatellite[] orbitals;
-        ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.calculate_input_layout_material : R.layout.calculate_input_layout), container, false);
+        ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.calculate_input_material_layout : R.layout.calculate_input_layout), container, false);
         View viewRow = rootView.findViewById(R.id.Calculate_View_Row);
         View intersectionRow = rootView.findViewById(R.id.Calculate_Intersection_Row);
         View intersectionUnitLayout = rootView.findViewById(R.id.Calculate_Intersection_Unit_Layout);
@@ -3115,8 +3043,8 @@ public abstract class Calculate
         MaterialButton startButton = rootView.findViewById(R.id.Calculate_Start_Button);
         IconSpinner.CustomAdapter orbitalAdapter;
         IconSpinner.CustomAdapter incrementAdapter;
+        AdapterView.OnItemSelectedListener itemSelectedListener;
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
-        ColorDrawable backgroundColorDrawable = (context != null ? new ColorDrawable(Globals.resolveColorID(context, R.attr.pageBackground)) : null);
 
         //set page displays
         page.viewUnitText = rootView.findViewById(R.id.Calculate_View_Unit_Text);
@@ -3143,22 +3071,33 @@ public abstract class Calculate
             @Override
             public void onLoaded(IconSpinner.Item[] loadedItems)
             {
+                //if there are items
                 if(loadedItems.length > 0)
                 {
-                    String firstValue = loadedItems[0].toString();
+                    //if started from an activity
+                    if(context instanceof Activity)
+                    {
+                        ((Activity)context).runOnUiThread(new Runnable()
+                        {
+                            @Override public void run()
+                            {
+                                String firstValue = loadedItems[0].toString();
 
-                    if(page.orbitalTextList != null)
-                    {
-                        page.orbitalTextList.setText(firstValue, false);
-                    }
-                    if(page.orbital2TextList != null)
-                    {
-                        page.orbital2TextList.setText(firstValue, false);
+                                if(page.orbitalTextList != null)
+                                {
+                                    page.orbitalTextList.setSelectedText(firstValue);
+                                }
+                                if(onIntersection && page.orbital2TextList != null)
+                                {
+                                    page.orbital2TextList.setSelectedText(firstValue);
+                                }
+                            }
+                        });
                     }
                 }
             }
         });
-        setupOrbitalList(page.orbitalList, orbitalAdapter, backgroundColorDrawable, new AdapterView.OnItemSelectedListener()
+        itemSelectedListener = new AdapterView.OnItemSelectedListener()
         {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
@@ -3168,8 +3107,9 @@ public abstract class Calculate
 
             @Override
             public void onNothingSelected(AdapterView<?> parent) {}
-        });
-        setupOrbitalTextList(page.orbitalTextList, orbitalAdapter, backgroundColorDrawable, orbitals, selectButtonLayout, usingMulti);
+        };
+        setupOrbitalList(page.orbitalList, orbitalAdapter, backgroundColor, itemSelectedListener);
+        setupOrbitalList(page.orbitalTextList, orbitalAdapter, backgroundColor, itemSelectedListener);
         if(usingMulti)
         {
             page.selectButton.setOnClickListener(new View.OnClickListener()
@@ -3190,8 +3130,8 @@ public abstract class Calculate
         }
         if(onIntersection)
         {
-            setupOrbitalList(page.orbital2List, orbitalAdapter, backgroundColorDrawable, null);
-            setupOrbitalTextList(page.orbital2TextList, orbitalAdapter, backgroundColorDrawable, orbitals, null, false);
+            setupOrbitalList(page.orbital2List, orbitalAdapter, backgroundColor, null);
+            setupOrbitalList(page.orbital2TextList, orbitalAdapter, backgroundColor, null);
         }
         if(page.orbital2List != null)
         {
@@ -3259,7 +3199,6 @@ public abstract class Calculate
                     if(page.viewUnitTextList != null)
                     {
                         page.viewUnitTextList.setAdapter(incrementAdapter);
-                        page.viewUnitTextList.setDropDownBackgroundDrawable(backgroundColorDrawable);
                     }
                 }
 

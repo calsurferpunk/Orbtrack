@@ -10,5 +10,5 @@
         android:textColor="?attr/defaultTextColor"
         android:textAllCaps="false"/>
 
-    <View style="@style/DividerThin"/>
+    <View android:id="@+id/Divider_View_Divider" style="@style/DividerThin"/>
 </LinearLayout>

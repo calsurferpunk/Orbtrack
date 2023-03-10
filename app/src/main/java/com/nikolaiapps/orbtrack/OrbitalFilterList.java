@@ -10,8 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.EditText;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
@@ -139,7 +137,7 @@ public class OrbitalFilterList
         private static int listTextColor;
         private static int listBgSelectedColor;
         private static int listTextSelectedColor;
-        private TableLayout searchTable;
+        private View searchTable;
         private AppCompatImageButton showButton;
 
         //Used data
@@ -171,9 +169,9 @@ public class OrbitalFilterList
             super(context);
             baseConstructor();
         }
-        public OrbitalListAdapter(View parentView, String categoryTitle)
+        public OrbitalListAdapter(Context context, String categoryTitle)
         {
-            super(parentView, categoryTitle);
+            super(context, categoryTitle);
             baseConstructor();
         }
 
@@ -285,11 +283,12 @@ public class OrbitalFilterList
         }
 
         //Sets up owner list
-        private void setupOwnerList(IconSpinner ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, AdapterView.OnItemSelectedListener itemSelectedListener)
+        private void setupOwnerList(SelectListInterface ownerList, ArrayList<UpdateService.MasterOwner> usedOwners, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
             int index;
             String listAllString = (haveContext() ? currentContext.getString(R.string.title_list_all) : null);
             String unknown = Globals.getUnknownString(currentContext);
+            IconSpinner.CustomAdapter listAdapter;
             IconSpinner.Item[] owners;
 
             if(unknown != null)
@@ -304,9 +303,10 @@ public class OrbitalFilterList
                 int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
                 owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
             }
+            listAdapter = new IconSpinner.CustomAdapter(currentContext, owners);
             if(ownerList != null)
             {
-                ownerList.setAdapter(new IconSpinner.CustomAdapter(currentContext, owners));
+                ownerList.setAdapter(listAdapter);
                 ownerList.setBackgroundColor(listBgColor);
                 ownerList.setBackgroundItemColor(listBgItemColor);
                 ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
@@ -318,7 +318,7 @@ public class OrbitalFilterList
         }
 
         //Sets up group list
-        private void setupGroupList(IconSpinner groupList, ArrayList<String> usedCategories, AdapterView.OnItemSelectedListener itemSelectedListener)
+        private void setupGroupList(SelectListInterface groupList, ArrayList<String> usedCategories, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
             ArrayList<String> groups;
 
@@ -338,7 +338,7 @@ public class OrbitalFilterList
         }
 
         //Sets up age list
-        private void setupAgeList(IconSpinner ageList, AdapterView.OnItemSelectedListener itemSelectedListener)
+        private void setupAgeList(SelectListInterface ageList, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
             Resources res = (haveContext() ? currentContext.getResources() : null);
             String lastString = (res != null ? res.getString(R.string.title_last_plural) : null);
@@ -383,7 +383,7 @@ public class OrbitalFilterList
         }
 
         //Sets up inputs
-        public void setupInputs(TableLayout searchGroup, IconSpinner ownerList, IconSpinner groupList, IconSpinner ageList, TableRow ageRow, EditText searchText, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
+        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, View ageLayout, EditText searchText, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
         {
             this.searchTable = searchGroup;
             this.showButton = showButton;
@@ -435,9 +435,9 @@ public class OrbitalFilterList
             setupAgeList(ageList, itemSelectedListener);
 
             //update age row visibility
-            if(ageRow != null)
+            if(ageLayout != null)
             {
-                ageRow.setVisibility(hasLaunchDates ? View.VISIBLE : View.GONE);
+                ageLayout.setVisibility(hasLaunchDates ? View.VISIBLE : View.GONE);
             }
 
             //setup name text

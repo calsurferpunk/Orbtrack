@@ -106,7 +106,7 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
 
         if(convertView == null)
         {
-            convertView = menuInflater.inflate((usingMaterial ? R.layout.side_menu_list_group_material : R.layout.side_menu_list_group), parent, false);
+            convertView = menuInflater.inflate((usingMaterial ? R.layout.side_menu_list_material_group : R.layout.side_menu_list_group), parent, false);
         }
         groupTitleImage = convertView.findViewById(R.id.Group_Title_Image);
         groupIndicatorImage = convertView.findViewById(R.id.Group_Indicator_Image);
@@ -132,7 +132,7 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
 
         if(childView == null)
         {
-            childView = menuInflater.inflate((usingMaterial ? R.layout.side_menu_list_item_material : R.layout.side_menu_list_item), parent, false);
+            childView = menuInflater.inflate((usingMaterial ? R.layout.side_menu_list_material_item : R.layout.side_menu_list_item), parent, false);
         }
         titleImage = childView.findViewById(R.id.Item_Title_Image);
         titleTextLbl = childView.findViewById(R.id.Item_Title_Text);
@@ -178,7 +178,7 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
         public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             Context context = parent.getContext();
-            View itemView = LayoutInflater.from(context).inflate((usingMaterial ? R.layout.side_menu_list_group_material : R.layout.side_menu_list_group), parent, false);
+            View itemView = LayoutInflater.from(context).inflate((usingMaterial ? R.layout.side_menu_list_material_group : R.layout.side_menu_list_group), parent, false);
             ItemHolder itemHolder = new ItemHolder(itemView, R.id.Group_Title_Image, R.id.Group_Title_Text);
 
             setViewClickListeners(itemView, itemHolder);

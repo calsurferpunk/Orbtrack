@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Orbital_Search_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingTop="4dp"
+    android:paddingLeft="4dp"
+    android:paddingRight="4dp"
+    android:orientation="vertical"
+    android:background="?attr/pageTitleBackground"
+    android:animateLayoutChanges="true"
+    android:focusableInTouchMode="true">
+    <LinearLayout
+        android:id="@+id/Orbital_Search_Lists_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Orbital_Search_Owner_Layout"
+            style="@style/OrbitalSearchTextInputLayout"
+            android:hint="@string/title_owner">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Orbital_Search_Owner_Text_List"
+                style="@style/TextViewMaterialList"
+                android:hint="@string/title_owner"
+                android:enabled="false"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Orbital_Search_Group_Layout"
+            style="@style/OrbitalSearchTextInputLayout"
+            android:hint="@string/title_group">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Orbital_Search_Group_Text_List"
+                style="@style/TextViewMaterialList"
+                android:hint="@string/title_group"
+                android:enabled="false"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Orbital_Search_Age_Layout"
+            style="@style/OrbitalSearchTextInputLayout"
+            android:hint="@string/title_age">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Orbital_Search_Age_Text_List"
+                style="@style/TextViewMaterialList"
+                android:hint="@string/title_age"
+                android:enabled="false"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Orbital_Search_Text_Layout"
+            style="@style/OrbitalSearchTextInputLayout"
+            app:startIconDrawable="@drawable/ic_search_black"
+            android:hint="@string/title_name_or_id">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Orbital_Search_Text"
+                style="@style/TextViewMaterialList"
+                android:inputType="textNoSuggestions"
+                android:hint="@string/title_name_or_id"
+                android:enabled="false"/>
+        </com.google.android.material.textfield.TextInputLayout>
+    </LinearLayout>
+
+
+    <androidx.appcompat.widget.AppCompatImageButton
+        android:id="@+id/Orbital_Search_Show_Button"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        app:srcCompat="@drawable/ic_expand_less"
+        android:background="?attr/pageTitleBackground"/>
+</LinearLayout>

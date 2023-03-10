@@ -79,14 +79,16 @@ public class AddSelectListAdapter extends BaseAdapter
         void onItemClick(int which);
     }
 
-    private final LayoutInflater listInflater;
+    private final boolean usingMaterial;
     private final byte selectType;
+    private final LayoutInflater listInflater;
     private String[] selections;
     private Integer[] selectionIds;
 
     private AddSelectListAdapter(Context context, byte listSelectType)
     {
         listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        usingMaterial = Settings.getMaterialTheme(context);
         selectType = listSelectType;
     }
     public AddSelectListAdapter(Context context, byte listSelectType, int extra, int extra2)
@@ -209,9 +211,9 @@ public class AddSelectListAdapter extends BaseAdapter
 
         if(convertView == null)
         {
-            convertView = listInflater.inflate(R.layout.list_add_select_item, parent, false);
+            convertView = listInflater.inflate((usingMaterial ? R.layout.list_add_select_item_material : R.layout.list_add_select_item), parent, false);
         }
-        convertView.setBackground(Globals.getListItemStateSelector(context));
+        convertView.setBackground(Globals.getListItemStateSelector(context, true));
         addSourceItemImage = convertView.findViewById(R.id.Add_Select_Item_Image);
         addSourceItemText = convertView.findViewById(R.id.Add_Select_Item_Text);
 

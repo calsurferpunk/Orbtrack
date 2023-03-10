@@ -832,7 +832,7 @@ public abstract class Globals
         boolean usingIcon = (titleIconId >= 0);
         AddSelectListAdapter listAdapter = (itemIds != null ? new AddSelectListAdapter(context, selectType, itemIds) : new AddSelectListAdapter(context, selectType, extra, extra2));
         AlertDialog dialog;
-        AlertDialog.Builder selectDialog = new AlertDialog.Builder(context, getDialogThemeID(context));
+        CustomAlertDialogBuilder selectDialog = new CustomAlertDialogBuilder(context, getDialogThemeID(context), Settings.getMaterialTheme(context), true);
 
         if(usingIcon)
         {
@@ -1498,8 +1498,15 @@ public abstract class Globals
             //add any request code
             BaseInputActivity.setRequestCode(intent, requestCode);
 
-            //launch activity
-            launcher.launch(intent);
+            try
+            {
+                //launch activity
+                launcher.launch(intent);
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
         }
     }
 
@@ -3267,9 +3274,13 @@ public abstract class Globals
     }
 
     //Gets list item selector
+    public static StateListDrawable getListItemStateSelector(Context context, boolean forDialog)
+    {
+        return(getItemStateSelector(context, forDialog ? R.attr.pageBackground : (Settings.getDarkTheme(context) ? R.attr.viewPagerBackground : R.attr.pageBackground), false));
+    }
     public static StateListDrawable getListItemStateSelector(Context context)
     {
-        return(getItemStateSelector(context, (Settings.getDarkTheme(context) ? R.attr.viewPagerBackground : R.attr.pageBackground), false));
+        return(getListItemStateSelector(context, false));
     }
 
     //Get visible icon for given state

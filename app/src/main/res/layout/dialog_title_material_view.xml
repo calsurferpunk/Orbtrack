@@ -10,16 +10,15 @@
         android:layout_margin="6dp"
         app:contentPadding="6dp"
         app:cardCornerRadius="6dp">
-
-    <TextView
-        android:id="@+id/Dialog_Title_Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:drawablePadding="6dp"
-        android:textColor="?attr/defaultTextColor"
-        android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-        android:textStyle="bold"/>
+        <TextView
+            android:id="@+id/Dialog_Title_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:drawablePadding="6dp"
+            android:textColor="?attr/defaultTextColor"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            android:textStyle="bold"/>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

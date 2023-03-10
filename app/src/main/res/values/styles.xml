@@ -59,18 +59,22 @@
     </style>
 
     <!-- Base themes -->
-    <style name="LightBase" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="LightBase" parent="Theme.Material3.Light">
         <item name="defaultTextColor">@color/black</item>
         <item name="defaultTextShadowColor">@color/white</item>
         <item name="pageTitleTextColor">@color/white</item>
         <item name="pageBackground">@color/white</item>
         <item name="pageHighlightBackground">@color/very_light_gray</item>
         <item name="viewPagerBackground">@color/very_light_gray</item>
+        <item name="colorOutline">@color/light_gray</item>
         <item name="dividerLineColor">@color/light_gray</item>
         <item name="dividerTextBackground">#F9F9F9</item>
         <item name="dialogStyle">@style/LightDialog</item>
-        <item name="colorPrimary">@color/very_dark_gray</item>
+        <item name="colorPrimary">?attr/colorAccent</item>
         <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurfaceVariant">?attr/pageBackground</item>
+        <item name="titleTextColor">@color/white</item>
         <item name="textColorAlertDialogListItem">@color/black</item>
         <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
@@ -78,18 +82,22 @@
         <item name="android:textColorSecondary">@color/gray</item>
     </style>
 
-    <style name="DarkBase" parent="Theme.MaterialComponents.Light.DarkActionBar">
+    <style name="DarkBase" parent="Theme.Material3.Dark">
         <item name="defaultTextColor">@color/white</item>
         <item name="defaultTextShadowColor">@color/black</item>
         <item name="pageTitleTextColor">@color/white</item>
         <item name="pageBackground">@color/very_dark_gray</item>
         <item name="pageHighlightBackground">@color/very_very_dark_gray</item>
         <item name="viewPagerBackground">@color/black</item>
+        <item name="colorOutline">@color/dark_gray</item>
         <item name="dividerLineColor">@color/dark_gray</item>
         <item name="dividerTextBackground">#2A2A2A</item>
         <item name="dialogStyle">@style/DarkDialog</item>
-        <item name="colorPrimary">@color/very_light_gray</item>
+        <item name="colorPrimary">?attr/colorAccent</item>
         <item name="colorPrimaryDark">@color/black</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurfaceVariant">?attr/pageBackground</item>
+        <item name="titleTextColor">@color/white</item>
         <item name="textColorAlertDialogListItem">@color/white</item>
         <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
@@ -428,6 +436,15 @@
         <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
+    <!--Text View Material List-->
+    <style name="TextViewMaterialList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:inputType">none</item>
+        <item name="android:textColor">?attr/defaultTextColor</item>
+        <item name="android:textColorHint">@color/transparent</item>
+    </style>
+
     <!--Calculate View-->
     <style name="CalculateEditRow">
         <item name="android:layout_width">match_parent</item>
@@ -517,16 +534,8 @@
         <item name="startIconTint">?attr/defaultTextColor</item>
     </style>
 
-    <style name="CalculateAutoCompleteTextView">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:inputType">none</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
-        <item name="android:textColorHint">@color/transparent</item>
-    </style>
-
     <!--Orbital Search Layout-->
-    <style name="OrbitalSearchTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <style name="OrbitalSearchTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColorHint">@color/white</item>

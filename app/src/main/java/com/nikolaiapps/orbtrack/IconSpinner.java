@@ -28,7 +28,7 @@ import java.util.Comparator;
 import java.util.TimeZone;
 
 
-public class IconSpinner extends AppCompatSpinner
+public class IconSpinner extends AppCompatSpinner implements SelectListInterface
 {
     public static class Item
     {
@@ -147,10 +147,15 @@ public class IconSpinner extends AppCompatSpinner
             return(usingIconColors(icon3Color, icon3SelectedColor));
         }
 
+        public Drawable getIcon()
+        {
+            return(icon3);
+        }
+
         @Override @NonNull
         public String toString()
         {
-            return(text != null ? text : value instanceof Integer ? String.valueOf((int)value) : value.toString());
+            return(text != null ? text : value instanceof Integer ? String.valueOf((int)value) : value != null ? value.toString() : "");
         }
     }
 
@@ -330,7 +335,8 @@ public class IconSpinner extends AppCompatSpinner
             this.items = new Item[items.length];
             for(index = 0; index < this.items.length; index++)
             {
-                this.items[index] = new Item((useFloat ? Globals.getNumberString((Float)items[index], 0) : items[index].toString()), items[index]);
+                Object currentCopyItem = items[index];
+                this.items[index] = new Item((useFloat ? Globals.getNumberString((Float)currentCopyItem, 0) : (currentCopyItem != null ? currentCopyItem.toString() : "")), currentCopyItem);
             }
 
             BaseConstructor(context);
@@ -342,7 +348,8 @@ public class IconSpinner extends AppCompatSpinner
             this.items = new Item[items.length];
             for(index = 0; index < this.items.length; index++)
             {
-                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawable(context, itemImageIds[index], false) : null), items[index].toString(), values[index], (subTexts != null ? subTexts[index] : null));
+                Object currentCopyItem = items[index];
+                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawable(context, itemImageIds[index], false) : null), (currentCopyItem != null ? currentCopyItem.toString() : ""), values[index], (subTexts != null ? subTexts[index] : null));
             }
 
             BaseConstructor(context);
@@ -490,7 +497,8 @@ public class IconSpinner extends AppCompatSpinner
                 for(index = 0; index < items.length; index++)
                 {
                     //if a match
-                    if(items[index].value.equals(val))
+                    Item currentItem = items[index];
+                    if(currentItem != null && currentItem.value != null && currentItem.value.equals(val))
                     {
                         //return index
                         return(index);
@@ -537,12 +545,20 @@ public class IconSpinner extends AppCompatSpinner
             //set view
             if(convertView == null)
             {
-                convertView = (listInflater != null ? listInflater.inflate((usingMaterial ? R.layout.icon_spinner_item_material : R.layout.icon_spinner_item), parent, false) : new View(null));
+                convertView = (listInflater != null ? listInflater.inflate((usingMaterial ? R.layout.icon_spinner_material_item : R.layout.icon_spinner_item), parent, false) : null);
+                if(convertView == null)
+                {
+                    return(new View(parent.getContext()));
+                }
             }
             context = convertView.getContext();
             icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
             icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
             icon3 = (currentItem.icon3Id > 0 ? (currentItem.icon3TintColor != Color.TRANSPARENT ? Globals.getDrawable(context, currentItem.icon3Id, currentItem.icon3TintColor, false) : Globals.getDrawable(context, currentItem.icon3Id, currentItem.iconsUseThemeTint)) : null);
+            if(icon3 != null)
+            {
+                currentItem.icon3 = icon3;
+            }
             convertView.setBackgroundColor(backgroundColor);
             if(usingIcon3Only)
             {
@@ -551,7 +567,11 @@ public class IconSpinner extends AppCompatSpinner
                 convertView.setLayoutParams(viewParams);
             }
             itemBackground = convertView.findViewById(R.id.Spinner_Item_Background);
-            itemBackground.setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
+            if(itemBackground != null)
+            {
+                itemBackground.setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
+                itemBackground.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
+            }
 
             //get views
             itemImage1 = convertView.findViewById(R.id.Spinner_Item_Image1);
@@ -560,69 +580,84 @@ public class IconSpinner extends AppCompatSpinner
             itemText = convertView.findViewById(R.id.Spinner_Item_Text);
             itemSubText = convertView.findViewById(R.id.Spinner_Item_Sub_Text);
             itemProgress = convertView.findViewById(R.id.Spinner_Item_Progress);
-
-            //set visibility
-            itemBackground.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
-            itemProgress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
+            if(itemProgress != null)
+            {
+                itemProgress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
+            }
 
             //if not loading items
             if(!loadingItems)
             {
                 //update displays
-                if(currentItem.usingIcon1Colors())
+                if(itemImage1 != null)
                 {
-                    itemImage1.setBackgroundDrawable(Globals.getDrawable(icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
+                    if(currentItem.usingIcon1Colors())
+                    {
+                        itemImage1.setBackgroundDrawable(Globals.getDrawable(icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
+                    }
+                    else
+                    {
+                        itemImage1.setBackgroundDrawable(icon1);
+                    }
+                    if(!usingIcon1)
+                    {
+                        itemImage1.setVisibility(View.GONE);
+                    }
                 }
-                else
+                if(itemImage2 != null)
                 {
-                    itemImage1.setBackgroundDrawable(icon1);
+                    itemImage2.setBackgroundDrawable(icon2);
+                    if(icon2 != null && itemImage1 != null)
+                    {
+                        LayoutParams viewParams = itemImage1.getLayoutParams();
+                        viewParams.width = itemImage2.getLayoutParams().width;
+                        itemImage1.setLayoutParams(viewParams);
+                        itemImage2.setVisibility(View.VISIBLE);
+                    }
                 }
-                if(!usingIcon1)
+                if(itemImage3 != null)
                 {
-                    itemImage1.setVisibility(View.GONE);
+                    if(currentItem.usingIcon3Colors())
+                    {
+                        itemImage3.setBackgroundDrawable(Globals.getDrawable((icon3 != null ? icon3 : currentItem.icon3), (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
+                    }
+                    else
+                    {
+                        itemImage3.setBackgroundDrawable(icon3 != null ? icon3 : currentItem.icon3);
+                    }
+                    if(currentItem.rotate != 0)
+                    {
+                        itemImage3.setRotation(currentItem.rotate);
+                    }
+                    if(!usingIcon3)
+                    {
+                        itemImage3.setVisibility(View.GONE);
+                    }
+                    if(usingIcon3Only)
+                    {
+                        LayoutParams imageParams = itemImage3.getLayoutParams();
+                        sizePx = (currentItem.icon3OnlyDp != LinearLayout.LayoutParams.WRAP_CONTENT ? (int)Globals.dpToPixels(context, currentItem.icon3OnlyDp) : LinearLayout.LayoutParams.WRAP_CONTENT);
+                        imageParams.width = sizePx;
+                        imageParams.height = sizePx;
+                        itemImage3.setLayoutParams(imageParams);
+                    }
                 }
-                itemImage2.setBackgroundDrawable(icon2);
-                if(icon2 != null)
+                if(itemText != null)
                 {
-                    LayoutParams viewParams = itemImage1.getLayoutParams();
-                    viewParams.width = itemImage2.getLayoutParams().width;
-                    itemImage1.setLayoutParams(viewParams);
-                    itemImage2.setVisibility(View.VISIBLE);
+                    itemText.setText(currentItem.text);
+                    itemText.setTextColor(isSelected ? textSelectedColor : textColor);
                 }
-                if(currentItem.usingIcon3Colors())
+                if(itemSubText != null)
                 {
-                    itemImage3.setBackgroundDrawable(Globals.getDrawable((icon3 != null ? icon3 : currentItem.icon3), (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
-                }
-                else
-                {
-                    itemImage3.setBackgroundDrawable(icon3 != null ? icon3 : currentItem.icon3);
-                }
-                if(currentItem.rotate != 0)
-                {
-                    itemImage3.setRotation(currentItem.rotate);
-                }
-                if(!usingIcon3)
-                {
-                    itemImage3.setVisibility(View.GONE);
-                }
-                if(usingIcon3Only)
-                {
-                    LayoutParams imageParams = itemImage3.getLayoutParams();
-                    sizePx = (currentItem.icon3OnlyDp != LinearLayout.LayoutParams.WRAP_CONTENT ? (int)Globals.dpToPixels(context, currentItem.icon3OnlyDp) : LinearLayout.LayoutParams.WRAP_CONTENT);
-                    imageParams.width = sizePx;
-                    imageParams.height = sizePx;
-                    itemImage3.setLayoutParams(imageParams);
-                }
-                itemText.setText(currentItem.text);
-                itemText.setTextColor(isSelected ? textSelectedColor : textColor);
-                if(currentItem.subText != null)
-                {
-                    itemSubText.setText(currentItem.subText);
-                    itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
-                }
-                else
-                {
-                    itemSubText.setVisibility(View.GONE);
+                    if(currentItem.subText != null)
+                    {
+                        itemSubText.setText(currentItem.subText);
+                        itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
+                    }
+                    else
+                    {
+                        itemSubText.setVisibility(View.GONE);
+                    }
                 }
             }
 
@@ -640,9 +675,19 @@ public class IconSpinner extends AppCompatSpinner
             backgroundColor = color;
         }
 
+        public int getBackgroundItemColor()
+        {
+            return(backgroundItemColor);
+        }
+
         public void setBackgroundItemColor(int color)
         {
             backgroundItemColor = color;
+        }
+
+        public int getBackgroundItemSelectedColor()
+        {
+            return(backgroundItemSelectedColor);
         }
 
         public void setBackgroundItemSelectedColor(int color)
@@ -650,9 +695,19 @@ public class IconSpinner extends AppCompatSpinner
             backgroundItemSelectedColor = color;
         }
 
+        public int getTextColor()
+        {
+            return(textColor);
+        }
+
         public void setTextColor(int color)
         {
             textColor = color;
+        }
+
+        public int getTextSelectedColor()
+        {
+            return(textSelectedColor);
         }
 
         public void setTextSelectedColor(int color)
@@ -749,99 +804,71 @@ public class IconSpinner extends AppCompatSpinner
         super.setAdapter(adapter);
     }
 
+    public CustomAdapter getAdapter()
+    {
+        return(currentAdapter);
+    }
+
     public int getBackgroundColor()
     {
-        return(currentAdapter != null ? currentAdapter.getBackgroundColor() : Color.TRANSPARENT);
+        return(SelectListInterface.getBackgroundColor(currentAdapter));
     }
 
     public void setBackgroundColor(int color)
     {
-        if(currentAdapter != null)
-        {
-            currentAdapter.setBackgroundColor(color);
-        }
+        SelectListInterface.setBackgroundColor(currentAdapter, color);
+        setPopupBackgroundDrawable(new ColorDrawable(color));
     }
 
     public void setBackgroundItemColor(int color)
     {
-        if(currentAdapter != null)
-        {
-            currentAdapter.setBackgroundItemColor(color);
-        }
+        SelectListInterface.setBackgroundItemColor(currentAdapter, color);
         setBackgroundItemSelectedColor(color);
     }
 
     public void setBackgroundItemSelectedColor(int color)
     {
-        if(currentAdapter != null)
-        {
-            currentAdapter.setBackgroundItemSelectedColor(color);
-        }
+        SelectListInterface.setBackgroundItemSelectedColor(currentAdapter, color);
     }
 
     public void setTextColor(int color)
     {
-        if(currentAdapter != null)
-        {
-            currentAdapter.setTextColor(color);
-        }
+        SelectListInterface.setTextColor(currentAdapter, color);
         setTextSelectedColor(color);
     }
 
     public void setTextSelectedColor(int color)
     {
-        if(currentAdapter != null)
-        {
-            currentAdapter.setTextSelectedColor(color);
-        }
+        SelectListInterface.setTextSelectedColor(currentAdapter, color);
     }
 
     public void setSelectedText(String value)
     {
-        int index;
-        Item[] items;
+        int index = SelectListInterface.setSelectedText(currentAdapter, value);
 
-        if(currentAdapter != null)
+        if(index >= 0)
         {
-            items = currentAdapter.getItems();
-            for(index = 0; index < items.length; index++)
-            {
-                if(items[index].text.equals(value))
-                {
-                    currentAdapter.setSelectedIndex(index);
-                    super.setSelection(index);
-                    return;
-                }
-            }
+            super.setSelection(index);
         }
     }
 
     public void setSelectedValue(Object value, Object defaultValue)
     {
-        if(!setSelectedValue(value))
-        {
-            setSelectedValue(defaultValue);
-        }
+        SelectListInterface.setSelectedValue(currentAdapter, value, defaultValue);
     }
     public boolean setSelectedValue(Object value)
     {
-        int index;
+        int index = SelectListInterface.setSelectedValue(currentAdapter, value);
+        boolean setSelection = (index >= 0);
 
-        if(currentAdapter != null)
+        if(setSelection)
         {
-            index = currentAdapter.getItemIndex(value);
-            if(index >= 0)
-            {
-                currentAdapter.setSelectedIndex(index);
-                super.setSelection(index);
-                return(true);
-            }
+            super.setSelection(index);
         }
-
-        return(false);
+        return(setSelection);
     }
 
-    Object getSelectedValue(Object defaultValue)
+    public Object getSelectedValue(Object defaultValue)
     {
         Object value;
 

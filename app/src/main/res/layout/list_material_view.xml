@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"/>
 
-    <include layout="@layout/orbital_search_layout_material" android:visibility="gone"/>
+    <include layout="@layout/orbital_search_material_layout" android:visibility="gone"/>
 
     <View
         android:id="@+id/List_View_Columns"

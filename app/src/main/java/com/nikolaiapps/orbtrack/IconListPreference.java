@@ -15,7 +15,8 @@ import androidx.preference.PreferenceViewHolder;
 
 public class IconListPreference extends CustomPreference
 {
-    private IconSpinner iconList;
+    private final boolean usingMaterial;
+    private SelectListInterface iconList;
     private IconSpinner.CustomAdapter adapter;
     private Object pendingSetValue;
     private Object pendingDefaultValue;
@@ -25,8 +26,9 @@ public class IconListPreference extends CustomPreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        usingMaterial = Settings.getMaterialTheme(context);
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.icon_list_preference_layout);
+        this.setLayoutResource(usingMaterial ? R.layout.icon_list_preference_material_layout : R.layout.icon_list_preference_layout);
     }
     public IconListPreference(Context context, AttributeSet attrs, int defStyleAttr)
     {
@@ -46,9 +48,9 @@ public class IconListPreference extends CustomPreference
         final Context context = this.getContext();
         final String preferenceName = this.getKey();
         final CharSequence summary = this.getSummary();
+        final View listParentView;
         final TextView titleView;
         final TextView summaryView;
-        final LinearLayout listParentView;
         final SharedPreferences.Editor writeSettings = getWriteSettings(context);
         View rootView = holder.itemView;
 
@@ -63,8 +65,8 @@ public class IconListPreference extends CustomPreference
         //get displays
         titleView = rootView.findViewById(R.id.Icon_List_Preference_Title);
         summaryView = rootView.findViewById(R.id.Icon_List_Preference_Summary);
-        listParentView = rootView.findViewById(R.id.Icon_List_Preference_List_Parent);
-        iconList = rootView.findViewById(R.id.Icon_List_Preference_List);
+        listParentView = rootView.findViewById(usingMaterial ? R.id.Icon_List_Preference_Text_Layout : R.id.Icon_List_Preference_List_Parent);
+        iconList = rootView.findViewById(usingMaterial ? R.id.Icon_List_Preference_Text_List : R.id.Icon_List_Preference_List);
 
         //set displays
         titleView.setText(titleText);
@@ -78,15 +80,16 @@ public class IconListPreference extends CustomPreference
             pendingSetValue = iconList.getSelectedValue(null);
         }
         iconList.setAdapter(adapter);
-        if(adapter != null && adapter.getUsingIcon3Only())
+        if(adapter != null && adapter.getUsingIcon3Only() && iconList instanceof IconSpinner && listParentView instanceof LinearLayout)
         {
-            ViewGroup.LayoutParams listParams = iconList.getLayoutParams();
+            IconSpinner iconSpinnerList = (IconSpinner)iconList;
+            ViewGroup.LayoutParams listParams = iconSpinnerList.getLayoutParams();
             ViewGroup.LayoutParams parentParams = listParentView.getLayoutParams();
 
             listParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
             parentParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
 
-            iconList.setLayoutParams(listParams);
+            iconSpinnerList.setLayoutParams(listParams);
             listParentView.setLayoutParams(parentParams);
         }
         if(pendingSetValue != null)

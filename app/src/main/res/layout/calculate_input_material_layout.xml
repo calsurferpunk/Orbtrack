@@ -16,9 +16,9 @@
             style="@style/CalculateListInputLayout"
             android:layout_marginBottom="8dp"
             android:hint="@string/title_orbital">
-            <AutoCompleteTextView
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Calculate_Orbital_Text_List"
-                style="@style/CalculateAutoCompleteTextView"
+                style="@style/TextViewMaterialList"
                 android:hint="@string/title_orbital"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -28,9 +28,9 @@
             android:layout_marginBottom="8dp"
             android:hint="@string/title_orbital2"
             android:visibility="gone">
-            <AutoCompleteTextView
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Calculate_Orbital2_Text_List"
-                style="@style/CalculateAutoCompleteTextView"
+                style="@style/TextViewMaterialList"
                 android:hint="@string/title_orbital2"/>
         </com.google.android.material.textfield.TextInputLayout>
 
@@ -111,9 +111,9 @@
                 android:layout_width="0dp"
                 android:layout_weight="0.5"
                 android:hint="@string/title_interval">
-                <AutoCompleteTextView
+                <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Calculate_View_Unit_Text_List"
-                    style="@style/CalculateAutoCompleteTextView"/>
+                    style="@style/TextViewMaterialList"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 

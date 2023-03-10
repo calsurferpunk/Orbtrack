@@ -91,7 +91,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     public static class SettingsSubFragment extends PreferenceFragmentCompat
     {
+        private boolean usingMaterial;
         private static boolean showSetup;
+
+        @Override
+        public void onResume()
+        {
+            if(usingMaterial)
+            {
+                setDivider(null);
+            }
+
+            super.onResume();
+        }
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
@@ -108,7 +120,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 args = new Bundle();
             }
 
-            //get if showing setup and screen key
+            //get if using material, showing setup, and screen key
+            usingMaterial = Settings.getMaterialTheme(context);
             showSetup = args.getBoolean(EXTRA_SHOW_SETUP, false);
             screenKey = args.getString(RootKey);
 
@@ -1088,7 +1101,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     public static final String EXTRA_RECREATE_LENS = "recreateLens";
     public static final String EXTRA_RECREATE_MAP = "recreateMap";
     public static final String EXTRA_RELOAD_LOCATION = "reloadLocation";
-    public static final String EXTRA_UPDATE_COMBINED_LAYOUT = "updateCombinedLayout";
     public static final String EXTRA_START_SCREEN = "startScreen";
     public static final String EXTRA_SHOW_SETUP = "showSetup";
     private static final String RootKey = "rootKey";
@@ -2697,13 +2709,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     {
         createResultIntent();
         resultIntent.putExtra(EXTRA_RELOAD_LOCATION, true);
-    }
-
-    //Sets update combined layout needed
-    private void setUpdateCombinedLayoutNeeded()
-    {
-        createResultIntent();
-        resultIntent.putExtra(EXTRA_UPDATE_COMBINED_LAYOUT, true);
     }
 
     //Shows an add account dialog

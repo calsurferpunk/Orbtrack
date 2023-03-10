@@ -29,8 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
@@ -187,9 +185,9 @@ public abstract class Orbitals
         private final int columnTitleStringId;
         private final LoadItemsTask loadItems;
 
-        public PageListAdapter(View parentView, int page, int titleStringId, String categoryTitle, boolean isSimple, OrbitalFilterList.OnLoadItemsListener loadItemsListener)
+        public PageListAdapter(Context context, int page, int titleStringId, String categoryTitle, boolean isSimple, OrbitalFilterList.OnLoadItemsListener loadItemsListener)
         {
-            super(parentView, categoryTitle);
+            super(context, categoryTitle);
 
             //set defaults
             loadingItems = true;
@@ -199,7 +197,7 @@ public abstract class Orbitals
             columnTitleStringId = titleStringId;
             simple = isSimple;
             forSetup = (columnTitleStringId > 0);
-            this.itemsRefID = (usingMaterial ? R.layout.orbitals_item_material : R.layout.orbitals_item);
+            this.itemsRefID = (usingMaterial ? R.layout.orbitals_material_item : R.layout.orbitals_item);
 
             //set load items task
             loadItems = new LoadItemsTask(new OrbitalFilterList.OnLoadItemsListener()
@@ -520,13 +518,13 @@ public abstract class Orbitals
         private UpdateReceiver saveReceiver;
         private Globals.PendingFile pendingSaveFile;
         private PageListAdapter listAdapter;
+        private View ageLayout;
+        private View searchGroup;
         private LinearLayout searchLayout;
-        private TableLayout searchGroup;
-        private IconSpinner ownerList;
-        private IconSpinner groupList;
-        private IconSpinner ageList;
+        private SelectListInterface ownerList;
+        private SelectListInterface groupList;
+        private SelectListInterface ageList;
         private EditText searchText;
-        private TableRow ageRow;
         private AppCompatImageButton showButton;
         public static WeakReference<MultiProgressDialog> updateProgressReference;
 
@@ -555,7 +553,7 @@ public abstract class Orbitals
             ArrayList<Database.DatabaseSatellite> satelliteList;
 
             //create adapter
-            listAdapter = new PageListAdapter(listParentView, page, -1, categoryTitle, simple, new OrbitalFilterList.OnLoadItemsListener()
+            listAdapter = new PageListAdapter(context, page, -1, categoryTitle, simple, new OrbitalFilterList.OnLoadItemsListener()
             {
                 @Override
                 public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
@@ -566,16 +564,17 @@ public abstract class Orbitals
                         //get used data
                         final OrbitalFilterList.OrbitalListAdapter.UsedData used = listAdapter.getUsed();
 
+                        //if started from an activity
                         if(context instanceof Activity)
                         {
-                            ((Activity) context).runOnUiThread(new Runnable()
+                            ((Activity)context).runOnUiThread(new Runnable()
                             {
                                 @Override
                                 public void run()
                                 {
                                     //setup inputs and collapse
                                     searchLayout.setVisibility(simple ? View.GONE : View.VISIBLE);
-                                    listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageRow, searchText, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
+                                    listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchText, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
                                     listAdapter.showSearchInputs(false);
                                 }
                             });
@@ -587,12 +586,16 @@ public abstract class Orbitals
             //create view
             newView = this.onCreateView(inflater, container, listAdapter, group, page);
             searchLayout = newView.findViewById(R.id.Orbital_Search_Layout);
-            searchGroup = newView.findViewById(R.id.Orbital_Search_Table);
-            ownerList = newView.findViewById(R.id.Orbital_Search_Owner_List);
-            groupList = newView.findViewById(R.id.Orbital_Search_Group_List);
-            ageList = newView.findViewById(R.id.Orbital_Search_Age_List);
+            searchGroup = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
+            ownerList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
+            groupList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
+            ageList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
             searchText = newView.findViewById(R.id.Orbital_Search_Text);
-            ageRow = newView.findViewById(R.id.Orbital_Search_Age_Row);
+            ageLayout = newView.findViewById(R.id.Orbital_Search_Age_Layout);
+            if(ageLayout == null)
+            {
+                ageLayout = newView.findViewById(R.id.Orbital_Search_Age_Row);
+            }
             showButton = newView.findViewById(R.id.Orbital_Search_Show_Button);
 
             //if for satellites

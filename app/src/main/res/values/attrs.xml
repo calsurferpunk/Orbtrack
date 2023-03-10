@@ -52,6 +52,10 @@
         <attr name="checkedTint"/>
     </declare-styleable>
 
+    <declare-styleable name="SelectableAutoCompleteTextView">
+        <attr name="android:inputType"/>
+    </declare-styleable>
+
     <declare-styleable name="CustomPreference">
         <attr name="sharedName" format="string"/>
         <attr name="titleText" format="string"/>

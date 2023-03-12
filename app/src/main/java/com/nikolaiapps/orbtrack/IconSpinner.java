@@ -132,6 +132,14 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             icon3 = new ColorDrawable(ContextCompat.getColor(context, colorID));
         }
 
+        public void loadIcon3(Context context)
+        {
+            if(icon3 == null && icon3Id > 0)
+            {
+                icon3 = ((icon3TintColor != Color.TRANSPARENT ? Globals.getDrawable(context, icon3Id, icon3TintColor, false) : Globals.getDrawable(context, icon3Id, iconsUseThemeTint)));
+            }
+        }
+
         private boolean usingIconColors(int color, int selectedColor)
         {
             return(color != Color.TRANSPARENT && selectedColor != Color.TRANSPARENT);
@@ -291,6 +299,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         private int backgroundColor;
         private int backgroundItemColor;
         private int backgroundItemSelectedColor;
+        private boolean usingText;
         private boolean usingIcon1;
         private boolean usingIcon3;
         private boolean usingIcon3Only;
@@ -414,7 +423,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         private void updateUsing()
         {
             int index;
-            boolean usingText;
             boolean usingIcon2;
 
             //not using until found
@@ -444,13 +452,13 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         @Override
         public int getCount()
         {
-            return(loadingItems ? 1 : items.length);
+            return(loadingItems ? 1 : (items == null ) ? 0 : items.length);
         }
 
         @Override
         public Object getItem(int position)
         {
-            return(loadingItems || (position >= items.length) ? null : items[position]);
+            return(loadingItems || (items == null) || (position < 0) || (position >= items.length) ? null : items[position]);
         }
 
         @Override
@@ -531,7 +539,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             boolean isSelected = (position == selectedIndex);
             Drawable icon1;
             Drawable icon2;
-            Drawable icon3;
             Context context;
             LinearLayout itemBackground;
             AppCompatImageView itemImage1;
@@ -554,11 +561,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             context = convertView.getContext();
             icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
             icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
-            icon3 = (currentItem.icon3Id > 0 ? (currentItem.icon3TintColor != Color.TRANSPARENT ? Globals.getDrawable(context, currentItem.icon3Id, currentItem.icon3TintColor, false) : Globals.getDrawable(context, currentItem.icon3Id, currentItem.iconsUseThemeTint)) : null);
-            if(icon3 != null)
-            {
-                currentItem.icon3 = icon3;
-            }
+            currentItem.loadIcon3(context);
             convertView.setBackgroundColor(backgroundColor);
             if(usingIcon3Only)
             {
@@ -619,11 +622,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 {
                     if(currentItem.usingIcon3Colors())
                     {
-                        itemImage3.setBackgroundDrawable(Globals.getDrawable((icon3 != null ? icon3 : currentItem.icon3), (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
+                        itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
                     }
                     else
                     {
-                        itemImage3.setBackgroundDrawable(icon3 != null ? icon3 : currentItem.icon3);
+                        itemImage3.setBackgroundDrawable(currentItem.icon3);
                     }
                     if(currentItem.rotate != 0)
                     {
@@ -715,9 +718,19 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             textSelectedColor = color;
         }
 
+        public Item getSelectedItem()
+        {
+            return((items != null) && (selectedIndex >= 0) && (selectedIndex < items.length) ? items[selectedIndex] : null);
+        }
+
         public void setSelectedIndex(int index)
         {
             selectedIndex = index;
+        }
+
+        public boolean getUsingText()
+        {
+            return(usingText);
         }
 
         public boolean getUsingIcon3Only()
@@ -729,8 +742,10 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
     private CustomAdapter currentAdapter;
     private OnItemSelectedListener itemSelectedListener;
 
-    public void BaseConstructor()
+    public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode, Resources.Theme popupTheme)
     {
+        super(context, attrs, defStyleAttr, mode, popupTheme);
+
         super.setOnItemSelectedListener(new OnItemSelectedListener()
         {
             @Override
@@ -760,36 +775,25 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             }
         });
     }
-
-    public IconSpinner(Context context)
+    public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode)
     {
-        super(context);
-        BaseConstructor();
-    }
-    public IconSpinner(Context context, int mode)
-    {
-        super(context, mode);
-        BaseConstructor();
-    }
-    public IconSpinner(Context context, AttributeSet attrs)
-    {
-        super(context, attrs);
-        BaseConstructor();
+        this(context, attrs, defStyleAttr, mode, null);
     }
     public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr)
     {
-        super(context, attrs, defStyleAttr);
-        BaseConstructor();
+        this(context, attrs, defStyleAttr, -1);
     }
-    public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode)
+    public IconSpinner(Context context, AttributeSet attrs)
     {
-        super(context, attrs, defStyleAttr, mode);
-        BaseConstructor();
+        this(context, attrs, R.attr.spinnerStyle);
     }
-    public IconSpinner(Context context, AttributeSet attrs, int defStyleAttr, int mode, Resources.Theme popupTheme)
+    public IconSpinner(Context context, int mode)
     {
-        super(context, attrs, defStyleAttr, mode, popupTheme);
-        BaseConstructor();
+        this(context, null, R.attr.spinnerStyle, mode, null);
+    }
+    public IconSpinner(Context context)
+    {
+        this(context, -1);
     }
 
     @Override

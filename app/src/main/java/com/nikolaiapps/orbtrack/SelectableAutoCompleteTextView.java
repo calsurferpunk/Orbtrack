@@ -3,6 +3,10 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -18,25 +22,96 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     private int backgroundColor;
     private int backgroundItemColor;
     private int backgroundItemSelectedColor;
+    private final Paint iconPaint;
     private IconSpinner.CustomAdapter currentAdapter;
     private AdapterView.OnItemSelectedListener selectedListener;
-
-    public SelectableAutoCompleteTextView(Context context)
-    {
-        super(context);
-        init(null, null);
-    }
-
-    public SelectableAutoCompleteTextView(Context context, AttributeSet attrs)
-    {
-        super(context, attrs);
-        init(context, attrs);
-    }
 
     public SelectableAutoCompleteTextView(Context context, AttributeSet attrs, int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
-        init(context, attrs);
+
+        int inputType = getInputType();
+
+        //if attributes are set
+        if(attrs != null)
+        {
+            //get attribute values
+            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SelectableAutoCompleteTextView, 0, 0))
+            {
+                inputType = valueArray.getInt(R.styleable.SelectableAutoCompleteTextView_android_inputType, inputType);
+                valueArray.recycle();
+            }
+            catch(NoSuchMethodError noMethod)
+            {
+                //do nothing
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
+        }
+
+        //setup
+        iconPaint = new Paint();
+        setInputType(inputType);
+        addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count)
+            {
+                int selectedId = -1;
+                int selectedIndex;
+
+                //if listener and adapter are set
+                if(selectedListener != null && currentAdapter != null)
+                {
+                    //if set a selection
+                    selectedIndex = getListIndex(s.toString());
+                    if(selectedIndex != -1)
+                    {
+                        //remember selected item
+                        IconSpinner.Item selectedItem = (IconSpinner.Item)currentAdapter.getItem(selectedIndex);
+
+                        //set selection and send event
+                        currentAdapter.setSelectedIndex(selectedIndex);
+                        selectedId = (selectedItem != null && selectedItem.value instanceof Integer ? (int)selectedItem.value : selectedId);
+                        selectedListener.onItemSelected(null, SelectableAutoCompleteTextView.this, selectedIndex, selectedId);
+                    }
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {}
+        });
+    }
+    public SelectableAutoCompleteTextView(Context context, AttributeSet attrs)
+    {
+        this(context, attrs, R.attr.autoCompleteTextViewStyle);
+    }
+    public SelectableAutoCompleteTextView(Context context)
+    {
+        this(context, null);
+    }
+
+    @Override
+    public void onDraw(Canvas canvas)
+    {
+        super.onDraw(canvas);
+
+        IconSpinner.Item selectedItem = (currentAdapter != null ? currentAdapter.getSelectedItem() : null);
+        boolean haveItem = (selectedItem != null);
+        Drawable selectedIcon = (haveItem ? selectedItem.getIcon() : null);
+        Bitmap selectedBitmap = (selectedIcon != null && !(selectedIcon instanceof ColorDrawable) ? Globals.getBitmap(selectedIcon) : null);
+
+        //if item exists, has not text, but does have an icon image
+        if(haveItem && selectedItem.text == null && selectedBitmap != null)
+        {
+            //draw icon image centered vertically
+            canvas.drawBitmap(selectedBitmap, 0.0f, (getMeasuredHeight() / 2f) - (selectedBitmap.getHeight() / 2f), iconPaint);
+        }
     }
 
     private int getListIndex(String stringValue)
@@ -72,65 +147,6 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         return(listIndex);
     }
 
-    private void init(Context context, AttributeSet attrs)
-    {
-        int inputType = getInputType();
-
-        //if attributes are set
-        if(attrs != null)
-        {
-            //get attribute values
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SelectableAutoCompleteTextView, 0, 0))
-            {
-                inputType = valueArray.getInt(R.styleable.SelectableAutoCompleteTextView_android_inputType, inputType);
-                valueArray.recycle();
-            }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
-            {
-                //do nothing
-            }
-        }
-
-        //setup
-        setInputType(inputType);
-        addTextChangedListener(new TextWatcher()
-        {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count)
-            {
-                int selectedId = -1;
-                int selectedIndex;
-
-                //if listener and adapter are set
-                if(selectedListener != null && currentAdapter != null)
-                {
-                    //if set a selection
-                    selectedIndex = getListIndex(s.toString());
-                    if(selectedIndex != -1)
-                    {
-                        //remember selected item
-                        IconSpinner.Item selectedItem = (IconSpinner.Item)currentAdapter.getItem(selectedIndex);
-
-                        //set selection and send event
-                        currentAdapter.setSelectedIndex(selectedIndex);
-                        selectedId = (selectedItem != null && selectedItem.value instanceof Integer ? (int)selectedItem.value : selectedId);
-                        selectedListener.onItemSelected(null, SelectableAutoCompleteTextView.this, selectedIndex, selectedId);
-                    }
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {}
-        });
-    }
-
     public void setOnItemSelectedListener(AdapterView.OnItemSelectedListener listener)
     {
         selectedListener = listener;
@@ -138,19 +154,43 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
 
     public void setAdapter(IconSpinner.CustomAdapter adapter)
     {
+        Context context = getContext();
         Object firstItem = null;
+        IconSpinner.Item[] adapterItems;
 
+        //set adapter
         currentAdapter = adapter;
         if(currentAdapter != null)
         {
+            //get first item and adapter colors
             firstItem = currentAdapter.getItem(0);
             backgroundColor = currentAdapter.getBackgroundColor();
             backgroundItemColor = currentAdapter.getBackgroundItemColor();
             backgroundItemSelectedColor = currentAdapter.getBackgroundItemSelectedColor();
             textColor = currentAdapter.getTextColor();
             textSelectedColor = currentAdapter.getTextSelectedColor();
+
+            //if no text is used
+            if(!currentAdapter.getUsingText())
+            {
+                //hide text by setting it transparent
+                super.setTextColor(Color.TRANSPARENT);
+            }
+
+            //if context exists
+            if(context != null)
+            {
+                //go through each item
+                adapterItems = currentAdapter.getItems();
+                for(IconSpinner.Item currentItem : adapterItems)
+                {
+                    //preload icon for text display
+                    currentItem.loadIcon3(context);
+                }
+            }
         }
 
+        //set colors and any selection
         setBackgroundColor(backgroundColor);
         setBackgroundItemColor(backgroundItemColor);
         setBackgroundItemSelectedColor(backgroundItemSelectedColor);
@@ -161,6 +201,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
             setSelectedText(firstItem.toString());
         }
 
+        //set adapter
         super.setAdapter(adapter);
     }
 
@@ -212,18 +253,9 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         if(currentAdapter != null && index >= 0)
         {
             IconSpinner.Item selectedItem = (IconSpinner.Item)currentAdapter.getItem(index);
-            boolean haveSelectedItem = (selectedItem != null);
-            String selectedText = (haveSelectedItem ? selectedItem.text : null);
-            Drawable selectedIcon = (haveSelectedItem ? selectedItem.getIcon() : null);
+            String selectedText = (selectedItem != null ? selectedItem.text : null);
 
-            if(selectedText != null)
-            {
-                setText(selectedText, false);
-            }
-            else if(selectedIcon != null)
-            {
-                setCompoundDrawablesWithIntrinsicBounds(selectedIcon, null, null, null);
-            }
+            setText(selectedText, false);
         }
     }
 

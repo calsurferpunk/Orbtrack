@@ -30,6 +30,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.graphics.drawable.ShapeDrawable;
@@ -3148,6 +3149,23 @@ public abstract class Globals
         textCanvas.drawText(text, 0, textHeight - 1, textPaint);
 
         return(new BitmapDrawable(context.getResources(), textImage));
+    }
+    public static BitmapDrawable getDrawable(Context context, ColorDrawable colorImage, int sizePx)
+    {
+        Paint paint = new Paint();
+        Bitmap squareImage = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(squareImage);
+
+        if(context == null || colorImage == null)
+        {
+            return(null);
+        }
+
+        paint.setColor(colorImage.getColor());
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawRect(new Rect(0, 0, sizePx, sizePx), paint);
+
+        return(new BitmapDrawable(context.getResources(), squareImage));
     }
     public static Drawable getDrawable(Drawable image, int tintColor)
     {

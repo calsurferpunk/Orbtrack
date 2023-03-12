@@ -132,9 +132,13 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             icon3 = new ColorDrawable(ContextCompat.getColor(context, colorID));
         }
 
-        public void loadIcon3(Context context)
+        public void loadIcon3(Context context, int colorIconPx)
         {
-            if(icon3 == null && icon3Id > 0)
+            if(icon3 instanceof ColorDrawable && colorIconPx > 0)
+            {
+                icon3 = Globals.getDrawable(context, (ColorDrawable)icon3, colorIconPx);
+            }
+            else if(icon3 == null && icon3Id > 0)
             {
                 icon3 = ((icon3TintColor != Color.TRANSPARENT ? Globals.getDrawable(context, icon3Id, icon3TintColor, false) : Globals.getDrawable(context, icon3Id, iconsUseThemeTint)));
             }
@@ -559,9 +563,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 }
             }
             context = convertView.getContext();
-            icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
-            icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
-            currentItem.loadIcon3(context);
             convertView.setBackgroundColor(backgroundColor);
             if(usingIcon3Only)
             {
@@ -586,6 +587,14 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             if(itemProgress != null)
             {
                 itemProgress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
+            }
+
+            //get icons
+            icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
+            icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
+            if(itemImage3 != null)
+            {
+                currentItem.loadIcon3(context, itemImage3.getMeasuredHeight());
             }
 
             //if not loading items

@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
@@ -22,7 +23,10 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     private int backgroundColor;
     private int backgroundItemColor;
     private int backgroundItemSelectedColor;
+    private final int iconSizePx;
     private final Paint iconPaint;
+    private final Rect iconStartArea;
+    private final Rect iconEndArea;
     private IconSpinner.CustomAdapter currentAdapter;
     private AdapterView.OnItemSelectedListener selectedListener;
 
@@ -53,6 +57,9 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
 
         //setup
         iconPaint = new Paint();
+        iconStartArea = new Rect();
+        iconEndArea = new Rect();
+        iconSizePx = (int)Globals.dpToPixels(context, 24);
         setInputType(inputType);
         addTextChangedListener(new TextWatcher()
         {
@@ -99,18 +106,40 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     @Override
     public void onDraw(Canvas canvas)
     {
-        super.onDraw(canvas);
-
+        int iconWidth;
+        int iconHeight;
+        int halfHeight = (getMeasuredHeight() / 2);
+        int halfPaddingLeft = (getPaddingLeft() / 2);
+        float iconRatio;
         IconSpinner.Item selectedItem = (currentAdapter != null ? currentAdapter.getSelectedItem() : null);
         boolean haveItem = (selectedItem != null);
         Drawable selectedIcon = (haveItem ? selectedItem.getIcon() : null);
         Bitmap selectedBitmap = (selectedIcon != null && !(selectedIcon instanceof ColorDrawable) ? Globals.getBitmap(selectedIcon) : null);
+        boolean haveIconAndText = (haveItem && selectedItem.text != null && selectedBitmap != null);
 
-        //if item exists, has not text, but does have an icon image
-        if(haveItem && selectedItem.text == null && selectedBitmap != null)
+        if(haveIconAndText)
+        {
+            canvas.save();
+            canvas.translate(iconSizePx, getPaddingTop() / -3f);
+        }
+
+        super.onDraw(canvas);
+
+        if(haveIconAndText)
+        {
+            canvas.restore();
+        }
+
+        //if have an icon image
+        if(selectedBitmap != null)
         {
             //draw icon image centered vertically
-            canvas.drawBitmap(selectedBitmap, 0.0f, (getMeasuredHeight() / 2f) - (selectedBitmap.getHeight() / 2f), iconPaint);
+            iconWidth = selectedBitmap.getWidth();
+            iconHeight = selectedBitmap.getHeight();
+            iconRatio = iconSizePx / (float)iconHeight;
+            iconStartArea.set(0, 0, iconWidth, iconHeight);
+            iconEndArea.set(halfPaddingLeft, halfHeight - (iconSizePx / 2), halfPaddingLeft + (int)(iconWidth * iconRatio), halfHeight + (iconSizePx / 2));
+            canvas.drawBitmap(selectedBitmap, iconStartArea, iconEndArea, iconPaint);
         }
     }
 
@@ -155,6 +184,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     public void setAdapter(IconSpinner.CustomAdapter adapter)
     {
         Context context = getContext();
+        int colorIconPx = (int)Globals.dpToPixels(context, 24);
         Object firstItem = null;
         IconSpinner.Item[] adapterItems;
 
@@ -170,13 +200,6 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
             textColor = currentAdapter.getTextColor();
             textSelectedColor = currentAdapter.getTextSelectedColor();
 
-            //if no text is used
-            if(!currentAdapter.getUsingText())
-            {
-                //hide text by setting it transparent
-                super.setTextColor(Color.TRANSPARENT);
-            }
-
             //if context exists
             if(context != null)
             {
@@ -185,7 +208,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                 for(IconSpinner.Item currentItem : adapterItems)
                 {
                     //preload icon for text display
-                    currentItem.loadIcon3(context);
+                    currentItem.loadIcon3(context, colorIconPx);
                 }
             }
         }
@@ -238,6 +261,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     public void setTextColor(int color)
     {
         textColor = color;
+        super.setTextColor(currentAdapter != null && !currentAdapter.getUsingText() ? Color.TRANSPARENT : textColor);
         SelectListInterface.setTextColor(currentAdapter, textColor);
         setTextSelectedColor(textColor);
     }

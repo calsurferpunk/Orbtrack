@@ -3147,19 +3147,19 @@ public abstract class Calculate
         }
         if(startDateLayout != null)
         {
-            startDateLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_calendar_month_white, 24, true, true, true));
+            startDateLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_calendar_month_white, 24, true, true));
         }
         if(startTimeLayout != null)
         {
-            startTimeLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_clock_black, 24, true, true, true));
+            startTimeLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_clock_black, 24, true, true));
         }
         if(endDateLayout != null)
         {
-            endDateLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_calendar_month_white, 24, true, true, false));
+            endDateLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_calendar_month_white, 24, true, false));
         }
         if(endTimeLayout != null)
         {
-            endTimeLayout.setStartIconDrawable(Globals.getYesNoDrawable(context, R.drawable.ic_clock_black, 24, true, true, false));
+            endTimeLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_clock_black, 24, true, false));
         }
 
         //setup date and time listeners

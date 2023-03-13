@@ -334,7 +334,7 @@ public class MasterAddListActivity extends BaseInputActivity
                 //set displays and update checked state
                 itemHolder.orbitalImage.setBackgroundDrawable(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType));
                 itemHolder.orbitalImage.setVisibility(View.VISIBLE);
-                itemHolder.ownerImage.setBackgroundDrawable(Globals.getDrawable(currentContext, Globals.getOwnerIconIDs(currentItem.satellite.ownerCode)));
+                itemHolder.ownerImage.setBackgroundDrawable(Globals.getDrawableCombined(currentContext, Globals.getOwnerIconIDs(currentItem.satellite.ownerCode)));
                 itemHolder.itemText.setText(currentItem.satellite.name);
                 itemHolder.checkBoxView.setOnCheckedChangeListener(null);
                 itemHolder.checkBoxView.setChecked(currentItem.isChecked);

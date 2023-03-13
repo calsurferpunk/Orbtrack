@@ -114,7 +114,7 @@ public class PlayBar extends LinearLayout
         //get images
         playDrawable = Globals.getDrawable(context, R.drawable.ic_play_arrow_white, buttonColor, false);
         pauseDrawable = Globals.getDrawable(context, R.drawable.ic_pause_white, buttonColor, false);
-        liveDrawable = Globals.getDrawable(context, context.getString(R.string.title_live), 12, Color.WHITE, Color.TRANSPARENT);
+        liveDrawable = Globals.getDrawableText(context, context.getString(R.string.title_live), 12, Color.WHITE, Color.TRANSPARENT);
         syncDrawable = Globals.getDrawable(context, R.drawable.ic_sync_white, buttonColor, false);
 
         //set images

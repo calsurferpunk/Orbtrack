@@ -1104,8 +1104,8 @@ class Whirly
                 if(noradId > 0)
                 {
                     //add outline
-                    orbitalBgImage = Globals.getDrawable(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
-                    orbitalImage = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
+                    orbitalBgImage = Globals.getDrawableSized(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
+                    orbitalImage = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
                 }
 
                 //save image for repeat use

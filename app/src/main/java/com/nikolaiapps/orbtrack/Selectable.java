@@ -229,7 +229,7 @@ public abstract class Selectable
                             {
                                 //add combination of owner and icon
                                 int[] ownerIconIds = Globals.getOwnerIconIDs(ownerCodes[index]);
-                                resultIcons.add(Globals.getDrawable(context, icons[index].getConstantState().newDrawable().mutate()));  //note: makes icon copy so that original is not altered
+                                resultIcons.add(Globals.getDrawableCombined(context, icons[index].getConstantState().newDrawable().mutate()));  //note: makes icon copy so that original is not altered
                                 for(int currentId : ownerIconIds)
                                 {
                                     if(currentId > 0)
@@ -241,7 +241,7 @@ public abstract class Selectable
                         }
 
                         //set icon to combination of all previous
-                        itemDetailDialog.setIcon(Globals.getDrawable(context, resultIcons.toArray(new Drawable[0])));
+                        itemDetailDialog.setIcon(Globals.getDrawableCombined(context, resultIcons.toArray(new Drawable[0])));
                     }
 
                     //set title

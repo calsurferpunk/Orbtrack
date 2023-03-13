@@ -978,7 +978,7 @@ public abstract class Globals
         int resId = (isError ? R.drawable.ic_error_black : R.drawable.ic_check_circle_black);
         int textColorId = resolveColorID(context, R.attr.pageTitleTextColor);
         final Drawable icon = getDrawable(context, resId, R.color.white);
-        final Drawable smallIcon = getDrawable(context, resId, 16, 16, R.color.white, true);
+        final Drawable smallIcon = getDrawableSized(context, resId, 16, 16, R.color.white, true);
         final Snackbar snackView = Snackbar.make(parentView, message, usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
         final View snackParentView = snackView.getView();
         final TextView snackText = snackParentView.findViewById(com.google.android.material.R.id.snackbar_text);
@@ -2919,7 +2919,7 @@ public abstract class Globals
     public static Drawable getDrawable(Context context, int resId, int tintColor, boolean colorIsId)
     {
         Drawable drawableItem = (resId > 0 ? tryGetDrawable(context, resId) : null);
-        if(drawableItem != null && tintColor != 0)
+        if(drawableItem != null && tintColor != Color.TRANSPARENT)
         {
             DrawableCompat.setTint(DrawableCompat.wrap(drawableItem).mutate(), (colorIsId ? ResourcesCompat.getColor(context.getResources(), tintColor, null) : tintColor));
         }
@@ -2932,13 +2932,15 @@ public abstract class Globals
     }
     public static Drawable getDrawable(Context context, int resId, boolean useThemeTint)
     {
-        return(getDrawable(context, resId, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : 0)));
+        return(getDrawable(context, resId, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : Color.TRANSPARENT), useThemeTint));
     }
     public static Drawable getDrawable(Context context, int resId)
     {
-        return(getDrawable(context, resId, 0));
+        return(getDrawable(context, resId, Color.TRANSPARENT, false));
     }
-    public static Drawable getDrawable(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
+
+    //Gets a sized drawable
+    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean colorIsId, boolean isDpSize)
     {
         float[] dpPixels = (isDpSize ? dpsToPixels(context, width, height) : null);
         int widthPixels = (isDpSize ? (int)dpPixels[0] : width);
@@ -2947,7 +2949,7 @@ public abstract class Globals
         Bitmap imageBitmap;
         BitmapDrawable scaledDrawable;
         Canvas imageCanvas;
-        Drawable image = getDrawable(context, resId, tintColor);
+        Drawable image = getDrawable(context, resId, tintColor, colorIsId);
 
         //get starting width(s) and height(s)
         imageSize = getImageWidthHeight(image);
@@ -2962,11 +2964,17 @@ public abstract class Globals
         //return scaled image
         return(scaledDrawable);
     }
-    public static Drawable getDrawable(Context context, int resId, int size, boolean useThemeTint, boolean isDpSize)
+    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
     {
-        return(getDrawable(context, resId, size, size, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : 0), isDpSize));
+        return(getDrawableSized(context, resId, width, height, tintColor, true, isDpSize));
     }
-    public static Drawable getDrawable(Context context, int xStackOffsets, int yStackOffsets, boolean stacked, Drawable ...images)
+    public static Drawable getDrawableSized(Context context, int resId, int width, int height, boolean useThemeTint, boolean isDpSize)
+    {
+        return(getDrawableSized(context, resId, width, height, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : Color.TRANSPARENT), useThemeTint, isDpSize));
+    }
+
+    //Gets combined drawables
+    public static Drawable getDrawableCombined(Context context, int xStackOffsets, int yStackOffsets, boolean stacked, Drawable ...images)
     {
         int x = 0;
         int index;
@@ -3091,11 +3099,11 @@ public abstract class Globals
             return(null);
         }
     }
-    public static Drawable getDrawable(Context context, Drawable ...images)
+    public static Drawable getDrawableCombined(Context context, Drawable ...images)
     {
-        return(getDrawable(context, 0, 0, false, images));
+        return(getDrawableCombined(context, 0, 0, false, images));
     }
-    public static Drawable getDrawable(Context context, int[] imageIds)
+    public static Drawable getDrawableCombined(Context context, int[] imageIds)
     {
         int index;
         Drawable[] images = null;
@@ -3116,9 +3124,45 @@ public abstract class Globals
         }
 
         //return combined image
-        return(getDrawable(context, 0, 0, false, images));
+        return(getDrawableCombined(context, 0, 0, false, images));
     }
-    public static BitmapDrawable getDrawable(Context context, String text, float textSize, int textColor, int bgColor)
+
+    //Gets a drawable color
+    public static BitmapDrawable getDrawableColor(Context context, ColorDrawable colorImage, int sizePx)
+    {
+        Paint paint = new Paint();
+        Bitmap squareImage = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(squareImage);
+
+        if(context == null || colorImage == null)
+        {
+            return(null);
+        }
+
+        paint.setColor(colorImage.getColor());
+        paint.setStyle(Paint.Style.FILL);
+        canvas.drawRect(new Rect(0, 0, sizePx, sizePx), paint);
+
+        return(new BitmapDrawable(context.getResources(), squareImage));
+    }
+
+    //Gets a tinted drawable
+    public static Drawable getDrawableTinted(Drawable image, int tintColor)
+    {
+        Drawable tintedImage;
+
+        if(image == null)
+        {
+            return(null);
+        }
+
+        tintedImage = image.mutate();
+        DrawableCompat.setTint(tintedImage, tintColor);
+        return(tintedImage);
+    }
+
+    //Gets text as a drawable
+    public static BitmapDrawable getDrawableText(Context context, String text, float textSize, int textColor, int bgColor)
     {
         int textWidth;
         int textHeight;
@@ -3150,35 +3194,14 @@ public abstract class Globals
 
         return(new BitmapDrawable(context.getResources(), textImage));
     }
-    public static BitmapDrawable getDrawable(Context context, ColorDrawable colorImage, int sizePx)
+
+    //Gets an image with/without a "no" drawable
+    public static Drawable getDrawableYesNo(Context context, int resId, int sizeDp, boolean useThemeTint, boolean isYes)
     {
-        Paint paint = new Paint();
-        Bitmap squareImage = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(squareImage);
+        Drawable image = getDrawableSized(context, resId, sizeDp, sizeDp, useThemeTint, true);
+        Drawable noImage = (isYes ? null : getDrawableSized(context, R.drawable.ic_no, sizeDp, sizeDp, useThemeTint, true));
 
-        if(context == null || colorImage == null)
-        {
-            return(null);
-        }
-
-        paint.setColor(colorImage.getColor());
-        paint.setStyle(Paint.Style.FILL);
-        canvas.drawRect(new Rect(0, 0, sizePx, sizePx), paint);
-
-        return(new BitmapDrawable(context.getResources(), squareImage));
-    }
-    public static Drawable getDrawable(Drawable image, int tintColor)
-    {
-        Drawable tintedImage;
-
-        if(image == null)
-        {
-            return(null);
-        }
-
-        tintedImage = image.mutate();
-        DrawableCompat.setTint(tintedImage, tintColor);
-        return(tintedImage);
+        return(getDrawableCombined(context, 0, 0, true, image, noImage));
     }
 
     //Copies a bitmap
@@ -3206,13 +3229,15 @@ public abstract class Globals
     {
         return(getBitmap(getDrawable(context, resId, tintColor, false)));
     }
-    public static Bitmap getBitmap(Context context, int resId, int tintColor, int width, int height)
-    {
-        return(getBitmap(getDrawable(context, resId, width, height, tintColor, false)));
-    }
     public static Bitmap getBitmap(Context context, int resId, boolean useThemeTint)
     {
         return(getBitmap(getDrawable(context, resId, useThemeTint)));
+    }
+
+    //Gets a sized bitmap
+    public static Bitmap getBitmapSized(Context context, int resId, int width, int height, int tintColorId)
+    {
+        return(getBitmap(getDrawableSized(context, resId, width, height, tintColorId, false)));
     }
 
     //Gets rotated version of given bitmap without changing size
@@ -3228,15 +3253,6 @@ public abstract class Globals
         rotatedImage = (haveImage && width > 0 && height > 0 ? Bitmap.createBitmap(image, 0, 0, width, height, rotateMatrix, true) : null);
 
         return(rotatedImage != null ? Bitmap.createBitmap(rotatedImage, (rotatedImage.getWidth() - width) / 2, (rotatedImage.getHeight() - height) / 2, width, height) : null);
-    }
-
-    //Gets an image with/without a "no" drawable
-    public static Drawable getYesNoDrawable(Context context, int resId, int size, boolean useThemeTint, boolean isDpSize, boolean isYes)
-    {
-        Drawable image = getDrawable(context, resId, size, useThemeTint, isDpSize);
-        Drawable noImage = (isYes ? null : getDrawable(context, R.drawable.ic_no, size, useThemeTint, isDpSize));
-
-        return(getDrawable(context, 0, 0, true, image, noImage));
     }
 
     //Gets a selector image

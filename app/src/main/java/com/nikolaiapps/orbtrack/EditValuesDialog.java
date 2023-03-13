@@ -507,7 +507,7 @@ public class EditValuesDialog
                                 currentText = Globals.Symbols.Elevating;
                             }
 
-                            currentIcon = Globals.getDrawable(currentContext, currentText, 16, (darkTheme ? Color.WHITE : Color.BLACK), Color.TRANSPARENT);
+                            currentIcon = Globals.getDrawableText(currentContext, currentText, 16, (darkTheme ? Color.WHITE : Color.BLACK), Color.TRANSPARENT);
                         }
                         else
                         {

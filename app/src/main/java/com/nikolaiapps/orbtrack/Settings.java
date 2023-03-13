@@ -334,8 +334,8 @@ public abstract class Settings
                     //init orbital icon items
                     orbitalIconsItems = new IconSpinner.Item[]
                     {
-                        new IconSpinner.Item(Globals.getDrawable(context, new int[]{R.drawable.orbital_sun_moozarov, R.drawable.orbital_mercury_moozarov, R.drawable.orbital_venus_moozarov, R.drawable.orbital_moon_moozarov, R.drawable.orbital_mars_moozarov, R.drawable.orbital_jupiter_moozarov, R.drawable.orbital_saturn_moozarov, R.drawable.orbital_uranus_moozarov, R.drawable.orbital_neptune_moozarov, R.drawable.orbital_pluto_moozarov}), null, OrbitalIcons.Moozarov),
-                        new IconSpinner.Item(Globals.getDrawable(context, new int[]{R.drawable.orbital_sun_freepik, R.drawable.orbital_mercury_freepik, R.drawable.orbital_venus_freepik, R.drawable.orbital_moon_freepik, R.drawable.orbital_mars_freepik, R.drawable.orbital_jupiter_freepik, R.drawable.orbital_saturn_freepik, R.drawable.orbital_uranus_freepik, R.drawable.orbital_neptune_freepik, R.drawable.orbital_pluto_freepik}), null, OrbitalIcons.Freepik),
+                        new IconSpinner.Item(Globals.getDrawableCombined(context, new int[]{R.drawable.orbital_sun_moozarov, R.drawable.orbital_mercury_moozarov, R.drawable.orbital_venus_moozarov, R.drawable.orbital_moon_moozarov, R.drawable.orbital_mars_moozarov, R.drawable.orbital_jupiter_moozarov, R.drawable.orbital_saturn_moozarov, R.drawable.orbital_uranus_moozarov, R.drawable.orbital_neptune_moozarov, R.drawable.orbital_pluto_moozarov}), null, OrbitalIcons.Moozarov),
+                        new IconSpinner.Item(Globals.getDrawableCombined(context, new int[]{R.drawable.orbital_sun_freepik, R.drawable.orbital_mercury_freepik, R.drawable.orbital_venus_freepik, R.drawable.orbital_moon_freepik, R.drawable.orbital_mars_freepik, R.drawable.orbital_jupiter_freepik, R.drawable.orbital_saturn_freepik, R.drawable.orbital_uranus_freepik, R.drawable.orbital_neptune_freepik, R.drawable.orbital_pluto_freepik}), null, OrbitalIcons.Freepik),
                     };
                 }
                 if(colorAdvancedItems == null || colorAdvancedItems.length == 0)
@@ -1456,7 +1456,7 @@ public abstract class Settings
             private void setNotifyText(TextView notifyText, boolean up, boolean nextOnly)
             {
                 notifyText.setVisibility(View.VISIBLE);
-                notifyText.setCompoundDrawablesWithIntrinsicBounds(Globals.getYesNoDrawable(currentContext, R.drawable.ic_clock_black, 18, true, true, !up), null, Globals.getDrawable(currentContext, (nextOnly ? R.drawable.ic_repeat_one_white : R.drawable.ic_repeat_white), 18, true, true), null);
+                notifyText.setCompoundDrawablesWithIntrinsicBounds(Globals.getDrawableYesNo(currentContext, R.drawable.ic_clock_black, 18, true, !up), null, Globals.getDrawableSized(currentContext, (nextOnly ? R.drawable.ic_repeat_one_white : R.drawable.ic_repeat_white), 18, 18, true, true), null);
             }
         }
     }

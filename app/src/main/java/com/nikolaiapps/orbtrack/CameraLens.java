@@ -1099,12 +1099,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     {
                         //create image and add to list
                         iconId = Globals.getOrbitalIconID(context, noradId, currentType);
-                        indicatorIcon.image = Globals.getBitmap(context, iconId, (isSatellite && (currentType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? R.color.white : 0), iconLength, iconLength);
+                        indicatorIcon.image = Globals.getBitmapSized(context, iconId, iconLength, iconLength, (isSatellite && (currentType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? R.color.white : 0));
                         if(isSatellite)
                         {
                             //add background highlight
-                            Drawable imageBg = Globals.getDrawable(context, iconId, indicatorIcon.image.getWidth(), indicatorIcon.image.getHeight(), R.color.black, false);
-                            indicatorIcon.image = Globals.getBitmap(Globals.getDrawable(context, 2, 2, true, new BitmapDrawable(context.getResources(), indicatorIcon.image), imageBg));
+                            Drawable imageBg = Globals.getDrawableSized(context, iconId, indicatorIcon.image.getWidth(), indicatorIcon.image.getHeight(), R.color.black, false);
+                            indicatorIcon.image = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), indicatorIcon.image), imageBg));
                         }
                         orbitalIcons.add(indexes[1], indicatorIcon);
                     }

@@ -59,7 +59,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         iconPaint = new Paint();
         iconStartArea = new Rect();
         iconEndArea = new Rect();
-        iconSizePx = (int)Globals.dpToPixels(context, 24);
+        iconSizePx = (int)Globals.dpToPixels(context, 32);
         setInputType(inputType);
         addTextChangedListener(new TextWatcher()
         {
@@ -184,7 +184,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     public void setAdapter(IconSpinner.CustomAdapter adapter)
     {
         Context context = getContext();
-        int colorIconPx = (int)Globals.dpToPixels(context, 24);
+        int iconHeightPx = (int)Globals.dpToPixels(context, 32);
         Object firstItem = null;
         IconSpinner.Item[] adapterItems;
 
@@ -208,7 +208,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                 for(IconSpinner.Item currentItem : adapterItems)
                 {
                     //preload icon for text display
-                    currentItem.loadIcon3(context, colorIconPx);
+                    currentItem.loadIcon3(context, iconHeightPx);
                 }
             }
         }
@@ -222,6 +222,14 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         if(firstItem != null)
         {
             setSelectedText(firstItem.toString());
+            if(firstItem instanceof IconSpinner.Item && adapter.getUsingIcon3Only())
+            {
+                Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon();
+                if(firstIcon != null && firstIcon.getIntrinsicWidth() > 0)
+                {
+                    setDropDownWidth(firstIcon.getIntrinsicWidth() + getTotalPaddingLeft() + getTotalPaddingRight());
+                }
+            }
         }
 
         //set adapter

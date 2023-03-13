@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import androidx.annotation.NonNull;
@@ -132,15 +133,19 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             icon3 = new ColorDrawable(ContextCompat.getColor(context, colorID));
         }
 
-        public void loadIcon3(Context context, int colorIconPx)
+        public void loadIcon3(Context context, int iconHeightPx)
         {
-            if(icon3 instanceof ColorDrawable && colorIconPx > 0)
+            if(iconHeightPx > 0)
             {
-                icon3 = Globals.getDrawable(context, (ColorDrawable)icon3, colorIconPx);
-            }
-            else if(icon3 == null && icon3Id > 0)
-            {
-                icon3 = ((icon3TintColor != Color.TRANSPARENT ? Globals.getDrawable(context, icon3Id, icon3TintColor, false) : Globals.getDrawable(context, icon3Id, iconsUseThemeTint)));
+                if(icon3 instanceof ColorDrawable)
+                {
+                    icon3 = Globals.getDrawableColor(context, (ColorDrawable)icon3, iconHeightPx);
+                }
+                else if(icon3 == null && icon3Id > 0)
+                {
+                    //noinspection SuspiciousNameCombination
+                    icon3 = ((icon3TintColor != Color.TRANSPARENT ? Globals.getDrawableSized(context, icon3Id, iconHeightPx, iconHeightPx, icon3TintColor, false, false) : Globals.getDrawableSized(context, icon3Id, iconHeightPx, iconHeightPx, iconsUseThemeTint, false)));
+                }
             }
         }
 
@@ -544,6 +549,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             Drawable icon1;
             Drawable icon2;
             Context context;
+            Rect iconBounds;
             LinearLayout itemBackground;
             AppCompatImageView itemImage1;
             AppCompatImageView itemImage2;
@@ -590,7 +596,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             }
 
             //get icons
-            icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawable(context, currentItem.icon1Ids) : null);
+            icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawableCombined(context, currentItem.icon1Ids) : null);
             icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
             if(itemImage3 != null)
             {
@@ -605,7 +611,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 {
                     if(currentItem.usingIcon1Colors())
                     {
-                        itemImage1.setBackgroundDrawable(Globals.getDrawable(icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
+                        itemImage1.setBackgroundDrawable(Globals.getDrawableTinted(icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
                     }
                     else
                     {
@@ -631,7 +637,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 {
                     if(currentItem.usingIcon3Colors())
                     {
-                        itemImage3.setBackgroundDrawable(Globals.getDrawable(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
+                        itemImage3.setBackgroundDrawable(Globals.getDrawableTinted(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
                     }
                     else
                     {
@@ -648,9 +654,18 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                     if(usingIcon3Only)
                     {
                         LayoutParams imageParams = itemImage3.getLayoutParams();
-                        sizePx = (currentItem.icon3OnlyDp != LinearLayout.LayoutParams.WRAP_CONTENT ? (int)Globals.dpToPixels(context, currentItem.icon3OnlyDp) : LinearLayout.LayoutParams.WRAP_CONTENT);
-                        imageParams.width = sizePx;
-                        imageParams.height = sizePx;
+                        iconBounds = (currentItem.icon3 != null ? currentItem.icon3.getBounds() : new Rect());
+                        if(iconBounds.width() > 0)
+                        {
+                            imageParams.width = iconBounds.width();
+                            imageParams.height = iconBounds.height();
+                        }
+                        else
+                        {
+                            sizePx = (currentItem.icon3OnlyDp != LinearLayout.LayoutParams.WRAP_CONTENT ? (int)Globals.dpToPixels(context, currentItem.icon3OnlyDp) : LinearLayout.LayoutParams.WRAP_CONTENT);
+                            imageParams.width = sizePx;
+                            imageParams.height = sizePx;
+                        }
                         itemImage3.setLayoutParams(imageParams);
                     }
                 }

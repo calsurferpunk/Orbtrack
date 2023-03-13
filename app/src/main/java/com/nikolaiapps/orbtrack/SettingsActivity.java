@@ -1483,8 +1483,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 {
                     switch(key)
                     {
-                        case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.DarkTheme:
+                            //reset satellite icon items to update theme color
+                            Settings.Options.Display.satelliteIconItems = null;
+                            //fall through
+
+                        case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.MaterialTheme:
                         case Settings.PreferenceName.SatelliteIcon:
                         case Settings.PreferenceName.OrbitalIcons:

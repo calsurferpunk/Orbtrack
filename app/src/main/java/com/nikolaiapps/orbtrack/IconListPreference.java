@@ -67,6 +67,7 @@ public class IconListPreference extends CustomPreference
         summaryView = rootView.findViewById(R.id.Icon_List_Preference_Summary);
         listParentView = rootView.findViewById(usingMaterial ? R.id.Icon_List_Preference_Text_Layout : R.id.Icon_List_Preference_List_Parent);
         iconList = rootView.findViewById(usingMaterial ? R.id.Icon_List_Preference_Text_List : R.id.Icon_List_Preference_List);
+        iconList.setAllowAutoSelect(false);
 
         //set displays
         titleView.setText(titleText);
@@ -94,17 +95,20 @@ public class IconListPreference extends CustomPreference
         }
         if(pendingSetValue != null)
         {
-            if(pendingDefaultValue != null)
-            {
-                iconList.setSelectedValue(pendingSetValue, pendingDefaultValue);
-            }
-            else
-            {
-                iconList.setSelectedValue(pendingSetValue);
-            }
+            Object setValue = pendingSetValue;
+            Object defaultValue = pendingDefaultValue;
 
             pendingSetValue = null;
             pendingDefaultValue = null;
+
+            if(defaultValue != null)
+            {
+                iconList.setSelectedValue(setValue, defaultValue);
+            }
+            else
+            {
+                iconList.setSelectedValue(setValue);
+            }
         }
         iconList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
         {

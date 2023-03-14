@@ -9,6 +9,7 @@ public interface SelectListInterface
 {
     void setOnItemSelectedListener(AdapterView.OnItemSelectedListener listener);
     void setAdapter(IconSpinner.CustomAdapter adapter);
+    void setAllowAutoSelect(boolean allow);
     IconSpinner.CustomAdapter getAdapter();
     int getBackgroundColor();
     void setBackgroundColor(int color);

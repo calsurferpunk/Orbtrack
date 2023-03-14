@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 
 public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.AppCompatAutoCompleteTextView implements SelectListInterface
 {
+    private boolean allowAutoSelect;
     private int textColor;
     private int textSelectedColor;
     private int backgroundColor;
@@ -56,6 +57,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         }
 
         //setup
+        allowAutoSelect = true;
         iconPaint = new Paint();
         iconStartArea = new Rect();
         iconEndArea = new Rect();
@@ -221,7 +223,10 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         setTextSelectedColor(textSelectedColor);
         if(firstItem != null)
         {
-            setSelectedText(firstItem.toString());
+            if(allowAutoSelect)
+            {
+                setSelectedText(firstItem.toString());
+            }
             if(firstItem instanceof IconSpinner.Item && adapter.getUsingIcon3Only())
             {
                 Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon();
@@ -234,6 +239,11 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
 
         //set adapter
         super.setAdapter(adapter);
+    }
+
+    public void setAllowAutoSelect(boolean allow)
+    {
+        allowAutoSelect = allow;
     }
 
     public IconSpinner.CustomAdapter getAdapter()

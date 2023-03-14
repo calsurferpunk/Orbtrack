@@ -46,7 +46,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         int icon3Color;
         int icon3TintColor;
         int icon3SelectedColor;
-        int icon3OnlyDp;
         boolean iconsUseThemeTint;
         int[] icon1Ids;
 
@@ -70,7 +69,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             subText = null;
             value = val;
             icon1Color = icon1SelectedColor = icon3Color = icon3TintColor = icon3SelectedColor = Color.TRANSPARENT;
-            icon3OnlyDp = LinearLayout.LayoutParams.WRAP_CONTENT;
             iconsUseThemeTint = false;
             icon1Ids = null;
         }
@@ -93,13 +91,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public Item(int icon3Id, boolean iconsUseThemeTint, Object val)
         {
             this(icon3Id, iconsUseThemeTint, null, val);
-            this.icon3OnlyDp = 32;
         }
         public Item(int icon3Id, int tintColor, Object val)
         {
             this(icon3Id, false, null, val);
             this.icon3TintColor = tintColor;
-            this.icon3OnlyDp = 32;
         }
         public Item(Drawable icon3, String txt, Object val, float rotateAngle)
         {
@@ -362,12 +358,13 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public CustomAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
         {
             int index;
+            int sizeDp = (usingMaterial ? 32 : 24);
 
             this.items = new Item[items.length];
             for(index = 0; index < this.items.length; index++)
             {
                 Object currentCopyItem = items[index];
-                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawable(context, itemImageIds[index], false) : null), (currentCopyItem != null ? currentCopyItem.toString() : ""), values[index], (subTexts != null ? subTexts[index] : null));
+                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawableSized(context, itemImageIds[index], sizeDp, sizeDp, false, true) : null), (currentCopyItem != null ? currentCopyItem.toString() : ""), values[index], (subTexts != null ? subTexts[index] : null));
             }
 
             BaseConstructor(context);
@@ -544,7 +541,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         @Override
         public View getView(int position, View convertView, ViewGroup parent)
         {
-            int sizePx;
             boolean isSelected = (position == selectedIndex);
             Drawable icon1;
             Drawable icon2;
@@ -662,9 +658,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                         }
                         else
                         {
-                            sizePx = (currentItem.icon3OnlyDp != LinearLayout.LayoutParams.WRAP_CONTENT ? (int)Globals.dpToPixels(context, currentItem.icon3OnlyDp) : LinearLayout.LayoutParams.WRAP_CONTENT);
-                            imageParams.width = sizePx;
-                            imageParams.height = sizePx;
+                            imageParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                            imageParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
                         }
                         itemImage3.setLayoutParams(imageParams);
                     }
@@ -830,6 +825,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
     {
         currentAdapter = adapter;
         super.setAdapter(adapter);
+    }
+
+    public void setAllowAutoSelect(boolean allow)
+    {
+        //do nothing
     }
 
     public CustomAdapter getAdapter()

@@ -144,8 +144,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         IconListPreference orbitalIconsList = this.findPreference(Settings.PreferenceName.OrbitalIcons);
                         PreferenceCategory iconsCategory = this.findPreference("IconsCategory");
 
-                        //always reset location icon items to update tint color
+                        //always reset icon items to update tint color/size
                         Settings.Options.Display.locationIconItems = null;
+                        Settings.Options.Display.satelliteIconItems = null;
 
                         //initialize values
                         Settings.Options.Display.initValues(context);
@@ -408,10 +409,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 final Context context = preference.getContext();
                 final String preferenceKey = preference.getKey();
                 boolean forGlobe = false;
+                boolean usingValue;
                 int index;
                 int value = -1;
                 int valueIndex = -1;
                 Object currentValue = null;
+                Preference.OnPreferenceChangeListener listener = null;
 
                 //if preference should be visible
                 if(preferenceVisible(preferenceKey))
@@ -443,8 +446,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.LensIndicator:
                             currentValue = Settings.getIndicator(context);
-
-                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            listener = new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -460,7 +462,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            });
+                            };
+                            break;
+
+                        case Settings.PreferenceName.LensAverageCount:
+                            currentValue = Settings.getLensAverageCount(context);
                             break;
 
                         case Settings.PreferenceName.LensUpdateDelay:
@@ -485,8 +491,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map:
                             currentValue = Settings.getMapLayerType(context, forGlobe);
-
-                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            listener = new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -503,7 +508,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            });
+                            };
                             break;
 
                         case Settings.PreferenceName.MapFootprintType:
@@ -512,8 +517,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         case Settings.PreferenceName.MapMarkerLocationIcon:
                             currentValue = Settings.getMapMarkerLocationIcon(context);
-
-                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            listener = new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -528,7 +532,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            });
+                            };
                             break;
 
                         case Settings.PreferenceName.MapMarkerInfoLocation:
@@ -539,15 +543,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.SatelliteDataSource:
                             boolean isCatalog = preferenceKey.equals(Settings.PreferenceName.SatelliteSource);
                             value = (isCatalog ? Settings.getSatelliteCatalogSource(context) : Settings.getSatelliteDataSource(context));
-
-                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            listener = new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
                                 {
                                     boolean isSharedSource = Settings.getSatelliteSourceShared(context);
-                                    byte dataSource = (!isCatalog || isSharedSource ? (byte)newValue : Integer.valueOf(Settings.getSatelliteDataSource(context)).byteValue());
-                                    byte catalogSource = (isCatalog ? (byte)newValue : Integer.valueOf(Settings.getSatelliteCatalogSource(context)).byteValue());
+                                    boolean valueIsInt = (newValue instanceof Integer);
+                                    byte valueByte = (valueIsInt ? ((Integer)newValue).byteValue() : (byte)newValue);
+                                    byte dataSource = (!isCatalog || isSharedSource ? valueByte : Integer.valueOf(Settings.getSatelliteDataSource(context)).byteValue());
+                                    byte catalogSource = (isCatalog ? valueByte : Integer.valueOf(Settings.getSatelliteCatalogSource(context)).byteValue());
                                     SwitchPreference childSwitch = (SwitchPreference)childPreference;
                                     boolean sourceUseGP = Settings.getSatelliteSourceUseGP(context, dataSource);
 
@@ -566,7 +571,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            });
+                            };
                             break;
 
                         case Settings.PreferenceName.AltitudeSource:
@@ -584,7 +589,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     }
 
                     //if value is set
-                    if(value >= 0)
+                    usingValue = (value >= 0);
+                    if(usingValue)
                     {
                         //go through values
                         for(index = 0; index < values.length && valueIndex == -1; index++)
@@ -596,6 +602,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                 valueIndex = index;
                             }
                         }
+                    }
+
+                    //if listener is set
+                    if(listener != null)
+                    {
+                        //if a value is set
+                        if((usingValue || currentValue != null))
+                        {
+                            //update display by calling listener
+                            listener.onPreferenceChange(preference, (usingValue ? value : currentValue));
+                        }
+
+                        //set preference listener
+                        preference.setOnPreferenceChangeListener(listener);
                     }
 
                     //if value index set and valid
@@ -1484,10 +1504,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     switch(key)
                     {
                         case Settings.PreferenceName.DarkTheme:
-                            //reset satellite icon items to update theme color
-                            Settings.Options.Display.satelliteIconItems = null;
-                            //fall through
-
                         case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.MaterialTheme:
                         case Settings.PreferenceName.SatelliteIcon:

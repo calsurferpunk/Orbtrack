@@ -22,17 +22,23 @@
         android:layout_height="wrap_content"
         android:textColor="?attr/defaultTextColor"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/Switch_Button_Preference_Button_Holder"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@id/Switch_Button_Preference_Material_Switch"/>
+        app:layout_constraintBottom_toBottomOf="@id/Switch_Button_Preference_Material_Switch"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0.0"/>
 
     <TextView
         android:id="@+id/Switch_Button_Preference_Summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxWidth="200dp"
-        android:textColor="?android:attr/textColorSecondary"
+        android:layout_marginRight="16dp"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/Switch_Button_Preference_Button_Holder"
         app:layout_constraintTop_toBottomOf="@id/Switch_Button_Preference_Title"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0.0"
+        android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone"/>
 
     <View

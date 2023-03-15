@@ -79,6 +79,7 @@ public class SwitchButtonPreference extends CustomPreference
                 newParams.width = currentParams.width;
                 newParams.height = currentParams.height;
                 button.setLayoutParams(newParams);
+                button.setId(R.id.Switch_Button_Preference_Button_Holder);
             }
         }
         titleView = rootView.findViewById(R.id.Switch_Button_Preference_Title);

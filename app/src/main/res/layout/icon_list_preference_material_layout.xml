@@ -25,16 +25,22 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/Icon_List_Preference_Text_Layout"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"/>
+        app:layout_constraintBottom_toBottomOf="@id/Icon_List_Preference_Text_Layout"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0.0"/>
 
     <TextView
         android:id="@+id/Icon_List_Preference_Summary"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintStart_toStartOf="@+id/Icon_List_Preference_Title"
+        android:layout_marginRight="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/Icon_List_Preference_Text_Layout"
         app:layout_constraintTop_toBottomOf="@id/Icon_List_Preference_Title"
-        android:maxWidth="180sp"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_bias="0.0"
         android:textColor="?android:textColorSecondary"
         android:visibility="gone"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

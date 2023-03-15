@@ -43,10 +43,11 @@ public class TimeIntervalPreference extends CustomPreference
     private static String[] frequencyItems = null;
     private static final Long[] FrequencyValues = new Long[]{MsPerDay, MsPerDay * 2, MsPer3Days, MsPerDay * 5, MsPerDay * 7, MsPerDay * 14, MsPer4Weeks};
 
+    private final boolean usingMaterial;
     private String hourKey;
     private String minuteKey;
     private String intervalKey;
-    private IconSpinner frequencyList;
+    private SelectListInterface frequencyList;
     private TimeInputView timeView;
     private OnPreferenceChangedListener changedListener;
 
@@ -54,8 +55,9 @@ public class TimeIntervalPreference extends CustomPreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        usingMaterial = Settings.getMaterialTheme(context);
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.time_interval_preference_layout);
+        this.setLayoutResource(usingMaterial ? R.layout.time_interval_preference_material_layout : R.layout.time_interval_preference_layout);
 
         Resources res = context.getResources();
 
@@ -127,7 +129,8 @@ public class TimeIntervalPreference extends CustomPreference
         rootView.setClickable(false);
 
         //set displays
-        frequencyList = rootView.findViewById(R.id.Time_Interval_Preference_List);
+        frequencyList = rootView.findViewById(usingMaterial ? R.id.Time_Interval_Preference_Text_List : R.id.Time_Interval_Preference_List);
+        frequencyList.setAllowAutoSelect(false);
         frequencyList.setAdapter(frequencyAdapter);
         if(intervalKey != null)
         {

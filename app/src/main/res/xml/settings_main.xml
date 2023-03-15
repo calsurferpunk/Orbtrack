@@ -229,6 +229,7 @@
                             app:titleText="@string/title_show_orbital_direction_limit"
                             android:key="MapShowOrbitalDirectionLimit"
                             app:switchKey="MapShowOrbitalDirectionUseLimit"
+                            app:paddingLeft="32dp"
                             app:minValue="1"
                             app:maxValue="1000"
                             app:valueType="Integer"
@@ -395,6 +396,7 @@
                     app:hourKey="TLEAutoUpdateHour"
                     app:minuteKey="TLEAutoUpdateMinute"
                     app:intervalKey="TLEAutoUpdateRate"
+                    app:paddingLeft="32dp"
                     app:isPreferenceVisible="false"/>
 
                 <com.nikolaiapps.orbtrack.SwitchPreference
@@ -406,6 +408,7 @@
                     app:hourKey="CatalogAutoUpdateHour"
                     app:minuteKey="CatalogAutoUpdateMinute"
                     app:intervalKey="CatalogAutoUpdateRate"
+                    app:paddingLeft="32dp"
                     app:isPreferenceVisible="false"/>
 
                 <PreferenceCategory android:title="@string/title_satellites">

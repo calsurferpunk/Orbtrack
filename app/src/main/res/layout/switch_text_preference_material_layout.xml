@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:layout_marginLeft="16dp"
+    android:layout_marginRight="24dp"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:baselineAligned="false">
+        <TextView
+            android:id="@+id/Switch_Text_Preference_No_Switch_Title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:textColor="?attr/defaultTextColor"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:layout_gravity="center_vertical"
+            android:gravity="center_vertical|end">
+            <EditText
+                android:id="@+id/Switch_Text_Preference_Value_Text"
+                android:layout_width="80dp"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:autofillHints="@string/empty"
+                android:hint="@string/empty"
+                android:selectAllOnFocus="true"
+                android:textColor="@color/text_color_selector"/>
+            <TextView
+                android:id="@+id/Switch_Text_Preference_Value_Suffix"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="?attr/defaultTextColor"/>
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/Switch_Text_Preference_Material_Switch"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                app:thumbTint="?attr/defaultTextColor"
+                android:textColor="?attr/defaultTextColor"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/Switch_Text_Preference_Summary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?android:attr/textColorSecondary"
+        android:visibility="gone"/>
+</LinearLayout>

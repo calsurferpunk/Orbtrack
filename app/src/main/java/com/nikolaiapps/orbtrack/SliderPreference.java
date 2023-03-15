@@ -30,8 +30,9 @@ public class SliderPreference extends CustomPreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        boolean usingMaterial = Settings.getMaterialTheme(context);
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.slider_preference_layout);
+        this.setLayoutResource(usingMaterial ? R.layout.slider_preference_material_layout : R.layout.slider_preference_layout);
 
         //set defaults
         scaleType = ScaleType.Integer;

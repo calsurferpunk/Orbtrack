@@ -11,7 +11,9 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.SwitchCompat;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
+import com.google.android.material.materialswitch.MaterialSwitch;
 
 
 public class SwitchButtonPreference extends CustomPreference
@@ -21,6 +23,7 @@ public class SwitchButtonPreference extends CustomPreference
         void onCheckedChanged(String preferenceName, boolean isChecked);
     }
 
+    private final boolean usingMaterial;
     private AppCompatButton button;
     private OnCheckedChangedListener checkedChangedListener;
 
@@ -28,8 +31,10 @@ public class SwitchButtonPreference extends CustomPreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
+        usingMaterial = Settings.getMaterialTheme(context);
+
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.switch_button_preference_layout);
+        this.setLayoutResource(usingMaterial ? R.layout.switch_button_preference_material_layout : R.layout.switch_button_preference_layout);
     }
 
     public SwitchButtonPreference(Context context, AttributeSet attrs, int defStyleAttr)
@@ -51,12 +56,15 @@ public class SwitchButtonPreference extends CustomPreference
         final Context context = this.getContext();
         final String preferenceName = this.getKey();
         final CharSequence summary = this.getSummary();
+        final boolean checked = Settings.getPreferenceBoolean(context, preferenceName);
         final View buttonHolder;
         final TextView titleView;
         final TextView summaryView;
         final SwitchCompat switchView;
+        final MaterialSwitch switchMaterialView;
         final ViewGroup rootView;
         final SharedPreferences.Editor writeSettings = getWriteSettings(context);
+        final CompoundButton.OnCheckedChangeListener switchCheckedChangeListener;
 
         //get displays
         rootView = (ViewGroup)holder.itemView;
@@ -64,10 +72,19 @@ public class SwitchButtonPreference extends CustomPreference
         if(button != null && button.getParent() == null && buttonHolder != null)
         {
             Globals.replaceView(R.id.Switch_Button_Preference_Button_Holder, button, (ViewGroup)buttonHolder.getParent());
+            if(usingMaterial)
+            {
+                ViewGroup.LayoutParams currentParams = button.getLayoutParams();
+                ConstraintLayout.LayoutParams newParams = (ConstraintLayout.LayoutParams)buttonHolder.getLayoutParams();
+                newParams.width = currentParams.width;
+                newParams.height = currentParams.height;
+                button.setLayoutParams(newParams);
+            }
         }
         titleView = rootView.findViewById(R.id.Switch_Button_Preference_Title);
         summaryView = rootView.findViewById(R.id.Switch_Button_Preference_Summary);
         switchView = rootView.findViewById(R.id.Switch_Button_Preference_Switch);
+        switchMaterialView = rootView.findViewById(R.id.Switch_Button_Preference_Material_Switch);
 
         //set displays
         rootView.setClickable(false);
@@ -77,8 +94,7 @@ public class SwitchButtonPreference extends CustomPreference
             summaryView.setText(summary);
             summaryView.setVisibility(View.VISIBLE);
         }
-        switchView.setChecked(Settings.getPreferenceBoolean(context, preferenceName));
-        switchView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        switchCheckedChangeListener = new CompoundButton.OnCheckedChangeListener()
         {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
@@ -93,7 +109,17 @@ public class SwitchButtonPreference extends CustomPreference
                     checkedChangedListener.onCheckedChanged(preferenceName, isChecked);
                 }
             }
-        });
+        };
+        if(switchView != null)
+        {
+            switchView.setChecked(checked);
+            switchView.setOnCheckedChangeListener(switchCheckedChangeListener);
+        }
+        if(switchMaterialView != null)
+        {
+            switchMaterialView.setChecked(checked);
+            switchMaterialView.setOnCheckedChangeListener(switchCheckedChangeListener);
+        }
     }
 
     //Sets the button

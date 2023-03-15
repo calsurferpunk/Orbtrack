@@ -323,10 +323,15 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         return(setSelection);
     }
 
-    public Object getSelectedValue(Object defaultValue)
+    public int getSelectedItemPosition()
     {
         Editable currentValue = getText();
-        int index = (currentValue != null ? getListIndex(currentValue.toString()) : -1);
+        return(currentValue != null ? getListIndex(currentValue.toString()) : -1);
+    }
+
+    public Object getSelectedValue(Object defaultValue)
+    {
+        int index = getSelectedItemPosition();
 
         if(currentAdapter != null && index >= 0)
         {

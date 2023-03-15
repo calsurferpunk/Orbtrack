@@ -28,7 +28,8 @@ public class RadioGroupPreference extends ValueTypePreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        this.setLayoutResource(R.layout.radio_group_preference_layout);
+        boolean usingMaterial = Settings.getMaterialTheme(context);
+        this.setLayoutResource(usingMaterial ? R.layout.radio_group_preference_material_layout : R.layout.radio_group_preference_layout);
 
         int resId;
         Resources res = context.getResources();

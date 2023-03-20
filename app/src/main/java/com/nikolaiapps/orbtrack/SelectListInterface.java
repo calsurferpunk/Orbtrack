@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.content.Context;
 import android.graphics.Color;
 import android.widget.AdapterView;
 
@@ -121,5 +122,26 @@ public interface SelectListInterface
         }
 
         return(index);
+    }
+
+    static void loadAdapterIcons(Context context, IconSpinner.CustomAdapter adapter)
+    {
+        int iconHeightPx;
+        IconSpinner.Item[] adapterItems;
+
+        //if context and adapter exist
+        if(context != null)
+        {
+            //get icon height
+            iconHeightPx = (int)Globals.dpToPixels(context, 32);
+
+            //go through each item
+            adapterItems = adapter.getItems();
+            for(IconSpinner.Item currentItem : adapterItems)
+            {
+                //preload icon for text display
+                currentItem.loadIcon3(context, iconHeightPx);
+            }
+        }
     }
 }

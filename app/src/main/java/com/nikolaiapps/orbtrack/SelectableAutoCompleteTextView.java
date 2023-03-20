@@ -186,33 +186,20 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     public void setAdapter(IconSpinner.CustomAdapter adapter)
     {
         Context context = getContext();
-        int iconHeightPx = (int)Globals.dpToPixels(context, 32);
         Object firstItem = null;
-        IconSpinner.Item[] adapterItems;
 
         //set adapter
         currentAdapter = adapter;
         if(currentAdapter != null)
         {
-            //get first item and adapter colors
+            //get first item, adapter colors, and icons
             firstItem = currentAdapter.getItem(0);
             backgroundColor = currentAdapter.getBackgroundColor();
             backgroundItemColor = currentAdapter.getBackgroundItemColor();
             backgroundItemSelectedColor = currentAdapter.getBackgroundItemSelectedColor();
             textColor = currentAdapter.getTextColor();
             textSelectedColor = currentAdapter.getTextSelectedColor();
-
-            //if context exists
-            if(context != null)
-            {
-                //go through each item
-                adapterItems = currentAdapter.getItems();
-                for(IconSpinner.Item currentItem : adapterItems)
-                {
-                    //preload icon for text display
-                    currentItem.loadIcon3(context, iconHeightPx);
-                }
-            }
+            SelectListInterface.loadAdapterIcons(context, currentAdapter);
         }
 
         //set colors and any selection

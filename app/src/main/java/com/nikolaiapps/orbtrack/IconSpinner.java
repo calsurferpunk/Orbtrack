@@ -824,6 +824,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
     public void setAdapter(CustomAdapter adapter)
     {
         currentAdapter = adapter;
+        SelectListInterface.loadAdapterIcons(getContext(), adapter);
         super.setAdapter(adapter);
     }
 

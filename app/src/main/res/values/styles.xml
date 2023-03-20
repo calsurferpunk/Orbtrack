@@ -719,6 +719,7 @@
     <style name="NotifySettingsSwitch">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="trackTint">?attr/dividerLineColor</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
@@ -782,6 +783,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">16dp</item>
         <item name="android:text">@string/title_shared</item>
+        <item name="trackTint">?attr/dividerLineColor</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
         <item name="android:textColor">?attr/defaultTextColor</item>
         <item name="android:checked">true</item>

@@ -17,7 +17,8 @@
         app:layout_constraintEnd_toEndOf="parent">
         <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
             android:id="@+id/Icon_List_Preference_Text_List"
-            style="@style/TextViewMaterialList"/>
+            style="@style/TextViewMaterialList"
+            android:padding="16dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView

@@ -140,7 +140,7 @@ public interface SelectListInterface
             for(IconSpinner.Item currentItem : adapterItems)
             {
                 //preload icon for text display
-                currentItem.loadIcon3(context, iconHeightPx);
+                currentItem.loadIcons(context, iconHeightPx);
             }
         }
     }

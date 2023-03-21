@@ -3081,15 +3081,14 @@ public abstract class Calculate
                         {
                             @Override public void run()
                             {
-                                String firstValue = loadedItems[0].toString();
-
+                                //reload adapter if list exists
                                 if(page.orbitalTextList != null)
                                 {
-                                    page.orbitalTextList.setSelectedText(firstValue);
+                                    page.orbitalTextList.loadAdapter();
                                 }
                                 if(onIntersection && page.orbital2TextList != null)
                                 {
-                                    page.orbital2TextList.setSelectedText(firstValue);
+                                    page.orbital2TextList.loadAdapter();
                                 }
                             }
                         });

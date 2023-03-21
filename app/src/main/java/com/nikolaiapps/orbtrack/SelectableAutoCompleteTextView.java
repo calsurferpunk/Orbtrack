@@ -26,8 +26,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     private int backgroundItemSelectedColor;
     private final int iconSizePx;
     private final Paint iconPaint;
-    private final Rect iconStartArea;
-    private final Rect iconEndArea;
+    private final Rect iconArea;
     private IconSpinner.CustomAdapter currentAdapter;
     private AdapterView.OnItemSelectedListener selectedListener;
 
@@ -59,8 +58,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         //setup
         allowAutoSelect = true;
         iconPaint = new Paint();
-        iconStartArea = new Rect();
-        iconEndArea = new Rect();
+        iconArea = new Rect();
         iconSizePx = (int)Globals.dpToPixels(context, 32);
         setInputType(inputType);
         addTextChangedListener(new TextWatcher()
@@ -110,19 +108,26 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     {
         int iconWidth;
         int iconHeight;
+        int halfIconSize = (iconSizePx / 2);
         int halfHeight = (getMeasuredHeight() / 2);
         int halfPaddingLeft = (getPaddingLeft() / 2);
         float iconRatio;
         IconSpinner.Item selectedItem = (currentAdapter != null ? currentAdapter.getSelectedItem() : null);
         boolean haveItem = (selectedItem != null);
-        Drawable selectedIcon = (haveItem ? selectedItem.getIcon() : null);
+        Drawable selectedIcon = (haveItem ? selectedItem.getIcon(getContext()) : null);
         Bitmap selectedBitmap = (selectedIcon != null && !(selectedIcon instanceof ColorDrawable) ? Globals.getBitmap(selectedIcon) : null);
-        boolean haveIconAndText = (haveItem && selectedItem.text != null && selectedBitmap != null);
+        boolean haveBitmap = (selectedBitmap != null);
+        boolean haveIconAndText = (haveItem && selectedItem.text != null && haveBitmap);
+
+        iconWidth = (haveBitmap ? selectedBitmap.getWidth() : 1);
+        iconHeight = (haveBitmap ? selectedBitmap.getHeight() : 1);
+        iconRatio = (iconSizePx / (float)iconHeight);
+        iconArea.set(halfPaddingLeft, halfHeight - halfIconSize, halfPaddingLeft + (int)(iconWidth * iconRatio), halfHeight + halfIconSize);
 
         if(haveIconAndText)
         {
             canvas.save();
-            canvas.translate(iconSizePx, getPaddingTop() / -3f);
+            canvas.translate(iconArea.right - halfPaddingLeft, 0);
         }
 
         super.onDraw(canvas);
@@ -133,15 +138,10 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         }
 
         //if have an icon image
-        if(selectedBitmap != null)
+        if(haveBitmap)
         {
             //draw icon image centered vertically
-            iconWidth = selectedBitmap.getWidth();
-            iconHeight = selectedBitmap.getHeight();
-            iconRatio = iconSizePx / (float)iconHeight;
-            iconStartArea.set(0, 0, iconWidth, iconHeight);
-            iconEndArea.set(halfPaddingLeft, halfHeight - (iconSizePx / 2), halfPaddingLeft + (int)(iconWidth * iconRatio), halfHeight + (iconSizePx / 2));
-            canvas.drawBitmap(selectedBitmap, iconStartArea, iconEndArea, iconPaint);
+            canvas.drawBitmap(selectedBitmap, null, iconArea, iconPaint);
         }
     }
 
@@ -183,13 +183,12 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         selectedListener = listener;
     }
 
-    public void setAdapter(IconSpinner.CustomAdapter adapter)
+    public void loadAdapter()
     {
         Context context = getContext();
         Object firstItem = null;
 
-        //set adapter
-        currentAdapter = adapter;
+        //if adapter is set
         if(currentAdapter != null)
         {
             //get first item, adapter colors, and icons
@@ -214,17 +213,22 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
             {
                 setSelectedText(firstItem.toString());
             }
-            if(firstItem instanceof IconSpinner.Item && adapter.getUsingIcon3Only())
+            if(firstItem instanceof IconSpinner.Item && currentAdapter.getUsingIcon3Only())
             {
-                Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon();
+                Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon(context);
                 if(firstIcon != null && firstIcon.getIntrinsicWidth() > 0)
                 {
                     setDropDownWidth(firstIcon.getIntrinsicWidth() + getTotalPaddingLeft() + getTotalPaddingRight());
                 }
             }
         }
+    }
 
-        //set adapter
+    public void setAdapter(IconSpinner.CustomAdapter adapter)
+    {
+        //set and load adapter
+        currentAdapter = adapter;
+        loadAdapter();
         super.setAdapter(adapter);
     }
 

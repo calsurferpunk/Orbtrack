@@ -37,6 +37,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         final String text;
         String subText;
         final Object value;
+        Drawable icon1;
         Drawable icon3;
         int icon1Id;
         int icon2Id;
@@ -63,6 +64,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             rotate = 0;
             icon1Id = -1;
             icon2Id = -1;
+            icon1 = null;
             icon3 = null;
             icon3Id = -1;
             text = txt;
@@ -107,6 +109,13 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             this(icon3, txt, val);
             this.subText = subText;
         }
+        public Item(int icon1Id, int icon1Color, int icon1SelectedColor, String txt, Object val)
+        {
+            this(txt, val);
+            this.icon1Id = icon1Id;
+            this.icon1Color = icon1Color;
+            this.icon1SelectedColor = icon1SelectedColor;
+        }
         public Item(int icon1Id, int icon1Color, int icon1SelectedColor, int icon2Id, Drawable icon3, int icon3Color, int icon3SelectedColor, boolean iconsUseThemeTint, String txt, Object val)
         {
             this(icon3, txt, val);
@@ -129,10 +138,12 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             icon3 = new ColorDrawable(ContextCompat.getColor(context, colorID));
         }
 
-        public void loadIcon3(Context context, int iconHeightPx)
+        public void loadIcons(Context context, int iconHeightPx)
         {
             if(iconHeightPx > 0)
             {
+                icon1 = (icon1Id > 0 ? Globals.getDrawable(context, icon1Id, iconsUseThemeTint) : icon1Ids != null ? Globals.getDrawableCombined(context, icon1Ids) : null);
+
                 if(icon3 instanceof ColorDrawable)
                 {
                     icon3 = Globals.getDrawableColor(context, (ColorDrawable)icon3, iconHeightPx);
@@ -160,9 +171,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             return(usingIconColors(icon3Color, icon3SelectedColor));
         }
 
-        public Drawable getIcon()
+        public Drawable getIcon(Context context)
         {
-            return(icon3);
+            Drawable icon1Result = (usingIcon1Colors() ? Globals.getDrawableTinted(icon1, icon1Color) : icon1);
+            Drawable icon3Result = (usingIcon3Colors() ? Globals.getDrawableTinted(icon3, icon3Color) : icon3);
+            return(context != null && icon1Result != null && icon3Result != null ? Globals.getDrawableCombined(context, icon1Result, icon3Result) : icon3Result != null ? icon3Result : icon1Result);
         }
 
         @Override @NonNull
@@ -271,8 +284,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 items = new Item[orbitals.length + offset];
                 if(addMulti)
                 {
-                    items[0] = new Item((haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
-                    items[0].icon1Id = (haveContext ? R.drawable.ic_list_white : -1);
+                    items[0] = new Item((haveContext ? R.drawable.ic_list_white : -1), icon3Color, icon3SelectedColor, (haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
                 }
                 for(index = 0; index < orbitals.length; index++)
                 {
@@ -298,6 +310,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             }
         }
 
+        private int defaultIconPx;
+        private int defaultIconDp;
         private int selectedIndex;
         private int textColor;
         private int textSelectedColor;
@@ -322,6 +336,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
             backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
             usingMaterial = Settings.getMaterialTheme(context);
+            defaultIconDp = (usingMaterial ? 32 : 24);
+            defaultIconPx = (int)(context != null ? Globals.dpToPixels(context, defaultIconDp) : 48);
 
             updateUsing();
         }
@@ -358,13 +374,12 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public CustomAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
         {
             int index;
-            int sizeDp = (usingMaterial ? 32 : 24);
 
             this.items = new Item[items.length];
             for(index = 0; index < this.items.length; index++)
             {
                 Object currentCopyItem = items[index];
-                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawableSized(context, itemImageIds[index], sizeDp, sizeDp, false, true) : null), (currentCopyItem != null ? currentCopyItem.toString() : ""), values[index], (subTexts != null ? subTexts[index] : null));
+                this.items[index] = new Item((itemImageIds != null ? Globals.getDrawableSized(context, itemImageIds[index], defaultIconDp, defaultIconDp, false, true) : null), (currentCopyItem != null ? currentCopyItem.toString() : ""), values[index], (subTexts != null ? subTexts[index] : null));
             }
 
             BaseConstructor(context);
@@ -419,7 +434,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, OnLoadItemsListener listener)
         {
-            this(context, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, Color.TRANSPARENT, 0, listener);
+            this(context, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0, listener);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
@@ -542,7 +557,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public View getView(int position, View convertView, ViewGroup parent)
         {
             boolean isSelected = (position == selectedIndex);
-            Drawable icon1;
+            boolean haveItemImage1;
+            boolean haveItemImage2;
+            boolean haveItemImage3;
+            int px = 0;
+            int color;
             Drawable icon2;
             Context context;
             Rect iconBounds;
@@ -591,36 +610,48 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 itemProgress.setVisibility(loadingItems ? View.VISIBLE : View.GONE);
             }
 
+            //update status
+            haveItemImage1 = (itemImage1 != null);
+            haveItemImage2 = (itemImage2 != null);
+            haveItemImage3 = (itemImage3 != null);
+
             //get icons
-            icon1 = (currentItem.icon1Id > 0 ? Globals.getDrawable(context, currentItem.icon1Id, currentItem.iconsUseThemeTint) : currentItem.icon1Ids != null ? Globals.getDrawableCombined(context, currentItem.icon1Ids) : null);
             icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
-            if(itemImage3 != null)
+            if(haveItemImage1 || haveItemImage3)
             {
-                currentItem.loadIcon3(context, itemImage3.getMeasuredHeight());
+                px = (haveItemImage3 ? itemImage3 : itemImage1).getMeasuredHeight();
             }
+            if(px <= 0)
+            {
+                px = defaultIconPx;
+            }
+            currentItem.loadIcons(context, px);
 
             //if not loading items
             if(!loadingItems)
             {
                 //update displays
-                if(itemImage1 != null)
+                if(haveItemImage1)
                 {
                     if(currentItem.usingIcon1Colors())
                     {
-                        itemImage1.setBackgroundDrawable(Globals.getDrawableTinted(icon1, (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color)));
+                        color = (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color);
+                        itemImage1.setImageDrawable(Globals.getDrawableTinted(currentItem.icon1, color));
+                        itemImage1.setColorFilter(color);
                     }
                     else
                     {
-                        itemImage1.setBackgroundDrawable(icon1);
+                        itemImage1.setImageDrawable(currentItem.icon1);
+                        itemImage1.setColorFilter(Color.TRANSPARENT);
                     }
                     if(!usingIcon1)
                     {
                         itemImage1.setVisibility(View.GONE);
                     }
                 }
-                if(itemImage2 != null)
+                if(haveItemImage2)
                 {
-                    itemImage2.setBackgroundDrawable(icon2);
+                    itemImage2.setImageDrawable(icon2);
                     if(icon2 != null && itemImage1 != null)
                     {
                         LayoutParams viewParams = itemImage1.getLayoutParams();
@@ -629,15 +660,18 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                         itemImage2.setVisibility(View.VISIBLE);
                     }
                 }
-                if(itemImage3 != null)
+                if(haveItemImage3)
                 {
                     if(currentItem.usingIcon3Colors())
                     {
-                        itemImage3.setBackgroundDrawable(Globals.getDrawableTinted(currentItem.icon3, (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color)));
+                        color = (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color);
+                        itemImage3.setImageDrawable(Globals.getDrawableTinted(currentItem.icon3, color));
+                        itemImage3.setColorFilter(color);
                     }
                     else
                     {
-                        itemImage3.setBackgroundDrawable(currentItem.icon3);
+                        itemImage3.setImageDrawable(currentItem.icon3);
+                        itemImage3.setColorFilter(Color.TRANSPARENT);
                     }
                     if(currentItem.rotate != 0)
                     {

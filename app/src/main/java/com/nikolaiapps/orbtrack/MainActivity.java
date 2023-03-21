@@ -166,7 +166,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
-        this.setContentView(usingMaterial ? R.layout.main_material_layout : R.layout.main_layout);
+        this.setContentView(R.layout.main_layout);
 
         //look for web protocol updates
         Globals.updateWebProtocols(this);
@@ -1522,6 +1522,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
             sideMenu.setOnChildClickListener(createOnSideMenuChildClickListener());
             sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener());
+            if(usingMaterial)
+            {
+                sideMenu.setGroupIndicator(null);
+            }
         }
     }
 
@@ -2360,7 +2364,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //update visibility
             if(sideActionDivider != null)
             {
-                sideActionDivider.setVisibility(hasItems ? View.VISIBLE : View.GONE);
+                sideActionDivider.setVisibility(hasItems && !usingMaterial ? View.VISIBLE : View.GONE);
             }
             sideActionMenu.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         }

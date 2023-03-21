@@ -985,7 +985,7 @@ public abstract class Globals
         final Resources res = context.getResources();
 
         //setup views
-        snackParentView.setBackgroundResource(resolveAttributeID(context, R.attr.pageTitleBackground));
+        snackView.setBackgroundTint(resolveColorID(context, R.attr.pageTitleBackground));
         snackText.setTextColor(textColorId);
         snackView.setActionTextColor(textColorId);
         snackText.setCompoundDrawablePadding((int)dpToPixels(context, 3));

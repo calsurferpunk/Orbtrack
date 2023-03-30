@@ -72,8 +72,8 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                 int selectedId = -1;
                 int selectedIndex;
 
-                //if listener and adapter are set
-                if(selectedListener != null && currentAdapter != null)
+                //if adapter is set
+                if(currentAdapter != null)
                 {
                     //if set a selection
                     selectedIndex = getListIndex(s.toString());
@@ -85,7 +85,10 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                         //set selection and send event
                         currentAdapter.setSelectedIndex(selectedIndex);
                         selectedId = (selectedItem != null && selectedItem.value instanceof Integer ? (int)selectedItem.value : selectedId);
-                        selectedListener.onItemSelected(null, SelectableAutoCompleteTextView.this, selectedIndex, selectedId);
+                        if(selectedListener != null)
+                        {
+                            selectedListener.onItemSelected(null, SelectableAutoCompleteTextView.this, selectedIndex, selectedId);
+                        }
                     }
                 }
             }

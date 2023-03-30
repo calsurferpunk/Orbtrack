@@ -3014,11 +3014,45 @@ public abstract class Calculate
         }
     }
 
+    //Creates an orbital adapter list
+    public static IconSpinner.CustomAdapter createOrbitalAdapter(Context context, SelectableAutoCompleteTextView textList, Database.DatabaseSatellite[] orbitals, boolean usingMulti, int pendingValue)
+    {
+        return(new IconSpinner.CustomAdapter(context, orbitals, usingMulti, new IconSpinner.CustomAdapter.OnLoadItemsListener()
+        {
+            @Override
+            public void onLoaded(IconSpinner.Item[] loadedItems)
+            {
+                //if there are items
+                if(loadedItems.length > 0)
+                {
+                    //if started from an activity
+                    if(context instanceof Activity)
+                    {
+                        ((Activity)context).runOnUiThread(new Runnable()
+                        {
+                            @Override public void run()
+                            {
+                                //if text list exists
+                                if(textList != null)
+                                {
+                                    //reload and set value
+                                    textList.loadAdapter();
+                                    textList.setSelectedValue(pendingValue);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+        }));
+    }
+
     //Create page
     private static View onCreateView(final Page page, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
         Context context = page.getContext();
-        final int pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
+        final boolean haveSavedInstance = (savedInstanceState != null);
+        final int pageNumber = (haveSavedInstance ? savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View) : PageType.View);
         final int backgroundColor = Globals.resolveColorID(context, R.attr.pageBackground);
         final boolean onIntersection = (pageNumber == PageType.Intersection);
         final boolean usingMulti = (pageNumber == PageType.View || pageNumber == PageType.Coordinates);
@@ -3042,6 +3076,7 @@ public abstract class Calculate
         TextInputLayout orbital2TextLayout = rootView.findViewById(R.id.Calculate_Orbital2_Text_Layout);
         MaterialButton startButton = rootView.findViewById(R.id.Calculate_Start_Button);
         IconSpinner.CustomAdapter orbitalAdapter;
+        IconSpinner.CustomAdapter orbital2Adapter;
         IconSpinner.CustomAdapter incrementAdapter;
         AdapterView.OnItemSelectedListener itemSelectedListener;
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
@@ -3066,36 +3101,7 @@ public abstract class Calculate
         orbitals = Database.getOrbitals(context);
 
         //set orbital list items
-        orbitalAdapter = new IconSpinner.CustomAdapter(context, orbitals, usingMulti, new IconSpinner.CustomAdapter.OnLoadItemsListener()
-        {
-            @Override
-            public void onLoaded(IconSpinner.Item[] loadedItems)
-            {
-                //if there are items
-                if(loadedItems.length > 0)
-                {
-                    //if started from an activity
-                    if(context instanceof Activity)
-                    {
-                        ((Activity)context).runOnUiThread(new Runnable()
-                        {
-                            @Override public void run()
-                            {
-                                //reload adapter if list exists
-                                if(page.orbitalTextList != null)
-                                {
-                                    page.orbitalTextList.loadAdapter();
-                                }
-                                if(onIntersection && page.orbital2TextList != null)
-                                {
-                                    page.orbital2TextList.loadAdapter();
-                                }
-                            }
-                        });
-                    }
-                }
-            }
-        });
+        orbitalAdapter = createOrbitalAdapter(context, page.orbitalTextList, orbitals, usingMulti, (haveSavedInstance ? savedInstanceState.getInt(ParamTypes.NoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE));
         itemSelectedListener = new AdapterView.OnItemSelectedListener()
         {
             @Override
@@ -3129,8 +3135,9 @@ public abstract class Calculate
         }
         if(onIntersection)
         {
-            setupOrbitalList(page.orbital2List, orbitalAdapter, backgroundColor, null);
-            setupOrbitalList(page.orbital2TextList, orbitalAdapter, backgroundColor, null);
+            orbital2Adapter = createOrbitalAdapter(context, page.orbital2TextList, orbitals, false, savedInstanceState.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
+            setupOrbitalList(page.orbital2List, orbital2Adapter, backgroundColor, null);
+            setupOrbitalList(page.orbital2TextList, orbital2Adapter, backgroundColor, null);
         }
         if(page.orbital2List != null)
         {

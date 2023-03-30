@@ -4430,7 +4430,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     currentSubPage = subPage;
                     currentPageAdapter.setSubPage(page, subPage);
 
-                    //clear any selected lens
+                    //clear any selected map and lens
+                    mapViewNoradID = Integer.MAX_VALUE;
                     viewLensNoradID = Integer.MAX_VALUE;
                 }
                 break;

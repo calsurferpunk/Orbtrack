@@ -10,7 +10,6 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.widget.AppCompatButton;
 import android.graphics.Color;
-import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -488,7 +487,7 @@ public class EditValuesDialog
                         float rotate = 0;
                         String currentText = "";
                         String currentValue = itemList2Values[index];
-                        Drawable currentIcon;
+                        IconSpinner.Item currentItem;
 
                         currentId = list2IconIds[index];
                         currentStringId = (list2SubValues != null && index < list2SubValues.length ? Integer.parseInt(list2SubValues[index]) : -1);
@@ -507,7 +506,7 @@ public class EditValuesDialog
                                 currentText = Globals.Symbols.Elevating;
                             }
 
-                            currentIcon = Globals.getDrawableText(currentContext, currentText, 16, (darkTheme ? Color.WHITE : Color.BLACK), Color.TRANSPARENT);
+                            currentItem = new IconSpinner.Item(Globals.getDrawableText(currentContext, currentText, 16, (darkTheme ? Color.WHITE : Color.BLACK), Color.TRANSPARENT), currentValue, currentValue);
                         }
                         else
                         {
@@ -516,10 +515,10 @@ public class EditValuesDialog
                                 rotate = 90;
                             }
 
-                            currentIcon = Globals.getDrawable(currentContext, currentId, (!isLogin && currentId != R.drawable.org_gdrive && currentId != R.drawable.org_dbox));
+                            currentItem = (currentId != -1 ? new IconSpinner.Item(currentId, (!isLogin && currentId != R.drawable.org_gdrive && currentId != R.drawable.org_dbox), currentValue, rotate) : null);
                         }
 
-                        items[index] = (currentId != -1 ? new IconSpinner.Item(currentIcon, currentValue, currentValue, rotate) : null);
+                        items[index] = currentItem;
                     }
                     editValueList2.setAdapter(new IconSpinner.CustomAdapter(currentContext, items));
                     if(isLogin)

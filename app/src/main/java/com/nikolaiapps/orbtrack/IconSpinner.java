@@ -99,9 +99,9 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             this(icon3Id, false, null, val);
             this.icon3TintColor = tintColor;
         }
-        public Item(Drawable icon3, String txt, Object val, float rotateAngle)
+        public Item(int icon3Id, boolean iconsUseThemeTint, String txt, float rotateAngle)
         {
-            this(icon3, txt, val);
+            this(icon3Id, iconsUseThemeTint, txt, txt);
             rotate = rotateAngle;
         }
         public Item(Drawable icon3, String txt, Object val, String subText)

@@ -4,6 +4,7 @@
     android:layout_height="wrap_content"
     android:background="?attr/viewPagerBackground">
     <com.google.android.material.card.MaterialCardView
+        android:id="@+id/Dialog_Title_Group"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardBackgroundColor="?attr/pageBackground"

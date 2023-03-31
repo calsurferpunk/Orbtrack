@@ -3,6 +3,7 @@ package com.nikolaiapps.orbtrack;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -12,6 +13,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import com.google.android.material.card.MaterialCardView;
 
 
 public class CustomAlertDialogBuilder extends AlertDialog.Builder
@@ -29,6 +31,7 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
     {
         FrameLayout.LayoutParams params;
         View titleView = LayoutInflater.from(context).inflate((useMaterial ? R.layout.dialog_title_material_view : R.layout.dialog_title_view), null, false);
+        MaterialCardView titleGroup;
 
         if(titleView instanceof TextView)
         {
@@ -36,9 +39,13 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
         }
         else if(titleView instanceof LinearLayout)
         {
+            titleGroup = titleView.findViewById(R.id.Dialog_Title_Group);
             titleText = titleView.findViewById(R.id.Dialog_Title_Text);
+
             if(forSelection)
             {
+                titleGroup.setStrokeColor(Color.TRANSPARENT);
+
                 params = (FrameLayout.LayoutParams)titleText.getLayoutParams();
                 if(params != null)
                 {

@@ -52,11 +52,14 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.security.ProviderInstaller;
+import com.google.android.material.datepicker.MaterialDatePicker;
+import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
 import androidx.lifecycle.MutableLiveData;
@@ -921,22 +924,46 @@ public abstract class Globals
             int year = date.get(Calendar.YEAR);
             int month = date.get(Calendar.MONTH);
             int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-            DatePickerDialog dateDialog;
+            DatePickerDialog legacyDateDialog;
+            MaterialDatePicker<Long> dateDialog;
 
-            //show picker
+            //if context is ContextThemeWrapper
+            if(context instanceof ContextThemeWrapper)
+            {
+                //if base context is AppCompatActivity
+                Context baseContext = ((ContextThemeWrapper) context).getBaseContext();
+                if(baseContext instanceof AppCompatActivity)
+                {
+                    //show dialog and stop
+                    dateDialog = MaterialDatePicker.Builder.datePicker().setSelection(date.getTimeInMillis()).build();
+                    dateDialog.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>()
+                    {
+                        @Override
+                        public void onPositiveButtonClick(Long selection)
+                        {
+                            Calendar result = Globals.getGMTTime(selection);
+                            listener.onDateSet(null, result.get(Calendar.YEAR), result.get(Calendar.MONTH), result.get(Calendar.DAY_OF_MONTH));
+                        }
+                    });
+                    dateDialog.show(((AppCompatActivity) baseContext).getSupportFragmentManager(), "DateDialog");
+                    return;
+                }
+            }
+
+            //show legacy dialog instead
             if(Build.VERSION.SDK_INT <= 20)
             {
-                dateDialog = new DatePickerDialog(context, listener, year, month, dayOfMonth);
-                if(dateDialog.getWindow() != null)
+                legacyDateDialog = new DatePickerDialog(context, listener, year, month, dayOfMonth);
+                if(legacyDateDialog.getWindow() != null)
                 {
-                    dateDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+                    legacyDateDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
                 }
             }
             else
             {
-                dateDialog = new DatePickerDialog(context, themeID, listener, year, month, dayOfMonth);
+                legacyDateDialog = new DatePickerDialog(context, themeID, listener, year, month, dayOfMonth);
             }
-            dateDialog.show();
+            legacyDateDialog.show();
         }
     }
 

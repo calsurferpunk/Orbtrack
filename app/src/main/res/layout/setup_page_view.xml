@@ -3,8 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?attr/viewPagerBackground">
+    android:orientation="vertical">
     <LinearLayout
         android:id="@+id/Setup_Text_Layout"
         android:layout_width="match_parent"
@@ -27,7 +26,6 @@
             android:padding="10dp"
             android:drawablePadding="10dp"
             android:text="@string/desc_quick_setup"
-            android:textColor="?attr/defaultTextColor"
             app:drawableTopCompat="@drawable/ic_launcher_clear" />
     </LinearLayout>
 

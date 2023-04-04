@@ -28,8 +28,7 @@
                 android:id="@+id/Object_Item_Text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:padding="3dp"
-                android:textColor="?attr/defaultTextColor"/>
+                android:padding="3dp"/>
         </LinearLayout>
 
         <LinearLayout
@@ -42,8 +41,7 @@
             <TextView
                 android:id="@+id/Object_TLE_Age_Text"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/defaultTextColor"/>
+                android:layout_height="wrap_content"/>
 
             <View
                 android:id="@+id/Object_TLE_Age_Under"

@@ -12,7 +12,7 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:background="@color/transparent"
-        android:tint="?attr/defaultTextColor"/>
+        android:tint="?android:textColor"/>
 
     <TextView
         android:id="@+id/Notify_Item_Name_Text"
@@ -21,8 +21,7 @@
         android:layout_weight="1"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
-        android:background="@color/transparent"
-        android:textColor="?attr/defaultTextColor"/>
+        android:background="@color/transparent"/>
 
     <TextView
         android:id="@+id/Notify_Item_Pass_Text"

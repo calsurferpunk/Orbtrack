@@ -3,8 +3,7 @@
     android:id="@+id/Manual_Layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?attr/viewPagerBackground">
+    android:orientation="vertical">
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -22,7 +21,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="end"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/title_name"/>
                     <com.nikolaiapps.orbtrack.EditTextSelect
                         android:id="@+id/Manual_Object_Name"
@@ -31,7 +29,6 @@
                         android:layout_weight="0.7"
                         android:inputType="textNoSuggestions"
                         android:maxLength="20"
-                        android:textColor="?attr/defaultTextColor"
                         android:typeface="monospace"
                         android:singleLine="true"/>
                 </TableRow>
@@ -40,7 +37,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="end"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/title_line_1"/>
                     <com.nikolaiapps.orbtrack.EditTextSelect
                         android:id="@+id/Manual_Object_Line1_Text"
@@ -49,7 +45,6 @@
                         android:layout_weight="1"
                         android:inputType="textNoSuggestions"
                         android:maxLength="69"
-                        android:textColor="?attr/defaultTextColor"
                         android:typeface="monospace"
                         android:singleLine="true"/>
                 </TableRow>
@@ -58,7 +53,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:gravity="end"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/title_line_2"/>
                     <com.nikolaiapps.orbtrack.EditTextSelect
                         android:id="@+id/Manual_Object_Line2_Text"
@@ -67,7 +61,6 @@
                         android:layout_weight="1"
                         android:inputType="textNoSuggestions"
                         android:maxLength="69"
-                        android:textColor="?attr/defaultTextColor"
                         android:typeface="monospace"
                         android:singleLine="true"/>
                 </TableRow>
@@ -82,13 +75,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/title_current_input_colon"/>
                     <TextView
                         android:id="@+id/Manual_Object_Current_Lbl"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="?attr/defaultTextColor"/>
+                        android:layout_height="wrap_content"/>
                 </TableRow>
 
                 <TableRow android:padding="5dp">
@@ -96,7 +87,6 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="end"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/title_character_colon"/>
                     <LinearLayout
                         android:orientation="horizontal"
@@ -105,18 +95,15 @@
                         <TextView
                             android:id="@+id/Manual_Object_Current_Char_Lbl"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="?attr/defaultTextColor"/>
+                            android:layout_height="wrap_content"/>
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/text_space_of_space"
-                            android:textColor="?attr/defaultTextColor"/>
+                            android:text="@string/text_space_of_space"/>
                         <TextView
                             android:id="@+id/Manual_Object_Current_Total_Lbl"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="?attr/defaultTextColor"/>
+                            android:layout_height="wrap_content"/>
                     </LinearLayout>
                 </TableRow>
             </TableLayout>
@@ -129,7 +116,6 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="?attr/defaultTextColor"
                         android:layout_gravity="end|center_vertical"
                         android:text="@string/title_owner"/>
 
@@ -143,7 +129,6 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="?attr/defaultTextColor"
                         android:layout_gravity="end|center_vertical"
                         android:text="@string/title_group"/>
 
@@ -157,7 +142,6 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textColor="?attr/defaultTextColor"
                         android:layout_gravity="center_vertical"
                         android:text="@string/title_launch_date"/>
 
@@ -170,8 +154,7 @@
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
                             android:gravity="center"
-                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                            android:textColor="?attr/defaultTextColor"/>
+                            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
                     </LinearLayout>
                 </TableRow>
             </TableLayout>

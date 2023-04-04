@@ -11,8 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|center"
         android:text="@string/title_every"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-        android:textColor="?attr/defaultTextColor"/>
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
     <com.nikolaiapps.orbtrack.IconSpinner
         android:id="@+id/Time_Interval_Preference_List"
@@ -27,14 +26,12 @@
         android:layout_height="wrap_content"
         android:layout_margin="5dp"
         android:layout_gravity="center"
-        android:text="@string/text_at"
-        android:textColor="?attr/defaultTextColor"/>
+        android:text="@string/text_at"/>
 
     <com.nikolaiapps.orbtrack.TimeInputView
         android:id="@+id/Time_Interval_Preference_Time_Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-        android:textColor="?attr/defaultTextColor"/>
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 </LinearLayout>

@@ -75,7 +75,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
         {
             actionBar.setHomeButtonEnabled(useDrawer);
             actionBar.setDisplayHomeAsUpEnabled(useDrawer);
-            actionBar.setBackgroundDrawable(ResourcesCompat.getDrawable(context.getResources(), Globals.resolveAttributeID(context, R.attr.actionBarBackground), null));
+            actionBar.setBackgroundDrawable(ResourcesCompat.getDrawable(context.getResources(), Globals.resolveAttributeID(context, R.attr.colorAccentDarkest), null));
         }
     }
 

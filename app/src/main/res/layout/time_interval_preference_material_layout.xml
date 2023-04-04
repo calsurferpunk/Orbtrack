@@ -13,8 +13,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end|center"
         android:layout_marginRight="16dp"
-        android:text="@string/title_every"
-        android:textColor="?attr/defaultTextColor"/>
+        android:text="@string/title_every"/>
 
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/Time_Interval_Preference_Text_Layout"
@@ -33,13 +32,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginRight="16dp"
-        android:text="@string/text_at"
-        android:textColor="?attr/defaultTextColor"/>
+        android:text="@string/text_at"/>
 
     <com.nikolaiapps.orbtrack.TimeInputView
         android:id="@+id/Time_Interval_Preference_Time_Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:textColor="?attr/defaultTextColor"/>
+        android:gravity="center"/>
 </LinearLayout>

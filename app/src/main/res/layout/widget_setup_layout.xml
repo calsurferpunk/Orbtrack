@@ -3,18 +3,17 @@
     android:id="@+id/Widget_Setup_Layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?attr/viewPagerBackground">
+    android:orientation="vertical">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/Widget_Setup_Tab_Layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/columnBackground"
-        app:tabTextColor="?attr/columnTitleTextColor"
+        android:background="?attr/colorAccentVariant"
+        app:tabTextColor="?attr/colorAccentLightest"
         app:tabTextAppearance="@style/TextAppearance.AppCompat.Small"
-        app:tabSelectedTextColor="?attr/columnTitleTextSelectColor"
-        app:tabBackground="?attr/columnBackground"
+        app:tabSelectedTextColor="?attr/colorAccentLight"
+        app:tabBackground="?attr/colorAccentVariant"
         app:tabGravity="fill">
         <com.google.android.material.tabs.TabItem
             android:id="@+id/Widget_Setup_Source_Tab"

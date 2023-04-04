@@ -3,8 +3,7 @@
     android:id="@+id/Setup_Layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?attr/viewPagerBackground">
+    android:orientation="vertical">
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -30,13 +29,11 @@
         android:layout_height="wrap_content"
         android:padding="5dp"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-        android:textColor="?attr/defaultTextColor"
         android:visibility="gone"/>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/Setup_Loading_Bar"
         style="@style/ProgressCircle"
-        android:background="?attr/viewPagerBackground"
         android:visibility="gone"/>
 
     <com.google.android.material.button.MaterialButton
@@ -51,7 +48,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:textColor="?attr/defaultTextColor"
         android:visibility="gone"/>
 
     <LinearLayout android:id="@+id/Setup_Progress_Layout" style="@style/ProgressBoxLayout">

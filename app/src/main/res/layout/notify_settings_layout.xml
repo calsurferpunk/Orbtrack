@@ -3,8 +3,7 @@
     android:id="@+id/Notify_Settings_Layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="?attr/viewPagerBackground">
+    android:orientation="vertical">
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -31,8 +30,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
                     android:text="@string/title_orbital"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Notify_Settings_Orbital_List"

@@ -12,15 +12,14 @@
         android:paddingLeft="5dp"
         android:paddingRight="5dp"
         android:background="@color/transparent"
-        android:tint="?attr/defaultTextColor"/>
+        android:tint="?android:textColor"/>
 
     <TextView
         android:id="@+id/Location_Item_Text"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.9"
-        android:background="@color/transparent"
-        android:textColor="?attr/defaultTextColor"/>
+        android:background="@color/transparent"/>
 
     <CheckBox
         android:id="@+id/Location_Item_CheckBox"

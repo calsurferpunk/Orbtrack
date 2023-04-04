@@ -22,8 +22,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:padding="10dp"
-            android:textColor="?attr/defaultTextColor"/>
+            android:padding="10dp"/>
     </LinearLayout>
 
     <View android:id="@+id/Group_Divider" style="@style/Divider"/>

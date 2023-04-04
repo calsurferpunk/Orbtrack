@@ -25,7 +25,6 @@
             android:id="@+id/Item_Title_Text"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:textColor="?attr/defaultTextColor"/>
+            android:layout_weight="1"/>
     </LinearLayout>
 </LinearLayout>

@@ -1167,7 +1167,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey)
         {
             setPreferencesFromResource(R.xml.settings_main, null);
-            setIconTint(this.getPreferenceScreen(), Globals.resolveColorID(this.getContext(), R.attr.defaultTextColor));
+            setIconTint(this.getPreferenceScreen(), Globals.resolveColorID(this.getContext(), android.R.attr.textColor));
         }
 
         //Set icon tint for given preference
@@ -1614,7 +1614,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if(showSetup)
             {
                 //set background
-                mainActionBar.setBackgroundDrawable(new ColorDrawable(Globals.resolveColorID(this, R.attr.actionBarBackground)));
+                mainActionBar.setBackgroundDrawable(new ColorDrawable(Globals.resolveColorID(this, R.attr.colorAccentDarkest)));
             }
             else
             {
@@ -2587,7 +2587,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if(progressBox != null)
             {
                 //set progress box color
-                progressBox.setBackgroundResource(currentPage <= page ? Globals.resolveAttributeID(this, currentPage < page ? R.attr.actionBarBackground : R.attr.colorAccent) : R.color.light_gray);
+                progressBox.setBackgroundResource(currentPage <= page ? Globals.resolveAttributeID(this, currentPage < page ? R.attr.colorAccentDarkest : R.attr.colorAccent) : R.color.light_gray);
             }
         }
 

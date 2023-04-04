@@ -23,8 +23,7 @@
             android:layout_marginStart="18dp"
             android:layout_marginBottom="10dp"
             android:text="@string/title_orbital"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-            android:textColor="?attr/defaultTextColor"/>
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
         <com.nikolaiapps.orbtrack.IconSpinner
             android:id="@+id/Calculate_Orbital2_List"
@@ -41,7 +40,6 @@
             android:layout_marginBottom="10dp"
             android:text="@string/title_orbital2"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-            android:textColor="?attr/defaultTextColor"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -70,32 +68,28 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/title_start_date"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
                 <com.nikolaiapps.orbtrack.TimeInputView
                     android:id="@+id/Calculate_Start_Time_Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/title_start_time"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
             </LinearLayout>
 
@@ -105,8 +99,7 @@
                 android:layout_weight="0.05"
                 android:gravity="center"
                 android:text="@string/text_to"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                android:textColor="?attr/defaultTextColor"/>
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
             <LinearLayout
                 android:layout_width="0dp"
@@ -120,32 +113,28 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/title_end_date"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
 
                 <com.nikolaiapps.orbtrack.TimeInputView
                     android:id="@+id/Calculate_End_Time_Text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/title_end_time"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
             </LinearLayout>
         </LinearLayout>
 

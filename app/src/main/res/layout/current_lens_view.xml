@@ -20,7 +20,7 @@
             android:id="@+id/Lens_Settings_Menu"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:imageTint="?attr/defaultTextColor"
+            app:imageTint="?android:textColor"
             app:backgroundTint="?attr/pageBackground"
             android:orientation="vertical"/>
 
@@ -74,8 +74,8 @@
             android:gravity="center"
             android:text="@string/title_select"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:textColor="?attr/columnTitleTextColor"
-            android:background="?attr/columnBackground"
+            android:textColor="?attr/colorAccentLightest"
+            android:background="?attr/colorAccentVariant"
             android:visibility="gone"/>
 
         <com.nikolaiapps.orbtrack.PlayBar
@@ -83,7 +83,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:background="?attr/pageTitleBackground"
+            android:background="?attr/colorAccentDark"
             android:visibility="gone"/>
     </FrameLayout>
 </LinearLayout>

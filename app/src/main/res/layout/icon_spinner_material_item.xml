@@ -42,14 +42,12 @@
                 android:id="@+id/Spinner_Item_Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:singleLine="true"
-                android:textColor="?attr/defaultTextColor"/>
+                android:singleLine="true"/>
 
             <TextView
                 android:id="@+id/Spinner_Item_Sub_Text"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/defaultTextColor"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
 

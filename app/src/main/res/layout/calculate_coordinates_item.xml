@@ -13,8 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="2dp"
-        android:background="?attr/viewPagerBackground"
-        android:textColor="?attr/defaultTextColor"
         android:visibility="gone"/>
 
     <LinearLayout
@@ -29,7 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.15"
             android:padding="2dp"
-            android:textColor="?attr/defaultTextColor"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -55,7 +52,6 @@
                 android:layout_weight="0.3"
                 android:gravity="end|center_vertical"
                 android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
                 tools:ignore="NestedWeights" />
 
             <TextView
@@ -64,8 +60,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.3"
                 android:gravity="end|center_vertical"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"/>
+                android:padding="2dp"/>
 
             <TextView
                 android:id="@+id/Coordinate_Altitude_Text"
@@ -73,8 +68,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="0.4"
                 android:gravity="end|center_vertical"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"/>
+                android:padding="2dp"/>
 
             <TextView
                 android:id="@+id/Coordinate_Speed_Text"
@@ -83,7 +77,6 @@
                 android:layout_weight="0.3"
                 android:gravity="end|center_vertical"
                 android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
                 android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>

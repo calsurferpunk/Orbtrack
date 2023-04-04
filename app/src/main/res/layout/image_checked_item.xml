@@ -30,7 +30,6 @@
         android:layout_marginStart="5dp"
         android:paddingLeft="2dp"
         android:paddingRight="2dp"
-        android:textColor="?attr/defaultTextColor"
         android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator

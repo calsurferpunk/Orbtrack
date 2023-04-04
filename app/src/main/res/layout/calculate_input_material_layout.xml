@@ -123,6 +123,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Calculate_Intersection_Unit_Layout"
                 style="@style/CalculateTextInputLayout"
+                android:layout_marginRight="16dp"
                 android:hint="@string/title_within"
                 app:helperText="@string/title_degrees">
                 <EditText

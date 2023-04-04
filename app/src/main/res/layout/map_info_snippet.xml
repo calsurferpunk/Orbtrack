@@ -10,9 +10,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="2dp"
-        android:background="?attr/pageTitleBackground"
+        android:background="?attr/colorAccentDark"
         android:gravity="center"
-        android:textColor="?attr/pageTitleTextColor"
+        android:textColor="?attr/titleTextColor"
         android:textStyle="bold"
         android:visibility="gone"/>
 

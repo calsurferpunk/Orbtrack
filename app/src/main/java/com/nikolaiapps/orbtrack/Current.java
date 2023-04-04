@@ -1842,8 +1842,8 @@ public abstract class Current
     private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals)
     {
         boolean usingSearchList = (searchList != null);
-        int textColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
-        int textSelectedColor = Globals.resolveColorID(context, R.attr.columnTitleTextColor);
+        int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
+        int textSelectedColor = Globals.resolveColorID(context, R.attr.colorAccentLightest);
         ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
 
         //setup selection list
@@ -1865,9 +1865,9 @@ public abstract class Current
         if(usingSearchList)
         {
             searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black), null));
-            searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageTitleBackground));
+            searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
             searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
-            searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.columnBackground));
+            searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
             searchList.setTextColor(textColor);
             searchList.setTextSelectedColor(textSelectedColor);
             searchList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()

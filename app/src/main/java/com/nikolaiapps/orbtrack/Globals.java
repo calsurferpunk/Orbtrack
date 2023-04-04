@@ -794,7 +794,7 @@ public abstract class Globals
         messageView.setPadding(padding, padding, padding, padding);
         messageView.setMovementMethod(LinkMovementMethod.getInstance());
         messageView.setText(messageText);
-        messageView.setTextColor(resolveColorID(context, R.attr.defaultTextColor));
+        messageView.setTextColor(resolveColorID(context, android.R.attr.textColor));
 
         messageScroll.setScrollbarFadingEnabled(false);
         messageScroll.addView(messageView);
@@ -927,11 +927,11 @@ public abstract class Globals
             DatePickerDialog legacyDateDialog;
             MaterialDatePicker<Long> dateDialog;
 
-            //if context is ContextThemeWrapper
-            if(context instanceof ContextThemeWrapper)
+            //if context is ContextThemeWrapper and using material
+            if(context instanceof ContextThemeWrapper && Settings.getMaterialTheme(context))
             {
                 //if base context is AppCompatActivity
-                Context baseContext = ((ContextThemeWrapper) context).getBaseContext();
+                Context baseContext = ((ContextThemeWrapper)context).getBaseContext();
                 if(baseContext instanceof AppCompatActivity)
                 {
                     //show dialog and stop
@@ -941,11 +941,18 @@ public abstract class Globals
                         @Override
                         public void onPositiveButtonClick(Long selection)
                         {
+                            //get result in ms
                             Calendar result = Globals.getGMTTime(selection);
-                            listener.onDateSet(null, result.get(Calendar.YEAR), result.get(Calendar.MONTH), result.get(Calendar.DAY_OF_MONTH));
+
+                            //if listener is set
+                            if(listener != null)
+                            {
+                                //call listener
+                                listener.onDateSet(null, result.get(Calendar.YEAR), result.get(Calendar.MONTH), result.get(Calendar.DAY_OF_MONTH));
+                            }
                         }
                     });
-                    dateDialog.show(((AppCompatActivity) baseContext).getSupportFragmentManager(), "DateDialog");
+                    dateDialog.show(((AppCompatActivity)baseContext).getSupportFragmentManager(), "DateDialog");
                     return;
                 }
             }
@@ -1003,7 +1010,7 @@ public abstract class Globals
         final Context context = parentView.getContext();
         boolean usingDetail = (detailMessage != null);
         int resId = (isError ? R.drawable.ic_error_black : R.drawable.ic_check_circle_black);
-        int textColorId = resolveColorID(context, R.attr.pageTitleTextColor);
+        int textColorId = resolveColorID(context, R.attr.titleTextColor);
         final Drawable icon = getDrawable(context, resId, R.color.white);
         final Drawable smallIcon = getDrawableSized(context, resId, 16, 16, R.color.white, true);
         final Snackbar snackView = Snackbar.make(parentView, message, usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
@@ -1012,7 +1019,7 @@ public abstract class Globals
         final Resources res = context.getResources();
 
         //setup views
-        snackView.setBackgroundTint(resolveColorID(context, R.attr.pageTitleBackground));
+        snackView.setBackgroundTint(resolveColorID(context, R.attr.colorAccentDark));
         snackText.setTextColor(textColorId);
         snackView.setActionTextColor(textColorId);
         snackText.setCompoundDrawablePadding((int)dpToPixels(context, 3));
@@ -3324,7 +3331,7 @@ public abstract class Globals
     //Gets an item selected state
     public static Drawable getItemSelectedState(Context context, boolean rounded)
     {
-        int[] colors = resolveColorIDs(context, R.attr.itemSelectedColor, R.attr.viewPagerBackground);
+        int[] colors = resolveColorIDs(context, R.attr.itemSelectedColor, R.attr.pageBackground);
         return(getSelectorImage(colors[0], colors[1], (rounded ? 36 : 0)));
     }
 

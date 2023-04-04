@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         app:switchPadding="10dp"
         app:trackTint="?attr/dividerLineColor"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-        android:textColor="?attr/defaultTextColor"/>
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
     <TextView
         android:id="@+id/Switch_Preference_Summary"

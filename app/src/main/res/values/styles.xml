@@ -15,18 +15,10 @@
     </style>
 
     <!-- Dialogs -->
-    <style name="DialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
-        <item name="android:textColor">?attr/defaultTextColor</item>
-    </style>
-
     <style name="DialogBase" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="android:background">@color/transparent</item>
         <item name="android:selectableItemBackground">@color/transparent</item>
-        <item name="buttonBarPositiveButtonStyle">@style/DialogButton</item>
-        <item name="buttonBarNeutralButtonStyle">@style/DialogButton</item>
-        <item name="buttonBarNegativeButtonStyle">@style/DialogButton</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
-        <item name="materialButtonStyle">@style/DialogButton</item>
     </style>
     
     <style name="LightDialog" parent="DialogBase">
@@ -47,303 +39,299 @@
 
     <!-- Preferences -->
     <style name="LightPreferenceOverlay" parent="PreferenceThemeOverlay">
-        <item name="android:textColor">@color/black</item>
         <item name="android:tint">@color/black</item>
     </style>
 
     <style name="DarkPreferenceOverlay" parent="PreferenceThemeOverlay">
-        <item name="android:textColor">@color/white</item>
         <item name="android:tint">@color/white</item>
     </style>
     
     <!-- Base themes -->
     <style name="LightBase" parent="Theme.Material3.Light">
-        <item name="defaultTextColor">@color/black</item>
-        <item name="defaultTextShadowColor">@color/white</item>
-        <item name="pageTitleTextColor">@color/white</item>
         <item name="pageBackground">@color/white</item>
         <item name="pageHighlightBackground">@color/very_light_gray</item>
         <item name="viewPagerBackground">@color/very_light_gray</item>
-        <item name="colorOutline">@color/light_gray</item>
-        <item name="dividerLineColor">@color/light_gray</item>
-        <item name="dividerTextBackground">#F9F9F9</item>
-        <item name="dialogStyle">@style/LightDialog</item>
+        <item name="colorControlNormal">?attr/colorAccent</item>
+        <item name="colorOutline">?attr/dividerLineColor</item>
         <item name="colorPrimary">?attr/colorAccent</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">?attr/itemSelectColor</item>
+        <item name="colorOnPrimaryContainer">?attr/titleTextColor</item>
+        <item name="colorPrimaryDark">?attr/colorAccentDarkest</item>
+        <item name="colorPrimaryVariant">?attr/colorAccentDark</item>
+        <item name="colorOnPrimary">?attr/colorAccentLightest</item>
+        <item name="colorSecondary">?attr/colorAccent</item>
+        <item name="colorSecondaryVariant">?attr/colorAccentDark</item>
+        <item name="colorOnSecondary">?attr/colorAccentLightest</item>
+        <item name="colorOnSurface">@color/gray</item>
         <item name="colorSurface">?attr/viewPagerBackground</item>
         <item name="colorSurfaceVariant">?attr/pageHighlightBackground</item>
+        <item name="colorTertiaryContainer">?attr/colorPrimaryContainer</item>
+        <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
+        <item name="dividerLineColor">@color/light_gray</item>
+        <item name="dividerTextBackground">#F9F9F9</item>
         <item name="titleTextColor">@color/white</item>
         <item name="textColorAlertDialogListItem">@color/black</item>
-        <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
-        <item name="preferenceCategoryStyle">@style/DividerCategory</item>
+        <item name="android:colorBackground">@color/white</item>
+        <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">@color/grey_400</item>
         <item name="android:textColorPrimary">@color/black</item>
         <item name="android:textColorSecondary">@color/gray</item>
+        <item name="dialogStyle">@style/LightDialog</item>
+        <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
+        <item name="preferenceCategoryStyle">@style/DividerCategory</item>
     </style>
 
     <style name="DarkBase" parent="Theme.Material3.Dark">
-        <item name="defaultTextColor">@color/white</item>
-        <item name="defaultTextShadowColor">@color/black</item>
-        <item name="pageTitleTextColor">@color/white</item>
         <item name="pageBackground">@color/very_dark_gray</item>
         <item name="pageHighlightBackground">@color/very_very_dark_gray</item>
         <item name="viewPagerBackground">@color/black</item>
-        <item name="colorOutline">@color/dark_gray</item>
-        <item name="dividerLineColor">@color/dark_gray</item>
-        <item name="dividerTextBackground">#2A2A2A</item>
-        <item name="dialogStyle">@style/DarkDialog</item>
+        <item name="colorControlNormal">?attr/colorAccent</item>
+        <item name="colorOutline">?attr/dividerLineColor</item>
         <item name="colorPrimary">?attr/colorAccent</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">?attr/colorAccentDarkest</item>
+        <item name="colorOnPrimaryContainer">?attr/titleTextColor</item>
+        <item name="colorPrimaryDark">?attr/colorAccentDarkest</item>
+        <item name="colorPrimaryVariant">?attr/colorAccentDark</item>
+        <item name="colorOnPrimary">?attr/colorAccentLightest</item>
+        <item name="colorSecondary">?attr/colorAccent</item>
+        <item name="colorSecondaryVariant">?attr/colorAccentDark</item>
+        <item name="colorOnSecondary">?attr/colorAccentLightest</item>
+        <item name="colorOnSurface">@color/gray</item>
         <item name="colorSurface">?attr/viewPagerBackground</item>
         <item name="colorSurfaceVariant">?attr/pageHighlightBackground</item>
+        <item name="colorTertiaryContainer">?attr/colorPrimaryContainer</item>
+        <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
+        <item name="dividerLineColor">@color/dark_gray</item>
+        <item name="dividerTextBackground">#2A2A2A</item>
         <item name="titleTextColor">@color/white</item>
         <item name="textColorAlertDialogListItem">@color/white</item>
-        <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
-        <item name="preferenceCategoryStyle">@style/DividerCategory</item>
+        <item name="android:colorBackground">@color/black</item>
+        <item name="android:textColor">@color/white</item>
         <item name="android:textColorHint">@color/grey_600</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/gray</item>
+        <item name="dialogStyle">@style/DarkDialog</item>
+        <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
+        <item name="preferenceCategoryStyle">@style/DividerCategory</item>
     </style>
 
     <!-- Themes -->
     <style name="LightBlue" parent="LightBase">
         <item name="colorAccent">@color/blue</item>
-        <item name="colorControlNormal">@color/blue</item>
-        <item name="actionBarBackground">@color/blue_900</item>
-        <item name="pageTitleBackground">@color/blue_800</item>
-        <item name="columnTitleTextColor">@color/blue_50</item>
-        <item name="columnTitleTextSelectColor">@color/blue_300</item>
-        <item name="columnBackground">@color/blue_700</item>
+        <item name="colorAccentDarkest">@color/blue_900</item>
+        <item name="colorAccentDark">@color/blue_800</item>
+        <item name="colorAccentLightest">@color/blue_50</item>
+        <item name="colorAccentLight">@color/blue_300</item>
+        <item name="colorAccentVariant">@color/blue_700</item>
         <item name="itemSelectColor">@color/blue_100</item>
         <item name="itemSelectedColor">@color/blue_300</item>
     </style>
 
     <style name="DarkBlue" parent="DarkBase">
         <item name="colorAccent">@color/blue_700</item>
-        <item name="colorControlNormal">@color/blue_700</item>
-        <item name="actionBarBackground">@color/blue_900</item>
-        <item name="pageTitleBackground">@color/blue_800</item>
-        <item name="columnTitleTextColor">@color/blue_50</item>
-        <item name="columnTitleTextSelectColor">@color/blue_300</item>
-        <item name="columnBackground">@color/blue_700</item>
+        <item name="colorAccentDarkest">@color/blue_900</item>
+        <item name="colorAccentDark">@color/blue_800</item>
+        <item name="colorAccentLightest">@color/blue_50</item>
+        <item name="colorAccentLight">@color/blue_300</item>
+        <item name="colorAccentVariant">@color/blue_700</item>
         <item name="itemSelectColor">@color/blue_800</item>
         <item name="itemSelectedColor">@color/blue_900</item>
     </style>
 
     <style name="LightBrown" parent="LightBase">
         <item name="colorAccent">@color/brown</item>
-        <item name="colorControlNormal">@color/brown</item>
-        <item name="actionBarBackground">@color/brown_900</item>
-        <item name="pageTitleBackground">@color/brown_800</item>
-        <item name="columnTitleTextColor">@color/brown_50</item>
-        <item name="columnTitleTextSelectColor">@color/brown_300</item>
-        <item name="columnBackground">@color/brown_700</item>
+        <item name="colorAccentDarkest">@color/brown_900</item>
+        <item name="colorAccentDark">@color/brown_800</item>
+        <item name="colorAccentLightest">@color/brown_50</item>
+        <item name="colorAccentLight">@color/brown_300</item>
+        <item name="colorAccentVariant">@color/brown_700</item>
         <item name="itemSelectColor">@color/brown_100</item>
         <item name="itemSelectedColor">@color/brown_300</item>
     </style>
 
     <style name="DarkBrown" parent="DarkBase">
         <item name="colorAccent">@color/brown_700</item>
-        <item name="colorControlNormal">@color/brown_700</item>
-        <item name="actionBarBackground">@color/brown_900</item>
-        <item name="pageTitleBackground">@color/brown_800</item>
-        <item name="columnTitleTextColor">@color/brown_50</item>
-        <item name="columnTitleTextSelectColor">@color/brown_300</item>
-        <item name="columnBackground">@color/brown_700</item>
+        <item name="colorAccentDarkest">@color/brown_900</item>
+        <item name="colorAccentDark">@color/brown_800</item>
+        <item name="colorAccentLightest">@color/brown_50</item>
+        <item name="colorAccentLight">@color/brown_300</item>
+        <item name="colorAccentVariant">@color/brown_700</item>
         <item name="itemSelectColor">@color/brown_800</item>
         <item name="itemSelectedColor">@color/brown_900</item>
     </style>
     
     <style name="LightCyan" parent="LightBase">
         <item name="colorAccent">@color/cyan</item>
-        <item name="colorControlNormal">@color/cyan</item>
-        <item name="actionBarBackground">@color/cyan_900</item>
-        <item name="pageTitleBackground">@color/cyan_800</item>
-        <item name="columnTitleTextColor">@color/cyan_50</item>
-        <item name="columnTitleTextSelectColor">@color/cyan_300</item>
-        <item name="columnBackground">@color/cyan_700</item>
+        <item name="colorAccentDarkest">@color/cyan_900</item>
+        <item name="colorAccentDark">@color/cyan_800</item>
+        <item name="colorAccentLightest">@color/cyan_50</item>
+        <item name="colorAccentLight">@color/cyan_300</item>
+        <item name="colorAccentVariant">@color/cyan_700</item>
         <item name="itemSelectColor">@color/cyan_100</item>
         <item name="itemSelectedColor">@color/cyan_300</item>
     </style>
 
     <style name="DarkCyan" parent="DarkBase">
         <item name="colorAccent">@color/cyan_700</item>
-        <item name="colorControlNormal">@color/cyan_700</item>
-        <item name="actionBarBackground">@color/cyan_900</item>
-        <item name="pageTitleBackground">@color/cyan_800</item>
-        <item name="columnTitleTextColor">@color/cyan_50</item>
-        <item name="columnTitleTextSelectColor">@color/cyan_300</item>
-        <item name="columnBackground">@color/cyan_700</item>
+        <item name="colorAccentDarkest">@color/cyan_900</item>
+        <item name="colorAccentDark">@color/cyan_800</item>
+        <item name="colorAccentLightest">@color/cyan_50</item>
+        <item name="colorAccentLight">@color/cyan_300</item>
+        <item name="colorAccentVariant">@color/cyan_700</item>
         <item name="itemSelectColor">@color/cyan_800</item>
         <item name="itemSelectedColor">@color/cyan_900</item>
     </style>
 
     <style name="LightGreen" parent="LightBase">
         <item name="colorAccent">@color/green</item>
-        <item name="colorControlNormal">@color/green</item>
-        <item name="actionBarBackground">@color/green_900</item>
-        <item name="pageTitleBackground">@color/green_800</item>
-        <item name="columnTitleTextColor">@color/green_50</item>
-        <item name="columnTitleTextSelectColor">@color/green_300</item>
-        <item name="columnBackground">@color/green_700</item>
+        <item name="colorAccentDarkest">@color/green_900</item>
+        <item name="colorAccentDark">@color/green_800</item>
+        <item name="colorAccentLightest">@color/green_50</item>
+        <item name="colorAccentLight">@color/green_300</item>
+        <item name="colorAccentVariant">@color/green_700</item>
         <item name="itemSelectColor">@color/green_100</item>
         <item name="itemSelectedColor">@color/green_300</item>
     </style>
 
     <style name="DarkGreen" parent="DarkBase">
         <item name="colorAccent">@color/green_700</item>
-        <item name="colorControlNormal">@color/green_700</item>
-        <item name="actionBarBackground">@color/green_900</item>
-        <item name="pageTitleBackground">@color/green_800</item>
-        <item name="columnTitleTextColor">@color/green_50</item>
-        <item name="columnTitleTextSelectColor">@color/green_300</item>
-        <item name="columnBackground">@color/green_700</item>
+        <item name="colorAccentDarkest">@color/green_900</item>
+        <item name="colorAccentDark">@color/green_800</item>
+        <item name="colorAccentLightest">@color/green_50</item>
+        <item name="colorAccentLight">@color/green_300</item>
+        <item name="colorAccentVariant">@color/green_700</item>
         <item name="itemSelectColor">@color/green_800</item>
         <item name="itemSelectedColor">@color/green_900</item>
     </style>
 
     <style name="LightGrey" parent="LightBase">
         <item name="colorAccent">@color/grey</item>
-        <item name="colorControlNormal">@color/grey</item>
-        <item name="actionBarBackground">@color/grey_900</item>
-        <item name="pageTitleBackground">@color/grey_800</item>
-        <item name="columnTitleTextColor">@color/grey_50</item>
-        <item name="columnTitleTextSelectColor">@color/grey_300</item>
-        <item name="columnBackground">@color/grey_700</item>
+        <item name="colorAccentDarkest">@color/grey_900</item>
+        <item name="colorAccentDark">@color/grey_800</item>
+        <item name="colorAccentLightest">@color/grey_50</item>
+        <item name="colorAccentLight">@color/grey_300</item>
+        <item name="colorAccentVariant">@color/grey_700</item>
         <item name="itemSelectColor">@color/grey_100</item>
         <item name="itemSelectedColor">@color/grey_300</item>
     </style>
 
     <style name="DarkGrey" parent="DarkBase">
         <item name="colorAccent">@color/grey_700</item>
-        <item name="colorControlNormal">@color/grey_700</item>
-        <item name="actionBarBackground">@color/grey_900</item>
-        <item name="pageTitleBackground">@color/grey_800</item>
-        <item name="columnTitleTextColor">@color/grey_50</item>
-        <item name="columnTitleTextSelectColor">@color/grey_300</item>
-        <item name="columnBackground">@color/grey_700</item>
+        <item name="colorAccentDarkest">@color/grey_900</item>
+        <item name="colorAccentDark">@color/grey_800</item>
+        <item name="colorAccentLightest">@color/grey_50</item>
+        <item name="colorAccentLight">@color/grey_300</item>
+        <item name="colorAccentVariant">@color/grey_700</item>
         <item name="itemSelectColor">@color/grey_800</item>
         <item name="itemSelectedColor">@color/grey_900</item>
     </style>
 
     <style name="LightOrange" parent="LightBase">
         <item name="colorAccent">@color/orange</item>
-        <item name="colorControlNormal">@color/orange</item>
-        <item name="actionBarBackground">@color/orange_900</item>
-        <item name="pageTitleBackground">@color/orange_800</item>
-        <item name="columnTitleTextColor">@color/orange_50</item>
-        <item name="columnTitleTextSelectColor">@color/orange_300</item>
-        <item name="columnBackground">@color/orange_700</item>
+        <item name="colorAccentDarkest">@color/orange_900</item>
+        <item name="colorAccentDark">@color/orange_800</item>
+        <item name="colorAccentLightest">@color/orange_50</item>
+        <item name="colorAccentLight">@color/orange_300</item>
+        <item name="colorAccentVariant">@color/orange_700</item>
         <item name="itemSelectColor">@color/orange_100</item>
         <item name="itemSelectedColor">@color/orange_300</item>
     </style>
 
     <style name="DarkOrange" parent="DarkBase">
         <item name="colorAccent">@color/orange_700</item>
-        <item name="colorControlNormal">@color/orange_700</item>
-        <item name="actionBarBackground">@color/orange_900</item>
-        <item name="pageTitleBackground">@color/orange_800</item>
-        <item name="columnTitleTextColor">@color/orange_50</item>
-        <item name="columnTitleTextSelectColor">@color/orange_300</item>
-        <item name="columnBackground">@color/orange_700</item>
+        <item name="colorAccentDarkest">@color/orange_900</item>
+        <item name="colorAccentDark">@color/orange_800</item>
+        <item name="colorAccentLightest">@color/orange_50</item>
+        <item name="colorAccentLight">@color/orange_300</item>
+        <item name="colorAccentVariant">@color/orange_700</item>
         <item name="itemSelectColor">@color/orange_800</item>
         <item name="itemSelectedColor">@color/orange_900</item>
     </style>
 
     <style name="LightPink" parent="LightBase">
         <item name="colorAccent">@color/pink</item>
-        <item name="colorControlNormal">@color/pink</item>
-        <item name="actionBarBackground">@color/pink_900</item>
-        <item name="pageTitleBackground">@color/pink_800</item>
-        <item name="columnTitleTextColor">@color/pink_50</item>
-        <item name="columnTitleTextSelectColor">@color/pink_300</item>
-        <item name="columnBackground">@color/pink_700</item>
+        <item name="colorAccentDarkest">@color/pink_900</item>
+        <item name="colorAccentDark">@color/pink_800</item>
+        <item name="colorAccentLightest">@color/pink_50</item>
+        <item name="colorAccentLight">@color/pink_300</item>
+        <item name="colorAccentVariant">@color/pink_700</item>
         <item name="itemSelectColor">@color/pink_100</item>
         <item name="itemSelectedColor">@color/pink_300</item>
     </style>
 
     <style name="DarkPink" parent="DarkBase">
         <item name="colorAccent">@color/pink_700</item>
-        <item name="colorControlNormal">@color/pink_700</item>
-        <item name="actionBarBackground">@color/pink_900</item>
-        <item name="pageTitleBackground">@color/pink_800</item>
-        <item name="columnTitleTextColor">@color/pink_50</item>
-        <item name="columnTitleTextSelectColor">@color/pink_300</item>
-        <item name="columnBackground">@color/pink_700</item>
+        <item name="colorAccentDarkest">@color/pink_900</item>
+        <item name="colorAccentDark">@color/pink_800</item>
+        <item name="colorAccentLightest">@color/pink_50</item>
+        <item name="colorAccentLight">@color/pink_300</item>
+        <item name="colorAccentVariant">@color/pink_700</item>
         <item name="itemSelectColor">@color/pink_800</item>
         <item name="itemSelectedColor">@color/pink_900</item>
     </style>
 
     <style name="LightRed" parent="LightBase">
         <item name="colorAccent">@color/red</item>
-        <item name="colorControlNormal">@color/red</item>
-        <item name="actionBarBackground">@color/red_900</item>
-        <item name="pageTitleBackground">@color/red_800</item>
-        <item name="columnTitleTextColor">@color/red_50</item>
-        <item name="columnTitleTextSelectColor">@color/red_300</item>
-        <item name="columnBackground">@color/red_700</item>
+        <item name="colorAccentDarkest">@color/red_900</item>
+        <item name="colorAccentDark">@color/red_800</item>
+        <item name="colorAccentLightest">@color/red_50</item>
+        <item name="colorAccentLight">@color/red_300</item>
+        <item name="colorAccentVariant">@color/red_700</item>
         <item name="itemSelectColor">@color/red_100</item>
         <item name="itemSelectedColor">@color/red_300</item>
     </style>
 
     <style name="DarkRed" parent="DarkBase">
         <item name="colorAccent">@color/red_700</item>
-        <item name="colorControlNormal">@color/red_700</item>
-        <item name="actionBarBackground">@color/red_900</item>
-        <item name="pageTitleBackground">@color/red_800</item>
-        <item name="columnTitleTextColor">@color/red_50</item>
-        <item name="columnTitleTextSelectColor">@color/red_300</item>
-        <item name="columnBackground">@color/red_700</item>
+        <item name="colorAccentDarkest">@color/red_900</item>
+        <item name="colorAccentDark">@color/red_800</item>
+        <item name="colorAccentLightest">@color/red_50</item>
+        <item name="colorAccentLight">@color/red_300</item>
+        <item name="colorAccentVariant">@color/red_700</item>
         <item name="itemSelectColor">@color/red_800</item>
         <item name="itemSelectedColor">@color/red_900</item>
     </style>
 
     <style name="LightPurple" parent="LightBase">
         <item name="colorAccent">@color/purple</item>
-        <item name="colorControlNormal">@color/purple</item>
-        <item name="actionBarBackground">@color/purple_900</item>
-        <item name="pageTitleBackground">@color/purple_800</item>
-        <item name="columnTitleTextColor">@color/purple_50</item>
-        <item name="columnTitleTextSelectColor">@color/purple_300</item>
-        <item name="columnBackground">@color/purple_700</item>
+        <item name="colorAccentDarkest">@color/purple_900</item>
+        <item name="colorAccentDark">@color/purple_800</item>
+        <item name="colorAccentLightest">@color/purple_50</item>
+        <item name="colorAccentLight">@color/purple_300</item>
+        <item name="colorAccentVariant">@color/purple_700</item>
         <item name="itemSelectColor">@color/purple_100</item>
         <item name="itemSelectedColor">@color/purple_300</item>
     </style>
 
     <style name="DarkPurple" parent="DarkBase">
         <item name="colorAccent">@color/purple_700</item>
-        <item name="colorControlNormal">@color/purple_700</item>
-        <item name="actionBarBackground">@color/purple_900</item>
-        <item name="pageTitleBackground">@color/purple_800</item>
-        <item name="columnTitleTextColor">@color/purple_50</item>
-        <item name="columnTitleTextSelectColor">@color/purple_300</item>
-        <item name="columnBackground">@color/purple_700</item>
+        <item name="colorAccentDarkest">@color/purple_900</item>
+        <item name="colorAccentDark">@color/purple_800</item>
+        <item name="colorAccentLightest">@color/purple_50</item>
+        <item name="colorAccentLight">@color/purple_300</item>
+        <item name="colorAccentVariant">@color/purple_700</item>
         <item name="itemSelectColor">@color/purple_800</item>
         <item name="itemSelectedColor">@color/purple_900</item>
     </style>
 
     <style name="LightYellow" parent="LightBase">
         <item name="colorAccent">@color/yellow</item>
-        <item name="colorControlNormal">@color/yellow</item>
-        <item name="actionBarBackground">@color/yellow_900</item>
-        <item name="pageTitleBackground">@color/yellow_800</item>
-        <item name="columnTitleTextColor">@color/yellow_100</item>
-        <item name="columnTitleTextSelectColor">@color/yellow_300</item>
-        <item name="columnBackground">@color/yellow_700</item>
+        <item name="colorAccentDarkest">@color/yellow_900</item>
+        <item name="colorAccentDark">@color/yellow_800</item>
+        <item name="colorAccentLightest">@color/yellow_100</item>
+        <item name="colorAccentLight">@color/yellow_300</item>
+        <item name="colorAccentVariant">@color/yellow_700</item>
         <item name="itemSelectColor">@color/yellow_100</item>
         <item name="itemSelectedColor">@color/yellow_300</item>
     </style>
 
     <style name="DarkYellow" parent="DarkBase">
         <item name="colorAccent">@color/yellow_700</item>
-        <item name="colorControlNormal">@color/yellow_700</item>
-        <item name="actionBarBackground">@color/yellow_900</item>
-        <item name="pageTitleBackground">@color/yellow_800</item>
-        <item name="columnTitleTextColor">@color/yellow_100</item>
-        <item name="columnTitleTextSelectColor">@color/yellow_300</item>
-        <item name="columnBackground">@color/yellow_700</item>
+        <item name="colorAccentDarkest">@color/yellow_900</item>
+        <item name="colorAccentDark">@color/yellow_800</item>
+        <item name="colorAccentLightest">@color/yellow_100</item>
+        <item name="colorAccentLight">@color/yellow_300</item>
+        <item name="colorAccentVariant">@color/yellow_700</item>
         <item name="itemSelectColor">@color/yellow_800</item>
         <item name="itemSelectedColor">@color/yellow_900</item>
     </style>
@@ -370,7 +358,6 @@
         <item name="android:layout_gravity">bottom|center</item>
         <item name="android:layout_margin">6dp</item>
         <item name="backgroundTint">?attr/pageHighlightBackground</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
     <style name="MaterialButtonRound" parent="MaterialButton">
         <item name="cornerRadius">18dp</item>
@@ -399,7 +386,6 @@
         <item name="android:layout_gravity">top</item>
         <item name="android:padding">1dp</item>
         <item name="android:maxLines">1</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="DetailTextMaterial" parent="DetailText">
@@ -435,7 +421,6 @@
     <style name="EditValueTitle">
         <item name="android:layout_gravity">right|center_vertical</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <!--Text View Material List-->
@@ -443,7 +428,6 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">none</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
         <item name="android:textColorHint">@color/transparent</item>
     </style>
 
@@ -480,7 +464,6 @@
         <item name="android:hint">@string/empty</item>
         <item name="android:selectAllOnFocus">true</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="CalculateEditTextMaterial" parent="CalculateEditText">
@@ -493,14 +476,12 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingTop">0dp</item>
         <item name="android:paddingBottom">0dp</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="CalculateEditUnitTitle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="CalculateEditValueTitle">
@@ -509,7 +490,6 @@
         <item name="android:layout_marginBottom">10dp</item>
         <item name="android:gravity">center</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="CalculateEditValueTitleMaterial" parent="CalculateEditUnitTitle">
@@ -521,7 +501,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:textColorHint">?attr/defaultTextColor</item>
+        <item name="android:textColorHint">?android:textColor</item>
         <item name="boxBackgroundColor">?attr/pageBackground</item>
     </style>
 
@@ -530,10 +510,10 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">0.5</item>
         <item name="android:minWidth">126dp</item>
-        <item name="android:textColorHint">?attr/defaultTextColor</item>
+        <item name="android:textColorHint">?android:textColor</item>
         <item name="boxBackgroundColor">?attr/pageBackground</item>
-        <item name="helperTextTextColor">?attr/defaultTextColor</item>
-        <item name="startIconTint">?attr/defaultTextColor</item>
+        <item name="helperTextTextColor">?android:textColor</item>
+        <item name="startIconTint">?android:textColor</item>
     </style>
 
     <!--Orbital Search Layout-->
@@ -541,7 +521,7 @@
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColorHint">@color/white</item>
-        <item name="boxBackgroundColor">?attr/pageTitleBackground</item>
+        <item name="boxBackgroundColor">?attr/colorAccentDark</item>
         <item name="helperTextTextColor">@color/white</item>
         <item name="startIconTint">@color/white</item>
     </style>
@@ -566,7 +546,7 @@
         <item name="android:layout_gravity">center_vertical|end</item>
         <item name="android:gravity">center</item>
         <item name="android:scaleType">fitCenter</item>
-        <item name="tint">?attr/defaultTextColor</item>
+        <item name="tint">?android:textColor</item>
     </style>
     <style name="CombinedImageMaterial" parent="CombinedImage">
         <item name="android:layout_width">18dp</item>
@@ -580,7 +560,6 @@
         <item name="android:layout_margin">1dp</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:gravity">center</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <!--Combined Text-->
@@ -590,7 +569,6 @@
         <item name="android:layout_weight">0.5</item>
         <item name="android:padding">2dp</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="CombinedTextMaterial">
@@ -598,7 +576,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">4dp</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <!--Title Text-->
@@ -607,8 +584,8 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
         <item name="android:padding">10dp</item>
-        <item name="android:background">?attr/columnBackground</item>
-        <item name="android:textColor">?attr/columnTitleTextColor</item>
+        <item name="android:background">?attr/colorAccentVariant</item>
+        <item name="android:textColor">?attr/colorAccentLightest</item>
     </style>
 
     <!--Progress circle-->
@@ -658,7 +635,7 @@
         <item name="useCompatPadding">true</item>
         <item name="borderWidth">0dp</item>
         <item name="fabSize">normal</item>
-        <item name="tint">?attr/pageTitleTextColor</item>
+        <item name="tint">?attr/titleTextColor</item>
         <item name="backgroundTint">?attr/colorAccent</item>
         <item name="android:contentDescription">@string/title_unknown</item>
     </style>
@@ -701,7 +678,6 @@
         <item name="android:paddingLeft">0dp</item>
         <item name="android:paddingRight">8dp</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <!--Notify settings-->
@@ -717,7 +693,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="NotifySettingsSwitch">
@@ -743,7 +718,6 @@
         <item name="android:paddingLeft">3dp</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:background">@color/transparent</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
         <item name="android:visibility">gone</item>
     </style>
 
@@ -789,7 +763,6 @@
         <item name="android:text">@string/title_shared</item>
         <item name="trackTint">?attr/dividerLineColor</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
         <item name="android:checked">true</item>
     </style>
 
@@ -802,7 +775,6 @@
         <item name="android:paddingBottom">10dp</item>
         <item name="android:gravity">center_vertical|end</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="WidgetSetupTextOptions">
@@ -818,7 +790,6 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:textColor">?attr/defaultTextColor</item>
     </style>
 
     <style name="WidgetSetupBoldCheckBox" parent="WidgetSetupCheckBox">

@@ -31,7 +31,6 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="?attr/defaultTextColor"
                     android:text="@string/title_before"/>
 
                 <com.nikolaiapps.orbtrack.BorderButton
@@ -45,7 +44,6 @@
                     android:layout_marginTop="10dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textColor="?attr/defaultTextColor"
                     android:text="@string/title_now"/>
 
                 <com.nikolaiapps.orbtrack.BorderButton
@@ -104,8 +102,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/title_r"
-                        android:textColor="?attr/defaultTextColor"/>
+                        android:text="@string/title_r"/>
 
                     <SeekBar
                         android:id="@+id/Color_Red_Bar"
@@ -122,7 +119,6 @@
                         android:inputType="number"
                         android:autofillHints="@string/empty"
                         android:hint="@string/empty"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/text_0"/>
                 </LinearLayout>
 
@@ -135,8 +131,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/title_g"
-                        android:textColor="?attr/defaultTextColor"/>
+                        android:text="@string/title_g"/>
 
                     <SeekBar
                         android:id="@+id/Color_Green_Bar"
@@ -153,7 +148,6 @@
                         android:inputType="number"
                         android:autofillHints="@string/empty"
                         android:hint="@string/empty"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/text_0"/>
                 </LinearLayout>
 
@@ -166,8 +160,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/title_b"
-                        android:textColor="?attr/defaultTextColor"/>
+                        android:text="@string/title_b"/>
 
                     <SeekBar
                         android:id="@+id/Color_Blue_Bar"
@@ -184,7 +177,6 @@
                         android:inputType="number"
                         android:autofillHints="@string/empty"
                         android:hint="@string/empty"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/text_0"/>
                 </LinearLayout>
 
@@ -197,8 +189,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="@string/title_o"
-                        android:textColor="?attr/defaultTextColor"/>
+                        android:text="@string/title_o"/>
 
                     <SeekBar
                         android:id="@+id/Color_Opacity_Bar"
@@ -215,7 +206,6 @@
                         android:inputType="number"
                         android:autofillHints="@string/empty"
                         android:hint="@string/empty"
-                        android:textColor="?attr/defaultTextColor"
                         android:text="@string/text_0"/>
                 </LinearLayout>
             </LinearLayout>
@@ -232,7 +222,6 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:padding="3dp"
-                android:textColor="?attr/defaultTextColor"
                 android:text="@string/title_before"/>
 
             <com.nikolaiapps.orbtrack.BorderButton
@@ -250,7 +239,6 @@
                 android:layout_marginStart="10dp"
                 android:layout_gravity="center"
                 android:padding="3dp"
-                android:textColor="?attr/defaultTextColor"
                 android:text="@string/title_now"/>
 
             <com.nikolaiapps.orbtrack.BorderButton
@@ -269,8 +257,7 @@
                     android:id="@+id/Color_Transparent_Check"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/title_transparent"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:text="@string/title_transparent"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

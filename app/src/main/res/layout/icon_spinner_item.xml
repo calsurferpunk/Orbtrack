@@ -45,14 +45,12 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:singleLine="true"
-                android:textColor="?attr/defaultTextColor"
                 android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
             <TextView
                 android:id="@+id/Spinner_Item_Sub_Text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="?attr/defaultTextColor"
                 android:textSize="10sp"
                 tools:ignore="SmallSp" />
         </LinearLayout>

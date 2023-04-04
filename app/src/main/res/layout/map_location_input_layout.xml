@@ -3,8 +3,7 @@
     android:id="@+id/Location_Layout"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/viewPagerBackground">
+    android:layout_height="match_parent">
     <FrameLayout
         android:id="@+id/Location_Map_Frame_Layout"
         android:layout_width="match_parent"
@@ -48,7 +47,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="end"
-                android:textColor="?attr/defaultTextColor"
                 android:text="@string/title_name"/>
             <AutoCompleteTextView
                 android:id="@+id/Location_Input_Name"
@@ -57,8 +55,7 @@
                 android:layout_weight="1"
                 android:singleLine="true"
                 android:imeOptions="actionNext"
-                android:hint="@string/empty"
-                android:textColor="?attr/defaultTextColor"/>
+                android:hint="@string/empty" />
         </TableRow>
 
         <TableRow>
@@ -81,7 +78,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="end"
-                android:textColor="?attr/defaultTextColor"
                 android:text="@string/title_latitude_north_south"/>
             <EditText
                 android:id="@+id/Location_Latitude_Text"
@@ -91,8 +87,7 @@
                 android:inputType="numberDecimal|numberSigned"
                 android:singleLine="true"
                 android:autofillHints="@string/text_90_plus_minus"
-                android:hint="@string/text_90_plus_minus"
-                android:textColor="?attr/defaultTextColor"/>
+                android:hint="@string/text_90_plus_minus"/>
         </TableRow>
 
         <TableRow>
@@ -101,7 +96,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="end"
-                android:textColor="?attr/defaultTextColor"
                 android:text="@string/title_longitude_west_east"/>
             <EditText
                 android:id="@+id/Location_Longitude_Text"
@@ -111,8 +105,7 @@
                 android:inputType="numberDecimal|numberSigned"
                 android:singleLine="true"
                 android:autofillHints="@string/text_180_plus_minus"
-                android:hint="@string/text_180_plus_minus"
-                android:textColor="?attr/defaultTextColor"/>
+                android:hint="@string/text_180_plus_minus"/>
         </TableRow>
 
         <TableRow>
@@ -121,8 +114,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
-                android:gravity="end"
-                android:textColor="?attr/defaultTextColor"/>
+                android:gravity="end"/>
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -136,8 +128,7 @@
                     android:inputType="numberDecimal|numberSigned"
                     android:singleLine="true"
                     android:autofillHints="@string/empty"
-                    android:hint="@string/empty"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:hint="@string/empty"/>
 
                 <androidx.appcompat.widget.AppCompatImageButton
                     android:id="@+id/Location_Altitude_Button"
@@ -153,8 +144,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical|end"
-                android:text="@string/title_time_zone"
-                android:textColor="?attr/defaultTextColor"/>
+                android:text="@string/title_time_zone"/>
 
             <LinearLayout
                 android:layout_width="0dp"

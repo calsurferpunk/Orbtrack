@@ -5,5 +5,5 @@
     android:layout_height="wrap_content"
     android:padding="5dp"
     android:gravity="center"
-    android:background="?attr/pageTitleBackground"
-    android:textColor="?attr/columnTitleTextColor"/>
+    android:background="?attr/colorAccentDark"
+    android:textColor="?attr/colorAccentLightest"/>

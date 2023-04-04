@@ -13,8 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="2dp"
-        android:background="?attr/viewPagerBackground"
-        android:textColor="?attr/defaultTextColor"
         android:visibility="gone"/>
 
     <LinearLayout
@@ -29,7 +27,6 @@
             android:layout_height="wrap_content"
             android:layout_weight="0.15"
             android:padding="2dp"
-            android:textColor="?attr/defaultTextColor"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -57,7 +54,6 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="end"
                 android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
                 tools:ignore="NestedWeights" />
 
             <TextView
@@ -67,8 +63,7 @@
                 android:layout_weight="0.3"
                 android:layout_gravity="center_vertical"
                 android:gravity="end"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"/>
+                android:padding="2dp"/>
 
             <TextView
                 android:id="@+id/View_Range_Text"
@@ -77,8 +72,7 @@
                 android:layout_weight="0.4"
                 android:layout_gravity="center_vertical"
                 android:gravity="end"
-                android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"/>
+                android:padding="2dp"/>
 
             <TextView
                 android:id="@+id/View_Phase_Text"
@@ -88,7 +82,6 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="end"
                 android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
                 android:visibility="gone"/>
 
             <TextView
@@ -99,7 +92,6 @@
                 android:layout_gravity="center_vertical"
                 android:gravity="end"
                 android:padding="2dp"
-                android:textColor="?attr/defaultTextColor"
                 android:visibility="gone"/>
         </LinearLayout>
     </LinearLayout>

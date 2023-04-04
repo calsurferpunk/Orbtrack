@@ -29,14 +29,12 @@
             android:id="@+id/Object_Item_Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="?attr/defaultTextColor"
             android:textStyle="bold"/>
 
         <TextView
             android:id="@+id/Object_TLE_Age_Text"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textColor="?attr/defaultTextColor"/>
+            android:layout_height="wrap_content"/>
     </LinearLayout>
 
     <View

@@ -141,7 +141,7 @@ public class RadioGroupPreference extends ValueTypePreference
                 String currentValue = itemValues[index];
                 AppCompatRadioButton currentRadioButton = new AppCompatRadioButton(new ContextThemeWrapper(context, R.style.RadioButton), null);
                 CompoundButtonCompat.setButtonTintList(currentRadioButton, new ColorStateList(new int[][]{new int[]{-android.R.attr.state_checked}, new int[]{android.R.attr.state_checked}}, new int[]{accentColor, accentColor}));
-                currentRadioButton.setTextColor(Globals.resolveColorID(context, R.attr.defaultTextColor));      //note: needed because bug setting color from R.style.RadioButton on dark/light theme switch
+                currentRadioButton.setTextColor(Globals.resolveColorID(context, android.R.attr.textColor));      //note: needed because bug setting color from R.style.RadioButton on dark/light theme switch
                 currentRadioButton.setText(itemTexts[index]);
                 currentRadioButton.setTag(currentValue);
                 currentRadioButton.setChecked(pendingSetValue != null && pendingSetValue.equals(currentValue));

@@ -423,11 +423,11 @@ public class OrbitalFilterList
             };
 
             //get colors
-            listBgColor = Globals.resolveColorID(currentContext, R.attr.pageTitleBackground);
+            listBgColor = Globals.resolveColorID(currentContext, R.attr.colorAccentDark);
             listBgItemColor = Globals.resolveColorID(currentContext, R.attr.pageBackground);
-            listTextColor = Globals.resolveColorID(currentContext, R.attr.defaultTextColor);
-            listBgSelectedColor = Globals.resolveColorID(currentContext, R.attr.columnBackground);
-            listTextSelectedColor = Globals.resolveColorID(currentContext, R.attr.columnTitleTextColor);
+            listTextColor = Globals.resolveColorID(currentContext, android.R.attr.textColor);
+            listBgSelectedColor = Globals.resolveColorID(currentContext, R.attr.colorAccentVariant);
+            listTextSelectedColor = Globals.resolveColorID(currentContext, R.attr.colorAccentLightest);
 
             //get owners, groups, and ages
             setupOwnerList(ownerList, usedOwners, itemSelectedListener);

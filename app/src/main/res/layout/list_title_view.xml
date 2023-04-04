@@ -2,15 +2,14 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?attr/viewPagerBackground">
+    android:layout_height="match_parent">
     <TextView
         android:id="@+id/List_Title_Text"
         android:padding="5dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="?attr/columnTitleTextColor"
-        android:background="?attr/columnBackground"/>
+        android:textColor="?attr/colorAccentLightest"
+        android:background="?attr/colorAccentVariant"/>
 
     <FrameLayout
         android:layout_width="match_parent"

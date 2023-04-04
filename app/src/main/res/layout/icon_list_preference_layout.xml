@@ -16,8 +16,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="6dp"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-            android:textColor="?attr/defaultTextColor"/>
+            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
         <com.nikolaiapps.orbtrack.IconSpinner
             android:id="@+id/Icon_List_Preference_List"

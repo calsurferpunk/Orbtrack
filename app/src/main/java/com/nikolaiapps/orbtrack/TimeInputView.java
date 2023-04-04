@@ -7,11 +7,15 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Parcelable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
+import android.view.View;
 import android.widget.TimePicker;
+import com.google.android.material.timepicker.MaterialTimePicker;
+import com.google.android.material.timepicker.TimeFormat;
 import java.text.DateFormat;
 import java.util.Calendar;
 
@@ -68,6 +72,28 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
             Context context = this.getContext();
 
             performClick();
+
+            //if context is ContextThemeWrapper and using material
+            if(context instanceof androidx.appcompat.view.ContextThemeWrapper && Settings.getMaterialTheme(context))
+            {
+                //if base context is AppCompatActivity
+                Context baseContext = ((androidx.appcompat.view.ContextThemeWrapper)context).getBaseContext();
+                if(baseContext instanceof AppCompatActivity)
+                {
+                    //show dialog and stop
+                    MaterialTimePicker timeDialog = new MaterialTimePicker.Builder().setHour(currentHour).setMinute(currentMinute).setTimeFormat(TimeFormat.CLOCK_12H).build();
+                    timeDialog.addOnPositiveButtonClickListener(new OnClickListener()
+                    {
+                        @Override
+                        public void onClick(View v)
+                        {
+                            TimeInputView.this.onTimeSet(null, timeDialog.getHour(), timeDialog.getMinute());
+                        }
+                    });
+                    timeDialog.show(((AppCompatActivity)baseContext).getSupportFragmentManager(), "TimeDialog");
+                    return(true);
+                }
+            }
 
             //if possibly a version with time picker dialog problems
             if(Build.VERSION.SDK_INT >= 22 && Build.VERSION.SDK_INT <= 23)

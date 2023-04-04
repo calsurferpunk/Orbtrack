@@ -56,7 +56,6 @@
                     android:layout_height="wrap_content"
                     android:selectAllOnFocus="true"
                     android:hint="@string/empty"
-                    android:textColor="?attr/defaultTextColor"
                     android:visibility="gone"/>
 
                 <RadioGroup

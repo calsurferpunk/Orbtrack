@@ -12,8 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:padding="2dp"
-        android:background="?attr/pageBackground"
-        android:textColor="?attr/defaultTextColor"/>
+        android:background="?attr/pageBackground"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -33,7 +32,6 @@
             android:layout_weight="1"
             android:gravity="center"
             android:text="@string/text_outdated"
-            android:textColor="?attr/defaultTextColor"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -211,8 +209,7 @@
                         <TextView
                             android:id="@+id/Combined_Item_El_Max_Text"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textColor="?attr/defaultTextColor"/>
+                            android:layout_height="wrap_content"/>
 
                         <View
                             android:id="@+id/Combined_Item_Pass_Quality_View"

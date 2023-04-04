@@ -11,7 +11,7 @@
         android:id="@+id/Switch_Button_Preference_Material_Switch"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:thumbTint="?attr/defaultTextColor"
+        app:thumbTint="?android:textColor"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"/>
@@ -20,7 +20,6 @@
         android:id="@+id/Switch_Button_Preference_Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textColor="?attr/defaultTextColor"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="@id/Switch_Button_Preference_Button_Holder"
         app:layout_constraintTop_toTopOf="parent"

@@ -328,16 +328,21 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         private LayoutInflater listInflater;
         private Item[] items = new Item[0];
 
+        private void getDefaultSize(Context context)
+        {
+            defaultIconDp = (usingMaterial ? 32 : 24);
+            defaultIconPx = (int)(context != null ? Globals.dpToPixels(context, defaultIconDp) : 48);
+        }
+
         private void BaseConstructor(Context context)
         {
             selectedIndex = -1;
             listInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
-            textColor = textSelectedColor = Globals.resolveColorID(context, R.attr.defaultTextColor);
+            textColor = textSelectedColor = Globals.resolveColorID(context, android.R.attr.textColor);
             backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
             backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
             usingMaterial = Settings.getMaterialTheme(context);
-            defaultIconDp = (usingMaterial ? 32 : 24);
-            defaultIconPx = (int)(context != null ? Globals.dpToPixels(context, defaultIconDp) : 48);
+            getDefaultSize(context);
 
             updateUsing();
         }
@@ -374,6 +379,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public CustomAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
         {
             int index;
+
+            getDefaultSize(context);
 
             this.items = new Item[items.length];
             for(index = 0; index < this.items.length; index++)

@@ -961,7 +961,7 @@ public abstract class Selectable
         protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
         {
             boolean usingContext = haveContext();
-            int[] colors = (usingContext ? Globals.resolveAttributeIDs(currentContext, R.attr.columnBackground, R.attr.columnTitleTextColor) : new int[]{Color.BLACK, Color.WHITE});
+            int[] colors = (usingContext ? Globals.resolveAttributeIDs(currentContext, R.attr.colorAccentVariant, R.attr.colorAccentLightest) : new int[]{Color.BLACK, Color.WHITE});
             colors[1] = (usingContext ? currentContext.getResources().getColor(colors[1]) : colors[1]);
 
             if(showColumnTitles(page))

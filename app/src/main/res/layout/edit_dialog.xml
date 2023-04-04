@@ -30,8 +30,7 @@
                     android:padding="10dp"
                     android:singleLine="true"
                     android:autofillHints="@string/empty"
-                    android:hint="@string/empty"
-                    android:textColor="?attr/defaultTextColor" />
+                    android:hint="@string/empty"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Edit_Value_List"
@@ -53,7 +52,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 app:passwordToggleEnabled="true"
-                app:passwordToggleTint="?attr/defaultTextColor">
+                app:passwordToggleTint="?android:textColor">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/Edit_Value2_Text"
                     android:layout_width="match_parent"
@@ -64,8 +63,7 @@
                     android:padding="10dp"
                     android:singleLine="true"
                     android:autofillHints="@string/empty"
-                    android:hint="@string/empty"
-                    android:textColor="?attr/defaultTextColor" />
+                    android:hint="@string/empty"/>
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
 
@@ -96,8 +94,7 @@
                 android:padding="10dp"
                 android:singleLine="true"
                 android:autofillHints="@string/empty"
-                android:hint="@string/empty"
-                android:textColor="?attr/defaultTextColor"/>
+                android:hint="@string/empty"/>
         </TableRow>
 
         <TableRow android:id="@+id/Edit_Number2_Row" android:padding="5dp" android:visibility="gone">
@@ -117,8 +114,7 @@
                 android:padding="10dp"
                 android:singleLine="true"
                 android:autofillHints="@string/empty"
-                android:hint="@string/empty"
-                android:textColor="?attr/defaultTextColor"/>
+                android:hint="@string/empty"/>
         </TableRow>
 
         <TableRow android:id="@+id/Edit_Number3_Row" android:padding="5dp" android:visibility="gone">
@@ -138,8 +134,7 @@
                 android:padding="10dp"
                 android:singleLine="true"
                 android:autofillHints="@string/empty"
-                android:hint="@string/empty"
-                android:textColor="?attr/defaultTextColor"/>
+                android:hint="@string/empty"/>
         </TableRow>
 
         <TableRow android:id="@+id/Edit_List2_Row" android:padding="5dp">
@@ -162,8 +157,7 @@
                     android:layout_height="match_parent"
                     android:layout_margin="5dp"
                     android:gravity="center"
-                    android:text="@string/text_to"
-                    android:textColor="?attr/defaultTextColor"/>
+                    android:text="@string/text_to"/>
             </LinearLayout>
 
             <com.nikolaiapps.orbtrack.IconSpinner
@@ -185,8 +179,7 @@
                 android:layout_width="120dp"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-                android:textColor="?attr/defaultTextColor"/>
+                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
         </TableRow>
 
         <com.nikolaiapps.orbtrack.IconSpinner

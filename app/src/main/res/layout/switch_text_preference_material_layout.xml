@@ -16,8 +16,7 @@
             android:id="@+id/Switch_Text_Preference_No_Switch_Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical"
-            android:textColor="?attr/defaultTextColor"/>
+            android:layout_gravity="center_vertical"/>
 
         <LinearLayout
             android:layout_width="0dp"
@@ -38,16 +37,14 @@
             <TextView
                 android:id="@+id/Switch_Text_Preference_Value_Suffix"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/defaultTextColor"/>
+                android:layout_height="wrap_content"/>
 
             <com.google.android.material.materialswitch.MaterialSwitch
                 android:id="@+id/Switch_Text_Preference_Material_Switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
-                app:thumbTint="?attr/defaultTextColor"
-                android:textColor="?attr/defaultTextColor"/>
+                app:thumbTint="?android:textColor"/>
         </LinearLayout>
     </LinearLayout>
 

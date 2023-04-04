@@ -21,6 +21,5 @@
         android:layout_weight="0.2"
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
-        android:background="@color/transparent"
-        android:textColor="?attr/defaultTextColor"/>
+        android:background="@color/transparent"/>
 </LinearLayout>

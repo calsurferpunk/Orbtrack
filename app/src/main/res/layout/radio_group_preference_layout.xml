@@ -12,8 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-        android:textColor="?attr/defaultTextColor"/>
+        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
 
     <RadioGroup
         android:id="@+id/Radio_Group_Group"

@@ -27,7 +27,6 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
-        android:textColor="?attr/defaultTextColor"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/Combined_Item_Az_Layout"
         app:layout_constraintStart_toEndOf="@+id/Combined_Item_Name_Image"
@@ -173,7 +172,6 @@
         app:layout_constraintStart_toStartOf="@+id/Combined_Item_Name_Text"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text"
         android:text="@string/text_outdated"
-        android:textColor="?attr/defaultTextColor"
         android:visibility="gone"/>
 
     <com.google.android.material.progressindicator.LinearProgressIndicator

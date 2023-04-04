@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <attr name="defaultTextColor" format="reference"/>
-    <attr name="defaultTextShadowColor" format="reference"/>
-    <attr name="actionBarBackground" format="reference"/>
-    <attr name="pageTitleTextColor" format="reference"/>
-    <attr name="pageTitleBackground" format="reference"/>
     <attr name="pageBackground" format="reference"/>
     <attr name="pageHighlightBackground" format="reference"/>
     <attr name="viewPagerBackground" format="reference"/>
-    <attr name="columnTitleTextColor" format="reference"/>
-    <attr name="columnTitleTextSelectColor" format="reference"/>
-    <attr name="columnBackground" format="reference"/>
+    <attr name="colorAccentDark" format="reference"/>
+    <attr name="colorAccentDarkest" format="reference"/>
+    <attr name="colorAccentLightest" format="reference"/>
+    <attr name="colorAccentLight" format="reference"/>
+    <attr name="colorAccentVariant" format="reference"/>
     <attr name="dividerLineColor" format="reference"/>
     <attr name="dividerTextBackground" format="color"/>
     <attr name="dialogStyle" format="reference"/>

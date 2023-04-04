@@ -13,8 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.275"
-        android:text="@string/title_sensitivity"
-        android:textColor="?attr/defaultTextColor"/>
+        android:text="@string/title_sensitivity"/>
 
     <com.nikolaiapps.orbtrack.PlayBar
         android:id="@+id/Slider_Preference_Bar"
@@ -23,6 +22,6 @@
         android:layout_weight="0.725"
         android:layout_marginLeft="2dp"
         android:layout_marginRight="2dp"
-        app:textColor="?attr/defaultTextColor"
-        app:buttonColor="?attr/defaultTextColor"/>
+        app:textColor="?android:textColor"
+        app:buttonColor="?android:textColor"/>
 </LinearLayout>

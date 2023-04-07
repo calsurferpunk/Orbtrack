@@ -789,7 +789,6 @@ public abstract class Globals
         TextView messageView = new TextView(context);
         ViewGroup.LayoutParams messageParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
-        messageView.setBackgroundColor(resolveColorID(context, R.attr.pageHighlightBackground));
         messageView.setLayoutParams(messageParams);
         messageView.setPadding(padding, padding, padding, padding);
         messageView.setMovementMethod(LinkMovementMethod.getInstance());
@@ -3331,24 +3330,26 @@ public abstract class Globals
     //Gets an item selected state
     public static Drawable getItemSelectedState(Context context, boolean rounded)
     {
-        int[] colors = resolveColorIDs(context, R.attr.itemSelectedColor, R.attr.pageBackground);
+        int[] colors = resolveColorIDs(context, R.attr.itemSelectedColor, android.R.attr.colorBackground);
         return(getSelectorImage(colors[0], colors[1], (rounded ? 36 : 0)));
     }
 
     //Gets menu item selector
     public static StateListDrawable getMenuItemStateSelector(Context context)
     {
-        return(getItemStateSelector(context, (Settings.getDarkTheme(context) ? R.attr.viewPagerBackground : R.attr.pageBackground), Settings.getMaterialTheme(context)));
+        return(getItemStateSelector(context, android.R.attr.colorBackground, Settings.getMaterialTheme(context)));
     }
 
     //Gets list item selector
     public static StateListDrawable getListItemStateSelector(Context context, boolean forDialog)
     {
-        return(getItemStateSelector(context, forDialog ? R.attr.pageBackground : (Settings.getDarkTheme(context) ? R.attr.viewPagerBackground : R.attr.pageBackground), false));
+        return(getItemStateSelector(context, (forDialog ? R.attr.pageHighlightBackground : android.R.attr.colorBackground), false));
     }
-    public static StateListDrawable getListItemStateSelector(Context context)
+
+    //Gets data item selector
+    public static StateListDrawable getDataItemStateSelector(Context context)
     {
-        return(getListItemStateSelector(context, false));
+        return(getItemStateSelector(context, android.R.attr.colorBackground, false));
     }
 
     //Get visible icon for given state

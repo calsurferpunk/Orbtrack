@@ -6,8 +6,7 @@
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="6dp"
-        android:background="?attr/pageBackground">
+        android:padding="6dp">
         <TableRow android:id="@+id/Edit_Value_Row" android:padding="5dp">
             <TextView
                 android:id="@+id/Edit_Value_Title"
@@ -57,7 +56,6 @@
                     android:id="@+id/Edit_Value2_Text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="?attr/pageBackground"
                     android:inputType="textPassword"
                     android:maxLength="50"
                     android:padding="10dp"

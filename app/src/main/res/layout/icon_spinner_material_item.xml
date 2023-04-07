@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="?attr/pageHighlightBackground">
     <LinearLayout
         android:id="@+id/Spinner_Item_Background"
         android:layout_width="match_parent"
@@ -10,8 +11,7 @@
         android:orientation="horizontal"
         android:gravity="center"
         android:padding="8dp"
-        android:layout_margin="0dp"
-        android:background="?attr/pageBackground">
+        android:layout_margin="0dp">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Spinner_Item_Image1"
             android:layout_width="24dp"

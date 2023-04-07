@@ -158,6 +158,7 @@ public abstract class Selectable
         {
             private boolean canShow;
             private final boolean usingMaterial;
+            private int groupCount;
             private final int[] noradIds;
             private final long timerDelay;
             private final Context currentContext;
@@ -185,6 +186,7 @@ public abstract class Selectable
                 CustomAlertDialogBuilder itemDetailDialog;
 
                 canShow = true;
+                groupCount = 0;
                 usingMaterial = Settings.getMaterialTheme(context);
                 currentContext = context;
                 noradIds = ids;
@@ -404,12 +406,15 @@ public abstract class Selectable
             {
                 if(canShow)
                 {
-                    ViewGroup detailGroup = (usingMaterial ? itemDetailCardsLayout : itemDetailTable);
+                    ViewGroup detailGroup = (usingMaterial ? itemDetailCardsLayout.findViewWithTag("group" + groupCount) : itemDetailTable);
                     final View passProgressLayout = this.findViewById(R.id.Item_Detail_Progress_Layout);
 
-                    addDivider(detailGroup, false);
-                    ((ViewGroup)passProgressLayout.getParent()).removeView(passProgressLayout);
-                    detailGroup.addView(passProgressLayout);
+                    if(detailGroup != null)
+                    {
+                        addDivider(detailGroup, false);
+                        ((ViewGroup)passProgressLayout.getParent()).removeView(passProgressLayout);
+                        detailGroup.addView(passProgressLayout);
+                    }
                 }
             }
 
@@ -423,6 +428,7 @@ public abstract class Selectable
                 int dpPixels;
                 int titleIndex;
                 int titleCount = (usingTitleStrings ? titleStrings.length : titleIds.length);
+                int bgColor = Globals.resolveColorID(currentContext, android.R.attr.colorBackground);
                 String text;
                 Resources res = currentContext.getResources();
 
@@ -437,6 +443,9 @@ public abstract class Selectable
                     TableRow.LayoutParams groupParams = new TableRow.LayoutParams();
                     TableRow[] detailRows = new TableRow[(titleCount / 2) + (titleCount % 2)];
 
+                    //update group count
+                    groupCount++;
+
                     //if using material
                     if(usingMaterial)
                     {
@@ -445,7 +454,7 @@ public abstract class Selectable
                         //setup group card
                         dpPixels = (int)Globals.dpToPixels(currentContext, 6);
                         cardParams.setMargins(0, 0, 0, dpPixels);
-                        groupCard.setCardBackgroundColor(Globals.resolveColorID(currentContext, R.attr.pageBackground));
+                        groupCard.setCardBackgroundColor(bgColor);
                         groupCard.setContentPadding(dpPixels, dpPixels, dpPixels , dpPixels);
                         groupCard.setRadius(dpPixels);
                         groupCard.setLayoutParams(cardParams);
@@ -455,9 +464,10 @@ public abstract class Selectable
                     {
                         //add divider and set row color
                         addDivider(currentDetailTable, false);
-                        groupRow.setBackgroundColor(Globals.resolveColorID(currentContext, R.attr.viewPagerBackground));
+                        groupRow.setBackgroundColor(bgColor);
                     }
                     currentDetailTable.setStretchAllColumns(true);
+                    currentDetailTable.setTag("group" + groupCount);
 
                     //if using group title
                     if(usingGroupTitle)
@@ -997,7 +1007,7 @@ public abstract class Selectable
         //Sets item selector
         protected void setItemSelector(View itemView)
         {
-            itemView.setBackground(Globals.getListItemStateSelector(currentContext));
+            itemView.setBackground(Globals.getDataItemStateSelector(currentContext));
         }
 
         //Sets item background
@@ -1011,7 +1021,7 @@ public abstract class Selectable
             if(setBackground && haveContext())
             {
                 //set background according to selected state
-                itemView.setBackground(isSelected ? Globals.getItemSelectedState(currentContext, false) : Globals.getListItemStateSelector(currentContext));
+                itemView.setBackground(isSelected ? Globals.getItemSelectedState(currentContext, false) : Globals.getListItemStateSelector(currentContext, false));
             }
         }
 

@@ -17,33 +17,33 @@
     <!-- Dialogs -->
     <style name="DialogBase" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="android:background">@color/transparent</item>
+        <item name="android:windowBackground">?attr/pageHighlightBackground</item>
         <item name="android:selectableItemBackground">@color/transparent</item>
         <item name="colorControlActivated">?attr/colorAccent</item>
     </style>
     
     <style name="LightDialog" parent="DialogBase">
-        <item name="android:textColor">@color/black</item>
-        <item name="android:textColorPrimary">@color/black</item>
-        <item name="android:textColorSecondary">@color/dark_gray</item>
-        <item name="android:windowBackground">@color/white</item>
         <item name="colorControlNormal">@color/black</item>
     </style>
 
     <style name="DarkDialog" parent="DialogBase">
-        <item name="android:textColor">@color/white</item>
-        <item name="android:textColorPrimary">@color/grey</item>
-        <item name="android:textColorSecondary">@color/very_light_gray</item>
-        <item name="android:windowBackground">@color/very_dark_gray</item>
         <item name="colorControlNormal">@color/white</item>
     </style>
 
     <!-- Preferences -->
     <style name="LightPreferenceOverlay" parent="PreferenceThemeOverlay">
         <item name="android:tint">@color/black</item>
+        <item name="android:background">?android:colorBackground</item>
     </style>
 
     <style name="DarkPreferenceOverlay" parent="PreferenceThemeOverlay">
         <item name="android:tint">@color/white</item>
+        <item name="android:background">?android:colorBackground</item>
+    </style>
+
+    <!-- Toolbar -->
+    <style name="ToolBarStyle" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <item name="subtitleTextColor">@color/light_gray</item>
     </style>
     
     <!-- Base themes -->
@@ -79,6 +79,8 @@
         <item name="dialogStyle">@style/LightDialog</item>
         <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
+        <item name="toolbarStyle">@style/ToolBarStyle</item>
+        <item name="elevationOverlayEnabled">false</item>
     </style>
 
     <style name="DarkBase" parent="Theme.Material3.Dark">
@@ -113,6 +115,8 @@
         <item name="dialogStyle">@style/DarkDialog</item>
         <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
+        <item name="toolbarStyle">@style/ToolBarStyle</item>
+        <item name="elevationOverlayEnabled">false</item>
     </style>
 
     <!-- Themes -->
@@ -357,11 +361,9 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">bottom|center</item>
         <item name="android:layout_margin">6dp</item>
-        <item name="backgroundTint">?attr/pageHighlightBackground</item>
     </style>
     <style name="MaterialButtonRound" parent="MaterialButton">
         <item name="cornerRadius">18dp</item>
-        <item name="backgroundTint">?attr/colorAccent</item>
     </style>
 
     <!-- Detail Views -->
@@ -373,7 +375,6 @@
     <style name="DetailTableRow">
         <item name="android:padding">1dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:background">?attr/pageBackground</item>
     </style>
     <style name="DetailTableRowMaterial" parent="DetailTableRow">
         <item name="android:background">@color/transparent</item>
@@ -420,6 +421,7 @@
     <!--Edit Dialog -->
     <style name="EditValueTitle">
         <item name="android:layout_gravity">right|center_vertical</item>
+        <item name="android:layout_marginRight">8dp</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
@@ -502,7 +504,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center</item>
         <item name="android:textColorHint">?android:textColor</item>
-        <item name="boxBackgroundColor">?attr/pageBackground</item>
     </style>
 
     <style name="CalculateTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -511,7 +512,6 @@
         <item name="android:layout_weight">0.5</item>
         <item name="android:minWidth">126dp</item>
         <item name="android:textColorHint">?android:textColor</item>
-        <item name="boxBackgroundColor">?attr/pageBackground</item>
         <item name="helperTextTextColor">?android:textColor</item>
         <item name="startIconTint">?android:textColor</item>
     </style>

@@ -45,6 +45,7 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
             if(forSelection)
             {
                 titleGroup.setStrokeColor(Color.TRANSPARENT);
+                titleGroup.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
 
                 params = (FrameLayout.LayoutParams)titleText.getLayoutParams();
                 if(params != null)
@@ -53,10 +54,6 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
                     titleText.setLayoutParams(params);
                 }
             }
-        }
-        if(forSelection)
-        {
-            titleView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageBackground));
         }
 
         setCustomTitle(titleView);

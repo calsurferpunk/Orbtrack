@@ -10,7 +10,6 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:background="?attr/pageBackground"
         android:visibility="gone">
         <TextView
             android:id="@+id/Setup_Text_Title"

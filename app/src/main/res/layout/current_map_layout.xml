@@ -48,7 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:imageTint="?android:textColor"
-            app:backgroundTint="?attr/pageBackground"
+            app:backgroundTint="?attr/pageHighlightBackground"
             android:orientation="vertical"/>
 
         <LinearLayout

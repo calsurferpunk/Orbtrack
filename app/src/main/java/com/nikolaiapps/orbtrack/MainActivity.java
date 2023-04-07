@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
@@ -207,6 +208,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //setup displays
         mainDrawerLayout = this.findViewById(R.id.Main_Drawer_Layout);
         mainDrawerToggle = createActionBarDrawerToggle();
+        mainDrawerToggle.getDrawerArrowDrawable().setColor(Color.WHITE);
         mainDrawerLayout.addDrawerListener(mainDrawerToggle);
         mainPager = this.findViewById(R.id.Main_Pager);
         mainPagerTitles = this.findViewById(R.id.Main_Pager_Titles);

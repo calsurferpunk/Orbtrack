@@ -7,7 +7,6 @@
         android:id="@+id/Item_Detail_Layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/viewPagerBackground"
         android:padding="6dp"
         android:orientation="vertical">
         <LinearLayout
@@ -43,6 +42,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
+            android:background="?android:colorBackground"
             android:visibility="gone">
             <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/Item_Detail_Graph_Progress"
@@ -121,6 +121,7 @@
                 android:padding="5dp"
                 android:maxLines="10"
                 android:scrollbars="vertical"
+                android:background="?android:colorBackground"
                 android:text="@string/title_loading_dots"
                 android:autoLink="web"
                 android:visibility="gone"/>

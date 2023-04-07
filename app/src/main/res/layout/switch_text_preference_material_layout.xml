@@ -43,8 +43,7 @@
                 android:id="@+id/Switch_Text_Preference_Material_Switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                app:thumbTint="?android:textColor"/>
+                android:layout_marginLeft="16dp"/>
         </LinearLayout>
     </LinearLayout>
 

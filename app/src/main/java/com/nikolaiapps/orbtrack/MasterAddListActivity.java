@@ -25,8 +25,6 @@ import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -411,12 +409,12 @@ public class MasterAddListActivity extends BaseInputActivity
     private LinearLayout searchLayout;
     private RecyclerView addList;
     private MasterListAdapter addAdapter;
-    private TableLayout searchGroup;
-    private IconSpinner ownerList;
-    private IconSpinner groupList;
-    private IconSpinner ageList;
+    private View ageLayout;
+    private View searchGroup;
+    private SelectListInterface ownerList;
+    private SelectListInterface groupList;
+    private SelectListInterface ageList;
     private EditText searchText;
-    private TableRow ageRow;
     private AppCompatImageButton showButton;
     private MaterialButton addButton;
     private MultiProgressDialog downloadProgress;
@@ -771,7 +769,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private void setupInputs(MasterListAdapter listAdapter, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories)
     {
         //setup inputs
-        listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageRow, searchText, showButton, usedOwners, usedCategories, addAdapter.getHasLaunchDates());
+        listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchText, showButton, usedOwners, usedCategories, addAdapter.getHasLaunchDates());
 
         //update title
         updateTitleCount();
@@ -798,13 +796,17 @@ public class MasterAddListActivity extends BaseInputActivity
         boolean[] orbitalIsSelected = addIntent.getBooleanArrayExtra(ParamTypes.OrbitalIsSelected);
         MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
         searchLayout = this.findViewById(R.id.Orbital_Search_Layout);
-        searchGroup = this.findViewById(R.id.Orbital_Search_Table);
-        ownerList = this.findViewById(R.id.Orbital_Search_Owner_List);
-        groupList = this.findViewById(R.id.Orbital_Search_Group_List);
-        ageList = this.findViewById(R.id.Orbital_Search_Age_List);
+        searchGroup = this.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
+        ownerList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
+        groupList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
+        ageList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
         addList = this.findViewById(R.id.Master_Add_List);
         searchText = this.findViewById(R.id.Orbital_Search_Text);
-        ageRow = this.findViewById(R.id.Orbital_Search_Age_Row);
+        ageLayout = this.findViewById(R.id.Orbital_Search_Age_Layout);
+        if(ageLayout == null)
+        {
+            ageLayout = this.findViewById(R.id.Orbital_Search_Age_Row);
+        }
         showButton = this.findViewById(R.id.Orbital_Search_Show_Button);
         addButton = this.findViewById(R.id.Master_Add_Button);
 

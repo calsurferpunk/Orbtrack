@@ -1212,7 +1212,7 @@ public abstract class Current
         }
 
         //Set saved items
-        public void setSavedItems(Object[] saveItems)
+        public static void setSavedItems(Object[] saveItems)
         {
             //set saved items
             savedItems = saveItems;
@@ -1386,11 +1386,13 @@ public abstract class Current
         ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_lens_view, container, false);
         FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
         int page = pageFragment.getPageParam();
+        int group = pageFragment.getGroupParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
         int pathDivisions = savedState.getInt(MainActivity.ParamTypes.PathDivisions, 8);
-        boolean onCalculateView = (page == Calculate.PageType.View);
-        boolean onCalculatePasses = (page == Calculate.PageType.Passes);
-        boolean onCalculateIntersection = (page == Calculate.PageType.Intersection);
+        boolean onCalculate = (group == MainActivity.Groups.Calculate);
+        boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
+        boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
+        boolean onCalculateIntersection = (onCalculate && page == Calculate.PageType.Intersection);
         Calculate.ViewAngles.Item[] savedViewItems = (Calculate.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.View);
         Calculate.Passes.Item[] savedPassItems = (savedState.getBoolean(MainActivity.ParamTypes.GetPassItems, false) ? (Calculate.Passes.Item[])Calculate.PageAdapter.getSavedItems(onCalculateIntersection ? Calculate.PageType.Intersection : Calculate.PageType.Passes) : null);
         boolean forceShowPaths = savedState.getBoolean(MainActivity.ParamTypes.ForceShowPaths, false);

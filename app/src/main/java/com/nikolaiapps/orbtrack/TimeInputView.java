@@ -7,8 +7,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Parcelable;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatEditText;
+import androidx.fragment.app.FragmentManager;
 import android.util.AttributeSet;
 import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
@@ -70,15 +70,16 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
         if(event.getAction() == MotionEvent.ACTION_DOWN)
         {
             Context context = this.getContext();
+            FragmentManager manager;
 
             performClick();
 
-            //if context is ContextThemeWrapper and using material
-            if(context instanceof androidx.appcompat.view.ContextThemeWrapper && Settings.getMaterialTheme(context))
+            //if using material
+            if(Settings.getMaterialTheme(context))
             {
-                //if base context is AppCompatActivity
-                Context baseContext = ((androidx.appcompat.view.ContextThemeWrapper)context).getBaseContext();
-                if(baseContext instanceof AppCompatActivity)
+                //get fragment manager
+                manager = Globals.getFragmentManager(context);
+                if(manager != null)
                 {
                     //show dialog and stop
                     MaterialTimePicker timeDialog = new MaterialTimePicker.Builder().setHour(currentHour).setMinute(currentMinute).setTimeFormat(TimeFormat.CLOCK_12H).build();
@@ -90,7 +91,7 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
                             TimeInputView.this.onTimeSet(null, timeDialog.getHour(), timeDialog.getMinute());
                         }
                     });
-                    timeDialog.show(((AppCompatActivity)baseContext).getSupportFragmentManager(), "TimeDialog");
+                    timeDialog.show(manager, "TimeDialog");
                     return(true);
                 }
             }

@@ -181,7 +181,7 @@ public abstract class Selectable
                 final LinearLayout itemDetailButtonLayout;
                 final FloatingActionButton itemDetail3dCloseButton;
                 final FloatingActionButton itemDetail3dFullscreenButton;
-                final FragmentManager fm;
+                final FragmentManager manager;
                 final int[] screenSize = Globals.getDevicePixels(context);
                 CustomAlertDialogBuilder itemDetailDialog;
 
@@ -210,7 +210,7 @@ public abstract class Selectable
                 itemDetail3dCloseButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Close_Button);
                 itemDetail3dFullscreenButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Fullscreen_Button);
                 itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeID(currentContext), usingMaterial, false);
-                fm = (currentContext instanceof FragmentActivity ? ((FragmentActivity)currentContext).getSupportFragmentManager() : null);
+                manager = Globals.getFragmentManager(currentContext);
                 itemDetailButtonClickListener = listener;
                 dismissListeners = new ArrayList<>(0);
 
@@ -313,10 +313,10 @@ public abstract class Selectable
                         UpdateService.cancel(UpdateService.UpdateType.GetInformation);
 
                         //if fragment manager and item detail 3d preview are set
-                        if(fm != null && itemDetail3dView != null)
+                        if(manager != null && itemDetail3dView != null)
                         {
                             //remove it
-                            fm.beginTransaction().remove(itemDetail3dView).commit();
+                            manager.beginTransaction().remove(itemDetail3dView).commit();
                         }
                     }
                 });
@@ -331,10 +331,10 @@ public abstract class Selectable
                 });
 
                 //if fragment manager is set
-                if(fm != null)
+                if(manager != null)
                 {
                     //set item detail 3d preview
-                    itemDetail3dView = (Whirly.PreviewFragment)fm.findFragmentByTag("itemDetail3dView");
+                    itemDetail3dView = (Whirly.PreviewFragment)manager.findFragmentByTag("itemDetail3dView");
                 }
             }
             public ItemDetailDialog(Context context, LayoutInflater inflater, int id, String title, String ownerCode, Drawable icon, OnItemDetailButtonClickListener listener)
@@ -651,9 +651,11 @@ public abstract class Selectable
                 {
                     private void setPreviewVisible(int visibility)
                     {
-                        if(itemDetail3dView != null && currentContext instanceof FragmentActivity)
+                        FragmentManager manager = Globals.getFragmentManager(currentContext);
+
+                        if(itemDetail3dView != null && manager != null)
                         {
-                            FragmentTransaction transaction = ((FragmentActivity)currentContext).getSupportFragmentManager().beginTransaction();
+                            FragmentTransaction transaction = manager.beginTransaction();
 
                             if(visibility == View.VISIBLE)
                             {

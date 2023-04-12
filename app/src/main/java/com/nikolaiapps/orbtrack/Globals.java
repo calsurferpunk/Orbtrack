@@ -62,6 +62,8 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.MutableLiveData;
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import androidx.core.app.ActivityCompat;
@@ -913,6 +915,28 @@ public abstract class Globals
         showSelectDialog(context, -1, title, selectType, AccountType.None, -1, null, listener);
     }
 
+    //Tries to get fragment manager from the given context
+    public static FragmentManager getFragmentManager(Context context)
+    {
+        //try to get fragment manager
+        if(context instanceof AppCompatActivity)
+        {
+            return(((AppCompatActivity)context).getSupportFragmentManager());
+        }
+        else if(context instanceof FragmentActivity)
+        {
+            return(((FragmentActivity)context).getSupportFragmentManager());
+        }
+        else if(context instanceof ContextThemeWrapper)
+        {
+            return(getFragmentManager(((ContextThemeWrapper)context).getBaseContext()));
+        }
+        else
+        {
+            return(null);
+        }
+    }
+
     //Shows a date dialog
     public static void showDateDialog(Context context, Calendar date, DatePickerDialog.OnDateSetListener listener)
     {
@@ -923,15 +947,17 @@ public abstract class Globals
             int year = date.get(Calendar.YEAR);
             int month = date.get(Calendar.MONTH);
             int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
+            Context dialogContext = null;
+            FragmentManager manager;
             DatePickerDialog legacyDateDialog;
             MaterialDatePicker<Long> dateDialog;
 
-            //if context is ContextThemeWrapper and using material
-            if(context instanceof ContextThemeWrapper && Settings.getMaterialTheme(context))
+            //if using material
+            if(Settings.getMaterialTheme(context))
             {
-                //if base context is AppCompatActivity
-                Context baseContext = ((ContextThemeWrapper)context).getBaseContext();
-                if(baseContext instanceof AppCompatActivity)
+                //get fragment manager
+                manager = getFragmentManager(context);
+                if(manager != null)
                 {
                     //show dialog and stop
                     dateDialog = MaterialDatePicker.Builder.datePicker().setSelection(date.getTimeInMillis()).build();
@@ -951,7 +977,7 @@ public abstract class Globals
                             }
                         }
                     });
-                    dateDialog.show(((AppCompatActivity)baseContext).getSupportFragmentManager(), "DateDialog");
+                    dateDialog.show(manager, "DateDialog");
                     return;
                 }
             }

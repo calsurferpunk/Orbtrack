@@ -2217,7 +2217,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(currentPageAdapter != null)
             {
                 //save items if not viewing list
-                currentPageAdapter.setSavedItems((saveItems && currentSubPage != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
+                Current.PageAdapter.setSavedItems((saveItems && currentSubPage != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
             }
         }
         //else if showing calculate

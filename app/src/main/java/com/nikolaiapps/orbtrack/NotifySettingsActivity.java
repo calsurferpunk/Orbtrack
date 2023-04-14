@@ -35,7 +35,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     private Calculations.ObserverType location;
     private View fullMoonStartDivider;
     private View fullMoonEndDivider;
-    private IconSpinner orbitalList;
+    private SelectListInterface orbitalList;
     private LinearLayout fullMoonStartLayout;
     private LinearLayout fullMoonEndLayout;
     private ActivityResultLauncher<Intent> resultLauncher;
@@ -48,22 +48,30 @@ public class NotifySettingsActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.notify_settings_layout);
+        boolean usingMaterial = Settings.getMaterialTheme(this);
+        this.setContentView(usingMaterial ? R.layout.notify_settings_material_layout : R.layout.notify_settings_layout);
 
         byte index;
-        String text;
         Intent intent = this.getIntent();
+        String titleString = this.getString(R.string.title_notifications);
         Database.DatabaseSatellite currentOrbital;
-        final View divider = this.findViewById(R.id.Notify_Settings_Divider);
+        final View listDivider = this.findViewById(R.id.Notify_Settings_List_Divider);
         final View orbitalGroup = this.findViewById(R.id.Notify_Settings_Orbital_Group);
         final TextView notificationsTitle = this.findViewById(R.id.Notify_Settings_Notifications_Title);
         final MaterialButton cancelButton = this.findViewById(R.id.Notify_Settings_Cancel_Button);
         final MaterialButton okayButton = this.findViewById(R.id.Notify_Settings_Ok_Button);
 
+        //if using material
+        if(usingMaterial)
+        {
+            //hide action bar
+            hideActionBar();
+        }
+
         //get displays
         fullMoonStartDivider = this.findViewById(R.id.Notify_Settings_Full_Moon_Start_Divider);
         fullMoonEndDivider = this.findViewById(R.id.Notify_Settings_Full_Moon_End_Divider);
-        orbitalList = this.findViewById(R.id.Notify_Settings_Orbital_List);
+        orbitalList = this.findViewById(usingMaterial ? R.id.Notify_Settings_Orbital_Text_List : R.id.Notify_Settings_Orbital_List);
         notifySwitch = new SwitchCompat[Globals.NotifyType.NotifyCount];
         notifySwitch[Globals.NotifyType.PassStart] = this.findViewById(R.id.Notify_Settings_Pass_Start_Switch);
         notifySwitch[Globals.NotifyType.PassEnd] = this.findViewById(R.id.Notify_Settings_Pass_End_Switch);
@@ -154,23 +162,23 @@ public class NotifySettingsActivity extends BaseInputActivity
 
             //update displays
             orbitalGroup.setVisibility(useList ? View.VISIBLE : View.GONE);
-            divider.setVisibility(useList ? View.VISIBLE : View.GONE);
+            listDivider.setVisibility(useList ? View.VISIBLE : View.GONE);
             if(!useList)
             {
                 //update displays
                 if(currentOrbital != null)
                 {
-                    text = currentOrbital.getName() + " " + notificationsTitle.getText();
-                    notificationsTitle.setText(text);
+                    titleString = currentOrbital.getName() + " " + titleString;
                 }
                 updateDisplays(noradId);
             }
             else
             {
-                //update list
-                orbitalList.setAdapter(new IconSpinner.CustomAdapter(this, Database.getOrbitals(this)));
+                //update displays
+                orbitalList.setAdapter(new IconSpinner.CustomAdapter(this, orbitalList, Database.getOrbitals(this)));
                 orbitalList.setSelectedValue(noradId);
             }
+            notificationsTitle.setText(titleString);
         }
         else
         {
@@ -283,8 +291,14 @@ public class NotifySettingsActivity extends BaseInputActivity
         {
             updateDisplays(notifySwitch[index], notifyNext[index], notifyAll[index], Settings.getNotifyPassSettings(NotifySettingsActivity.this, noradId, index));
         }
-        fullMoonStartDivider.setVisibility(moonVisibility);
-        fullMoonEndDivider.setVisibility(moonVisibility);
+        if(fullMoonStartDivider != null)
+        {
+            fullMoonStartDivider.setVisibility(moonVisibility);
+        }
+        if(fullMoonEndDivider != null)
+        {
+            fullMoonEndDivider.setVisibility(moonVisibility);
+        }
         fullMoonStartLayout.setVisibility(moonVisibility);
         fullMoonEndLayout.setVisibility(moonVisibility);
         if(moonVisibility == View.GONE)

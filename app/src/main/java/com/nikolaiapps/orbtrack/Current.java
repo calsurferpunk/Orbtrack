@@ -1866,9 +1866,9 @@ public abstract class Current
         //setup search list
         if(usingSearchList)
         {
-            searchList.setAdapter(new IconSpinner.CustomAdapter(context, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black), null));
+            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
             searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
-            searchList.setBackgroundItemColor(Globals.resolveColorID(context, R.attr.pageBackground));
+            searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
             searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
             searchList.setTextColor(textColor);
             searchList.setTextSelectedColor(textSelectedColor);

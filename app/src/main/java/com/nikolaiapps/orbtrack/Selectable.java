@@ -1007,9 +1007,13 @@ public abstract class Selectable
         }
 
         //Sets item selector
+        protected void setItemSelector(View itemView, int bgAttrId)
+        {
+            itemView.setBackground(Globals.getDataItemStateSelector(currentContext, bgAttrId));
+        }
         protected void setItemSelector(View itemView)
         {
-            itemView.setBackground(Globals.getDataItemStateSelector(currentContext));
+            setItemSelector(itemView, android.R.attr.colorBackground);
         }
 
         //Sets item background
@@ -1517,6 +1521,10 @@ public abstract class Selectable
                 selectListAdapter.setOnItemClickedListener(createOnItemClickListener());
                 selectListAdapter.setOnItemLongClickedListener(createOnItemLongClickListener());
                 selectListAdapter.setOnItemDetailButtonClickedListener(createOnItemDetailButtonClickListener());
+                if(selectListAdapter.forSubItems)
+                {
+                    rootView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
+                }
             }
 
             //return view

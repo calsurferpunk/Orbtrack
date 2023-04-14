@@ -208,9 +208,9 @@ public abstract class Settings
                     indicatorItems = new IconSpinner.Item[]
                     {
                         new IconSpinner.Item(Settings.getSatelliteIconImageId(context), Settings.getSatelliteIconImageIsThemeable(context), res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
-                        new IconSpinner.Item(R.drawable.shape_circle_black, true, res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
-                        new IconSpinner.Item(R.drawable.shape_square_black, true, res.getString(R.string.title_square), LensView.IndicatorType.Square),
-                        new IconSpinner.Item(R.drawable.shape_triangle_black, true, res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
+                        new IconSpinner.Item(R.drawable.shape_circle_black, res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
+                        new IconSpinner.Item(R.drawable.shape_square_black, res.getString(R.string.title_square), LensView.IndicatorType.Square),
+                        new IconSpinner.Item(R.drawable.shape_triangle_black, res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
                     };
                 }
                 if(sensorSmoothingItems == null || sensorSmoothingItems.length == 0)

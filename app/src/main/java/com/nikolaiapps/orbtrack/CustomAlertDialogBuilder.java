@@ -29,6 +29,7 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
     @SuppressLint("InflateParams")
     private void setTitleView(Context context, boolean useMaterial, boolean forSelection)
     {
+        int backgroundColor;
         FrameLayout.LayoutParams params;
         View titleView = LayoutInflater.from(context).inflate((useMaterial ? R.layout.dialog_title_material_view : R.layout.dialog_title_view), null, false);
         MaterialCardView titleGroup;
@@ -44,8 +45,10 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
 
             if(forSelection)
             {
+                backgroundColor = Globals.resolveColorID(context, R.attr.pageHighlightBackground);
                 titleGroup.setStrokeColor(Color.TRANSPARENT);
-                titleGroup.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
+                titleGroup.setBackgroundColor(backgroundColor);
+                titleText.setBackgroundColor(backgroundColor);
 
                 params = (FrameLayout.LayoutParams)titleText.getLayoutParams();
                 if(params != null)

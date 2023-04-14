@@ -20,14 +20,12 @@
             android:padding="5dp"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/pageBackground"
             android:choiceMode="multipleChoice"/>
 
         <View
             android:id="@+id/List_Loading_View"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:background="?attr/pageBackground"
             android:clickable="true"
             android:focusable="true"
             android:alpha="0.75"
@@ -37,8 +35,7 @@
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/List_Layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/pageBackground"/>
+        android:layout_height="wrap_content"/>
 
     <LinearLayout style="@style/ResultButtonLayout">
         <com.google.android.material.button.MaterialButton

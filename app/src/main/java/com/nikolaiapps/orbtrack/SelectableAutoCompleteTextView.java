@@ -24,6 +24,8 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     private int backgroundColor;
     private int backgroundItemColor;
     private int backgroundItemSelectedColor;
+    private Object lastValue;
+    private Object lastDefaultValue;
     private final int iconSizePx;
     private final Paint iconPaint;
     private final Rect iconArea;
@@ -56,6 +58,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         }
 
         //setup
+        setLast(null, null);
         allowAutoSelect = true;
         iconPaint = new Paint();
         iconArea = new Rect();
@@ -225,6 +228,20 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                 }
             }
         }
+
+        //try to set value again
+        if(lastDefaultValue != null)
+        {
+            setSelectedValue(lastValue, lastDefaultValue);
+        }
+        else if(lastValue instanceof String)
+        {
+            setSelectedText((String)lastValue);
+        }
+        else if(lastValue != null)
+        {
+            setSelectedValue(lastValue);
+        }
     }
 
     public void setAdapter(IconSpinner.CustomAdapter adapter)
@@ -284,6 +301,12 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         SelectListInterface.setTextSelectedColor(currentAdapter, textSelectedColor);
     }
 
+    private void setLast(Object value, Object defaultValue)
+    {
+        lastValue = value;
+        lastDefaultValue = defaultValue;
+    }
+
     private void setSelectedIndex(int index)
     {
         if(currentAdapter != null && index >= 0)
@@ -298,11 +321,13 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     public void setSelectedText(String value)
     {
         setSelectedIndex(SelectListInterface.setSelectedText(currentAdapter, value));
+        setLast(value, null);
     }
 
     public void setSelectedValue(Object value, Object defaultValue)
     {
         setSelectedIndex(SelectListInterface.setSelectedValue(currentAdapter, value, defaultValue));
+        setLast(value, defaultValue);
     }
     public boolean setSelectedValue(Object value)
     {
@@ -313,6 +338,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         {
             setSelectedIndex(index);
         }
+        setLast(value, null);
 
         return(setSelection);
     }

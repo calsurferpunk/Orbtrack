@@ -84,30 +84,34 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             this(txt, val);
             this.icon3 = icon3;
         }
+        public Item(Drawable icon3, String txt, Object val, String subText)
+        {
+            this(icon3, txt, val);
+            this.subText = subText;
+        }
         public Item(int icon3Id, boolean iconsUseThemeTint, String txt, Object val)
         {
             this(txt, val);
             this.icon3Id = icon3Id;
             this.iconsUseThemeTint = iconsUseThemeTint;
         }
+        public Item(int icon3Id, boolean iconsUseThemeTint, String txt, Object val, float rotateAngle)
+        {
+            this(icon3Id, iconsUseThemeTint, txt, val);
+            rotate = rotateAngle;
+        }
         public Item(int icon3Id, boolean iconsUseThemeTint, Object val)
         {
             this(icon3Id, iconsUseThemeTint, null, val);
+        }
+        public Item(int icon3Id, String txt, Object val)
+        {
+            this(icon3Id, true, txt, val);
         }
         public Item(int icon3Id, int tintColor, Object val)
         {
             this(icon3Id, false, null, val);
             this.icon3TintColor = tintColor;
-        }
-        public Item(int icon3Id, boolean iconsUseThemeTint, String txt, float rotateAngle)
-        {
-            this(icon3Id, iconsUseThemeTint, txt, txt);
-            rotate = rotateAngle;
-        }
-        public Item(Drawable icon3, String txt, Object val, String subText)
-        {
-            this(icon3, txt, val);
-            this.subText = subText;
         }
         public Item(int icon1Id, int icon1Color, int icon1SelectedColor, String txt, Object val)
         {
@@ -339,8 +343,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             selectedIndex = -1;
             listInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
             textColor = textSelectedColor = Globals.resolveColorID(context, android.R.attr.textColor);
-            backgroundColor = Globals.resolveColorID(context, R.attr.viewPagerBackground);
-            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageBackground);
+            backgroundColor = Globals.resolveColorID(context, android.R.attr.colorBackground);
+            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageHighlightBackground);
             usingMaterial = Settings.getMaterialTheme(context);
             getDefaultSize(context);
 
@@ -404,7 +408,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId, OnLoadItemsListener listener)
+        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
         {
             BaseConstructor(context);
 
@@ -420,6 +424,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                     items = loadedItems;
                     updateUsing();
                     loadingItems = false;
+
+                    //if called from an activity
                     if(context instanceof Activity)
                     {
                         ((Activity)context).runOnUiThread(new Runnable()
@@ -427,25 +433,33 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                             @Override
                             public void run()
                             {
+                                //notify change
                                 CustomAdapter.this.notifyDataSetChanged();
+
+                                //if there are items and view exists
+                                if(loadedItems.length > 0 && listView != null)
+                                {
+                                    //load adapter again
+                                    listView.loadAdapter();
+                                }
                             }
                         });
-                    }
-                    if(listener != null)
-                    {
-                        listener.onLoaded(loadedItems);
                     }
                 }
             });
             loadItems.execute(context, satellites, addMulti, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites, boolean addMulti, OnLoadItemsListener listener)
+        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti)
         {
-            this(context, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0, listener);
+            this(context, listView, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0);
+        }
+        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites)
+        {
+            this(context, listView, satellites, false);
         }
         public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
         {
-            this(context, satellites, false, null);
+            this(context, null, satellites, false);
         }
 
         private void updateUsing()
@@ -569,6 +583,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             boolean haveItemImage3;
             int px = 0;
             int color;
+            int currentBackgroundColor = (isSelected ? backgroundItemSelectedColor : backgroundItemColor);
             Drawable icon2;
             Context context;
             Rect iconBounds;
@@ -601,7 +616,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             itemBackground = convertView.findViewById(R.id.Spinner_Item_Background);
             if(itemBackground != null)
             {
-                itemBackground.setBackgroundColor(isSelected ? backgroundItemSelectedColor : backgroundItemColor);
+                itemBackground.setBackgroundColor(currentBackgroundColor);
                 itemBackground.setVisibility(loadingItems ? View.GONE : View.VISIBLE);
             }
 
@@ -640,6 +655,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 //update displays
                 if(haveItemImage1)
                 {
+                    itemImage1.setBackgroundColor(currentBackgroundColor);
                     if(currentItem.usingIcon1Colors())
                     {
                         color = (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color);
@@ -658,6 +674,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 }
                 if(haveItemImage2)
                 {
+                    itemImage2.setBackgroundColor(currentBackgroundColor);
                     itemImage2.setImageDrawable(icon2);
                     if(icon2 != null && itemImage1 != null)
                     {
@@ -669,6 +686,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 }
                 if(haveItemImage3)
                 {
+                    itemImage3.setBackgroundColor(currentBackgroundColor);
                     if(currentItem.usingIcon3Colors())
                     {
                         color = (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color);
@@ -707,11 +725,13 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 }
                 if(itemText != null)
                 {
+                    itemText.setBackgroundColor(currentBackgroundColor);
                     itemText.setText(currentItem.text);
                     itemText.setTextColor(isSelected ? textSelectedColor : textColor);
                 }
                 if(itemSubText != null)
                 {
+                    itemSubText.setBackgroundColor(currentBackgroundColor);
                     if(currentItem.subText != null)
                     {
                         itemSubText.setText(currentItem.subText);
@@ -860,6 +880,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
     public void setOnItemSelectedListener(@Nullable OnItemSelectedListener listener)
     {
         itemSelectedListener = listener;
+    }
+
+    public void loadAdapter()
+    {
+        //do nothing
     }
 
     public void setAdapter(CustomAdapter adapter)

@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:background="?attr/pageHighlightBackground">
     <TableLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp">
         <TableRow android:id="@+id/Edit_Value_Row" android:padding="5dp">
             <TextView
-                android:id="@+id/Edit_Value_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                style="@style/EditValueTitle"/>
+                style="@style/EditValueTitle"
+                android:id="@+id/Edit_Value_Title"/>
 
             <LinearLayout
                 android:orientation="horizontal"
@@ -41,8 +39,6 @@
         <TableRow android:id="@+id/Edit_Value2_Row" android:padding="5dp" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Value2_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 style="@style/EditValueTitle"/>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -58,7 +54,6 @@
                     android:layout_height="wrap_content"
                     android:inputType="textPassword"
                     android:maxLength="50"
-                    android:padding="10dp"
                     android:singleLine="true"
                     android:autofillHints="@string/empty"
                     android:hint="@string/empty"/>
@@ -67,19 +62,16 @@
 
         <TextView
             android:id="@+id/Edit_Text"
+            style="@style/EditValueTitle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:padding="5dp"
             android:autoLink="web"
             android:text="@string/spacetrack_create_link"
-            android:visibility="gone"
-            style="@style/EditValueTitle"/>
+            android:visibility="gone"/>
 
         <TableRow android:id="@+id/Edit_Number_Row" android:padding="5dp" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Number_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 style="@style/EditValueTitle"/>
 
             <EditText
@@ -98,8 +90,6 @@
         <TableRow android:id="@+id/Edit_Number2_Row" android:padding="5dp" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Number2_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 style="@style/EditValueTitle"/>
 
             <EditText
@@ -118,8 +108,6 @@
         <TableRow android:id="@+id/Edit_Number3_Row" android:padding="5dp" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Number3_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 style="@style/EditValueTitle"/>
 
             <EditText
@@ -144,8 +132,6 @@
                 android:visibility="gone">
                 <TextView
                     android:id="@+id/Edit_List2_Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
                     style="@style/EditValueTitle"
                     android:visibility="gone"/>
 
@@ -168,8 +154,6 @@
         <TableRow android:id="@+id/Edit_Date_Row" android:padding="5dp" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Date_Title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 style="@style/EditValueTitle"/>
 
             <com.nikolaiapps.orbtrack.DateInputView
@@ -215,11 +199,10 @@
 
         <TextView
             android:id="@+id/Edit_Text2"
+            style="@style/EditValueTitle"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:padding="5dp"
             android:text="@string/empty"
-            android:visibility="gone"
-            style="@style/EditValueTitle"/>
+            android:visibility="gone"/>
     </TableLayout>
 </ScrollView>

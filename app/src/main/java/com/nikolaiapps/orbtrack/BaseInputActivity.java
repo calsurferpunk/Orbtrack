@@ -79,6 +79,17 @@ public abstract class BaseInputActivity extends AppCompatActivity
         }
     }
 
+    //Hides action bar
+    public void hideActionBar()
+    {
+        ActionBar actionBar = this.getSupportActionBar();
+
+        if(actionBar != null)
+        {
+            actionBar.hide();
+        }
+    }
+
     //Gets request code from given intent
     public static byte getRequestCode(Intent intent)
     {

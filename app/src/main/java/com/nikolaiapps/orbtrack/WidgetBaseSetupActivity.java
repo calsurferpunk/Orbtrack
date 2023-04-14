@@ -398,12 +398,12 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     locationList = rootView.findViewById(R.id.Widget_Setup_Location_Source_List);
                     if(res != null)
                     {
-                        locationItems.add(new IconSpinner.Item(R.drawable.ic_my_location_black, true, res.getString(R.string.title_location_current), Database.LocationType.Current));
+                        locationItems.add(new IconSpinner.Item(R.drawable.ic_my_location_black, res.getString(R.string.title_location_current), Database.LocationType.Current));
                         for(Database.DatabaseLocation savedLocation : locations)
                         {
-                            locationItems.add(new IconSpinner.Item(Globals.getLocationIcon(savedLocation.locationType), true, savedLocation.name, savedLocation.locationType));
+                            locationItems.add(new IconSpinner.Item(Globals.getLocationIcon(savedLocation.locationType), savedLocation.name, savedLocation.locationType));
                         }
-                        locationItems.add(new IconSpinner.Item(R.drawable.ic_search_black, true, res.getString(R.string.title_search), Database.LocationType.New));
+                        locationItems.add(new IconSpinner.Item(R.drawable.ic_search_black, res.getString(R.string.title_search), Database.LocationType.New));
                         locationList.setAdapter(new IconSpinner.CustomAdapter(context, locationItems.toArray(new IconSpinner.Item[0])));
                     }
                     locationList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()

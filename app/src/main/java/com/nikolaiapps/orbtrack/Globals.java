@@ -947,7 +947,6 @@ public abstract class Globals
             int year = date.get(Calendar.YEAR);
             int month = date.get(Calendar.MONTH);
             int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
-            Context dialogContext = null;
             FragmentManager manager;
             DatePickerDialog legacyDateDialog;
             MaterialDatePicker<Long> dateDialog;
@@ -3373,9 +3372,9 @@ public abstract class Globals
     }
 
     //Gets data item selector
-    public static StateListDrawable getDataItemStateSelector(Context context)
+    public static StateListDrawable getDataItemStateSelector(Context context, int bgAttrId)
     {
-        return(getItemStateSelector(context, android.R.attr.colorBackground, false));
+        return(getItemStateSelector(context, bgAttrId, false));
     }
 
     //Get visible icon for given state

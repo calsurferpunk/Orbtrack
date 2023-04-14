@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/Notify_Settings_Layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+    <TextView
+        android:id="@+id/Notify_Settings_Notifications_Title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:textStyle="bold"
+        android:text="@string/title_notifications"/>
+
+    <View android:id="@+id/Notify_Settings_Title_Divider" style="@style/DividerThin"/>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="24dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <LinearLayout
+                android:id="@+id/Notify_Settings_Orbital_Group"
+                style="@style/NotifySettingsMaterialLayout"
+                android:visibility="gone">
+                <TextView
+                    style="@style/NotifySettingsMaterialText"
+                    android:text="@string/title_orbital"/>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:id="@+id/Orbital_Search_Owner_Layout"
+                    style="@style/NotifySettingsTextInputLayout"
+                    android:layout_width="236dp"
+                    android:hint="@string/empty">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Notify_Settings_Orbital_Text_List"
+                        style="@style/TextViewMaterialList"
+                        android:hint="@string/empty"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <View android:id="@+id/Notify_Settings_List_Divider" style="@style/DividerThin" android:visibility="gone"/>
+
+            <LinearLayout
+                style="@style/NotifySettingsMaterialLayout">
+                <TextView
+                    style="@style/NotifySettingsMaterialText"
+                    android:text="@string/title_pass_start"/>
+
+                <RadioGroup
+                    android:id="@+id/Notify_Settings_Pass_Start_Group"
+                    style="@style/NotifySettingsMaterialRadioGroup">
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Pass_Start_Next_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_next"
+                        android:checked="true"/>
+
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Pass_Start_All_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_all"/>
+                </RadioGroup>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/Notify_Settings_Pass_Start_Switch"
+                    style="@style/NotifySettingsMaterialSwitch"/>
+            </LinearLayout>
+
+            <View style="@style/DividerThin"/>
+
+            <LinearLayout
+                style="@style/NotifySettingsMaterialLayout">
+                <TextView
+                    style="@style/NotifySettingsMaterialText"
+                    android:text="@string/title_pass_end"/>
+
+                <RadioGroup
+                    android:id="@+id/Notify_Settings_Pass_End_Group"
+                    style="@style/NotifySettingsMaterialRadioGroup">
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Pass_End_Next_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_next"
+                        android:checked="true"/>
+
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Pass_End_All_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_all"/>
+                </RadioGroup>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/Notify_Settings_Pass_End_Switch"
+                    style="@style/NotifySettingsMaterialSwitch"/>
+            </LinearLayout>
+
+            <View android:id="@+id/Notify_Settings_Full_Moon_Start_Divider" style="@style/DividerThin" android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/Notify_Settings_Full_Moon_Start_Layout"
+                style="@style/NotifySettingsMaterialLayout"
+                android:visibility="gone">
+                <TextView
+                    style="@style/NotifySettingsMaterialText"
+                    android:text="@string/title_full_moon_start"/>
+
+                <RadioGroup
+                    android:id="@+id/Notify_Settings_Full_Moon_Start_Group"
+                    style="@style/NotifySettingsMaterialRadioGroup">
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Full_Moon_Start_Next_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_next"
+                        android:checked="true"/>
+
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Full_Moon_Start_All_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_all"/>
+                </RadioGroup>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/Notify_Settings_Full_Moon_Start_Switch"
+                    style="@style/NotifySettingsMaterialSwitch"/>
+            </LinearLayout>
+
+            <View android:id="@+id/Notify_Settings_Full_Moon_End_Divider" style="@style/DividerThin" android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/Notify_Settings_Full_Moon_End_Layout"
+                style="@style/NotifySettingsMaterialLayout"
+                android:visibility="gone">
+                <TextView
+                    style="@style/NotifySettingsMaterialText"
+                    android:text="@string/title_full_moon_end"/>
+
+                <RadioGroup
+                    android:id="@+id/Notify_Settings_Full_Moon_End_Group"
+                    style="@style/NotifySettingsMaterialRadioGroup">
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Full_Moon_End_Next_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_next"
+                        android:checked="true"/>
+
+                    <androidx.appcompat.widget.AppCompatRadioButton
+                        android:id="@+id/Notify_Settings_Full_Moon_End_All_Radio"
+                        style="@style/RadioButton"
+                        android:text="@string/title_all"/>
+                </RadioGroup>
+
+                <com.google.android.material.materialswitch.MaterialSwitch
+                    android:id="@+id/Notify_Settings_Full_Moon_End_Switch"
+                    style="@style/NotifySettingsMaterialSwitch"/>
+            </LinearLayout>
+        </LinearLayout>
+    </ScrollView>
+
+    <LinearLayout style="@style/ResultButtonLayout">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/Notify_Settings_Cancel_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_cancel"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/Notify_Settings_Ok_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_ok" />
+    </LinearLayout>
+</LinearLayout>

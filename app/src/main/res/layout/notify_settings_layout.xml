@@ -11,8 +11,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:background="?attr/pageBackground">
+            android:orientation="vertical">
             <TextView
                 android:id="@+id/Notify_Settings_Notifications_Title"
                 style="@style/TitleText"
@@ -41,7 +40,7 @@
                     android:layout_marginStart="5dp"/>
             </LinearLayout>
 
-            <View android:id="@+id/Notify_Settings_Divider" style="@style/Divider" android:visibility="gone"/>
+            <View android:id="@+id/Notify_Settings_List_Divider" style="@style/Divider" android:visibility="gone"/>
 
             <LinearLayout
                 style="@style/NotifySettingsLayout">

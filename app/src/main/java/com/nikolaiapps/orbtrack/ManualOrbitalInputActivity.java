@@ -3,6 +3,7 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -29,11 +31,13 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.manual_object_input_layout);
+        boolean usingMaterial = Settings.getMaterialTheme(this);
+        setContentView(usingMaterial ? R.layout.manual_object_input_material_layout : R.layout.manual_object_input_layout);
 
         int index;
         final Intent resultIntent = new Intent();
         final LinearLayout manualLayout = this.findViewById(R.id.Manual_Layout);
+        TextInputLayout nameTextLayout = this.findViewById(R.id.Manual_Object_Name_Text_Layout);
         ArrayList<UpdateService.MasterOwner> owners = Database.getOwners(this);
         ArrayList<IconSpinner.Item> ownerItems = new ArrayList<>(0);
         ArrayList<UpdateService.MasterCategory> categories = Database.getCategories(this);
@@ -50,10 +54,16 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         currentCharLbl = this.findViewById(R.id.Manual_Object_Current_Char_Lbl);
         currentTotalLbl = this.findViewById(R.id.Manual_Object_Current_Total_Lbl);
         launchDate = this.findViewById(R.id.Manual_Object_Launch_Date);
-        final IconSpinner ownerList = this.findViewById(R.id.Manual_Object_Owner_List);
-        final IconSpinner groupList = this.findViewById(R.id.Manual_Object_Group_List);
+        final SelectListInterface ownerList = this.findViewById(usingMaterial ? R.id.Manual_Object_Owner_Text_List : R.id.Manual_Object_Owner_List);
+        final SelectListInterface groupList = this.findViewById(usingMaterial ? R.id.Manual_Object_Group_Text_List : R.id.Manual_Object_Group_List);
         MaterialButton cancelButton = this.findViewById(R.id.Manual_Object_Cancel_Button);
         MaterialButton addButton = this.findViewById(R.id.Manual_Object_Add_Button);
+
+        //set icon
+        if(nameTextLayout != null)
+        {
+            nameTextLayout.setStartIconDrawable(Globals.getDrawableText(this, " abc ", 16, Globals.resolveColorID(this, android.R.attr.textColor), Color.TRANSPARENT));
+        }
 
         //set owners list
         for(index = 0; index < owners.size(); index++)

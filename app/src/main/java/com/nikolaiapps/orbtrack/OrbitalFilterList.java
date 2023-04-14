@@ -424,7 +424,7 @@ public class OrbitalFilterList
 
             //get colors
             listBgColor = Globals.resolveColorID(currentContext, R.attr.colorAccentDark);
-            listBgItemColor = Globals.resolveColorID(currentContext, R.attr.pageBackground);
+            listBgItemColor = Globals.resolveColorID(currentContext, android.R.attr.colorBackground);
             listTextColor = Globals.resolveColorID(currentContext, android.R.attr.textColor);
             listBgSelectedColor = Globals.resolveColorID(currentContext, R.attr.colorAccentVariant);
             listTextSelectedColor = Globals.resolveColorID(currentContext, R.attr.colorAccentLightest);

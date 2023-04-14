@@ -30,6 +30,10 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
+    <style name="MaterialCalendarTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/purple</item>
+    </style>
+
     <!-- Preferences -->
     <style name="LightPreferenceOverlay" parent="PreferenceThemeOverlay">
         <item name="android:tint">@color/black</item>
@@ -42,15 +46,18 @@
     </style>
 
     <!-- Toolbar -->
-    <style name="ToolBarStyle" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+    <style name="ToolBarStyle" parent="Widget.Material3.Toolbar">
         <item name="subtitleTextColor">@color/light_gray</item>
+    </style>
+
+    <!-- Drawer -->
+    <style name="DrawerToggleStyle" parent="Widget.AppCompat.DrawerArrowToggle">
+        <item name="color">@color/white</item>
     </style>
     
     <!-- Base themes -->
     <style name="LightBase" parent="Theme.Material3.Light">
-        <item name="pageBackground">@color/white</item>
         <item name="pageHighlightBackground">@color/very_light_gray</item>
-        <item name="viewPagerBackground">@color/very_light_gray</item>
         <item name="colorControlNormal">?attr/colorAccent</item>
         <item name="colorOutline">?attr/dividerLineColor</item>
         <item name="colorPrimary">?attr/colorAccent</item>
@@ -63,7 +70,7 @@
         <item name="colorSecondaryVariant">?attr/colorAccentDark</item>
         <item name="colorOnSecondary">?attr/colorAccentLightest</item>
         <item name="colorOnSurface">@color/gray</item>
-        <item name="colorSurface">?attr/viewPagerBackground</item>
+        <item name="colorSurface">@color/very_light_gray</item>
         <item name="colorSurfaceVariant">?attr/pageHighlightBackground</item>
         <item name="colorTertiaryContainer">?attr/colorPrimaryContainer</item>
         <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
@@ -74,9 +81,11 @@
         <item name="android:colorBackground">@color/white</item>
         <item name="android:textColor">@color/black</item>
         <item name="android:textColorHint">@color/grey_400</item>
+        <item name="android:textColorHighlight">@color/light_gray</item>
         <item name="android:textColorPrimary">@color/black</item>
         <item name="android:textColorSecondary">@color/gray</item>
         <item name="dialogStyle">@style/LightDialog</item>
+        <item name="drawerArrowStyle">@style/DrawerToggleStyle</item>
         <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
         <item name="toolbarStyle">@style/ToolBarStyle</item>
@@ -84,9 +93,7 @@
     </style>
 
     <style name="DarkBase" parent="Theme.Material3.Dark">
-        <item name="pageBackground">@color/very_dark_gray</item>
         <item name="pageHighlightBackground">@color/very_very_dark_gray</item>
-        <item name="viewPagerBackground">@color/black</item>
         <item name="colorControlNormal">?attr/colorAccent</item>
         <item name="colorOutline">?attr/dividerLineColor</item>
         <item name="colorPrimary">?attr/colorAccent</item>
@@ -99,7 +106,7 @@
         <item name="colorSecondaryVariant">?attr/colorAccentDark</item>
         <item name="colorOnSecondary">?attr/colorAccentLightest</item>
         <item name="colorOnSurface">@color/gray</item>
-        <item name="colorSurface">?attr/viewPagerBackground</item>
+        <item name="colorSurface">@color/black</item>
         <item name="colorSurfaceVariant">?attr/pageHighlightBackground</item>
         <item name="colorTertiaryContainer">?attr/colorPrimaryContainer</item>
         <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
@@ -110,9 +117,11 @@
         <item name="android:colorBackground">@color/black</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:textColorHint">@color/grey_600</item>
+        <item name="android:textColorHighlight">@color/dark_gray</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/gray</item>
         <item name="dialogStyle">@style/DarkDialog</item>
+        <item name="drawerArrowStyle">@style/DrawerToggleStyle</item>
         <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
         <item name="toolbarStyle">@style/ToolBarStyle</item>
@@ -362,6 +371,7 @@
         <item name="android:layout_gravity">bottom|center</item>
         <item name="android:layout_margin">6dp</item>
     </style>
+
     <style name="MaterialButtonRound" parent="MaterialButton">
         <item name="cornerRadius">18dp</item>
     </style>
@@ -420,17 +430,39 @@
 
     <!--Edit Dialog -->
     <style name="EditValueTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">right|center_vertical</item>
         <item name="android:layout_marginRight">8dp</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
-    <!--Text View Material List-->
+    <!--Text View Material-->
     <style name="TextViewMaterialList">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">none</item>
         <item name="android:textColorHint">@color/transparent</item>
+    </style>
+
+    <style name="TextViewMaterialInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColorHint">?android:textColor</item>
+        <item name="helperTextTextColor">?android:textColor</item>
+        <item name="startIconTint">?android:textColor</item>
+    </style>
+
+    <!--Manual-->
+    <style name="ManualEditTextMaterial">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:hint">@string/empty</item>
+        <item name="android:inputType">textNoSuggestions</item>
+        <item name="maxLines">1</item>
+        <item name="android:typeface">monospace</item>
+        <item name="android:textSize">12sp</item>
+        <item name="android:selectAllOnFocus">true</item>
     </style>
 
     <!--Calculate View-->
@@ -506,14 +538,11 @@
         <item name="android:textColorHint">?android:textColor</item>
     </style>
 
-    <style name="CalculateTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <style name="CalculateTextInputLayout" parent="TextViewMaterialInputLayout">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">0.5</item>
         <item name="android:minWidth">126dp</item>
-        <item name="android:textColorHint">?android:textColor</item>
-        <item name="helperTextTextColor">?android:textColor</item>
-        <item name="startIconTint">?android:textColor</item>
     </style>
 
     <!--Orbital Search Layout-->
@@ -681,34 +710,55 @@
     </style>
 
     <!--Notify settings-->
-    <style name="NotifySettingsLayout">
+    <style name="NotifySettingsMaterialLayout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:padding">10dp</item>
         <item name="android:orientation">horizontal</item>
     </style>
 
-    <style name="NotifySettingsText">
+    <style name="NotifySettingsLayout" parent="NotifySettingsMaterialLayout">
+        <item name="android:padding">10dp</item>
+    </style>
+
+    <style name="NotifySettingsMaterialText">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="NotifySettingsText" parent="NotifySettingsMaterialText">
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
     </style>
 
-    <style name="NotifySettingsSwitch">
+    <style name="NotifySettingsTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="textColor">?attr/textColor</item>
+        <item name="android:textColorHint">@color/white</item>
+    </style>
+
+    <style name="NotifySettingsMaterialSwitch">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">16dp</item>
+    </style>
+
+    <style name="NotifySettingsSwitch" parent="NotifySettingsMaterialSwitch">
         <item name="trackTint">?attr/dividerLineColor</item>
         <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
-    <style name="NotifySettingsRadioGroup">
-        <item name="android:layout_width">match_parent</item>
+    <style name="NotifySettingsMaterialRadioGroup">
+        <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">end</item>
         <item name="android:orientation">horizontal</item>
-        <item name="android:padding">5dp</item>
         <item name="android:visibility">gone</item>
+    </style>
+
+    <style name="NotifySettingsRadioGroup" parent="NotifySettingsMaterialRadioGroup">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:padding">5dp</item>
     </style>
 
     <!--Notify item-->

@@ -181,6 +181,7 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
             View itemView = LayoutInflater.from(context).inflate((usingMaterial ? R.layout.side_menu_list_material_group : R.layout.side_menu_list_group), parent, false);
             ItemHolder itemHolder = new ItemHolder(itemView, R.id.Group_Title_Image, R.id.Group_Title_Text);
 
+            setItemSelector(itemView, R.attr.pageHighlightBackground);
             setViewClickListeners(itemView, itemHolder);
             return(itemHolder);
         }

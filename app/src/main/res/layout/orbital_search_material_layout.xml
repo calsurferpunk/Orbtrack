@@ -24,7 +24,7 @@
                 style="@style/TextViewMaterialList"
                 android:hint="@string/title_owner"
                 android:enabled="false"/>
-            </com.google.android.material.textfield.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/Orbital_Search_Group_Layout"

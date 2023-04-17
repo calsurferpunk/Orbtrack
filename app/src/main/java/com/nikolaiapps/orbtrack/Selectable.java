@@ -1420,7 +1420,7 @@ public abstract class Selectable
                     //remove all column decorations
                     currentColumns = (int)tagObject;
                     selectList.removeItemDecorationAt(0);
-                    if(currentColumns > 1)
+                    if(currentColumns > 1 && !usingMaterial)
                     {
                         selectList.removeItemDecorationAt(0);
                     }
@@ -1454,12 +1454,8 @@ public abstract class Selectable
                 selectList.setAdapter(null);
                 selectList.setAdapter(selectListAdapter);
 
-                //if not using material
-                if(!usingMaterial)
-                {
-                    //update column count
-                    selectList.setTag(columns);
-                }
+                //update column count
+                selectList.setTag(columns);
 
                 //if columns and adapter are set
                 if(listColumns != null && selectListAdapter != null)

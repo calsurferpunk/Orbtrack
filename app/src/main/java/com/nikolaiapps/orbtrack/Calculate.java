@@ -37,6 +37,10 @@ import java.util.TimerTask;
 
 public abstract class Calculate
 {
+    static final int EXTENDED_COLUMN_1_WIDTH_DP = 510;
+    static final int EXTENDED_COLUMN_1_SHORT_WIDTH_DP = 450;
+    static final int EXTENDED_COLUMN_2_SHORT_WIDTH_DP = 500;
+
     public static abstract class PageType
     {
         static final int View = 0;
@@ -483,8 +487,8 @@ public abstract class Calculate
             {
                 boolean isSun;
                 boolean isMoon;
-                boolean showPhase = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_SHORT_WIDTH_DP);
-                boolean showIllumination = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_2_SHORT_WIDTH_DP);
+                boolean showPhase = (widthDp >= EXTENDED_COLUMN_1_SHORT_WIDTH_DP);
+                boolean showIllumination = (widthDp >= EXTENDED_COLUMN_2_SHORT_WIDTH_DP);
                 TextView phaseText;
                 TextView illuminationText;
                 CalculateDataBase currentData = dataItems[childPosition];
@@ -1370,7 +1374,7 @@ public abstract class Calculate
             {
                 Context context = parent.getContext();
                 Resources res = context.getResources();
-                boolean showSpeed = (widthDp >= Selectable.ListBaseAdapter.EXTENDED_COLUMN_1_WIDTH_DP);
+                boolean showSpeed = (widthDp >= EXTENDED_COLUMN_1_WIDTH_DP);
                 TextView speedText;
                 CalculateDataBase currentData = dataItems[childPosition];
 

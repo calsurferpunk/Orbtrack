@@ -123,10 +123,6 @@ public abstract class Selectable
 
     public static abstract class ListBaseAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
     {
-        static final int EXTENDED_COLUMN_1_WIDTH_DP = 510;
-        static final int EXTENDED_COLUMN_1_SHORT_WIDTH_DP = 450;
-        static final int EXTENDED_COLUMN_2_SHORT_WIDTH_DP = 500;
-
         public interface OnItemClickListener
         {
             void onItemClicked(View view, int position);
@@ -1458,8 +1454,12 @@ public abstract class Selectable
                 selectList.setAdapter(null);
                 selectList.setAdapter(selectListAdapter);
 
-                //update column count
-                selectList.setTag(columns);
+                //if not using material
+                if(!usingMaterial)
+                {
+                    //update column count
+                    selectList.setTag(columns);
+                }
 
                 //if columns and adapter are set
                 if(listColumns != null && selectListAdapter != null)

@@ -43,6 +43,8 @@ import java.util.TimerTask;
 
 public abstract class Current
 {
+    static final float EXTENDED_COLUMNS_WIDTH_DP = 671f;
+
     public static abstract class PageType
     {
         static final int Combined = 0;
@@ -930,7 +932,7 @@ public abstract class Current
             }
 
             //return desired column count
-            return(1);
+            return((int)Math.ceil(widthDp / EXTENDED_COLUMNS_WIDTH_DP));
         }
 
         @Override

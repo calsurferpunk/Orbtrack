@@ -245,7 +245,7 @@ public class EditValuesDialog
                         view.setBackgroundColor(color);
                     }
                 });
-                colorDialog.show(context);
+                colorDialog.show();
             }
         });
     }

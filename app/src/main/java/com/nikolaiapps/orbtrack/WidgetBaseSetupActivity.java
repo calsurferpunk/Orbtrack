@@ -1274,7 +1274,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             }
                         }
                     });
-                    colorDialog.show(context);
+                    colorDialog.show();
                 }
             });
         }

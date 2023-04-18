@@ -655,6 +655,68 @@
         <item name="android:orientation">horizontal</item>
     </style>
 
+    <!--Choose Color-->
+    <style name="ChooseColorLayout">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="ChooseColorMaterialLayout" parent="ChooseColorLayout">
+        <item name="android:layout_margin">8dp</item>
+    </style>
+
+    <style name="ChooseColorMaterialLandLayout" parent="ChooseColorLayout">
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
+    <style name="ChooseColorTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center</item>
+    </style>
+
+    <style name="ChooseColorSlider">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">match_parent</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="labelBehavior">gone</item>
+        <item name="android:stepSize">1</item>
+        <item name="tickVisible">false</item>
+        <item name="android:valueFrom">0</item>
+        <item name="android:valueTo">255</item>
+    </style>
+
+    <style name="ChooseColorTextInputLayout" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:hint">@string/empty</item>
+        <item name="android:textColorHint">?android:textColor</item>
+    </style>
+
+    <style name="ChooseColorEditText">
+        <item name="android:layout_width">45dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:maxLength">3</item>
+        <item name="android:inputType">number</item>
+        <item name="android:autofillHints" tools:targetApi="26">@string/empty</item>
+        <item name="android:hint">@string/empty</item>
+        <item name="android:selectAllOnFocus">true</item>
+        <item name="android:text">@string/text_0</item>
+    </style>
+
+    <style name="ChooseColorMaterialEditText" parent="ChooseColorEditText">
+        <item name="android:padding">8dp</item>
+        <item name="android:textColor">?android:textColor</item>
+    </style>
+
     <!--Floating button-->
     <style name="FloatingButton" parent="Widget.MaterialComponents.FloatingActionButton">
         <item name="android:layout_width">wrap_content</item>

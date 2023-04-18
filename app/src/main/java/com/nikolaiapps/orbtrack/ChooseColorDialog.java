@@ -13,13 +13,13 @@ import android.graphics.Paint;
 import android.graphics.Shader;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import androidx.annotation.NonNull;
 import androidx.core.content.ContextCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -27,15 +27,20 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+import com.google.android.material.slider.Slider;
 
 
 public class ChooseColorDialog
 {
+    private final int RED_INDEX = 0;
+    private final int GREEN_INDEX = 1;
+    private final int BLUE_INDEX = 2;
+    private final int OPACITY_INDEX = 3;
+
     public interface OnColorSelectedListener
     {
         void onColorSelected(int color);
@@ -71,11 +76,12 @@ public class ChooseColorDialog
     //displays
     private TextView colorBeforeText;
     private TextView colorCurrentText;
+    private Button negativeButton;
     private BorderButton colorBeforeView;
     private BorderButton colorCurrentView;
     private BorderButton colorCurrent2View;
     private CursorImageView colorImage;
-    private CursorImageView brightnessBar;
+    private CursorImageView brightnessSlider;
     private CheckBox transparentCheck;
     private LinearLayout colorTableLayout;
     private LinearLayout colorImageLayout;
@@ -83,7 +89,7 @@ public class ChooseColorDialog
     private LinearLayout greenLayout;
     private LinearLayout blueLayout;
     private LinearLayout opacityLayout;
-    private SeekBar[] barDisplays;
+    private Slider[] sliderDisplays;
     private EditText[] textDisplays;
     private static BitmapDrawable colorImageBackground;
     private static final int[] colorIdList = new int[]{R.color.red_100, R.color.red, R.color.red_900, R.color.brown_200,
@@ -94,12 +100,12 @@ public class ChooseColorDialog
                                                        R.color.purple_100, R.color.purple, R.color.purple_900, R.color.black };
     //
     //variables
-    private Drawable icon;
     private boolean closed;
     private boolean reloading;
     private boolean showAdvanced;
     private boolean allowOpacity;
     private boolean allowTransparent;
+    private final boolean usingMaterial;
     private int startColor;
     private int currentColor;
     private int lastColor;
@@ -111,21 +117,24 @@ public class ChooseColorDialog
     private int rgbTextOffset;
     private float[] rgbBase;
     private String title;
-    private Button negativeButton;
+    private Drawable icon;
+    private final Context currentContext;
     private OnColorSelectedListener colorSelectedListener;
 
     public ChooseColorDialog(Context context, int defaultColor)
     {
         icon = null;
+        currentContext = context;
         closed = reloading = showAdvanced = allowOpacity = allowTransparent = false;
+        usingMaterial = Settings.getMaterialTheme(currentContext);
         setColor(defaultColor);
         colorSelectedListener = null;
         rgbOffset = rgbTextOffset = 0;
         rgbBase = new float[]{0, 0, 0, 0};
-        title = (context != null ? context.getResources().getString(R.string.title_select_color) : null);
+        title = (currentContext != null ? currentContext.getResources().getString(R.string.title_select_color) : null);
     }
 
-    public void show(final Context context)
+    public void show()
     {
         //if closed
         if(closed)
@@ -134,25 +143,25 @@ public class ChooseColorDialog
             return;
         }
 
+        boolean haveContext = (currentContext != null);
         int index;
         int column;
-        int orientation = Globals.getScreenOrientation(context);
-        int paddingSize = (int)Globals.dpToPixels(context, 3);
+        int buttonMarginPx = (int)Globals.dpToPixels(currentContext, 3);
         final Button neutralButton;
         final Button[] buttons;
-        LayoutInflater viewInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
+        LayoutInflater viewInflater = (haveContext ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
         TableRow currentRow = null;
         TableLayout colorTable;
         BorderButton colorBefore2View;
         ViewGroup.LayoutParams colorImageParams;
         ViewGroup.LayoutParams brightBarParams;
-        View colorDialogView = (viewInflater != null ? viewInflater.inflate(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270 ? R.layout.choose_color_landscape_dialog : R.layout.choose_color_portrait_dialog, null, false) : null);
-        final Resources res = (context != null ? context.getResources() : null);
+        View colorDialogView = (viewInflater != null ? viewInflater.inflate((usingMaterial ? R.layout.choose_color_material_dialog : R.layout.choose_color_dialog), null, false) : null);
+        final Resources res = (haveContext ? currentContext.getResources() : null);
         final CircularProgressIndicator colorProgress = (colorDialogView != null ? colorDialogView.findViewById(R.id.Color_Progress) : null);
-        float[] buttonSize = Globals.dpsToPixels(context, 45, 35);
+        float[] buttonSize = Globals.dpsToPixels(currentContext, 45, 35);
 
         //if context and view are set
-        if(context != null && colorProgress != null)
+        if(haveContext && colorProgress != null)
         {
             colorBeforeText = colorDialogView.findViewById(R.id.Color_Before_Text);
             colorCurrentText = colorDialogView.findViewById(R.id.Color_Current_Text);
@@ -161,7 +170,7 @@ public class ChooseColorDialog
             colorCurrentView = colorDialogView.findViewById(R.id.Color_Current_View);
             colorCurrent2View = colorDialogView.findViewById(R.id.Color_Current2_View);
             colorImage = colorDialogView.findViewById(R.id.Color_Image);
-            brightnessBar = colorDialogView.findViewById(R.id.Color_Brightness_Bar);
+            brightnessSlider = colorDialogView.findViewById(R.id.Color_Brightness_Bar);
             transparentCheck = colorDialogView.findViewById(R.id.Color_Transparent_Check);
             colorTableLayout = colorDialogView.findViewById(R.id.Color_Table_Layout);
             colorImageLayout = colorDialogView.findViewById(R.id.Color_Image_Layout);
@@ -170,10 +179,10 @@ public class ChooseColorDialog
             blueLayout = colorDialogView.findViewById(R.id.Color_Blue_Layout);
             opacityLayout = colorDialogView.findViewById(R.id.Color_Opacity_Layout);
             colorTable = colorDialogView.findViewById(R.id.Color_Table);
-            barDisplays = new SeekBar[]{colorDialogView.findViewById(R.id.Color_Red_Bar), colorDialogView.findViewById(R.id.Color_Green_Bar), colorDialogView.findViewById(R.id.Color_Blue_Bar), colorDialogView.findViewById(R.id.Color_Opacity_Bar)};
+            sliderDisplays = new Slider[]{colorDialogView.findViewById(R.id.Color_Red_Slider), colorDialogView.findViewById(R.id.Color_Green_Slider), colorDialogView.findViewById(R.id.Color_Blue_Slider), colorDialogView.findViewById(R.id.Color_Opacity_Slider)};
             textDisplays = new EditText[]{colorDialogView.findViewById(R.id.Color_Red_Text), colorDialogView.findViewById(R.id.Color_Green_Text), colorDialogView.findViewById(R.id.Color_Blue_Text), colorDialogView.findViewById(R.id.Color_Opacity_Text)};
             colorImageParams = colorImage.getLayoutParams();
-            brightBarParams = brightnessBar.getLayoutParams();
+            brightBarParams = brightnessSlider.getLayoutParams();
             imageWidth = colorImageParams.width;
             imageHeight = colorImageParams.height;
             brightWidth = brightBarParams.width;
@@ -188,10 +197,10 @@ public class ChooseColorDialog
             for(final int currentColorId : colorIdList)
             {
                 //get color and create button
-                final int currentListColor = ContextCompat.getColor(context, currentColorId);
-                BorderButton currentButton = new BorderButton(new ContextThemeWrapper(context, R.style.ColorButton), null, 0);
+                final int currentListColor = ContextCompat.getColor(currentContext, currentColorId);
+                BorderButton currentButton = new BorderButton(new ContextThemeWrapper(currentContext, R.style.ColorButton), null, 0);
                 TableRow.LayoutParams buttonLayoutParams = new TableRow.LayoutParams((int)buttonSize[0], (int)buttonSize[1]);
-                buttonLayoutParams.setMargins(paddingSize, paddingSize, paddingSize, paddingSize);
+                buttonLayoutParams.setMargins(buttonMarginPx, buttonMarginPx, buttonMarginPx, buttonMarginPx);
                 currentButton.setBackgroundColor(currentListColor);
                 currentButton.setLayoutParams(buttonLayoutParams);
                 currentButton.setOnClickListener(new View.OnClickListener()
@@ -200,10 +209,10 @@ public class ChooseColorDialog
                     public void onClick(View v)
                     {
                         //set color and displays
-                        rgbBase[0] = Color.red(currentListColor);
-                        rgbBase[1] = Color.green(currentListColor);
-                        rgbBase[2] = Color.blue(currentListColor);
-                        rgbBase[3] = 255;
+                        rgbBase[RED_INDEX] = Color.red(currentListColor);
+                        rgbBase[GREEN_INDEX] = Color.green(currentListColor);
+                        rgbBase[BLUE_INDEX] = Color.blue(currentListColor);
+                        rgbBase[OPACITY_INDEX] = 255;
                         updateBars(true);
                         updateTexts(true);
                         updateBrightnessBarColor(res);
@@ -216,7 +225,7 @@ public class ChooseColorDialog
                 if(currentRow == null)
                 {
                     //create row
-                    currentRow = new TableRow(context);
+                    currentRow = new TableRow(currentContext);
                 }
 
 
@@ -252,20 +261,23 @@ public class ChooseColorDialog
                     @Override
                     public void onCreatedBackground(final Bitmap image)
                     {
-                        ((Activity)context).runOnUiThread(new Runnable()
+                        if(currentContext instanceof Activity)
                         {
-                            @Override
-                            public void run()
+                            ((Activity)currentContext).runOnUiThread(new Runnable()
                             {
-                                //use created
-                                colorImageBackground = new BitmapDrawable(res, image);
-                                colorImage.setBackgroundDrawable(colorImageBackground);
+                                @Override
+                                public void run()
+                                {
+                                    //use created
+                                    colorImageBackground = new BitmapDrawable(res, image);
+                                    colorImage.setBackgroundDrawable(colorImageBackground);
 
-                                //update displays
-                                colorProgress.setVisibility(View.GONE);
-                                colorImage.setVisibility(View.VISIBLE);
-                            }
-                        });
+                                    //update displays
+                                    colorProgress.setVisibility(View.GONE);
+                                    colorImage.setVisibility(View.VISIBLE);
+                                }
+                            });
+                        }
                     }
                 });
                 colorBackgroundTask.execute(null, null, null);
@@ -334,8 +346,8 @@ public class ChooseColorDialog
             });
 
             //setup brightness bar
-            brightnessBar.setFixed(true, false);
-            brightnessBar.setOnTouchListener(new View.OnTouchListener()
+            brightnessSlider.setFixed(true, false);
+            brightnessSlider.setOnTouchListener(new View.OnTouchListener()
             {
                 @Override
                 public boolean onTouch(View v, MotionEvent event)
@@ -359,10 +371,10 @@ public class ChooseColorDialog
                     rgbOffset = normalize(rawOffset - rgbTextOffset);
 
                     //move cursor
-                    brightnessBar.setCursor(0, y);
+                    brightnessSlider.setCursor(0, y);
 
                     //notify from user
-                    brightnessBar.setTag(true);
+                    brightnessSlider.setTag(true);
 
                     //update displays
                     updateBars(false);
@@ -370,42 +382,36 @@ public class ChooseColorDialog
                     updateCurrentColor();
 
                     //end notify from user
-                    brightnessBar.setTag(null);
+                    brightnessSlider.setTag(null);
 
                     //if down
                     if(event.getAction() == MotionEvent.ACTION_DOWN)
                     {
                         //perform click
-                        brightnessBar.performClick();
+                        brightnessSlider.performClick();
                     }
 
                     //handled
-                    return (true);
+                    return(true);
                 }
             });
             updateBrightnessBarColor(res, currentColor);
             updateCursors(true);
 
-            //setup component bars and opacity
-            for(index = 0; index < barDisplays.length; index++)
+            //setup component sliders and opacity
+            for(index = 0; index < sliderDisplays.length; index++)
             {
                 final int textIndex = index;
-                barDisplays[index].setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+                sliderDisplays[index].addOnChangeListener(new Slider.OnChangeListener()
                 {
                     @Override
-                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser)
+                    public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
                     {
-                        boolean fromBrightness = (brightnessBar.getTag() != null && brightnessBar.getTag().equals(true));
+                        boolean fromBrightness = (brightnessSlider.getTag() != null && brightnessSlider.getTag().equals(true));
 
                         //update display
-                        updateDisplay(res, textIndex, progress, true, false, fromBrightness, fromUser);
+                        updateDisplay(res, textIndex, (int)value, true, false, fromBrightness, fromUser);
                     }
-
-                    @Override
-                    public void onStartTrackingTouch(SeekBar seekBar){}
-
-                    @Override
-                    public void onStopTrackingTouch(SeekBar seekBar){}
                 });
             }
             setAllowOpacity(allowOpacity);
@@ -426,11 +432,11 @@ public class ChooseColorDialog
                     @Override
                     public void afterTextChanged(Editable s)
                     {
-                        boolean fromBrightness = (brightnessBar.getTag() != null && brightnessBar.getTag().equals(true));
+                        boolean fromBrightness = (brightnessSlider.getTag() != null && brightnessSlider.getTag().equals(true));
                         boolean fromUser = (textDisplays[barIndex].getTag() == null || !textDisplays[barIndex].getTag().equals(false));
                         String text = s.toString();
                         int intValue = Integer.parseInt(!text.isEmpty() ? text : "0");
-                        int textValue = (barIndex != 3 ? intValue : (int)((intValue / 100.0f) * 255));
+                        int textValue = (barIndex != OPACITY_INDEX ? intValue : (int)((intValue / 100.0f) * 255));
 
                         //update display
                         updateDisplay(res, barIndex, textValue, false, true, fromBrightness, fromUser);
@@ -466,7 +472,7 @@ public class ChooseColorDialog
             setShowAdvanced(showAdvanced);
 
             //show dialog
-            buttons = Globals.showConfirmDialog(context, icon, colorDialogView, title, null, res.getString(R.string.title_ok), res.getString(R.string.title_cancel), res.getString(R.string.title_advanced), true, new DialogInterface.OnClickListener()
+            buttons = Globals.showConfirmDialog(currentContext, icon, colorDialogView, title, null, res.getString(R.string.title_ok), res.getString(R.string.title_cancel), res.getString(R.string.title_advanced), true, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
@@ -490,7 +496,7 @@ public class ChooseColorDialog
                     if(reloading)
                     {
                         //show again
-                        show(context);
+                        show();
                     }
 
                     //reset
@@ -639,7 +645,7 @@ public class ChooseColorDialog
         if(nonAlphaColor != lastColor)
         {
             //update brightness bar with color
-            brightnessBar.setBackgroundDrawable(createBrightnessImageBg(res, brightWidth, brightHeight, nonAlphaColor));
+            brightnessSlider.setBackgroundDrawable(createBrightnessImageBg(res, brightWidth, brightHeight, nonAlphaColor));
 
             //update last color
             lastColor = color;
@@ -648,7 +654,7 @@ public class ChooseColorDialog
     private void updateBrightnessBarColor(Resources res)
     {
         //update with current base
-        updateBrightnessBarColor(res, Color.rgb(normalizePositive(rgbBase[0]), normalizePositive(rgbBase[1]), normalizePositive((rgbBase[2]))));
+        updateBrightnessBarColor(res, Color.rgb(normalizePositive(rgbBase[RED_INDEX]), normalizePositive(rgbBase[GREEN_INDEX]), normalizePositive((rgbBase[BLUE_INDEX]))));
     }
 
     //converts brightness y to rgb offset
@@ -661,10 +667,10 @@ public class ChooseColorDialog
     private void updateBar(int index, int value)
     {
         //if value is changing
-        if(barDisplays[index].getProgress() != value)
+        if((int)sliderDisplays[index].getValue() != value)
         {
             //set progress
-            barDisplays[index].setProgress(value);
+            sliderDisplays[index].setValue(value);
         }
     }
 
@@ -674,7 +680,7 @@ public class ChooseColorDialog
         int index;
 
         //go through each display (possibly not using opacity)
-        for(index = 0; index < barDisplays.length - (updateAlpha ? 0 : 1); index++)
+        for(index = 0; index < sliderDisplays.length - (updateAlpha ? 0 : 1); index++)
         {
             //update component bar
             updateBar(index, addOffset(rgbBase[index]));
@@ -684,7 +690,7 @@ public class ChooseColorDialog
     //updates text display
     private void updateText(int index, int value)
     {
-        String valueString = String.valueOf(index != 3 ? value : (int)Math.ceil((value / 255.0f) * 100));
+        String valueString = String.valueOf(index != OPACITY_INDEX ? value : (int)Math.ceil((value / 255.0f) * 100));
 
         //if value is changing
         if(valueString.length() > 0 && !textDisplays[index].getText().toString().equals(valueString))
@@ -720,7 +726,7 @@ public class ChooseColorDialog
     //update current color
     private void updateCurrentColor()
     {
-        int newColor = Color.argb((int)rgbBase[3], addOffset(rgbBase[0]), addOffset(rgbBase[1]), addOffset(rgbBase[2]));
+        int newColor = Color.argb((int)rgbBase[OPACITY_INDEX], addOffset(rgbBase[RED_INDEX]), addOffset(rgbBase[GREEN_INDEX]), addOffset(rgbBase[BLUE_INDEX]));
 
         //if color is changing
         if(currentColor != newColor)
@@ -737,7 +743,7 @@ public class ChooseColorDialog
     @SuppressWarnings("SpellCheckingInspection")
     private void updateCursors(boolean force, boolean updateImage)
     {
-        int[] coords = getCoordinates(Color.rgb((int) rgbBase[0], (int) rgbBase[1], (int) rgbBase[2]), imageWidth, imageHeight);
+        int[] coords = getCoordinates(Color.rgb((int)rgbBase[RED_INDEX], (int)rgbBase[GREEN_INDEX], (int)rgbBase[BLUE_INDEX]), imageWidth, imageHeight);
         int y = (int)((brightHeight / 2f) - ((coords[2] / 255f / 2f) * brightHeight));
 
         //if updating image and position is changing
@@ -748,10 +754,10 @@ public class ChooseColorDialog
         }
 
         //if forcing or it is changing
-        if(force || (brightnessBar.getCursorY() != y))
+        if(force || (brightnessSlider.getCursorY() != y))
         {
             //update cursor
-            brightnessBar.setCursor(0, y);
+            brightnessSlider.setCursor(0, y);
         }
     }
     private void updateCursors(boolean force)
@@ -774,7 +780,7 @@ public class ChooseColorDialog
                 rgbBase[displayIndex] = value;
 
                 //if not from opacity
-                if(displayIndex != 3)
+                if(displayIndex != OPACITY_INDEX)
                 {
                     //go through each component (not using opacity)
                     for(index = 0; index < rgbBase.length - 1; index++)
@@ -800,7 +806,7 @@ public class ChooseColorDialog
                 else
                 {
                     //make sure opacity is normalized
-                    rgbBase[3] = normalize(rgbBase[3]);
+                    rgbBase[OPACITY_INDEX] = normalize(rgbBase[OPACITY_INDEX]);
                 }
             }
 

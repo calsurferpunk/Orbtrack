@@ -237,6 +237,7 @@
     <string name="title_20_ms">20 Ms</string>
     <string name="title_100_ms">100 Ms</string>
     <string name="title_500_ms">500 Ms</string>
+    <string name="title_a">A</string>
     <string name="title_accept">Aceptar</string>
     <string name="title_account">Cuenta</string>
     <string name="title_account_add">Añadir Cuenta</string>
@@ -455,7 +456,6 @@
     <string name="title_now">Ahora</string>
     <string name="title_number">Número</string>
     <string name="title_numbers_have_commas">Números Tienen Comas</string>
-    <string name="title_o">O</string>
     <string name="title_ok">OK</string>
     <string name="title_opacity">Opacidad</string>
     <string name="title_open_settings">Configuración Abierta</string>

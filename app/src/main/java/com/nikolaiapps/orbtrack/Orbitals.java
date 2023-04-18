@@ -470,7 +470,7 @@ public abstract class Orbitals
                         });
                         colorDialog.setIcon(itemIcon);
                         colorDialog.setTitle(haveRes ? (res.getString(R.string.title_select) + " " + currentItem.text + " " + res.getString(R.string.title_color)) : currentItem.text);
-                        colorDialog.show(currentContext);
+                        colorDialog.show();
                     }
                 });
                 itemHolder.visibleButton.setOnClickListener(new View.OnClickListener()

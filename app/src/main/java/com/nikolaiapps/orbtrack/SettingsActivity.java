@@ -2376,7 +2376,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         v.setBackgroundColor(color);
                     }
                 });
-                colorDialog.show(context);
+                colorDialog.show();
             }
         });
     }

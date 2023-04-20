@@ -157,6 +157,7 @@
     <string name="desc_sensor_smoothing">Increase stability (higher) or decrease delay (lower).</string>
     <string name="desc_show_3d_paths">Use elevated or flat paths</string>
     <string name="desc_show_clouds">Show/hide clouds on surface</string>
+    <string name="desc_show_direction_centered">Keep guide direction centered on display</string>
     <string name="desc_show_footprint">Show orbitals visible areas on surface</string>
     <string name="desc_show_label_background">Show label backgrounds or make clear</string>
     <string name="desc_show_labels_always">Show labels even when not selected</string>
@@ -544,6 +545,7 @@
     <string name="title_show_3d_paths">Show 3d Paths</string>
     <string name="title_show_background">Show Background</string>
     <string name="title_show_clouds">Show Clouds</string>
+    <string name="title_show_direction_centered">Show Guide Direction Centered</string>
     <string name="title_show_footprint">Show Footprint</string>
     <string name="title_show_grid">Show Grid</string>
     <string name="title_show_horizon">Show Horizon</string>

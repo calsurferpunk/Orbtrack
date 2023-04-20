@@ -166,6 +166,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case ScreenKey.LensView:
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
+                        SwitchPreference lensShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.LensShowToolbars);
+                        SwitchPreference lensDirectionCentered = this.findPreference(Settings.PreferenceName.LensDirectionCentered);
                         SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
                         SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
@@ -182,6 +184,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(useCameraSwitch);
                         setupSwitch(rotateSwitch);
+                        setupSwitch(lensShowToolbarsSwitch);
+                        setupSwitch(lensDirectionCentered);
                         setupSwitch(lensShowIconDirection);
                         setupSwitchButton(lensUseHorizonSwitch);
                         setupSwitchText(lensWidthSwitch);
@@ -282,7 +286,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     case ScreenKey.MapViewDisplay:
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
-                        SwitchPreference showToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
+                        SwitchPreference mapShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
                         SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
                         SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
@@ -298,7 +302,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
-                        setupSwitch(showToolbarsSwitch);
+                        setupSwitch(mapShowToolbarsSwitch);
                         setupSwitch(showZoomSwitch);
                         setupSwitch(showLabelsAlwaysSwitch);
                         setupSwitch(showShadowsSwitch);
@@ -1527,6 +1531,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             }
                             break;
 
+                        case Settings.PreferenceName.LensDirectionCentered:
                         case Settings.PreferenceName.LensIndicator:
                         case Settings.PreferenceName.LensIndicatorIconShowDirection:
                         case Settings.PreferenceName.LensHorizonColor:
@@ -1538,6 +1543,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         case Settings.PreferenceName.LensAzimuthUserOffset:
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
+                        case Settings.PreferenceName.LensShowToolbars:
                             //lens needs recreate
                             setLensRecreateNeed();
                             break;

@@ -1651,7 +1651,8 @@ public abstract class Calculate
                                     break;
 
                                 case Globals.SubPageType.Lens:
-                                    newView = Current.onCreateLensView(this, inflater, container, savedInstanceState);
+                                    selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState);
                                     break;
                             }
                             break;
@@ -1681,7 +1682,8 @@ public abstract class Calculate
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PathDivisions, 8);
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PassIndex, params.getInt(MainActivity.ParamTypes.PassIndex, 0));
                                     savedInstanceState.putBoolean(MainActivity.ParamTypes.GetPassItems, true);
-                                    newView = Current.onCreateLensView(this, inflater, container, savedInstanceState);
+                                    selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState);
                                     break;
                             }
                             break;
@@ -1711,7 +1713,7 @@ public abstract class Calculate
 
                                 case Globals.SubPageType.Map:
                                 case Globals.SubPageType.Globe:
-                                    selectedOrbitals = (multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : (savedItems != null && savedItems.length > 0) ? (new Database.SatelliteData[]{new Database.SatelliteData(context, savedItems[0].id)}) : null);
+                                    selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
                                     newView = Current.onCreateMapView(this, inflater, container, selectedOrbitals, (subPage == Globals.SubPageType.Globe), savedInstanceState);
                                     break;
                             }
@@ -1767,6 +1769,13 @@ public abstract class Calculate
 
         @Override
         protected void onUpdateFinished(boolean success) { }
+
+        //Gets selected orbitals from inputs
+        private Database.SatelliteData[] getSelectedOrbitals(Context context, ArrayList<Integer> multiNoradId, Selectable.ListItem[] savedItems)
+        {
+            //use multi norad ID if it exists, else use saved items, otherwise nothing
+            return(multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : (savedItems != null && savedItems.length > 0) ? (new Database.SatelliteData[]{new Database.SatelliteData(context, savedItems[0].id)}) : null);
+        }
 
         //Sets orbital is selected
         private void setOrbitalIsSelected(boolean[] isSelected)

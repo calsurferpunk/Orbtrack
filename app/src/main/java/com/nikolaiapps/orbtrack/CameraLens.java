@@ -152,7 +152,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 if(lastAzimuth != Double.MAX_VALUE && lastElevation != Double.MAX_VALUE && azimuth != Double.MAX_VALUE && elevation != Double.MAX_VALUE && (lastAzimuth != azimuth || lastElevation != elevation))
                 {
                     //get angle direction
-                    angleDirection = 180 - Math.toDegrees(Math.atan2(lastElevation - elevation, lastAzimuth - azimuth));
+                    angleDirection = Globals.getAngleDirection(lastAzimuth, azimuth, lastElevation, elevation);
                 }
 
                 //update last angles
@@ -477,6 +477,28 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
+    private static class RelativeLocationProperties
+    {
+        public boolean closeArea;
+        public boolean outsideArea;
+        public float azCenterPx;
+        public float elCenterPx;
+        public float azDeltaDegrees;
+        public float elDeltaDegrees;
+
+        public RelativeLocationProperties(boolean closeArea, boolean outsideArea, float azCenterPx, float elCenterPx, float azDeltaDegrees, float elDeltaDegrees)
+        {
+            this.closeArea = closeArea;
+            this.outsideArea = outsideArea;
+            this.azCenterPx = azCenterPx;
+            this.elCenterPx = elCenterPx;
+            this.azDeltaDegrees = azDeltaDegrees;
+            this.elDeltaDegrees = elDeltaDegrees;
+        }
+    }
+
+    private static final float CLOSE_AREA_DEGREES = 12f;
+
     public int pathDivisions;
     public boolean showPaths;
     public boolean showHorizon;
@@ -498,9 +520,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int textBgColor;
     private final int horizonColor;
     private final int horizonLineColor;
+    private int calibrateIndex;
+    private int selectedNoradId;
     private int selectedOrbitalIndex;
     private boolean compassBad;
     private boolean compassHadBad;
+    private final boolean arrowDirectionCentered;
     private final boolean showIconIndicatorDirection;
     private final float textSize;
     private final float textOffset;
@@ -528,6 +553,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final Paint iconPaint;
     private final Paint currentPaint;
     private Rect selectedArea;
+    private final Bitmap arrowDirection;
+    private final Bitmap arrowDoubleDirection;
     private final Bitmap compassDirection;
     private Button calibrateOkayButton;
     private AlignmentAngle alignCenter;
@@ -541,10 +568,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final ArrayList<IconImage> orbitalIcons;
     private Rect[] currentOrbitalAreas;
     private Database.SatelliteData[] currentOrbitals;
+    private final Calculations.TopographicDataType[] calibrateAngles;
     private Calculations.TopographicDataType[] currentLookAngles;
     private CalculateViewsTask.OrbitalView[][] travelLookAngles;
 
-    public CameraLens(Context context)
+    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals)
     {
         super(context);
 
@@ -555,6 +583,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
         float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42);
 
+        selectedOrbitalIndex = -1;
+        selectedNoradId = Universe.IDs.None;
         orientation = getCameraOrientation();
         textColor = (darkTheme ? Color.argb(160, 255, 255, 255) : Color.argb(160, 0, 0, 0));
         textBgColor = (darkTheme ? Color.argb(50, 0, 0, 0) : Color.argb(50, 255, 255, 255));
@@ -600,6 +630,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentHolder.addCallback(this);
         this.setWillNotDraw(false);
 
+        arrowDirectionCentered = Settings.getLensDirectionCentered(context);
+        arrowDirection = Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawable(context, R.drawable.ic_arrow_up_black, R.color.white), Globals.getDrawable(context, R.drawable.ic_arrow_up_black, R.color.black)));
+        arrowDoubleDirection = Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawable(context, R.drawable.ic_arrow_up_double_black, R.color.white), Globals.getDrawable(context, R.drawable.ic_arrow_up_double_black, R.color.black)));
         compassDirection = BitmapFactory.decodeResource(currentResources, R.drawable.compass);
         compassWidth = compassDirection.getWidth();
         compassHeight = compassDirection.getHeight();
@@ -645,10 +678,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         helpText = null;
 
         orbitalIcons = new ArrayList<>(0);
-        currentOrbitals = new Database.SatelliteData[0];
+        currentOrbitals = (selectedOrbitals != null ? selectedOrbitals : new Database.SatelliteData[0]);
         currentOrbitalAreas = new Rect[0];
+        calibrateAngles = new Calculations.TopographicDataType[3];
         currentLookAngles = new Calculations.TopographicDataType[0];
         travelLookAngles = new CalculateViewsTask.OrbitalView[0][0];
+    }
+    public CameraLens(Context context)
+    {
+        this(context, null);
     }
 
     @Override
@@ -718,18 +756,17 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int selectedId = Universe.IDs.Invalid;
         byte currentType;
         byte selectedType = Database.OrbitalType.Satellite;
-        boolean outsideArea;
-        float azCenterPx;
+        boolean selectedCloseArea = false;
+        boolean selectedOutsideArea = false;
         float elCenterPx;
-        float azDeltaDeg;
         float elDeltaDeg;
         float alignCenterX;
         float alignCenterY;
         float currentAzDeg = getAzDeg();
         float currentElDeg = getElDeg();
-        float degToPxWidth = width / (useCameraDegWidth != Float.MAX_VALUE ? useCameraDegWidth : 1);
-        float degToPxHeight = height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1);
-        //float indicatorPxRadius = (degToPxWidth < degToPxHeight ? degToPxWidth : degToPxHeight) * 3.5f;
+        float degToPxWidth = getDegreeToPixelWidth(width);
+        float degToPxHeight = getDegreeToPixelHeight(height);
+        double angleDirection;
         double julianDateStart;
         double julianDateEnd;
         double pathJulianDelta;
@@ -742,6 +779,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         String currentName;
         String selectedName = "";
         Context context = getContext();
+        Calculations.TopographicDataType selectedLookAngle = null;
 
         //if camera area has been calculated
         if(useCameraDegWidth != Float.MAX_VALUE && useCameraDegHeight != Float.MAX_VALUE)
@@ -772,11 +810,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //go through each orbital and look angle
             for(index = 0; index < currentOrbitals.length; index++)
             {
-                //remember current orbital
+                //remember if on selection and current orbital
+                boolean currentSelected = (selectedOrbitalIndex == index);
                 Database.SatelliteData currentOrbital = currentOrbitals[index];
 
                 //if current orbital is set, look angle is set, and using orbital
-                if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelectedOrbital() || selectedOrbitalIndex == index))
+                if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelectedOrbital() || currentSelected))
                 {
                     //remember current color, look, and travel angles
                     int currentColor = currentOrbital.database.pathColor;
@@ -787,7 +826,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(currentLookAngle != null || currentTravel != null)
                     {
                         //setup paint
-                        currentPaint.setColor(Globals.getColor((showCalibration && selectedOrbitalIndex == index ? 70 : 255), currentColor));
+                        currentPaint.setColor(Globals.getColor((showCalibration && currentSelected ? 70 : 255), currentColor));
                         currentPaint.setStrokeWidth(indicatorThickness);
                     }
 
@@ -904,50 +943,31 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //if current look angle is set
                     if(currentLookAngle != null)
                     {
-                        //remember current ID, type, and name
+                        RelativeLocationProperties relativeProperties;
+
+                        //remember current ID, type, name
                         currentId = currentOrbital.getSatelliteNum();
                         currentType = currentOrbital.getOrbitalType();
                         currentName = currentOrbital.getName();
-                        if(selectedOrbitalIndex == index)
+
+                        //determine relative location
+                        relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight);
+
+                        //if on selection
+                        if(currentSelected)
                         {
-                            //update selected ID, type, name, and color
+                            //update selected properties
                             selectedId = currentId;
                             selectedType = currentType;
                             selectedName = currentName;
                             selectedColor = currentOrbital.database.pathColor;
-                        }
-
-                        //determine relative location
-                        azDeltaDeg = (float)Globals.degreeDistance(currentAzDeg, currentLookAngle.azimuth);
-                        elDeltaDeg = (float)Globals.degreeDistance(currentElDeg, currentLookAngle.elevation);
-                        outsideArea = false;
-
-                        //get center
-                        azCenterPx = widthHalf + (azDeltaDeg * degToPxWidth);
-                        if(azCenterPx > width)
-                        {
-                            azCenterPx = width;
-                            outsideArea = true;
-                        }
-                        else if(azCenterPx < 0)
-                        {
-                            azCenterPx = 0;
-                            outsideArea = true;
-                        }
-                        elCenterPx = heightHalf - (elDeltaDeg * degToPxHeight);
-                        if(elCenterPx > height)
-                        {
-                            elCenterPx = height;
-                            outsideArea = true;
-                        }
-                        else if(elCenterPx < 0)
-                        {
-                            elCenterPx = 0;
-                            outsideArea = true;
+                            selectedCloseArea = relativeProperties.closeArea;
+                            selectedOutsideArea = relativeProperties.outsideArea;
+                            selectedLookAngle = currentLookAngle;
                         }
 
                         //draw orbital
-                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], azCenterPx, elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, outsideArea);
+                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, relativeProperties.outsideArea);
                     }
                 }
             }
@@ -967,18 +987,21 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     {
                         alignCenterX = widthHalf;
                         alignCenterY = heightHalf;
+                        calibrateIndex = 0;
                     }
                     //else if need bottom left
                     else if(needAlignmentBottomLeft())
                     {
                         alignCenterX = (0.25f * width);
                         alignCenterY = (0.75f * height);
+                        calibrateIndex = 1;
                     }
                     //else must need bottom right
                     else //if(needAlignmentTopRight())
                     {
                         alignCenterX = (0.75f * width);
                         alignCenterY = (0.25f * height);
+                        calibrateIndex = 2;
                     }
 
                     //show offset orbital position
@@ -1015,6 +1038,24 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     compassHadBad = true;
                 }
                 Globals.drawBitmap(canvas, compassDirection, compassCenterX, compassCenterY, currentAzDeg, currentPaint);
+            }
+
+            //if have a selection
+            if(haveSelectedOrbital())
+            {
+                Calculations.TopographicDataType usedLookAngle = (showCalibration ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
+                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight) : null);
+                boolean haveProperties = (relativeCalibrateProperties != null);
+                boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
+                boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
+
+                //if not too close and have look angles
+                if(!closeArea && usedLookAngle != null)
+                {
+                    //draw arrow direction
+                    angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
+                    Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * degToPxHeight)), (float)(angleDirection + 90), currentPaint);
+                }
             }
         }
 
@@ -1223,6 +1264,57 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         return((float)Globals.normalizeAngle(getAverageDegree(elDegArray)));
     }
 
+    //Gets degree to pixel conversion for given width
+    private float getDegreeToPixelWidth(int width)
+    {
+        return(width / (useCameraDegWidth != Float.MAX_VALUE ? useCameraDegWidth : 1));
+    }
+
+    //Gets degree to pixel conversion for given height
+    private float getDegreeToPixelHeight(int height)
+    {
+        return(height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1));
+    }
+
+    //Gets relative location properties
+    private RelativeLocationProperties getRelativeLocationProperties(double currentAzDeg, double currentElDeg, double locationAzDeg, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight)
+    {
+        float azCenterPx;
+        float elCenterPx;
+        float azDeltaDegrees = (float)Globals.degreeDistance(currentAzDeg, locationAzDeg);
+        float elDeltaDegrees = (float)Globals.degreeDistance(currentElDeg, locationElDeg);
+        boolean closeArea;
+        boolean outsideArea = false;
+
+        //get centers and area properties
+        azCenterPx = (width / 2f) + (azDeltaDegrees * degToPxWidth);
+        if(azCenterPx > width)
+        {
+            azCenterPx = width;
+            outsideArea = true;
+        }
+        else if(azCenterPx < 0)
+        {
+            azCenterPx = 0;
+            outsideArea = true;
+        }
+        elCenterPx = (height / 2f) - (elDeltaDegrees * degToPxHeight);
+        if(elCenterPx > height)
+        {
+            elCenterPx = height;
+            outsideArea = true;
+        }
+        else if(elCenterPx < 0)
+        {
+            elCenterPx = 0;
+            outsideArea = true;
+        }
+        closeArea = (Math.abs(azDeltaDegrees) <= CLOSE_AREA_DEGREES && Math.abs(elDeltaDegrees) <= CLOSE_AREA_DEGREES);
+
+        //return results
+        return(new RelativeLocationProperties(closeArea, outsideArea, azCenterPx, elCenterPx, azDeltaDegrees, elDeltaDegrees));
+    }
+
     //Update orbital positions to display
     public void updatePositions(Database.SatelliteData[] orbitals, Calculations.TopographicDataType[] lookAngles, boolean checkLength)
     {
@@ -1290,6 +1382,17 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //if look angles match orbitals length
         if(currentLookAngles.length == currentOrbitals.length)
         {
+            //if showing calibration
+            if(showCalibration)
+            {
+                //go through each calibration angle
+                for(index = 0; index < calibrateAngles.length; index++)
+                {
+                    //create new angles
+                    calibrateAngles[index] = new Calculations.TopographicDataType();
+                }
+            }
+
             //go through each look angle
             for(index = 0; index < currentLookAngles.length; index++)
             {
@@ -1310,6 +1413,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         //update status
                         selectIndex = index;
                         nearestDelta = totalDelta;
+                        if(showCalibration)
+                        {
+                            calibrateAngles[0].azimuth = currentLookAngle.azimuth;
+                            calibrateAngles[0].elevation = currentLookAngle.elevation;
+                        }
                     }
                 }
             }
@@ -1320,11 +1428,62 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         {
             //update selected
             selectedOrbitalIndex = selectIndex;
+            selectedNoradId = currentOrbitals[selectIndex].getSatelliteNum();
             selectedArea.setEmpty();
+
+            //if showing calibration
+            if(showCalibration)
+            {
+                //remember widths, heights, and first angles
+                int width = getWidth();
+                int height = getHeight();
+                float quarterWidthDegrees = (0.25f * width) / getDegreeToPixelWidth(width);
+                float quarterHeightDegrees = (0.25f * height) / getDegreeToPixelHeight(height);
+                Calculations.TopographicDataType firstAngles = calibrateAngles[0];
+
+                //calculate bottom left and top right angles
+                calibrateAngles[1].azimuth = firstAngles.azimuth + quarterWidthDegrees;
+                calibrateAngles[1].elevation = firstAngles.elevation + quarterHeightDegrees;
+                calibrateAngles[2].azimuth = firstAngles.azimuth - quarterWidthDegrees;
+                calibrateAngles[2].elevation = firstAngles.elevation - quarterHeightDegrees;
+            }
         }
 
         //return if selected nearest
         return(selectIndex >= 0);
+    }
+
+    //Selects orbital with given norad ID
+    public void selectOrbital(int noradId)
+    {
+        int index;
+
+        //if orbitals are set
+        if(currentOrbitals != null)
+        {
+            //go through each orbital
+            for(index = 0; index < currentOrbitals.length; index++)
+            {
+                //if a match
+                if(currentOrbitals[index].getSatelliteNum() == noradId)
+                {
+                    //set selection and stop
+                    selectedOrbitalIndex = index;
+                    selectedNoradId = noradId;
+                    return;
+                }
+            }
+        }
+
+        //not found
+        selectedOrbitalIndex = -1;
+        selectedNoradId = Universe.IDs.None;
+    }
+
+    //Gets selected norad ID
+    public int getSelectedNoradId()
+    {
+        return(selectedNoradId);
     }
 
     //Returns if any valid orbital is selected
@@ -1395,7 +1554,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     //Resets alignment status
     public void resetAlignmentStatus()
     {
+        calibrateIndex = 0;
         selectedOrbitalIndex = -1;
+        selectedNoradId = Universe.IDs.None;
         selectedArea = new Rect(0, 0, 0, 0);
         selectedArea.setEmpty();
 

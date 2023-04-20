@@ -4086,7 +4086,7 @@ public abstract class Globals
         return(name);
     }
 
-    public static void drawBitmap(Canvas canvas, Bitmap image, float centerX, float centerY, float rotateDegrees, Paint paint)
+    public static void drawBitmap(Canvas canvas, Bitmap image, float centerX, float centerY, float offsetY, float rotateDegrees, Paint paint)
     {
         int width;
         int height;
@@ -4099,9 +4099,13 @@ public abstract class Globals
             canvas.save();
             canvas.translate(centerX, centerY);
             canvas.rotate(rotateDegrees);
-            canvas.drawBitmap(image, width / -2f, height / -2f, paint);
+            canvas.drawBitmap(image, width / -2f, (height / -2f) + offsetY, paint);
             canvas.restore();
         }
+    }
+    public static void drawBitmap(Canvas canvas, Bitmap image, float centerX, float centerY, float rotateDegrees, Paint paint)
+    {
+        drawBitmap(canvas, image, centerX, centerY, 0, rotateDegrees, paint);
     }
 
     //Gets location icon type icon ID
@@ -4564,6 +4568,12 @@ public abstract class Globals
     public static double degreeDistance(double start, double end)
     {
         return(degreeDistance(start, end, 180));
+    }
+
+    //Gets angle direction from start to end angles
+    public static double getAngleDirection(double startAzimuth, double startElevation, double endAzimuth, double endElevation)
+    {
+        return(180 - Math.toDegrees(Math.atan2(Globals.degreeDistance(endElevation, startElevation), Globals.degreeDistance(endAzimuth, startAzimuth))));
     }
 
     //Gets distance between 2 latitude/longitude angles

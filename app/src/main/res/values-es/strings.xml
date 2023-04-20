@@ -157,6 +157,7 @@
     <string name="desc_sensor_smoothing">Aumenta la estabilidad (más alta) o disminuye la demora (más baja).</string>
     <string name="desc_show_3d_paths">Use caminos elevados o planos</string>
     <string name="desc_show_clouds">Mostrar/ocultar nubes en la superficie</string>
+    <string name="desc_show_direction_centered">Mantenga la dirección de la guía centrada en la pantalla</string>
     <string name="desc_show_footprint">Mostrar áreas visibles de orbitales en la superficie</string>
     <string name="desc_show_label_background">Mostrar fondos etiquetas o dejar en claro</string>
     <string name="desc_show_labels_always">Mostrar etiquetas incluso cuando no está seleccionado</string>
@@ -544,6 +545,7 @@
     <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
     <string name="title_show_background">Mostrar Fondo</string>
     <string name="title_show_clouds">Mostrar Nubes</string>
+    <string name="title_show_direction_centered">Mostrar Dirección Guía Centrada</string>
     <string name="title_show_footprint">Mostrar Huella</string>
     <string name="title_show_grid">Mostrar Cuadrícula</string>
     <string name="title_show_horizon">Mostrar Horizonte</string>

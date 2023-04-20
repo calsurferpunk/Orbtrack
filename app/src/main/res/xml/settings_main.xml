@@ -287,11 +287,6 @@
                     android:summary="@string/desc_show_orbital_direction"
                     app:isPreferenceVisible="false"/>
 
-                <com.nikolaiapps.orbtrack.SwitchButtonPreference
-                    app:titleText="@string/title_show_horizon"
-                    android:key="LensUseHorizon"
-                    android:summary="@string/desc_show_horizon"/>
-
                 <com.nikolaiapps.orbtrack.SwitchPreference
                     android:title="@string/title_use_camera"
                     android:key="LensUseCamera"
@@ -301,6 +296,21 @@
                     android:title="@string/title_force_rotate"
                     android:key="LensRotate"
                     android:summary="@string/desc_force_rotate"/>
+
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_show_toolbars"
+                    android:key="LensShowToolbars"
+                    android:summary="@string/desc_show_toolbars"/>
+
+                <com.nikolaiapps.orbtrack.SwitchButtonPreference
+                    app:titleText="@string/title_show_horizon"
+                    android:key="LensUseHorizon"
+                    android:summary="@string/desc_show_horizon"/>
+
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_show_direction_centered"
+                    android:key="LensDirectionCentered"
+                    android:summary="@string/desc_show_direction_centered"/>
 
                 <PreferenceCategory android:title="@string/title_rates">
                     <com.nikolaiapps.orbtrack.IconListPreference

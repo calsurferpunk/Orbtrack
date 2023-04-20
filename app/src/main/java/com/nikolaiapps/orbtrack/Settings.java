@@ -95,12 +95,13 @@ public abstract class Settings
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
         static final String MapShowToolbars = "MapShowToolbars";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
-        static final String LensFirstRun = "LensFirstRun";
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
         static final String ListShowPassQuality = "ListShowPassQuality";
+        static final String LensFirstRun = "LensFirstRun";
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
+        static final String LensDirectionCentered = "LensDirectionCentered";
         static final String LensIndicator = "LensIndicator";
         static final String LensIndicatorIconShowDirection = "LensIndicatorIconShowDirection";
         static final String LensHorizonColor = "LensHorizonColor";
@@ -112,6 +113,7 @@ public abstract class Settings
         static final String LensAzimuthUserOffset = "LensAzimuthUserOffset";
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
+        static final String LensShowToolbars = "LensShowToolbars";
         static final String LocationLastLatitude = "LocationLatitude";
         static final String LocationLastLongitude = "LocationLastLongitude";
         static final String LocationLastAltitude = "LocationLastAltitude";
@@ -1949,6 +1951,7 @@ public abstract class Settings
             case PreferenceName.LensFirstRun:
             case PreferenceName.LensUseCamera:
             case PreferenceName.LensIndicatorIconShowDirection:
+            case PreferenceName.LensShowToolbars:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
             case PreferenceName.MapMarkerShowShadow:
@@ -2308,6 +2311,12 @@ public abstract class Settings
         return(getPreferenceInt(context, PreferenceName.OrbitalIcons));
     }
 
+    //Returns if lens direction centered
+    public static boolean getLensDirectionCentered(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensDirectionCentered));
+    }
+
     //Gets indicator type
     public static int getIndicator(Context context)
     {
@@ -2400,6 +2409,18 @@ public abstract class Settings
     public static void setLensFirstRun(Context context, boolean first)
     {
         setPreferenceBoolean(context, PreferenceName.LensFirstRun, first);
+    }
+
+    //Returns lens showing toolbars
+    public static boolean getLensShowToolbars(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensShowToolbars));
+    }
+
+    //Sets lens showing search list
+    public static void setLensShowToolbars(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
     }
 
     //Get lens horizon color

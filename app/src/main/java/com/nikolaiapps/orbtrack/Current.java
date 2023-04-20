@@ -946,7 +946,8 @@ public abstract class Current
             View newView = null;
             Context context = this.getContext();
             Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems();
-            final Selectable.ListBaseAdapter listAdapter = new Combined.ItemListAdapter(context, savedItems, MainActivity.getSatellites());
+            Database.SatelliteData[] satellites = MainActivity.getSatellites();
+            final Selectable.ListBaseAdapter listAdapter = new Combined.ItemListAdapter(context, savedItems, satellites);
 
             //set default
             actionButton = null;
@@ -963,16 +964,16 @@ public abstract class Current
             if(createLens)
             {
                 //set orbital views
-                setOrbitalViews();
+                setOrbitalViews(satellites);
 
                 //create view
-                newView = onCreateLensView(this, inflater, container, savedInstanceState);
+                newView = onCreateLensView(this, inflater, container, satellites, savedInstanceState);
             }
             //else if need to create map view
             else if(createMapView)
             {
                 //create view
-                newView = Current.onCreateMapView(this, inflater, container, (MainActivity.mapViewNoradID == Integer.MAX_VALUE ? MainActivity.getSatellites() : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                newView = Current.onCreateMapView(this, inflater, container, (MainActivity.mapViewNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
             }
 
             //if view is not set yet
@@ -1319,6 +1320,7 @@ public abstract class Current
     public static Calculations.SatelliteObjectType[] orbitalViews = new Calculations.SatelliteObjectType[0];
 
     private static boolean lensShowHorizon = false;
+    private static boolean lensShowToolbars = true;
     private static boolean mapViewReady = false;
     private static boolean mapShowToolbars = true;
     private static boolean mapShowZoom = true;
@@ -1364,13 +1366,11 @@ public abstract class Current
     }
 
     //Sets all orbital views
-    private static void setOrbitalViews()
+    private static void setOrbitalViews(Database.SatelliteData[] satellites)
     {
         int index;
-        Database.SatelliteData[] satellites;
 
         //get views
-        satellites = MainActivity.getSatellites();
         orbitalViews = new Calculations.SatelliteObjectType[satellites.length];
         for(index = 0; index < satellites.length; index++)
         {
@@ -1379,14 +1379,179 @@ public abstract class Current
         }
     }
 
+    //Select orbital with the given ID
+    private static void selectOrbital(int noradId, boolean forLens)
+    {
+        boolean isNone = (noradId == Universe.IDs.None);
+        boolean isLocation = (noradId == Universe.IDs.CurrentLocation);
+        CoordinatesFragment mapView = getMapView();
+        CameraLens cameraView = getCameraView();
+
+        //if for lens and lens view exists
+        if(forLens && cameraView != null)
+        {
+            //select it
+            cameraView.selectOrbital(noradId);
+        }
+        //else if for map and map view exists
+        else if(!forLens && mapView != null)
+        {
+            //if location or anything
+            if(isLocation || !isNone)
+            {
+                //select it
+                mapView.selectOrbital(noradId);
+
+                //if location
+                if(isLocation)
+                {
+                    //move to now since not updated later
+                    mapView.moveCamera(currentLocation.geo.latitude, currentLocation.geo.longitude);
+                }
+            }
+            else
+            {
+                //select nothing
+                mapView.deselectCurrent();
+            }
+        }
+    }
+
+    //Setup search
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    {
+        boolean usingSearchList = (searchList != null);
+        int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
+        int textSelectedColor = Globals.resolveColorID(context, R.attr.colorAccentLightest);
+        ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
+
+        //setup selection list
+        if(selectedOrbitals != null)
+        {
+            //add none and location
+            selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_none), Universe.IDs.None, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
+            if(!forLens)
+            {
+                selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
+            }
+
+            //go through each selected orbital
+            for(Database.SatelliteData currentData : selectedOrbitals)
+            {
+                //add current orbital to list
+                selectedOrbitalList.add(currentData.database);
+            }
+        }
+
+        //setup search list
+        if(usingSearchList)
+        {
+            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+            searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
+            searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
+            searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
+            searchList.setTextColor(textColor);
+            searchList.setTextSelectedColor(textSelectedColor);
+            searchList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+            {
+                @Override
+                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                {
+                    //if list being shown
+                    if((forLens ? lensShowToolbars : mapShowToolbars))
+                    {
+                        //update selection
+                        selectOrbital((int)searchList.getSelectedValue(Universe.IDs.None), forLens);
+                    }
+                }
+
+                @Override
+                public void onNothingSelected(AdapterView<?> parent) {}
+            });
+            searchList.setSelectedValue(Universe.IDs.None);
+        }
+
+        //if show toolbars button exists
+        if(showToolbarsButton != null)
+        {
+            //setup toolbars button
+            showToolbarsButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    boolean showToolbars;
+                    CameraLens cameraView = (forLens ? getCameraView() : null);
+                    CoordinatesFragment mapView = (forLens ? null : getMapView());
+
+                    //try to reverse state
+                    if(forLens)
+                    {
+                        lensShowToolbars = !lensShowToolbars;
+                        showToolbars = lensShowToolbars;
+                        Settings.setLensShowToolbars(context, showToolbars);
+                    }
+                    else
+                    {
+                        mapShowToolbars = !mapShowToolbars;
+                        showToolbars = mapShowToolbars;
+                        Settings.setMapShowToolbars(context, showToolbars);
+                    }
+
+                    //update button
+                    showToolbarsButton.setChecked(showToolbars);
+
+                    //update visibility
+                    if(searchListLayout != null)
+                    {
+                        searchListLayout.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                    }
+                    if(pagePlayBar != null)
+                    {
+                        pagePlayBar.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                    }
+
+                    //if search list and exists and showing toolbars
+                    if(searchList != null && showToolbars)
+                    {
+                        //if showing lens and camera view exists
+                        if(forLens && cameraView != null)
+                        {
+                            //update selection
+                            searchList.setSelectedValue(cameraView.getSelectedNoradId());
+                        }
+                        //else if showing map and map view exists
+                        else if(!forLens && mapView != null)
+                        {
+                            //update selection
+                            searchList.setSelectedValue(mapView.getSelectedNoradId());
+                        }
+                    }
+                }
+            });
+
+            //set to opposite for later click called
+            if(forLens)
+            {
+                lensShowToolbars = !lensShowToolbars;
+            }
+            else
+            {
+                mapShowToolbars = !mapShowToolbars;
+            }
+        }
+    }
+
     //Creates lens view
-    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState)
     {
         final Context context = pageFragment.getContext();
         final Resources res = (context != null ? context.getResources() : null);
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
-        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_lens_view, container, false);
-        FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
+        final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_lens_view, container, false);
+        final FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
+        final LinearLayout searchListLayout = rootView.findViewById(R.id.Lens_Search_List_Layout);
+        final IconSpinner searchList;
         int page = pageFragment.getPageParam();
         int group = pageFragment.getGroupParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
@@ -1397,41 +1562,49 @@ public abstract class Current
         boolean onCalculateIntersection = (onCalculate && page == Calculate.PageType.Intersection);
         Calculate.ViewAngles.Item[] savedViewItems = (Calculate.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.View);
         Calculate.Passes.Item[] savedPassItems = (savedState.getBoolean(MainActivity.ParamTypes.GetPassItems, false) ? (Calculate.Passes.Item[])Calculate.PageAdapter.getSavedItems(onCalculateIntersection ? Calculate.PageType.Intersection : Calculate.PageType.Passes) : null);
+        final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
+        final boolean multiSelected = (haveSelected && selectedOrbitals.length > 1);
         boolean forceShowPaths = savedState.getBoolean(MainActivity.ParamTypes.ForceShowPaths, false);
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
-        final CameraLens cameraView;
+        final CameraLens cameraView = new CameraLens(context, selectedOrbitals);
+        cameraView.settingsMenu = rootView.findViewById(R.id.Lens_Settings_Menu);
         final Calculate.Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
         final boolean havePassViews = (passViews != null && passViews.length > 0);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
         final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Lens_Fullscreen_Button);
-        final FloatingActionStateButton showCalibrationButton;
-        final FloatingActionStateButton showHorizonButton;
-        final FloatingActionStateButton showPathButton;
+        final FloatingActionStateButton showToolbarsButton = (multiSelected ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
+        final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align) : null);;
+        final FloatingActionStateButton showHorizonButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_remove_black, R.string.title_show_horizon);
+        final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
         final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
         final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
         final MaterialButton cancelButton = rootView.findViewById(R.id.Lens_Cancel_Button);
 
-        //create camera
-        cameraView = new CameraLens(context);
+        //update status
+        lensShowToolbars = Settings.getLensShowToolbars(context);
+
+        //setup camera
         cameraViewReference = new WeakReference<>(cameraView);
         fullscreenButtonReference = new WeakReference<>(fullscreenButton);
         cameraView.updateAzDeclination(MainActivity.getObserver());
-        cameraView.pathDivisions = pathDivisions;
-        cameraView.showPaths = (lensShowPaths || useSaved);       //if showing paths or using a saved path
-        lensLayout.addView(cameraView, 0);              //add before menu
-
-        //get help text
         cameraView.helpText = rootView.findViewById(R.id.Lens_Help_Text);
+        cameraView.pathDivisions = pathDivisions;
+        cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
+        cameraView.showPaths = (lensShowPaths || useSaved);       //if showing paths or using a saved path
+        lensLayout.addView(cameraView, 0);                  //add before menu
 
-        //create settings menu
-        cameraView.settingsMenu = rootView.findViewById(R.id.Lens_Settings_Menu);
-        showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align) : null);
-        showHorizonButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_remove_black, R.string.title_show_horizon);
-        showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
+        //setup search displays
+        searchList = (multiSelected ? rootView.findViewById(R.id.Lens_Search_List) : null);
+        setupSearch(context, showToolbarsButton, searchList, searchListLayout, cameraView.playBar, selectedOrbitals, true);
+        if(showToolbarsButton != null)
+        {
+            //toggle displays
+            showToolbarsButton.performClick();
+        }
 
         //setup calibration button
         lensShowCalibration = false;
@@ -1445,6 +1618,30 @@ public abstract class Current
                     //reverse state
                     lensShowCalibration = !lensShowCalibration;
                     showCalibrationButton.setChecked(lensShowCalibration);
+                    if(lensShowCalibration)
+                    {
+                        //hide menu when starting calibration
+                        cameraView.settingsMenu.close();
+                    }
+
+                    //if list is set
+                    if(searchList != null)
+                    {
+                        //if list being shown
+                        if(lensShowToolbars)
+                        {
+                            //update selection
+                            searchList.setSelectedValue(Universe.IDs.None);
+                        }
+                        else
+                        {
+                            //update selection
+                            selectOrbital(Universe.IDs.None, true);
+                        }
+
+                        //make sure list can be used
+                        searchList.setEnabled(true);
+                    }
 
                     //update display
                     cameraView.showCalibration = lensShowCalibration;
@@ -1471,12 +1668,19 @@ public abstract class Current
                                 //try to select nearest
                                 if(cameraView.selectNearest())
                                 {
-                                    //update display
+                                    //update displays
+                                    if(searchList != null)
+                                    {
+                                        //update selection and disable list until finished
+                                        searchList.setSelectedValue(cameraView.getSelectedNoradId());
+                                        searchList.setEnabled(false);
+                                    }
                                     selectButton.setText(R.string.title_align);
                                     resetButton.setVisibility(View.GONE);
                                     cameraView.helpText.setText(R.string.title_set_actual_position);
                                 }
                             }
+                            //else if need to align center
                             else if(cameraView.needAlignmentCenter())
                             {
                                 //update status
@@ -1489,6 +1693,7 @@ public abstract class Current
                                 cameraView.helpText.setText(R.string.title_align_bottom_left);
                                 cancelButton.setText(R.string.title_skip);
                             }
+                            //else if need to align bottom left
                             else if(cameraView.needAlignmentBottomLeft())
                             {
                                 //update status
@@ -1497,6 +1702,7 @@ public abstract class Current
                                 //update display
                                 cameraView.helpText.setText(R.string.title_align_top_right);
                             }
+                            //else if need to align top right
                             else if(cameraView.needAlignmentTopRight())
                             {
                                 //update status
@@ -1627,7 +1833,6 @@ public abstract class Current
             header.setVisibility(View.VISIBLE);
 
             //setup play bar
-            cameraView.playBar = rootView.findViewById(R.id.Lens_Play_Bar);
             if(useSavedViewPath)
             {
                 if(savedViewItems.length > 1)
@@ -1645,7 +1850,7 @@ public abstract class Current
                 cameraView.playBar.setMax(passViews.length - 1);
             }
             cameraView.playBar.setPlayActivity(pageFragment.getActivity());
-            cameraView.playBar.setVisibility(View.VISIBLE);
+            cameraView.playBar.setVisibility(Settings.getLensShowToolbars(context) ? View.VISIBLE : View.GONE);
         }
         else
         {
@@ -1809,128 +2014,6 @@ public abstract class Current
 
         //return task
         return(task);
-    }
-
-    //Select orbital with the given ID
-    private static void selectOrbital(int noradId)
-    {
-        boolean isNone = (noradId == Universe.IDs.None);
-        boolean isLocation = (noradId == Universe.IDs.CurrentLocation);
-        CoordinatesFragment mapView = getMapView();
-
-        //if map view exists
-        if(mapView != null)
-        {
-            //if location or anything
-            if(isLocation || !isNone)
-            {
-                //select it
-                mapView.selectOrbital(noradId);
-
-                //if location
-                if(isLocation)
-                {
-                    //move to now since not updated later
-                    mapView.moveCamera(currentLocation.geo.latitude, currentLocation.geo.longitude);
-                }
-            }
-            else
-            {
-                //select nothing
-                mapView.deselectCurrent();
-            }
-        }
-    }
-
-    //setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals)
-    {
-        boolean usingSearchList = (searchList != null);
-        int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
-        int textSelectedColor = Globals.resolveColorID(context, R.attr.colorAccentLightest);
-        ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
-
-        //setup selection list
-        if(selectedOrbitals != null)
-        {
-            //add none and location
-            selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_none), Universe.IDs.None, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
-            selectedOrbitalList.add(new Database.DatabaseSatellite(context.getResources().getString(R.string.title_location_current), Universe.IDs.CurrentLocation, null, Globals.UNKNOWN_DATE_MS, Database.OrbitalType.Planet));
-
-            //go through each selected orbital
-            for(Database.SatelliteData currentData : selectedOrbitals)
-            {
-                //add current orbital to list
-                selectedOrbitalList.add(currentData.database);
-            }
-        }
-
-        //setup search list
-        if(usingSearchList)
-        {
-            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
-            searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
-            searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
-            searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
-            searchList.setTextColor(textColor);
-            searchList.setTextSelectedColor(textSelectedColor);
-            searchList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
-            {
-                @Override
-                public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-                {
-                    //if list being shown
-                    if(mapShowToolbars)
-                    {
-                        //update selection
-                        selectOrbital((int)searchList.getSelectedValue(Universe.IDs.None));
-                    }
-                }
-
-                @Override
-                public void onNothingSelected(AdapterView<?> parent) {}
-            });
-            searchList.setSelectedValue(Universe.IDs.None);
-        }
-
-        //if show toolbars button exists
-        if(showToolbarsButton != null)
-        {
-            //setup toolbars button
-            showToolbarsButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    CoordinatesFragment mapView = getMapView();
-
-                    //reverse state
-                    mapShowToolbars = !mapShowToolbars;
-                    showToolbarsButton.setChecked(mapShowToolbars);
-                    Settings.setMapShowToolbars(context, mapShowToolbars);
-
-                    //update visibility
-                    if(searchListLayout != null)
-                    {
-                        searchListLayout.setVisibility(mapShowToolbars ? View.VISIBLE : View.GONE);
-                    }
-                    if(pagePlayBar != null)
-                    {
-                        pagePlayBar.setVisibility(mapShowToolbars ? View.VISIBLE : View.GONE);
-                    }
-
-                    //if search list and map exists and showing toolbars
-                    if(searchList != null && mapView != null && mapShowToolbars)
-                    {
-                        //update selection
-                        searchList.setSelectedValue(mapView.getSelectedNoradId());
-                    }
-                }
-            });
-
-            //set to opposite for later click called
-            mapShowToolbars = !(Settings.getMapShowToolbars(context));
-        }
     }
 
     //Gets map information text
@@ -2481,6 +2564,9 @@ public abstract class Current
         final FloatingActionButton zoomOutButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_Out_Button);
         mapSettingsMenu.setVisibility(View.GONE);
 
+        //update status
+        mapShowToolbars = Settings.getMapShowToolbars(context);
+
         //get displays
         Bundle args = new Bundle();
         final TextView mapInfoText = rootView.findViewById(R.id.Map_Coordinate_Info_Text);
@@ -2490,7 +2576,7 @@ public abstract class Current
         Current.fullscreenButtonReference = new WeakReference<>(fullscreenButton);
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
         mapView.setArguments(args);
-        searchList = (multiSelected ? (IconSpinner)rootView.findViewById(R.id.Map_Search_List) : null);
+        searchList = (multiSelected ? rootView.findViewById(R.id.Map_Search_List) : null);
         page.playBar = rootView.findViewById(R.id.Map_Coordinate_Play_Bar);
         page.scaleBar = rootView.findViewById(R.id.Map_Coordinate_Scale_Bar);
         page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
@@ -2503,7 +2589,7 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null));
+        setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
 
         //if map info text exists and not using background
         if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))
@@ -2667,7 +2753,7 @@ public abstract class Current
                                 else
                                 {
                                     //update selection
-                                    selectOrbital(noradId);
+                                    selectOrbital(noradId, false);
                                 }
                             }
                             //else if norad ID changing and exists

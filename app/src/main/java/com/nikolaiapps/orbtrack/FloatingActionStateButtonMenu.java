@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.material.shape.CornerFamily;
+import com.google.android.material.shape.ShapeAppearanceModel;
 import java.util.ArrayList;
 
 
@@ -110,6 +112,7 @@ public class FloatingActionStateButtonMenu extends LinearLayout
         menuButton.setCompatElevation(1f);
         menuButton.setCustomSize((int)Globals.dpToPixels(context, SmallDp));
         menuButton.setStateColors(backgroundTintColor, checkedTintColor);
+        menuButton.setShapeAppearanceModel(ShapeAppearanceModel.builder().setAllCorners(CornerFamily.ROUNDED, Globals.dpToPixels(context, LargeDp)).build());
         menuButton.setShowChecked(showChecked);
         menuButton.setImageDrawable(Globals.getDrawable(context, imageId, imageTintColor, false));
         menuButton.setSupportImageTintList(ColorStateList.valueOf(imageTintColor));
@@ -193,7 +196,7 @@ public class FloatingActionStateButtonMenu extends LinearLayout
     public FloatingActionStateButton addMenuItem(int imageId, int stringId)
     {
         Context context = getContext();
-        float[] dps = Globals.dpsToPixels(context, 7, (Build.VERSION.SDK_INT >= 21 ? 20 : 10));
+        float[] dps = Globals.dpsToPixels(context, 7, (Build.VERSION.SDK_INT >= 21 ? 20 : 7));
         int padding = (int)dps[0];
         int offset = (int)dps[1];
         LinearLayout.LayoutParams textParams;

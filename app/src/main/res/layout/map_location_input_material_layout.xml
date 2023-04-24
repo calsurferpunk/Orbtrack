@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:ignore="ContentDescription"
+    android:id="@+id/Location_Layout"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <FrameLayout
+        android:id="@+id/Location_Map_Frame_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <FrameLayout
+            android:id="@+id/Location_Map_View"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <LinearLayout
+            android:id="@+id/Location_Zoom_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:gravity="bottom|end">
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/Location_Zoom_In_Button"
+                style="@style/FloatingButton"
+                android:alpha="0.7"
+                app:srcCompat="@drawable/ic_add_white"
+                app:fabSize="mini"/>
+
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/Location_Zoom_Out_Button"
+                style="@style/FloatingButton"
+                android:alpha="0.7"
+                app:srcCompat="@drawable/ic_remove_black"
+                android:tint="@color/white"
+                app:fabSize="mini"/>
+        </LinearLayout>
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginRight="16dp">
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextViewMaterialInputLayout"
+            android:hint="@string/title_name">
+            <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                android:id="@+id/Location_Input_Name"
+                style="@style/Widget.Material3.AutoCompleteTextView.FilledBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:singleLine="true"
+                android:padding="16dp"
+                android:imeOptions="actionNext"
+                android:hint="@string/empty" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/Location_Powered_Google_Image"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scaleType="fitEnd"
+            app:srcCompat="@drawable/powered_by_google_on_white" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextViewMaterialInputLayout"
+            android:hint="@string/title_latitude_north_south_range">
+            <EditText
+                android:id="@+id/Location_Latitude_Text"
+                style="@style/LocationMaterialEditText"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/TextViewMaterialInputLayout"
+            android:hint="@string/title_longitude_west_east_range">
+            <EditText
+                android:id="@+id/Location_Longitude_Text"
+                style="@style/LocationMaterialEditText"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <LinearLayout
+            android:id="@+id/Location_Altitude_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/Location_Altitude_Text_Layout"
+                style="@style/TextViewMaterialInputLayout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:hint="@string/title_altitude">
+                <EditText
+                    android:id="@id/Location_Altitude_Text"
+                    style="@style/LocationMaterialEditText"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Location_Altitude_Button"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:src="@drawable/ic_sync_white"
+                android:scaleType="fitCenter"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Location_Time_Zone_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/CalculateListInputLayout"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:hint="@string/title_time_zone">
+                <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                    android:id="@+id/Location_Time_Zone_Text_List"
+                    style="@style/TextViewMaterialList"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <androidx.appcompat.widget.AppCompatImageButton
+                android:id="@+id/Location_Time_Zone_Button"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:src="@drawable/ic_sync_white"
+                android:scaleType="fitCenter"/>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/ResultButtonLayout"
+            android:layout_marginTop="8dp">
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Location_Cancel_Button"
+                style="@style/ResultButton"
+                android:text="@string/title_cancel"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/Location_Add_Button"
+                style="@style/ResultButton"
+                android:text="@string/title_add"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

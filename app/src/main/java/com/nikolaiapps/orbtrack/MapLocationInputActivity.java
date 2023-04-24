@@ -4,12 +4,14 @@ package com.nikolaiapps.orbtrack;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.location.Location;
 import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.view.ViewCompat;
 import androidx.fragment.app.Fragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -23,6 +25,7 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.textfield.TextInputLayout;
 import java.util.TimeZone;
 
 
@@ -68,13 +71,15 @@ public class MapLocationInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.map_location_input_layout);
+        final boolean usingMaterial = Settings.getMaterialTheme(this);
+        setContentView(usingMaterial ? R.layout.map_location_input_material_layout : R.layout.map_location_input_layout);
 
         //get displays and task
         String text;
         Bundle args = new Bundle();
         Intent intent = this.getIntent();
         final boolean forSearch = intent.getBooleanExtra(ParamTypes.ForSearch, false);
+        final int primaryColor = Globals.resolveColorID(this, R.attr.colorPrimary);
         final int poweredByVisible = (forSearch ? View.VISIBLE : View.GONE);
         final int coordinateInputVisible = (forSearch ? View.GONE : View.VISIBLE);
         final MapLocation currentLocation = new MapLocation();
@@ -82,11 +87,14 @@ public class MapLocationInputActivity extends BaseInputActivity
         final FloatingActionButton zoomInButton = this.findViewById(R.id.Location_Zoom_In_Button);
         final FloatingActionButton zoomOutButton = this.findViewById(R.id.Location_Zoom_Out_Button);
         final LinearLayout locationLayout = this.findViewById(R.id.Location_Layout);
+        final LinearLayout altitudeLayout = this.findViewById(R.id.Location_Altitude_Layout);
+        final LinearLayout timeZoneLayout = this.findViewById(R.id.Location_Time_Zone_Layout);
         final TextView poweredGoogleLbl = this.findViewById(R.id.Location_Powered_Google_Lbl);
         final TextView latitudeLbl = this.findViewById(R.id.Location_Latitude_Lbl);
         final TextView longitudeLbl = this.findViewById(R.id.Location_Longitude_Lbl);
         final TextView altitudeLbl = this.findViewById(R.id.Location_Altitude_Lbl);
         final TextView timeZoneLbl = this.findViewById(R.id.Location_Time_Zone_Lbl);
+        final TextInputLayout altitudeTextLayout = this.findViewById(R.id.Location_Altitude_Text_Layout);
         final Resources res = this.getResources();
         final String invalidString = res.getString(R.string.title_invalid);
         final String latitudeString = res.getString(R.string.title_latitude);
@@ -97,7 +105,7 @@ public class MapLocationInputActivity extends BaseInputActivity
         final EditText latitudeText = this.findViewById(R.id.Location_Latitude_Text);
         final EditText longitudeText = this.findViewById(R.id.Location_Longitude_Text);
         final EditText altitudeText = this.findViewById(R.id.Location_Altitude_Text);
-        final IconSpinner timeZoneList = this.findViewById(R.id.Location_Time_Zone_List);
+        final SelectListInterface timeZoneList = this.findViewById(usingMaterial ? R.id.Location_Time_Zone_Text_List : R.id.Location_Time_Zone_List);
         final AppCompatImageButton altitudeButton = this.findViewById(R.id.Location_Altitude_Button);
         final AppCompatImageButton timeZoneButton = this.findViewById(R.id.Location_Time_Zone_Button);
         final MaterialButton cancelButton = this.findViewById(R.id.Location_Cancel_Button);
@@ -111,28 +119,48 @@ public class MapLocationInputActivity extends BaseInputActivity
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(this, false));
         this.getSupportFragmentManager().beginTransaction().replace(R.id.Location_Map_View, (Fragment)mapInputView).commit();
 
-        //if any displays don't exist
-        if(nameText == null || latitudeLbl == null || latitudeText == null || longitudeLbl == null || longitudeText == null || altitudeLbl == null || altitudeText == null || altitudeButton == null || timeZoneButton == null || addButton == null || cancelButton == null)
-        {
-            //stop
-            return;
-        }
-
         //update available inputs
-        poweredGoogleLbl.setVisibility(poweredByVisible);
+        if(poweredGoogleLbl != null)
+        {
+            poweredGoogleLbl.setVisibility(poweredByVisible);
+        }
         poweredGoogleImage.setVisibility(poweredByVisible);
         poweredGoogleImage.setImageResource(Settings.getDarkTheme(this) ? R.drawable.powered_by_google_on_non_white : R.drawable.powered_by_google_on_white);
-        latitudeLbl.setVisibility(coordinateInputVisible);
+        if(latitudeLbl != null)
+        {
+            latitudeLbl.setVisibility(coordinateInputVisible);
+        }
         latitudeText.setVisibility(coordinateInputVisible);
-        longitudeLbl.setVisibility(coordinateInputVisible);
+        if(longitudeLbl != null)
+        {
+            longitudeLbl.setVisibility(coordinateInputVisible);
+        }
         longitudeText.setVisibility(coordinateInputVisible);
         text = altitudeString + " (" + Globals.getMetersLabel(res) + ")";
-        altitudeLbl.setText(text);
-        altitudeLbl.setVisibility(coordinateInputVisible);
+        if(altitudeLbl != null)
+        {
+            altitudeLbl.setText(text);
+            altitudeLbl.setVisibility(coordinateInputVisible);
+        }
+        if(altitudeTextLayout != null)
+        {
+            altitudeTextLayout.setHint(text);
+        }
+        if(altitudeLayout != null)
+        {
+            altitudeLayout.setVisibility(coordinateInputVisible);
+        }
         altitudeText.setVisibility(coordinateInputVisible);
         altitudeButton.setVisibility(coordinateInputVisible);
-        timeZoneLbl.setVisibility(coordinateInputVisible);
+        if(timeZoneLbl != null)
+        {
+            timeZoneLbl.setVisibility(coordinateInputVisible);
+        }
         timeZoneList.setVisibility(coordinateInputVisible);
+        if(timeZoneLayout != null)
+        {
+            timeZoneLayout.setVisibility(coordinateInputVisible);
+        }
         timeZoneButton.setVisibility(coordinateInputVisible);
         if(forSearch)
         {
@@ -141,8 +169,8 @@ public class MapLocationInputActivity extends BaseInputActivity
         }
         else
         {
-            altitudeButton.setImageDrawable(Globals.getDrawable(this, R.drawable.ic_sync_white, R.color.black));
-            timeZoneButton.setImageDrawable(Globals.getDrawable(this, R.drawable.ic_sync_white, R.color.black));
+            ViewCompat.setBackgroundTintList(altitudeButton, ColorStateList.valueOf(primaryColor));
+            ViewCompat.setBackgroundTintList(timeZoneButton, ColorStateList.valueOf(primaryColor));
         }
 
         //setup and show dialog

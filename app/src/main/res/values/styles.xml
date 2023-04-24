@@ -453,6 +453,31 @@
         <item name="startIconTint">?android:textColor</item>
     </style>
 
+    <!--Location-->
+    <style name="LocationTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:gravity">end</item>
+    </style>
+
+    <style name="LocationEditText">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:inputType">numberDecimal|numberSigned</item>
+        <item name="android:singleLine">true</item>
+    </style>
+
+    <style name="LocationMaterialEditText">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:inputType">numberDecimal|numberSigned</item>
+        <item name="android:singleLine">true</item>
+        <item name="android:autofillHints" tools:targetApi="26">@string/empty</item>
+        <item name="android:hint">@string/empty</item>
+    </style>
+
     <!--Manual-->
     <style name="ManualEditTextMaterial">
         <item name="android:layout_width">match_parent</item>

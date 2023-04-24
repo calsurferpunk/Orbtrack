@@ -25,6 +25,7 @@ public interface SelectListInterface
     int getSelectedItemPosition();
     Object getSelectedValue(Object defaultValue);
     void setEnabled(boolean enabled);
+    void setVisibility(int visibility);
 
     static int getBackgroundColor(IconSpinner.CustomAdapter adapter)
     {

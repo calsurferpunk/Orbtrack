@@ -398,6 +398,7 @@
     <string name="title_last_quarter">Last Quarter</string>
     <string name="title_latitude">Latitude</string>
     <string name="title_latitude_north_south">Latitude (N+/S-)</string>
+    <string name="title_latitude_north_south_range">Latitude (N +180/S -180)</string>
     <string name="title_launch_date">Launch Date</string>
     <string name="title_launch_number">Launch Number</string>
     <string name="title_launch_number_of_year">Launch Number of Year</string>
@@ -425,6 +426,7 @@
     <string name="title_login">Login</string>
     <string name="title_longitude">Longitude</string>
     <string name="title_longitude_west_east">Longitude (W+/E-)</string>
+    <string name="title_longitude_west_east_range">Longitude (W +180/E -180)</string>
     <string name="title_low">Low</string>
     <string name="title_manual">Manual</string>
     <string name="title_map">Map</string>

@@ -4,12 +4,11 @@
     android:layout_height="match_parent">
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.SwitchCompat
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/Widget_Setup_Global_Images_Switch"
             style="@style/WidgetSetupGlobalSwitch"/>
-
-        <View android:id="@+id/Widget_Setup_Global_Images_Divider" style="@style/Divider"/>
 
         <TableRow android:id="@+id/Widget_Setup_Unused_Image_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -23,7 +22,7 @@
                 android:text="@string/title_all"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Global_Images_Color_Button"
                     style="@style/ColorButton"/>
@@ -36,14 +35,12 @@
                 android:text="@string/title_orbital"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Orbital_Image_Color_Button"
                     style="@style/ColorButton"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Orbital_Image_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Settings_Image_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -51,14 +48,12 @@
                 android:text="@string/title_settings"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Settings_Image_Color_Button"
                     style="@style/ColorButton"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Settings_Image_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Location_Image_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -66,7 +61,7 @@
                 android:text="@string/title_location"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Location_Image_Color_Button"
                     style="@style/ColorButton"/>

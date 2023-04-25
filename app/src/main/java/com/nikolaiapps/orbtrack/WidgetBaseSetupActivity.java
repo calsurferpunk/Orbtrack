@@ -18,6 +18,7 @@ import androidx.annotation.NonNull;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -300,12 +301,13 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         private SwitchCompat globalTextSwitch;
         private SwitchCompat globalImageSwitch;
         private SwitchCompat globalBackgroundSwitch;
-        private IconSpinner orbitalList;
-        private IconSpinner locationList;
-        private IconSpinner intervalList;
-        private IconSpinner globalBorderStyleList;
-        private IconSpinner borderStyleList;
-        private IconSpinner[] textSizeList;
+        private SelectListInterface orbitalList;
+        private SelectListInterface locationList;
+        private SelectListInterface intervalList;
+        private SelectListInterface globalBorderStyleList;
+        private SelectListInterface borderStyleList;
+        private SelectListInterface[] textSizeList;
+        private TextInputLayout intervalLayout;
         private RadioGroup currentLocationGroup;
         private AppCompatRadioButton followRadio;
         private AppCompatRadioButton intervalRadio;
@@ -365,14 +367,14 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             switch(page)
             {
                 case TabPage.Data:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_data_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_data_material_view : R.layout.widget_setup_data_view), container, false);
 
                     satellites = Database.getOrbitals(context);
                     locations = Database.getLocations(context, "[Type] <> " + Database.LocationType.Current);
 
                     outdatedText = rootView.findViewById(R.id.Widget_Setup_Outdated_Text);
-                    orbitalList = rootView.findViewById(R.id.Widget_Setup_Orbital_List);
-                    orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, satellites));
+                    orbitalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Orbital_Text_List : R.id.Widget_Setup_Orbital_List);
+                    orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitalList, satellites));
                     orbitalList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                     {
                         @Override
@@ -395,7 +397,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         public void onNothingSelected(AdapterView<?> parent) {}
                     });
 
-                    locationList = rootView.findViewById(R.id.Widget_Setup_Location_Source_List);
+                    locationList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Location_Source_Text_List : R.id.Widget_Setup_Location_Source_List);
                     if(res != null)
                     {
                         locationItems.add(new IconSpinner.Item(R.drawable.ic_my_location_black, res.getString(R.string.title_location_current), Database.LocationType.Current));
@@ -473,7 +475,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
                     nowRadio = rootView.findViewById(R.id.Widget_Setup_Now_Radio);
 
-                    intervalList = rootView.findViewById(R.id.Widget_Setup_Interval_List);
+                    intervalLayout = rootView.findViewById(R.id.Widget_Setup_Interval_Layout);
+                    intervalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Interval_Text_List : R.id.Widget_Setup_Interval_List);
                     if(intervalItems != null)
                     {
                         intervalList.setAdapter(new IconSpinner.CustomAdapter(context, intervalItems));
@@ -575,7 +578,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     break;
 
                 case TabPage.Images:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_images_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_images_material_view : R.layout.widget_setup_images_view), container, false);
 
                     unusedImageRow = rootView.findViewById(R.id.Widget_Setup_Unused_Image_Row);
 
@@ -612,7 +615,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     break;
 
                 case TabPage.Background:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_background_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_background_material_view : R.layout.widget_setup_background_view), container, false);
 
                     globalBackgroundRow = rootView.findViewById(R.id.Widget_Setup_Global_Background_Row);
                     globalBackgroundSwitch = rootView.findViewById(R.id.Widget_Setup_Global_Background_Switch);
@@ -628,7 +631,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     });
                     globalBackgroundColorButton = rootView.findViewById(R.id.Widget_Setup_Global_Background_Color_Button);
                     globalBackgroundColorButton.setOnClickListener(createOnColorButtonClickListener(globalBackgroundRow, true));
-                    globalBorderStyleList = rootView.findViewById(R.id.Widget_Setup_Global_Border_Style_List);
+                    globalBorderStyleList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Global_Border_Style_Text_List : R.id.Widget_Setup_Global_Border_Style_List);
                     if(borderStyles != null)
                     {
                         globalBorderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
@@ -652,7 +655,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     borderRow = rootView.findViewById(R.id.Widget_Setup_Border_Background_Row);
                     borderColorButton = rootView.findViewById(R.id.Widget_Setup_Border_Color_Button);
                     borderColorButton.setOnClickListener(createOnColorButtonClickListener(borderRow, true));
-                    borderStyleList = rootView.findViewById(R.id.Widget_Setup_Border_Style_List);
+                    borderStyleList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Border_Style_Text_List : R.id.Widget_Setup_Border_Style_List);
                     if(borderStyles != null)
                     {
                         borderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
@@ -676,10 +679,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     break;
 
                 case TabPage.Text:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_text_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_text_material_view : R.layout.widget_setup_text_view), container, false);
 
                     textRow = new TableRow[TextType.TextCount];
-                    textSizeList = new IconSpinner[TextType.TextCount];
+                    textSizeList = new SelectListInterface[TextType.TextCount];
                     textBoldCheckBox = new CheckBox[TextType.TextCount];
                     textItalicCheckBox = new CheckBox[TextType.TextCount];
                     textColorButton = new BorderButton[TextType.TextCount];
@@ -697,13 +700,13 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             onSettingChanged(context, PreferenceName.GlobalText, isChecked);
                         }
                     });
-                    textSizeList[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Size_List);
+                    textSizeList[TextType.Global] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Global_Text_Size_Text_List : R.id.Widget_Setup_Global_Text_Size_List);
                     textBoldCheckBox[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Italic_CheckBox);
                     textColorButton[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Color_Button);
 
                     textRow[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Row);
-                    textSizeList[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Size_List);
+                    textSizeList[TextType.Orbital] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Orbital_Text_Size_Text_List : R.id.Widget_Setup_Orbital_Text_Size_List);
                     textBoldCheckBox[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Italic_CheckBox);
                     textColorButton[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Color_Button);
@@ -711,49 +714,49 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
                     textRow[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Row);
                     passStartText = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text);
-                    textSizeList[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Size_List);
+                    textSizeList[TextType.PassStart] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Start_Text_Size_Text_List : R.id.Widget_Setup_Pass_Start_Text_Size_List);
                     textBoldCheckBox[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Italic_CheckBox);
                     textColorButton[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Color_Button);
                     textDivider[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Divider);
 
                     textRow[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Row);
-                    textSizeList[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Size_List);
+                    textSizeList[TextType.PassEnd] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_End_Text_Size_Text_List :  R.id.Widget_Setup_Pass_End_Text_Size_List);
                     textBoldCheckBox[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Italic_CheckBox);
                     textColorButton[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Color_Button);
                     textDivider[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Divider);
 
                     textRow[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Row);
-                    textSizeList[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Size_List);
+                    textSizeList[TextType.PassElevation] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Elevation_Text_Size_Text_List : R.id.Widget_Setup_Pass_Elevation_Text_Size_List);
                     textBoldCheckBox[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Italic_CheckBox);
                     textColorButton[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Color_Button);
                     textDivider[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Divider);
 
                     textRow[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Row);
-                    textSizeList[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Size_List);
+                    textSizeList[TextType.PassAzimuthStart] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Azimuth_Start_Text_Size_Text_List : R.id.Widget_Setup_Pass_Azimuth_Start_Text_Size_List);
                     textBoldCheckBox[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Italic_CheckBox);
                     textColorButton[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Color_Button);
                     textDivider[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Divider);
 
                     textRow[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Row);
-                    textSizeList[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Size_List);
+                    textSizeList[TextType.PassAzimuthEnd] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Azimuth_End_Text_Size_Text_List : R.id.Widget_Setup_Pass_Azimuth_End_Text_Size_List);
                     textBoldCheckBox[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Italic_CheckBox);
                     textColorButton[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Color_Button);
                     textDivider[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Divider);
 
                     textRow[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Row);
-                    textSizeList[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Size_List);
+                    textSizeList[TextType.PassDuration] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Duration_Text_Size_Text_List : R.id.Widget_Setup_Pass_Duration_Text_Size_List);
                     textBoldCheckBox[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Italic_CheckBox);
                     textColorButton[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Color_Button);
                     textDivider[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Divider);
 
                     textRow[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Row);
-                    textSizeList[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Size_List);
+                    textSizeList[TextType.Location] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Location_Text_Size_Text_List : R.id.Widget_Setup_Location_Text_Size_List);
                     textBoldCheckBox[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Italic_CheckBox);
                     textColorButton[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Color_Button);
@@ -869,54 +872,79 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                 case TabPage.Data:
                     boolean isCurrent = (widgetSettings.location.source == Database.LocationType.Current);
                     boolean isSearch = (widgetSettings.location.source == Database.LocationType.New);
+                    int intervalVisibility = (isCurrent && widgetSettings.location.useInterval ? View.VISIBLE : View.GONE);
                     String currentText;
 
-                    orbitalList.setSelectedValue(widgetSettings.noradId);
-
-                    if(widgetSettings.location.id != -1)
+                    if(orbitalList != null)
                     {
-                        locationList.setSelectedText(widgetSettings.location.locationName);
+                        orbitalList.setSelectedValue(widgetSettings.noradId);
                     }
-                    else
+                    if(locationList != null)
                     {
-                        locationList.setSelectedValue(widgetSettings.location.source == Database.LocationType.Current ? Database.LocationType.Current : Database.LocationType.New);
+                        if(widgetSettings.location.id != -1)
+                        {
+                            locationList.setSelectedText(widgetSettings.location.locationName);
+                        }
+                        else
+                        {
+                            locationList.setSelectedValue(widgetSettings.location.source == Database.LocationType.Current ? Database.LocationType.Current : Database.LocationType.New);
+                        }
                     }
 
                     if(widgetSettings.location.useFollow)
                     {
-                        followRadio.setChecked(true);
+                        if(followRadio != null)
+                        {
+                            followRadio.setChecked(true);
+                        }
                     }
                     else if(widgetSettings.location.useInterval)
                     {
-                        intervalRadio.setChecked(true);
+                        if(intervalRadio != null)
+                        {
+                            intervalRadio.setChecked(true);
+                        }
                     }
-                    else
+                    else if(nowRadio != null)
                     {
                         nowRadio.setChecked(true);      //default to current location now
                     }
 
-                    intervalList.setSelectedValue(widgetSettings.location.intervalMs);
-                    intervalList.setVisibility(isCurrent && widgetSettings.location.useInterval ? View.VISIBLE : View.GONE);
-
-                    if(isSearch)
+                    if(intervalList != null)
                     {
-                        //remember current text
-                        currentText = searchText.getText().toString();
-
-                        //if search name is set and different than current text
-                        if(widgetSettings.location.searchName != null && !widgetSettings.location.searchName.equals(currentText))
-                        {
-                            //update text
-                            searchText.setText(widgetSettings.location.searchName);
-                        }
-
-                        //focus on and select all text
-                        searchText.requestFocus();
-                        searchText.selectAll();
+                        intervalList.setSelectedValue(widgetSettings.location.intervalMs);
+                        intervalList.setVisibility(intervalVisibility);
                     }
-                    searchText.setVisibility(isSearch ? View.VISIBLE : View.GONE);
+                    if(intervalLayout != null)
+                    {
+                        intervalLayout.setVisibility(intervalVisibility);
+                    }
 
-                    currentLocationGroup.setVisibility(isCurrent ? View.VISIBLE : View.GONE);
+                    if(searchText != null)
+                    {
+                        if(isSearch)
+                        {
+                            //remember current text
+                            currentText = searchText.getText().toString();
+
+                            //if search name is set and different than current text
+                            if(widgetSettings.location.searchName != null && !widgetSettings.location.searchName.equals(currentText))
+                            {
+                                //update text
+                                searchText.setText(widgetSettings.location.searchName);
+                            }
+
+                            //focus on and select all text
+                            searchText.requestFocus();
+                            searchText.selectAll();
+                        }
+                        searchText.setVisibility(isSearch ? View.VISIBLE : View.GONE);
+                    }
+
+                    if(currentLocationGroup != null)
+                    {
+                        currentLocationGroup.setVisibility(isCurrent ? View.VISIBLE : View.GONE);
+                    }
                     break;
 
                 case TabPage.Images:
@@ -926,50 +954,137 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     int orbitalImageVisibility  = (useOrbitalImage && !useGlobalImage ? View.VISIBLE : View.GONE);   //show if using orbital image and not using global image
                     int nonOrbitalImageVisibility = (!useNormal || useGlobalImage ? View.GONE : View.VISIBLE);       //hide if not using normal size or using global image
 
-                    unusedImageRow.setVisibility(!useNormal && !useOrbitalImage ? View.VISIBLE : View.GONE);         //show if not using normal and not using orbital image
+                    if(unusedImageRow != null)
+                    {
+                        unusedImageRow.setVisibility(!useNormal && !useOrbitalImage ? View.VISIBLE : View.GONE);         //show if not using normal and not using orbital image
+                    }
 
-                    globalImageRow.setVisibility(showGlobalImageSwitch && useGlobalImage ? View.VISIBLE : View.GONE);
-                    globalImageSwitch.setChecked(useGlobalImage);
-                    globalImageSwitch.setVisibility(showGlobalImageSwitch ? View. VISIBLE : View.GONE);
-                    globalImageColorButton.setBackgroundColor(widgetSettings.globalImageColor);
-                    globalImagesDivider.setVisibility(showGlobalImageSwitch ? View.VISIBLE : View.GONE);
+                    if(globalImageRow != null)
+                    {
+                        globalImageRow.setVisibility(showGlobalImageSwitch && useGlobalImage ? View.VISIBLE : View.GONE);
+                    }
+                    if(globalImageSwitch != null)
+                    {
+                        globalImageSwitch.setChecked(useGlobalImage);
+                        globalImageSwitch.setVisibility(showGlobalImageSwitch ? View. VISIBLE : View.GONE);
+                    }
+                    if(globalImageColorButton != null)
+                    {
+                        globalImageColorButton.setBackgroundColor(widgetSettings.globalImageColor);
+                    }
+                    if(globalImagesDivider != null)
+                    {
+                        globalImagesDivider.setVisibility(showGlobalImageSwitch ? View.VISIBLE : View.GONE);
+                    }
 
-                    orbitalImageRow.setVisibility(orbitalImageVisibility);
-                    orbitalImageColorButton.setBackgroundColor(widgetSettings.orbitalImageColor);
-                    orbitalImageDivider.setVisibility(!useNormal ? View.GONE : orbitalImageVisibility);
+                    if(orbitalImageRow != null)
+                    {
+                        orbitalImageRow.setVisibility(orbitalImageVisibility);
+                    }
+                    if(orbitalImageColorButton != null)
+                    {
+                        orbitalImageColorButton.setBackgroundColor(widgetSettings.orbitalImageColor);
+                    }
+                    if(orbitalImageDivider != null)
+                    {
+                        orbitalImageDivider.setVisibility(!useNormal ? View.GONE : orbitalImageVisibility);
+                    }
 
-                    settingsImageRow.setVisibility(nonOrbitalImageVisibility);
-                    settingsImageColorButton.setBackgroundColor(widgetSettings.settingsImageColor);
-                    settingsImageDivider.setVisibility(nonOrbitalImageVisibility);
+                    if(settingsImageRow != null)
+                    {
+                        settingsImageRow.setVisibility(nonOrbitalImageVisibility);
+                    }
+                    if(settingsImageColorButton != null)
+                    {
+                        settingsImageColorButton.setBackgroundColor(widgetSettings.settingsImageColor);
+                    }
+                    if(settingsImageDivider != null)
+                    {
+                        settingsImageDivider.setVisibility(nonOrbitalImageVisibility);
+                    }
 
-                    locationImageRow.setVisibility(nonOrbitalImageVisibility);
-                    locationImageColorButton.setBackgroundColor(widgetSettings.locationImageColor);
+                    if(locationImageRow != null)
+                    {
+                        locationImageRow.setVisibility(nonOrbitalImageVisibility);
+                    }
+                    if(locationImageColorButton != null)
+                    {
+                        locationImageColorButton.setBackgroundColor(widgetSettings.locationImageColor);
+                    }
                     break;
 
                 case TabPage.Background:
                     boolean useGlobalBackground = widgetSettings.useGlobalBackground;
                     int nonGlobalBackgroundVisibility = (useGlobalBackground ? View.GONE : View.VISIBLE);
 
-                    globalBackgroundRow.setVisibility(useGlobalBackground ? View.VISIBLE : View.GONE);
-                    globalBackgroundSwitch.setChecked(useGlobalBackground);
-                    globalBackgroundColorButton.setBackgroundColor(widgetSettings.globalBackgroundColor);
-                    globalBorderStyleList.setSelectedValue(widgetSettings.borderType);
+                    if(globalBackgroundRow != null)
+                    {
+                        globalBackgroundRow.setVisibility(useGlobalBackground ? View.VISIBLE : View.GONE);
+                    }
+                    if(globalBackgroundSwitch != null)
+                    {
+                        globalBackgroundSwitch.setChecked(useGlobalBackground);
+                    }
+                    if(globalBackgroundColorButton != null)
+                    {
+                        globalBackgroundColorButton.setBackgroundColor(widgetSettings.globalBackgroundColor);
+                    }
+                    if(globalBorderStyleList != null)
+                    {
+                        globalBorderStyleList.setSelectedValue(widgetSettings.borderType);
+                    }
 
-                    borderRow.setVisibility(nonGlobalBackgroundVisibility);
-                    borderColorButton.setBackgroundColor(widgetSettings.borderColor);
-                    borderStyleList.setSelectedValue(widgetSettings.borderType);
-                    borderDivider.setVisibility(nonGlobalBackgroundVisibility);
+                    if(borderRow != null)
+                    {
+                        borderRow.setVisibility(nonGlobalBackgroundVisibility);
+                    }
+                    if(borderColorButton != null)
+                    {
+                        borderColorButton.setBackgroundColor(widgetSettings.borderColor);
+                    }
+                    if(borderStyleList != null)
+                    {
+                        borderStyleList.setSelectedValue(widgetSettings.borderType);
+                    }
+                    if(borderDivider != null)
+                    {
+                        borderDivider.setVisibility(nonGlobalBackgroundVisibility);
+                    }
 
-                    topRow.setVisibility(nonGlobalBackgroundVisibility);
-                    topColorButton.setBackgroundColor(widgetSettings.topBackgroundColor);
-                    topDivider.setVisibility(nonGlobalBackgroundVisibility);
+                    if(topRow != null)
+                    {
+                        topRow.setVisibility(nonGlobalBackgroundVisibility);
+                    }
+                    if(topColorButton != null)
+                    {
+                        topColorButton.setBackgroundColor(widgetSettings.topBackgroundColor);
+                    }
+                    if(topDivider != null)
+                    {
+                        topDivider.setVisibility(nonGlobalBackgroundVisibility);
+                    }
 
-                    middleRow.setVisibility(nonGlobalBackgroundVisibility);
-                    middleColorButton.setBackgroundColor(widgetSettings.middleBackgroundColor);
-                    middleDivider.setVisibility(nonGlobalBackgroundVisibility);
+                    if(middleRow != null)
+                    {
+                        middleRow.setVisibility(nonGlobalBackgroundVisibility);
+                    }
+                    if(middleColorButton != null)
+                    {
+                        middleColorButton.setBackgroundColor(widgetSettings.middleBackgroundColor);
+                    }
+                    if(middleDivider != null)
+                    {
+                        middleDivider.setVisibility(nonGlobalBackgroundVisibility);
+                    }
 
-                    bottomRow.setVisibility(nonGlobalBackgroundVisibility);
-                    bottomColorButton.setBackgroundColor(widgetSettings.bottomBackgroundColor);
+                    if(bottomRow != null)
+                    {
+                        bottomRow.setVisibility(nonGlobalBackgroundVisibility);
+                    }
+                    if(bottomColorButton != null)
+                    {
+                        bottomColorButton.setBackgroundColor(widgetSettings.bottomBackgroundColor);
+                    }
                     break;
 
                 case TabPage.Text:
@@ -978,9 +1093,15 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     int nonGlobalTextVisibility = (useGlobalText ? View.GONE : View.VISIBLE);
                     int nonGlobalExtendedTextVisibility = (useGlobalText || !useExtended ? View.GONE : View.VISIBLE);
 
-                    globalTextSwitch.setChecked(useGlobalText);
+                    if(globalTextSwitch != null)
+                    {
+                        globalTextSwitch.setChecked(useGlobalText);
+                    }
 
-                    passStartText.setText(this.getResources().getString(useNormal ? R.string.title_pass_start : R.string.title_pass));
+                    if(passStartText != null)
+                    {
+                        passStartText.setText(this.getResources().getString(useNormal ? R.string.title_pass_start : R.string.title_pass));
+                    }
 
                     for(index = 0; index < TextType.TextCount; index++)
                     {
@@ -1016,11 +1137,26 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             visibility = View.INVISIBLE;
                         }
 
-                        textRow[index].setVisibility(visibility);
-                        textSizeList[index].setSelectedValue(widgetSettings.text[index].size);
-                        textBoldCheckBox[index].setChecked(widgetSettings.text[index].bold);
-                        textItalicCheckBox[index].setChecked(widgetSettings.text[index].italic);
-                        textColorButton[index].setBackgroundColor(widgetSettings.text[index].color);
+                        if(textRow[index] != null)
+                        {
+                            textRow[index].setVisibility(visibility);
+                        }
+                        if(textSizeList[index] != null)
+                        {
+                            textSizeList[index].setSelectedValue(widgetSettings.text[index].size);
+                        }
+                        if(textBoldCheckBox[index] != null)
+                        {
+                            textBoldCheckBox[index].setChecked(widgetSettings.text[index].bold);
+                        }
+                        if(textItalicCheckBox[index] != null)
+                        {
+                            textItalicCheckBox[index].setChecked(widgetSettings.text[index].italic);
+                        }
+                        if(textColorButton[index] != null)
+                        {
+                            textColorButton[index].setBackgroundColor(widgetSettings.text[index].color);
+                        }
                         if(textDivider[index] != null)
                         {
                             textDivider[index].setVisibility(visibility);
@@ -1416,7 +1552,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             public void onTabSelected(TabLayout.Tab tab)
             {
                 //update page
-                setupPager.setCurrentItem(tab.getPosition());
+                 setupPager.setCurrentItem(tab.getPosition());
             }
 
             @Override

@@ -4,12 +4,11 @@
     android:layout_height="match_parent">
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.SwitchCompat
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/Widget_Setup_Global_Text_Switch"
             style="@style/WidgetSetupGlobalSwitch"/>
-
-        <View style="@style/Divider"/>
 
         <TableRow android:id="@+id/Widget_Setup_Global_Text_Row" style="@style/WidgetSetupRow">
             <TextView
@@ -22,9 +21,12 @@
                     android:id="@+id/Widget_Setup_Global_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Global_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Global_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Global_Text_Bold_CheckBox"
@@ -47,9 +49,12 @@
                     android:id="@+id/Widget_Setup_Orbital_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Orbital_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Orbital_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Orbital_Text_Bold_CheckBox"
@@ -60,8 +65,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Orbital_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Start_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -75,9 +78,12 @@
                     android:id="@+id/Widget_Setup_Pass_Start_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Pass_Start_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Pass_Start_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Pass_Start_Text_Bold_CheckBox"
@@ -88,8 +94,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Pass_Start_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_End_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -102,9 +106,12 @@
                     android:id="@+id/Widget_Setup_Pass_End_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Pass_End_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Pass_End_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Pass_End_Text_Bold_CheckBox"
@@ -115,8 +122,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Pass_End_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Elevation_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -129,9 +134,12 @@
                     android:id="@+id/Widget_Setup_Pass_Elevation_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Pass_Elevation_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Pass_Elevation_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Pass_Elevation_Text_Bold_CheckBox"
@@ -142,8 +150,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Pass_Elevation_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -156,9 +162,12 @@
                     android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Bold_CheckBox"
@@ -169,8 +178,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -183,9 +190,12 @@
                     android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Bold_CheckBox"
@@ -196,8 +206,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Duration_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -210,9 +218,12 @@
                     android:id="@+id/Widget_Setup_Pass_Duration_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Pass_Duration_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Pass_Duration_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Pass_Duration_Text_Bold_CheckBox"
@@ -223,8 +234,6 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Pass_Duration_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Location_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -237,9 +246,12 @@
                     android:id="@+id/Widget_Setup_Location_Text_Color_Button"
                     style="@style/ColorButton"/>
 
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Location_Text_Size_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Location_Text_Size_Text_List"
+                        style="@style/WidgetSetupMaterialList"/>
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
                     android:id="@+id/Widget_Setup_Location_Text_Bold_CheckBox"

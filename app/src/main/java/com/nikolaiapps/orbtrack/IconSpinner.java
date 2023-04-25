@@ -457,10 +457,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         {
             this(context, listView, satellites, false);
         }
-        public CustomAdapter(Context context, Database.DatabaseSatellite[] satellites)
-        {
-            this(context, null, satellites, false);
-        }
 
         private void updateUsing()
         {

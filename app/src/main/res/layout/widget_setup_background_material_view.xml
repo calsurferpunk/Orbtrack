@@ -4,12 +4,11 @@
     android:layout_height="match_parent">
     <TableLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.appcompat.widget.SwitchCompat
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/Widget_Setup_Global_Background_Switch"
             style="@style/WidgetSetupGlobalSwitch"/>
-
-        <View style="@style/Divider"/>
 
         <TableRow android:id="@+id/Widget_Setup_Global_Background_Row" style="@style/WidgetSetupRow">
             <TextView
@@ -17,18 +16,18 @@
                 android:text="@string/title_all"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Global_Background_Color_Button"
                     style="@style/ColorButton"/>
 
-                <TextView
-                    style="@style/WidgetSetupTitle"
-                    android:text="@string/title_style"/>
-
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Global_Border_Style_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout"
+                    android:hint="@string/title_style">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Global_Border_Style_Text_List"
+                        style="@style/WidgetSetupMaterialWideList"/>
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </TableRow>
 
@@ -38,22 +37,20 @@
                 android:text="@string/title_border"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Border_Color_Button"
                     style="@style/ColorButton"/>
 
-                <TextView
-                    style="@style/WidgetSetupTitle"
-                    android:text="@string/title_style"/>
-
-                <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Border_Style_List"
-                    style="@style/WidgetSetupList"/>
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/WidgetSetupListInputLayout"
+                    android:hint="@string/title_style">
+                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                        android:id="@+id/Widget_Setup_Border_Style_Text_List"
+                        style="@style/WidgetSetupMaterialWideList"/>
+                </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Border_Background_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Top_Background_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -61,14 +58,12 @@
                 android:text="@string/title_top"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Top_Background_Color_Button"
                     style="@style/ColorButton"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Top_Background_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Middle_Background_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -76,14 +71,12 @@
                 android:text="@string/title_middle"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Middle_Background_Color_Button"
                     style="@style/ColorButton"/>
             </LinearLayout>
         </TableRow>
-
-        <View android:id="@+id/Widget_Setup_Middle_Background_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Bottom_Background_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -91,7 +84,7 @@
                 android:text="@string/title_bottom"/>
 
             <LinearLayout
-                style="@style/WidgetSetupColorButtonLayout">
+                style="@style/WidgetSetupColorButtonMaterialLayout">
                 <com.nikolaiapps.orbtrack.BorderButton
                     android:id="@+id/Widget_Setup_Bottom_Background_Color_Button"
                     style="@style/ColorButton"/>

@@ -878,6 +878,58 @@
         <item name="android:textSize">10sp</item>
     </style>
 
+    <style name="WidgetSetupRow">
+        <item name="android:layout_marginTop">4dp</item>
+        <item name="android:layout_marginBottom">4dp</item>
+        <item name="android:minHeight">50dp</item>
+    </style>
+
+    <style name="WidgetSetupList">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_marginRight">8dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
+    <style name="WidgetSetupListInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:hint">@string/empty</item>
+    </style>
+
+    <style name="WidgetSetupMaterialList">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:minWidth">80dp</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:inputType">none</item>
+        <item name="android:textColorHint">@color/transparent</item>
+    </style>
+
+    <style name="WidgetSetupMaterialWideList" parent="WidgetSetupMaterialList">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:minWidth">148dp</item>
+    </style>
+
+    <style name="WidgetSetupColorButtonLayout">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">45dp</item>
+        <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:orientation">horizontal</item>
+    </style>
+
+    <style name="WidgetSetupColorButtonMaterialLayout" parent="WidgetSetupColorButtonLayout">
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center_vertical</item>
+    </style>
+
     <style name="WidgetSetupGlobalSwitch">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
@@ -886,14 +938,21 @@
         <item name="android:checked">true</item>
     </style>
 
-    <style name="WidgetSetupText">
+    <style name="WidgetSetupStartTitle">
         <item name="android:minWidth">56sp</item>
-        <item name="android:maxWidth">76sp</item>
+        <item name="android:maxWidth">72sp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:gravity">center_vertical|end</item>
+    </style>
+
+    <style name="WidgetSetupTitle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginLeft">10dp</item>
+        <item name="android:layout_marginStart">10dp</item>
     </style>
 
     <style name="WidgetSetupTextOptions">
@@ -909,6 +968,7 @@
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">center_vertical</item>
+        <item name="android:layout_marginRight">2dp</item>
     </style>
 
     <style name="WidgetSetupBoldCheckBox" parent="WidgetSetupCheckBox">
@@ -917,7 +977,6 @@
     </style>
 
     <style name="WidgetSetupItalicCheckBox" parent="WidgetSetupCheckBox">
-        <item name="android:layout_marginLeft">3dp</item>
         <item name="android:text">@string/title_italic</item>
         <item name="android:textStyle">italic</item>
     </style>

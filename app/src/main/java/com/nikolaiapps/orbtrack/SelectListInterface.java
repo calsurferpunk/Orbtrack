@@ -9,6 +9,7 @@ import android.widget.AdapterView;
 public interface SelectListInterface
 {
     void setOnItemSelectedListener(AdapterView.OnItemSelectedListener listener);
+    AdapterView.OnItemSelectedListener getOnItemSelectedListener();
     void loadAdapter();
     void setAdapter(IconSpinner.CustomAdapter adapter);
     void setAllowAutoSelect(boolean allow);

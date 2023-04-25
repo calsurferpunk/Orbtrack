@@ -189,6 +189,11 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         selectedListener = listener;
     }
 
+    public AdapterView.OnItemSelectedListener getOnItemSelectedListener()
+    {
+        return(selectedListener);
+    }
+
     public void loadAdapter()
     {
         Context context = getContext();
@@ -312,9 +317,15 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         if(currentAdapter != null && index >= 0)
         {
             IconSpinner.Item selectedItem = (IconSpinner.Item)currentAdapter.getItem(index);
+            Editable currentEditable = getText();
+            String currentText = (currentEditable != null ? currentEditable.toString() : null);
             String selectedText = (selectedItem != null ? selectedItem.text : null);
 
-            setText(selectedText, false);
+            //if -current is not null and not equal to selected- or -current is null and selected is not-
+            if((currentText != null && !currentText.equals(selectedText)) || (currentText == null && selectedText != null))
+            {
+                setText(selectedText, false);
+            }
         }
     }
 

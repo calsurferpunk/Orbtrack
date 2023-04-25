@@ -48,7 +48,6 @@ public class NotifySettingsActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        boolean usingMaterial = Settings.getMaterialTheme(this);
         this.setContentView(usingMaterial ? R.layout.notify_settings_material_layout : R.layout.notify_settings_layout);
 
         byte index;

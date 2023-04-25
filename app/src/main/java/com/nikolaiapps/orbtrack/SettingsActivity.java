@@ -10,7 +10,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.hardware.Camera;
 import android.os.Build;
@@ -29,9 +28,7 @@ import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
@@ -53,7 +50,7 @@ import java.util.List;
 import java.util.TimeZone;
 
 
-public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, ActivityResultCallback<ActivityResult>
+public class SettingsActivity extends BaseInputActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, ActivityResultCallback<ActivityResult>
 {
     static
     {
@@ -361,8 +358,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         setupCategory(informationCategory);
                         setupCategory(colorsCategory);
 
-                        //if showing setup
-                        if(showSetup)
+                        //if showing setup and first time setting updates
+                        if(showSetup && firstSetUpdates)
                         {
                             //if TLE auto switch exists
                             if(tleAutoSwitch != null)
@@ -375,6 +372,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                                 {
                                     listener.onPreferenceChange(tleAutoSwitch, true);
                                 }
+
+                                //update status
+                                firstSetUpdates = false;
                             }
                         }
                         break;
@@ -1131,6 +1131,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static final String SetupPageParam = "setupPageParam";
 
     private static boolean inEditMode = false;
+    private static boolean firstSetUpdates = true;
     private static Intent resultIntent = null;
 
     private byte locationSource;
@@ -1147,6 +1148,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private LinearLayout progressLayout;
     private FragmentManager manager;
     private SwipeStateViewPager setupPager;
+    private SetupPageAdapter setupPageAdapter;
     private MaterialButton backButton;
     private MaterialButton nextButton;
     private MaterialButton loadingCancelButton;
@@ -1215,7 +1217,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         String startScreenKey;
         Bundle args = new Bundle();
         Intent startIntent = this.getIntent();
-        ActionBar mainActionBar;
         Fragment startFragment;
         List<Fragment> previousPages;
 
@@ -1234,7 +1235,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         locationSource = Database.LocationType.Current;
         lastUpdateType = UpdateService.UpdateType.UpdateSatellites;
         orbitalsPageAdapter = null;
-        settingsPageAdapter = null;
         settingsLocationsListAdapter = null;
         accountsListAdapter = null;
         informationChangedListener = null;
@@ -1245,6 +1245,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         this.setContentView(showSetup ? R.layout.setup_layout : R.layout.settings_layout);
 
         //setup displays
+        hideActionBar();
         settingsLayout = this.findViewById(showSetup ? R.id.Setup_Layout : R.id.Settings_Layout);
         progressLayout = (showSetup ? this.findViewById(R.id.Setup_Progress_Layout) : null);
         floatingButton = this.findViewById(showSetup ? R.id.Setup_Floating_Button : R.id.Settings_Layout_Floating_Button);
@@ -1449,7 +1450,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if(setupPager != null)
         {
             //setup pager
-            setupPager.setAdapter(new SetupPageAdapter(manager, settingsLayout));
+            setupPageAdapter = new SetupPageAdapter(manager, settingsLayout);
+            setupPager.setAdapter(setupPageAdapter);
             setupPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener()
             {
                 @Override
@@ -1473,8 +1475,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             currentPage = -1;
                             break;
                     }
+
+                    //update displays
                     updateProgress();
                     updateFloatingButton();
+
+                    //if page needs updates every load
+                    if(currentPage != -1)
+                    {
+                        //update pages
+                        setupPageAdapter.notifyDataSetChanged();
+                    }
                 }
 
                 @Override
@@ -1611,23 +1622,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         };
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-
-        //if able to get action bar
-        mainActionBar = getSupportActionBar();
-        if(mainActionBar != null)
-        {
-            //if showing setup
-            if(showSetup)
-            {
-                //set background
-                mainActionBar.setBackgroundDrawable(new ColorDrawable(Globals.resolveColorID(this, R.attr.colorAccentDarkest)));
-            }
-            else
-            {
-                //hide it
-                mainActionBar.hide();
-            }
-        }
 
         //update display
         updateBackButton();

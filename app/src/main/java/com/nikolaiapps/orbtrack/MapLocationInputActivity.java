@@ -71,7 +71,6 @@ public class MapLocationInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        final boolean usingMaterial = Settings.getMaterialTheme(this);
         setContentView(usingMaterial ? R.layout.map_location_input_material_layout : R.layout.map_location_input_layout);
 
         //get displays and task

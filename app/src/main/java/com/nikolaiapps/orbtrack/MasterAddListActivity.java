@@ -783,7 +783,6 @@ public class MasterAddListActivity extends BaseInputActivity
     {
         super.onCreate(savedInstanceState);
 
-        boolean usingMaterial = Settings.getMaterialTheme(this);
         setContentView(usingMaterial ? R.layout.master_list_material_layout : R.layout.master_list_layout);
 
         //get intent, source, and displays

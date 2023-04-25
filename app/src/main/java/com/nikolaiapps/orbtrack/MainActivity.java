@@ -163,6 +163,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         int index;
         Resources res = this.getResources();
         final Bundle stateCopy;
+        final boolean acceptedPrivacy = Settings.getAcceptedPrivacy(this);
 
         usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
@@ -205,6 +206,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //setup displays
+        if(!acceptedPrivacy)
+        {
+            BaseInputActivity.hideActionBar(this.getSupportActionBar());
+        }
         mainDrawerLayout = this.findViewById(R.id.Main_Drawer_Layout);
         mainDrawerToggle = createActionBarDrawerToggle();
         mainDrawerLayout.addDrawerListener(mainDrawerToggle);
@@ -220,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //if privacy policy has been accepted
         stateCopy = savedInstanceState;
-        if(Settings.getAcceptedPrivacy(this))
+        if(acceptedPrivacy)
         {
             //handle any first run
             handleFirstRun(stateCopy);

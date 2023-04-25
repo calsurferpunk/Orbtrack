@@ -31,7 +31,6 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        boolean usingMaterial = Settings.getMaterialTheme(this);
         setContentView(usingMaterial ? R.layout.manual_object_input_material_layout : R.layout.manual_object_input_layout);
 
         int index;

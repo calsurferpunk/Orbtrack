@@ -44,7 +44,6 @@
 
     <CheckBox
         android:id="@+id/Setup_Input_CheckBox"
-        style="@style/Base.TextAppearance.AppCompat.Medium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"

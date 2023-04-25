@@ -53,11 +53,14 @@ public abstract class BaseInputActivity extends AppCompatActivity
 
     public static final String EXTRA_REQUEST_CODE = "RequestCode";
 
+    protected boolean usingMaterial;
+
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
+        usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
         setupActionBar(this, this.getSupportActionBar(), false);
     }
@@ -80,14 +83,16 @@ public abstract class BaseInputActivity extends AppCompatActivity
     }
 
     //Hides action bar
-    public void hideActionBar()
+    public static void hideActionBar(ActionBar actionBar)
     {
-        ActionBar actionBar = this.getSupportActionBar();
-
         if(actionBar != null)
         {
             actionBar.hide();
         }
+    }
+    public void hideActionBar()
+    {
+        hideActionBar(this.getSupportActionBar());
     }
 
     //Gets request code from given intent

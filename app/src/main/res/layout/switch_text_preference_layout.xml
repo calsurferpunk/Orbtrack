@@ -23,16 +23,14 @@
                 android:layout_height="wrap_content"
                 android:paddingTop="10dp"
                 android:paddingBottom="10dp"
-                android:paddingRight="10dp"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+                android:paddingRight="10dp"/>
 
             <androidx.appcompat.widget.SwitchCompat
                 android:id="@+id/Switch_Text_Preference_Switch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:switchPadding="10dp"
-                app:trackTint="?attr/dividerLineColor"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+                app:trackTint="?attr/dividerLineColor"/>
         </LinearLayout>
 
         <LinearLayout
@@ -50,13 +48,11 @@
                 android:autofillHints="@string/empty"
                 android:hint="@string/empty"
                 android:selectAllOnFocus="true"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:textColor="@color/text_color_selector"/>
             <TextView
                 android:id="@+id/Switch_Text_Preference_Value_Suffix"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+                android:layout_height="wrap_content"/>
         </LinearLayout>
     </LinearLayout>
 
@@ -64,7 +60,6 @@
         android:id="@+id/Switch_Text_Preference_Summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone"/>
 </LinearLayout>

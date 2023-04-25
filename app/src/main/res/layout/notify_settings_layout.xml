@@ -28,8 +28,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_vertical"
-                    android:text="@string/title_orbital"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+                    android:text="@string/title_orbital"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Notify_Settings_Orbital_List"

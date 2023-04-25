@@ -31,7 +31,7 @@
                 style="@style/NotifySettingsMaterialLayout"
                 android:visibility="gone">
                 <TextView
-                    style="@style/NotifySettingsMaterialText"
+                    style="@style/NotifySettingsText"
                     android:text="@string/title_orbital"/>
 
                 <com.google.android.material.textfield.TextInputLayout
@@ -51,7 +51,7 @@
             <LinearLayout
                 style="@style/NotifySettingsMaterialLayout">
                 <TextView
-                    style="@style/NotifySettingsMaterialText"
+                    style="@style/NotifySettingsText"
                     android:text="@string/title_pass_start"/>
 
                 <RadioGroup
@@ -71,7 +71,7 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/Notify_Settings_Pass_Start_Switch"
-                    style="@style/NotifySettingsMaterialSwitch"/>
+                    style="@style/NotifySettingsSwitch"/>
             </LinearLayout>
 
             <View style="@style/DividerThin"/>
@@ -79,7 +79,7 @@
             <LinearLayout
                 style="@style/NotifySettingsMaterialLayout">
                 <TextView
-                    style="@style/NotifySettingsMaterialText"
+                    style="@style/NotifySettingsText"
                     android:text="@string/title_pass_end"/>
 
                 <RadioGroup
@@ -99,7 +99,7 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/Notify_Settings_Pass_End_Switch"
-                    style="@style/NotifySettingsMaterialSwitch"/>
+                    style="@style/NotifySettingsSwitch"/>
             </LinearLayout>
 
             <View android:id="@+id/Notify_Settings_Full_Moon_Start_Divider" style="@style/DividerThin" android:visibility="gone"/>
@@ -109,7 +109,7 @@
                 style="@style/NotifySettingsMaterialLayout"
                 android:visibility="gone">
                 <TextView
-                    style="@style/NotifySettingsMaterialText"
+                    style="@style/NotifySettingsText"
                     android:text="@string/title_full_moon_start"/>
 
                 <RadioGroup
@@ -129,7 +129,7 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/Notify_Settings_Full_Moon_Start_Switch"
-                    style="@style/NotifySettingsMaterialSwitch"/>
+                    style="@style/NotifySettingsSwitch"/>
             </LinearLayout>
 
             <View android:id="@+id/Notify_Settings_Full_Moon_End_Divider" style="@style/DividerThin" android:visibility="gone"/>
@@ -139,7 +139,7 @@
                 style="@style/NotifySettingsMaterialLayout"
                 android:visibility="gone">
                 <TextView
-                    style="@style/NotifySettingsMaterialText"
+                    style="@style/NotifySettingsText"
                     android:text="@string/title_full_moon_end"/>
 
                 <RadioGroup
@@ -159,7 +159,7 @@
 
                 <com.google.android.material.materialswitch.MaterialSwitch
                     android:id="@+id/Notify_Settings_Full_Moon_End_Switch"
-                    style="@style/NotifySettingsMaterialSwitch"/>
+                    style="@style/NotifySettingsSwitch"/>
             </LinearLayout>
         </LinearLayout>
     </ScrollView>

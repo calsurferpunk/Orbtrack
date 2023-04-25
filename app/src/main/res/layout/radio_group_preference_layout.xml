@@ -11,8 +11,7 @@
         android:id="@+id/Radio_Group_Title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+        android:layout_gravity="center_vertical"/>
 
     <RadioGroup
         android:id="@+id/Radio_Group_Group"

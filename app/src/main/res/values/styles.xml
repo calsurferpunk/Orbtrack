@@ -434,7 +434,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_gravity">right|center_vertical</item>
         <item name="android:layout_marginRight">8dp</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
     <!--Text View Material-->
@@ -522,7 +521,6 @@
         <item name="android:maxLength">6</item>
         <item name="android:hint">@string/empty</item>
         <item name="android:selectAllOnFocus">true</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
     </style>
 
     <style name="CalculateEditTextMaterial" parent="CalculateEditText">
@@ -540,7 +538,6 @@
     <style name="CalculateEditUnitTitle">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
     <style name="CalculateEditValueTitle">
@@ -548,7 +545,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">10dp</item>
         <item name="android:gravity">center</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
     <style name="CalculateEditValueTitleMaterial" parent="CalculateEditUnitTitle">
@@ -636,7 +632,6 @@
     <style name="TitleText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
         <item name="android:padding">10dp</item>
         <item name="android:background">?attr/colorAccentVariant</item>
         <item name="android:textColor">?attr/colorAccentLightest</item>
@@ -793,7 +788,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingLeft">0dp</item>
         <item name="android:paddingRight">8dp</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
     <!--Notify settings-->
@@ -807,14 +801,10 @@
         <item name="android:padding">10dp</item>
     </style>
 
-    <style name="NotifySettingsMaterialText">
+    <style name="NotifySettingsText">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
-    </style>
-
-    <style name="NotifySettingsText" parent="NotifySettingsMaterialText">
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Medium</item>
     </style>
 
     <style name="NotifySettingsTextInputLayout" parent="Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu">
@@ -824,15 +814,10 @@
         <item name="android:textColorHint">@color/white</item>
     </style>
 
-    <style name="NotifySettingsMaterialSwitch">
+    <style name="NotifySettingsSwitch">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginLeft">16dp</item>
-    </style>
-
-    <style name="NotifySettingsSwitch" parent="NotifySettingsMaterialSwitch">
-        <item name="trackTint">?attr/dividerLineColor</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
     <style name="NotifySettingsMaterialRadioGroup">
@@ -898,8 +883,6 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:padding">16dp</item>
         <item name="android:text">@string/title_shared</item>
-        <item name="trackTint">?attr/dividerLineColor</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
         <item name="android:checked">true</item>
     </style>
 
@@ -911,7 +894,6 @@
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:gravity">center_vertical|end</item>
-        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Small</item>
     </style>
 
     <style name="WidgetSetupTextOptions">

@@ -15,8 +15,7 @@
             android:id="@+id/Icon_List_Preference_Title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="6dp"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+            android:layout_marginRight="6dp"/>
 
         <com.nikolaiapps.orbtrack.IconSpinner
             android:id="@+id/Icon_List_Preference_List"
@@ -29,7 +28,6 @@
         android:id="@+id/Icon_List_Preference_Summary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"
         android:textColor="?android:attr/textColorSecondary"
         android:visibility="gone"/>
 </LinearLayout>

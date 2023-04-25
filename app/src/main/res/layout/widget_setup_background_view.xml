@@ -30,8 +30,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginStart="10dp"
-                    android:text="@string/title_style"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                    android:text="@string/title_style"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Widget_Setup_Global_Border_Style_List"
@@ -61,8 +60,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
                     android:layout_marginStart="10dp"
-                    android:text="@string/title_style"
-                    android:textAppearance="@style/Base.TextAppearance.AppCompat.Small"/>
+                    android:text="@string/title_style"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Widget_Setup_Border_Style_List"

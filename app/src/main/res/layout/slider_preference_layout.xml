@@ -11,8 +11,7 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.275"
-        android:text="@string/title_sensitivity"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+        android:text="@string/title_sensitivity"/>
 
     <com.nikolaiapps.orbtrack.PlayBar
         android:id="@+id/Slider_Preference_Bar"

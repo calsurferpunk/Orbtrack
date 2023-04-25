@@ -19,7 +19,6 @@
                 android:paddingLeft="3dp"
                 android:paddingRight="3dp"
                 android:text="@string/title_owner"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:textColor="?attr/colorAccentLightest"/>
 
             <com.nikolaiapps.orbtrack.IconSpinner
@@ -38,7 +37,6 @@
                 android:paddingLeft="3dp"
                 android:paddingRight="3dp"
                 android:text="@string/title_group"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:textColor="?attr/colorAccentLightest"/>
 
             <com.nikolaiapps.orbtrack.IconSpinner
@@ -57,7 +55,6 @@
                 android:paddingLeft="3dp"
                 android:paddingRight="3dp"
                 android:text="@string/title_age"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:textColor="?attr/colorAccentLightest"/>
 
             <com.nikolaiapps.orbtrack.IconSpinner
@@ -85,7 +82,6 @@
                 android:inputType="textNoSuggestions"
                 android:autofillHints="@string/title_name_or_id"
                 android:hint="@string/title_name_or_id"
-                android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
                 android:enabled="false"/>
         </TableRow>
     </TableLayout>

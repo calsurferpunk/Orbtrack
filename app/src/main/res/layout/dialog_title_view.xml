@@ -6,5 +6,4 @@
     android:gravity="center_vertical"
     android:drawablePadding="6dp"
     android:padding="6dp"
-    android:textAppearance="@style/TextAppearance.AppCompat.Medium"
     android:textStyle="bold"/>

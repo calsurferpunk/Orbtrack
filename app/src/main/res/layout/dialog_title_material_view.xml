@@ -18,7 +18,6 @@
             android:layout_gravity="center"
             android:gravity="center"
             android:drawablePadding="6dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             android:textStyle="bold"/>
     </com.google.android.material.card.MaterialCardView>
 </LinearLayout>

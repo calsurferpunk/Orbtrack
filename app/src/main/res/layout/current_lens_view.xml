@@ -85,7 +85,6 @@
             android:padding="5dp"
             android:gravity="center"
             android:text="@string/title_select"
-            android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
             android:textColor="?attr/colorAccentLightest"
             android:background="?attr/colorAccentVariant"
             android:visibility="gone"/>

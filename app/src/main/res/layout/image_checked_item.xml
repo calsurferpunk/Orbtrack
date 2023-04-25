@@ -28,8 +28,7 @@
         android:layout_marginLeft="5dp"
         android:layout_marginStart="5dp"
         android:paddingLeft="2dp"
-        android:paddingRight="2dp"
-        android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"/>
+        android:paddingRight="2dp"/>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/Item_Checked_Progress"

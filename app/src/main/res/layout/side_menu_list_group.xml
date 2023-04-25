@@ -18,7 +18,6 @@
             android:layout_marginStart="30dp"/>
         <TextView
             android:id="@+id/Group_Title_Text"
-            style="@style/Base.TextAppearance.AppCompat.Medium"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"

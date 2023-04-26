@@ -915,6 +915,24 @@ public abstract class Globals
         showSelectDialog(context, -1, title, selectType, AccountType.None, -1, null, listener);
     }
 
+    //Tries to get activity from the given context
+    public static AppCompatActivity getActivity(Context context)
+    {
+        //try to get fragment manager
+        if(context instanceof AppCompatActivity)
+        {
+            return(((AppCompatActivity)context));
+        }
+        else if(context instanceof ContextThemeWrapper)
+        {
+            return(getActivity(((ContextThemeWrapper)context).getBaseContext()));
+        }
+        else
+        {
+            return(null);
+        }
+    }
+
     //Tries to get fragment manager from the given context
     public static FragmentManager getFragmentManager(Context context)
     {
@@ -1115,7 +1133,14 @@ public abstract class Globals
         final boolean isExactAlarm;
         final boolean isNotification;
         boolean createDialog;
-        final AppCompatActivity currentActivity = (AppCompatActivity)context;
+        final AppCompatActivity currentActivity = getActivity(context);
+
+        //if unable to get activity
+        if(currentActivity == null)
+        {
+            //top
+            return;
+        }
 
         //get properties
         switch(resultCode)

@@ -18,7 +18,6 @@ import androidx.annotation.NonNull;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
-import com.google.android.material.textfield.TextInputLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -187,7 +186,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             savedId = -1;
             id = getLocationId(context, widgetId);
             source = getLocationSource(context, widgetId);
-            if(source == Database.LocationType.Current && !useFollow && !useInterval && noradId != Universe.IDs.Invalid)       //if used current location but not following or on an interval
+            if(getIsCurrent() && !useFollow && !useInterval && noradId != Universe.IDs.Invalid)       //if used current location but not following or on an interval
             {
                 source = Database.LocationType.New;
             }
@@ -207,6 +206,16 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             {
                 searchObserver = getLocation(context, widgetId);
             }
+        }
+
+        boolean getIsSearch()
+        {
+            return(source == Database.LocationType.New);
+        }
+
+        boolean getIsCurrent()
+        {
+            return(source == Database.LocationType.Current);
         }
     }
 
@@ -286,6 +295,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             void settingChanged();
         }
 
+        private TableRow searchRow;
+        private TableRow intervalRow;
+        private TableRow currentLocationRow;
         private TableRow unusedImageRow;
         private TableRow globalImageRow;
         private TableRow orbitalImageRow;
@@ -307,7 +319,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         private SelectListInterface globalBorderStyleList;
         private SelectListInterface borderStyleList;
         private SelectListInterface[] textSizeList;
-        private TextInputLayout intervalLayout;
         private RadioGroup currentLocationGroup;
         private AppCompatRadioButton followRadio;
         private AppCompatRadioButton intervalRadio;
@@ -450,6 +461,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         public void onNothingSelected(AdapterView<?> parent) {}
                     });
 
+                    currentLocationRow = rootView.findViewById(R.id.Widget_Setup_Current_Location_Row);
                     currentLocationGroup = rootView.findViewById(R.id.Widget_Setup_Current_Location_Group);
 
                     followRadio = rootView.findViewById(R.id.Widget_Setup_Follow_Radio);
@@ -475,7 +487,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
                     nowRadio = rootView.findViewById(R.id.Widget_Setup_Now_Radio);
 
-                    intervalLayout = rootView.findViewById(R.id.Widget_Setup_Interval_Layout);
+                    intervalRow = rootView.findViewById(R.id.Widget_Setup_Interval_Row);
                     intervalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Interval_Text_List : R.id.Widget_Setup_Interval_List);
                     if(intervalItems != null)
                     {
@@ -496,6 +508,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         public void onNothingSelected(AdapterView<?> parent) {}
                     });
 
+                    searchRow = rootView.findViewById(R.id.Widget_Setup_Location_Search_Row);
                     searchText = rootView.findViewById(R.id.Widget_Setup_Location_Search_Text);
                     searchText.addTextChangedListener(new TextWatcher()
                     {
@@ -870,9 +883,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             switch(page)
             {
                 case TabPage.Data:
-                    boolean isCurrent = (widgetSettings.location.source == Database.LocationType.Current);
-                    boolean isSearch = (widgetSettings.location.source == Database.LocationType.New);
-                    int intervalVisibility = (isCurrent && widgetSettings.location.useInterval ? View.VISIBLE : View.GONE);
+                    int visibility;
                     String currentText;
 
                     if(orbitalList != null)
@@ -887,7 +898,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         }
                         else
                         {
-                            locationList.setSelectedValue(widgetSettings.location.source == Database.LocationType.Current ? Database.LocationType.Current : Database.LocationType.New);
+                            locationList.setSelectedValue(widgetSettings.location.getIsCurrent() ? Database.LocationType.Current : Database.LocationType.New);
                         }
                     }
 
@@ -910,19 +921,21 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                         nowRadio.setChecked(true);      //default to current location now
                     }
 
+                    visibility = (widgetSettings.location.getIsCurrent() && widgetSettings.location.useInterval ? View.VISIBLE : View.GONE);
                     if(intervalList != null)
                     {
                         intervalList.setSelectedValue(widgetSettings.location.intervalMs);
-                        intervalList.setVisibility(intervalVisibility);
+                        intervalList.setVisibility(visibility);
                     }
-                    if(intervalLayout != null)
+                    if(intervalRow != null)
                     {
-                        intervalLayout.setVisibility(intervalVisibility);
+                        intervalRow.setVisibility(visibility);
                     }
 
+                    visibility = (widgetSettings.location.getIsSearch() ? View.VISIBLE : View.GONE);
                     if(searchText != null)
                     {
-                        if(isSearch)
+                        if(widgetSettings.location.getIsSearch())
                         {
                             //remember current text
                             currentText = searchText.getText().toString();
@@ -938,12 +951,21 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             searchText.requestFocus();
                             searchText.selectAll();
                         }
-                        searchText.setVisibility(isSearch ? View.VISIBLE : View.GONE);
+                        searchText.setVisibility(visibility);
+                    }
+                    if(searchRow != null)
+                    {
+                        searchRow.setVisibility(visibility);
                     }
 
+                    visibility = (widgetSettings.location.getIsCurrent() ? View.VISIBLE : View.GONE);
+                    if(currentLocationRow != null)
+                    {
+                        currentLocationRow.setVisibility(visibility);
+                    }
                     if(currentLocationGroup != null)
                     {
-                        currentLocationGroup.setVisibility(isCurrent ? View.VISIBLE : View.GONE);
+                        currentLocationGroup.setVisibility(visibility);
                     }
                     break;
 
@@ -976,7 +998,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     {
                         globalImagesDivider.setVisibility(showGlobalImageSwitch ? View.VISIBLE : View.GONE);
                     }
-
                     if(orbitalImageRow != null)
                     {
                         orbitalImageRow.setVisibility(orbitalImageVisibility);
@@ -1089,7 +1110,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 
                 case TabPage.Text:
                     boolean useGlobalText = widgetSettings.useGlobalText;
-                    int visibility;
                     int nonGlobalTextVisibility = (useGlobalText ? View.GONE : View.VISIBLE);
                     int nonGlobalExtendedTextVisibility = (useGlobalText || !useExtended ? View.GONE : View.VISIBLE);
 
@@ -1703,7 +1723,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     if(satellite != null)
                     {
                         //if using LocationType.Current and don't have location permission
-                        if(widgetSettings.location.source == Database.LocationType.Current && !Globals.haveLocationPermission(context))
+                        if(widgetSettings.location.getIsCurrent() && !Globals.haveLocationPermission(context))
                         {
                             //if can ask for permission
                             if(Globals.canAskLocationPermission)
@@ -1720,7 +1740,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             //not done yet
                             done = false;
                         }
-                        else if(widgetSettings.location.source == Database.LocationType.Current && widgetSettings.location.useFollow && !Globals.havePostNotificationsPermission(context))
+                        else if(widgetSettings.location.getIsCurrent() && widgetSettings.location.useFollow && !Globals.havePostNotificationsPermission(context))
                         {
                             //if can ask for permission
                             if(Globals.canAskPostNotificationsPermission)
@@ -1749,7 +1769,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             useExtended = widgetClass.equals(WidgetPassMediumProvider.class);
 
                             //save values
-                            if(widgetSettings.location.source == Database.LocationType.New)
+                            if(widgetSettings.location.getIsSearch())
                             {
                                 usedSource = Database.LocationType.Online;
                                 usedObserver = widgetSettings.location.searchObserver;
@@ -1761,7 +1781,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                             setName(context, widgetId, satellite.getName());
                             setNoradID(context, widgetId, widgetSettings.noradId);
                             setOrbitalType(context, widgetId, satellite.orbitalType);
-                            setLocation(context, alarmReceiverClass, widgetId, usedSource, widgetSettings.location.savedId, (widgetSettings.location.source == Database.LocationType.New ? widgetSettings.location.searchName : widgetSettings.location.savedName), usedObserver.geo.latitude, usedObserver.geo.longitude, useFollow, useInterval, widgetSettings.location.intervalMs, (widgetSettings.location.source != Database.LocationType.Current));
+                            setLocation(context, alarmReceiverClass, widgetId, usedSource, widgetSettings.location.savedId, (widgetSettings.location.getIsSearch() ? widgetSettings.location.searchName : widgetSettings.location.savedName), usedObserver.geo.latitude, usedObserver.geo.longitude, useFollow, useInterval, widgetSettings.location.intervalMs, (widgetSettings.location.source != Database.LocationType.Current));
                             setGlobalImage(context, widgetId, useGlobalImage);
                             if(useGlobalImage)
                             {

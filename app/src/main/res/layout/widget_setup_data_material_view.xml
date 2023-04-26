@@ -32,54 +32,55 @@
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
 
-        <TableRow style="@style/WidgetSetupRow">
-            <LinearLayout
-                android:layout_width="match_parent"
+        <TableRow style="@style/WidgetSetupRow" android:id="@+id/Widget_Setup_Location_Search_Row" android:visibility="gone">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/WidgetSetupListInputLayout"
+                android:hint="@string/title_name">
+                <com.google.android.material.textfield.MaterialAutoCompleteTextView
+                    android:id="@+id/Widget_Setup_Location_Search_Text"
+                    style="@style/Widget.Material3.AutoCompleteTextView.FilledBox"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="12dp"
+                    android:selectAllOnFocus="true"
+                    android:hint="@string/empty"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </TableRow>
+
+        <TableRow style="@style/WidgetSetupRow" android:id="@+id/Widget_Setup_Current_Location_Row" android:visibility="visible">
+            <RadioGroup
+                android:id="@+id/Widget_Setup_Current_Location_Group"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:orientation="vertical">
-                <AutoCompleteTextView
-                    android:id="@+id/Widget_Setup_Location_Search_Text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:selectAllOnFocus="true"
-                    android:hint="@string/empty"
-                    android:visibility="gone"/>
+                android:gravity="center"
+                android:orientation="horizontal">
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/Widget_Setup_Now_Radio"
+                    style="@style/RadioButton"
+                    android:text="@string/title_now"/>
 
-                <RadioGroup
-                    android:id="@+id/Widget_Setup_Current_Location_Group"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="horizontal"
-                    android:visibility="gone">
-                    <androidx.appcompat.widget.AppCompatRadioButton
-                        android:id="@+id/Widget_Setup_Now_Radio"
-                        style="@style/RadioButton"
-                        android:text="@string/title_now"/>
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/Widget_Setup_Follow_Radio"
+                    style="@style/RadioButton"
+                    android:text="@string/title_follow"/>
 
-                    <androidx.appcompat.widget.AppCompatRadioButton
-                        android:id="@+id/Widget_Setup_Follow_Radio"
-                        style="@style/RadioButton"
-                        android:text="@string/title_follow"/>
+                <androidx.appcompat.widget.AppCompatRadioButton
+                    android:id="@+id/Widget_Setup_Interval_Radio"
+                    style="@style/RadioButton"
+                    android:text="@string/title_interval"/>
+            </RadioGroup>
+        </TableRow>
 
-                    <androidx.appcompat.widget.AppCompatRadioButton
-                        android:id="@+id/Widget_Setup_Interval_Radio"
-                        style="@style/RadioButton"
-                        android:text="@string/title_interval"/>
-                </RadioGroup>
-
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/Widget_Setup_Interval_Layout"
-                    style="@style/WidgetSetupListInputLayout"
-                    android:layout_width="match_parent"
-                    android:hint="@string/empty"
-                    android:visibility="gone">
-                    <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
-                        android:id="@+id/Widget_Setup_Interval_Text_List"
-                        style="@style/WidgetSetupMaterialWideList"/>
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
+        <TableRow style="@style/WidgetSetupRow" android:id="@+id/Widget_Setup_Interval_Row" android:visibility="gone">
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/WidgetSetupListInputLayout"
+                android:layout_width="match_parent"
+                android:hint="@string/empty">
+                <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                    android:id="@+id/Widget_Setup_Interval_Text_List"
+                    style="@style/WidgetSetupMaterialWideList"/>
+            </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
     </TableLayout>
 </ScrollView>

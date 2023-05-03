@@ -979,8 +979,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 currentPaint.setStyle(Paint.Style.STROKE);
                 currentPaint.setStrokeWidth(indicatorThickness);
 
-                //if selected orbital
-                if(haveSelectedOrbital())
+                //if selected nearest orbital
+                if(haveSelectedNearestOrbital())
                 {
                     //if need to align center
                     if(needAlignmentCenter())
@@ -1043,7 +1043,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //if have a selection
             if(haveSelectedOrbital())
             {
-                Calculations.TopographicDataType usedLookAngle = (showCalibration ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
+                Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
                 RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight) : null);
                 boolean haveProperties = (relativeCalibrateProperties != null);
                 boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
@@ -1446,6 +1446,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 calibrateAngles[1].elevation = firstAngles.elevation + quarterHeightDegrees;
                 calibrateAngles[2].azimuth = firstAngles.azimuth - quarterWidthDegrees;
                 calibrateAngles[2].elevation = firstAngles.elevation - quarterHeightDegrees;
+
+                //update status
+                calibrateIndex = 0;
             }
         }
 
@@ -1490,6 +1493,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public boolean haveSelectedOrbital()
     {
         return(selectedOrbitalIndex >= 0 && currentLookAngles != null && selectedOrbitalIndex < currentLookAngles.length);
+    }
+
+    //Returns if any valid nearest orbital is selected
+    public boolean haveSelectedNearestOrbital()
+    {
+        return(calibrateIndex >= 0 && haveSelectedOrbital());
     }
 
     //Returns if need alignment for center
@@ -1554,7 +1563,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     //Resets alignment status
     public void resetAlignmentStatus()
     {
-        calibrateIndex = 0;
+        calibrateIndex = -1;
         selectedOrbitalIndex = -1;
         selectedNoradId = Universe.IDs.None;
         selectedArea = new Rect(0, 0, 0, 0);

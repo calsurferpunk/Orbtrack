@@ -1627,18 +1627,6 @@ public abstract class Current
                     //if list is set
                     if(searchList != null)
                     {
-                        //if list being shown
-                        if(lensShowToolbars)
-                        {
-                            //update selection
-                            searchList.setSelectedValue(Universe.IDs.None);
-                        }
-                        else
-                        {
-                            //update selection
-                            selectOrbital(Universe.IDs.None, true);
-                        }
-
                         //make sure list can be used
                         searchList.setEnabled(true);
                     }
@@ -1662,8 +1650,8 @@ public abstract class Current
                         @Override
                         public void onClick(View v)
                         {
-                            //if no orbital selected yet
-                            if(!cameraView.haveSelectedOrbital())
+                            //if no nearest orbital selected yet
+                            if(!cameraView.haveSelectedNearestOrbital())
                             {
                                 //try to select nearest
                                 if(cameraView.selectNearest())

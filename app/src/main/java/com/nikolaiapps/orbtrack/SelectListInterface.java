@@ -3,6 +3,7 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 
 
@@ -14,6 +15,7 @@ public interface SelectListInterface
     void setAdapter(IconSpinner.CustomAdapter adapter);
     void setAllowAutoSelect(boolean allow);
     IconSpinner.CustomAdapter getAdapter();
+    ViewTreeObserver getViewTreeObserver();
     int getBackgroundColor();
     void setBackgroundColor(int color);
     void setBackgroundItemColor(int color);
@@ -25,6 +27,7 @@ public interface SelectListInterface
     boolean setSelectedValue(Object value);
     int getSelectedItemPosition();
     Object getSelectedValue(Object defaultValue);
+    void setDropDownWidth(int width);
     void setEnabled(boolean enabled);
     void setVisibility(int visibility);
 

@@ -8,16 +8,18 @@
     android:layout_marginBottom="8dp">
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/Icon_List_Preference_Text_Layout"
-        style="@style/Widget.Material3.TextInputLayout.FilledBox.ExposedDropdownMenu"
+        style="@style/Widget.MaterialComponents.TextInputLayout.FilledBox.ExposedDropdownMenu"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:minWidth="168dp"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:startIconTint="@null">
         <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
             android:id="@+id/Icon_List_Preference_Text_List"
             style="@style/TextViewMaterialList"
+            android:background="@color/transparent"
             android:padding="16dp"/>
     </com.google.android.material.textfield.TextInputLayout>
 

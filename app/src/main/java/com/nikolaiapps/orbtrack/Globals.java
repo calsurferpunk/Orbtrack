@@ -76,6 +76,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.LocaleList;
 import android.provider.OpenableColumns;
 import android.text.Html;
+import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
 import android.text.method.LinkMovementMethod;
@@ -1138,7 +1139,7 @@ public abstract class Globals
         //if unable to get activity
         if(currentActivity == null)
         {
-            //top
+            //stop
             return;
         }
 
@@ -2946,7 +2947,7 @@ public abstract class Globals
     }
 
     //Gets an image width and height
-    private static int[] getImageWidthHeight(Drawable image)
+    public static int[] getImageWidthHeight(Drawable image)
     {
         int[] size = new int[2];
 
@@ -3023,7 +3024,7 @@ public abstract class Globals
     }
 
     //Gets a sized drawable
-    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean colorIsId, boolean isDpSize)
+    public static Drawable getDrawableSized(Context context, Drawable image, int width, int height, boolean isDpSize)
     {
         float[] dpPixels = (isDpSize ? dpsToPixels(context, width, height) : null);
         int widthPixels = (isDpSize ? (int)dpPixels[0] : width);
@@ -3032,7 +3033,6 @@ public abstract class Globals
         Bitmap imageBitmap;
         BitmapDrawable scaledDrawable;
         Canvas imageCanvas;
-        Drawable image = getDrawable(context, resId, tintColor, colorIsId);
 
         //get starting width(s) and height(s)
         imageSize = getImageWidthHeight(image);
@@ -3046,6 +3046,10 @@ public abstract class Globals
 
         //return scaled image
         return(scaledDrawable);
+    }
+    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean colorIsId, boolean isDpSize)
+    {
+        return(getDrawableSized(context, getDrawable(context, resId, tintColor, colorIsId), width, height, isDpSize));
     }
     public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
     {
@@ -3245,19 +3249,20 @@ public abstract class Globals
     }
 
     //Gets text as a drawable
-    public static BitmapDrawable getDrawableText(Context context, String text, float textSize, int textColor, int bgColor)
+    public static BitmapDrawable getDrawableText(Context context, String text, float textSize, int textColor)
     {
         int textWidth;
         int textHeight;
         Bitmap textImage;
         Canvas textCanvas;
-        Paint textPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        Paint textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG);
 
         if(context == null)
         {
             return(null);
         }
 
+        textPaint.setColor(textColor);
         textPaint.setStrokeWidth(2);
         textPaint.setStyle(Paint.Style.FILL);
         textPaint.setTypeface(Typeface.SANS_SERIF);
@@ -3265,14 +3270,9 @@ public abstract class Globals
 
         textWidth = getTextWidth(textPaint, text);
         textHeight = getTextHeight(textPaint, text);
-
         textImage = Bitmap.createBitmap(textWidth, textHeight, Bitmap.Config.ARGB_8888);
         textCanvas = new Canvas(textImage);
 
-        textPaint.setColor(bgColor);
-        textCanvas.drawRect(0, 0, textWidth, textHeight - 1, textPaint);
-
-        textPaint.setColor(textColor);
         textCanvas.drawText(text, 0, textHeight - 1, textPaint);
 
         return(new BitmapDrawable(context.getResources(), textImage));

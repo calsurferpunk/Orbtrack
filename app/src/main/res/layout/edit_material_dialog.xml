@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:tools="http://schemas.android.com/tools" tools:ignore="Autofill,LabelFor,TextFields"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/pageHighlightBackground">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_margin="8dp">
+        <LinearLayout
+            android:id="@+id/Edit_Value_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/Edit_Value_Text_Layout"
+                style="@style/TextViewMaterialInputLayout">
+                <EditText
+                    android:id="@+id/Edit_Value_Text"
+                    style="@style/EditValueMaterialText"
+                    android:inputType="textAutoComplete"
+                    android:maxLength="50"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/Edit_Value_Text_List_Layout"
+                style="@style/CalculateListInputLayout"
+                android:layout_width="wrap_content"
+                android:minWidth="100dp">
+                <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                    android:id="@+id/Edit_Value_Text_List"
+                    style="@style/TextViewMaterialList"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Value2_Text_Layout"
+            style="@style/TextViewMaterialInputLayout"
+            app:passwordToggleEnabled="true"
+            app:passwordToggleTint="?android:textColor"
+            android:visibility="gone">
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/Edit_Value2_Text"
+                style="@style/EditValueMaterialText"
+                android:inputType="textPassword"
+                android:maxLength="50"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/Edit_Text"
+            style="@style/EditValueTitle"
+            android:layout_width="match_parent"
+            android:autoLink="web"
+            android:text="@string/spacetrack_create_link"
+            android:visibility="gone"/>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Number_Layout"
+            style="@style/TextViewMaterialInputLayout"
+            android:visibility="gone">
+            <EditText
+                android:id="@+id/Edit_Number_Text"
+                style="@style/EditValueMaterialText"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Number2_Layout"
+            style="@style/TextViewMaterialInputLayout"
+            android:visibility="gone">
+            <EditText
+                android:id="@+id/Edit_Number2_Text"
+                style="@style/EditValueMaterialText"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Number3_Layout"
+            style="@style/TextViewMaterialInputLayout"
+            android:visibility="gone">
+            <EditText
+                android:id="@+id/Edit_Number3_Text"
+                style="@style/EditValueMaterialText"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Value_Text_List2_Layout"
+            style="@style/CalculateListInputLayout">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Edit_Value_Text_List2"
+                style="@style/TextViewMaterialList"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Date_Layout"
+            style="@style/TextViewMaterialInputLayout"
+            android:visibility="gone">
+            <com.nikolaiapps.orbtrack.DateInputView
+                android:id="@+id/Edit_Date"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Edit_Color_Text_List_Layout"
+            style="@style/CalculateListInputLayout"
+            android:visibility="gone">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Edit_Color_Text_List"
+                style="@style/TextViewMaterialList"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.nikolaiapps.orbtrack.BorderButton
+            android:id="@+id/Edit_Color_Button"
+            style="@style/ColorButton"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Edit_Colors_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone">
+            <com.nikolaiapps.orbtrack.BorderButton
+                android:id="@+id/Edit_Colors_Button1"
+                style="@style/ColorButton"
+                android:layout_marginRight="16dp"/>
+
+            <com.nikolaiapps.orbtrack.BorderButton
+                android:id="@+id/Edit_Colors_Button2"
+                style="@style/ColorButton"/>
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/Edit_Visible_Button"
+            style="@style/VisibleButton"
+            android:visibility="gone"/>
+
+        <TextView
+            android:id="@+id/Edit_Text2"
+            style="@style/EditValueTitle"
+            android:layout_width="match_parent"
+            android:visibility="gone"/>
+    </LinearLayout>
+</ScrollView>

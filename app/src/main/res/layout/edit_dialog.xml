@@ -7,27 +7,22 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="6dp">
-        <TableRow android:id="@+id/Edit_Value_Row" android:padding="5dp">
+        <TableRow android:id="@+id/Edit_Value_Row">
             <TextView
-                style="@style/EditValueTitle"
-                android:id="@+id/Edit_Value_Title"/>
+                android:id="@+id/Edit_Value_Title"
+                style="@style/EditValueTitle"/>
 
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1">
+                android:layout_weight="1"
+                android:gravity="center_vertical">
                 <EditText
                     android:id="@+id/Edit_Value_Text"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
+                    style="@style/EditValueText"
                     android:inputType="textAutoComplete"
-                    android:maxLength="50"
-                    android:padding="10dp"
-                    android:singleLine="true"
-                    android:autofillHints="@string/empty"
-                    android:hint="@string/empty"/>
+                    android:maxLength="50"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
                     android:id="@+id/Edit_Value_List"
@@ -36,13 +31,14 @@
             </LinearLayout>
         </TableRow>
 
-        <TableRow android:id="@+id/Edit_Value2_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Value2_Row" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Value2_Title"
                 style="@style/EditValueTitle"/>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/Edit_Value_Text_Layout"
+                android:id="@+id/Edit_Value2_Text_Layout"
+                style="@style/TextViewMaterialInputLayout"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -69,80 +65,41 @@
             android:text="@string/spacetrack_create_link"
             android:visibility="gone"/>
 
-        <TableRow android:id="@+id/Edit_Number_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Number_Row" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Number_Title"
                 style="@style/EditValueTitle"/>
 
             <EditText
                 android:id="@+id/Edit_Number_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:maxLength="20"
-                android:padding="10dp"
-                android:singleLine="true"
-                android:autofillHints="@string/empty"
-                android:hint="@string/empty"/>
+                style="@style/EditValueText"/>
         </TableRow>
 
-        <TableRow android:id="@+id/Edit_Number2_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Number2_Row" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Number2_Title"
                 style="@style/EditValueTitle"/>
 
             <EditText
                 android:id="@+id/Edit_Number2_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:maxLength="20"
-                android:padding="10dp"
-                android:singleLine="true"
-                android:autofillHints="@string/empty"
-                android:hint="@string/empty"/>
+                style="@style/EditValueText"/>
         </TableRow>
 
-        <TableRow android:id="@+id/Edit_Number3_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Number3_Row" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Number3_Title"
                 style="@style/EditValueTitle"/>
 
             <EditText
                 android:id="@+id/Edit_Number3_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:inputType="numberDecimal"
-                android:maxLength="20"
-                android:padding="10dp"
-                android:singleLine="true"
-                android:autofillHints="@string/empty"
-                android:hint="@string/empty"/>
+                style="@style/EditValueText"/>
         </TableRow>
 
-        <TableRow android:id="@+id/Edit_List2_Row" android:padding="5dp">
-            <LinearLayout
-                android:id="@+id/Edit_List2_Layout"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="end|center_vertical"
-                android:visibility="gone">
-                <TextView
-                    android:id="@+id/Edit_List2_Title"
-                    style="@style/EditValueTitle"
-                    android:visibility="gone"/>
-
-                <TextView
-                    android:id="@+id/Edit_List2_Title2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_margin="5dp"
-                    android:gravity="center"
-                    android:text="@string/text_to"/>
-            </LinearLayout>
+        <TableRow android:id="@+id/Edit_List2_Row">
+            <TextView
+                android:id="@+id/Edit_List2_Title"
+                style="@style/EditValueTitle"
+                android:visibility="gone"/>
 
             <com.nikolaiapps.orbtrack.IconSpinner
                 android:id="@+id/Edit_Value_List2"
@@ -151,7 +108,7 @@
                 android:layout_weight="1"/>
         </TableRow>
 
-        <TableRow android:id="@+id/Edit_Date_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Date_Row" android:visibility="gone">
             <TextView
                 android:id="@+id/Edit_Date_Title"
                 style="@style/EditValueTitle"/>
@@ -170,30 +127,30 @@
             android:layout_height="wrap_content"
             android:visibility="gone"/>
 
-        <TableRow android:id="@+id/Edit_Color_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Color_Row" android:visibility="gone">
             <com.nikolaiapps.orbtrack.BorderButton
                 android:id="@+id/Edit_Color_Button"
-                android:layout_marginRight="16dp"
-                style="@style/ColorButton"/>
+                style="@style/ColorButton"
+                android:layout_marginRight="16dp" />
         </TableRow>
 
         <TableRow android:id="@+id/Edit_Colors_Row" android:padding="5dp" android:visibility="gone">
             <com.nikolaiapps.orbtrack.BorderButton
                 android:id="@+id/Edit_Colors_Button1"
-                android:layout_marginRight="16dp"
-                style="@style/ColorButton"/>
+                style="@style/ColorButton"
+                android:layout_marginRight="16dp"/>
 
             <com.nikolaiapps.orbtrack.BorderButton
                 android:id="@+id/Edit_Colors_Button2"
                 style="@style/ColorButton"/>
         </TableRow>
 
-        <TableRow android:id="@+id/Edit_Visible_Row" android:padding="5dp" android:visibility="gone">
+        <TableRow android:id="@+id/Edit_Visible_Row" android:visibility="gone">
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/Edit_Visible_Button"
+                style="@style/VisibleButton"
                 android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                style="@style/VisibleButton"/>
+                android:layout_marginRight="16dp"/>
         </TableRow>
 
         <TextView
@@ -201,7 +158,6 @@
             style="@style/EditValueTitle"
             android:layout_width="match_parent"
             android:padding="5dp"
-            android:text="@string/empty"
             android:visibility="gone"/>
     </TableLayout>
 </ScrollView>

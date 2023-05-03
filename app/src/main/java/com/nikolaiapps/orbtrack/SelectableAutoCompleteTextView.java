@@ -3,17 +3,16 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.ViewParent;
 import android.widget.AdapterView;
+import android.widget.FrameLayout;
+import com.google.android.material.textfield.TextInputLayout;
 
 
 public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.AppCompatAutoCompleteTextView implements SelectListInterface
@@ -26,9 +25,6 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     private int backgroundItemSelectedColor;
     private Object lastValue;
     private Object lastDefaultValue;
-    private final int iconSizePx;
-    private final Paint iconPaint;
-    private final Rect iconArea;
     private IconSpinner.CustomAdapter currentAdapter;
     private AdapterView.OnItemSelectedListener selectedListener;
 
@@ -60,9 +56,6 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         //setup
         setLast(null, null);
         allowAutoSelect = true;
-        iconPaint = new Paint();
-        iconArea = new Rect();
-        iconSizePx = (int)Globals.dpToPixels(context, 32);
         setInputType(inputType);
         addTextChangedListener(new TextWatcher()
         {
@@ -80,16 +73,40 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                 {
                     //if set a selection
                     selectedIndex = getListIndex(s.toString());
-                    if(selectedIndex != -1)
+                    if(selectedIndex < 0)
+                    {
+                        //try to get selected index
+                        selectedIndex = currentAdapter.getSelectedIndex();
+                    }
+                    if(selectedIndex >= 0)
                     {
                         //remember selected item
                         IconSpinner.Item selectedItem = (IconSpinner.Item)currentAdapter.getItem(selectedIndex);
+                        boolean haveItem = (selectedItem != null);
+
+                        //if have selected item
+                        if(haveItem)
+                        {
+                            //try to get parent frame
+                            ViewParent itemParent = getParent();
+                            if(itemParent instanceof FrameLayout)
+                            {
+                                //try to get parent input layout
+                                ViewParent frameParent = itemParent.getParent();
+                                if(frameParent instanceof TextInputLayout)
+                                {
+                                    //set icon to selected item icon
+                                    ((TextInputLayout)frameParent).setStartIconDrawable(selectedItem.getIcon(context, 96));
+                                }
+                            }
+                        }
 
                         //set selection and send event
                         currentAdapter.setSelectedIndex(selectedIndex);
-                        selectedId = (selectedItem != null && selectedItem.value instanceof Integer ? (int)selectedItem.value : selectedId);
+                        selectedId = (haveItem && selectedItem.value instanceof Integer ? (int)selectedItem.value : selectedId);
                         if(selectedListener != null)
                         {
+                            //call listener
                             selectedListener.onItemSelected(null, SelectableAutoCompleteTextView.this, selectedIndex, selectedId);
                         }
                     }
@@ -107,48 +124,6 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     public SelectableAutoCompleteTextView(Context context)
     {
         this(context, null);
-    }
-
-    @Override
-    public void onDraw(Canvas canvas)
-    {
-        int iconWidth;
-        int iconHeight;
-        int halfIconSize = (iconSizePx / 2);
-        int halfHeight = (getMeasuredHeight() / 2);
-        int halfPaddingLeft = (getPaddingLeft() / 2);
-        float iconRatio;
-        IconSpinner.Item selectedItem = (currentAdapter != null ? currentAdapter.getSelectedItem() : null);
-        boolean haveItem = (selectedItem != null);
-        Drawable selectedIcon = (haveItem ? selectedItem.getIcon(getContext()) : null);
-        Bitmap selectedBitmap = (selectedIcon != null && !(selectedIcon instanceof ColorDrawable) ? Globals.getBitmap(selectedIcon) : null);
-        boolean haveBitmap = (selectedBitmap != null);
-        boolean haveIconAndText = (haveItem && selectedItem.text != null && haveBitmap);
-
-        iconWidth = (haveBitmap ? selectedBitmap.getWidth() : 1);
-        iconHeight = (haveBitmap ? selectedBitmap.getHeight() : 1);
-        iconRatio = (iconSizePx / (float)iconHeight);
-        iconArea.set(halfPaddingLeft, halfHeight - halfIconSize, halfPaddingLeft + (int)(iconWidth * iconRatio), halfHeight + halfIconSize);
-
-        if(haveIconAndText)
-        {
-            canvas.save();
-            canvas.translate(iconArea.right - halfPaddingLeft, 0);
-        }
-
-        super.onDraw(canvas);
-
-        if(haveIconAndText)
-        {
-            canvas.restore();
-        }
-
-        //if have an icon image
-        if(haveBitmap)
-        {
-            //draw icon image centered vertically
-            canvas.drawBitmap(selectedBitmap, null, iconArea, iconPaint);
-        }
     }
 
     private int getListIndex(String stringValue)
@@ -227,9 +202,10 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
             if(firstItem instanceof IconSpinner.Item && currentAdapter.getUsingIcon3Only())
             {
                 Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon(context);
-                if(firstIcon != null && firstIcon.getIntrinsicWidth() > 0)
+                int[] firstIconSize = Globals.getImageWidthHeight(firstIcon);
+                if(firstIcon != null && firstIconSize[0] > 0)
                 {
-                    setDropDownWidth(firstIcon.getIntrinsicWidth() + getTotalPaddingLeft() + getTotalPaddingRight());
+                    setDropDownWidth(firstIconSize[0] + getTotalPaddingLeft() + getTotalPaddingRight());
                 }
             }
         }

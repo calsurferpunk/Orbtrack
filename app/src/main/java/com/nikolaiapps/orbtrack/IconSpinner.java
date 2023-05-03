@@ -175,11 +175,33 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             return(usingIconColors(icon3Color, icon3SelectedColor));
         }
 
-        public Drawable getIcon(Context context)
+        public Drawable getIcon(Context context, int limitWidthDp)
         {
+            int maxWidthPx;
+            int[] iconSize;
             Drawable icon1Result = (usingIcon1Colors() ? Globals.getDrawableTinted(icon1, icon1Color) : icon1);
             Drawable icon3Result = (usingIcon3Colors() ? Globals.getDrawableTinted(icon3, icon3Color) : icon3);
-            return(context != null && icon1Result != null && icon3Result != null ? Globals.getDrawableCombined(context, icon1Result, icon3Result) : icon3Result != null ? icon3Result : icon1Result);
+            Drawable iconResult = (context != null && icon1Result != null && icon3Result != null ? Globals.getDrawableCombined(context, icon1Result, icon3Result) : icon3Result != null ? icon3Result : icon1Result);
+
+            //if context and icon are set while needing to limit width
+            if(context != null && iconResult != null && limitWidthDp > 0)
+            {
+                //check if icon is greater than width
+                iconSize = Globals.getImageWidthHeight(iconResult);
+                maxWidthPx = (int)Globals.dpToPixels(context, limitWidthDp);
+                if(iconSize[0] > maxWidthPx)
+                {
+                    //return resized icon
+                    return(Globals.getDrawableSized(context, iconResult, maxWidthPx, iconSize[1], false));
+                }
+            }
+
+            //return icon
+            return(iconResult);
+        }
+        public Drawable getIcon(Context context)
+        {
+            return(getIcon(context, 0));
         }
 
         @Override @NonNull
@@ -802,6 +824,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public void setSelectedIndex(int index)
         {
             selectedIndex = index;
+        }
+
+        public int getSelectedIndex()
+        {
+            return(selectedIndex);
         }
 
         public boolean getUsingText()

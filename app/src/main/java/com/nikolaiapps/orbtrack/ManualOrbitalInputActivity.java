@@ -61,7 +61,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         //set icon
         if(nameTextLayout != null)
         {
-            nameTextLayout.setStartIconDrawable(Globals.getDrawableText(this, " abc ", 16, Globals.resolveColorID(this, android.R.attr.textColor), Color.TRANSPARENT));
+            nameTextLayout.setStartIconDrawable(Globals.getDrawableText(this, " abc ", 16, Globals.resolveColorID(this, android.R.attr.textColor)));
         }
 
         //set owners list

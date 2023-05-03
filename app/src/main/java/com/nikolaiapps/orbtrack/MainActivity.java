@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //
     //Current
     private int mainGroup;
-    private static int viewLensNoradID = Integer.MAX_VALUE;
+    public static int viewLensNoradID = Integer.MAX_VALUE;
     public static int mapViewNoradID = Integer.MAX_VALUE;
     private static int passesPassIndex = Integer.MAX_VALUE;
     private static int intersectionPassIndex = Integer.MAX_VALUE;
@@ -4007,10 +4007,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             if((!allViewOrbitals && currentNoradId == viewLensNoradID))
                             {
                                 //set array with current satellite
-                                selectedSatellites = new Database.SatelliteData[currentSatellites.length];
-                                selectedSatellites[index] = currentSatellites[index];
-                                selectedLookAngles = new TopographicDataType[currentSatellites.length];
-                                selectedLookAngles[index] = topographicData;
+                                selectedSatellites = new Database.SatelliteData[1];
+                                selectedSatellites[0] = currentSatellites[index];
+                                selectedLookAngles = new TopographicDataType[1];
+                                selectedLookAngles[0] = topographicData;
                             }
 
                             //if not viewing a specific orbital or norad ID matches

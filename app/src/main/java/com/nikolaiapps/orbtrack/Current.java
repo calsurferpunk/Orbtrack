@@ -967,7 +967,7 @@ public abstract class Current
                 setOrbitalViews(satellites);
 
                 //create view
-                newView = onCreateLensView(this, inflater, container, satellites, savedInstanceState);
+                newView = onCreateLensView(this, inflater, container, (MainActivity.viewLensNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)}), savedInstanceState);
             }
             //else if need to create map view
             else if(createMapView)
@@ -1562,8 +1562,6 @@ public abstract class Current
         boolean onCalculateIntersection = (onCalculate && page == Calculate.PageType.Intersection);
         Calculate.ViewAngles.Item[] savedViewItems = (Calculate.ViewAngles.Item[])Calculate.PageAdapter.getSavedItems(Calculate.PageType.View);
         Calculate.Passes.Item[] savedPassItems = (savedState.getBoolean(MainActivity.ParamTypes.GetPassItems, false) ? (Calculate.Passes.Item[])Calculate.PageAdapter.getSavedItems(onCalculateIntersection ? Calculate.PageType.Intersection : Calculate.PageType.Passes) : null);
-        final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
-        final boolean multiSelected = (haveSelected && selectedOrbitals.length > 1);
         boolean forceShowPaths = savedState.getBoolean(MainActivity.ParamTypes.ForceShowPaths, false);
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
@@ -1575,8 +1573,8 @@ public abstract class Current
         final boolean havePassViews = (passViews != null && passViews.length > 0);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
         final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Lens_Fullscreen_Button);
-        final FloatingActionStateButton showToolbarsButton = (multiSelected ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
-        final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align) : null);;
+        final FloatingActionStateButton showToolbarsButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars);
+        final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align) : null);
         final FloatingActionStateButton showHorizonButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_remove_black, R.string.title_show_horizon);
         final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
@@ -1594,11 +1592,11 @@ public abstract class Current
         cameraView.helpText = rootView.findViewById(R.id.Lens_Help_Text);
         cameraView.pathDivisions = pathDivisions;
         cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
-        cameraView.showPaths = (lensShowPaths || useSaved);       //if showing paths or using a saved path
-        lensLayout.addView(cameraView, 0);                  //add before menu
+        cameraView.showPaths = (lensShowPaths || useSaved);         //if showing paths or using a saved path
+        lensLayout.addView(cameraView, 0);                          //add before menu
 
         //setup search displays
-        searchList = (multiSelected ? rootView.findViewById(R.id.Lens_Search_List) : null);
+        searchList = rootView.findViewById(R.id.Lens_Search_List);
         setupSearch(context, showToolbarsButton, searchList, searchListLayout, cameraView.playBar, selectedOrbitals, true);
         if(showToolbarsButton != null)
         {

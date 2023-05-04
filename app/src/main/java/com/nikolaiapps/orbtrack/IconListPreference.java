@@ -150,11 +150,26 @@ public class IconListPreference extends CustomPreference
         });
     }
 
+    //Sets adapter background colors
+    private void setAdapterBackgrounds(Context context)
+    {
+        int bgColor;
+
+        if(!usingMaterial && adapter != null)
+        {
+            bgColor = Globals.resolveColorID(context, R.attr.pageHighlightBackground);
+            adapter.setBackgroundColor(bgColor);
+            adapter.setBackgroundItemColor(bgColor);
+            adapter.setBackgroundItemSelectedColor(bgColor);
+        }
+    }
+
     //Sets adapter
     public void setAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
     {
         adapter = new IconSpinner.CustomAdapter(context, items, values, itemImageIds, subTexts);
         itemValues = adapter.getItemValues();
+        setAdapterBackgrounds(context);
     }
     public void setAdapter(Context context, IconSpinner.Item[] items, boolean refresh)
     {
@@ -169,6 +184,8 @@ public class IconListPreference extends CustomPreference
             iconList.setAdapter(adapter);
             iconList.setSelectedValue(selectedValue);
         }
+
+        setAdapterBackgrounds(context);
     }
     public void setAdapter(Context context, IconSpinner.Item[] items)
     {

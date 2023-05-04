@@ -351,7 +351,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             listInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
             textColor = textSelectedColor = Globals.resolveColorID(context, android.R.attr.textColor);
             backgroundColor = Globals.resolveColorID(context, android.R.attr.colorBackground);
-            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageHighlightBackground);
+            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, (usingMaterial ? R.attr.pageHighlightBackground : android.R.attr.colorBackground));
             usingMaterial = Settings.getMaterialTheme(context);
             getDefaultSize(context);
 

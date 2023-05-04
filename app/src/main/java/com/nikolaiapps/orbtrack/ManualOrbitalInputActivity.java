@@ -3,7 +3,6 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Intent;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -110,7 +109,8 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                 String name = (nameString != null ? nameString.toString().trim() : "");
                 String line1 = (line1String != null ? line1String.toString() : "");
                 String line2 = (line2String != null ? line2String.toString() : "");
-                String currentError = "";
+                String firstError = "";
+                String currentError;
                 Calculations.SatelliteObjectType currentSat;
                 Resources res = ManualOrbitalInputActivity.this.getResources();
                 String invalidString = res.getString(R.string.title_invalid);
@@ -118,32 +118,37 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                 //check for invalid values
                 if(name.equals(""))
                 {
-                    currentError = updateError(currentError, invalidString + " " + res.getString(R.string.title_name));
+                    currentError = invalidString + " " + res.getString(R.string.title_name);
+                    firstError = updateError(firstError, currentError);
                     nameText.setError(currentError);
                 }
                 if(line1.length() < 69)
                 {
-                    currentError = updateError(currentError, invalidString + " " + res.getString(R.string.title_length));
+                    currentError = invalidString + " " + res.getString(R.string.title_length);
+                    firstError = updateError(firstError, currentError);
                     line1Text.setError(currentError);
                 }
                 if(line2.length() < 69)
                 {
-                    currentError = updateError(currentError, invalidString + " " + res.getString(R.string.title_length));
+                    currentError = invalidString + " " + res.getString(R.string.title_length);
+                    firstError = updateError(firstError, currentError);
                     line2Text.setError(currentError);
                 }
 
                 //check for valid list selections
                 if(ownerList.getSelectedValue("").equals(""))
                 {
-                    currentError = updateError(currentError, invalidString + " " + res.getString(R.string.title_owner));
+                    currentError = invalidString + " " + res.getString(R.string.title_owner);
+                    firstError = updateError(firstError, currentError);
                 }
                 if(groupList.getSelectedValue("").equals(""))
                 {
-                    currentError = updateError(currentError, invalidString + " " + res.getString(R.string.title_group));
+                    currentError = invalidString + " " + res.getString(R.string.title_group);
+                    firstError = updateError(firstError, currentError);
                 }
 
                 //if there is no error
-                if(currentError.equals(""))
+                if(firstError.equals(""))
                 {
                     currentSat = Calculations.loadSatellite(line1, line2);
                     if(currentSat.getSatelliteNum() != Universe.IDs.None && currentSat.tle.launchYear != Integer.MAX_VALUE)
@@ -160,7 +165,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                 }
                 else
                 {
-                    Globals.showSnackBar(manualLayout, currentError, null, true, true);
+                    Globals.showSnackBar(manualLayout, firstError, null, true, true);
                 }
             }
         });

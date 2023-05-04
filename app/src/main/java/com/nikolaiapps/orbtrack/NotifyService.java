@@ -98,6 +98,7 @@ public abstract class NotifyService extends IntentService
             boolean isRetry;
             boolean isDismiss;
             boolean runService = false;
+            boolean closeNotification = false;
             String action = intent.getAction();
 
             //if action is not set
@@ -120,14 +121,15 @@ public abstract class NotifyService extends IntentService
             //else if settings
             else if(action.equals(SettingsAction))
             {
-                //handle on settings
+                //handle on settings and close notification
                 onSettings(context, intent);
+                closeNotification = true;
             }
             //else if retrying or dismissing
             else if(isRetry || isDismiss)
             {
                 //close notification
-                onCloseNotification(context, intent, NotificationManagerCompat.from(context));
+                closeNotification = true;
 
                 //run service if retrying
                 runService = isRetry;
@@ -136,6 +138,13 @@ public abstract class NotifyService extends IntentService
             {
                 //run service
                 runService = true;
+            }
+
+            //if closing notification
+            if(closeNotification)
+            {
+                //close notification
+                onCloseNotification(context, intent, NotificationManagerCompat.from(context));
             }
 
             //if running service

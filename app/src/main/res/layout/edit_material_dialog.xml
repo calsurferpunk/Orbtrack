@@ -15,7 +15,9 @@
             android:orientation="horizontal">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Edit_Value_Text_Layout"
-                style="@style/TextViewMaterialInputLayout">
+                style="@style/TextViewMaterialInputLayout"
+                android:layout_width="0dp"
+                android:layout_weight="1">
                 <EditText
                     android:id="@+id/Edit_Value_Text"
                     style="@style/EditValueMaterialText"

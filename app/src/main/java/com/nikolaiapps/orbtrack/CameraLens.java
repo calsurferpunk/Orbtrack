@@ -1671,7 +1671,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
         }
 
-        if(playBar != null)
+        if(playBar != null && kill)
         {
             playBar.stopPlayTimer();
         }

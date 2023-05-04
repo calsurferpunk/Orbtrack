@@ -3024,40 +3024,117 @@ public abstract class Globals
     }
 
     //Gets a sized drawable
-    public static Drawable getDrawableSized(Context context, Drawable image, int width, int height, boolean isDpSize)
+    public static Drawable getDrawableSizedRotated(Context context, Drawable image, int width, int height, float rotateDegrees, boolean isDpSize)
     {
         float[] dpPixels = (isDpSize ? dpsToPixels(context, width, height) : null);
-        int widthPixels = (isDpSize ? (int)dpPixels[0] : width);
-        int heightPixels = (isDpSize ? (int)dpPixels[1] : height);
+        int startWidthPx;
+        int startHeightPx;
+        int scaledWidthPx = (isDpSize ? (int)dpPixels[0] : width);
+        int scaledHeightPx = (isDpSize ? (int)dpPixels[1] : height);
         int[] imageSize;
         Bitmap imageBitmap;
-        BitmapDrawable scaledDrawable;
+        Bitmap resultBitmap;
         Canvas imageCanvas;
+        Matrix rotateMatrix;
 
-        //get starting width(s) and height(s)
+        //get starting width and height
         imageSize = getImageWidthHeight(image);
+        startWidthPx = imageSize[0];
+        startHeightPx = imageSize[1];
 
-        //create bitmap and scale it
-        imageBitmap = Bitmap.createBitmap(imageSize[0], imageSize[1], Bitmap.Config.ARGB_8888);
+        //create bitmap and draw it
+        imageBitmap = Bitmap.createBitmap(startWidthPx, startHeightPx, Bitmap.Config.ARGB_8888);
         imageCanvas = new Canvas(imageBitmap);
-        image.setBounds(0, 0, imageCanvas.getWidth(), imageCanvas.getHeight());
+        image.setBounds(0, 0, startWidthPx, startHeightPx);
         image.draw(imageCanvas);
-        scaledDrawable = new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(imageBitmap, widthPixels, heightPixels, true));
 
-        //return scaled image
-        return(scaledDrawable);
+        //if need to rotate
+        if(rotateDegrees != 0)
+        {
+            //rotate matrix
+            rotateMatrix = new Matrix();
+            rotateMatrix.postRotate(rotateDegrees);
+
+            //rotate original image
+            resultBitmap = Bitmap.createBitmap(imageBitmap, 0, 0, startWidthPx, startHeightPx, rotateMatrix, true);
+        }
+        else
+        {
+            //use original image
+            resultBitmap = imageBitmap;
+        }
+
+        //return scaled result image
+        return(new BitmapDrawable(context.getResources(), Bitmap.createScaledBitmap(resultBitmap, scaledWidthPx, scaledHeightPx, true)));
     }
-    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean colorIsId, boolean isDpSize)
+    public static Drawable getDrawableSizedRotated(Context context, int resId, int width, int height, float rotateDegrees, int tintColor, boolean colorIsId, boolean isDpSize)
     {
-        return(getDrawableSized(context, getDrawable(context, resId, tintColor, colorIsId), width, height, isDpSize));
+        return(getDrawableSizedRotated(context, getDrawable(context, resId, tintColor, colorIsId), width, height, rotateDegrees, isDpSize));
     }
-    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
+    public static Drawable getDrawableSizedRotated(Context context, int resId, int width, int height, float rotateDegrees, boolean useThemeTint, boolean isDpSize)
     {
-        return(getDrawableSized(context, resId, width, height, tintColor, true, isDpSize));
+        return(getDrawableSizedRotated(context, resId, width, height, rotateDegrees, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : Color.TRANSPARENT), useThemeTint, isDpSize));
     }
     public static Drawable getDrawableSized(Context context, int resId, int width, int height, boolean useThemeTint, boolean isDpSize)
     {
-        return(getDrawableSized(context, resId, width, height, (useThemeTint ? (Settings.getDarkTheme(context) ? R.color.white : R.color.black) : Color.TRANSPARENT), useThemeTint, isDpSize));
+        return(getDrawableSizedRotated(context, resId, width, height, 0, useThemeTint, isDpSize));
+    }
+    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
+    {
+        return(getDrawableSizedRotated(context, resId, width, height, 0, tintColor, true, isDpSize));
+    }
+
+    //Gets a drawable with restricted size
+    public static Drawable getDrawableSizeRestricted(Context context, Drawable image, int limitWidthDp, int limitHeightDp)
+    {
+        int widthPx;
+        int heightPx;
+        int maxWidthPx;
+        int maxHeightPx;
+        int[] iconSize;
+        boolean overWidth;
+        boolean overHeight;
+        boolean needLimitWidth = (limitWidthDp > 0);
+        boolean needLimitHeight = (limitHeightDp > 0);
+
+        //if context and icon are set while needing to limit width or height
+        if(context != null && image != null && (needLimitWidth || needLimitHeight))
+        {
+            //get icon size and ratio
+            iconSize = getImageWidthHeight(image);
+            widthPx = iconSize[0];
+            heightPx = iconSize[1];
+
+            //check if icon is too large
+            maxWidthPx = (needLimitWidth ? (int)dpToPixels(context, limitWidthDp) : Integer.MAX_VALUE);
+            maxHeightPx = (needLimitHeight ? (int)dpToPixels(context, limitHeightDp) : Integer.MAX_VALUE);
+            overWidth = (widthPx > maxWidthPx);
+            overHeight = (heightPx > maxHeightPx);
+            if(overWidth || overHeight)
+            {
+                //if too tall
+                if(overHeight)
+                {
+                    //limit height and adjust width by fixed ratio
+                    widthPx /= (heightPx / (float)maxHeightPx);
+                    overWidth = (widthPx > maxWidthPx);
+                    heightPx = maxHeightPx;
+                }
+
+                //if too wide
+                if(overWidth)
+                {
+                    //limit width
+                    widthPx = maxWidthPx;
+                }
+
+                //return resized image
+                return(getDrawableSizedRotated(context, image, widthPx, heightPx, 0, false));
+            }
+        }
+
+        //return unmodified image
+        return(image);
     }
 
     //Gets combined drawables

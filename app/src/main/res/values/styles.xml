@@ -30,10 +30,6 @@
         <item name="colorControlNormal">@color/white</item>
     </style>
 
-    <style name="MaterialCalendarTheme" parent="ThemeOverlay.Material3.MaterialCalendar">
-        <item name="colorPrimary">@color/purple</item>
-    </style>
-
     <!-- Preferences -->
     <style name="LightPreferenceOverlay" parent="PreferenceThemeOverlay">
         <item name="android:tint">@color/black</item>
@@ -72,7 +68,7 @@
         <item name="colorOnSurface">@color/gray</item>
         <item name="colorSurface">@color/very_light_gray</item>
         <item name="colorSurfaceVariant">?attr/pageHighlightBackground</item>
-        <item name="colorOnSurfaceVariant">?attr/pageHighlightBackground</item>
+        <item name="colorOnSurfaceVariant">@color/dark_gray</item>
         <item name="colorTertiaryContainer">?attr/colorPrimaryContainer</item>
         <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
         <item name="dividerLineColor">@color/light_gray</item>
@@ -109,7 +105,7 @@
         <item name="colorOnSurface">@color/gray</item>
         <item name="colorSurface">@color/black</item>
         <item name="colorSurfaceVariant">?attr/pageHighlightBackground</item>
-        <item name="colorOnSurfaceVariant">?attr/pageHighlightBackground</item>
+        <item name="colorOnSurfaceVariant">@color/light_gray</item>
         <item name="colorTertiaryContainer">?attr/colorPrimaryContainer</item>
         <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
         <item name="dividerLineColor">@color/dark_gray</item>
@@ -592,7 +588,11 @@
         <item name="android:textColorHint">@color/white</item>
         <item name="boxBackgroundColor">?attr/colorAccentDark</item>
         <item name="helperTextTextColor">@color/white</item>
-        <item name="startIconTint">@color/white</item>
+        <item name="startIconTint">@null</item>
+    </style>
+
+    <style name="OrbitalSearchMaterialList" parent="TextViewMaterialList">
+        <item name="android:textColor">?titleTextColor</item>
     </style>
 
     <!--Combined Layout-->

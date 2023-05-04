@@ -21,6 +21,7 @@ public interface SelectListInterface
     void setBackgroundItemColor(int color);
     void setBackgroundItemSelectedColor(int color);
     void setTextColor(int color);
+    void setTextColor(int color, int superColor);
     void setTextSelectedColor(int color);
     void setSelectedText(String value);
     void setSelectedValue(Object value, Object defaultValue);

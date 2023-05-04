@@ -155,7 +155,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 else if(icon3 == null && icon3Id > 0)
                 {
                     //noinspection SuspiciousNameCombination
-                    icon3 = ((icon3TintColor != Color.TRANSPARENT ? Globals.getDrawableSized(context, icon3Id, iconHeightPx, iconHeightPx, icon3TintColor, false, false) : Globals.getDrawableSized(context, icon3Id, iconHeightPx, iconHeightPx, iconsUseThemeTint, false)));
+                    icon3 = ((icon3TintColor != Color.TRANSPARENT ? Globals.getDrawableSizedRotated(context, icon3Id, iconHeightPx, iconHeightPx, rotate, icon3TintColor, false, false) : Globals.getDrawableSizedRotated(context, icon3Id, iconHeightPx, iconHeightPx, rotate, iconsUseThemeTint, false)));
                 }
             }
         }
@@ -175,33 +175,18 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             return(usingIconColors(icon3Color, icon3SelectedColor));
         }
 
-        public Drawable getIcon(Context context, int limitWidthDp)
+        public Drawable getIcon(Context context, int limitWidthDp, int limitHeightDp)
         {
-            int maxWidthPx;
-            int[] iconSize;
             Drawable icon1Result = (usingIcon1Colors() ? Globals.getDrawableTinted(icon1, icon1Color) : icon1);
             Drawable icon3Result = (usingIcon3Colors() ? Globals.getDrawableTinted(icon3, icon3Color) : icon3);
             Drawable iconResult = (context != null && icon1Result != null && icon3Result != null ? Globals.getDrawableCombined(context, icon1Result, icon3Result) : icon3Result != null ? icon3Result : icon1Result);
 
-            //if context and icon are set while needing to limit width
-            if(context != null && iconResult != null && limitWidthDp > 0)
-            {
-                //check if icon is greater than width
-                iconSize = Globals.getImageWidthHeight(iconResult);
-                maxWidthPx = (int)Globals.dpToPixels(context, limitWidthDp);
-                if(iconSize[0] > maxWidthPx)
-                {
-                    //return resized icon
-                    return(Globals.getDrawableSized(context, iconResult, maxWidthPx, iconSize[1], false));
-                }
-            }
-
-            //return icon
-            return(iconResult);
+            //return icon with possibly restricted size
+            return(Globals.getDrawableSizeRestricted(context, iconResult, limitWidthDp,limitHeightDp));
         }
         public Drawable getIcon(Context context)
         {
-            return(getIcon(context, 0));
+            return(getIcon(context, 0, 0));
         }
 
         @Override @NonNull
@@ -310,7 +295,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 items = new Item[orbitals.length + offset];
                 if(addMulti)
                 {
-                    items[0] = new Item((haveContext ? R.drawable.ic_list_white : -1), icon3Color, icon3SelectedColor, (haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
+                    items[0] = new Item((haveContext ? R.drawable.ic_list_white : -1), Globals.resolveColorID(context, android.R.attr.textColor), icon3SelectedColor, (haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
                 }
                 for(index = 0; index < orbitals.length; index++)
                 {
@@ -716,10 +701,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                         itemImage3.setImageDrawable(currentItem.icon3);
                         itemImage3.setColorFilter(Color.TRANSPARENT);
                     }
-                    if(currentItem.rotate != 0)
-                    {
-                        itemImage3.setRotation(currentItem.rotate);
-                    }
                     if(!usingIcon3)
                     {
                         itemImage3.setVisibility(View.GONE);
@@ -953,6 +934,12 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
     {
         SelectListInterface.setTextColor(currentAdapter, color);
         setTextSelectedColor(color);
+    }
+
+    @Override
+    public void setTextColor(int color, int superColor)
+    {
+        setTextColor(color);
     }
 
     public void setTextSelectedColor(int color)

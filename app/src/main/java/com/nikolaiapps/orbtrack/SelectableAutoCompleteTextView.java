@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
+import android.view.View;
 import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
@@ -33,6 +34,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         super(context, attrs, defStyleAttr);
 
         int inputType = getInputType();
+        int iconPadding = (int)Globals.dpToPixels(context, 12);
 
         //if attributes are set
         if(attrs != null)
@@ -95,8 +97,17 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                                 ViewParent frameParent = itemParent.getParent();
                                 if(frameParent instanceof TextInputLayout)
                                 {
+                                    //get layout and icon view
+                                    TextInputLayout inputLayout = (TextInputLayout)frameParent;
+                                    View iconView = inputLayout.findViewById(R.id.text_input_start_icon);
+
                                     //set icon to selected item icon
-                                    ((TextInputLayout)frameParent).setStartIconDrawable(selectedItem.getIcon(context, 96));
+                                    inputLayout.setStartIconDrawable(selectedItem.getIcon(context, 96, 32));
+                                    if(iconView != null)
+                                    {
+                                        //update padding
+                                        iconView.setPadding(iconPadding, iconPadding, iconPadding, iconPadding);
+                                    }
                                 }
                             }
                         }
@@ -173,6 +184,11 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
     {
         Context context = getContext();
         Object firstItem = null;
+        Object savedLastValue = lastValue;
+        Object savedLastDefaultValue = lastDefaultValue;
+
+        //clear any old text
+        setText(null);
 
         //if adapter is set
         if(currentAdapter != null)
@@ -195,33 +211,39 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         setTextSelectedColor(textSelectedColor);
         if(firstItem != null)
         {
+            //if allowing auto selection
             if(allowAutoSelect)
             {
+                //set to first item
                 setSelectedText(firstItem.toString());
             }
+
+            //if first item is using icon 3 only
             if(firstItem instanceof IconSpinner.Item && currentAdapter.getUsingIcon3Only())
             {
+                ///get icon and size
                 Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon(context);
                 int[] firstIconSize = Globals.getImageWidthHeight(firstIcon);
                 if(firstIcon != null && firstIconSize[0] > 0)
                 {
+                    //set dropdown size to icon with padding
                     setDropDownWidth(firstIconSize[0] + getTotalPaddingLeft() + getTotalPaddingRight());
                 }
             }
         }
 
         //try to set value again
-        if(lastDefaultValue != null)
+        if(savedLastDefaultValue != null)
         {
-            setSelectedValue(lastValue, lastDefaultValue);
+            setSelectedValue(savedLastValue, savedLastDefaultValue);
         }
-        else if(lastValue instanceof String)
+        else if(savedLastValue instanceof String)
         {
-            setSelectedText((String)lastValue);
+            setSelectedText((String)savedLastValue);
         }
-        else if(lastValue != null)
+        else if(savedLastValue != null)
         {
-            setSelectedValue(lastValue);
+            setSelectedValue(savedLastValue);
         }
     }
 
@@ -268,12 +290,16 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         SelectListInterface.setBackgroundItemSelectedColor(currentAdapter, backgroundItemSelectedColor);
     }
 
-    public void setTextColor(int color)
+    public void setTextColor(int color, int superColor)
     {
         textColor = color;
-        super.setTextColor(currentAdapter != null && !currentAdapter.getUsingText() ? Color.TRANSPARENT : textColor);
+        super.setTextColor(superColor != color ? superColor : currentAdapter != null && !currentAdapter.getUsingText() ? Color.TRANSPARENT : textColor);
         SelectListInterface.setTextColor(currentAdapter, textColor);
         setTextSelectedColor(textColor);
+    }
+    public void setTextColor(int color)
+    {
+        setTextColor(color, color);
     }
 
     public void setTextSelectedColor(int color)

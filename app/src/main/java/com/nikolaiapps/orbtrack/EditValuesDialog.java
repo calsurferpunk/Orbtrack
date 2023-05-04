@@ -503,6 +503,10 @@ public class EditValuesDialog
             else
             {
                 editValueList.setVisibility(View.GONE);
+                if(editValueTextListLayout != null)
+                {
+                    editValueTextListLayout.setVisibility(View.GONE);
+                }
             }
 
             editNumberLayout = editDialogView.findViewById(R.id.Edit_Number_Layout);

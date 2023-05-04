@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -135,6 +136,7 @@ public class OrbitalFilterList
         private static int listBgColor;
         private static int listBgItemColor;
         private static int listTextColor;
+        private static int listTitleTextColor;
         private static int listBgSelectedColor;
         private static int listTextSelectedColor;
         private View searchTable;
@@ -157,22 +159,23 @@ public class OrbitalFilterList
         protected ArrayList<Item> displayedItems;
         protected Item[] allItems;
 
-        private void baseConstructor()
+        private void baseConstructor(Context context)
         {
             foundLaunchDate = false;
             displayedItems = new ArrayList<>(0);
             allItems = new Item[0];
+            listTitleTextColor = (context != null ? Globals.resolveColorID(context, R.attr.titleTextColor) : Color.WHITE);
         }
 
         public OrbitalListAdapter(Context context)
         {
             super(context);
-            baseConstructor();
+            baseConstructor(context);
         }
         public OrbitalListAdapter(Context context, String categoryTitle)
         {
             super(context, categoryTitle);
-            baseConstructor();
+            baseConstructor(context);
         }
 
         @Override @NonNull
@@ -310,7 +313,7 @@ public class OrbitalFilterList
                 ownerList.setBackgroundColor(listBgColor);
                 ownerList.setBackgroundItemColor(listBgItemColor);
                 ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
-                ownerList.setTextColor(listTextColor);
+                ownerList.setTextColor(listTextColor, listTitleTextColor);
                 ownerList.setTextSelectedColor(listTextSelectedColor);
                 ownerList.setOnItemSelectedListener(itemSelectedListener);
                 ownerList.setEnabled(true);
@@ -330,7 +333,7 @@ public class OrbitalFilterList
                 groupList.setBackgroundColor(listBgColor);
                 groupList.setBackgroundItemColor(listBgItemColor);
                 groupList.setBackgroundItemSelectedColor(listBgSelectedColor);
-                groupList.setTextColor(listTextColor);
+                groupList.setTextColor(listTextColor, listTitleTextColor);
                 groupList.setTextSelectedColor(listTextSelectedColor);
                 groupList.setOnItemSelectedListener(itemSelectedListener);
                 groupList.setEnabled(true);
@@ -362,7 +365,7 @@ public class OrbitalFilterList
                 ageList.setBackgroundColor(listBgColor);
                 ageList.setBackgroundItemColor(listBgItemColor);
                 ageList.setBackgroundItemSelectedColor(listBgSelectedColor);
-                ageList.setTextColor(listTextColor);
+                ageList.setTextColor(listTextColor, listTitleTextColor);
                 ageList.setTextSelectedColor(listTextSelectedColor);
                 ageList.setOnItemSelectedListener(itemSelectedListener);
                 ageList.setEnabled(true);

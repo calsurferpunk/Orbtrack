@@ -1773,8 +1773,43 @@ public abstract class Calculate
         //Gets selected orbitals from inputs
         private Database.SatelliteData[] getSelectedOrbitals(Context context, ArrayList<Integer> multiNoradId, Selectable.ListItem[] savedItems)
         {
-            //use multi norad ID if it exists, else use saved items, otherwise nothing
-            return(multiNoradId != null ? (Database.SatelliteData.getSatellites(context, multiNoradId)) : (savedItems != null && savedItems.length > 0) ? (new Database.SatelliteData[]{new Database.SatelliteData(context, savedItems[0].id)}) : null);
+            //if multi norad ID exists
+            if(multiNoradId != null)
+            {
+                //return orbitals for each ID
+                return(Database.SatelliteData.getSatellites(context, multiNoradId));
+            }
+            //else if saved items exist
+            else if(savedItems != null && savedItems.length > 0)
+            {
+                //remember first item and orbitals
+                Selectable.ListItem firstItem = savedItems[0];
+                Database.SatelliteData firstOrbital = new Database.SatelliteData(context, firstItem.id);
+                Database.SatelliteData secondOrbital = null;
+
+                //if first item has pass data
+                if(firstItem instanceof CalculateService.PassData)
+                {
+                    //remember pass data and second orbital ID
+                    CalculateService.PassData firstDataItem = (CalculateService.PassData)firstItem;
+                    int secondId = firstDataItem.id2;
+
+                    //if second orbital ID is valid
+                    if(secondId != Universe.IDs.Invalid)
+                    {
+                        //set second orbital
+                        secondOrbital = new Database.SatelliteData(context, secondId);
+                    }
+                }
+
+                //if second orbital exists, return first and second, otherwise just first
+                return(secondOrbital != null ? (new Database.SatelliteData[]{firstOrbital, secondOrbital}) : (new Database.SatelliteData[]{firstOrbital}));
+            }
+            else
+            {
+                //nothing
+                return(null);
+            }
         }
 
         //Sets orbital is selected
@@ -3086,7 +3121,7 @@ public abstract class Calculate
         }
         if(onIntersection)
         {
-            orbital2Adapter = createOrbitalAdapter(context, page.orbitalList, orbitals, false, savedInstanceState.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
+            orbital2Adapter = createOrbitalAdapter(context, page.orbital2List, orbitals, false, savedInstanceState.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
             setupOrbitalList(page.orbital2List, orbital2Adapter, backgroundColor, null);
         }
         if(page.orbital2List instanceof IconSpinner)

@@ -21,7 +21,7 @@
             android:hint="@string/title_owner">
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Owner_Text_List"
-                style="@style/TextViewMaterialList"
+                style="@style/OrbitalSearchMaterialList"
                 android:hint="@string/title_owner"
                 android:enabled="false"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -32,7 +32,7 @@
             android:hint="@string/title_group">
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Group_Text_List"
-                style="@style/TextViewMaterialList"
+                style="@style/OrbitalSearchMaterialList"
                 android:hint="@string/title_group"
                 android:enabled="false"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -43,7 +43,7 @@
             android:hint="@string/title_age">
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Age_Text_List"
-                style="@style/TextViewMaterialList"
+                style="@style/OrbitalSearchMaterialList"
                 android:hint="@string/title_age"
                 android:enabled="false"/>
         </com.google.android.material.textfield.TextInputLayout>
@@ -52,16 +52,18 @@
             android:id="@+id/Orbital_Search_Text_Layout"
             style="@style/OrbitalSearchTextInputLayout"
             app:startIconDrawable="@drawable/ic_search_black"
+            app:startIconTint="?attr/titleTextColor"
+            app:endIconMode="none"
             android:hint="@string/title_name_or_id">
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Text"
-                style="@style/TextViewMaterialList"
+                style="@style/OrbitalSearchMaterialList"
                 android:inputType="textNoSuggestions"
                 android:hint="@string/title_name_or_id"
+                android:selectAllOnFocus="true"
                 android:enabled="false"/>
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
-
 
     <androidx.appcompat.widget.AppCompatImageButton
         android:id="@+id/Orbital_Search_Show_Button"

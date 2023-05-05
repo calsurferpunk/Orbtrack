@@ -4889,6 +4889,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
                 {
+                    int index;
                     Runnable viewAction = null;
 
                     //handle based on progress
@@ -4908,58 +4909,49 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
 
                         case Globals.ProgressType.Success:
-                            viewAction = new Runnable()
+                            //if items not setup yet
+                            if(items == null)
                             {
-                                @Override
-                                public synchronized void run()
+                                //setup items
+                                items = new Calculate.ViewAngles.Item[pathPoints.size()];
+
+                                //go through each item
+                                for(index = 0; index < items.length; index++)
                                 {
-                                    int index;
+                                    //remember current item, view, and time
+                                    Calculate.ViewAngles.Item currentItem = new Calculate.ViewAngles.Item(index, satellites.length);
+                                    CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
+                                    Calendar time = Globals.getLocalTime(currentView.gmtTime, observer.timeZone);
 
-                                    //if items not setup yet
-                                    if(items == null)
-                                    {
-                                        //setup items
-                                        items = new Calculate.ViewAngles.Item[pathPoints.size()];
-
-                                        //go through each item
-                                        for(index = 0; index < items.length; index++)
-                                        {
-                                            //remember current item, view, and time
-                                            Calculate.ViewAngles.Item currentItem = new Calculate.ViewAngles.Item(index, satellites.length);
-                                            CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
-                                            Calendar time = Globals.getLocalTime(currentView.gmtTime, observer.timeZone);
-
-                                            //set shared values
-                                            currentItem.id = firstSatellite.getSatelliteNum();
-                                            currentItem.julianDate = currentView.julianDate;
-                                            currentItem.time = time;
-                                            items[index] = currentItem;
-                                        }
-                                    }
-
-                                    //go through each item/view
-                                    for(index = 0; index < items.length; index++)
-                                    {
-                                        //remember current item, view, and data
-                                        Calculate.ViewAngles.Item currentItem = items[index];
-                                        CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
-                                        CalculateViewsTask.ViewData currentData = new CalculateViewsTask.ViewData();
-
-                                        //if index is within range
-                                        if(satelliteIndex < currentItem.views.length)
-                                        {
-                                            //set current data
-                                            currentData.noradId = satellites[satelliteIndex].getSatelliteNum();
-                                            currentData.azimuth = (float)currentView.azimuth;
-                                            currentData.elevation = (float)currentView.elevation;
-                                            currentData.rangeKm = (float)currentView.rangeKm;
-                                            currentData.illumination = currentView.illumination;
-                                            currentData.phaseName =  currentView.phaseName;
-                                            currentItem.views[satelliteIndex] = currentData;
-                                        }
-                                    }
+                                    //set shared values
+                                    currentItem.id = firstSatellite.getSatelliteNum();
+                                    currentItem.julianDate = currentView.julianDate;
+                                    currentItem.time = time;
+                                    items[index] = currentItem;
                                 }
-                            };
+                            }
+
+                            //go through each item/view
+                            for(index = 0; index < items.length; index++)
+                            {
+                                //remember current item, view, and data
+                                Calculate.ViewAngles.Item currentItem = items[index];
+                                CalculateViewsTask.OrbitalView currentView = pathPoints.get(index);
+                                CalculateViewsTask.ViewData currentData = new CalculateViewsTask.ViewData();
+
+                                //if index is within range
+                                if(satelliteIndex < currentItem.views.length)
+                                {
+                                    //set current data
+                                    currentData.noradId = satellites[satelliteIndex].getSatelliteNum();
+                                    currentData.azimuth = (float)currentView.azimuth;
+                                    currentData.elevation = (float)currentView.elevation;
+                                    currentData.rangeKm = (float)currentView.rangeKm;
+                                    currentData.illumination = currentView.illumination;
+                                    currentData.phaseName =  currentView.phaseName;
+                                    currentItem.views[satelliteIndex] = currentData;
+                                }
+                            }
                             break;
 
                         case Globals.ProgressType.Finished:
@@ -5229,6 +5221,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, final ArrayList<CalculateCoordinatesTask.OrbitalCoordinate> pathPoints)
                 {
+                    int index;
                     Runnable coordinateAction = null;
 
                     //handle based on progress
@@ -5248,59 +5241,50 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
 
                         case Globals.ProgressType.Success:
-                            coordinateAction = new Runnable()
+                            //if items not setup yet
+                            if(items == null)
                             {
-                                @Override
-                                public synchronized void run()
+                                //setup items
+                                items = new Calculate.Coordinates.Item[pathPoints.size()];
+
+                                //go through each item
+                                for(index = 0; index < items.length; index++)
                                 {
-                                    int index;
+                                    //remember current item, coordinate, and time
+                                    Calculate.Coordinates.Item currentItem = new Calculate.Coordinates.Item(index, satellites.length);
+                                    CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
+                                    Calendar time = Globals.getLocalTime(currentCoordinate.time, observer.timeZone);
 
-                                    //if items not setup yet
-                                    if(items == null)
-                                    {
-                                        //setup items
-                                        items = new Calculate.Coordinates.Item[pathPoints.size()];
-
-                                        //go through each item
-                                        for(index = 0; index < items.length; index++)
-                                        {
-                                            //remember current item, coordinate, and time
-                                            Calculate.Coordinates.Item currentItem = new Calculate.Coordinates.Item(index, satellites.length);
-                                            CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
-                                            Calendar time = Globals.getLocalTime(currentCoordinate.time, observer.timeZone);
-
-                                            //set shared values
-                                            currentItem.id = firstSatellite.getSatelliteNum();
-                                            currentItem.julianDate = currentCoordinate.julianDate;
-                                            currentItem.time = time;
-                                            items[index] = currentItem;
-                                        }
-                                    }
-
-                                    //go through each item/view
-                                    for(index = 0; index < items.length; index++)
-                                    {
-                                        //remember current item, coordinate, and data
-                                        Calculate.Coordinates.Item currentItem = items[index];
-                                        CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
-                                        CalculateCoordinatesTask.CoordinateData currentData = new CalculateCoordinatesTask.CoordinateData();
-
-                                        //if index is within range
-                                        if(satelliteIndex < currentItem.coordinates.length)
-                                        {
-                                            //set current data
-                                            currentData.noradId = satellites[satelliteIndex].getSatelliteNum();
-                                            currentData.latitude = (float)currentCoordinate.latitude;
-                                            currentData.longitude = (float)currentCoordinate.longitude;
-                                            currentData.altitudeKm = (float)currentCoordinate.altitudeKm;
-                                            currentData.speedKms = currentCoordinate.speedKmS;
-                                            currentData.illumination = currentCoordinate.illumination;
-                                            currentData.phaseName = currentCoordinate.phaseName;
-                                            currentItem.coordinates[satelliteIndex] = currentData;
-                                        }
-                                    }
+                                    //set shared values
+                                    currentItem.id = firstSatellite.getSatelliteNum();
+                                    currentItem.julianDate = currentCoordinate.julianDate;
+                                    currentItem.time = time;
+                                    items[index] = currentItem;
                                 }
-                            };
+                            }
+
+                            //go through each item/view
+                            for(index = 0; index < items.length; index++)
+                            {
+                                //remember current item, coordinate, and data
+                                Calculate.Coordinates.Item currentItem = items[index];
+                                CalculateCoordinatesTask.OrbitalCoordinate currentCoordinate = pathPoints.get(index);
+                                CalculateCoordinatesTask.CoordinateData currentData = new CalculateCoordinatesTask.CoordinateData();
+
+                                //if index is within range
+                                if(satelliteIndex < currentItem.coordinates.length)
+                                {
+                                    //set current data
+                                    currentData.noradId = satellites[satelliteIndex].getSatelliteNum();
+                                    currentData.latitude = (float)currentCoordinate.latitude;
+                                    currentData.longitude = (float)currentCoordinate.longitude;
+                                    currentData.altitudeKm = (float)currentCoordinate.altitudeKm;
+                                    currentData.speedKms = currentCoordinate.speedKmS;
+                                    currentData.illumination = currentCoordinate.illumination;
+                                    currentData.phaseName = currentCoordinate.phaseName;
+                                    currentItem.coordinates[satelliteIndex] = currentData;
+                                }
+                            }
                             break;
 
                         case Globals.ProgressType.Finished:

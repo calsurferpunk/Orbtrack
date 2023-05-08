@@ -80,6 +80,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Status
+    private static int calculatePendingPage = -1;
     private static boolean inEditMode;
     private static boolean wasPaused = false;
     private static boolean wasRecreated = false;
@@ -2458,7 +2459,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 updateCurrentCalculations();
             }
             setCurrentPassCalculations(onCurrent && onCurrentList);
-            if(onCalculateViewNonInput)
+            if(onCalculateViewNonInput && calculatePendingPage != Calculate.PageType.View)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
                 if(params != null)
@@ -2467,7 +2468,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     setCalculateViewCalculations(true, (multiNoradId != null && multiNoradId.size() > 0 ? Database.SatelliteData.getSatellites(this, multiNoradId) : new Database.SatelliteData[]{new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId))}), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
                 }
             }
-            if(onCalculatePassesNonInput)
+            if(onCalculatePassesNonInput && calculatePendingPage != Calculate.PageType.Passes)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Passes);
                 if(params != null)
@@ -2475,7 +2476,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     setCalculatePassCalculations(true, new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId)), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), params.getDouble(Calculate.ParamTypes.ElevationMinDegs, 0.0));
                 }
             }
-            if(onCalculateCoordinatesNonInput)
+            if(onCalculateCoordinatesNonInput && calculatePendingPage != Calculate.PageType.Coordinates)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Coordinates);
                 if(params != null)
@@ -2484,7 +2485,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     setCalculateCoordinateCalculations(true, (multiNoradId != null && multiNoradId.size() > 0 ? Database.SatelliteData.getSatellites(this, multiNoradId) : new Database.SatelliteData[]{new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId))}), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
                 }
             }
-            if(onCalculateIntersectionNonInput)
+            if(onCalculateIntersectionNonInput && calculatePendingPage != Calculate.PageType.Intersection)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Intersection);
                 if(params != null)
@@ -2493,7 +2494,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
             }
         }
-        if(!run)
+        else
         {
             setCurrentPassCalculations(false);
             setCurrentViewCalculations(false, 0);
@@ -3346,7 +3347,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 {
                                     orbitalId = params.getInt(Calculate.ParamTypes.NoradId);
                                     multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
-                                    if(orbitalId == Universe.IDs.Invalid &&  multiNoradId != null && multiNoradId.size() == 1)
+                                    if(orbitalId == Universe.IDs.Invalid && multiNoradId != null && multiNoradId.size() == 1)
                                     {
                                         orbitalId = multiNoradId.get(0);
                                     }
@@ -3484,7 +3485,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     params.putIntegerArrayList(Calculate.ParamTypes.MultiNoradIdOld, oldParams.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId));
                     Calculate.PageAdapter.setParams(page, params);
 
-                    //update display
+                    //update status/display
+                    calculatePendingPage = page;
                     updateMainPager(false);
                     updateOptionsMenu();
 
@@ -3515,6 +3517,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 break;
                         }
                     }
+
+                    //update status
+                    calculatePendingPage = -1;
                 }
                 else
                 {

@@ -2596,7 +2596,7 @@ public abstract class Globals
     public static String getHeaderText(Context context, String satelliteName, double julianDateStart, double julianDateEnd, double intersection)
     {
         TimeZone zone = MainActivity.getTimeZone();
-        return(context != null ? ((satelliteName != null ? (satelliteName + "\n") : "") + getDateTimeString(julianDateStart, zone) + " " + context.getString(R.string.text_to) + " " + getDateTimeString(julianDateEnd, zone) + (intersection > -Double.MAX_VALUE ? ("\n" + context.getString(R.string.title_within) + " " + getDegreeString(intersection)) : "")) : "");
+        return(context != null ? ((satelliteName != null && !satelliteName.equals("?") ? (satelliteName + "\n") : "") + getDateTimeString(julianDateStart, zone) + " " + context.getString(R.string.text_to) + " " + getDateTimeString(julianDateEnd, zone) + (intersection > -Double.MAX_VALUE ? ("\n" + context.getString(R.string.title_within) + " " + getDegreeString(intersection)) : "")) : "");
     }
     public static String getHeaderText(Context context, String satelliteName, double julianDateStart, double julianDateEnd)
     {

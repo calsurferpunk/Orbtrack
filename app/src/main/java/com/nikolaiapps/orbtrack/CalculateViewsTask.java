@@ -182,7 +182,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         ArrayList<OrbitalView> pathViews = new ArrayList<>(0);
 
         //if want to adjust time and over 1 minute increment
-        adjustTime = (adjustTime && dayIncrement > 0.000694444);
+        adjustTime = (adjustTime && dayIncrement > (1.0 / Calculations.MinutesPerDay));
 
         //if adjusting time
         if(adjustTime)

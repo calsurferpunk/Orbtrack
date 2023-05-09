@@ -42,11 +42,6 @@ import java.util.Map;
 
 public abstract class WidgetBaseSetupActivity extends BaseInputActivity
 {
-    static
-    {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-    }
-
     private static abstract class PreferenceName
     {
         private static final String Name = "name";

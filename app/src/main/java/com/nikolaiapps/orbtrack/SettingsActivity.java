@@ -52,11 +52,6 @@ import java.util.TimeZone;
 
 public class SettingsActivity extends BaseInputActivity implements PreferenceFragmentCompat.OnPreferenceStartFragmentCallback, ActivityResultCallback<ActivityResult>
 {
-    static
-    {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-    }
-
     private static abstract class SetupPageType
     {
         static final int Welcome = 0;

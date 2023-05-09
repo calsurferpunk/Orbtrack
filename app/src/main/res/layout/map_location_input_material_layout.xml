@@ -104,7 +104,7 @@
                 android:id="@+id/Location_Altitude_Button"
                 android:layout_width="42dp"
                 android:layout_height="42dp"
-                android:src="@drawable/ic_sync_white"
+                app:srcCompat="@drawable/ic_sync_white"
                 android:scaleType="fitCenter"/>
         </LinearLayout>
 
@@ -128,7 +128,7 @@
                 android:id="@+id/Location_Time_Zone_Button"
                 android:layout_width="42dp"
                 android:layout_height="42dp"
-                android:src="@drawable/ic_sync_white"
+                app:srcCompat="@drawable/ic_sync_white"
                 android:scaleType="fitCenter"/>
         </LinearLayout>
 

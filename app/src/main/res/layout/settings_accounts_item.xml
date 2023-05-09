@@ -1,16 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="start|center_vertical"
-    android:padding="5dp">
+    android:orientation="horizontal"
+    android:gravity="start|center_vertical">
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/Accounts_Item_Image"
         android:layout_width="36dp"
         android:layout_height="36dp"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
+        android:layout_margin="8dp"
         android:background="@color/transparent"
         android:tint="@color/transparent"/>
 
@@ -19,7 +17,6 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="0.2"
-        android:layout_marginLeft="5dp"
-        android:layout_marginStart="5dp"
+        android:layout_margin="8dp"
         android:background="@color/transparent"/>
 </LinearLayout>

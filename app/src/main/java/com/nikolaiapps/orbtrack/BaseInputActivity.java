@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.View;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -24,6 +25,11 @@ import java.util.ArrayList;
 
 public abstract class BaseInputActivity extends AppCompatActivity
 {
+    static
+    {
+        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+    }
+
     //Activity result codes
     public static abstract class RequestCode
     {

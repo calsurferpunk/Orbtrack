@@ -2,6 +2,20 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/Combined_Item_Data_Left_Guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="72dp"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/Combined_Item_Data_Right_Guide"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.55"/>
+
     <View
         android:id="@+id/Combined_Item_Pass_Quality_View"
         android:layout_width="1dp"
@@ -25,17 +39,16 @@
         android:id="@+id/Combined_Item_Name_Text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/Combined_Item_Az_Layout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Name_Image"
+        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Az_Layout"
         style="@style/CombinedLayoutStartMaterial"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Name_Text"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Az_Image"
@@ -50,7 +63,7 @@
     <LinearLayout
         android:id="@+id/Combined_Item_El_Layout"
         style="@style/CombinedLayoutMaterial"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Az_Layout"
+        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Elevation_Image"
@@ -65,7 +78,7 @@
     <LinearLayout
         android:id="@+id/Combined_Item_Latitude_Layout"
         style="@style/CombinedLayoutStartMaterial"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Name_Text"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Latitude_Image"
@@ -81,7 +94,7 @@
     <LinearLayout
         android:id="@+id/Combined_Item_Longitude_Layout"
         style="@style/CombinedLayoutMaterial"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Latitude_Layout"
+        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Longitude_Image"
@@ -96,7 +109,7 @@
     <LinearLayout
         android:id="@+id/Combined_Item_Range_Layout"
         style="@style/CombinedLayoutStartMaterial"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Name_Text"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Range_Image"
@@ -111,7 +124,7 @@
     <LinearLayout
         android:id="@+id/Combined_Item_Speed_Layout"
         style="@style/CombinedLayoutMaterial"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Range_Layout"
+        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Speed_Image"
@@ -136,7 +149,7 @@
         android:id="@+id/Combined_Item_Pass_Start_Layout"
         style="@style/CombinedLayoutStartMaterial"
         android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Name_Text"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Start_Title"
@@ -152,7 +165,7 @@
         android:id="@+id/Combined_Item_Pass_Duration_Layout"
         style="@style/CombinedLayoutMaterial"
         android:paddingBottom="12dp"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Pass_Start_Layout"
+        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Duration_Title"
@@ -169,7 +182,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Name_Text"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text"
         android:text="@string/text_outdated"
         android:visibility="gone"/>

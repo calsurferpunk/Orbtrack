@@ -7,18 +7,18 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.FragmentActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
-import androidx.appcompat.widget.AppCompatSeekBar;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
 import android.widget.LinearLayout;
-import android.widget.SeekBar;
 import android.widget.TextView;
+import com.google.android.material.slider.Slider;
 import java.util.Calendar;
 import java.util.TimeZone;
 
@@ -55,7 +55,7 @@ public class PlayBar extends LinearLayout
     private FragmentActivity playActivity;
     private final AppCompatButton cancelButton;
     private final AppCompatButton confirmButton;
-    private final AppCompatSeekBar seekBar;
+    private final Slider seekSlider;
     private final AppCompatImageButton syncButton;
     private final AppCompatImageButton playButton;
     private final TextView valueText;
@@ -105,7 +105,7 @@ public class PlayBar extends LinearLayout
         syncButton = rootView.findViewById(R.id.Play_Bar_Sync_Button);
         cancelButton = rootView.findViewById(R.id.Play_Bar_Cancel_Button);
         confirmButton = rootView.findViewById(R.id.Play_Bar_Ok_Button);
-        seekBar = rootView.findViewById(R.id.Play_Bar_Seek_Bar);
+        seekSlider = rootView.findViewById(R.id.Play_Bar_Seek_Slider);
         valueText = rootView.findViewById(R.id.Play_Bar_Value_Text);
         scaleText = rootView.findViewById(R.id.Play_Bar_Scale_Text);
         scaleTitle = rootView.findViewById(R.id.Play_Bar_Title);
@@ -136,8 +136,9 @@ public class PlayBar extends LinearLayout
         playScaleType = ScaleType.Speed;
         playScaleFactor = 1;
         playIndexIncrementUnits = 1;
-        value2 = minValue = 0;
-        maxValue = seekBar.getMax();
+        value2 = 0;
+        setMax((int)seekSlider.getValueTo());
+        setMin((int)seekSlider.getValueFrom());
         zone = TimeZone.getDefault();
 
         //setup seek buttons
@@ -151,7 +152,7 @@ public class PlayBar extends LinearLayout
 
     public int getValue()
     {
-        return(seekBar != null ? (seekBar.getProgress() + minValue) : minValue);
+        return(seekSlider != null ? (int)(seekSlider.getValue()) : minValue);
     }
 
     public long getValue2()
@@ -159,25 +160,40 @@ public class PlayBar extends LinearLayout
         return(value2);
     }
 
+    private void updateValue(int value)
+    {
+        //if slider exists
+        if(seekSlider != null)
+        {
+            //keep value within range
+            if(value < minValue)
+            {
+                value = minValue;
+            }
+            else if(value > maxValue)
+            {
+                value = maxValue;
+            }
+
+            //set value
+            seekSlider.setValue(value);
+        }
+    }
+
     public void setValue(int value, boolean forceChange)
     {
-        int actualValue;
-
         //if a valid value
         if(value >= minValue && value <= maxValue)
         {
-            //get progress value used
-            actualValue = value - minValue;
-
             //if value --is not changing- or -forced-- and listener is set
-            if((actualValue == seekBar.getProgress() || forceChange) && progressChangedListener != null)
+            if((value == (int)seekSlider.getValue() || forceChange) && progressChangedListener != null)
             {
                 //still send event
                 progressChangedListener.onProgressChanged(this, value, 0, false);
             }
 
             //update value and reset increments
-            seekBar.setProgress(actualValue);
+            updateValue(value);
             resetPlayIncrements();
             setSynced(false);
         }
@@ -205,7 +221,7 @@ public class PlayBar extends LinearLayout
 
     public double getSubProgressPercent()
     {
-        return(seekBar != null ? playSubProgressPercent : 0);
+        return(seekSlider != null ? playSubProgressPercent : 0);
     }
 
     public void setPlayIndexIncrementUnits(double incrementUnits)
@@ -218,14 +234,14 @@ public class PlayBar extends LinearLayout
         if(minValue < maxValue)
         {
             minValue = min;
-            setMax(maxValue);
+            seekSlider.setValueFrom(minValue);
         }
     }
 
     public void setMax(int max)
     {
         maxValue = max;
-        seekBar.setMax(maxValue - minValue);
+        seekSlider.setValueTo(maxValue);
     }
 
     public void setTitle(String title)
@@ -389,11 +405,23 @@ public class PlayBar extends LinearLayout
     public void setOnSeekChangedListener(OnPlayBarChangedListener changedListener)
     {
         progressChangedListener = changedListener;
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener()
+        seekSlider.addOnChangeListener(new Slider.OnChangeListener()
         {
             @Override
-            public void onProgressChanged(SeekBar seekBar, int progressValue, boolean fromUser)
+            public void onValueChange(@NonNull Slider seekSlider, float value, boolean fromUser)
             {
+                int progressValue = (int)value;
+
+                //keep rounded value inside range
+                if(progressValue < minValue)
+                {
+                    progressValue = minValue;
+                }
+                else if(progressValue > maxValue)
+                {
+                    progressValue = maxValue;
+                }
+
                 //if user moved
                 if(fromUser)
                 {
@@ -406,15 +434,9 @@ public class PlayBar extends LinearLayout
                 if(progressChangedListener != null)
                 {
                     //call it
-                    progressChangedListener.onProgressChanged(PlayBar.this, progressValue + minValue, playSubProgressPercent, fromUser);
+                    progressChangedListener.onProgressChanged(PlayBar.this, progressValue, playSubProgressPercent, fromUser);
                 }
             }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) { }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) { }
         });
     }
 
@@ -492,10 +514,10 @@ public class PlayBar extends LinearLayout
         }
 
         //if using speed scale and already at end
-        if(playScaleType == ScaleType.Speed && seekBar.getProgress() >= seekBar.getMax())
+        if(playScaleType == ScaleType.Speed && (int)seekSlider.getValue() >= maxValue)
         {
             //reset value and increments
-            seekBar.setProgress(0);
+            updateValue(minValue);
             resetPlayIncrements();
         }
 
@@ -518,8 +540,7 @@ public class PlayBar extends LinearLayout
                 @Override
                 public void run()
                 {
-                    int actualMaxValue = seekBar.getMax();
-                    int progressValue = seekBar.getProgress();
+                    int progressValue = (int)seekSlider.getValue();
                     int increments;
                     boolean wasSynced = synced;
 
@@ -533,14 +554,14 @@ public class PlayBar extends LinearLayout
                         progressValue += increments;
 
                         //if after end
-                        if(progressValue > actualMaxValue)
+                        if(progressValue > maxValue)
                         {
                             //handle based on scale type
                             switch(playScaleType)
                             {
                                 case ScaleType.Speed:
                                     //set to end and stop
-                                    progressValue = actualMaxValue;
+                                    progressValue = maxValue;
                                     stopPlayTimer();
                                     break;
 
@@ -557,13 +578,13 @@ public class PlayBar extends LinearLayout
                         }
 
                         //update progress
-                        seekBar.setProgress(progressValue);
+                        updateValue(progressValue);
                     }
                     //else if listener exists
                     else if(progressChangedListener != null)
                     {
                         //update sub progress
-                        progressChangedListener.onProgressChanged(PlayBar.this, progressValue + minValue, playSubProgressPercent, false);
+                        progressChangedListener.onProgressChanged(PlayBar.this, progressValue, playSubProgressPercent, false);
                     }
 
                     //sync with calling thread
@@ -673,15 +694,14 @@ public class PlayBar extends LinearLayout
             public void onClick(View view)
             {
                 boolean clear = false;
-                int max = seekBar.getMax();
-                int progressValue = seekBar.getProgress();
+                int progressValue = (int)seekSlider.getValue();
                 int increments = updatePlayIncrements(forward, true);
 
                 //if going forward
                 if(forward)
                 {
                     //if before end
-                    if(progressValue < max)
+                    if(progressValue < maxValue)
                     {
                         //go forward an increment
                         progressValue += increments;
@@ -690,7 +710,7 @@ public class PlayBar extends LinearLayout
                 else
                 {
                     //if after first
-                    if(progressValue > 0)
+                    if(progressValue > minValue)
                     {
                         //go backward an increment
                         progressValue += increments;
@@ -698,9 +718,9 @@ public class PlayBar extends LinearLayout
                 }
 
                 //make sure still within range
-                if(forward && (progressValue + playSubProgressPercent) >= max)
+                if(forward && (progressValue + playSubProgressPercent) >= maxValue)
                 {
-                    progressValue = max;
+                    progressValue = maxValue;
                     clear = true;
                 }
                 else if(!forward && (progressValue + playSubProgressPercent) <= 0)
@@ -718,12 +738,12 @@ public class PlayBar extends LinearLayout
                 if(increments == 0 && progressChangedListener != null)
                 {
                     //update sub progress
-                    progressChangedListener.onProgressChanged(PlayBar.this, progressValue + minValue, playSubProgressPercent, true);
+                    progressChangedListener.onProgressChanged(PlayBar.this, progressValue, playSubProgressPercent, true);
                 }
 
                 //update progress
                 playSubProgressPercent = 0;
-                seekBar.setProgress(progressValue);
+                updateValue(progressValue);
                 setSynced(false);
             }
         });

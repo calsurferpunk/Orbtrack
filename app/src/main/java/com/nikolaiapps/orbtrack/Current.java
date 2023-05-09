@@ -1405,8 +1405,19 @@ public abstract class Current
                 //if location
                 if(isLocation)
                 {
-                    //move to now since not updated later
+                    //move to location
                     mapView.moveCamera(currentLocation.geo.latitude, currentLocation.geo.longitude);
+                }
+                else
+                {
+                    //try to get selected orbital and location
+                    CoordinatesFragment.OrbitalBase selectedOrbital = mapView.getSelectedOrbital();
+                    GeodeticDataType selectedGeo = (selectedOrbital != null ? selectedOrbital.getGeo() : null);
+                    if(selectedGeo != null)
+                    {
+                        //move to location
+                        mapView.moveCamera(selectedGeo.latitude, selectedGeo.longitude);
+                    }
                 }
             }
             else
@@ -2231,7 +2242,6 @@ public abstract class Current
     //Setup play bar
     private static void setupPlayBar(final FragmentActivity activity, PlayBar playBar, final Calculate.Coordinates.Item[] playbackItems, final CoordinatesFragment.OrbitalBase[] playbackMarkers)
     {
-        CoordinatesFragment mapView = getMapViewIfReady();
         final boolean usingPlaybackItems = (playbackItems != null);
         final boolean usingMarkers = (playbackMarkers != null);
         final boolean singlePlaybackMarker = (usingMarkers && playbackMarkers.length == 1);
@@ -2239,7 +2249,6 @@ public abstract class Current
         final int max = (usingPlaybackItems ? playbackItems.length : (int)(Calculations.SecondsPerDay * 1000)) - 1;
         final int scaleType = (usingPlaybackItems ? PlayBar.ScaleType.Speed : PlayBar.ScaleType.Time);
         int mapTimerDelay;
-        int mapSelectedNoradId = (mapView != null ? mapView.getSelectedNoradId() : Universe.IDs.Invalid);
 
         //if play bar exists
         if(playBar != null)
@@ -2276,7 +2285,9 @@ public abstract class Current
                             Calculate.Coordinates.Item nextItem = (currentItemIndex + 1 < playbackItems.length ? playbackItems[currentItemIndex + 1] : null);
                             Calculate.Coordinates.Item currentItem = playbackItems[currentItemIndex];
                             TextView mapInfoText = getMapInfoText();
+                            CoordinatesFragment mapView = getMapViewIfReady();
                             Calendar playTime = Globals.getGMTTime(currentItem.time);
+                            int mapSelectedNoradId = (mapView != null ? mapView.getSelectedNoradId() : Universe.IDs.Invalid);
 
                             //if more points after current
                             if(nextItem != null)
@@ -2317,6 +2328,7 @@ public abstract class Current
                                     int currentNoradId = currentOrbital.getSatelliteNum();
                                     boolean currentIsSatellite = (currentNoradId > 0);
                                     boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapSelectedNoradId);
+                                    boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
 
                                     //update showing selected footprint
                                     currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
@@ -2327,7 +2339,10 @@ public abstract class Current
                                         String coordinateString = Globals.getCoordinateString(activity, latitude, longitude, altitudeKm);
 
                                         //update coordinates
-                                        currentMarker.setText(coordinateString);
+                                        if(infoUnderTitle)
+                                        {
+                                            currentMarker.setText(coordinateString);
+                                        }
                                         if(mapInfoText != null && Settings.usingMapMarkerInfoBottom())
                                         {
                                             mapInfoText.setText(coordinateString.replace("\n", Globals.COORDINATE_SEPARATOR));
@@ -2341,7 +2356,7 @@ public abstract class Current
                                             mapView.moveCamera(latitude, longitude);
                                         }
                                     }
-                                    else
+                                    else if(infoUnderTitle)
                                     {
                                         //clear old text
                                         currentMarker.setText(null);
@@ -2643,8 +2658,12 @@ public abstract class Current
                             //if multiple orbitals
                             if(multiSelected)
                             {
-                                //deselect current
+                                //deselect current and hide information
                                 mapView.deselectCurrent();
+                                if(mapInfoText != null)
+                                {
+                                    mapInfoText.setVisibility(View.GONE);
+                                }
                             }
                         }
                     }

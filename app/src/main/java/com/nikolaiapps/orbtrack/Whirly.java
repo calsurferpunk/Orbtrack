@@ -2659,6 +2659,12 @@ class Whirly
         }
 
         @Override
+        public OrbitalBase getSelectedOrbital()
+        {
+            return(common.getOrbital(common.selectedOrbitalIndex));
+        }
+
+        @Override
         public void selectOrbital(int noradId)
         {
             //deselect current

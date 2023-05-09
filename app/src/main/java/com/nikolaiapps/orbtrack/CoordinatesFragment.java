@@ -820,6 +820,7 @@ public interface CoordinatesFragment
 
     int getOrbitalCount();
     int getOrbitalNoradId(int orbitalIndex);
+    OrbitalBase getSelectedOrbital();
     OrbitalBase getOrbital(int orbitalIndex);
     OrbitalBase addOrbital(Context context, Database.SatelliteData newSat, Calculations.ObserverType observerLocation);
     void removeOrbital(OrbitalBase object);

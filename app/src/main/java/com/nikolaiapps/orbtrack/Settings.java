@@ -1912,6 +1912,7 @@ public abstract class Settings
     //Status of using metric units, grid, map marker bottom info, footprint, default colors, and sort by
     private static boolean usingMetric = true;
     private static boolean allowNumberCommas = true;
+    private static boolean mapMarkerInfoTitle = false;
     private static boolean mapMarkerInfoBottom = true;
     private static boolean mapShowFootprint = false;
     private static boolean mapSelectedShowFootprint = false;
@@ -2810,7 +2811,15 @@ public abstract class Settings
     public static void setMapMarkerInfoLocation(Context context, int location)
     {
         setPreferenceInt(context, PreferenceName.MapMarkerInfoLocation, location);
+        mapMarkerInfoTitle = (location == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
         mapMarkerInfoBottom = (location == CoordinatesFragment.MapMarkerInfoLocation.ScreenBottom);
+    }
+
+    //Returns if using map marker under title info
+    //note: faster than getting through preferences since called a lot
+    public static boolean usingMapMarkerInfoTitle()
+    {
+        return(mapMarkerInfoTitle);
     }
 
     //Returns if using map marker bottom info

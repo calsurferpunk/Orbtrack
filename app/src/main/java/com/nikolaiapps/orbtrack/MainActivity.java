@@ -4060,10 +4060,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     //if using multiple orbitals or current is selected
                                     if(multiOrbitals || currentOrbitalSelected)
                                     {
-                                        //remember latitude, longitude, and if visible
+                                        //remember latitude, longitude, and if info under title
                                         double currentLatitude = currentOrbital.geo.latitude;
                                         double currentLongitude = currentOrbital.geo.longitude;
                                         double currentAltitudeKm = currentOrbital.geo.altitudeKm;
+                                        boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
 
                                         //update showing selected footprint
                                         currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
@@ -4087,7 +4088,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         {
                                             //refresh window and follow
                                             coordinateString = Globals.getCoordinateString(MainActivity.this, currentLatitude, currentLongitude, currentAltitudeKm);
-                                            currentMarker.setText(coordinateString);
+                                            if(infoUnderTitle)
+                                            {
+                                                currentMarker.setText(coordinateString);
+                                            }
 
                                             //if julian date changed
                                             if(julianDate != lastJulianDate)
@@ -4098,7 +4102,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             //update last
                                             lastNoradId = currentNoradId;
                                         }
-                                        else
+                                        else if(infoUnderTitle)
                                         {
                                             //clear old text
                                             currentMarker.setText(null);

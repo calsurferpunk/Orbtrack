@@ -1516,11 +1516,11 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.DarkTheme:
                         case Settings.PreferenceName.ColorTheme:
                         case Settings.PreferenceName.MaterialTheme:
-                        case Settings.PreferenceName.SatelliteIcon:
-                        case Settings.PreferenceName.OrbitalIcons:
                             recreateThis = true;
                             //fall through
 
+                        case Settings.PreferenceName.SatelliteIcon:
+                        case Settings.PreferenceName.OrbitalIcons:
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.ListShowPassQuality:
                         case Settings.PreferenceName.MetricUnits:

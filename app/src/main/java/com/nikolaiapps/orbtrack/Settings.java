@@ -684,7 +684,7 @@ public abstract class Settings
                                     }
                                 });
                             }
-                        }, true);
+                        });
                     }
                 }
 

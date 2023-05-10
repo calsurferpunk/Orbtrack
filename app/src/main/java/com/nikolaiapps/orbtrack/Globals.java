@@ -407,11 +407,13 @@ public abstract class Globals
     {
         private boolean canceled;
         private final boolean createOnly;
+        private final boolean retrying;
         private final WebPageListener loginListener;
 
-        public LoginTask(boolean createAccountOnly, WebPageListener listener)
+        public LoginTask(boolean createAccountOnly, boolean retryingAccount, WebPageListener listener)
         {
             createOnly = createAccountOnly;
+            retrying = retryingAccount;
             loginListener = listener;
         }
 
@@ -478,8 +480,8 @@ public abstract class Globals
                                 //if listener is set and not canceled
                                 if(loginListener != null && !canceled)
                                 {
-                                    //send any login data and success -if creating only or source not space-track-
-                                    loginListener.onResult(loginData, (createOnly || (source != Database.UpdateSource.SpaceTrack)));
+                                    //send any login data and success --if creating only- or -retrying- or -source not space-track--
+                                    loginListener.onResult(loginData, (createOnly || retrying || (source != Database.UpdateSource.SpaceTrack)));
                                 }
                             }
                         },
@@ -749,8 +751,10 @@ public abstract class Globals
     //Shows a confirm dialog
     public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
     {
+        ImageView iconView;
         AlertDialog confirmDialog;
         AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(context, getDialogThemeID(context));
+
         if(icon != null)
         {
             confirmBuilder.setIcon(icon);
@@ -775,9 +779,21 @@ public abstract class Globals
         {
             confirmBuilder.setNeutralButton(neutralText, neutralListener);
         }
-
         confirmDialog = confirmBuilder.create();
         confirmDialog.show();
+
+        iconView = confirmDialog.findViewById(android.R.id.icon);
+        if(iconView != null)
+        {
+            if(Build.VERSION.SDK_INT >= 21)
+            {
+                iconView.setImageTintList(null);
+            }
+            else
+            {
+                iconView.setColorFilter(null);
+            }
+        }
 
         return(new Button[]{confirmDialog.getButton(AlertDialog.BUTTON_POSITIVE), confirmDialog.getButton(AlertDialog.BUTTON_NEUTRAL), confirmDialog.getButton(AlertDialog.BUTTON_NEGATIVE)});
     }
@@ -5430,7 +5446,7 @@ public abstract class Globals
     }
 
     //Shows a space-track login
-    private static void showAccountLogin(Activity context, int accountType, int updateType, WebPageListener listener, boolean alwaysShow)
+    private static void showAccountLogin(Activity context, int accountType, int updateType, WebPageListener listener, boolean retrying)
     {
         //if context exists and not closing
         if(context != null && !context.isFinishing())
@@ -5439,16 +5455,16 @@ public abstract class Globals
             String[] loginData = Settings.getLogin(context, accountType);
 
             //try to login
-            (new LoginTask((updateType == UpdateService.UpdateType.UpdateCount), listener)).execute(context, accountType, updateType, loginData[0], loginData[1], alwaysShow, updateType);
+            (new LoginTask((updateType == UpdateService.UpdateType.UpdateCount), retrying, listener)).execute(context, accountType, updateType, loginData[0], loginData[1], true, updateType);
         }
     }
-    public static void showAccountLogin(Activity context, int accountType, WebPageListener listener, boolean alwaysShow)
+    public static void showAccountLogin(Activity context, int accountType, WebPageListener listener)
     {
-        showAccountLogin(context, accountType, UpdateService.UpdateType.UpdateCount, listener, alwaysShow);
+        showAccountLogin(context, accountType, UpdateService.UpdateType.UpdateCount, listener, false);
     }
     public static void showAccountLogin(Activity context, int accountType, int updateType, WebPageListener listener)
     {
-        showAccountLogin(context, accountType, updateType, listener, false);
+        showAccountLogin(context, accountType, updateType, listener, true);
     }
 
     //Translates text with context language

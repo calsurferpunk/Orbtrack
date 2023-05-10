@@ -2793,7 +2793,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                         Settings.removeSpaceTrackLogin(SettingsActivity.this);
                                     }
                                 }
-                            }, true);
+                            });
                             break;
                     }
                 }

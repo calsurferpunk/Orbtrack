@@ -773,9 +773,6 @@ public class EditValuesDialog
         });
         editDialog.show();
 
-        //set displays
-        updateDisplays();
-
         //setup buttons
         positiveButton = editDialog.getButton(DialogInterface.BUTTON_POSITIVE);
         positiveButton.setOnClickListener(createOnClickListener(DialogInterface.BUTTON_POSITIVE));
@@ -788,6 +785,9 @@ public class EditValuesDialog
             editDialog.getButton(DialogInterface.BUTTON_NEUTRAL).setOnClickListener(createOnClickListener(DialogInterface.BUTTON_NEUTRAL));
         }
         editDialog.getButton(DialogInterface.BUTTON_NEGATIVE).setOnClickListener(createOnClickListener(DialogInterface.BUTTON_NEGATIVE));
+
+        //set displays
+        updateDisplays();
     }
     public void getLocation(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String[] numberTitles, double[] numberValues, double[] number2Values, double[] number3Values, String list2Title, String[] list2Values, String[] defaultList2Value)
     {

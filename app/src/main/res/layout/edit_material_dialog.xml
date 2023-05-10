@@ -49,14 +49,6 @@
                 android:maxLength="50"/>
         </com.google.android.material.textfield.TextInputLayout>
 
-        <TextView
-            android:id="@+id/Edit_Text"
-            style="@style/EditValueTitle"
-            android:layout_width="match_parent"
-            android:autoLink="web"
-            android:text="@string/spacetrack_create_link"
-            android:visibility="gone"/>
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/Edit_Number_Layout"
             style="@style/TextViewMaterialInputLayout"
@@ -91,6 +83,14 @@
                 android:id="@+id/Edit_Value_Text_List2"
                 style="@style/TextViewMaterialList"/>
         </com.google.android.material.textfield.TextInputLayout>
+
+        <TextView
+            android:id="@+id/Edit_Text"
+            style="@style/EditValueTitle"
+            android:layout_width="match_parent"
+            android:autoLink="web"
+            android:text="@string/spacetrack_create_link"
+            android:visibility="gone"/>
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/Edit_Date_Layout"

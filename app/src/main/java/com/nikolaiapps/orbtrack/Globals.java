@@ -1069,8 +1069,8 @@ public abstract class Globals
         final Context context = parentView.getContext();
         boolean usingDetail = (detailMessage != null);
         int resId = (isError ? R.drawable.ic_error_black : R.drawable.ic_check_circle_black);
-        int textColorId = resolveColorID(context, R.attr.titleTextColor);
-        final Drawable icon = getDrawable(context, resId, R.color.white);
+        int textColor = resolveColorID(context, R.attr.titleTextColor);
+        final Drawable icon = getDrawable(context, resId, true);
         final Drawable smallIcon = getDrawableSized(context, resId, 16, 16, R.color.white, true);
         final Snackbar snackView = Snackbar.make(parentView, message, usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
         final View snackParentView = snackView.getView();
@@ -1079,8 +1079,8 @@ public abstract class Globals
 
         //setup views
         snackView.setBackgroundTint(resolveColorID(context, R.attr.colorAccentDark));
-        snackText.setTextColor(textColorId);
-        snackView.setActionTextColor(textColorId);
+        snackText.setTextColor(textColor);
+        snackView.setActionTextColor(textColor);
         snackText.setCompoundDrawablePadding((int)dpToPixels(context, 3));
         snackText.setCompoundDrawablesWithIntrinsicBounds(smallIcon, null, null, null);
 
@@ -3095,9 +3095,9 @@ public abstract class Globals
     {
         return(getDrawableSizedRotated(context, resId, width, height, 0, useThemeTint, isDpSize));
     }
-    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColor, boolean isDpSize)
+    public static Drawable getDrawableSized(Context context, int resId, int width, int height, int tintColorId, boolean isDpSize)
     {
-        return(getDrawableSizedRotated(context, resId, width, height, 0, tintColor, true, isDpSize));
+        return(getDrawableSizedRotated(context, resId, width, height, 0, tintColorId, true, isDpSize));
     }
 
     //Gets a drawable with restricted size

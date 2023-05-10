@@ -888,7 +888,7 @@ public abstract class Selectable
         protected boolean hasItems;
         protected boolean forSubItems;
         protected boolean loadingItems;
-        protected boolean usingMaterial;
+        final protected boolean usingMaterial;
         private boolean enableItemClicks;
         protected int dataID = Integer.MAX_VALUE;
         protected int itemsRefID = -1;

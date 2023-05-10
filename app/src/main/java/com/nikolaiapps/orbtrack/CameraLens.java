@@ -479,12 +479,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
     private static class RelativeLocationProperties
     {
-        public boolean closeArea;
-        public boolean outsideArea;
-        public float azCenterPx;
-        public float elCenterPx;
-        public float azDeltaDegrees;
-        public float elDeltaDegrees;
+        final public boolean closeArea;
+        final public boolean outsideArea;
+        final public float azCenterPx;
+        final public float elCenterPx;
+        final public float azDeltaDegrees;
+        final public float elDeltaDegrees;
 
         public RelativeLocationProperties(boolean closeArea, boolean outsideArea, float azCenterPx, float elCenterPx, float azDeltaDegrees, float elDeltaDegrees)
         {

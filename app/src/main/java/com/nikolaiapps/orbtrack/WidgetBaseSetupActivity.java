@@ -20,7 +20,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.tabs.TabLayout;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.appcompat.widget.SwitchCompat;
 import android.text.Editable;

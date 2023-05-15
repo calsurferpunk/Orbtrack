@@ -947,6 +947,7 @@ public abstract class Current
             Context context = this.getContext();
             Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems();
             Database.SatelliteData[] satellites = MainActivity.getSatellites();
+            Database.SatelliteData[] usedSatellites;
             final Selectable.ListBaseAdapter listAdapter = new Combined.ItemListAdapter(context, savedItems, satellites);
 
             //set default
@@ -963,11 +964,14 @@ public abstract class Current
             //if need to create lens
             if(createLens)
             {
+                //get used satellites
+                usedSatellites = (MainActivity.viewLensNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)});
+
                 //set orbital views
-                setOrbitalViews(satellites);
+                setOrbitalViews(usedSatellites);
 
                 //create view
-                newView = onCreateLensView(this, inflater, container, (MainActivity.viewLensNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)}), savedInstanceState);
+                newView = onCreateLensView(this, inflater, container, usedSatellites, savedInstanceState);
             }
             //else if need to create map view
             else if(createMapView)

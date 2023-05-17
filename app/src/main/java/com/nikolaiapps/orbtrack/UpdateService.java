@@ -604,12 +604,14 @@ public class UpdateService extends NotifyService
     //Notify receiver
     public static class NotifyReceiver extends NotifyService.NotifyReceiver
     {
+        private static final int InvalidID = -1;
         private static final int UpdateSatelliteID = 1;
         private static final int UpdateListID = 2;
         private static final int RetrySatelliteID = 3;
         private static final int RetryListID = 4;
         private static final int DismissSatelliteID = 5;
         private static final int DismissListID = 6;
+        private static final int CancelID = 7;
 
         @Override
         protected void onBootCompleted(Context context, long timeNowMs, AlarmManager manager)
@@ -679,6 +681,20 @@ public class UpdateService extends NotifyService
         protected void onCloseNotification(Context context, Intent intent, NotificationManagerCompat manager)
         {
             manager.cancel(getUpdateID(getUpdateType(intent)));
+        }
+
+        @Override
+        protected void onCancel(Context context, Intent intent)
+        {
+            byte updateType = getUpdateType(intent);
+
+            switch(updateType)
+            {
+                case UpdateType.GetMasterList:
+                case UpdateType.UpdateSatellites:
+                    UpdateService.cancel(updateType);
+                    break;
+            }
         }
 
         //Gets the update type from the given intent
@@ -1043,7 +1059,7 @@ public class UpdateService extends NotifyService
             }
         }
 
-        sendMessage(getLocalBroadcast(), messageType, updateType, ParamTypes.UpdateType, Integer.MAX_VALUE, titleDesc, section, UPDATE_FILTER, NotifyReceiver.class, overall, 0, index, count, progressType, updateID, dismissID, retryID, showNotification[updateType], extraData);
+        sendMessage(getLocalBroadcast(), messageType, updateType, ParamTypes.UpdateType, Integer.MAX_VALUE, titleDesc, section, UPDATE_FILTER, NotifyReceiver.class, overall, 0, index, count, progressType, updateID, dismissID, NotifyReceiver.CancelID, retryID, showNotification[updateType], extraData);
     }
     private void sendMessage(byte messageType, byte updateType, String section, long index, long count, int progressType, Object data)
     {
@@ -1091,7 +1107,10 @@ public class UpdateService extends NotifyService
             @Override
             public void onProgressChanged(int progressType, String section, final long updateIndex, final long updateCount)
             {
-                UpdateService.this.sendMessage(messageType, UpdateType.GetMasterList, displaySection, updateIndex, updateCount, overall, progressType);
+                if(!cancelIntent[UpdateType.GetMasterList])
+                {
+                    UpdateService.this.sendMessage(messageType, UpdateType.GetMasterList, displaySection, updateIndex, updateCount, overall, progressType);
+                }
             }
         });
     }
@@ -3162,7 +3181,7 @@ public class UpdateService extends NotifyService
             }
 
             //update status
-            downloadError = (downloadError || receivedPage == null || receivedPage.equals(""));
+            downloadError = (downloadError || receivedPage == null || receivedPage.equals("") || cancelIntent[UpdateType.UpdateSatellites]);
 
             //if page was received
             if(!downloadError)
@@ -3170,8 +3189,8 @@ public class UpdateService extends NotifyService
                 //remember lower case received page
                 receivedPageLower = receivedPage.toLowerCase();
 
-                //go through each downloaded TLE
-                for(index3 = index; index3 <= index2; index3++)
+                //go through each downloaded TLE while not canceled
+                for(index3 = index; index3 <= index2 && !cancelIntent[UpdateType.UpdateSatellites]; index3++)
                 {
                     //remember current satellite
                     Database.DatabaseSatellite currentSatellite = satellites[index3];

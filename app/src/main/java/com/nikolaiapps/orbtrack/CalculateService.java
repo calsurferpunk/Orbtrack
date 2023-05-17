@@ -379,6 +379,7 @@ public class CalculateService extends NotifyService
     //Notify receiver
     public static class NotifyReceiver extends NotifyService.NotifyReceiver
     {
+        private static final int InvalidID = -1;
         private static final int CalculateMultiOrbitalPassesID = 1;
         private static final int CalculateSinglePassesID = 2;
         private static final int RetryPassesID = 3;
@@ -1076,7 +1077,7 @@ public class CalculateService extends NotifyService
             extraData.putParcelable(ParamTypes.PassData, pass);
         }
 
-        sendMessage(getLocalBroadcast(), messageType, calculateType, ParamTypes.CalculateType, id, titleDesc, section, CALCULATE_FILTER, NotifyReceiver.class, subIndex, subCount, index, count, progressType, updateID, NotifyReceiver.DismissPassesID, NotifyReceiver.RetryPassesID, showNotification[calculateType], extraData);
+        sendMessage(getLocalBroadcast(), messageType, calculateType, ParamTypes.CalculateType, id, titleDesc, section, CALCULATE_FILTER, NotifyReceiver.class, subIndex, subCount, index, count, progressType, updateID, NotifyReceiver.DismissPassesID, NotifyReceiver.InvalidID, NotifyReceiver.RetryPassesID, showNotification[calculateType], extraData);
     }
 
     //Sends a load message

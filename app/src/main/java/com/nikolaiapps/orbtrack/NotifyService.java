@@ -83,6 +83,7 @@ public abstract class NotifyService extends IntentService
     public static abstract class NotifyReceiver extends BroadcastReceiver
     {
         public static final String RetryAction = "RetryAction";
+        public static final String CancelAction = "CancelAction";
         public static final String DismissAction = "DismissAction";
         public static final String SettingsAction = "SettingsAction";
         public static final long MAX_WAKE_LOCK_MS = 900000;             //15 minutes
@@ -91,11 +92,13 @@ public abstract class NotifyService extends IntentService
         protected abstract void onRunService(Context context, Intent intent);
         protected abstract void onCloseNotification(Context context, Intent intent, NotificationManagerCompat manager);
         protected void onSettings(Context context, Intent intent) {}
+        protected void onCancel(Context context, Intent intent) {}
 
         @Override
         public void onReceive(Context context, Intent intent)
         {
             boolean isRetry;
+            boolean isCancel;
             boolean isDismiss;
             boolean runService = false;
             boolean closeNotification = false;
@@ -110,6 +113,7 @@ public abstract class NotifyService extends IntentService
 
             //update status
             isRetry = action.equals(RetryAction);
+            isCancel = action.equals(CancelAction);
             isDismiss = action.equals(DismissAction);
 
             //if from boot completed
@@ -125,14 +129,21 @@ public abstract class NotifyService extends IntentService
                 onSettings(context, intent);
                 closeNotification = true;
             }
-            //else if retrying or dismissing
-            else if(isRetry || isDismiss)
+            //else if retrying, canceling, or dismissing
+            else if(isRetry || isCancel || isDismiss)
             {
                 //close notification
                 closeNotification = true;
 
                 //run service if retrying
                 runService = isRetry;
+
+                //if canceling
+                if(isCancel)
+                {
+                    //cancel
+                    onCancel(context, intent);
+                }
             }
             else
             {
@@ -261,12 +272,43 @@ public abstract class NotifyService extends IntentService
         }
     }
 
+    //Creates an action
+    private NotificationCompat.Action createAction(String actionString, int actionId, Class<?> receiverClass, String serviceParam, byte serviceIndex)
+    {
+        int stringId;
+        Intent actionIntent = new Intent(this, receiverClass);
+
+        //setup action
+        actionIntent.setAction(actionString);
+        actionIntent.putExtra(serviceParam, serviceIndex);
+        switch(actionString)
+        {
+            case NotifyReceiver.RetryAction:
+                stringId = R.string.title_retry;
+                break;
+
+            case NotifyReceiver.CancelAction:
+                stringId = R.string.title_cancel;
+                break;
+
+            default:
+            case NotifyReceiver.DismissAction:
+                stringId = R.string.title_dismiss;
+                break;
+        }
+
+        //return action
+        return(new NotificationCompat.Action(0, this.getString(stringId), Globals.getPendingBroadcastIntent(this, actionId, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+    }
+
     //Sends a message
-    protected void sendMessage(MutableLiveData<Intent> localBroadcast, byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int retryID, boolean showNotification, Bundle extraData)
+    protected void sendMessage(MutableLiveData<Intent> localBroadcast, byte messageType, byte serviceIndex, String serviceParam, int id, String titleDesc, String section, String filter, Class<?> receiverClass, long subIndex, long subCount, long index, long count, int progressType, int updateID, int dismissID, int cancelID, int retryID, boolean showNotification, Bundle extraData)
     {
         boolean isGeneral = (messageType == MessageTypes.General);
         boolean isStarted = (progressType == Globals.ProgressType.Started);
         boolean isFinished = (progressType == Globals.ProgressType.Finished);
+        boolean isCanceled = (progressType == Globals.ProgressType.Cancelled);
+        boolean showCancel = (cancelID >= 0);
         boolean haveSection = (section != null && !section.equals(""));
         boolean haveSubIndex = (subIndex >= 0);
         boolean enoughProgress = (System.currentTimeMillis() - lastNotify.timeMs >= 250);
@@ -297,17 +339,10 @@ public abstract class NotifyService extends IntentService
                     //if showing notification
                     if(showNotification)
                     {
-                        Intent retryIntent;
-                        Intent dismissIntent;
                         Resources res = this.getResources();
 
-                        //create dismiss intent
-                        dismissIntent = new Intent(this, receiverClass);
-                        dismissIntent.setAction(NotifyReceiver.DismissAction);
-                        dismissIntent.putExtra(serviceParam, serviceIndex);
-
                         //update message
-                        currentNotify.title = res.getString(isStarted ? R.string.title_start : isFinished ? R.string.title_finished : R.string.title_failed) + " " + titleDesc;
+                        currentNotify.title = res.getString(isStarted ? R.string.title_start : isFinished ? R.string.title_finished : isCanceled ? R.string.title_canceled : R.string.title_failed) + " " + titleDesc;
                         currentNotify.message = "";
                         currentNotify.progress = 0;
                         currentNotify.maxProgress = 0;
@@ -320,17 +355,15 @@ public abstract class NotifyService extends IntentService
                             //if didn't finish
                             if(!isFinished)
                             {
-                                //create retry intent
-                                retryIntent = new Intent(this, receiverClass);
-                                retryIntent.setAction(NotifyReceiver.RetryAction);
-                                retryIntent.putExtra(serviceParam, serviceIndex);
-
                                 //add retry button
-                                notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_retry), Globals.getPendingBroadcastIntent(this, retryID, retryIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                                notifyBuilder.addAction(createAction(NotifyReceiver.RetryAction, retryID, receiverClass, serviceParam, serviceIndex));
                             }
 
                             //add dismiss button
-                            notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(this, dismissID, dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
+                            notifyBuilder.addAction(createAction(NotifyReceiver.DismissAction, dismissID, receiverClass, serviceParam, serviceIndex));
+
+                            //don't show cancel
+                            showCancel = false;
                         }
                         break;
                     }
@@ -376,6 +409,11 @@ public abstract class NotifyService extends IntentService
             if(localBroadcast != null)
             {
                 Globals.setBroadcastValue(this, localBroadcast, intent);
+            }
+            if(notifyBuilder != null && showCancel)
+            {
+                //add cancel button
+                notifyBuilder.addAction(createAction(NotifyReceiver.CancelAction, cancelID, receiverClass, serviceParam, serviceIndex));
             }
             updateNotification(notifyBuilder, updateID, limitMs, showNotification);
         }

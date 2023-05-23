@@ -483,17 +483,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         final public boolean outsideArea;
         final public float azCenterPx;
         final public float elCenterPx;
-        final public float azDeltaDegrees;
-        final public float elDeltaDegrees;
 
-        public RelativeLocationProperties(boolean closeArea, boolean outsideArea, float azCenterPx, float elCenterPx, float azDeltaDegrees, float elDeltaDegrees)
+        public RelativeLocationProperties(boolean closeArea, boolean outsideArea, float azCenterPx, float elCenterPx)
         {
             this.closeArea = closeArea;
             this.outsideArea = outsideArea;
             this.azCenterPx = azCenterPx;
             this.elCenterPx = elCenterPx;
-            this.azDeltaDegrees = azDeltaDegrees;
-            this.elDeltaDegrees = elDeltaDegrees;
         }
     }
 
@@ -1312,7 +1308,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         closeArea = (Math.abs(azDeltaDegrees) <= CLOSE_AREA_DEGREES && Math.abs(elDeltaDegrees) <= CLOSE_AREA_DEGREES);
 
         //return results
-        return(new RelativeLocationProperties(closeArea, outsideArea, azCenterPx, elCenterPx, azDeltaDegrees, elDeltaDegrees));
+        return(new RelativeLocationProperties(closeArea, outsideArea, azCenterPx, elCenterPx));
     }
 
     //Update orbital positions to display

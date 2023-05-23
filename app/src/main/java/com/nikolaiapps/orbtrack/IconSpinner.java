@@ -966,16 +966,14 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             super.setSelection(index);
         }
     }
-    public boolean setSelectedValue(Object value)
+    public void setSelectedValue(Object value)
     {
         int index = SelectListInterface.setSelectedValue(currentAdapter, value);
-        boolean setSelection = (index >= 0);
 
-        if(setSelection)
+        if(index >= 0)
         {
             super.setSelection(index);
         }
-        return(setSelection);
     }
 
     public Object getSelectedValue(Object defaultValue)

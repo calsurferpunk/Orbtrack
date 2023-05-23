@@ -299,14 +299,12 @@ public abstract class Calculations
     //Geodetic area type
     public static class GeodeticAreaType
     {
-        public double latitude;
-        public double longitude;
         public double latitudeWidth;
         public double longitudeWidth;
 
         public GeodeticAreaType()
         {
-            latitude = longitude = latitudeWidth = longitudeWidth = 0;
+            latitudeWidth = longitudeWidth = 0;
         }
     }
 
@@ -2851,7 +2849,7 @@ public abstract class Calculations
     }
 
     //Calculates the satellite min/max latitude and longitude area for visibility
-    public static GeodeticAreaType getFootprint(double latitude, double longitude, double altitudeKm)
+    public static GeodeticAreaType getFootprint(double latitude, double altitudeKm)
     {
         double radiusKm = Math.acos(EarthRadiusKM / (EarthRadiusKM + altitudeKm)) * EarthRadiusKM;
         double latitudeKm = radiusKm / DegToLatKm;
@@ -2859,8 +2857,6 @@ public abstract class Calculations
         double longitudeKm = radiusKm / (DegToLonKm * Math.cos(latitudeRad));
         GeodeticAreaType geoArea = new GeodeticAreaType();
 
-        geoArea.latitude = latitude;
-        geoArea.longitude = longitude;
         geoArea.latitudeWidth = latitudeKm;
         geoArea.longitudeWidth = longitudeKm;
 

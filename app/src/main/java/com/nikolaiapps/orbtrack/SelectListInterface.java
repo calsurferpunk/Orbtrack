@@ -25,7 +25,7 @@ public interface SelectListInterface
     void setTextSelectedColor(int color);
     void setSelectedText(String value);
     void setSelectedValue(Object value, Object defaultValue);
-    boolean setSelectedValue(Object value);
+    void setSelectedValue(Object value);
     int getSelectedItemPosition();
     Object getSelectedValue(Object defaultValue);
     void setDropDownWidth(int width);

@@ -345,18 +345,15 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         setSelectedIndex(SelectListInterface.setSelectedValue(currentAdapter, value, defaultValue));
         setLast(value, defaultValue);
     }
-    public boolean setSelectedValue(Object value)
+    public void setSelectedValue(Object value)
     {
         int index = SelectListInterface.setSelectedValue(currentAdapter, value);
-        boolean setSelection = (index >= 0);
 
-        if(setSelection)
+        if(index >= 0)
         {
             setSelectedIndex(index);
         }
         setLast(value, null);
-
-        return(setSelection);
     }
 
     public int getSelectedItemPosition()

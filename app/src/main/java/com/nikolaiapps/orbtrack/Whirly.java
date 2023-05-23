@@ -1692,7 +1692,7 @@ class Whirly
             if(canShowFootprint || canShowSelectedFootprint)
             {
                 //move footprints
-                selectedFootprint = Calculations.getFootprint(latitude, longitude, altitudeKm);
+                selectedFootprint = Calculations.getFootprint(latitude, altitudeKm);
                 if(canShowFootprint)
                 {
                     orbitalFootprint.moveLocation(latitude, longitude, selectedFootprint.latitudeWidth, selectedFootprint.longitudeWidth);

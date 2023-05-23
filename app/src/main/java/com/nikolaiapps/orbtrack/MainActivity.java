@@ -1755,7 +1755,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //get items
             items = Calculate.PageAdapter.getViewAngleItems();
-            if(items.length <= 0)
+            if(items.length < 1)
             {
                 //show error
                 throw(new Exception(res.getString(R.string.text_no_items)));
@@ -1848,7 +1848,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //get items
             items = Calculate.PageAdapter.getPassItems();
-            if(items.length <= 0)
+            if(items.length < 1)
             {
                 //show error
                 throw(new Exception(res.getString(R.string.text_no_items)));
@@ -1902,7 +1902,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //get items
             items = Calculate.PageAdapter.getCoordinatesItems();
-            if(items.length <= 0)
+            if(items.length < 1)
             {
                 //show error
                 throw(new Exception(res.getString(R.string.text_no_items)));
@@ -4241,7 +4241,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Database.SatelliteData currentSatellite1 = null;
                 Database.SatelliteData currentSatellite2 = null;
                 Database.SatelliteData[] currentSatellites = null;
-                TopographicDataType[] currentPlayTopographicDatas;
+                TopographicDataType[] currentPlayTopographicData;
                 CalculateViewsTask.OrbitalView currentView;
                 CalculateViewsTask.OrbitalView nextView;
                 CalculateViewsTask.OrbitalView[] views = null;
@@ -4364,7 +4364,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //get play index and progress and set topographic data
                         playIndex = cameraView.playBar.getValue();
                         subProgressPercent = cameraView.playBar.getSubProgressPercent();
-                        currentPlayTopographicDatas = new TopographicDataType[currentViews.length];
+                        currentPlayTopographicData = new TopographicDataType[currentViews.length];
 
                         //go through each view set
                         for(index = 0; index < currentViews.length; index++)
@@ -4395,23 +4395,23 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     currentTopographicData = new TopographicDataType(currentView.azimuth, currentView.elevation, currentView.rangeKm);
                                 }
                             }
-                            currentPlayTopographicDatas[index] = currentTopographicData;
+                            currentPlayTopographicData[index] = currentTopographicData;
                         }
 
                         //go through topographic data
-                        for(index = 0; index < currentPlayTopographicDatas.length; index++)
+                        for(index = 0; index < currentPlayTopographicData.length; index++)
                         {
                             //if not set
-                            if(currentPlayTopographicDatas[index] == null)
+                            if(currentPlayTopographicData[index] == null)
                             {
                                 //clear all data
-                                currentPlayTopographicDatas = new TopographicDataType[0];
+                                currentPlayTopographicData = new TopographicDataType[0];
                             }
                         }
 
                         //show paths and update positions/travel
                         cameraView.showPaths = true;
-                        cameraView.updatePositions(currentSatellites, currentPlayTopographicDatas, false);
+                        cameraView.updatePositions(currentSatellites, currentPlayTopographicData, false);
                         for(index = 0; index < currentViews.length; index++)
                         {
                             cameraView.setTravel(index, currentViews[index]);

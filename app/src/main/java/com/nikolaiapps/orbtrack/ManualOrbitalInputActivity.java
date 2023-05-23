@@ -324,7 +324,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                             description = res.getString(R.string.title_element_set) + " " + numberString;
                             totalChars = 4;
                         }
-                        else if(position >= Calculations.TLE1Index.Ephem)
+                        else if(position == Calculations.TLE1Index.Ephem)
                         {
                             index = Calculations.TLE1Index.Ephem;
                             description = res.getString(R.string.text_0);
@@ -384,7 +384,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                             description = res.getString(R.string.title_last_2_digits_of_year);
                             totalChars = 2;
                         }
-                        else if(position >= Calculations.TLE1Index.Class)
+                        else if(position == Calculations.TLE1Index.Class)
                         {
                             index = Calculations.TLE1Index.Class;
                             description = res.getString(R.string.title_classification);

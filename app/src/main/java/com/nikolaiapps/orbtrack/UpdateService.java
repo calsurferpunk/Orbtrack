@@ -604,7 +604,6 @@ public class UpdateService extends NotifyService
     //Notify receiver
     public static class NotifyReceiver extends NotifyService.NotifyReceiver
     {
-        private static final int InvalidID = -1;
         private static final int UpdateSatelliteID = 1;
         private static final int UpdateListID = 2;
         private static final int RetrySatelliteID = 3;

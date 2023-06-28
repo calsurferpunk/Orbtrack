@@ -5268,7 +5268,7 @@ public abstract class Globals
             {
                 siteRequestBuilder.post(RequestBody.create(MediaType.parse(contentType), postData));
             }
-            clientBuilder = new OkHttpClient.Builder().writeTimeout(5, TimeUnit.SECONDS).readTimeout(5, TimeUnit.SECONDS);
+            clientBuilder = new OkHttpClient.Builder().writeTimeout(12, TimeUnit.SECONDS).readTimeout(12, TimeUnit.SECONDS);
             clientBuilder.cookieJar(cookies);
             if(Build.VERSION.SDK_INT <= 20)
             {

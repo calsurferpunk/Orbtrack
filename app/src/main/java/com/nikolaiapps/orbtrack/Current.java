@@ -1625,6 +1625,8 @@ public abstract class Current
         {
             showCalibrationButton.setOnClickListener(new View.OnClickListener()
             {
+                private int lastSelectedNoradId = Universe.IDs.None;
+
                 @Override
                 public void onClick(View v)
                 {
@@ -1633,7 +1635,8 @@ public abstract class Current
                     showCalibrationButton.setChecked(lensShowCalibration);
                     if(lensShowCalibration)
                     {
-                        //hide menu when starting calibration
+                        //remember selection and hide menu when starting calibration
+                        lastSelectedNoradId = cameraView.getSelectedNoradId();
                         cameraView.settingsMenu.close();
                     }
 
@@ -1648,7 +1651,10 @@ public abstract class Current
                     cameraView.showCalibration = lensShowCalibration;
                     if(!lensShowCalibration)
                     {
+                        //reset alignment status and select any previous selection
                         cameraView.resetAlignmentStatus();
+                        cameraView.selectOrbital(lastSelectedNoradId);
+                        lastSelectedNoradId = Universe.IDs.None;
                     }
                     buttonLayout.setVisibility(lensShowCalibration ? View.VISIBLE : View.GONE);
                     selectButton.setText(R.string.title_select);

@@ -54,7 +54,7 @@ public class DateInputView extends AppCompatEditText implements DatePickerDialog
     public boolean onTouchEvent(MotionEvent event)
     {
         //if for the on touch down event
-        if(event.getAction() == MotionEvent.ACTION_DOWN)
+        if(event.getAction() == MotionEvent.ACTION_UP)
         {
             performClick();
             Globals.showDateDialog(this.getContext(), currentDate, this);

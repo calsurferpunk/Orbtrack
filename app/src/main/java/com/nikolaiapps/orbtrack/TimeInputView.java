@@ -67,7 +67,7 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
     public boolean onTouchEvent(MotionEvent event)
     {
         //if for the on touch down event
-        if(event.getAction() == MotionEvent.ACTION_DOWN)
+        if(event.getAction() == MotionEvent.ACTION_UP)
         {
             Context context = this.getContext();
             FragmentManager manager;

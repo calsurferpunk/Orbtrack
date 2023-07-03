@@ -4131,6 +4131,10 @@ public abstract class Globals
                     ids[1] = R.drawable.owner_braz;
                     break;
 
+                case "vat":
+                    ids[0] = R.drawable.owner_vat;
+                    break;
+
                 case "venz":
                     ids[0] = R.drawable.owner_venz;
                     break;
@@ -4163,6 +4167,10 @@ public abstract class Globals
             //check and fix any typos
             switch(code)
             {
+                case "BGL":
+                    code = "BUL";
+                    break;
+
                 case "IRAK":
                     code = "IRAQ";
                     break;
@@ -4177,6 +4185,10 @@ public abstract class Globals
 
                 case "SRI":
                     code = "LKA";
+                    break;
+
+                case "SVK":
+                    code = "SK";
                     break;
             }
         }

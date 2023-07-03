@@ -807,11 +807,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             for(index = 0; index < currentOrbitals.length; index++)
             {
                 //remember if on selection and current orbital
+                boolean haveSelected = haveSelectedOrbital();
                 boolean currentSelected = (selectedOrbitalIndex == index);
                 Database.SatelliteData currentOrbital = currentOrbitals[index];
 
                 //if current orbital is set, look angle is set, and using orbital
-                if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelectedOrbital() || currentSelected))
+                if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
                 {
                     //remember current color, look, and travel angles
                     int currentColor = currentOrbital.database.pathColor;
@@ -826,8 +827,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         currentPaint.setStrokeWidth(indicatorThickness);
                     }
 
-                    //if current travel is set, showing paths, and not calibrating
-                    if(currentTravel != null && showPaths && !showCalibration)
+                    //if current travel is set, showing paths, not calibrating, and -non selected or on selected-
+                    if(currentTravel != null && showPaths && !showCalibration && (!haveSelected || currentSelected))
                     {
                         //remember length
                         travelLength = currentTravel.length;

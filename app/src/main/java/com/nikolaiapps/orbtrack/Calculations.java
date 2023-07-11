@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import org.json.JSONObject;
-
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -85,7 +84,6 @@ public abstract class Calculations
     static final double AU                      = 149597870.691;          //convert between km and astronomical units
     static final double EarthRadiusKM           = 6378.135;				  //earth equatorial radius in km (WGS '72)
     private static final double DaysPerYear     = 365.25;
-    private static final double LSTHoursPerDay  = 23.9344697222;
     private static final double EarthRotPerSD   = 1.00273790934;		  //earth rotations per sidereal day
     private static final double HalfPI          = (Math.PI / 2.0);
     private static final double TwoPI           = (2 * Math.PI);
@@ -171,13 +169,12 @@ public abstract class Calculations
         public double positionY;
         public double positionZ;
         public double julianDate;						//Julian date of last position update
-        public double lstHours;                         //Local sidereal time in hours
         public static final Creator<EciDataType> CREATOR = new Parcelable.Creator<EciDataType>()
         {
             @Override
             public EciDataType createFromParcel(Parcel source)
             {
-                return(new EciDataType(source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble()));
+                return(new EciDataType(source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble()));
             }
 
             @Override
@@ -189,15 +186,14 @@ public abstract class Calculations
 
         public EciDataType()
         {
-            positionX = positionY = positionZ = julianDate = lstHours = 0;
+            positionX = positionY = positionZ = julianDate = 0;
         }
-        public EciDataType(double x, double y, double z, double jd, double lstHrs)
+        public EciDataType(double x, double y, double z, double jd)
         {
             positionX = x;
             positionY = y;
             positionZ = z;
             julianDate = jd;
-            lstHours = lstHrs;
         }
         public EciDataType(EciDataType copyFrom)
         {
@@ -205,7 +201,6 @@ public abstract class Calculations
             positionY = copyFrom.positionY;
             positionZ = copyFrom.positionZ;
             julianDate = copyFrom.julianDate;
-            lstHours = copyFrom.lstHours;
         }
 
         @Override
@@ -221,7 +216,6 @@ public abstract class Calculations
             dest.writeDouble(positionY);
             dest.writeDouble(positionZ);
             dest.writeDouble(julianDate);
-            dest.writeDouble(lstHours);
         }
     }
 
@@ -576,52 +570,78 @@ public abstract class Calculations
         final double rightAscDeg;
         final double distanceKm;
 
-        PlanetDataType(int planetNumber, double julianCenturies, double obliquity, double localSiderealTime, double latitude)
+        PlanetDataType(int planetNumber, double julianDate, double latitude, double longitude)
         {
+            double rightAscHours;
+            double declinationDegs;
+            double calcHourAngleRad;
+            double julianCenturies = calcTimeJulianCent(julianDate);
             GeodeticDataType polarLocation;
             GeodeticDataType cartesianLocation;
             GeodeticDataType equatorialLocation;
             GeodeticDataType altAzLocation;
             GeodeticDataType earthCartesianLocation;
 
-            if(planetNumber == Universe.IDs.Moon)
+            switch(planetNumber)
             {
-                polarLocation = Universe.Moon.getPolarLocation(julianCenturies);
-            }
-            else
-            {
-                polarLocation = Universe.getPolarLocation(planetNumber, julianCenturies);
-            }
+                case Universe.IDs.Earth:
+                case Universe.IDs.Sun:
+                case Universe.IDs.Moon:
+                case Universe.IDs.Mars:
+                case Universe.IDs.Mercury:
+                case Universe.IDs.Venus:
+                case Universe.IDs.Jupiter:
+                case Universe.IDs.Saturn:
+                case Universe.IDs.Uranus:
+                case Universe.IDs.Neptune:
+                case Universe.IDs.Pluto:
+                    if(planetNumber == Universe.IDs.Moon)
+                    {
+                        polarLocation = Universe.Moon.getPolarLocation(julianCenturies);
+                    }
+                    else
+                    {
+                        polarLocation = Universe.getPolarLocation(planetNumber, julianCenturies);
+                    }
+                    cartesianLocation = polarToCartesian(polarLocation);
 
-            cartesianLocation = polarToCartesian(polarLocation);
-            if(planetNumber != Universe.IDs.Moon && planetNumber != Universe.IDs.Sun && planetNumber != Universe.IDs.Polaris)
-            {
-                earthCartesianLocation = polarToCartesian(Universe.getPolarLocation(Universe.IDs.Earth, julianCenturies));
-                cartesianLocation.latitude -= earthCartesianLocation.latitude;
-                cartesianLocation.longitude -= earthCartesianLocation.longitude;
-                cartesianLocation.radius -= earthCartesianLocation.radius;
-            }
+                    if(planetNumber != Universe.IDs.Moon && planetNumber != Universe.IDs.Sun)
+                    {
+                        earthCartesianLocation = polarToCartesian(Universe.getPolarLocation(Universe.IDs.Earth, julianCenturies));
+                        cartesianLocation.latitude -= earthCartesianLocation.latitude;
+                        cartesianLocation.longitude -= earthCartesianLocation.longitude;
+                        cartesianLocation.radius -= earthCartesianLocation.radius;
+                    }
 
-            if(planetNumber == Universe.IDs.Polaris)
-            {
-                distanceKm = 4.0681141e+15;
-                equatorialLocation = new GeodeticDataType(90, 0, distanceKm, 0, distanceKm);
-                altAzLocation = rotateLocation(equatorialLocation, -localSiderealTime, 2);
-                hourAngleRad = Math.atan2(-altAzLocation.longitude, altAzLocation.latitude);
-                rightAscDeg = 37.953;
-                declinationRad = Math.atan2(equatorialLocation.radius, Math.sqrt(equatorialLocation.latitude * equatorialLocation.latitude + equatorialLocation.longitude * equatorialLocation.longitude));
-            }
-            else
-            {
-                equatorialLocation = rotateLocation(cartesianLocation, Math.toRadians(obliquity), 0);
-                altAzLocation = rotateLocation(equatorialLocation, -localSiderealTime, 2);
+                    equatorialLocation = rotateLocation(cartesianLocation, Math.toRadians(calcObliquityCorrection(julianCenturies)), 0);
+                    altAzLocation = rotateLocation(equatorialLocation, -julianDateToLST(julianDate, longitude), 2);
 
-                hourAngleRad = Math.atan2(-altAzLocation.longitude, altAzLocation.latitude);
-                rightAscDeg = Math.toDegrees(Math.atan2(equatorialLocation.longitude, equatorialLocation.latitude));
-                declinationRad = Math.atan2(equatorialLocation.radius, Math.sqrt(equatorialLocation.latitude * equatorialLocation.latitude + equatorialLocation.longitude * equatorialLocation.longitude));
+                    hourAngleRad = Math.atan2(-altAzLocation.longitude, altAzLocation.latitude);
+                    rightAscDeg = Math.toDegrees(Math.atan2(equatorialLocation.longitude, equatorialLocation.latitude));
+                    declinationRad = Math.atan2(equatorialLocation.radius, Math.sqrt(equatorialLocation.latitude * equatorialLocation.latitude + equatorialLocation.longitude * equatorialLocation.longitude));
 
-                altAzLocation = rotateLocation(altAzLocation, Math.toRadians(latitude) - (HalfPI), 1);
-                distanceKm = Math.sqrt(altAzLocation.latitude * altAzLocation.latitude + altAzLocation.longitude * altAzLocation.longitude + altAzLocation.radius * altAzLocation.radius) * AU;
+                    altAzLocation = rotateLocation(altAzLocation, Math.toRadians(latitude) - (HalfPI), 1);
+                    distanceKm = Math.sqrt(altAzLocation.latitude * altAzLocation.latitude + altAzLocation.longitude * altAzLocation.longitude + altAzLocation.radius * altAzLocation.radius) * AU;
+                    break;
+
+                default:
+                    rightAscHours = 2.694166667;
+                    declinationDegs = 89.264166667;
+                    distanceKm = 4.0681141e+15;
+
+                    rightAscDeg = rightAscHours * 15;
+                    declinationRad = Math.toRadians(declinationDegs);
+                    calcHourAngleRad = julianDateToLMST(julianDate, Math.toRadians(longitude)) - Math.toRadians(rightAscDeg);
+                    if(calcHourAngleRad < 0)
+                    {
+                        calcHourAngleRad += TwoPI;
+                    }
+                    if(calcHourAngleRad > Math.PI)
+                    {
+                        calcHourAngleRad = calcHourAngleRad - TwoPI;
+                    }
+                    hourAngleRad = calcHourAngleRad;
+                    break;
             }
         }
     }
@@ -920,9 +940,9 @@ public abstract class Calculations
 
     //Returns the Local Mean Sidereal Time (LMST) in radians from the given julian date and longitude
     @SuppressWarnings("SpellCheckingInspection")
-    private static double julianDateToLMST(double julianDate, double longitude)
+    private static double julianDateToLMST(double julianDate, double longitudeRads)
     {
-        return(Math.IEEEremainder(julianDateToGMST(julianDate) + longitude, TwoPI));
+        return(Math.IEEEremainder(julianDateToGMST(julianDate) + longitudeRads, TwoPI));
     }
 
     //Returns the local sidereal time
@@ -939,12 +959,6 @@ public abstract class Calculations
         julianC = julianRel / JulianCentury;
         lstDeg = 280.46061837 + 360.98564736629 * (julianRel - julianRelInt) + 0.98564736629 * julianRelInt + Math.pow(julianC, 2) * (0.000387933 - julianC / 38710000.0);
         return(Math.toRadians(lstDeg) + Math.toRadians(longitude));
-    }
-
-    //Returns the local sidereal time in hours
-    private static double lstTimeToHours(double lstTime)
-    {
-        return((Math.toDegrees(lstTime % Calculations.TwoPI) / 360) * LSTHoursPerDay);
     }
 
     //Returns julian date century
@@ -1051,24 +1065,24 @@ public abstract class Calculations
     private static EciDataType geoToECI(GeodeticDataType geoData, double julianDate)
     {
         double theta, c, s, achcp;
-        double latitude, longitude, altitude;
+        double latitudeRads, longitudeRads, altitude;
         EciDataType eci_data = new EciDataType();
 
-        latitude = Math.toRadians(geoData.latitude);
-        longitude = Math.toRadians(geoData.longitude);
+        latitudeRads = Math.toRadians(geoData.latitude);
+        longitudeRads = Math.toRadians(geoData.longitude);
         altitude = geoData.altitudeKm;
 
         //calculate Local Mean Sidereal Time (theta)
-        theta = julianDateToLMST(julianDate, longitude);
-        c = 1.0 / Math.sqrt(1.0 + EarthFlattening * (EarthFlattening - 2.0) * Square(Math.sin(latitude)));
+        theta = julianDateToLMST(julianDate, longitudeRads);
+        c = 1.0 / Math.sqrt(1.0 + EarthFlattening * (EarthFlattening - 2.0) * Square(Math.sin(latitudeRads)));
         s = Square(1.0 - EarthFlattening) * c;
-        achcp = (EarthRadiusKM * c + altitude) * Math.cos(latitude);
+        achcp = (EarthRadiusKM * c + altitude) * Math.cos(latitudeRads);
 
         eci_data.julianDate = julianDate;
 
         eci_data.positionX = achcp * Math.cos(theta);               // km
         eci_data.positionY = achcp * Math.sin(theta);               // km
-        eci_data.positionZ = (EarthRadiusKM * s + altitude) * Math.sin(latitude);   // km
+        eci_data.positionZ = (EarthRadiusKM * s + altitude) * Math.sin(latitudeRads);   // km
         //eci_data.position_w = Math.sqrt(Square(m_pos.m_x) + Square(m_pos.m_y) + Square(m_pos.m_z));            // range, km
         return(eci_data);
     }
@@ -2574,30 +2588,18 @@ public abstract class Calculations
 
     //Updates the given satellite position and geodetic location if desired
     //note: geodetic position updated manually
-    private static void updateSatellitePosition(SatelliteObjectType satObj, ObserverType observer, double julianDate)
+    private static void updateSatellitePosition(SatelliteObjectType satObj, double julianDate)
     {
         EciNoradDataType eciNoradData = getECIPosition(satObj, DaysPassed(satObj.tle.epochJulian, julianDate));
         satObj.eci = eciNoradData.eciData;
-        satObj.eci.lstHours = lstTimeToHours(julianDateToLST(julianDate, observer.geo.longitude));
         satObj.norad = eciNoradData.noradData;
     }
 
     //Updates the given non satellite position
     private static void updateNonSatellitePosition(SatelliteObjectType nonSatObj, ObserverType observer, double julianDate)
     {
-        double oblC;
-        double localSideRealTime;
-        double julianCenturies;
-
-        localSideRealTime = julianDateToLST(julianDate, observer.geo.longitude);
-
         nonSatObj.eci.julianDate = julianDate;
-        nonSatObj.eci.lstHours = lstTimeToHours(localSideRealTime);
-
-        julianCenturies = calcTimeJulianCent(nonSatObj.eci.julianDate);
-        oblC = calcObliquityCorrection(julianCenturies);
-
-        nonSatObj.planetData = new PlanetDataType(nonSatObj.getSatelliteNum(), julianCenturies, oblC, localSideRealTime, observer.geo.latitude);
+        nonSatObj.planetData = new PlanetDataType(nonSatObj.getSatelliteNum(), julianDate, observer.geo.latitude, observer.geo.longitude);
     }
 
     //Updates the given orbital position
@@ -2631,7 +2633,7 @@ public abstract class Calculations
         }
         else
         {
-            updateSatellitePosition(orbital, observer, julianDate);
+            updateSatellitePosition(orbital, julianDate);
 
             if(updateGeo)
             {

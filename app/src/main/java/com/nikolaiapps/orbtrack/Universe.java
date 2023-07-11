@@ -1821,10 +1821,6 @@ public abstract class Universe
                 terms = (calcLat ? Neptune.LatTerms : calcLon ? Neptune.LonTerms : Neptune.RadTerms);
                 break;
 
-            case IDs.Polaris:
-                terms = new VSOPData[0][0];
-                break;
-
             default:
             case IDs.Sun:
             case IDs.Earth:
@@ -1876,18 +1872,9 @@ public abstract class Universe
         else
         {
             polarData = new Calculations.GeodeticDataType();
-            if(planetNumber == IDs.Polaris)
-            {
-                polarData.latitude = 90;
-                polarData.longitude = 0;
-                polarData.radius = 0;
-            }
-            else
-            {
-                polarData.latitude = getPolarCoordinate(planetNumber, julianCenturies, true, false);
-                polarData.longitude = getPolarCoordinate(planetNumber, julianCenturies, false, true);
-                polarData.radius = getPolarCoordinate(planetNumber, julianCenturies, false, false);
-            }
+            polarData.latitude = getPolarCoordinate(planetNumber, julianCenturies, true, false);
+            polarData.longitude = getPolarCoordinate(planetNumber, julianCenturies, false, true);
+            polarData.radius = getPolarCoordinate(planetNumber, julianCenturies, false, false);
         }
 
         return(polarData);

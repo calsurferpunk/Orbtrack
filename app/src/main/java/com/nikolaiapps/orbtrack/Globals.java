@@ -3504,7 +3504,7 @@ public abstract class Globals
     //Gets an orbital icon ID
     public static int getOrbitalIconID(Context context, int satelliteNum, byte orbitalType)
     {
-        int iconId = -1;
+        int iconId;
         boolean isMoozarov;
 
         if(satelliteNum > 0)
@@ -3517,6 +3517,10 @@ public abstract class Globals
 
                 case Database.OrbitalType.Debris:
                     iconId = R.drawable.orbital_debris;
+                    break;
+
+                default:
+                    iconId = Settings.getSatelliteIconImageId(context);
                     break;
             }
         }
@@ -3536,10 +3540,6 @@ public abstract class Globals
 
                 case Universe.IDs.Pluto:
                     iconId = (isMoozarov ? R.drawable.orbital_pluto_moozarov : R.drawable.orbital_pluto_freepik);
-                    break;
-
-                case Universe.IDs.Polaris:
-                    iconId = (isMoozarov ? R.drawable.orbital_star_moozarov : R.drawable.orbital_star_freepik);
                     break;
 
                 case Universe.IDs.Venus:
@@ -3569,12 +3569,11 @@ public abstract class Globals
                 case Universe.IDs.Uranus:
                     iconId = (isMoozarov ? R.drawable.orbital_uranus_moozarov : R.drawable.orbital_uranus_freepik);
                     break;
-            }
-        }
 
-        if(iconId == -1)
-        {
-            iconId = Settings.getSatelliteIconImageId(context);
+                default:
+                    iconId = (isMoozarov ? R.drawable.orbital_star_moozarov : R.drawable.orbital_star_freepik);
+                    break;
+            }
         }
 
         return(iconId);

@@ -88,6 +88,7 @@ import android.view.LayoutInflater;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -749,9 +750,10 @@ public abstract class Globals
     }
 
     //Shows a confirm dialog
-    public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
+    public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, int heightPx, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
     {
         ImageView iconView;
+        Window dialogWindow;
         AlertDialog confirmDialog;
         AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(context, getDialogThemeID(context));
 
@@ -782,6 +784,12 @@ public abstract class Globals
         confirmDialog = confirmBuilder.create();
         confirmDialog.show();
 
+        if(heightPx != WindowManager.LayoutParams.MATCH_PARENT)
+        {
+            dialogWindow = confirmDialog.getWindow();
+            dialogWindow.setLayout(dialogWindow.getAttributes().width, heightPx);
+        }
+
         iconView = confirmDialog.findViewById(android.R.id.icon);
         if(iconView != null)
         {
@@ -797,27 +805,35 @@ public abstract class Globals
 
         return(new Button[]{confirmDialog.getButton(AlertDialog.BUTTON_POSITIVE), confirmDialog.getButton(AlertDialog.BUTTON_NEUTRAL), confirmDialog.getButton(AlertDialog.BUTTON_NEGATIVE)});
     }
+    public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
+    {
+        return(showConfirmDialog(context, icon, dialogView, WindowManager.LayoutParams.MATCH_PARENT, titleText, messageText, positiveText, negativeText, neutralText, canCancel, positiveListener, negativeListener, neutralListener, dismissListener));
+    }
     public static void showConfirmDialog(Context context, Drawable icon, String titleText, String messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnDismissListener dismissListener)
     {
         showConfirmDialog(context, icon, null, titleText, messageText, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, dismissListener);
     }
     public static void showConfirmDialog(Context context, String titleText, CharSequence messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
     {
-        int padding = (int)dpToPixels(context, 15);
+        float[] dpPixels = dpsToPixels(context, 15, 5, 320);
+        int viewPadding = (int)dpPixels[0];
+        int scrollPadding = (int)dpPixels[1];
         ScrollView messageScroll = new ScrollView(context);
         TextView messageView = new TextView(context);
         ViewGroup.LayoutParams messageParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
 
         messageView.setLayoutParams(messageParams);
-        messageView.setPadding(padding, padding, padding, padding);
+        messageView.setPadding(viewPadding, viewPadding, viewPadding, viewPadding);
         messageView.setMovementMethod(LinkMovementMethod.getInstance());
+        messageView.setBackgroundColor(resolveColorID(context, android.R.attr.colorBackground));
         messageView.setText(messageText);
         messageView.setTextColor(resolveColorID(context, android.R.attr.textColor));
 
+        messageScroll.setPadding(scrollPadding, scrollPadding, scrollPadding, scrollPadding);
         messageScroll.setScrollbarFadingEnabled(false);
         messageScroll.addView(messageView);
 
-        showConfirmDialog(context, null, messageScroll, titleText, null, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, null);
+        showConfirmDialog(context, null, messageScroll, (int)dpPixels[2], titleText, null, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, null);
     }
     public static void showConfirmDialog(Context context, String titleText, String messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnDismissListener dismissListener)
     {

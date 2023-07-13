@@ -549,6 +549,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final Paint iconPaint;
     private final Paint currentPaint;
     private Rect selectedArea;
+    private RectF firstArea;
+    private RectF previousArea;
     private final Bitmap arrowDirection;
     private final Bitmap arrowDoubleDirection;
     private final Bitmap compassDirection;
@@ -600,6 +602,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         indicator = Settings.getIndicator(context);
         indicatorPxRadius = Globals.dpToPixels(context, 36);
         resetAlignmentStatus();
+        firstArea = new RectF();
+        previousArea = new RectF();
         azIndex = elIndex = pathDivisions = 0;
         azUserOffset = Settings.getLensAzimuthUserOffset(context);
         azDeclination = 0;
@@ -859,6 +863,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         //if there are travel views
                         if(travelLength > 0)
                         {
+                            //reset first and previous areas
+                            firstArea.setEmpty();
+                            previousArea.setEmpty();
+
                             //setup paint
                             currentPaint.setStyle(Paint.Style.FILL);
 
@@ -870,12 +878,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             for(index2 = 0; index2 < travelLength; index2++)
                             {
                                 //remember current view and status
+                                boolean onFirst = (index2 == 0);
                                 CalculateViewsTask.OrbitalView currentView = currentTravel[index2];
                                 currentAzDelta = Globals.degreeDistance(currentAzDeg, currentView.azimuth);
                                 currentElDelta = Globals.degreeDistance(currentElDeg, currentView.elevation);
 
                                 //if on first
-                                if(index2 == 0)
+                                if(onFirst)
                                 {
                                     //set last point
                                     azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
@@ -891,7 +900,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                 currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
 
                                 //if not on first and not too long to draw
-                                if(index2 != 0 && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
+                                if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
                                 {
                                     //draw line between last and current view
                                     currentPaint.setColor(currentColor);
@@ -899,7 +908,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                 }
 
                                 //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
-                                if(index2 == 0 || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
+                                if(onFirst || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
                                 {
                                     RectF bgArea;
 
@@ -916,22 +925,34 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     //get background area
                                     bgArea = new RectF(currentView.timeArea.left - textPadding, currentView.timeArea.top - textOffset - textPadding, currentView.timeArea.right + textPadding, (currentView.timeArea.bottom - textOffset) + textPadding);
 
-                                    //draw text background
-                                    currentPaint.setColor(textBgColor);
-                                    canvas.drawRect(bgArea, currentPaint);
+                                    //if -first area empty or not intersecting with current- and -previous area is empty or not intersecting with current-
+                                    if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
+                                    {
+                                        //draw text background
+                                        currentPaint.setColor(textBgColor);
+                                        canvas.drawRect(bgArea, currentPaint);
 
-                                    //draw text border
-                                    currentPaint.setColor(currentColor);
-                                    currentPaint.setStyle(Paint.Style.STROKE);
-                                    canvas.drawRect(bgArea, currentPaint);
+                                        //draw text border
+                                        currentPaint.setColor(currentColor);
+                                        currentPaint.setStyle(Paint.Style.STROKE);
+                                        canvas.drawRect(bgArea, currentPaint);
 
-                                    //draw text
-                                    currentPaint.setColor(textColor);
-                                    currentPaint.setStyle(Paint.Style.FILL);
-                                    canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
+                                        //draw text
+                                        currentPaint.setColor(textColor);
+                                        currentPaint.setStyle(Paint.Style.FILL);
+                                        canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
 
-                                    //update starting julian date
-                                    julianDateStart = currentView.julianDate;
+                                        //remember previous area and starting julian date
+                                        previousArea.set(bgArea);
+                                        julianDateStart = currentView.julianDate;
+                                    }
+
+                                    //if were on the first
+                                    if(onFirst)
+                                    {
+                                        //remember first area
+                                        firstArea.set(bgArea);
+                                    }
                                 }
                             }
                         }

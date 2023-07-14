@@ -27,6 +27,8 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
@@ -752,6 +754,7 @@ public abstract class Globals
     //Shows a confirm dialog
     public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, int heightPx, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
     {
+        boolean sdkAtLeast21 = (Build.VERSION.SDK_INT >= 21);
         ImageView iconView;
         Window dialogWindow;
         AlertDialog confirmDialog;
@@ -791,9 +794,9 @@ public abstract class Globals
         }
 
         iconView = confirmDialog.findViewById(android.R.id.icon);
-        if(iconView != null)
+        if(iconView != null && !(sdkAtLeast21 && icon instanceof VectorDrawable) && !(icon instanceof VectorDrawableCompat))
         {
-            if(Build.VERSION.SDK_INT >= 21)
+            if(sdkAtLeast21)
             {
                 iconView.setImageTintList(null);
             }
@@ -3034,10 +3037,14 @@ public abstract class Globals
     //Gets a drawable with optional tint
     public static Drawable getDrawable(Context context, int resId, int tintColor, boolean colorIsId)
     {
+        int color;
         Drawable drawableItem = (resId > 0 ? tryGetDrawable(context, resId) : null);
+
         if(drawableItem != null && tintColor != Color.TRANSPARENT)
         {
-            DrawableCompat.setTint(DrawableCompat.wrap(drawableItem).mutate(), (colorIsId ? ResourcesCompat.getColor(context.getResources(), tintColor, null) : tintColor));
+            color = (colorIsId ? ResourcesCompat.getColor(context.getResources(), tintColor, null) : tintColor);
+            DrawableCompat.setTint(DrawableCompat.wrap(drawableItem).mutate(), color);
+            drawableItem.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
         }
 
         return(drawableItem);

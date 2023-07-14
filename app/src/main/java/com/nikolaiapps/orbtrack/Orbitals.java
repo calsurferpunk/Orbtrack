@@ -413,7 +413,7 @@ public abstract class Orbitals
             if(!loadingItems)
             {
                 //set displays
-                itemIcon = Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType);
+                itemIcon = Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType, (Settings.getDarkTheme(currentContext) ? R.color.white : R.color.black));
                 itemHolder.itemImage.setImageDrawable(itemIcon);
                 itemHolder.itemText.setText(currentItem.text);
                 if(itemHolder.tleAgeLayout != null)

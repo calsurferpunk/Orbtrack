@@ -510,6 +510,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int compassWidth;
     private final int indicator;
     private final int iconLength;
+    private final int iconHalfLength;
+    private final int iconScaleOffset;
     private final int compassHeight;
     private int compassBorderWidth;
     private final int textColor;
@@ -549,6 +551,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final Paint iconPaint;
     private final Paint currentPaint;
     private Rect selectedArea;
+    private final Rect iconArea;
+    private final Rect iconScaledArea;
     private RectF firstArea;
     private RectF previousArea;
     private final Bitmap arrowDirection;
@@ -597,11 +601,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
         iconLength = (int)dpPixels[4];
+        iconHalfLength = (iconLength / 2);
+        iconScaleOffset = (iconHalfLength / 2);
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
         indicator = Settings.getIndicator(context);
         indicatorPxRadius = Globals.dpToPixels(context, 36);
         resetAlignmentStatus();
+        iconArea = new Rect();
+        iconScaledArea = new Rect();
         firstArea = new RectF();
         previousArea = new RectF();
         azIndex = elIndex = pathDivisions = 0;
@@ -1169,7 +1177,16 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     }
 
                     //draw image
-                    canvas.drawBitmap(indicatorIcon.image, centerX - (iconLength / 2f), centerY - (iconLength / 2f), iconPaint);
+                    iconArea.set((int)(centerX - iconHalfLength), (int)(centerY - iconHalfLength), (int)(centerX + iconHalfLength), (int)(centerY + iconHalfLength));
+                    if(outsideArea)
+                    {
+                        iconScaledArea.set(iconArea.left + iconScaleOffset, iconArea.top + iconScaleOffset, iconArea.right - iconScaleOffset, iconArea.bottom - iconScaleOffset);
+                        canvas.drawBitmap(indicatorIcon.image, null, iconScaledArea, iconPaint);
+                    }
+                    else
+                    {
+                        canvas.drawBitmap(indicatorIcon.image, iconArea.left, iconArea.top, iconPaint);
+                    }
                     break;
                 }
                 //else fall through

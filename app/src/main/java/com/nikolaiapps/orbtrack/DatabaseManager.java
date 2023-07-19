@@ -49,17 +49,6 @@ public abstract class DatabaseManager
         }
     }
 
-    //Handle any updates
-    public static synchronized void handleUpdates(Context context)
-    {
-        //if database has been loaded
-        if(db != null)
-        {
-            //handle any updates
-            Database.handleUpdates(context);
-        }
-    }
-
     public static synchronized void close()
     {
         if(db != null)

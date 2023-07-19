@@ -2437,6 +2437,22 @@ public abstract class Globals
             return(Locale.getDefault().getLanguage());
         }
     }
+    public static byte getLanguageIndex(Context context)
+    {
+        //get language
+        String language = getLanguage(context);
+
+        //if Spanish
+        if(language.equals(Languages.Spanish))
+        {
+            return(Database.LanguageIndex.Spanish);
+        }
+        //else default to English
+        else
+        {
+            return(Database.LanguageIndex.English);
+        }
+    }
 
     //Gets a number as a string
     public static String getNumberString(double number, int decimalPlaces, boolean allowCommas)

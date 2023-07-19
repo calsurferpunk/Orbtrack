@@ -81,12 +81,12 @@ public abstract class Universe
         static final int Invalid = Integer.MIN_VALUE;
     }
 
-    public static String getName(Context context, int planetID)
+    public static String getName(Context context, int id)
     {
         boolean usingRes = (context != null);
         Resources res = (usingRes ? context.getResources() : null);
 
-        switch(planetID)
+        switch(id)
         {
             case IDs.Moon:
                 return(usingRes ? res.getString(R.string.title_moon) : "Moon");
@@ -118,11 +118,8 @@ public abstract class Universe
             case IDs.Pluto:
                 return(usingRes ? res.getString(R.string.title_pluto) : "Pluto");
 
-            case IDs.Polaris:
-                return(usingRes ? res.getString(R.string.title_polaris) : "Polaris");
-
             default:
-                return("");
+                return(id < 0 ? (usingRes ? Database.LocaleStars.getName(context, id) : Database.LocaleStars.getEnglishName(id)) : "");
         }
     }
 

@@ -1348,7 +1348,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         locationReceiver = createLocationReceiver(locationReceiver);
 
         //handle any updates
-        DatabaseManager.handleUpdates(this);
+        Database.handleUpdates(this);
 
         //load orbitals
         loadOrbitals(this, mainDrawerLayout);

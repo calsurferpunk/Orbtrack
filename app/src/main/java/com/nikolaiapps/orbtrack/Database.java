@@ -49,6 +49,10 @@ public class Database extends SQLiteOpenHelper
         static final String TLEDate = "tleDate";
         static final String GP = "gp";
         static final String UpdateDate = "updateDate";
+        static final String RightAscensionHours = "rightAscensionHours";
+        static final String DeclinationDegs = "declinationDegs";
+        static final String Magntitude = "magnitude";
+        static final String DistanceLightYears = "distanceLightYears";
         static final String PathColor = "pathColor";
         static final String OrbitalType = "orbitalType";
         static final String IsSelected = "isSelected";
@@ -57,6 +61,7 @@ public class Database extends SQLiteOpenHelper
     static abstract class Tables
     {
         static final String Orbital = "[Orbital]";
+        static final String Stars = "[Stars]";
         static final String Location = "[Location]";
         static final String LocationName = "[LocationName]";
         static final String TimeZone = "[TimeZone]";
@@ -91,16 +96,16 @@ public class Database extends SQLiteOpenHelper
     {
         static final byte String = 0;
         static final byte Double = 1;
+        static final byte None = Byte.MAX_VALUE;
     }
 
-    private static abstract class LanguageIndex
+    public static abstract class LanguageIndex
     {
         static final byte English = 0;
         static final byte Spanish = 1;
         static final byte LanguageCount = 2;
     }
 
-    @SuppressWarnings("SpellCheckingInspection")
     private static abstract class TLELines
     {
         static final String ISSZarya1 = "1 25544U 98067A   23184.70990191  .00010129  00000-0  18119-3 0  9990";
@@ -108,8 +113,147 @@ public class Database extends SQLiteOpenHelper
         static final long ISSZaryaDate = 1688423100541L;
     }
 
-    @SuppressWarnings("SpellCheckingInspection")
     private static final int ISS_ZARYA_NORAD_ID = 25544;
+
+    private static final int STARS_FILE_COUNT = 1;
+    private static final int STARS_FILE_MIN_COLUMNS = 2;
+    private static final int STARS_FILE_FULL_COLUMNS = 6;
+    private static final int STARS_FILE_1_ROWS = 0;
+    private static final int STARS_FILE_TOTAL_ROWS = 0;
+    private static final String STARS_FILE_SEPARATOR = "[|]";
+
+    public static abstract class LocaleStars
+    {
+        private static final ArrayList<Integer> noradId = new ArrayList<>(0);
+        private static final ArrayList<ArrayList<String>> starNames = new ArrayList<>(LanguageIndex.LanguageCount);
+
+        //Initializes data
+        public static void initData(Context context)
+        {
+            int fileId;
+            int fileNumber;
+            int languageIndex;
+            String line;
+            BufferedReader file;
+            Resources res = context.getResources();
+
+            //clear any existing
+            noradId.clear();
+            starNames.clear();
+
+             //go through each stars file
+            for(languageIndex = 0; languageIndex < LanguageIndex.LanguageCount; languageIndex++)
+            {
+                ArrayList<String> nameList = new ArrayList<>(0);
+
+                //go through each file number
+                for(fileNumber = 1; fileNumber <= STARS_FILE_COUNT; fileNumber++)
+                {
+                    //open stars file
+                    switch(languageIndex)
+                    {
+                        case LanguageIndex.Spanish:
+                            //noinspection SwitchStatementWithTooFewBranches
+                            switch(fileNumber)
+                            {
+                                default:
+                                case 1:
+                                    fileId = R.raw.stars_01_es;
+                                    break;
+                            }
+                            break;
+
+                        default:
+                        case LanguageIndex.English:
+                            //noinspection SwitchStatementWithTooFewBranches
+                            switch(fileNumber)
+                            {
+                                default:
+                                case 1:
+                                    fileId = R.raw.stars_01_en;
+                                    break;
+                            }
+                            break;
+                    }
+                    file = new BufferedReader(new InputStreamReader(res.openRawResource(fileId)));
+                    try
+                    {
+                        //while there are lines to read
+                        while((line = file.readLine()) != null)
+                        {
+                            //split columns
+                            String[] columns = line.split(STARS_FILE_SEPARATOR);
+
+                            //if have at least minimum columns
+                            if(columns.length >= STARS_FILE_MIN_COLUMNS)
+                            {
+                                //add current ID and name
+                                if(languageIndex == 0)
+                                {
+                                    noradId.add(Integer.valueOf(columns[0]));
+                                }
+                                nameList.add(columns[1]);
+                            }
+                        }
+                        //close file
+                        file.close();
+                    }
+                    catch(IOException ex)
+                    {
+                        //do nothing
+                    }
+                }
+
+                //add names
+                starNames.add(nameList);
+            }
+        }
+
+        //Gets the name for the given language
+        private static String getName(int id, byte languageIndex)
+        {
+            int index;
+            String name = null;
+
+            //if ID is in list
+            index = noradId.indexOf(id);
+            if(index >= 0)
+            {
+                //get name for ID and language
+                name = starNames.get(languageIndex).get(index);
+
+                //if unknown and not English
+                if(name.equals("?") && languageIndex != LanguageIndex.English)
+                {
+                    //default to English
+                    name = starNames.get(LanguageIndex.English).get(index);
+                }
+            }
+
+            //return name
+            return(name);
+        }
+        public static String getName(Context context, int id)
+        {
+            return(getName(id, Globals.getLanguageIndex(context)));
+        }
+        public static String getEnglishName(int id)
+        {
+            return(getName(id, LanguageIndex.English));
+        }
+
+        //Get norad IDs
+        public static ArrayList<Integer> getNoradIds()
+        {
+            return(noradId);
+        }
+
+        //Returns if have data
+        public static boolean haveData()
+        {
+            return(noradId.size() > 0);
+        }
+    }
 
     private static final int INFO_FILE_COLUMNS = 2;
     private static final int INFO_FILE_ROWS = 11;
@@ -186,30 +330,14 @@ public class Database extends SQLiteOpenHelper
         public static String getInformation(Context context, int id)
         {
             int index;
-            byte languageIndex;
             String info = null;
-            String language;
 
             //if ID is in list
             index = noradId.indexOf(id);
             if(index >= 0)
             {
-                //get language
-                language = Globals.getLanguage(context);
-
-                //if Spanish
-                if(language.equals(Globals.Languages.Spanish))
-                {
-                    languageIndex = LanguageIndex.Spanish;
-                }
-                //else default to English
-                else
-                {
-                    languageIndex = LanguageIndex.English;
-                }
-
                 //get info for ID and language
-                info = languageInfo.get(languageIndex).get(index);
+                info = languageInfo.get(Globals.getLanguageIndex(context)).get(index);
             }
 
             //return information
@@ -300,7 +428,6 @@ public class Database extends SQLiteOpenHelper
             int index;
             byte languageIndex;
             String name = null;
-            String language;
 
             //if no code set
             if(code == null)
@@ -314,18 +441,7 @@ public class Database extends SQLiteOpenHelper
             if(index >= 0)
             {
                 //get language
-                language = Globals.getLanguage(context);
-
-                //if Spanish
-                if(language.equals(Globals.Languages.Spanish))
-                {
-                    languageIndex = LanguageIndex.Spanish;
-                }
-                //else default to English
-                else
-                {
-                    languageIndex = LanguageIndex.English;
-                }
+                languageIndex = Globals.getLanguageIndex(context);
 
                 //get info for code and language
                 name = languageName.get(languageIndex).get(index);
@@ -880,6 +996,10 @@ public class Database extends SQLiteOpenHelper
         public long tleDateMs;
         public final long updateDateMs;
         public final long launchDateMs;
+        public final double rightAscensionHours;
+        public final double declinationDegs;
+        public final double magnitude;
+        public final double distanceLightYears;
         public int pathColor;
         public final byte orbitalType;
         public final boolean tleIsAccurate;
@@ -895,7 +1015,7 @@ public class Database extends SQLiteOpenHelper
                     bundle = new Bundle();
                 }
 
-                return(new DatabaseSatellite(bundle.getString(ParamTypes.Name), bundle.getString(ParamTypes.UserName), bundle.getInt(ParamTypes.Norad), bundle.getString(ParamTypes.OwnerCode), bundle.getString(ParamTypes.OwnerName), bundle.getLong(ParamTypes.LaunchDate), bundle.getString(ParamTypes.TLELine1), bundle.getString(ParamTypes.TLELine2), bundle.getLong(ParamTypes.TLEDate), bundle.getString(ParamTypes.GP), bundle.getLong(ParamTypes.UpdateDate), bundle.getInt(ParamTypes.PathColor), bundle.getByte(ParamTypes.OrbitalType), bundle.getBoolean(ParamTypes.IsSelected)));
+                return(new DatabaseSatellite(bundle.getString(ParamTypes.Name), bundle.getString(ParamTypes.UserName), bundle.getInt(ParamTypes.Norad), bundle.getString(ParamTypes.OwnerCode), bundle.getString(ParamTypes.OwnerName), bundle.getLong(ParamTypes.LaunchDate), bundle.getString(ParamTypes.TLELine1), bundle.getString(ParamTypes.TLELine2), bundle.getLong(ParamTypes.TLEDate), bundle.getString(ParamTypes.GP), bundle.getLong(ParamTypes.UpdateDate), bundle.getDouble(ParamTypes.RightAscensionHours), bundle.getDouble(ParamTypes.DeclinationDegs), bundle.getDouble(ParamTypes.Magntitude), bundle.getDouble(ParamTypes.DistanceLightYears), bundle.getInt(ParamTypes.PathColor), bundle.getByte(ParamTypes.OrbitalType), bundle.getBoolean(ParamTypes.IsSelected)));
             }
 
             @Override
@@ -905,7 +1025,7 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String nm, String uNm, int nrd, String ownerCode, String ownerName, long launchDate, String line1, String line2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbType, boolean selected)
+        public DatabaseSatellite(String nm, String uNm, int nrd, String ownerCode, String ownerName, long launchDate, String line1, String line2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbType, boolean selected)
         {
             this.name = nm;
             this.userName = (uNm != null ? uNm : "");
@@ -926,6 +1046,10 @@ public class Database extends SQLiteOpenHelper
             }
             this.tleDateMs = tleDateMs;
             this.updateDateMs = updateDateMs;
+            this.rightAscensionHours = rightAscensionHours;
+            this.declinationDegs = declinationDegs;
+            this.magnitude = magnitude;
+            this.distanceLightYears = distanceLightYears;
             this.pathColor = pathColor;
             this.orbitalType = orbType;
             this.isSelected = selected;
@@ -937,6 +1061,10 @@ public class Database extends SQLiteOpenHelper
             }
 
             this.tleIsAccurate = Globals.getTLEIsAccurate(this.tleDateMs);
+        }
+        public DatabaseSatellite(String nm, String uNm, int nrd, String ownerCode, String ownerName, long launchDate, String line1, String line2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbType, boolean selected)
+        {
+            this(nm, uNm, nrd, ownerCode, ownerName, launchDate, line1, line2, tleDateMs, gp, updateDateMs, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, pathColor, orbType, selected);
         }
         public DatabaseSatellite(String nm, int nrd, String ownCd, long launchDate, byte orbType)
         {
@@ -1002,6 +1130,10 @@ public class Database extends SQLiteOpenHelper
             bundle.putLong(ParamTypes.TLEDate, tleDateMs);
             bundle.putString(ParamTypes.GP, gp);
             bundle.putLong(ParamTypes.UpdateDate, updateDateMs);
+            bundle.putDouble(ParamTypes.RightAscensionHours, rightAscensionHours);
+            bundle.putDouble(ParamTypes.DeclinationDegs, declinationDegs);
+            bundle.putDouble(ParamTypes.Magntitude, magnitude);
+            bundle.putDouble(ParamTypes.DistanceLightYears, distanceLightYears);
             bundle.putInt(ParamTypes.PathColor, pathColor);
             bundle.putByte(ParamTypes.OrbitalType, orbitalType);
             bundle.putBoolean(ParamTypes.IsSelected, isSelected);
@@ -1140,7 +1272,7 @@ public class Database extends SQLiteOpenHelper
     private static final int MAX_INFO_LENGTH = 5000;
     private static final int MAX_LANGUAGE_LENGTH = 10;
 
-    private static final int DB_VERSION = 32;
+    private static final int DB_VERSION = 33;
     private static final String DB_NAME = "OrbTrack.DB";
     private static UpdateStatusType updateStatus = null;
 
@@ -1151,6 +1283,10 @@ public class Database extends SQLiteOpenHelper
         super(context, DB_NAME, null, DB_VERSION);
 
         //init data
+        if(!LocaleStars.haveData())
+        {
+            LocaleStars.initData(context);
+        }
         if(!LocaleOwner.haveData())
         {
             LocaleOwner.initData(context);
@@ -1167,10 +1303,11 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Sets up table in database with initial data
-    private void initTable(SQLiteDatabase db, Resources res, String tableName, String tableValues, Object[] sqlBindConstants,  @NonNull byte[] sqlBindTypes, int fileId, String fileSeparator, int rowCount, int columnCount, int progressTitleId)
+    private static void initTable(Database instance, SQLiteDatabase db, Resources res, String tableName, String tableValues, Object[] sqlBindConstants,  @NonNull byte[] sqlBindTypes, Integer[] fileIds, String fileSeparator, int rowTotalCount, int columnCount, int progressTitleId)
     {
         int index = 0;
         int bindIndex;
+        int fileIndex;
         int currentColumn;
         int pendingRows = 0;
         boolean usingConstant;
@@ -1178,97 +1315,119 @@ public class Database extends SQLiteOpenHelper
         SQLiteStatement sqlStatement = db.compileStatement("REPLACE INTO " + tableName + " " + tableValues);
         String[] columns;
 
-        //open file
-        BufferedReader file = new BufferedReader(new InputStreamReader(res.openRawResource(fileId)));
-        try
+        //go through each file
+        for(fileIndex = 0; fileIndex < fileIds.length; fileIndex++)
         {
-            //while there are lines to read
-            while((line = file.readLine()) != null)
+            //open file
+            BufferedReader file = new BufferedReader(new InputStreamReader(res.openRawResource(fileIds[fileIndex])));
+            try
             {
-                //split columns
-                columns = line.split(fileSeparator);
-
-                //if valid number of columns
-                if(columns.length == columnCount)
+                //while there are lines to read
+                while((line = file.readLine()) != null)
                 {
-                    //if starting over
-                    if(pendingRows == 0)
-                    {
-                        //begin
-                        db.beginTransaction();
-                    }
+                    int bindIndexOffset = 0;
 
-                    //add bind values
-                    currentColumn = 0;
-                    sqlStatement.clearBindings();
-                    for(bindIndex = 0; bindIndex < sqlBindTypes.length; bindIndex++)
-                    {
-                        //check if using constant
-                        usingConstant = (sqlBindConstants != null && sqlBindConstants[bindIndex] != null);
+                    //split columns
+                    columns = line.split(fileSeparator);
 
-                        //handle based on type
-                        switch(sqlBindTypes[bindIndex])
+                    //if valid number of columns
+                    if(columns.length == columnCount)
+                    {
+                        //if starting over
+                        if(pendingRows == 0)
                         {
-                            case SQLBindType.Double:
-                                sqlStatement.bindDouble(bindIndex + 1, (usingConstant ? (Double)sqlBindConstants[bindIndex] : Double.valueOf(columns[currentColumn])));
-                                break;
-
-                            case SQLBindType.String:
-                                sqlStatement.bindString(bindIndex + 1, (usingConstant ? (String)sqlBindConstants[bindIndex] : columns[currentColumn]));
-                                break;
+                            //begin
+                            db.beginTransaction();
                         }
 
-                        //if didn't use constant
-                        if(!usingConstant)
+                        //add bind values
+                        currentColumn = 0;
+                        sqlStatement.clearBindings();
+                        for(bindIndex = 0; bindIndex < sqlBindTypes.length; bindIndex++)
                         {
-                            //go to next column
-                            currentColumn++;
+                            byte currentBindType = sqlBindTypes[bindIndex];
+
+                            //check if using constant
+                            usingConstant = (sqlBindConstants != null && sqlBindConstants[bindIndex] != null);
+
+                            //if using current bind type
+                            if(currentBindType != SQLBindType.None)
+                            {
+                                //handle based on current bind type
+                                switch(currentBindType)
+                                {
+                                    case SQLBindType.Double:
+                                        sqlStatement.bindDouble(bindIndex + bindIndexOffset + 1, (usingConstant ? (Double)sqlBindConstants[bindIndex] : Double.valueOf(columns[currentColumn])));
+                                        break;
+
+                                    case SQLBindType.String:
+                                        sqlStatement.bindString(bindIndex + bindIndexOffset + 1, (usingConstant ? (String)sqlBindConstants[bindIndex] : columns[currentColumn]));
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                //don't count unused
+                                bindIndexOffset--;
+                            }
+
+                            //if didn't use constant
+                            if(!usingConstant)
+                            {
+                                //go to next column
+                                currentColumn++;
+                            }
                         }
-                    }
-                    sqlStatement.executeInsert();
+                        sqlStatement.executeInsert();
 
-                    //update progress
-                    sendProgress(Globals.ProgressType.Running, res.getString(progressTitleId), index, rowCount);
-                    index++;
+                        //update progress
+                        if(instance != null)
+                        {
+                            instance.sendProgress(Globals.ProgressType.Running, res.getString(progressTitleId), index, rowTotalCount);
+                        }
+                        index++;
 
-                    //update pending rows
-                    pendingRows++;
-                    if(pendingRows >= 500)
-                    {
-                        //finish
-                        db.setTransactionSuccessful();
-                        db.endTransaction();
-                        pendingRows = 0;
+                        //update pending rows
+                        pendingRows++;
+                        if(pendingRows >= 500)
+                        {
+                            //finish
+                            db.setTransactionSuccessful();
+                            db.endTransaction();
+                            pendingRows = 0;
+                        }
                     }
                 }
-            }
 
-            //if there are still pending rows
-            if(pendingRows > 0)
+                //if there are still pending rows
+                if(pendingRows > 0)
+                {
+                    //finish
+                    db.setTransactionSuccessful();
+                    db.endTransaction();
+                }
+            }
+            catch(IOException ex)
             {
-                //finish
-                db.setTransactionSuccessful();
-                db.endTransaction();
+                //do nothing
             }
         }
-        catch(IOException ex)
-        {
-            //do nothing
-        }
+    }
+    private void initTable(SQLiteDatabase db, Resources res, String tableName, String tableValues, Object[] sqlBindConstants,  @NonNull byte[] sqlBindTypes, int fileId, String fileSeparator, int rowCount, int columnCount, int progressTitleId)
+    {
+        initTable(this, db, res, tableName, tableValues, sqlBindConstants, sqlBindTypes, new Integer[]{fileId}, fileSeparator, rowCount, columnCount, progressTitleId);
     }
 
     //Adds indexing to tables
-    private static void initIndexing(SQLiteDatabase db)
+    private static void initIndexing(SQLiteDatabase db, String... tables)
     {
-        String[] tables = new String[]{Tables.Orbital, Tables.Location, Tables.LocationName, Tables.TimeZone, Tables.Altitude, Tables.MasterSatellite, Tables.Owner, Tables.Category, Tables.SatelliteCategory, Tables.Information};
-
         //go through each table
         for(String currentTable : tables)
         {
             try
             {
                 //add index to table
-                db.execSQL("CREATE INDEX [" + currentTable.replace("[", "").replace("]", "") + "_Index] ON " + currentTable + "([ID])");
+                db.execSQL("CREATE INDEX IF NOT EXISTS [" + currentTable.replace("[", "").replace("]", "") + "_Index] ON " + currentTable + "([ID])");
             }
             catch(Exception ex)
             {
@@ -1276,9 +1435,53 @@ public class Database extends SQLiteOpenHelper
             }
         }
     }
+    private static void initIndexing(SQLiteDatabase db)
+    {
+        initIndexing(db, Tables.Orbital, Tables.Stars, Tables.Location, Tables.LocationName, Tables.TimeZone, Tables.Altitude, Tables.MasterSatellite, Tables.Owner, Tables.Category, Tables.SatelliteCategory, Tables.Information);
+    }
+
+    //Creates stars table
+    private static void createStars(SQLiteDatabase db)
+    {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Stars + "([ID] INTEGER PRIMARY KEY, [Norad] INTEGER UNIQUE, [RA] DOUBLE, [DEC] DOUBLE, [Magnitude] DOUBLE, [Distance_LY] Double)");
+    }
+
+    //Adds stars
+    private static void addStars(Context context, Database instance, SQLiteDatabase db, Integer[] fileIds, int rowTotalCount)
+    {
+        Resources res = (context != null ? context.getResources() : null);
+        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.very_light_gray, null) : Color.TRANSPARENT);
+        ArrayList<Integer> ids;
+
+        //if no context or no resources
+        if(context == null || res == null)
+        {
+            //stop
+            return;
+        }
+
+        //load information
+        initTable(instance, db, res, Tables.Stars, "([Norad], [RA], [DEC], [Magnitude], [Distance_LY]) VALUES(?, ?, ?, ?, ?)", null, new byte[]{SQLBindType.String, SQLBindType.None, SQLBindType.Double, SQLBindType.Double, SQLBindType.Double, SQLBindType.Double}, fileIds, STARS_FILE_SEPARATOR, rowTotalCount, STARS_FILE_FULL_COLUMNS, R.string.title_stars);
+
+        //update local information
+        LocaleStars.initData(context);
+
+        //add stars
+        ids = LocaleStars.getNoradIds();
+        for(Integer currentId : ids)
+        {
+            //add current star
+            addOrbital(context, currentId, pathColor, OrbitalType.Star);
+        }
+    }
+    private static void addStars(Context context, Database instance, SQLiteDatabase db)
+    {
+        //add all stars files
+        //note: only 1 for now, but will add more later
+        addStars(context, instance, db, new Integer[]{R.raw.stars_01_en}, STARS_FILE_TOTAL_ROWS);
+    }
 
     //Sets up database with initial data
-    @SuppressWarnings("SpellCheckingInspection")
     private void initData(Context context, SQLiteDatabase db)
     {
         Resources res = (context != null ? context.getResources() : null);
@@ -1304,6 +1507,7 @@ public class Database extends SQLiteOpenHelper
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Category + " ([ID] INTEGER PRIMARY KEY, [Name] TEXT(" + MAX_CATEGORY_NAME_LENGTH + ") UNIQUE, [Indx] INTEGER)");
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.SatelliteCategory + " ([ID] INTEGER PRIMARY KEY, [Norad] INTEGER, [Category_Index] INTEGER)");
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Information + "([ID] INTEGER PRIMARY KEY, [Norad] INTEGER, [Source] INTEGER, [Language] TEXT(" + MAX_LANGUAGE_LENGTH + "), [Info] TEXT(" + MAX_INFO_LENGTH + "))");
+        createStars(db);
 
         //add indexing
         initIndexing(db);
@@ -1311,9 +1515,8 @@ public class Database extends SQLiteOpenHelper
         //if there are no orbitals
         if(runQuery(context, "SELECT [Name] FROM " + Tables.Orbital + " WHERE [Type]=" + OrbitalType.Star + " LIMIT 1", null).length == 0)
         {
-            //add stars
+            //add sun
             addOrbital(context, Universe.IDs.Sun, Color.YELLOW, OrbitalType.Star);
-            addOrbital(context, Universe.IDs.Polaris, ResourcesCompat.getColor(res, R.color.very_light_gray, null), OrbitalType.Star);
 
             //add planets
             addOrbital(context, Universe.IDs.Moon, Color.GRAY, OrbitalType.Planet);
@@ -1325,6 +1528,13 @@ public class Database extends SQLiteOpenHelper
             addOrbital(context, Universe.IDs.Uranus, Color.CYAN, OrbitalType.Planet);
             addOrbital(context, Universe.IDs.Neptune, ResourcesCompat.getColor(res, R.color.dark_blue, null), OrbitalType.Planet);
             addOrbital(context, Universe.IDs.Pluto, ResourcesCompat.getColor(res, R.color.tan, null), OrbitalType.Planet);
+        }
+
+        //if there are no stars
+        if(runQuery(context, "SELECT [Norad] FROM " + Tables.Stars + " LIMIT 1", null).length == 0)
+        {
+            //add stars
+            addStars(context, this, db);
         }
 
         //if there are no locations
@@ -1404,11 +1614,13 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Handles any needed updates
-    @SuppressWarnings("SpellCheckingInspection")
     public static void handleUpdates(Context context)
     {
         SQLiteDatabase db = null;
         DatabaseSatellite issZarya;
+
+        //make a call to possibly call onUpgrade/set updateStatus
+        getSatelliteID(context, Universe.IDs.None);
 
         //if update status is set
         if(updateStatus != null)
@@ -1439,14 +1651,7 @@ public class Database extends SQLiteOpenHelper
                     clearMasterSatelliteTable(context);
                 }
 
-                //if previous is before lens icon indicators
-                if(updateStatus.previousVersion < 30)
-                {
-                    //default to lens icon indicators
-                    Settings.setIndicator(context, Settings.Options.LensView.IndicatorType.Icon);
-                }
-
-                //if previous version if before table indexing
+                //if previous version is before table indexing
                 if(updateStatus.previousVersion < 19)
                 {
                     //add indexing
@@ -1454,7 +1659,44 @@ public class Database extends SQLiteOpenHelper
                     {
                         db = DatabaseManager.get(context, true);
                     }
-                    Database.initIndexing(db);
+                    initIndexing(db);
+                }
+
+                //if previous is before lens icon indicators
+                if(updateStatus.previousVersion < 30)
+                {
+                    //default to lens icon indicators
+                    Settings.setIndicator(context, Settings.Options.LensView.IndicatorType.Icon);
+                }
+
+                //if previous version before adding stars table
+                if(updateStatus.previousVersion < 33)
+                {
+                    int rowTotalCount = 0;
+                    ArrayList<Integer> fileIds = new ArrayList<>(0);
+
+                    //if polaris is already in orbitals
+                    if(Database.getOrbital(context, Universe.IDs.Polaris) != null)
+                    {
+                        //remove it before adding again later
+                        Database.deleteSatellite(context, Universe.IDs.Polaris);
+                    }
+
+                    //make sure table exists and add indexing
+                    if(db == null)
+                    {
+                        db = DatabaseManager.get(context, true);
+                    }
+                    createStars(db);
+                    initIndexing(db, Tables.Stars);
+
+                    //add file 1
+                    //note: more will be added later
+                    rowTotalCount += STARS_FILE_1_ROWS;
+                    fileIds.add(R.raw.stars_01_en);
+
+                    //add all missing stars
+                    addStars(context, null, db, fileIds.toArray(new Integer[0]), rowTotalCount);
                 }
 
                 //show any notice
@@ -1817,7 +2059,7 @@ public class Database extends SQLiteOpenHelper
         String name;
         String ownerCode;
         String localOwnerName;
-        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], [Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
+        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], " + Tables.Orbital + ".[Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [RA], [DEC], [Magnitude], [Distance_LY], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code] LEFT JOIN " + Tables.Stars + " ON " + Tables.Orbital + ".[Norad]=" + Tables.Stars + ".[Norad]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
         ArrayList<DatabaseSatellite> list = new ArrayList<>(0);
 
         //go through each satellite
@@ -1832,7 +2074,7 @@ public class Database extends SQLiteOpenHelper
             localOwnerName = LocaleOwner.getName(context, ownerCode);
 
             //add to list
-            list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Integer.parseInt(queryResult[index][11]), Byte.parseByte(queryResult[index][12]), queryResult[index][13].equals("1")));
+            list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Globals.tryParseDouble(queryResult[index][11]), Globals.tryParseDouble(queryResult[index][12]), Globals.tryParseDouble(queryResult[index][13]), Globals.tryParseDouble(queryResult[index][14]), Integer.parseInt(queryResult[index][15]), Byte.parseByte(queryResult[index][16]), queryResult[index][17].equals("1")));
         }
 
         //return list as array

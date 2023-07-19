@@ -4622,6 +4622,11 @@ public abstract class Globals
     //Tries to return a double from given input
     public static double tryParseDouble(String input)
     {
+        if(input == null)
+        {
+            return(Double.MAX_VALUE);
+        }
+
         try
         {
             return(Double.parseDouble(input));

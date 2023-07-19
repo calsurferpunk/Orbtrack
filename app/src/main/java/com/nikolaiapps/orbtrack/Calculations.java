@@ -2,9 +2,9 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
+import androidx.annotation.NonNull;
 import org.json.JSONObject;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
@@ -74,7 +74,7 @@ public abstract class Calculations
     }
 
     //Misc
-    //static final double KmPerLightYear        = 9.460730472581e+12      //km per light year
+    static final double KmPerLightYear          = 9.460730472581e+12;      //km per light year
     static final double SecondsPerHour          = 3600.0;
     static final double SecondsPerDay           = 86400.0;
     static final double MsPerDay                = SecondsPerDay * 1000;
@@ -145,15 +145,6 @@ public abstract class Calculations
     //
     //Types
     //
-
-    private static abstract class ParamTypes
-    {
-        public static final String TimeZoneId = "tzId";
-        public static final String ECI = "eci";
-        public static final String Geo = "geo";
-        public static final String TLE = "tle";
-        public static final String Orbit = "orbit";
-    }
 
     //Prediction model
     public static abstract class SgpModelType
@@ -358,15 +349,9 @@ public abstract class Calculations
             @Override
             public TLEDataType createFromParcel(Parcel source)
             {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
-
-                return(new TLEDataType(bundle.getInt("1"), bundle.getChar("2"), bundle.getInt("3"), bundle.getInt("4"), bundle.getString("5"), bundle.getInt("6"), bundle.getDouble("7"),
-                                       bundle.getDouble("8"), bundle.getDouble("9"), bundle.getDouble("10"), bundle.getInt("11"), bundle.getInt("12"), bundle.getDouble("13"), bundle.getDouble("14"),
-                                       bundle.getDouble("15"), bundle.getDouble("16"), bundle.getDouble("17"), bundle.getDouble("18"), bundle.getInt("19"), bundle.getDouble("20"), bundle.getString("21")));
+                return(new TLEDataType(source.readInt(), (char)source.readInt(), source.readInt(), source.readInt(), source.readString(), source.readInt(), source.readDouble(),
+                                       source.readDouble(), source.readDouble(), source.readDouble(), source.readInt(), source.readInt(), source.readDouble(), source.readDouble(),
+                                       source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readInt(), source.readDouble(), source.readString()));
             }
 
             @Override
@@ -398,13 +383,9 @@ public abstract class Calculations
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            Bundle bundle = new Bundle();
-
-            bundle.putInt("1", satelliteNum);   bundle.putChar("2", classification);    bundle.putInt("3", launchYear); bundle.putInt("4", launchNum);  bundle.putString("5", launchPiece); bundle.putInt("6", epochYear);  bundle.putDouble("7", epochDay);
-            bundle.putDouble("8", meanMotionDeriv1);    bundle.putDouble("9", meanMotionDeriv2);    bundle.putDouble("10", drag);   bundle.putInt("11", ephemeris); bundle.putInt("12", elementNum);    bundle.putDouble("13", inclinationDeg); bundle.putDouble("14", rightAscnAscNodeDeg);
-            bundle.putDouble("15", eccentricity);   bundle.putDouble("16", argPerigreeDeg); bundle.putDouble("17", meanAnomalyDeg); bundle.putDouble("18", revsPerDay); bundle.putInt("19", revAtEpoch);    bundle.putDouble("20", epochJulian);    bundle.putString("21", internationalCode);
-            
-            dest.writeBundle(bundle);
+            dest.writeInt(satelliteNum); dest.writeInt(classification); dest.writeInt(launchYear); dest.writeInt(launchNum); dest.writeString(launchPiece); dest.writeInt(epochYear); dest.writeDouble(epochDay);
+            dest.writeDouble(meanMotionDeriv1); dest.writeDouble(meanMotionDeriv2); dest.writeDouble(drag); dest.writeInt(ephemeris); dest.writeInt(elementNum); dest.writeDouble(inclinationDeg); dest.writeDouble(rightAscnAscNodeDeg);
+            dest.writeDouble(eccentricity); dest.writeDouble(argPerigreeDeg); dest.writeDouble(meanAnomalyDeg); dest.writeDouble(revsPerDay); dest.writeInt(revAtEpoch); dest.writeDouble(epochJulian); dest.writeString(internationalCode);
         }
     }
 
@@ -563,17 +544,30 @@ public abstract class Calculations
     }
 
     //Planet data type
-    public static class PlanetDataType
+    public static class PlanetDataType implements Parcelable
     {
-        final double hourAngleRad;
-        final double declinationRad;
+        final double hourAngleDeg;
+        final double declinationDeg;
         final double rightAscDeg;
         final double distanceKm;
 
-        PlanetDataType(int planetNumber, double julianDate, double latitude, double longitude)
+        public static final Creator<PlanetDataType> CREATOR = new Parcelable.Creator<PlanetDataType>()
         {
-            double rightAscHours;
-            double declinationDegs;
+            @Override
+            public PlanetDataType createFromParcel(Parcel source)
+            {
+                return(new PlanetDataType(source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble()));
+            }
+
+            @Override
+            public PlanetDataType[] newArray(int size)
+            {
+                return(new PlanetDataType[size]);
+            }
+        };
+
+        PlanetDataType(int planetNumber, double julianDate, double latitude, double longitude, double rightAscHours, double declinationDeg, double distanceKm)
+        {
             double calcHourAngleRad;
             double julianCenturies = calcTimeJulianCent(julianDate);
             GeodeticDataType polarLocation;
@@ -616,21 +610,18 @@ public abstract class Calculations
                     equatorialLocation = rotateLocation(cartesianLocation, Math.toRadians(calcObliquityCorrection(julianCenturies)), 0);
                     altAzLocation = rotateLocation(equatorialLocation, -julianDateToLST(julianDate, longitude), 2);
 
-                    hourAngleRad = Math.atan2(-altAzLocation.longitude, altAzLocation.latitude);
-                    rightAscDeg = Math.toDegrees(Math.atan2(equatorialLocation.longitude, equatorialLocation.latitude));
-                    declinationRad = Math.atan2(equatorialLocation.radius, Math.sqrt(equatorialLocation.latitude * equatorialLocation.latitude + equatorialLocation.longitude * equatorialLocation.longitude));
+                    this.hourAngleDeg = Math.toDegrees(Math.atan2(-altAzLocation.longitude, altAzLocation.latitude));
+                    this.rightAscDeg = Math.toDegrees(Math.atan2(equatorialLocation.longitude, equatorialLocation.latitude));
+                    this.declinationDeg = Math.toDegrees(Math.atan2(equatorialLocation.radius, Math.sqrt(equatorialLocation.latitude * equatorialLocation.latitude + equatorialLocation.longitude * equatorialLocation.longitude)));
 
                     altAzLocation = rotateLocation(altAzLocation, Math.toRadians(latitude) - (HalfPI), 1);
-                    distanceKm = Math.sqrt(altAzLocation.latitude * altAzLocation.latitude + altAzLocation.longitude * altAzLocation.longitude + altAzLocation.radius * altAzLocation.radius) * AU;
+                    this.distanceKm = Math.sqrt(altAzLocation.latitude * altAzLocation.latitude + altAzLocation.longitude * altAzLocation.longitude + altAzLocation.radius * altAzLocation.radius) * AU;
                     break;
 
                 default:
-                    rightAscHours = 2.694166667;
-                    declinationDegs = 89.264166667;
-                    distanceKm = 4.0681141e+15;
-
-                    rightAscDeg = rightAscHours * 15;
-                    declinationRad = Math.toRadians(declinationDegs);
+                    this.declinationDeg = declinationDeg;
+                    this.distanceKm = distanceKm;
+                    this.rightAscDeg = rightAscHours * 15;
                     calcHourAngleRad = julianDateToLMST(julianDate, Math.toRadians(longitude)) - Math.toRadians(rightAscDeg);
                     if(calcHourAngleRad < 0)
                     {
@@ -640,9 +631,45 @@ public abstract class Calculations
                     {
                         calcHourAngleRad = calcHourAngleRad - TwoPI;
                     }
-                    hourAngleRad = calcHourAngleRad;
+                    this.hourAngleDeg = Math.toDegrees(calcHourAngleRad);
                     break;
             }
+        }
+        PlanetDataType(double hourAngleDeg, double declinationDeg, double rightAscDeg, double distanceKm)
+        {
+            this.hourAngleDeg = hourAngleDeg;
+            this.declinationDeg = declinationDeg;
+            this.rightAscDeg = rightAscDeg;
+            this.distanceKm = distanceKm;
+        }
+        PlanetDataType(PlanetDataType copyFrom)
+        {
+            if(copyFrom != null)
+            {
+                this.hourAngleDeg = copyFrom.hourAngleDeg;
+                this.declinationDeg = copyFrom.declinationDeg;
+                this.rightAscDeg = copyFrom.rightAscDeg;
+                this.distanceKm = copyFrom.distanceKm;
+            }
+            else
+            {
+                this.hourAngleDeg = this.declinationDeg = this.rightAscDeg = this.distanceKm = Double.MAX_VALUE;
+            }
+        }
+
+        @Override
+        public int describeContents()
+        {
+            return(0);
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel dest, int flags)
+        {
+            dest.writeDouble(hourAngleDeg);
+            dest.writeDouble(declinationDeg);
+            dest.writeDouble(rightAscDeg);
+            dest.writeDouble(distanceKm);
         }
     }
 
@@ -661,13 +688,7 @@ public abstract class Calculations
             @Override
             public SatelliteObjectType createFromParcel(Parcel source)
             {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
-
-                return(new SatelliteObjectType(bundle.getParcelable(ParamTypes.ECI), bundle.getParcelable(ParamTypes.Geo), bundle.getParcelable(ParamTypes.TLE), bundle.getParcelable(ParamTypes.Orbit)));
+                return(new SatelliteObjectType(source.readParcelable(EciDataType.class.getClassLoader()), source.readParcelable(GeodeticDataType.class.getClassLoader()), source.readParcelable(TLEDataType.class.getClassLoader()), source.readParcelable(OrbitDataType.class.getClassLoader()), source.readParcelable(PlanetDataType.class.getClassLoader())));
             }
 
             @Override
@@ -692,7 +713,7 @@ public abstract class Calculations
         {
             baseConstructor();
         }
-        SatelliteObjectType(EciDataType e, GeodeticDataType g, TLEDataType t, OrbitDataType o)
+        SatelliteObjectType(EciDataType e, GeodeticDataType g, TLEDataType t, OrbitDataType o, PlanetDataType p)
         {
             eci = new EciDataType(e);
             geo = new GeodeticDataType(g);
@@ -700,7 +721,7 @@ public abstract class Calculations
             tle = t;
             orbit = new OrbitDataType(o);
             norad = loadNorad(orbit, tle);
-            planetData = null;
+            planetData = new PlanetDataType(p);
         }
         SatelliteObjectType(SatelliteObjectType copyFrom)
         {
@@ -712,7 +733,7 @@ public abstract class Calculations
                 tle = copyFrom.tle;
                 orbit = new OrbitDataType(copyFrom.orbit);
                 norad = new NoradDataType(copyFrom.norad);
-                planetData = null;
+                planetData = new PlanetDataType(copyFrom.planetData);
             }
             else
             {
@@ -729,12 +750,11 @@ public abstract class Calculations
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(ParamTypes.ECI, eci);
-            bundle.putParcelable(ParamTypes.Geo, geo);
-            bundle.putParcelable(ParamTypes.TLE, tle);
-            bundle.putParcelable(ParamTypes.Orbit, orbit);
-            dest.writeBundle(bundle);
+            dest.writeParcelable(eci, 0);
+            dest.writeParcelable(geo, 0);
+            dest.writeParcelable(tle, 0);
+            dest.writeParcelable(orbit, 0);
+            dest.writeParcelable(planetData, 0);
         }
 
         public int getSatelliteNum()
@@ -754,13 +774,7 @@ public abstract class Calculations
             @Override
             public ObserverType createFromParcel(Parcel source)
             {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
-
-                return(new ObserverType(bundle.getString(ParamTypes.TimeZoneId), bundle.getParcelable(ParamTypes.Geo)));
+                return(new ObserverType(source.readString(), source.readParcelable(GeodeticDataType.class.getClassLoader())));
             }
 
             @Override
@@ -794,10 +808,8 @@ public abstract class Calculations
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            Bundle bundle = new Bundle();
-            bundle.putString(ParamTypes.TimeZoneId, timeZone.getID());
-            bundle.putParcelable(ParamTypes.Geo, geo);
-            dest.writeBundle(bundle);
+            dest.writeString(timeZone.getID());
+            dest.writeParcelable(geo, 0);
         }
 
         public boolean notEqual(ObserverType other)
@@ -1619,11 +1631,16 @@ public abstract class Calculations
     }
 
     //Loads the sun
-    private static SatelliteObjectType loadNonSatellite(int planetID)
+    private static SatelliteObjectType loadNonSatellite(Database.DatabaseSatellite currentSat)
     {
-        SatelliteObjectType sun_obj = new SatelliteObjectType();
-        sun_obj.tle.satelliteNum = planetID;
-        return(sun_obj);
+        SatelliteObjectType nonSatObj = new SatelliteObjectType();
+        nonSatObj.tle.satelliteNum = currentSat.noradId;
+        if(currentSat.orbitalType == Database.OrbitalType.Star)
+        {
+            nonSatObj.planetData = new PlanetDataType(currentSat.noradId, 0, 0, 0, currentSat.rightAscensionHours, currentSat.declinationDegs, currentSat.distanceLightYears * KmPerLightYear);
+        }
+
+        return(nonSatObj);
     }
 
     //Gets orbital
@@ -1640,7 +1657,7 @@ public abstract class Calculations
         {
             case Database.OrbitalType.Star:
             case Database.OrbitalType.Planet:
-                return(Calculations.loadNonSatellite(currentSat.noradId));
+                return(Calculations.loadNonSatellite(currentSat));
 
             default:
                 return(Calculations.loadSatellite(currentSat));
@@ -2598,8 +2615,9 @@ public abstract class Calculations
     //Updates the given non satellite position
     private static void updateNonSatellitePosition(SatelliteObjectType nonSatObj, ObserverType observer, double julianDate)
     {
+        boolean havePlanetData = (nonSatObj.planetData != null);
         nonSatObj.eci.julianDate = julianDate;
-        nonSatObj.planetData = new PlanetDataType(nonSatObj.getSatelliteNum(), julianDate, observer.geo.latitude, observer.geo.longitude);
+        nonSatObj.planetData = new PlanetDataType(nonSatObj.getSatelliteNum(), julianDate, observer.geo.latitude, observer.geo.longitude, (havePlanetData && nonSatObj.planetData.rightAscDeg != Double.MAX_VALUE ? (nonSatObj.planetData.rightAscDeg / 15) : Double.MAX_VALUE), (havePlanetData ? nonSatObj.planetData.declinationDeg : Double.MAX_VALUE), (havePlanetData ? nonSatObj.planetData.distanceKm : Double.MAX_VALUE));
     }
 
     //Updates the given orbital position
@@ -2615,7 +2633,7 @@ public abstract class Calculations
 
             if(updateGeo)
             {
-                orbital.geo.latitude = Math.toDegrees(orbital.planetData.declinationRad);
+                orbital.geo.latitude = orbital.planetData.declinationDeg;
 
                 gmstDeg = Math.toDegrees(julianDateToGMST(orbital.eci.julianDate));
                 satLon = orbital.planetData.rightAscDeg - gmstDeg;
@@ -2727,8 +2745,8 @@ public abstract class Calculations
         {
             latitude = observer.geo.latitude;
             latRad = Math.toRadians(latitude);
-            hourAngle = Math.toDegrees(satObj.planetData.hourAngleRad);
-            declRad = satObj.planetData.declinationRad;
+            hourAngle = satObj.planetData.hourAngleDeg;
+            declRad = Math.toRadians(satObj.planetData.declinationDeg);
             distanceKm = satObj.planetData.distanceKm;
 
             //normalize hour angle

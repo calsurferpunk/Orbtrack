@@ -58,6 +58,7 @@ import java.util.Date;
 
 class Whirly
 {
+    private static final float StarScale = (1.0f / 3.5f);
     private static final float DefaultImageScale = 0.15f;
     private static final float DefaultTextScale = 0.2f;
     public static final double ZoomToZValue = 6356965.15661353;
@@ -194,7 +195,9 @@ class Whirly
     private static class Board
     {
         private boolean isVisible;
+        private final boolean isStar;
         private final boolean tleIsAccurate;
+        private final float imageScale;
         private double zValue;
         private double rotateDegrees;
         private final BaseController controller;
@@ -206,7 +209,7 @@ class Whirly
         private ComponentObject boardObject;
         final ArrayList<Billboard> billboardList;
 
-        private Board(BaseController boardController, Bitmap image, double imageRotateDegrees, float markerScale, boolean tleIsAc, boolean visible)
+        private Board(BaseController boardController, Bitmap image, double imageRotateDegrees, float markerScale, boolean tleIsAc, boolean forStar, boolean visible)
         {
             Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
 
@@ -214,6 +217,8 @@ class Whirly
             zValue = 0;
             rotateDegrees = imageRotateDegrees;
             controller = boardController;
+            isStar = forStar;
+            imageScale = DefaultImageScale * (isStar ? StarScale : 1);
 
             board = new Billboard();
             boardInfo = new BillboardInfo();
@@ -243,13 +248,13 @@ class Whirly
 
             setVisible(visible);
         }
-        Board(BaseController boardController, boolean tleIsAc, boolean visible)
+        Board(BaseController boardController, boolean tleIsAc, boolean forStar, boolean visible)
         {
-            this(boardController, null, Double.MAX_VALUE, Float.MAX_VALUE, tleIsAc, visible);
+            this(boardController, null, Double.MAX_VALUE, Float.MAX_VALUE, tleIsAc, forStar, visible);
         }
         Board(BaseController boardController, Board copyFrom, float markerScale, boolean visible)
         {
-            this(boardController, copyFrom.boardImage, copyFrom.rotateDegrees, markerScale, copyFrom.tleIsAccurate, visible);
+            this(boardController, copyFrom.boardImage, copyFrom.rotateDegrees, markerScale, copyFrom.tleIsAccurate, copyFrom.isStar, visible);
 
             copyFrom.remove();
             board.setCenter(copyFrom.board.getCenter());
@@ -308,13 +313,13 @@ class Whirly
         }
         void setImage(Bitmap image, float markerScale)
         {
-            setImage(image, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale);
+            setImage(image, imageScale / -2, imageScale / -2, imageScale, markerScale);
         }
 
         private void rotateImage(double degrees, float markerScale)
         {
             rotateDegrees = degrees;
-            updateImage(boardImage, DefaultImageScale / -2, DefaultImageScale / -2, DefaultImageScale, markerScale);
+            updateImage(boardImage, imageScale / -2, imageScale / -2, imageScale, markerScale);
         }
 
         public boolean getVisible()
@@ -384,6 +389,7 @@ class Whirly
         private double flatScale;
         private double zoomScale;
         private int imageId;
+        private final float imageScale;
         private final Sticker flatSticker;
         private final StickerInfo flatInfo;
         private MaplyTexture flatTexture;
@@ -392,7 +398,7 @@ class Whirly
         final ArrayList<Sticker> flatList;
         final ArrayList<MaplyTexture> flatTextureList;
 
-        FlatObject(BaseController boardController)
+        FlatObject(BaseController boardController, boolean forStar)
         {
             controller = boardController;
 
@@ -409,6 +415,7 @@ class Whirly
             flatInfo.setDrawPriority(DrawPriority.BoardFlat);
             flatList.add(flatSticker);
             flatScale = zoomScale = 1;
+            imageScale = DefaultImageScale * (forStar ? StarScale : 1);
             imageId = -1;
 
             setVisible(true);
@@ -503,7 +510,7 @@ class Whirly
         }
         void moveLocation(double latitude, double longitude, boolean show)
         {
-            double halfRadsWidth = (DefaultImageScale / 3.0) * flatScale * Math.min(zoomScale, 1);
+            double halfRadsWidth = (imageScale / 3.0) * flatScale * Math.min(zoomScale, 1);
 
             move(latitude, longitude, halfRadsWidth, halfRadsWidth, show);
         }
@@ -1013,6 +1020,7 @@ class Whirly
 
     public static class OrbitalObject extends CoordinatesFragment.OrbitalBase
     {
+        private static Bitmap starImage;
         private static Bitmap debrisImage;
         private static Bitmap satelliteImage;
         private static Bitmap rocketBodyImage;
@@ -1022,6 +1030,7 @@ class Whirly
         boolean alwaysShowTitle;
         private final boolean forMap;
         private final int noradId;
+        private boolean isStar;
         private boolean showShadow;
         private boolean showFootprint;
         private boolean showSelectedFootprint;
@@ -1034,6 +1043,7 @@ class Whirly
         private boolean lastMoveWithinZoom;
         private final boolean tleIsAccurate;
         private float markerScale;
+        private final float imageScale;
         private double lastMoveZoom;
         private double orbitalRotation;
         private double lastOrbitalRotation;
@@ -1056,6 +1066,7 @@ class Whirly
             Bitmap titleImage;
             Bitmap orbitalImage = null;
             Drawable orbitalBgImage;
+            Drawable orbitalDrawable;
 
             currentContext = context;
             common = new Shared();
@@ -1078,10 +1089,16 @@ class Whirly
             orbitalSelectedFootprint = null;
             noradId = common.data.getSatelliteNum();
             orbitalType = common.data.getOrbitalType();
+            isStar = false;
 
             //try to use saved image
             switch(orbitalType)
             {
+                case Database.OrbitalType.Star:
+                    orbitalImage = Globals.copyBitmap(starImage);
+                    isStar = true;
+                    break;
+
                 case Database.OrbitalType.Satellite:
                     orbitalImage = Globals.copyBitmap(satelliteImage);
                     break;
@@ -1095,22 +1112,37 @@ class Whirly
                     break;
             }
 
+            //get image scale
+            imageScale = DefaultImageScale * (isStar ? StarScale : 1);
+
             //if image not set yet
             if(orbitalImage == null)
             {
                 //get image
                 iconId = Globals.getOrbitalIconID(context, noradId, orbitalType);
-                orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(context, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(context, iconId, (noradId > 0 && (orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? Color.WHITE : 0)));
-                if(noradId > 0)
+                if(orbitalType == Database.OrbitalType.Star)
                 {
-                    //add outline
-                    orbitalBgImage = Globals.getDrawableSized(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
-                    orbitalImage = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
+                    orbitalDrawable = Globals.getOrbitalIcon(context, observerLocation, noradId, orbitalType);
+                    orbitalImage = Globals.getBitmapSized(context, iconId, (int)(orbitalDrawable.getIntrinsicWidth() * StarScale), (int)(orbitalDrawable.getIntrinsicHeight() * StarScale), 0);
+                }
+                else
+                {
+                    orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(context, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(context, iconId, (noradId > 0 && (orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? Color.WHITE : 0)));
+                    if(noradId > 0)
+                    {
+                        //add outline
+                        orbitalBgImage = Globals.getDrawableSized(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
+                        orbitalImage = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
+                    }
                 }
 
                 //save image for repeat use
                 switch(orbitalType)
                 {
+                    case Database.OrbitalType.Star:
+                        starImage = Globals.copyBitmap(orbitalImage);
+                        break;
+
                     case Database.OrbitalType.Satellite:
                         satelliteImage = Globals.copyBitmap(orbitalImage);
                         break;
@@ -1144,7 +1176,7 @@ class Whirly
             else
             {
                 //create board
-                orbitalBoard = new Board(controller, tleIsAccurate, true);
+                orbitalBoard = new Board(controller, tleIsAccurate, isStar, true);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
                 //add/remove shadow
@@ -1152,8 +1184,8 @@ class Whirly
 
                 //set title
                 titleImage = getInfoCreator().get(context, common.data.getName(), null);
-                infoBoard = new Board(controller, tleIsAccurate, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
+                infoBoard = new Board(controller, tleIsAccurate, isStar, (showingInfo || alwaysShowTitle));
+                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * imageScale * -0.0093, (orbitalImage.getHeight() / 2f) * imageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
             //set defaults
@@ -1168,6 +1200,7 @@ class Whirly
 
         public static void clearImages()
         {
+            starImage = null;
             debrisImage = null;
             satelliteImage = null;
             rocketBodyImage = null;
@@ -1345,7 +1378,7 @@ class Whirly
                     infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
                     if(orbitalBoard.boardImage != null)
                     {
-                        infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                        infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * imageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * imageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
                     }
                 }
             }
@@ -1380,7 +1413,7 @@ class Whirly
                 //recreate info
                 infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? lastInfo : null));
                 infoBoard = new Board(controller, infoBoard, markerScale, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
+                infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * imageScale * -0.0093, (orbitalImage.getHeight() / 2f) * imageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
             }
         }
 
@@ -1417,7 +1450,7 @@ class Whirly
                 {
                     noradId = common.data.getSatelliteNum();
 
-                    orbitalShadow = new FlatObject(controller);
+                    orbitalShadow = new FlatObject(controller, isStar);
                     orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(currentContext, noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0));
                 }
             }
@@ -1437,7 +1470,7 @@ class Whirly
                 }
                 else if(showFootprint && orbitalFootprint == null)
                 {
-                    orbitalFootprint = new FlatObject(controller);
+                    orbitalFootprint = new FlatObject(controller, isStar);
                     orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(Settings.getMapFootprintAlpha(currentContext), common.data.database.pathColor)));
                 }
             }
@@ -1457,7 +1490,7 @@ class Whirly
                 }
                 else if(showSelectedFootprint && orbitalSelectedFootprint == null)
                 {
-                    orbitalSelectedFootprint = new FlatObject(controller);
+                    orbitalSelectedFootprint = new FlatObject(controller, isStar);
                     orbitalSelectedFootprint.setDrawPriority(DrawPriority.SelectedBoardFlat);
                     orbitalSelectedFootprint.setImage(selectedFootprintImage);
                 }

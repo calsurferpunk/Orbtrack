@@ -62,6 +62,7 @@ public class Database extends SQLiteOpenHelper
     {
         static final String Orbital = "[Orbital]";
         static final String Stars = "[Stars]";
+        static final String Constellation = "[Constellation]";
         static final String Location = "[Location]";
         static final String LocationName = "[LocationName]";
         static final String TimeZone = "[TimeZone]";
@@ -118,8 +119,8 @@ public class Database extends SQLiteOpenHelper
     private static final int STARS_FILE_COUNT = 1;
     private static final int STARS_FILE_MIN_COLUMNS = 2;
     private static final int STARS_FILE_FULL_COLUMNS = 6;
-    private static final int STARS_FILE_1_ROWS = 0;
-    private static final int STARS_FILE_TOTAL_ROWS = 0;
+    private static final int STARS_FILE_1_ROWS = 7;
+    private static final int STARS_FILE_TOTAL_ROWS = STARS_FILE_1_ROWS;
     private static final String STARS_FILE_SEPARATOR = "[|]";
 
     public static abstract class LocaleStars
@@ -252,6 +253,157 @@ public class Database extends SQLiteOpenHelper
         public static boolean haveData()
         {
             return(noradId.size() > 0);
+        }
+    }
+
+    private static final int CONSTELLATION_FILE_COUNT = 1;
+    private static final int CONSTELLATION_FILE_MIN_COLUMNS = 2;
+    private static final int CONSTELLATION_FILE_FULL_COLUMNS = 3;
+    private static final int CONSTELLATION_FILE_1_ROWS = 1;
+    private static final int CONSTELLATION_FILE_TOTAL_ROWS = CONSTELLATION_FILE_1_ROWS;
+    private static final String CONSTELLATION_FILE_SEPARATOR = "[|]";
+    private static final String CONSTELLATION_FILE_PAIR_SEPARATOR = "[:]";
+    private static final String CONSTELLATION_FILE_POINT_SEPARATOR = "[,]";
+
+    public static abstract class LocaleConstellations
+    {
+        private static final ArrayList<Integer> constellationId = new ArrayList<>(0);
+        private static final ArrayList<ArrayList<Integer>> constellationPaths = new ArrayList<>(0);
+        private static final ArrayList<ArrayList<String>> constellationNames = new ArrayList<>(LanguageIndex.LanguageCount);
+
+        //Initializes data
+        public static void initData(Context context)
+        {
+            int fileId;
+            int fileNumber;
+            int languageIndex;
+            String line;
+            BufferedReader file;
+            Resources res = context.getResources();
+
+            //clear any existing
+            constellationId.clear();
+            constellationNames.clear();
+
+            //go through each stars file
+            for(languageIndex = 0; languageIndex < LanguageIndex.LanguageCount; languageIndex++)
+            {
+                ArrayList<String> nameList = new ArrayList<>(0);
+
+                //go through each file number
+                for(fileNumber = 1; fileNumber <= CONSTELLATION_FILE_COUNT; fileNumber++)
+                {
+                    //open stars file
+                    switch(languageIndex)
+                    {
+                        case LanguageIndex.Spanish:
+                            //noinspection SwitchStatementWithTooFewBranches
+                            switch(fileNumber)
+                            {
+                                default:
+                                case 1:
+                                    fileId = R.raw.constellation_01_es;
+                                    break;
+                            }
+                            break;
+
+                        default:
+                        case LanguageIndex.English:
+                            //noinspection SwitchStatementWithTooFewBranches
+                            switch(fileNumber)
+                            {
+                                default:
+                                case 1:
+                                    fileId = R.raw.constellation_01_en;
+                                    break;
+                            }
+                            break;
+                    }
+                    file = new BufferedReader(new InputStreamReader(res.openRawResource(fileId)));
+                    try
+                    {
+                        //while there are lines to read
+                        while((line = file.readLine()) != null)
+                        {
+                            //split columns
+                            String[] columns = line.split(CONSTELLATION_FILE_SEPARATOR);
+
+                            //if have at least minimum columns
+                            if(columns.length >= CONSTELLATION_FILE_MIN_COLUMNS)
+                            {
+                                //add current ID, paths, and name
+                                if(languageIndex == 0)
+                                {
+                                    String[] paths;
+
+                                    constellationId.add(Integer.valueOf(columns[0]));
+                                    paths = columns[2].split(CONSTELLATION_FILE_PAIR_SEPARATOR);
+                                    for(String currentPath : paths )
+                                    {
+                                        String[] points = currentPath.split(CONSTELLATION_FILE_POINT_SEPARATOR);
+                                    }
+                                    //constellationPaths.add();
+                                }
+                                nameList.add(columns[1]);
+                            }
+                        }
+                        //close file
+                        file.close();
+                    }
+                    catch(IOException ex)
+                    {
+                        //do nothing
+                    }
+                }
+
+                //add names
+                constellationNames.add(nameList);
+            }
+        }
+
+        //Gets the name for the given language
+        private static String getName(int id, byte languageIndex)
+        {
+            int index;
+            String name = null;
+
+            //if ID is in list
+            index = constellationId.indexOf(id);
+            if(index >= 0)
+            {
+                //get name for ID and language
+                name = constellationNames.get(languageIndex).get(index);
+
+                //if unknown and not English
+                if(name.equals("?") && languageIndex != LanguageIndex.English)
+                {
+                    //default to English
+                    name = constellationNames.get(LanguageIndex.English).get(index);
+                }
+            }
+
+            //return name
+            return(name);
+        }
+        public static String getName(Context context, int id)
+        {
+            return(getName(id, Globals.getLanguageIndex(context)));
+        }
+        public static String getEnglishName(int id)
+        {
+            return(getName(id, LanguageIndex.English));
+        }
+
+        //Get constellation IDs
+        public static ArrayList<Integer> getConstellationIds()
+        {
+            return(constellationId);
+        }
+
+        //Returns if have data
+        public static boolean haveData()
+        {
+            return(constellationId.size() > 0);
         }
     }
 
@@ -1264,6 +1416,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     public static final byte MAX_ORBITAL_NAME_LENGTH = 24;
+    private static final byte MAX_CONSTELLATION_NAME_LENGTH = 40;
     private static final byte MAX_LOCATION_NAME_LENGTH = 50;
     private static final byte MAX_OWNER_CODE_LENGTH = 8;
     private static final byte MAX_OWNER_NAME_LENGTH = 40;
@@ -1481,6 +1634,45 @@ public class Database extends SQLiteOpenHelper
         addStars(context, instance, db, new Integer[]{R.raw.stars_01_en}, STARS_FILE_TOTAL_ROWS);
     }
 
+    //Create constellation table
+    private static void createConstellation(SQLiteDatabase db)
+    {
+        db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Constellation + "([ID] INTEGER PRIMARY KEY, [Constellation] INTEGER UNIQUE, [Name] TEXT(" + MAX_CONSTELLATION_NAME_LENGTH + "), [Points] TEXT)");
+    }
+
+    //Adds constellations
+    private static void addConstellations(Context context, Database instance, SQLiteDatabase db, Integer[] fileIds, int rowTotalCount)
+    {
+        Resources res = (context != null ? context.getResources() : null);
+        ArrayList<Integer> ids;
+
+        //if no context or no resources
+        if(context == null || res == null)
+        {
+            //stop
+            return;
+        }
+
+        //load information
+        initTable(instance, db, res, Tables.Constellation, "([Constellation], [Name], [Points]) VALUES (?, ?, ?)", null, new byte[]{SQLBindType.String, SQLBindType.String, SQLBindType.String}, fileIds, CONSTELLATION_FILE_SEPARATOR, rowTotalCount, CONSTELLATION_FILE_FULL_COLUMNS, R.string.title_constellations);
+
+        //update local information
+        LocaleConstellations.initData(context);
+
+        //add constellations
+        ids = LocaleConstellations.getConstellationIds();
+        for(Integer currentId : ids)
+        {
+            //add current constellation
+        }
+    }
+    private static void addConstellations(Context context, Database instance, SQLiteDatabase db)
+    {
+        //add all constellation files
+        //note: only 1 for now, but could add more later
+        addConstellations(context, instance, db, new Integer[]{R.raw.constellation_01_en}, CONSTELLATION_FILE_TOTAL_ROWS);
+    }
+
     //Sets up database with initial data
     private void initData(Context context, SQLiteDatabase db)
     {
@@ -1508,6 +1700,7 @@ public class Database extends SQLiteOpenHelper
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.SatelliteCategory + " ([ID] INTEGER PRIMARY KEY, [Norad] INTEGER, [Category_Index] INTEGER)");
         db.execSQL("CREATE TABLE IF NOT EXISTS " + Tables.Information + "([ID] INTEGER PRIMARY KEY, [Norad] INTEGER, [Source] INTEGER, [Language] TEXT(" + MAX_LANGUAGE_LENGTH + "), [Info] TEXT(" + MAX_INFO_LENGTH + "))");
         createStars(db);
+        createConstellation(db);
 
         //add indexing
         initIndexing(db);
@@ -1535,6 +1728,13 @@ public class Database extends SQLiteOpenHelper
         {
             //add stars
             addStars(context, this, db);
+        }
+
+        //if there are no constellations
+        if(runQuery(context, "SELECT [CID] FROM " + Tables.Constellation + " LIMIT 1", null).length == 0)
+        {
+            //add constellations
+            addConstellations(context, this, db);
         }
 
         //if there are no locations
@@ -1688,15 +1888,28 @@ public class Database extends SQLiteOpenHelper
                         db = DatabaseManager.get(context, true);
                     }
                     createStars(db);
-                    initIndexing(db, Tables.Stars);
+                    createConstellation(db);
+                    initIndexing(db, Tables.Stars, Tables.Constellation);
 
-                    //add file 1
+                    //add stars file 1
                     //note: more will be added later
                     rowTotalCount += STARS_FILE_1_ROWS;
                     fileIds.add(R.raw.stars_01_en);
 
                     //add all missing stars
                     addStars(context, null, db, fileIds.toArray(new Integer[0]), rowTotalCount);
+
+                    //reset count and files
+                    rowTotalCount = 0;
+                    fileIds.clear();
+
+                    //add constellation file 1
+                    //note: more will be added later
+                    rowTotalCount += CONSTELLATION_FILE_1_ROWS;
+                    fileIds.add(R.raw.constellation_01_en);
+
+                    //add all missing constellations
+                    addConstellations(context, null, db, fileIds.toArray(new Integer[0]), rowTotalCount);
                 }
 
                 //show any notice

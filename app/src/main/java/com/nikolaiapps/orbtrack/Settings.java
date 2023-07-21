@@ -114,6 +114,7 @@ public abstract class Settings
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
         static final String LensShowToolbars = "LensShowToolbars";
+        static final String LensShowOutsideArea = "LensShowOutsideArea";
         static final String LocationLastLatitude = "LocationLatitude";
         static final String LocationLastLongitude = "LocationLastLongitude";
         static final String LocationLastAltitude = "LocationLastAltitude";
@@ -2422,6 +2423,12 @@ public abstract class Settings
     public static void setLensShowToolbars(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
+    }
+
+    //Returns lens showing outside visible area
+    public static boolean getLensShowOutsideArea(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensShowOutsideArea));
     }
 
     //Get lens horizon color

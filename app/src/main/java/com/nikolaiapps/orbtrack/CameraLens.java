@@ -494,11 +494,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     private static final float CLOSE_AREA_DEGREES = 12f;
+    private static final float STAR_SCALE = (1.0f / 3.5f);
 
     public int pathDivisions;
     public boolean showPaths;
     public boolean showHorizon;
     public boolean showCalibration;
+    public boolean showOutsideArea;
     public TextView helpText;
     public PlayBar playBar;
     public FloatingActionStateButtonMenu settingsMenu;
@@ -586,7 +588,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         boolean darkTheme = Settings.getDarkTheme(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
-        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42, 12);
+        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42);
 
         selectedOrbitalIndex = -1;
         selectedNoradId = Universe.IDs.None;
@@ -597,6 +599,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         horizonColor = Globals.getColor(70, horizonLineColor);
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
+        showOutsideArea = Settings.getLensShowOutsideArea(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, metrics);
         textOffset = textSize / 1.5f;
@@ -606,7 +609,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         iconLength = (int)dpPixels[4];
         iconHalfLength = (iconLength / 2);
         iconScaleOffset = (iconHalfLength / 2);
-        starLength = (int)dpPixels[5];
+        starLength = (int)(dpPixels[4] * STAR_SCALE);
         starHalfLength = (starLength / 2);
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
@@ -999,7 +1002,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
 
                         //draw orbital
-                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, relativeProperties.outsideArea);
+                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
                     }
                 }
             }
@@ -1037,7 +1040,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     }
 
                     //show offset orbital position
-                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, false);
+                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, true, false);
                 }
                 else
                 {
@@ -1096,13 +1099,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     //Draws orbital at the given position
-    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, double azimuth, double elevation, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean outsideArea)
+    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, double azimuth, double elevation, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean isSelected, boolean outsideArea)
     {
         boolean isSmallStar = (currentType == Database.OrbitalType.Star) && (noradId != Universe.IDs.Sun);
-        float drawPxRadius = indicatorPxRadius / (outsideArea ? 2 : 1);
+        float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isSmallStar ? STAR_SCALE : 1);
 
-        //if a small star outside of area
-        if(isSmallStar && outsideArea)
+        //if not selected, outside of area, and not showing
+        if(!isSelected && outsideArea && !showOutsideArea)
         {
             //stop and don't draw
             return;
@@ -1233,7 +1236,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         {
             currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
         }
-        currentArea.offsetTo((int) (centerX - (currentArea.width() / 2f)), (int) ((centerY - indicatorPxRadius - textSize) + textOffset));
+        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - indicatorPxRadius - textSize) + (textOffset * (isSmallStar || indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
         if(currentArea.left < 20)
         {
             currentArea.offsetTo(20, currentArea.top);

@@ -175,7 +175,14 @@ class Whirly
             snippetCanvas = new Canvas(snippetImage);
 
             //draw image
-            snippetLayout.draw(snippetCanvas);
+            try
+            {
+                snippetLayout.draw(snippetCanvas);
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
 
             //update status
             lastUseBackground = useBackground;
@@ -777,6 +784,7 @@ class Whirly
         MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation)
         {
             int locationIconType;
+            float sizeDp;
 
             if(markerController != null)
             {
@@ -788,7 +796,27 @@ class Whirly
 
                 controller = markerController;
                 markerScale = markerScaling;
-                markerBaseSizeValue = Globals.dpToPixels(currentContext, 46);
+                switch(noradId)
+                {
+                    case Universe.IDs.Earth:
+                    case Universe.IDs.Sun:
+                    case Universe.IDs.Moon:
+                    case Universe.IDs.Mars:
+                    case Universe.IDs.Mercury:
+                    case Universe.IDs.Venus:
+                    case Universe.IDs.Jupiter:
+                    case Universe.IDs.Saturn:
+                    case Universe.IDs.Uranus:
+                    case Universe.IDs.Neptune:
+                    case Universe.IDs.Pluto:
+                        sizeDp = 46;
+                        break;
+
+                    default:
+                        sizeDp = 46 * (noradId < 0 ? StarScale : 1);
+                        break;
+                }
+                markerBaseSizeValue = Globals.dpToPixels(currentContext, sizeDp);
 
                 marker = new ScreenMarker();
                 markerInfo = new MarkerInfo();
@@ -1043,7 +1071,6 @@ class Whirly
         private boolean lastMoveWithinZoom;
         private final boolean tleIsAccurate;
         private float markerScale;
-        private final float imageScale;
         private double lastMoveZoom;
         private double orbitalRotation;
         private double lastOrbitalRotation;
@@ -1111,9 +1138,6 @@ class Whirly
                     orbitalImage = Globals.copyBitmap(debrisImage);
                     break;
             }
-
-            //get image scale
-            imageScale = DefaultImageScale * (isStar ? StarScale : 1);
 
             //if image not set yet
             if(orbitalImage == null)
@@ -1185,7 +1209,7 @@ class Whirly
                 //set title
                 titleImage = getInfoCreator().get(context, common.data.getName(), null);
                 infoBoard = new Board(controller, tleIsAccurate, isStar, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * imageScale * -0.0093, (orbitalImage.getHeight() / 2f) * imageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
+                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
             }
 
             //set defaults
@@ -1378,7 +1402,7 @@ class Whirly
                     infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
                     if(orbitalBoard.boardImage != null)
                     {
-                        infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * imageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * imageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                        infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
                     }
                 }
             }
@@ -1413,7 +1437,7 @@ class Whirly
                 //recreate info
                 infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? lastInfo : null));
                 infoBoard = new Board(controller, infoBoard, markerScale, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * imageScale * -0.0093, (orbitalImage.getHeight() / 2f) * imageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
+                infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
             }
         }
 
@@ -1647,7 +1671,7 @@ class Whirly
             }
 
             //update bearing if -using and -first bearing, enough to see, or rotation changed-- or -changed showing direction-
-            updateBearing = (showingDirection && ((canUseBearing && firstBearing) || (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2))) || showingDirectionChanged;
+            updateBearing = (showingDirection && ((canUseBearing && firstBearing) || (Math.abs(bearingDelta) >= 2 || Math.abs(orbitalRotationDelta) >= 2))) || (showingDirectionChanged && canUseBearing);
             if(updateBearing)
             {
                 //update value

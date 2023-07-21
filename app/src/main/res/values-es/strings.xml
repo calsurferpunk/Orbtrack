@@ -167,6 +167,7 @@
     <string name="desc_show_pass_quality">Mostrar línea de calidad de pase</string>
     <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria</string>
     <string name="desc_show_orbital_direction_limit">Mostrar dirección si está dentro del conteo orbital visible\nNota: Obligatorio para las GPU Mali y PowerVR</string>
+    <string name="desc_show_outside_visible_area">Mostrar orbitales fuera de la vista en los bordes</string>
     <string name="desc_show_selected_footprint">Mostrar el área visible orbital seleccionada en la superficie</string>
     <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo\nNota: Desactivado para algunas GPU Mali y PowerVR</string>
     <string name="desc_show_stars">Mostrar estrellas en vista de globo</string>
@@ -304,6 +305,7 @@
     <string name="title_compass_align">Alinear Brújula</string>
     <string name="title_compass_calibrate">Calibrar Brújula</string>
     <string name="title_compass_inaccurate_fix">Brújula Inexacta [Reparar]</string>
+    <string name="title_constellations">Constelaciones</string>
     <string name="title_coordinates">Coordenadas</string>
     <string name="title_current">Corriente</string>
     <string name="title_current_input_colon">"Entrada Actual: "</string>
@@ -556,6 +558,7 @@
     <string name="title_show_notifications">Mostrar Notificaciones</string>
     <string name="title_show_orbital_direction">Mostrar Dirección Orbital</string>
     <string name="title_show_orbital_direction_limit">Dirección Orbital Límite</string>
+    <string name="title_show_outside_visible_area">Mostrar Área Visible Exterior</string>
     <string name="title_show_path">Mostrar Ruta</string>
     <string name="title_show_selected">Mostrar Seleccionado</string>
     <string name="title_show_selected_footprint">Mostrar Huella Seleccionada</string>

@@ -158,6 +158,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
                         SwitchPreference lensShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.LensShowToolbars);
+                        SwitchPreference lensShowOutsideAreaSwitch = this.findPreference(Settings.PreferenceName.LensShowOutsideArea);
                         SwitchPreference lensDirectionCentered = this.findPreference(Settings.PreferenceName.LensDirectionCentered);
                         SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
@@ -176,6 +177,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitch(useCameraSwitch);
                         setupSwitch(rotateSwitch);
                         setupSwitch(lensShowToolbarsSwitch);
+                        setupSwitch(lensShowOutsideAreaSwitch);
                         setupSwitch(lensDirectionCentered);
                         setupSwitch(lensShowIconDirection);
                         setupSwitchButton(lensUseHorizonSwitch);
@@ -1549,6 +1551,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
                         case Settings.PreferenceName.LensShowToolbars:
+                        case Settings.PreferenceName.LensShowOutsideArea:
                             //lens needs recreate
                             setLensRecreateNeed();
                             break;

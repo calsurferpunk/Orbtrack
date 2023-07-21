@@ -167,6 +167,7 @@
     <string name="desc_show_pass_quality">Show pass quality line</string>
     <string name="desc_show_orbital_direction">Orbitals point in path direction</string>
     <string name="desc_show_orbital_direction_limit">Show direction if within visible orbital count\nNote: Required for Mali and PowerVR GPUs</string>
+    <string name="desc_show_outside_visible_area">Show orbitals outside view on edges</string>
     <string name="desc_show_selected_footprint">Show selected orbital visible area on surface</string>
     <string name="desc_show_shadows">Show orbital shadows in globe view\nNote: Disabled for some Mali and PowerVR GPUs</string>
     <string name="desc_show_stars">Show stars in globe view</string>
@@ -304,6 +305,7 @@
     <string name="title_compass_align">Compass Align</string>
     <string name="title_compass_calibrate">Calibrate Compass</string>
     <string name="title_compass_inaccurate_fix">Compass Inaccurate [Fix]</string>
+    <string name="title_constellations">Constellations</string>
     <string name="title_coordinates">Coordinates</string>
     <string name="title_current">Current</string>
     <string name="title_current_input_colon">"Current Input: "</string>
@@ -556,6 +558,7 @@
     <string name="title_show_notifications">Show Notifications</string>
     <string name="title_show_orbital_direction">Show Orbital Direction</string>
     <string name="title_show_orbital_direction_limit">Limit Orbital Direction</string>
+    <string name="title_show_outside_visible_area">Show Outside Visible Area</string>
     <string name="title_show_path">Show Path</string>
     <string name="title_show_selected">Show Selected</string>
     <string name="title_show_selected_footprint">Show Selected Footprint</string>

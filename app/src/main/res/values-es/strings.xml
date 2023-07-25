@@ -528,8 +528,8 @@
     <string name="title_select">Seleccionar</string>
     <string name="title_select_color">Seleccionar Color</string>
     <string name="title_select_file_or_files">Seleccione Archivo(s)</string>
-    <string name="title_select_filter">Seleccionar Filtro</string>
     <string name="title_select_folder">Seleccione Carpeta</string>
+    <string name="title_select_list_filter">Seleccionar Filtro de Lista</string>
     <string name="title_select_orbital">Seleccionar Orbital</string>
     <string name="title_select_satellites">Seleccionar Satélites</string>
     <string name="title_select_source">Seleccionar Fuente</string>

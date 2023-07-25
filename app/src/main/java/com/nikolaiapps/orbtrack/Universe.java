@@ -81,7 +81,7 @@ public abstract class Universe
         static final int Invalid = Integer.MIN_VALUE;
     }
 
-    public static String getName(Context context, int id)
+    public static String getName(Context context, int id, byte orbitalType)
     {
         boolean usingRes = (context != null);
         Resources res = (usingRes ? context.getResources() : null);
@@ -119,7 +119,21 @@ public abstract class Universe
                 return(usingRes ? res.getString(R.string.title_pluto) : "Pluto");
 
             default:
-                return(id < 0 ? (usingRes ? Database.LocaleStars.getName(context, id) : Database.LocaleStars.getEnglishName(id)) : "");
+                if(id < 0)
+                {
+                    if(orbitalType == Database.OrbitalType.Constellation)
+                    {
+                        return(usingRes ? Database.LocaleConstellations.getName(context, id) : Database.LocaleConstellations.getEnglishName(id));
+                    }
+                    else
+                    {
+                        return(usingRes ? Database.LocaleStars.getName(context, id) : Database.LocaleStars.getEnglishName(id));
+                    }
+                }
+                else
+                {
+                    return("");
+                }
         }
     }
 

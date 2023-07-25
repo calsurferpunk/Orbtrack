@@ -1633,9 +1633,11 @@ public abstract class Calculations
     //Loads the sun
     private static SatelliteObjectType loadNonSatellite(Database.DatabaseSatellite currentSat)
     {
+        byte currentType = currentSat.orbitalType;
         SatelliteObjectType nonSatObj = new SatelliteObjectType();
+
         nonSatObj.tle.satelliteNum = currentSat.noradId;
-        if(currentSat.orbitalType == Database.OrbitalType.Star)
+        if(currentType == Database.OrbitalType.Star || currentType == Database.OrbitalType.Constellation)
         {
             nonSatObj.planetData = new PlanetDataType(currentSat.noradId, 0, 0, 0, currentSat.rightAscensionHours, currentSat.declinationDegs, currentSat.distanceLightYears * KmPerLightYear);
         }
@@ -1657,6 +1659,7 @@ public abstract class Calculations
         {
             case Database.OrbitalType.Star:
             case Database.OrbitalType.Planet:
+            case Database.OrbitalType.Constellation:
                 return(Calculations.loadNonSatellite(currentSat));
 
             default:

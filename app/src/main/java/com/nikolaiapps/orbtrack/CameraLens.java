@@ -1102,6 +1102,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, double azimuth, double elevation, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean isSelected, boolean outsideArea)
     {
         boolean isSmallStar = (currentType == Database.OrbitalType.Star) && (noradId != Universe.IDs.Sun);
+        boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
         float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isSmallStar ? STAR_SCALE : 1);
 
         //if not selected, outside of area, and not showing
@@ -1115,119 +1116,127 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentPaint.setColor(currentColor);
         currentPaint.setStyle(Paint.Style.STROKE);
 
-        //draw indicator
-        switch(indicator)
+        //if a constellation
+        if(isConstellation)
         {
-            case Settings.Options.LensView.IndicatorType.Square:
-                canvas.drawRect(centerX - drawPxRadius, centerY - drawPxRadius, centerX + drawPxRadius, centerY + drawPxRadius, currentPaint);
-                break;
+            //draw connecting stars
+        }
+        else
+        {
+            //draw indicator
+            switch(indicator)
+            {
+                case Settings.Options.LensView.IndicatorType.Square:
+                    canvas.drawRect(centerX - drawPxRadius, centerY - drawPxRadius, centerX + drawPxRadius, centerY + drawPxRadius, currentPaint);
+                    break;
 
-            case Settings.Options.LensView.IndicatorType.Triangle:
-                trianglePoints[0] = centerX - drawPxRadius;        //bottom left
-                trianglePoints[1] = centerY + drawPxRadius;        //bottom left
-                trianglePoints[2] = centerX + drawPxRadius;        //bottom right
-                trianglePoints[3] = centerY + drawPxRadius;        //bottom right
+                case Settings.Options.LensView.IndicatorType.Triangle:
+                    trianglePoints[0] = centerX - drawPxRadius;        //bottom left
+                    trianglePoints[1] = centerY + drawPxRadius;        //bottom left
+                    trianglePoints[2] = centerX + drawPxRadius;        //bottom right
+                    trianglePoints[3] = centerY + drawPxRadius;        //bottom right
 
-                trianglePoints[4] = centerX + drawPxRadius;        //bottom right
-                trianglePoints[5] = centerY + drawPxRadius;        //bottom right
-                trianglePoints[6] = centerX;                       //top center
-                trianglePoints[7] = centerY - drawPxRadius;        //top center
+                    trianglePoints[4] = centerX + drawPxRadius;        //bottom right
+                    trianglePoints[5] = centerY + drawPxRadius;        //bottom right
+                    trianglePoints[6] = centerX;                       //top center
+                    trianglePoints[7] = centerY - drawPxRadius;        //top center
 
-                trianglePoints[8] = centerX;                       //top center
-                trianglePoints[9] = centerY - drawPxRadius;        //top center
-                trianglePoints[10] = centerX - drawPxRadius;       //bottom left
-                trianglePoints[11] = centerY + drawPxRadius;       //bottom left
-                canvas.drawLines(trianglePoints, currentPaint);
-                break;
+                    trianglePoints[8] = centerX;                       //top center
+                    trianglePoints[9] = centerY - drawPxRadius;        //top center
+                    trianglePoints[10] = centerX - drawPxRadius;       //bottom left
+                    trianglePoints[11] = centerY + drawPxRadius;       //bottom left
+                    canvas.drawLines(trianglePoints, currentPaint);
+                    break;
 
-            case Settings.Options.LensView.IndicatorType.Icon:
-                if(context != null)
-                {
-                    int iconId = Globals.getOrbitalIconID(context, noradId, currentType);
-
-                    //if a small star
-                    if(isSmallStar)
+                case Settings.Options.LensView.IndicatorType.Icon:
+                    if(context != null)
                     {
-                        //if star icon image not set yet
-                        if(starIconImage == null)
+                        int iconId = Globals.getOrbitalIconID(context, noradId, currentType);
+
+                        //if a small star
+                        if(isSmallStar)
                         {
-                            //create image
-                            starIconImage = Globals.getBitmapSized(context, iconId, starLength, starLength, 0);
-                        }
-
-                        //draw image
-                        canvas.drawBitmap(starIconImage, centerX - starHalfLength, centerY - starHalfLength, iconPaint);
-                    }
-                    else
-                    {
-                        boolean isSatellite = (noradId > 0);
-                        IconImage indicatorIcon = new IconImage(noradId, null);
-                        int[] indexes = Globals.divideFind(indicatorIcon, orbitalIcons, iconImageComparer);
-
-                        //if already in the list
-                        if(indexes[0] >= 0)
-                        {
-                            //remember current icon in list
-                            double angleDirection = 135;
-                            double directionDelta = 0;
-                            Bitmap rotatedImage;
-                            IconImage currentOrbitalIcon = orbitalIcons.get(indexes[0]);
-
-                            //use center and image
-                            indicatorIcon.copyData(currentOrbitalIcon);
-                            if(showIconIndicatorDirection && isSatellite)
+                            //if star icon image not set yet
+                            if(starIconImage == null)
                             {
-                                angleDirection = indicatorIcon.getAngleDirection(azimuth, elevation);
-                                directionDelta = indicatorIcon.getAngleDirectionDelta();
+                                //create image
+                                starIconImage = Globals.getBitmapSized(context, iconId, starLength, starLength, 0);
                             }
-                            if(directionDelta == Double.MAX_VALUE || Math.abs(directionDelta) >= 2.0)
+
+                            //draw image
+                            canvas.drawBitmap(starIconImage, centerX - starHalfLength, centerY - starHalfLength, iconPaint);
+                        }
+                        else
+                        {
+                            boolean isSatellite = (noradId > 0);
+                            IconImage indicatorIcon = new IconImage(noradId, null);
+                            int[] indexes = Globals.divideFind(indicatorIcon, orbitalIcons, iconImageComparer);
+
+                            //if already in the list
+                            if(indexes[0] >= 0)
                             {
-                                rotatedImage = Globals.getBitmapRotated(currentOrbitalIcon.image, angleDirection - 135);
+                                //remember current icon in list
+                                double angleDirection = 135;
+                                double directionDelta = 0;
+                                Bitmap rotatedImage;
+                                IconImage currentOrbitalIcon = orbitalIcons.get(indexes[0]);
+
+                                //use center and image
+                                indicatorIcon.copyData(currentOrbitalIcon);
+                                if(showIconIndicatorDirection && isSatellite)
+                                {
+                                    angleDirection = indicatorIcon.getAngleDirection(azimuth, elevation);
+                                    directionDelta = indicatorIcon.getAngleDirectionDelta();
+                                }
+                                if(directionDelta == Double.MAX_VALUE || Math.abs(directionDelta) >= 2.0)
+                                {
+                                    rotatedImage = Globals.getBitmapRotated(currentOrbitalIcon.image, angleDirection - 135);
+                                }
+                                else
+                                {
+                                    rotatedImage = (currentOrbitalIcon.lastImage != null ? currentOrbitalIcon.lastImage : currentOrbitalIcon.image);
+                                }
+                                indicatorIcon.image = rotatedImage;
+                                if(rotatedImage != null)
+                                {
+                                    currentOrbitalIcon.lastImage = Globals.copyBitmap(rotatedImage);
+                                }
+                                currentOrbitalIcon.copyData(indicatorIcon);
                             }
                             else
                             {
-                                rotatedImage = (currentOrbitalIcon.lastImage != null ? currentOrbitalIcon.lastImage : currentOrbitalIcon.image);
+                                //create image and add to list
+                                indicatorIcon.image = Globals.getBitmapSized(context, iconId, iconLength, iconLength, (isSatellite && (currentType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? R.color.white : 0));
+                                if(isSatellite)
+                                {
+                                    //add background highlight
+                                    Drawable imageBg = Globals.getDrawableSized(context, iconId, indicatorIcon.image.getWidth(), indicatorIcon.image.getHeight(), R.color.black, false);
+                                    indicatorIcon.image = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), indicatorIcon.image), imageBg));
+                                }
+                                orbitalIcons.add(indexes[1], indicatorIcon);
                             }
-                            indicatorIcon.image = rotatedImage;
-                            if(rotatedImage != null)
-                            {
-                                currentOrbitalIcon.lastImage = Globals.copyBitmap(rotatedImage);
-                            }
-                            currentOrbitalIcon.copyData(indicatorIcon);
-                        }
-                        else
-                        {
-                            //create image and add to list
-                            indicatorIcon.image = Globals.getBitmapSized(context, iconId, iconLength, iconLength, (isSatellite && (currentType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? R.color.white : 0));
-                            if(isSatellite)
-                            {
-                                //add background highlight
-                                Drawable imageBg = Globals.getDrawableSized(context, iconId, indicatorIcon.image.getWidth(), indicatorIcon.image.getHeight(), R.color.black, false);
-                                indicatorIcon.image = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), indicatorIcon.image), imageBg));
-                            }
-                            orbitalIcons.add(indexes[1], indicatorIcon);
-                        }
 
-                        //draw image
-                        iconArea.set((int)(centerX - iconHalfLength), (int)(centerY - iconHalfLength), (int)(centerX + iconHalfLength), (int)(centerY + iconHalfLength));
-                        if(outsideArea)
-                        {
-                            iconScaledArea.set(iconArea.left + iconScaleOffset, iconArea.top + iconScaleOffset, iconArea.right - iconScaleOffset, iconArea.bottom - iconScaleOffset);
-                            canvas.drawBitmap(indicatorIcon.image, null, iconScaledArea, iconPaint);
+                            //draw image
+                            iconArea.set((int)(centerX - iconHalfLength), (int)(centerY - iconHalfLength), (int)(centerX + iconHalfLength), (int)(centerY + iconHalfLength));
+                            if(outsideArea)
+                            {
+                                iconScaledArea.set(iconArea.left + iconScaleOffset, iconArea.top + iconScaleOffset, iconArea.right - iconScaleOffset, iconArea.bottom - iconScaleOffset);
+                                canvas.drawBitmap(indicatorIcon.image, null, iconScaledArea, iconPaint);
+                            }
+                            else
+                            {
+                                canvas.drawBitmap(indicatorIcon.image, iconArea.left, iconArea.top, iconPaint);
+                            }
                         }
-                        else
-                        {
-                            canvas.drawBitmap(indicatorIcon.image, iconArea.left, iconArea.top, iconPaint);
-                        }
+                        break;
                     }
-                    break;
-                }
-                //else fall through
+                    //else fall through
 
-            default:
-            case Settings.Options.LensView.IndicatorType.Circle:
-                canvas.drawCircle(centerX, centerY, drawPxRadius, currentPaint);
-                break;
+                default:
+                case Settings.Options.LensView.IndicatorType.Circle:
+                    canvas.drawCircle(centerX, centerY, drawPxRadius, currentPaint);
+                    break;
+            }
         }
 
         //get text area
@@ -1236,7 +1245,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         {
             currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
         }
-        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - indicatorPxRadius - textSize) + (textOffset * (isSmallStar || indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
+        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - textSize) + (textOffset * (isSmallStar || indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
         if(currentArea.left < 20)
         {
             currentArea.offsetTo(20, currentArea.top);

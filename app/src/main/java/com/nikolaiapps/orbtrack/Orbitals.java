@@ -44,9 +44,10 @@ public abstract class Orbitals
     public static abstract class PageType
     {
         static final int Satellites = 0;
-        static final int Stars = 1;
-        static final int Planets = 2;
-        private static final int PageCount = 3;
+        static final int Planets = 1;
+        static final int Stars = 2;
+        static final int Constellation = 3;
+        private static final int PageCount = 4;
     }
 
     //Page list item
@@ -128,8 +129,9 @@ public abstract class Orbitals
                 switch(page)
                 {
                     case PageType.Satellites:
-                    case PageType.Stars:
                     case PageType.Planets:
+                    case PageType.Stars:
+                    case PageType.Constellation:
                         //get conditions
                         switch(page)
                         {
@@ -139,6 +141,10 @@ public abstract class Orbitals
 
                             case PageType.Stars:
                                 orbitalTypes = new byte[]{Database.OrbitalType.Star};
+                                break;
+
+                            case PageType.Constellation:
+                                orbitalTypes = new byte[]{Database.OrbitalType.Constellation};
                                 break;
 
                             case PageType.Planets:
@@ -1245,11 +1251,14 @@ public abstract class Orbitals
                 case PageType.Satellites:
                     return(res.getString(R.string.title_satellites));
 
+                case PageType.Planets:
+                    return(res.getString(R.string.title_moon_and_planets));
+
                 case PageType.Stars:
                     return(res.getString(R.string.title_stars));
 
-                case PageType.Planets:
-                    return(res.getString(R.string.title_moon_and_planets));
+                case PageType.Constellation:
+                    return(res.getString(R.string.title_constellations));
 
                 default:
                     return(res.getString(R.string.title_invalid));

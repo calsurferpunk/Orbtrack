@@ -159,5 +159,12 @@
             android:layout_width="match_parent"
             android:padding="5dp"
             android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Edit_CheckBox_Layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"/>
     </TableLayout>
 </ScrollView>

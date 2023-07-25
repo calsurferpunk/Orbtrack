@@ -58,7 +58,8 @@ public class AddSelectListAdapter extends BaseAdapter
     static abstract class FilterType
     {
         static final int Sorting = 0;
-        static final int Visibility = 1;
+        static final int Type = 1;
+        static final int Visibility = 2;
     }
 
     static abstract class SettingsType
@@ -124,7 +125,7 @@ public class AddSelectListAdapter extends BaseAdapter
                 break;
 
             case SelectType.Filter:
-                selections = new String[]{res.getString(R.string.title_sort_by), res.getString(R.string.title_visible)};
+                selections = new String[]{res.getString(R.string.title_sort_by), res.getString(R.string.title_type), res.getString(R.string.title_visible)};
                 break;
 
             case SelectType.Settings:
@@ -320,7 +321,21 @@ public class AddSelectListAdapter extends BaseAdapter
                 break;
 
             case SelectType.Filter:
-                imageId = (position == FilterType.Sorting ? R.drawable.ic_list_white : R.drawable.ic_remove_red_eye_white);
+                switch(position)
+                {
+                    case FilterType.Sorting:
+                        imageId = R.drawable.ic_list_white;
+                        break;
+
+                    case FilterType.Type:
+                        imageId = R.drawable.ic_category_black;
+                        break;
+
+                    default:
+                    case FilterType.Visibility:
+                        imageId = R.drawable.ic_remove_red_eye_white;
+                        break;
+                }
                 break;
 
             case SelectType.Settings:

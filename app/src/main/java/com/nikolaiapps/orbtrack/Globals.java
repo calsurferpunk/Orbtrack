@@ -3545,6 +3545,7 @@ public abstract class Globals
     {
         int iconId;
         boolean isMoozarov;
+        boolean isConstellation;
 
         if(satelliteNum > 0)
         {
@@ -3610,7 +3611,8 @@ public abstract class Globals
                     break;
 
                 default:
-                    iconId = (isMoozarov ? R.drawable.orbital_star_moozarov : R.drawable.orbital_star_freepik);
+                    isConstellation = (orbitalType == Database.OrbitalType.Constellation);
+                    iconId = (isMoozarov ? (isConstellation ? R.drawable.orbital_constellation_moozarov : R.drawable.orbital_star_moozarov) : (isConstellation ? R.drawable.orbital_constellation_freepik : R.drawable.orbital_star_freepik));
                     break;
             }
         }

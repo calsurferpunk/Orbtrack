@@ -1504,8 +1504,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Drawable passDrawable = Globals.getDrawable(this, R.drawable.orbit, true);
         Drawable coordinateDrawable = Globals.getDrawable(this, R.drawable.ic_language_black, true);
         Drawable intersectionDrawable = Globals.getDrawable(this, R.drawable.ic_intersect, true);
-        Drawable starDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Sun));
         Drawable planetDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Moon));
+        Drawable starDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Polaris, Database.OrbitalType.Star));
+        Drawable constellationDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Polaris, Database.OrbitalType.Constellation));
         Drawable displayDrawable = Globals.getDrawable(this, R.drawable.ic_tablet_white, true);
         Drawable locationDrawable = Globals.getDrawable(this, R.drawable.ic_my_location_black, true);
         Drawable notificationsDrawable = Globals.getDrawable(this, R.drawable.ic_notifications_white, true);
@@ -1522,7 +1523,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, new Item[]{new Item(statusString, viewDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_calculate), R.drawable.ic_calculator_black, new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable), new Item(intersectionString, intersectionDrawable)}));
-            groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable)}));
+            groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_constellations), constellationDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_display), displayDrawable), new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_all), allDrawable)}));
 
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
@@ -2900,7 +2901,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         final Resources res = this.getResources();
 
-        Globals.showSelectDialog(this, res.getString(R.string.title_select_filter), AddSelectListAdapter.SelectType.Filter, new AddSelectListAdapter.OnItemClickListener()
+        Globals.showSelectDialog(this, res.getString(R.string.title_select_list_filter), AddSelectListAdapter.SelectType.Filter, new AddSelectListAdapter.OnItemClickListener()
         {
             @Override
             public void onItemClick(int which)
@@ -2909,7 +2910,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(which)
                 {
                     case AddSelectListAdapter.FilterType.Sorting:
-                        //show dialog
+                        //show sorting dialog
                         new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
                         {
                             @Override
@@ -2920,6 +2921,17 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 Current.PageAdapter.setPendingSort(true);
                             }
                         }).getSortBy(res.getString(R.string.title_sort_by));
+                        break;
+
+                    case AddSelectListAdapter.FilterType.Type:
+                        //show type dialog
+                        new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
+                        {
+                            @Override public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
+                            {
+
+                            }
+                        }).getType(res.getString(R.string.title_type), new String[]{res.getString(R.string.title_satellites), res.getString(R.string.title_moon_and_planets), res.getString(R.string.title_add_rocket_bodies), res.getString(R.string.title_add_debris), res.getString(R.string.title_stars), res.getString(R.string.title_constellations)}, new boolean[]{true, true, true, true, true, true});
                         break;
 
                     case AddSelectListAdapter.FilterType.Visibility:

@@ -43,7 +43,7 @@
 
     <item android:id="@+id/menu_filter"
         android:title="@string/title_visible"
-        android:icon="@drawable/ic_filter_white"
+        android:icon="@drawable/ic_filter_alt_white"
         android:orderInCategory="60"
         app:showAsAction="always"
         android:visible="false"/>

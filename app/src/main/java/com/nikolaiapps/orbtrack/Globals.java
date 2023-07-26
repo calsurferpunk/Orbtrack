@@ -2,6 +2,7 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.DatePickerDialog;
@@ -758,7 +759,7 @@ public abstract class Globals
         ImageView iconView;
         Window dialogWindow;
         AlertDialog confirmDialog;
-        AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(context, getDialogThemeID(context));
+        AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(context, getDialogThemeId(context));
 
         if(icon != null)
         {
@@ -873,7 +874,7 @@ public abstract class Globals
         boolean usingIcon = (titleIconId >= 0);
         AddSelectListAdapter listAdapter = (itemIds != null ? new AddSelectListAdapter(context, selectType, itemIds) : new AddSelectListAdapter(context, selectType, extra, extra2));
         AlertDialog dialog;
-        CustomAlertDialogBuilder selectDialog = new CustomAlertDialogBuilder(context, getDialogThemeID(context), Settings.getMaterialTheme(context), true);
+        CustomAlertDialogBuilder selectDialog = new CustomAlertDialogBuilder(context, getDialogThemeId(context), Settings.getMaterialTheme(context), true);
 
         if(usingIcon)
         {
@@ -997,7 +998,7 @@ public abstract class Globals
         //if context an date are set
         if(context != null && date != null)
         {
-            int themeID = Globals.getDialogThemeID(context);
+            int themeID = Globals.getDialogThemeId(context);
             int year = date.get(Calendar.YEAR);
             int month = date.get(Calendar.MONTH);
             int dayOfMonth = date.get(Calendar.DAY_OF_MONTH);
@@ -2678,7 +2679,7 @@ public abstract class Globals
             {
                 //resolve attribute ID
                 currentTheme.resolveAttribute(resIDs[index], values, true);
-                try(TypedArray valueArray = context.obtainStyledAttributes(values.data, resIDs))
+                try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.obtainStyledAttributes(values.data, resIDs))
                 {
                     ids[index] = valueArray.getResourceId(index, -1);
                     valueArray.recycle();
@@ -2837,7 +2838,7 @@ public abstract class Globals
     }
 
     //Gets current dialog theme ID
-    public static int getDialogThemeID(Context context)
+    public static int getDialogThemeId(Context context)
     {
         return(resolveAttributeID(context, R.attr.dialogStyle));
     }
@@ -2869,7 +2870,7 @@ public abstract class Globals
     //Creates a new progress dialog
     public static MultiProgressDialog createProgressDialog(Context context)
     {
-        return(new MultiProgressDialog(context, getDialogThemeID(context)));
+        return(new MultiProgressDialog(context, getDialogThemeId(context)));
     }
 
     //Creates an add current location dialog
@@ -2877,7 +2878,7 @@ public abstract class Globals
     {
         LinearLayout progressLayout = new LinearLayout(context);
         CircularProgressIndicator progressView = new CircularProgressIndicator(context);
-        AlertDialog.Builder addCurrentLocationDialogBuilder = new AlertDialog.Builder(context, getDialogThemeID(context));
+        AlertDialog.Builder addCurrentLocationDialogBuilder = new AlertDialog.Builder(context, getDialogThemeId(context));
 
         progressView.setIndeterminate(true);
         progressLayout.setGravity(Gravity.CENTER);

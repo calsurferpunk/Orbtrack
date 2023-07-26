@@ -317,6 +317,7 @@
     <string name="title_database_building">Building Database</string>
     <string name="title_day">Day</string>
     <string name="title_days">Days</string>
+    <string name="title_debris">Debris</string>
     <string name="title_degs">Degs</string>
     <string name="title_degrees">Degrees</string>
     <string name="title_delete">Delete</string>
@@ -508,6 +509,7 @@
     <string name="title_retry">Retry</string>
     <string name="title_rev_number_at_epoch">Revolution Number at Epoch</string>
     <string name="title_right_asc_ascd_node">Right Ascension of Ascending Node</string>
+    <string name="title_rocket_bodies">Rocket Bodies</string>
     <string name="title_round">Round</string>
     <string name="title_satellite">Satellite</string>
     <string name="title_satellites">Satellites</string>

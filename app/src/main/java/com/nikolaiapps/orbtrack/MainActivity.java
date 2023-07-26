@@ -14,6 +14,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.core.view.GravityCompat;
@@ -2924,14 +2925,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         break;
 
                     case AddSelectListAdapter.FilterType.Type:
-                        //show type dialog
-                        new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
-                        {
-                            @Override public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
-                            {
-
-                            }
-                        }).getType(res.getString(R.string.title_type), new String[]{res.getString(R.string.title_satellites), res.getString(R.string.title_moon_and_planets), res.getString(R.string.title_add_rocket_bodies), res.getString(R.string.title_add_debris), res.getString(R.string.title_stars), res.getString(R.string.title_constellations)}, new boolean[]{true, true, true, true, true, true});
+                        //show filter type dialog
+                        showFilterTypeDialog();
                         break;
 
                     case AddSelectListAdapter.FilterType.Visibility:
@@ -2941,6 +2936,87 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
             }
         });
+    }
+
+    //Shows a filter type dialog
+    public void showFilterTypeDialog()
+    {
+        int index;
+        AlertDialog.Builder filterTypeBuilder = new AlertDialog.Builder(this, Globals.getDialogThemeId(this));
+        boolean[] typeValues;
+        ArrayList<String> typeTitles = new ArrayList<>(0);
+        ArrayList<Boolean> typeSelected = new ArrayList<>(0);
+
+        //get type selections
+        for(byte currentType : new byte[]{Database.OrbitalType.Satellite, Database.OrbitalType.Planet, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Star, Database.OrbitalType.Constellation})
+        {
+            //if current type existing in orbitals
+            if(Database.getOrbitalTypeCount(MainActivity.this, currentType) > 0)
+            {
+                int stringId;
+
+                //get title and if selected
+                switch(currentType)
+                {
+                    case Database.OrbitalType.Satellite:
+                        stringId = R.string.title_satellites;
+                        break;
+
+                    case Database.OrbitalType.Planet:
+                        stringId = R.string.title_moon_and_planets;
+                        break;
+
+                    case Database.OrbitalType.RocketBody:
+                        stringId = R.string.title_rocket_bodies;
+                        break;
+
+                    case Database.OrbitalType.Debris:
+                        stringId = R.string.title_debris;
+                        break;
+
+                    case Database.OrbitalType.Star:
+                        stringId = R.string.title_stars;
+                        break;
+
+                    default:
+                    case Database.OrbitalType.Constellation:
+                        stringId = R.string.title_constellations;
+                        break;
+                }
+                typeSelected.add(true);
+                typeTitles.add(this.getString(stringId));
+            }
+        }
+
+        //copy selected into values
+        typeValues = new boolean[typeSelected.size()];
+        for(index = 0; index < typeSelected.size(); index++)
+        {
+            //copy selected value
+            typeValues[index] = typeSelected.get(index);
+        }
+
+        //setup and show dialog
+        filterTypeBuilder.setTitle(R.string.title_select_list_filter);
+        filterTypeBuilder.setMultiChoiceItems(typeTitles.toArray(new String[0]), typeValues, new DialogInterface.OnMultiChoiceClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which, boolean isChecked)
+            {
+                //update type value
+                typeValues[which] = isChecked;
+            }
+        });
+        filterTypeBuilder.setPositiveButton(R.string.title_ok, new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int which)
+            {
+                //update filter
+            }
+        });
+        filterTypeBuilder.setNegativeButton(R.string.title_cancel, null);
+        filterTypeBuilder.show();
     }
 
     //Shows a settings dialog

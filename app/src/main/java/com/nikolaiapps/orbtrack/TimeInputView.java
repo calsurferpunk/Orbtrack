@@ -54,7 +54,7 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
     {
         Calendar currentTime = Calendar.getInstance();
 
-        themeID = Globals.getDialogThemeID(context);
+        themeID = Globals.getDialogThemeId(context);
         currentHour = currentTime.get(Calendar.HOUR_OF_DAY);
         currentMinute = currentTime.get(Calendar.MINUTE);
         setTime(currentHour, currentMinute);

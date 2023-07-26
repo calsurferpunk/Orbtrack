@@ -17,9 +17,7 @@ import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 import android.widget.Button;
-import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -35,9 +33,8 @@ public class EditValuesDialog
         static final byte Folder = 2;
         static final byte Login = 3;
         static final byte SortBy = 4;
-        static final byte Type = 5;
-        static final byte EditColors = 6;
-        static final byte Visible = 7;
+        static final byte EditColors = 5;
+        static final byte Visible = 6;
     }
 
     public interface OnSaveListener
@@ -60,7 +57,6 @@ public class EditValuesDialog
     private int currentIndex;
     private boolean isLogin;
     private boolean isSortBy;
-    private boolean isType;
     private boolean isVisible;
     private boolean isEditColors;
     private boolean visibleValue;
@@ -102,7 +98,6 @@ public class EditValuesDialog
     private OnDismissListener dismissListener;
     private final OnCancelListener cancelListener;
     private int[] itemIDs;
-    private boolean[] itemCheckBoxValues;
     private final int[] selectedColors;
     private double[] itemNumberValues;
     private double[] itemNumber2Values;
@@ -116,7 +111,6 @@ public class EditValuesDialog
     private String[] itemTextRow2Values;
     private String[] itemListValues;
     private String[] itemList2Values;
-    private String[] itemCheckBoxTitles;
     private long[] itemDateValues;
 
     public EditValuesDialog(Activity context, OnSaveListener sListener, OnDismissListener dListener, OnCancelListener cListener)
@@ -415,7 +409,7 @@ public class EditValuesDialog
     }
 
     //Show the dialog
-    private void show(byte editType, String titleText, int[] ids, @Nullable String textValueTitle, String[] textValues, @Nullable String textValue2Title, @Nullable String[] text2Values, @Nullable String[] textRowValues, @Nullable String[] textRow2Values, @Nullable String[] numberTitles, @Nullable double[] numberValues, @Nullable double[] number2Values, @Nullable double[] number3Values, String[] listValues, String[] defaultListValue, String list2Title, int[] list2IconIds, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues, int[] colorValues, boolean defaultVisible, @Nullable String[] checkBoxTitles, @Nullable boolean[] checkBoxValues)
+    private void show(byte editType, String titleText, int[] ids, @Nullable String textValueTitle, String[] textValues, @Nullable String textValue2Title, @Nullable String[] text2Values, @Nullable String[] textRowValues, @Nullable String[] textRow2Values, @Nullable String[] numberTitles, @Nullable double[] numberValues, @Nullable double[] number2Values, @Nullable double[] number3Values, String[] listValues, String[] defaultListValue, String list2Title, int[] list2IconIds, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues, int[] colorValues, boolean defaultVisible)
     {
         boolean isEditFolder = (editType == EditType.Folder);
         boolean isVisibleEdit = (editType == EditType.Visible);
@@ -440,20 +434,18 @@ public class EditValuesDialog
         final View colorRow;
         final View colorsRow;
         final View visibleRow;
-        final LinearLayout checkBoxLayout;
         BorderButton editColorButton;
         BorderButton editColorsButton1;
         BorderButton editColorsButton2;
         AppCompatButton visibleButton;
         TextInputLayout editColorTextListLayout;
-        AlertDialog.Builder editDialogBuilder = new AlertDialog.Builder(currentContext, Globals.getDialogThemeID(currentContext));
+        AlertDialog.Builder editDialogBuilder = new AlertDialog.Builder(currentContext, Globals.getDialogThemeId(currentContext));
         LayoutInflater viewInflater = (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final View editDialogView = (viewInflater != null ? viewInflater.inflate(usingMaterial ? R.layout.edit_material_dialog : R.layout.edit_dialog, currentContext.findViewById(android.R.id.content), false) : null);
 
         //remember if a specific edit type
         isLogin = (editType == EditType.Login);
         isSortBy = (editType == EditType.SortBy);
-        isType = (editType == EditType.Type);
         isVisible = isVisibleEdit;
         isEditColors = (editType == EditType.EditColors);
 
@@ -478,8 +470,6 @@ public class EditValuesDialog
         itemDefaultList2Values = defaultList2Value;
         itemDateTitle = dateTitleText;
         itemDateValues = dateValues;
-        itemCheckBoxTitles = checkBoxTitles;
-        itemCheckBoxValues = checkBoxValues;
 
         //if dialog view is set
         if(editDialogView != null)
@@ -559,7 +549,7 @@ public class EditValuesDialog
                 editValueTextList2Layout.setVisibility(usingList2 ? View.VISIBLE : View.GONE);
             }
             editValueList2 = editDialogView.findViewById(usingMaterial ? R.id.Edit_Value_Text_List2 : R.id.Edit_Value_List2);
-            (usingMaterial ? editValueTextList2Layout : editDialogView.findViewById(R.id.Edit_List2_Row)).setVisibility((isLogin && usingList2) || (!usingText2 && !isEditColors && !isVisible && !isType) ? View.VISIBLE : View.GONE);
+            (usingMaterial ? editValueTextList2Layout : editDialogView.findViewById(R.id.Edit_List2_Row)).setVisibility((isLogin && usingList2) || (!usingText2 && !isEditColors && !isVisible) ? View.VISIBLE : View.GONE);
             if(usingList2)
             {
                 //if editing orbitals, have owner codes, and there is a code for every owner
@@ -743,21 +733,6 @@ public class EditValuesDialog
                 visibleValue = !defaultVisible;
                 visibleButton.performClick();
             }
-
-            //get checkbox list
-            checkBoxLayout = editDialogView.findViewById(R.id.Edit_CheckBox_Layout);
-            checkBoxLayout.setVisibility(isType ? View.VISIBLE : View.GONE);
-            if(isType && itemCheckBoxTitles != null && itemCheckBoxValues != null && itemCheckBoxTitles.length == itemCheckBoxValues.length)
-            {
-                //go through each checkbox title/value
-                for(index = 0; index < itemCheckBoxTitles.length; index++)
-                {
-                    CheckBox currentCheckBox = new CheckBox(currentContext);
-                    currentCheckBox.setText(itemCheckBoxTitles[index]);
-                    currentCheckBox.setChecked(itemCheckBoxValues[index]);
-                    checkBoxLayout.addView(currentCheckBox);
-                }
-            }
         }
 
         //setup and show dialog
@@ -816,20 +791,20 @@ public class EditValuesDialog
     }
     public void getLocation(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String[] numberTitles, double[] numberValues, double[] number2Values, double[] number3Values, String list2Title, String[] list2Values, String[] defaultList2Value)
     {
-        show(EditType.Location, titleText, ids, textValueTitle, textValues, null, null, null, null, numberTitles, numberValues, number2Values, number3Values, null, null, list2Title, null, list2Values, null, defaultList2Value, null, null, null, false, null, null);
+        show(EditType.Location, titleText, ids, textValueTitle, textValues, null, null, null, null, numberTitles, numberValues, number2Values, number3Values, null, null, list2Title, null, list2Values, null, defaultList2Value, null, null, null, false);
     }
     public void getFileLocation(String titleText, int[] ids, @NonNull String[] textValues, String[] listValues, String[] defaultListValue, String[] defaultList2Value)
     {
-        show(EditType.Folder, titleText, ids, null, textValues, null, null, null, null, null, null, null, null, listValues, defaultListValue, null, Globals.fileSourceImageIds, Globals.getFileLocations(currentContext), null, defaultList2Value, null, null, null, false, null, null);
+        show(EditType.Folder, titleText, ids, null, textValues, null, null, null, null, null, null, null, null, listValues, defaultListValue, null, Globals.fileSourceImageIds, Globals.getFileLocations(currentContext), null, defaultList2Value, null, null, null, false);
     }
     public void getOrbital(String titleText, int[] ids, String textValueTitle, @NonNull String[] textValues, String list2Title, String[] list2Values, String[] list2SubValues, String[] defaultList2Value, String dateTitleText, long[] dateValues)
     {
-        show(EditType.Orbital, titleText, ids, textValueTitle, textValues, null, null, null, null, null, null, null, null, null, null, list2Title, null, list2Values, list2SubValues, defaultList2Value, dateTitleText, dateValues, null, false, null, null);
+        show(EditType.Orbital, titleText, ids, textValueTitle, textValues, null, null, null, null, null, null, null, null, null, null, list2Title, null, list2Values, list2SubValues, defaultList2Value, dateTitleText, dateValues, null, false);
     }
     public void getLogin(String titleText, String textValueTitle, @NonNull String[] textValues, String textValue2Title, String[] text2Values, String[] textRowValues, String[] textRow2Values, String list2Title)
     {
         boolean createOnly = (list2Title == null);
-        show(EditType.Login, titleText, null, textValueTitle, textValues, textValue2Title, text2Values, textRowValues, textRow2Values, null, null, null, null, null, null, list2Title, (createOnly ? null : Settings.Options.Updates.SatelliteSourceImageIds), (createOnly ? null : Settings.Options.Updates.SatelliteSourceItems), null, (createOnly ? null : new String[]{Settings.Options.Sources.SpaceTrack}), null, null, null, false, null, null);
+        show(EditType.Login, titleText, null, textValueTitle, textValues, textValue2Title, text2Values, textRowValues, textRow2Values, null, null, null, null, null, null, list2Title, (createOnly ? null : Settings.Options.Updates.SatelliteSourceImageIds), (createOnly ? null : Settings.Options.Updates.SatelliteSourceItems), null, (createOnly ? null : new String[]{Settings.Options.Sources.SpaceTrack}), null, null, null, false);
     }
     public void getSortBy(String titleText)
     {
@@ -848,18 +823,14 @@ public class EditValuesDialog
             listSubValues[index] = String.valueOf(listIds[index]);
         }
 
-        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext)}, null, null, null, false, null, null);
+        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext)}, null, null, null, false);
     }
     public void getEditColors(String titleText, int color1, int color2)
     {
-        show(EditType.EditColors, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, new int[]{color1, color2}, false, null, null);
+        show(EditType.EditColors, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, new int[]{color1, color2}, false);
     }
     public void getVisible(String titleText, boolean defaultVisible)
     {
-        show(EditType.Visible, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, defaultVisible, null, null);
-    }
-    public void getType(String titleText, String[] checkBoxTitles, boolean[] checkBoxValues)
-    {
-        show(EditType.Type, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, false, checkBoxTitles, checkBoxValues);
+        show(EditType.Visible, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, defaultVisible);
     }
 }

@@ -205,7 +205,7 @@ public abstract class Selectable
                 itemDetailButtonLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Button_Layout);
                 itemDetail3dCloseButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Close_Button);
                 itemDetail3dFullscreenButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Fullscreen_Button);
-                itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeID(currentContext), usingMaterial, false);
+                itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeId(currentContext), usingMaterial, false);
                 manager = Globals.getFragmentManager(currentContext);
                 itemDetailButtonClickListener = listener;
                 dismissListeners = new ArrayList<>(0);

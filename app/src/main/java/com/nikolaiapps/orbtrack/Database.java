@@ -81,6 +81,7 @@ public class Database extends SQLiteOpenHelper
         static final byte RocketBody = 4;
         static final byte Debris = 5;
         static final byte Constellation = 6;
+        static final byte TypeCount = 6;
     }
 
     static abstract class UpdateSource
@@ -907,6 +908,7 @@ public class Database extends SQLiteOpenHelper
     private static abstract class OrbitalsBuffer
     {
         private static boolean needReload = false;
+        private static int[] typeCount = null;
         private static DatabaseSatellite[] buffer = null;
 
         //Load orbitals from database into buffers
@@ -915,6 +917,7 @@ public class Database extends SQLiteOpenHelper
             //get all orbitals and reset status
             buffer = Database.getOrbitals(context, (String)null);
             needReload = false;
+            typeCount = null;
         }
 
         //Sets that orbitals need to be reloaded
@@ -1056,6 +1059,44 @@ public class Database extends SQLiteOpenHelper
 
             //unknown
             return(false);
+        }
+
+        //Gets the count of the given orbital type
+        public static int getTypeCount(Context context, byte orbitalType)
+        {
+            int index;
+
+            //load if needed
+            handleLoad(context);
+
+            //if type count needs to be calculated
+            if(typeCount == null)
+            {
+                //initialize type count length
+                typeCount = new int[OrbitalType.TypeCount];
+                for(index = 0; index < OrbitalType.TypeCount; index++)
+                {
+                    typeCount[index] = 0;
+                }
+
+                //go through each orbital
+                for(DatabaseSatellite currentOrbital : buffer)
+                {
+                    //remember current type
+                    byte currentType = currentOrbital.orbitalType;
+
+                    //if a valid type
+                    //note: types start at 1
+                    if(currentType > 0 && currentType <= typeCount.length)
+                    {
+                        //update count for type
+                        typeCount[currentType - 1]++;
+                    }
+                }
+            }
+
+            //return count
+            return(orbitalType > 0 && orbitalType <= typeCount.length ? typeCount[orbitalType - 1] : 0);
         }
 
         //Sets path color for orbital with given norad ID
@@ -1763,7 +1804,7 @@ public class Database extends SQLiteOpenHelper
         DatabaseSatellite issZarya;
 
         //make a call to possibly call onUpgrade/set updateStatus
-        getSatelliteID(context, Universe.IDs.None);
+        getSatelliteId(context, Universe.IDs.None);
 
         //if update status is set
         if(updateStatus != null)
@@ -2276,7 +2317,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets a satellite ID by norad
-    private static long getSatelliteID(Context context, int noradId)
+    private static long getSatelliteId(Context context, int noradId)
     {
         //run query
         String[][] queryResult = runQuery(context,"SELECT [ID] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId + " LIMIT 1", null);
@@ -2286,7 +2327,7 @@ public class Database extends SQLiteOpenHelper
     //Modifies satellite data and returns ID
     public static long saveSatellite(Context context, String name, String userName, int noradId, String ownerCode, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected, boolean needReload)
     {
-        long id = getSatelliteID(context, noradId);
+        long id = getSatelliteId(context, noradId);
         long saveId;
         ContentValues satelliteValues = getSatelliteValues(name, userName, noradId, ownerCode, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, pathColor, orbitalType, selected);
         saveId = runSave(context, id, Tables.Orbital, satelliteValues);
@@ -2346,9 +2387,15 @@ public class Database extends SQLiteOpenHelper
     //Deletes a satellite
     public static boolean deleteSatellite(Context context, int noradId)
     {
-        boolean success = runDelete(context, Tables.Orbital, "[ID]='" + getSatelliteID(context, noradId) + "'");
+        boolean success = runDelete(context, Tables.Orbital, "[ID]='" + getSatelliteId(context, noradId) + "'");
         OrbitalsBuffer.setNeedReload();
         return(success);
+    }
+
+    //Gets the count of given orbital type
+    public static int getOrbitalTypeCount(Context context, byte orbitalType)
+    {
+        return(OrbitalsBuffer.getTypeCount(context, orbitalType));
     }
 
     //Gets location name values

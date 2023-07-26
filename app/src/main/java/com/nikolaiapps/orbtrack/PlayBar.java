@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.res.Resources;
@@ -81,7 +82,7 @@ public class PlayBar extends LinearLayout
         //if attributes are set
         if(attrs != null)
         {
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PlayBar, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.PlayBar, 0, 0))
             {
                 textColor = valueArray.getColor(R.styleable.PlayBar_textColor, Color.WHITE);
                 buttonColor = valueArray.getColor(R.styleable.PlayBar_buttonColor, Color.WHITE);

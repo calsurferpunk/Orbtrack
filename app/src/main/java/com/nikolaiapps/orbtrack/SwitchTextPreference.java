@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.text.Editable;
@@ -55,7 +56,7 @@ public class SwitchTextPreference extends ValueTypePreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwitchTextPreference, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SwitchTextPreference, 0, 0))
             {
                 showSwitch = valueArray.getBoolean(R.styleable.SwitchTextPreference_showSwitch, true);
                 reverseEnabled = valueArray.getBoolean(R.styleable.SwitchTextPreference_reverseEnabled, false);

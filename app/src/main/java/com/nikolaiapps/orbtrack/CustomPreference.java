@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -28,7 +29,7 @@ public class CustomPreference extends Preference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CustomPreference, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.CustomPreference, 0, 0))
             {
                 paddingLeft = valueArray.getDimension(R.styleable.CustomPreference_paddingLeft, paddingLeft);
                 titleText = valueArray.getString(R.styleable.CustomPreference_titleText);

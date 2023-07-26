@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
@@ -41,7 +42,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
         if(attrs != null)
         {
             //get attribute values
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SelectableAutoCompleteTextView, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SelectableAutoCompleteTextView, 0, 0))
             {
                 inputType = valueArray.getInt(R.styleable.SelectableAutoCompleteTextView_android_inputType, inputType);
                 valueArray.recycle();

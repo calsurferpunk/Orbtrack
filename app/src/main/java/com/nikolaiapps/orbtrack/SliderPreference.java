@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.TypedArray;
@@ -42,7 +43,7 @@ public class SliderPreference extends CustomPreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SliderPreference, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SliderPreference, 0, 0))
             {
                 scaleType = valueArray.getInt(R.styleable.SliderPreference_scaleType, ScaleType.Integer);
                 minValue = (int)valueArray.getFloat(R.styleable.SliderPreference_minValue, 0);

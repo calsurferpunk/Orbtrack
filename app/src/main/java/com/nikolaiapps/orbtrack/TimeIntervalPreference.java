@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
@@ -86,7 +87,7 @@ public class TimeIntervalPreference extends CustomPreference
         //if there are attributes, retrieve them
         if(attrs != null)
         {
-            try(TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.TimeIntervalPreference, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.TimeIntervalPreference, 0, 0))
             {
                 hourKey = valueArray.getString(R.styleable.TimeIntervalPreference_hourKey);
                 minuteKey = valueArray.getString(R.styleable.TimeIntervalPreference_minuteKey);

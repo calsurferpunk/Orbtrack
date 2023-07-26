@@ -2,6 +2,7 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.animation.LayoutTransition;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
@@ -74,7 +75,7 @@ public class FloatingActionStateButtonMenu extends LinearLayout
         }
         else
         {
-            try(TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.FloatingActionStateButtonMenu, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.FloatingActionStateButtonMenu, 0, 0))
             {
                 imageTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_imageTint, Color.BLACK);
                 backgroundTintColor = valueArray.getColor(R.styleable.FloatingActionStateButtonMenu_backgroundTint, Color.WHITE);

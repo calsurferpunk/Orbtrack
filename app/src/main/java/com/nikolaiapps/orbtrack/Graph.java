@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.TypedArray;
@@ -266,7 +267,7 @@ public class Graph extends View
 
         if(attrs != null)
         {
-            try(TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.Graph, 0, 0))
+            try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = getContext().getTheme().obtainStyledAttributes(attrs, R.styleable.Graph, 0, 0))
             {
                 textSizeSmall = valueArray.getDimension(R.styleable.Graph_dataTextSize, textSizeSmall);
                 valueArray.recycle();

@@ -43,11 +43,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import com.nikolaiapps.orbtrack.SideMenuListAdapter.*;
 import com.nikolaiapps.orbtrack.Calculations.*;
+
+import org.checkerframework.checker.units.qual.A;
 
 
 public class MainActivity extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
@@ -1505,9 +1510,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Drawable passDrawable = Globals.getDrawable(this, R.drawable.orbit, true);
         Drawable coordinateDrawable = Globals.getDrawable(this, R.drawable.ic_language_black, true);
         Drawable intersectionDrawable = Globals.getDrawable(this, R.drawable.ic_intersect, true);
-        Drawable planetDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Moon));
-        Drawable starDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Polaris, Database.OrbitalType.Star));
-        Drawable constellationDrawable = Globals.getDrawable(this, Globals.getOrbitalIconID(this, Universe.IDs.Polaris, Database.OrbitalType.Constellation));
+        Drawable sunDrawable = Globals.getDrawable(this, Globals.getOrbitalIconId(this, Universe.IDs.Sun));
+        Drawable starDrawable = Globals.getDrawable(this, Globals.getOrbitalIconId(this, Universe.IDs.Polaris, Database.OrbitalType.Star));
+        Drawable constellationDrawable = Globals.getDrawable(this, Globals.getOrbitalIconId(this, Universe.IDs.Polaris, Database.OrbitalType.Constellation));
         Drawable displayDrawable = Globals.getDrawable(this, R.drawable.ic_tablet_white, true);
         Drawable locationDrawable = Globals.getDrawable(this, R.drawable.ic_my_location_black, true);
         Drawable notificationsDrawable = Globals.getDrawable(this, R.drawable.ic_notifications_white, true);
@@ -1524,7 +1529,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             groups.add(new Group(this, res.getString(R.string.title_current), R.drawable.ic_access_time_black, new Item[]{new Item(statusString, viewDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_calculate), R.drawable.ic_calculator_black, new Item[]{new Item(viewString, viewDrawable), new Item(passesString, passDrawable), new Item(coordinatesString, coordinateDrawable), new Item(intersectionString, intersectionDrawable)}));
-            groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_moon_and_planets), planetDrawable), new Item(res.getString(R.string.title_stars), starDrawable), new Item(res.getString(R.string.title_constellations), constellationDrawable)}));
+            groups.add(new Group(this, res.getString(R.string.title_orbitals), R.drawable.orbit, new Item[]{new Item(res.getString(R.string.title_satellites), satelliteDrawable), new Item(res.getString(R.string.title_solar_system), sunDrawable), new Item(res.getString(R.string.title_constellations), constellationDrawable), new Item(res.getString(R.string.title_stars), starDrawable)}));
             groups.add(new Group(this, res.getString(R.string.title_settings), R.drawable.ic_settings_black, new Item[]{new Item(res.getString(R.string.title_display), displayDrawable), new Item(res.getString(R.string.title_locations), locationDrawable), new Item(res.getString(R.string.title_notifications), notificationsDrawable), new Item(res.getString(R.string.title_updates), updatesDrawable), new Item(res.getString(R.string.title_all), allDrawable)}));
 
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
@@ -2943,68 +2948,81 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         int index;
         AlertDialog.Builder filterTypeBuilder = new AlertDialog.Builder(this, Globals.getDialogThemeId(this));
-        boolean[] typeValues;
-        ArrayList<String> typeTitles = new ArrayList<>(0);
-        ArrayList<Boolean> typeSelected = new ArrayList<>(0);
+        boolean[] checkedArray;
+        int[] selections = new int[]{R.string.title_satellites, R.string.title_solar_system, R.string.title_rocket_bodies, R.string.title_debris, R.string.title_constellations, R.string.title_stars};
+        ArrayList<Byte> filterList = Settings.getListOrbitalTypeFilter(this);
+        ArrayList<String> titleList = new ArrayList<>(0);
+        ArrayList<Boolean> checkedList = new ArrayList<>(0);
+        ArrayList<List<Byte>> orbitalTypeList = new ArrayList<>(0);
 
-        //get type selections
-        for(byte currentType : new byte[]{Database.OrbitalType.Satellite, Database.OrbitalType.Planet, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Star, Database.OrbitalType.Constellation})
+        //get filter selections
+        for(int stringId : selections)
         {
-            //if current type existing in orbitals
-            if(Database.getOrbitalTypeCount(MainActivity.this, currentType) > 0)
+            int count = 0;
+            boolean inFilter = false;
+            List<Byte> currentOrbitalTypes;
+
+            //get orbital types by title
+            if(stringId == R.string.title_satellites)
             {
-                int stringId;
+                currentOrbitalTypes = Collections.singletonList(Database.OrbitalType.Satellite);
+            }
+            else if(stringId == R.string.title_solar_system)
+            {
+                currentOrbitalTypes = Arrays.asList(Database.OrbitalType.Sun, Database.OrbitalType.Planet);
+            }
+            else if(stringId == R.string.title_rocket_bodies)
+            {
+                currentOrbitalTypes = Collections.singletonList(Database.OrbitalType.RocketBody);
+            }
+            else if(stringId == R.string.title_debris)
+            {
+                currentOrbitalTypes = Collections.singletonList(Database.OrbitalType.Debris);
+            }
+            else if(stringId == R.string.title_constellations)
+            {
+                currentOrbitalTypes = Collections.singletonList(Database.OrbitalType.Constellation);
+            }
+            else    //if(stringId == R.string.title_stars)
+            {
+                currentOrbitalTypes = Collections.singletonList(Database.OrbitalType.Star);
+            }
 
-                //get title and if selected
-                switch(currentType)
-                {
-                    case Database.OrbitalType.Satellite:
-                        stringId = R.string.title_satellites;
-                        break;
+            //go through each orbital type
+            for(byte currentType : currentOrbitalTypes)
+            {
+                //update in filter status and count
+                inFilter = (inFilter || filterList.contains(currentType));
+                count += Database.getOrbitalTypeCount(this, currentType);
+            }
 
-                    case Database.OrbitalType.Planet:
-                        stringId = R.string.title_moon_and_planets;
-                        break;
-
-                    case Database.OrbitalType.RocketBody:
-                        stringId = R.string.title_rocket_bodies;
-                        break;
-
-                    case Database.OrbitalType.Debris:
-                        stringId = R.string.title_debris;
-                        break;
-
-                    case Database.OrbitalType.Star:
-                        stringId = R.string.title_stars;
-                        break;
-
-                    default:
-                    case Database.OrbitalType.Constellation:
-                        stringId = R.string.title_constellations;
-                        break;
-                }
-                typeSelected.add(true);
-                typeTitles.add(this.getString(stringId));
+            //if items exist in database
+            if(count > 0)
+            {
+                //add selection
+                titleList.add(this.getString(stringId));
+                checkedList.add(inFilter);
+                orbitalTypeList.add(currentOrbitalTypes);
             }
         }
 
         //copy selected into values
-        typeValues = new boolean[typeSelected.size()];
-        for(index = 0; index < typeSelected.size(); index++)
+        checkedArray = new boolean[checkedList.size()];
+        for(index = 0; index < checkedList.size(); index++)
         {
             //copy selected value
-            typeValues[index] = typeSelected.get(index);
+            checkedArray[index] = checkedList.get(index);
         }
 
         //setup and show dialog
-        filterTypeBuilder.setTitle(R.string.title_select_list_filter);
-        filterTypeBuilder.setMultiChoiceItems(typeTitles.toArray(new String[0]), typeValues, new DialogInterface.OnMultiChoiceClickListener()
+        filterTypeBuilder.setTitle(R.string.title_select_type);
+        filterTypeBuilder.setMultiChoiceItems(titleList.toArray(new String[0]), checkedArray, new DialogInterface.OnMultiChoiceClickListener()
         {
             @Override
             public void onClick(DialogInterface dialog, int which, boolean isChecked)
             {
-                //update type value
-                typeValues[which] = isChecked;
+                //update checked status
+                checkedArray[which] = isChecked;
             }
         });
         filterTypeBuilder.setPositiveButton(R.string.title_ok, new DialogInterface.OnClickListener()
@@ -3012,7 +3030,23 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             @Override
             public void onClick(DialogInterface dialogInterface, int which)
             {
+                int index;
+                ArrayList<Byte> selectedOrbitalTypes = new ArrayList<>(0);
+
+                //go through each checked status
+                for(index = 0; index < checkedArray.length; index++)
+                {
+                    //if checked
+                    if(checkedArray[index])
+                    {
+                        //add orbital types for this selection
+                        selectedOrbitalTypes.addAll(orbitalTypeList.get(index));
+                    }
+                }
+
                 //update filter
+                Settings.setListOrbitalTypeFilter(MainActivity.this, selectedOrbitalTypes.toArray(new Byte[0]));
+                updateMainPager(false);
             }
         });
         filterTypeBuilder.setNegativeButton(R.string.title_cancel, null);

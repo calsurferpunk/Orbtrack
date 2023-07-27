@@ -44,9 +44,9 @@ public abstract class Orbitals
     public static abstract class PageType
     {
         static final int Satellites = 0;
-        static final int Planets = 1;
-        static final int Stars = 2;
-        static final int Constellation = 3;
+        static final int SolarSystem = 1;
+        static final int Constellations = 2;
+        static final int Stars = 3;
         private static final int PageCount = 4;
     }
 
@@ -68,6 +68,10 @@ public abstract class Orbitals
             isVisible = currentSat.isSelected;
             tleDateMs = currentSat.tleDateMs;
             satelliteObject = Calculations.loadSatellite(currentSat);
+            if(satellite != null)
+            {
+                satellite.orbitalType = currentSat.orbitalType;;
+            }
         }
     }
 
@@ -129,9 +133,9 @@ public abstract class Orbitals
                 switch(page)
                 {
                     case PageType.Satellites:
-                    case PageType.Planets:
+                    case PageType.SolarSystem:
+                    case PageType.Constellations:
                     case PageType.Stars:
-                    case PageType.Constellation:
                         //get conditions
                         switch(page)
                         {
@@ -139,16 +143,16 @@ public abstract class Orbitals
                                 orbitalTypes = new byte[]{Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris};
                                 break;
 
-                            case PageType.Stars:
-                                orbitalTypes = new byte[]{Database.OrbitalType.Star};
+                            case PageType.SolarSystem:
+                                orbitalTypes = new byte[]{Database.OrbitalType.Sun, Database.OrbitalType.Planet};
                                 break;
 
-                            case PageType.Constellation:
+                            case PageType.Constellations:
                                 orbitalTypes = new byte[]{Database.OrbitalType.Constellation};
                                 break;
 
-                            case PageType.Planets:
-                                orbitalTypes = new byte[]{Database.OrbitalType.Planet};
+                            case PageType.Stars:
+                                orbitalTypes = new byte[]{Database.OrbitalType.Star};
                                 break;
                         }
 
@@ -1251,14 +1255,14 @@ public abstract class Orbitals
                 case PageType.Satellites:
                     return(res.getString(R.string.title_satellites));
 
-                case PageType.Planets:
-                    return(res.getString(R.string.title_moon_and_planets));
+                case PageType.SolarSystem:
+                    return(res.getString(R.string.title_solar_system));
+
+                case PageType.Constellations:
+                    return(res.getString(R.string.title_constellations));
 
                 case PageType.Stars:
                     return(res.getString(R.string.title_stars));
-
-                case PageType.Constellation:
-                    return(res.getString(R.string.title_constellations));
 
                 default:
                     return(res.getString(R.string.title_invalid));

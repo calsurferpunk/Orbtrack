@@ -446,7 +446,6 @@
     <string name="title_minutes">Minutos</string>
     <string name="title_months">Meses</string>
     <string name="title_moon">Luna</string>
-    <string name="title_moon_and_planets">Luna y Planetas</string>
     <string name="title_multiple">Múltiple</string>
     <string name="title_name">Nombre</string>
     <string name="title_name_or_id">Nombre o ID</string>
@@ -535,6 +534,7 @@
     <string name="title_select_orbital">Seleccionar Orbital</string>
     <string name="title_select_satellites">Seleccionar Satélites</string>
     <string name="title_select_source">Seleccionar Fuente</string>
+    <string name="title_select_type">Seleccione Tipo</string>
     <string name="title_select_visible">Seleccione Visible</string>
     <string name="title_selected_delete">Eliminar Seleccionado</string>
     <string name="title_semi_major_axis">Semieje Mayor</string>
@@ -571,6 +571,7 @@
     <string name="title_show_zoom">Mostrar Enfocar</string>
     <string name="title_skip">Omitir</string>
     <string name="title_slow">Lento</string>
+    <string name="title_solar_system">Sistema Solar</string>
     <string name="title_sort_by">Ordenar Por</string>
     <string name="title_source">Fuente</string>
     <string name="title_space">Espacio</string>

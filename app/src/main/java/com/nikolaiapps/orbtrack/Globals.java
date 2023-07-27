@@ -3542,7 +3542,7 @@ public abstract class Globals
     }
 
     //Gets an orbital icon ID
-    public static int getOrbitalIconID(Context context, int satelliteNum, byte orbitalType)
+    public static int getOrbitalIconId(Context context, int satelliteNum, byte orbitalType)
     {
         int iconId;
         boolean isMoozarov;
@@ -3620,15 +3620,15 @@ public abstract class Globals
 
         return(iconId);
     }
-    public static int getOrbitalIconID(Context context, int satelliteNum)
+    public static int getOrbitalIconId(Context context, int satelliteNum)
     {
-        return(getOrbitalIconID(context, satelliteNum, Database.OrbitalType.Satellite));
+        return(getOrbitalIconId(context, satelliteNum, Database.OrbitalType.Satellite));
     }
 
     //Gets an orbital icon
     public static Drawable getOrbitalIcon(Context context, Calculations.ObserverType location, int satelliteNum, byte orbitalType, long timeMs, int forceColorId)
     {
-        int iconID = getOrbitalIconID(context, satelliteNum, orbitalType);
+        int iconID = getOrbitalIconId(context, satelliteNum, orbitalType);
         boolean allowIconColor = (iconID == R.drawable.orbital_rocket || iconID == R.drawable.orbital_debris || (satelliteNum > 0 && Settings.getSatelliteIconImageIsThemeable(context)));
 
         if(context == null)
@@ -4593,6 +4593,19 @@ public abstract class Globals
         else
         {
             return(Integer.valueOf(value1).compareTo((value2)));
+        }
+    }
+
+    //Tries to return a byte from the given input
+    public static byte tryParseByte(String input)
+    {
+        try
+        {
+            return(Byte.parseByte(input));
+        }
+        catch(NumberFormatException ex)
+        {
+            return(Byte.MAX_VALUE);
         }
     }
 

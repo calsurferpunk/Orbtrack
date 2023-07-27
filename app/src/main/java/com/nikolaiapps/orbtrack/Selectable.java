@@ -2002,8 +2002,8 @@ public abstract class Selectable
                                 elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 6);
                                 elevationGraph.setRangeY(0, 90, 6);
                                 elevationGraph.setSelectedType(Graph.SelectType.Image);
-                                elevationGraph.setSelectedImage(Globals.getBitmap(activity, Globals.getOrbitalIconID(activity, id1, orbital1.getOrbitalType()), id1 > 0));
-                                elevationGraph.setSelectedImage2(usingOrbital2 ? Globals.getBitmap(activity, Globals.getOrbitalIconID(activity, id2, orbital2.getOrbitalType()), id2 > 0) : null);
+                                elevationGraph.setSelectedImage(Globals.getBitmap(activity, Globals.getOrbitalIconId(activity, id1, orbital1.getOrbitalType()), id1 > 0));
+                                elevationGraph.setSelectedImage2(usingOrbital2 ? Globals.getBitmap(activity, Globals.getOrbitalIconId(activity, id2, orbital2.getOrbitalType()), id2 > 0) : null);
                                 elevationGraph.setVisibility(View.VISIBLE);
                             }
                         });

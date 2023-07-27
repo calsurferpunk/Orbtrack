@@ -700,7 +700,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         else
         {
             //get icon
-            iconId = Globals.getOrbitalIconID(context, noradId, orbitalType);
+            iconId = Globals.getOrbitalIconId(context, noradId, orbitalType);
 
             //if a themeable satellite
             if((noradId > 0 && Settings.getSatelliteIconImageIsThemeable(context)) || iconId == R.drawable.orbital_rocket || iconId == R.drawable.orbital_debris)

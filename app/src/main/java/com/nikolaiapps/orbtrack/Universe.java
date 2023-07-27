@@ -410,7 +410,7 @@ public abstract class Universe
             int centerX;
             int centerY;
             int radius;
-            int moonIconId = Globals.getOrbitalIconID(context, IDs.Moon);
+            int moonIconId = Globals.getOrbitalIconId(context, IDs.Moon);
             double phase = getPhase(gmtMs);
             Canvas phaseCanvas;
             Bitmap phaseImage = Globals.getBitmap(context, moonIconId, 0);

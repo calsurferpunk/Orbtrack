@@ -521,9 +521,11 @@ public abstract class Current
             {
                 super(context);
 
-                int index;
+                int index = 0;
                 boolean usePathProgress = Settings.getListPathProgress(context);
                 boolean usePassQuality = Settings.getListPassQuality(context);
+                ArrayList<Byte> filterList = Settings.getListOrbitalTypeFilter(context);
+                ArrayList<Item> filteredItems = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
                 this.itemsRefID = (usingMaterial ? R.layout.current_combined_material_item : R.layout.current_combined_item);
@@ -538,11 +540,25 @@ public abstract class Current
                 }
                 else
                 {
-                    //setup items
-                    combinedItems.set(new Item[orbitals.length]);
-                    for(index = 0; index < orbitals.length; index++)
+                    //go through each orbital
+                    for(Database.SatelliteData currentOrbital : orbitals)
                     {
-                        combinedItems.set(index, new Item(context, index, orbitals[index], usePathProgress, usePassQuality));
+                        //remember current orbital type
+                        byte currentOrbitalType = currentOrbital.getOrbitalType();
+
+                        //if type is in filter
+                        if(filterList.contains(currentOrbitalType))
+                        {
+                            //add item
+                            filteredItems.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality));
+                        }
+                    }
+
+                    //setup items with filter
+                    combinedItems.set(new Item[filteredItems.size()]);
+                    for(index = 0; index < filteredItems.size(); index++)
+                    {
+                        combinedItems.set(index, filteredItems.get(index));
                     }
                 }
                 combinedItems.sort();

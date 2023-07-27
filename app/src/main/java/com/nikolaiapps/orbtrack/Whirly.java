@@ -1090,7 +1090,6 @@ class Whirly
         {
             int iconId;
             byte orbitalType;
-            boolean isSun;
             Bitmap titleImage;
             Bitmap orbitalImage = null;
             Drawable orbitalBgImage;
@@ -1118,17 +1117,13 @@ class Whirly
             noradId = common.data.getSatelliteNum();
             orbitalType = common.data.getOrbitalType();
             isStar = false;
-            isSun = (noradId == Universe.IDs.Sun);
 
             //try to use saved image
             switch(orbitalType)
             {
                 case Database.OrbitalType.Star:
-                    if(!isSun)
-                    {
-                        orbitalImage = Globals.copyBitmap(starImage);
-                        isStar = true;
-                    }
+                    orbitalImage = Globals.copyBitmap(starImage);
+                    isStar = true;
                     break;
 
                 case Database.OrbitalType.Satellite:
@@ -1148,8 +1143,8 @@ class Whirly
             if(orbitalImage == null && orbitalType != Database.OrbitalType.Constellation)
             {
                 //get image
-                iconId = Globals.getOrbitalIconID(context, noradId, orbitalType);
-                if(!isSun && (orbitalType == Database.OrbitalType.Star))
+                iconId = Globals.getOrbitalIconId(context, noradId, orbitalType);
+                if(orbitalType == Database.OrbitalType.Star)
                 {
                     orbitalDrawable = Globals.getOrbitalIcon(context, observerLocation, noradId, orbitalType);
                     orbitalImage = Globals.getBitmapSized(context, iconId, (int)(orbitalDrawable.getIntrinsicWidth() * StarScale), (int)(orbitalDrawable.getIntrinsicHeight() * StarScale), 0);
@@ -1169,10 +1164,7 @@ class Whirly
                 switch(orbitalType)
                 {
                     case Database.OrbitalType.Star:
-                        if(!isSun)
-                        {
-                            starImage = Globals.copyBitmap(orbitalImage);
-                        }
+                        starImage = Globals.copyBitmap(orbitalImage);
                         break;
 
                     case Database.OrbitalType.Satellite:
@@ -1483,7 +1475,7 @@ class Whirly
                     noradId = common.data.getSatelliteNum();
 
                     orbitalShadow = new FlatObject(controller, isStar);
-                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconID(currentContext, noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0));
+                    orbitalShadow.setImage(currentContext, Globals.getOrbitalIconId(currentContext, noradId, common.data.getOrbitalType()), Color.argb((noradId < 0 ? 144 : 192), 0, 0, 0));
                 }
             }
         }

@@ -81,7 +81,8 @@ public class Database extends SQLiteOpenHelper
         static final byte RocketBody = 4;
         static final byte Debris = 5;
         static final byte Constellation = 6;
-        static final byte TypeCount = 6;
+        static final byte Sun = 7;
+        static final byte TypeCount = 7;
     }
 
     static abstract class UpdateSource
@@ -1696,10 +1697,10 @@ public class Database extends SQLiteOpenHelper
         initIndexing(db);
 
         //if there are no orbitals
-        if(runQuery(context, "SELECT [Name] FROM " + Tables.Orbital + " WHERE [Type]=" + OrbitalType.Star + " LIMIT 1", null).length == 0)
+        if(runQuery(context, "SELECT [Name] FROM " + Tables.Orbital + " WHERE [Type]=" + OrbitalType.Sun + " LIMIT 1", null).length == 0)
         {
             //add sun
-            addOrbital(context, Universe.IDs.Sun, Color.YELLOW, OrbitalType.Star);
+            addOrbital(context, Universe.IDs.Sun, Color.YELLOW, OrbitalType.Sun);
 
             //add planets
             addOrbital(context, Universe.IDs.Moon, Color.GRAY, OrbitalType.Planet);
@@ -1857,6 +1858,16 @@ public class Database extends SQLiteOpenHelper
                     }
                     createStars(db);
                     initIndexing(db, Tables.Star);
+
+                    //if sun is already in orbitals
+                    if(Database.getOrbital(context, Universe.IDs.Sun) != null)
+                    {
+                        ContentValues values = new ContentValues();
+
+                        //update sun orbital type
+                        values.put("[Type]", OrbitalType.Sun);
+                        runUpdate(context, Tables.Orbital, values, "[Norad]=" + Universe.IDs.Sun);
+                    }
 
                     //if polaris is already in orbitals
                     if(Database.getOrbital(context, Universe.IDs.Polaris) != null)

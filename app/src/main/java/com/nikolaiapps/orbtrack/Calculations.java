@@ -1637,7 +1637,7 @@ public abstract class Calculations
         SatelliteObjectType nonSatObj = new SatelliteObjectType();
 
         nonSatObj.tle.satelliteNum = currentSat.noradId;
-        if(currentType == Database.OrbitalType.Star || currentType == Database.OrbitalType.Constellation)
+        if(currentType == Database.OrbitalType.Sun || currentType == Database.OrbitalType.Star || currentType == Database.OrbitalType.Constellation)
         {
             nonSatObj.planetData = new PlanetDataType(currentSat.noradId, 0, 0, 0, currentSat.rightAscensionHours, currentSat.declinationDegs, currentSat.distanceLightYears * KmPerLightYear);
         }
@@ -1657,6 +1657,7 @@ public abstract class Calculations
         //handle based on orbital type
         switch(currentSat.orbitalType)
         {
+            case Database.OrbitalType.Sun:
             case Database.OrbitalType.Star:
             case Database.OrbitalType.Planet:
             case Database.OrbitalType.Constellation:

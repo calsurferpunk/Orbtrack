@@ -503,7 +503,7 @@ public class CalculateService extends NotifyService
                 //show notification
                 notifyChannelId = Globals.getChannelId(Globals.ChannelIds.Pass);
                 Globals.createNotifyChannel(context, notifyChannelId);
-                notifyBuilder = Globals.createNotifyBuilder(context, notifyChannelId, Globals.getOrbitalIconID(context, noradId, orbital.orbitalType));
+                notifyBuilder = Globals.createNotifyBuilder(context, notifyChannelId, Globals.getOrbitalIconId(context, noradId, orbital.orbitalType));
                 notifyBuilder.setContentTitle(notifyTitle).setContentText(notifyMessage).setStyle(new NotificationCompat.BigTextStyle().bigText(notifyDetails));
                 notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_settings), Globals.getPendingBroadcastIntent(context, getSettingsID(noradId), settingsIntent, PendingIntent.FLAG_UPDATE_CURRENT)));
                 notifyBuilder.addAction(new NotificationCompat.Action(0, res.getString(R.string.title_dismiss), Globals.getPendingBroadcastIntent(context, getDismissID(noradId, notifyType), dismissIntent, PendingIntent.FLAG_UPDATE_CURRENT)));

@@ -1101,9 +1101,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     //Draws orbital at the given position
     private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, double azimuth, double elevation, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean isSelected, boolean outsideArea)
     {
-        boolean isSmallStar = (currentType == Database.OrbitalType.Star) && (noradId != Universe.IDs.Sun);
+        boolean isStar = (currentType == Database.OrbitalType.Star);
         boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
-        float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isSmallStar ? STAR_SCALE : 1);
+        float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isStar ? STAR_SCALE : 1);
 
         //if not selected, outside of area, and not showing
         if(!isSelected && outsideArea && !showOutsideArea)
@@ -1151,10 +1151,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 case Settings.Options.LensView.IndicatorType.Icon:
                     if(context != null)
                     {
-                        int iconId = Globals.getOrbitalIconID(context, noradId, currentType);
+                        int iconId = Globals.getOrbitalIconId(context, noradId, currentType);
 
-                        //if a small star
-                        if(isSmallStar)
+                        //if a star
+                        if(isStar)
                         {
                             //if star icon image not set yet
                             if(starIconImage == null)
@@ -1245,7 +1245,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         {
             currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
         }
-        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - textSize) + (textOffset * (isSmallStar || indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
+        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - textSize) + (textOffset * (isStar || indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
         if(currentArea.left < 20)
         {
             currentArea.offsetTo(20, currentArea.top);

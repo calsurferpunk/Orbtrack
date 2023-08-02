@@ -1186,15 +1186,15 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String nm, String uNm, int nrd, String ownerCode, String ownerName, long launchDate, String line1, String line2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbType, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbitalType, boolean selected)
         {
-            this.name = nm;
-            this.userName = (uNm != null ? uNm : "");
-            this.noradId = nrd;
+            this.name = name;
+            this.userName = (userName != null ? userName : "");
+            this.noradId = noradId;
             this.ownerCode = ownerCode;
             this.ownerName = ownerName;
-            this.tleLine1 = line1;
-            this.tleLine2 = line2;
+            this.tleLine1 = tleLine1;
+            this.tleLine2 = tleLine2;
             this.gp = gp;
             this.tle = null;
             if(this.gp != null && !this.gp.equals(""))
@@ -1203,7 +1203,7 @@ public class Database extends SQLiteOpenHelper
             }
             if(this.tle == null)
             {
-                this.tle = Calculations.loadTLE(line1, line2);
+                this.tle = Calculations.loadTLE(tleLine1, tleLine2);
             }
             this.tleDateMs = tleDateMs;
             this.updateDateMs = updateDateMs;
@@ -1212,7 +1212,7 @@ public class Database extends SQLiteOpenHelper
             this.magnitude = magnitude;
             this.distanceLightYears = distanceLightYears;
             this.pathColor = pathColor;
-            this.orbitalType = orbType;
+            this.orbitalType = orbitalType;
             this.isSelected = selected;
             this.launchDateMs = launchDate;
 
@@ -1221,15 +1221,15 @@ public class Database extends SQLiteOpenHelper
                 this.tleDateMs = Globals.julianDateToCalendar(this.tle.epochJulian).getTimeInMillis();
             }
 
-            this.tleIsAccurate = Globals.getTLEIsAccurate(this.tleDateMs);
+            this.tleIsAccurate = (this.noradId != Universe.IDs.Invalid && this.noradId < 0) || Globals.getTLEIsAccurate(this.tleDateMs);
         }
-        public DatabaseSatellite(String nm, String uNm, int nrd, String ownerCode, String ownerName, long launchDate, String line1, String line2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbType, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
         {
-            this(nm, uNm, nrd, ownerCode, ownerName, launchDate, line1, line2, tleDateMs, gp, updateDateMs, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, pathColor, orbType, selected);
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, pathColor, orbitalType, selected);
         }
-        public DatabaseSatellite(String nm, int nrd, String ownCd, long launchDate, byte orbType)
+        public DatabaseSatellite(String name, int noradId, String ownerCode, long launchDate, byte orbitalType)
         {
-            this(nm, null, nrd, ownCd, null, launchDate, null, null, Globals.UNKNOWN_DATE_MS, null, Globals.UNKNOWN_DATE_MS, Color.DKGRAY, orbType, true);
+            this(name, null, noradId, ownerCode, null, launchDate, null, null, Globals.UNKNOWN_DATE_MS, null, Globals.UNKNOWN_DATE_MS, Color.DKGRAY, orbitalType, true);
         }
 
         public String getName()

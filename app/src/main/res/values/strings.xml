@@ -349,6 +349,7 @@
     <string name="title_file_loading">Loading File</string>
     <string name="title_file_select_source">Select File Source</string>
     <string name="title_filled">Filled</string>
+    <string name="title_filter">Filter</string>
     <string name="title_finish">Finish</string>
     <string name="title_finished">Finished</string>
     <string name="title_first_deriv_mean_motion_div_2">First Derivative of Mean Motion / 2</string>
@@ -365,7 +366,6 @@
     <string name="title_g">G</string>
     <string name="title_getting">Getting</string>
     <string name="title_globe">Globe</string>
-    <!--string name="title_globe_type">Globe Type</string-->
     <string name="title_globe_view">Globe View</string>
     <string name="title_globe_slash_map_view">Globe/Map View</string>
     <string name="title_golden_hour">Golden Hour</string>

@@ -22,9 +22,7 @@ public class AddSelectListAdapter extends BaseAdapter
         static final byte SaveAs = 3;
         static final byte EditAccount = 4;
         static final byte AddAccount = 5;
-        static final byte Filter = 6;
-        static final byte Settings = 7;
-        static final byte Edit = 8;
+        static final byte Edit = 6;
     }
 
     static abstract class SatelliteSourceType
@@ -55,19 +53,6 @@ public class AddSelectListAdapter extends BaseAdapter
         static final int Remove = 1;
     }
 
-    static abstract class FilterType
-    {
-        static final int Sorting = 0;
-        static final int Type = 1;
-        static final int Visibility = 2;
-    }
-
-    static abstract class SettingsType
-    {
-        static final int Settings = 0;
-        static final int Visibility = 1;
-    }
-
     static abstract class EditType
     {
         static final int Color = 0;
@@ -92,7 +77,7 @@ public class AddSelectListAdapter extends BaseAdapter
         usingMaterial = Settings.getMaterialTheme(context);
         selectType = listSelectType;
     }
-    public AddSelectListAdapter(Context context, byte listSelectType, int extra, int extra2)
+    public AddSelectListAdapter(Context context, byte listSelectType, int extra)
     {
         this(context, listSelectType);
 
@@ -122,14 +107,6 @@ public class AddSelectListAdapter extends BaseAdapter
 
             case SelectType.EditAccount:
                 selections = (extra != Globals.AccountType.GoogleDrive && extra != Globals.AccountType.Dropbox ? new String[]{res.getString(R.string.title_edit), res.getString(R.string.title_remove)} : new String[]{res.getString(R.string.title_remove)});
-                break;
-
-            case SelectType.Filter:
-                selections = new String[]{res.getString(R.string.title_sort_by), res.getString(R.string.title_type), res.getString(R.string.title_visible)};
-                break;
-
-            case SelectType.Settings:
-                selections = new String[]{res.getString(extra2 == Globals.SubPageType.Lens ? R.string.title_lens_view : R.string.title_globe_slash_map_view), res.getString(R.string.title_visible)};
                 break;
 
             case SelectType.Edit:
@@ -317,37 +294,6 @@ public class AddSelectListAdapter extends BaseAdapter
                             imageId = R.drawable.org_space_track;
                             break;
                     }
-                }
-                break;
-
-            case SelectType.Filter:
-                switch(position)
-                {
-                    case FilterType.Sorting:
-                        imageId = R.drawable.ic_list_white;
-                        break;
-
-                    case FilterType.Type:
-                        imageId = R.drawable.ic_category_black;
-                        break;
-
-                    default:
-                    case FilterType.Visibility:
-                        imageId = R.drawable.ic_remove_red_eye_white;
-                        break;
-                }
-                break;
-
-            case SelectType.Settings:
-                switch(position)
-                {
-                    case SettingsType.Settings:
-                        imageId = R.drawable.ic_settings_black;
-                        break;
-
-                    case SettingsType.Visibility:
-                        imageId = R.drawable.ic_remove_red_eye_white;
-                        break;
                 }
                 break;
 

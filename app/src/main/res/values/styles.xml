@@ -46,6 +46,14 @@
         <item name="subtitleTextColor">@color/light_gray</item>
     </style>
 
+    <!-- Menu -->
+    <style name="PopupMenuStyle" parent="Widget.Material3.PopupMenu.Overflow">
+        <item name="android:popupBackground">?attr/colorAccentDark</item>
+    </style>
+    <style name="PopupMenuTextStyle" parent="Widget.AppCompat.TextView.SpinnerItem">
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <!-- Drawer -->
     <style name="DrawerToggleStyle" parent="Widget.AppCompat.DrawerArrowToggle">
         <item name="color">@color/white</item>
@@ -86,6 +94,8 @@
         <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
         <item name="toolbarStyle">@style/ToolBarStyle</item>
+        <item name="actionOverflowMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:itemTextAppearance">@style/PopupMenuTextStyle</item>
         <item name="elevationOverlayEnabled">false</item>
     </style>
 
@@ -123,6 +133,8 @@
         <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
         <item name="toolbarStyle">@style/ToolBarStyle</item>
+        <item name="actionOverflowMenuStyle">@style/PopupMenuStyle</item>
+        <item name="android:itemTextAppearance">@style/PopupMenuTextStyle</item>
         <item name="elevationOverlayEnabled">false</item>
     </style>
 

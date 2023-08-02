@@ -52,8 +52,6 @@ import java.util.TimeZone;
 import com.nikolaiapps.orbtrack.SideMenuListAdapter.*;
 import com.nikolaiapps.orbtrack.Calculations.*;
 
-import org.checkerframework.checker.units.qual.A;
-
 
 public class MainActivity extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
 {
@@ -142,6 +140,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private CalculateService.CalculatePathsTask currentPassesTask;
     private CalculateService.CalculatePathsTask calculatePassesTask;
     private CalculateService.CalculatePathsTask calculateIntersectionsTask;
+    private static final ArrayList<Byte> mapFilterList = new ArrayList<>(0);
     private static final ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
     private static Database.SatelliteData[] currentSatellites = new Database.SatelliteData[0];
     //
@@ -770,6 +769,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean showMap = (onCurrent && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
         boolean showGlobe = (onCurrent && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
         boolean onCurrentNoSelected = (onCurrent && viewLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
+        boolean showFilter = (onCurrentNoSelected && (onSubPageList || onSubPageMap || onSubPageGlobe));
+        boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
         menu.findItem(R.id.menu_list).setVisible(showList);
@@ -777,8 +778,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         menu.findItem(R.id.menu_map).setVisible(showMap);
         menu.findItem(R.id.menu_globe).setVisible(showGlobe);
         menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(this));
-        menu.findItem(R.id.menu_filter).setVisible(onCurrentNoSelected && onSubPageList);
-        menu.findItem(R.id.menu_settings).setVisible(onCurrentNoSelected && (onSubPageLens || onSubPageMap || onSubPageGlobe));
+        menu.findItem(R.id.menu_sort_by).setVisible(onCurrentCombinedList);
+        menu.findItem(R.id.menu_filter).setVisible(showFilter);
+        menu.findItem(R.id.menu_visible).setVisible(showSettings);
+        menu.findItem(R.id.menu_settings).setVisible(showSettings);
+        menu.findItem(R.id.menu_overflow).setVisible(showFilter || showSettings);
         menu.findItem(R.id.menu_edit).setVisible((showSave && !onOrbitalSatellites) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe);
         menu.findItem(R.id.menu_save).setVisible(showSave);
         menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
@@ -942,18 +946,26 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 showLocationGettingDisplay();
             }
         }
+        else if(id == R.id.menu_sort_by)
+        {
+            showSortingDialog();
+        }
         else if(id == R.id.menu_filter)
         {
             if(mainGroup == Groups.Current)
             {
-                showFilterDialog();
+                showFilterTypeDialog();
             }
+        }
+        else if(id == R.id.menu_visible)
+        {
+            showOrbitalViewList();
         }
         else if(id == R.id.menu_settings)
         {
             if(mainGroup == Groups.Current)
             {
-                showSettingsDialog();
+                showSettingsDisplay();
             }
         }
         else if(id == R.id.menu_update)
@@ -1358,6 +1370,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //load orbitals
         loadOrbitals(this, mainDrawerLayout);
+
+        //load filters
+        mapFilterList.clear();
+        mapFilterList.addAll(Settings.getMapOrbitalTypeFilter(this));
 
         //get observer
         loadObserver(!savedState);
@@ -2902,60 +2918,53 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         MasterAddListActivity.showList(this, resultLauncher, MasterAddListActivity.ListType.VisibleList, BaseInputActivity.RequestCode.OrbitalViewList, null);
     }
 
-    //Shows a filter dialog
-    public void showFilterDialog()
+    //Shows a sorting dialog
+    public void showSortingDialog()
     {
-        final Resources res = this.getResources();
-
-        Globals.showSelectDialog(this, res.getString(R.string.title_select_list_filter), AddSelectListAdapter.SelectType.Filter, new AddSelectListAdapter.OnItemClickListener()
+        //show sorting dialog
+        new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
         {
             @Override
-            public void onItemClick(int which)
+            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
             {
-                //handle based on source
-                switch(which)
-                {
-                    case AddSelectListAdapter.FilterType.Sorting:
-                        //show sorting dialog
-                        new EditValuesDialog(MainActivity.this, new EditValuesDialog.OnSaveListener()
-                        {
-                            @Override
-                            public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
-                            {
-                                //update current sort by for page and set pending
-                                Settings.setCurrentSortBy(MainActivity.this, list2Value);
-                                Current.PageAdapter.setPendingSort(true);
-                            }
-                        }).getSortBy(res.getString(R.string.title_sort_by));
-                        break;
-
-                    case AddSelectListAdapter.FilterType.Type:
-                        //show filter type dialog
-                        showFilterTypeDialog();
-                        break;
-
-                    case AddSelectListAdapter.FilterType.Visibility:
-                        //show view list
-                        showOrbitalViewList();
-                        break;
-                }
+                //update current sort by for page and set pending
+                Settings.setCurrentSortBy(MainActivity.this, list2Value);
+                Current.PageAdapter.setPendingSort(true);
             }
-        });
+        }).getSortBy(this.getString(R.string.title_sort_by));
     }
 
     //Shows a filter type dialog
     public void showFilterTypeDialog()
     {
         int index;
+        int subPage = getSubPage();
         AlertDialog.Builder filterTypeBuilder = new AlertDialog.Builder(this, Globals.getDialogThemeId(this));
         boolean[] checkedArray;
         int[] selections = new int[]{R.string.title_satellites, R.string.title_solar_system, R.string.title_rocket_bodies, R.string.title_debris, R.string.title_constellations, R.string.title_stars};
-        ArrayList<Byte> filterList = Settings.getListOrbitalTypeFilter(this);
+        ArrayList<Byte> filterList;
         ArrayList<String> titleList = new ArrayList<>(0);
         ArrayList<Boolean> checkedList = new ArrayList<>(0);
         ArrayList<List<Byte>> orbitalTypeList = new ArrayList<>(0);
 
-        //get filter selections
+        //get filter list
+        switch(subPage)
+        {
+            case Globals.SubPageType.List:
+                filterList = Settings.getListOrbitalTypeFilter(this);
+                break;
+
+            case Globals.SubPageType.Map:
+            case Globals.SubPageType.Globe:
+                filterList = Settings.getMapOrbitalTypeFilter(this);
+                break;
+
+            default:
+                filterList = new ArrayList<>(0);
+                break;
+        }
+
+        //go through filter selections
         for(int stringId : selections)
         {
             int count = 0;
@@ -3031,6 +3040,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             public void onClick(DialogInterface dialogInterface, int which)
             {
                 int index;
+                Byte[] selectedArray;
                 ArrayList<Byte> selectedOrbitalTypes = new ArrayList<>(0);
 
                 //go through each checked status
@@ -3045,46 +3055,53 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
 
                 //update filter
-                Settings.setListOrbitalTypeFilter(MainActivity.this, selectedOrbitalTypes.toArray(new Byte[0]));
-                updateMainPager(false);
+                selectedArray = selectedOrbitalTypes.toArray(new Byte[0]);
+                switch(subPage)
+                {
+                    case Globals.SubPageType.List:
+                        Settings.setListOrbitalTypeFilter(MainActivity.this, selectedArray);
+                        updateMainPager(false);
+                        break;
+
+                    case Globals.SubPageType.Map:
+                    case Globals.SubPageType.Globe:
+                        Settings.setMapOrbitalTypeFilter(MainActivity.this, selectedArray);
+                        mapFilterList.clear();
+                        mapFilterList.addAll(selectedOrbitalTypes);
+                        break;
+                }
             }
         });
         filterTypeBuilder.setNegativeButton(R.string.title_cancel, null);
         filterTypeBuilder.show();
     }
 
-    //Shows a settings dialog
-    public void showSettingsDialog()
+    //Shows settings display for current sub page
+    public void showSettingsDisplay()
     {
-        final Activity activity = this;
-        final int page = getMainPage();
-        final int subPage = getSubPage();
-        Resources res = this.getResources();
+        int subPage = getSubPage();
+        Intent startIntent = new Intent(this, SettingsActivity.class);
+        String startScreenValue = null;
 
-        Globals.showSelectDialog(activity, res.getString(R.string.title_settings), AddSelectListAdapter.SelectType.Settings, page, subPage, new AddSelectListAdapter.OnItemClickListener()
+        switch(subPage)
         {
-            @Override
-            public void onItemClick(int which)
-            {
-                //handle based on source
-                switch(which)
-                {
-                    case AddSelectListAdapter.SettingsType.Settings:
-                        Intent startIntent = new Intent(activity, SettingsActivity.class);
-                        String startScreenValue = (subPage == Globals.SubPageType.Lens ? SettingsActivity.ScreenKey.LensView : SettingsActivity.ScreenKey.GlobeMapView);
+            case Globals.SubPageType.List:
+                startScreenValue = SettingsActivity.ScreenKey.ListView;
+                break;
 
-                        //start settings activity
-                        startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
-                        Globals.startActivityForResult(resultLauncher, startIntent, BaseInputActivity.RequestCode.Settings);
-                        break;
+            case Globals.SubPageType.Lens:
+                startScreenValue = SettingsActivity.ScreenKey.LensView;
+                break;
 
-                    case AddSelectListAdapter.SettingsType.Visibility:
-                        //show view list
-                        showOrbitalViewList();
-                        break;
-                }
-            }
-        });
+            case Globals.SubPageType.Map:
+            case Globals.SubPageType.Globe:
+                startScreenValue = SettingsActivity.ScreenKey.GlobeMapView;
+                break;
+        }
+
+        //start settings activity
+        startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
+        Globals.startActivityForResult(resultLauncher, startIntent, BaseInputActivity.RequestCode.Settings);
     }
 
     //Shows getting location display
@@ -4078,8 +4095,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //go through each satellite
                     for(index = 0; index < currentSatellites.length; index++)
                     {
-                        //get current orbital data
+                        //get current orbital data and remember if in filter
                         Database.SatelliteData currentOrbitalData = currentSatellites[index];
+                        byte currentOrbitalType = currentOrbitalData.getOrbitalType();
+                        boolean currentInFilter = (!onMap || mapFilterList.contains(currentOrbitalType));
 
                         //if current orbital TLE is accurate
                         if(currentOrbitalData.getTLEIsAccurate())
@@ -4090,25 +4109,32 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                             currentNoradId = currentOrbital.getSatelliteNum();
                             currentIsSatellite = (currentNoradId > 0);
-                            Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
-                            topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
-
-                            //if the sun
-                            if(currentNoradId == Universe.IDs.Sun)
+                            if(currentInFilter)
                             {
-                                //if have last elevation
-                                if(sunLastEl.value != Double.MAX_VALUE)
-                                {
-                                    //if changed enough
-                                    changedEnough = (Math.abs(topographicData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
-                                }
+                                Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
+                                topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
 
-                                //if -had no last elevation- or -changed enough-
-                                if(sunLastEl.value == Double.MAX_VALUE || changedEnough)
+                                //if the sun
+                                if(currentNoradId == Universe.IDs.Sun)
                                 {
-                                    //update last elevation
-                                    sunLastEl.value = topographicData.elevation;
+                                    //if have last elevation
+                                    if(sunLastEl.value != Double.MAX_VALUE)
+                                    {
+                                        //if changed enough
+                                        changedEnough = (Math.abs(topographicData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
+                                    }
+
+                                    //if -had no last elevation- or -changed enough-
+                                    if(sunLastEl.value == Double.MAX_VALUE || changedEnough)
+                                    {
+                                        //update last elevation
+                                        sunLastEl.value = topographicData.elevation;
+                                    }
                                 }
+                            }
+                            else
+                            {
+                                topographicData = new TopographicDataType();
                             }
 
                             //if not a satellite
@@ -4125,45 +4151,49 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 if(updateElapsed)
                                 {
                                     //update speed and saved geo
-                                    currentOrbital.geo.speedKmS = Calculations.getDistanceKm(currentOrbital.savedGeo, currentOrbital.geo) / travelSeconds;
+                                    currentOrbital.geo.speedKmS = (currentInFilter ? (Calculations.getDistanceKm(currentOrbital.savedGeo, currentOrbital.geo) / travelSeconds) : 0);
                                     currentOrbital.savedGeo = new GeodeticDataType(currentOrbital.geo);
                                 }
                             }
 
-                            //if not using all satellites and satellite number matches
-                            if((!allViewOrbitals && currentNoradId == viewLensNoradID))
+                            //if in filter
+                            if(currentInFilter)
                             {
-                                //set array with current satellite
-                                selectedSatellites = new Database.SatelliteData[1];
-                                selectedSatellites[0] = currentSatellites[index];
-                                selectedLookAngles = new TopographicDataType[1];
-                                selectedLookAngles[0] = topographicData;
-                            }
-
-                            //if not viewing a specific orbital or norad ID matches
-                            if(allViewOrbitals || currentNoradId == viewLensNoradID)
-                            {
-                                //remember look angle
-                                lookAngles[index] = topographicData;
-
-                                //if combined list exists and showing list
-                                if(onList && Current.PageAdapter.hasItems())
+                                //if not using all satellites and satellite number matches
+                                if((!allViewOrbitals && currentNoradId == viewLensNoradID))
                                 {
-                                    //get current item
-                                    Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);
-                                    if(currentItem != null)
-                                    {
-                                        //update values
-                                        currentItem.azimuth = (float)topographicData.azimuth;
-                                        currentItem.elevation = (float)topographicData.elevation;
-                                        currentItem.rangeKm = (float)topographicData.rangeKm;
-                                        currentItem.speedKms = (float)currentOrbital.geo.speedKmS;
-                                        currentItem.latitude = (float)currentOrbital.geo.latitude;
-                                        currentItem.longitude = (float)currentOrbital.geo.longitude;
-                                        currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
+                                    //set array with current satellite
+                                    selectedSatellites = new Database.SatelliteData[1];
+                                    selectedSatellites[0] = currentSatellites[index];
+                                    selectedLookAngles = new TopographicDataType[1];
+                                    selectedLookAngles[0] = topographicData;
+                                }
 
-                                        //update list later
-                                        updateList = true;
+                                //if not viewing a specific orbital or norad ID matches
+                                if(allViewOrbitals || currentNoradId == viewLensNoradID)
+                                {
+                                    //remember look angle
+                                    lookAngles[index] = topographicData;
+
+                                    //if combined list exists and showing list
+                                    if(onList && Current.PageAdapter.hasItems())
+                                    {
+                                        //get current item
+                                        Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);
+                                        if(currentItem != null)
+                                        {
+                                            //update values
+                                            currentItem.azimuth = (float)topographicData.azimuth;
+                                            currentItem.elevation = (float)topographicData.elevation;
+                                            currentItem.rangeKm = (float)topographicData.rangeKm;
+                                            currentItem.speedKms = (float)currentOrbital.geo.speedKmS;
+                                            currentItem.latitude = (float)currentOrbital.geo.latitude;
+                                            currentItem.longitude = (float)currentOrbital.geo.longitude;
+                                            currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
+
+                                            //update list later
+                                            updateList = true;
+                                        }
                                     }
                                 }
                             }
@@ -4179,8 +4209,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     boolean singlePlaybackMarker = (mapViewNoradID == currentNoradId);
                                     boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapView.getSelectedNoradId());
 
-                                    //if using multiple orbitals or current is selected
-                                    if(multiOrbitals || currentOrbitalSelected)
+                                    //if -in filter- and -using multiple orbitals or current is selected-
+                                    if(currentInFilter && (multiOrbitals || currentOrbitalSelected))
                                     {
                                         //remember latitude, longitude, and if info under title
                                         double currentLatitude = currentOrbital.geo.latitude;
@@ -4237,7 +4267,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     }
                                     else
                                     {
+                                        //hide marker
                                         currentMarker.setVisible(false);
+
+                                        //if not in filter
+                                        if(!currentInFilter)
+                                        {
+                                            //remove completely
+                                            currentMarker.remove();
+                                        }
                                     }
                                 }
                             }

@@ -869,10 +869,10 @@ public abstract class Globals
     }
 
     //Shows a select dialog
-    private static void showSelectDialog(Context context, int titleIconId, String title, final byte selectType, final int extra, int extra2, final Integer[] itemIds, final AddSelectListAdapter.OnItemClickListener listener)
+    private static void showSelectDialog(Context context, int titleIconId, String title, final byte selectType, final int extra, final Integer[] itemIds, final AddSelectListAdapter.OnItemClickListener listener)
     {
         boolean usingIcon = (titleIconId >= 0);
-        AddSelectListAdapter listAdapter = (itemIds != null ? new AddSelectListAdapter(context, selectType, itemIds) : new AddSelectListAdapter(context, selectType, extra, extra2));
+        AddSelectListAdapter listAdapter = (itemIds != null ? new AddSelectListAdapter(context, selectType, itemIds) : new AddSelectListAdapter(context, selectType, extra));
         AlertDialog dialog;
         CustomAlertDialogBuilder selectDialog = new CustomAlertDialogBuilder(context, getDialogThemeId(context), Settings.getMaterialTheme(context), true);
 
@@ -895,25 +895,22 @@ public abstract class Globals
                     //set to account
                     which = itemIds[which];
                 }
-                //else if not for settings
-                else if(selectType != AddSelectListAdapter.SelectType.Settings)
-                {
-                    //if for file source
-                    if(selectType == AddSelectListAdapter.SelectType.FileSource && Build.VERSION.SDK_INT >= 29)
-                    {
-                        //skip SD card
-                        which++;
-                    }
 
-                    //handle based on account type
-                    switch(extra)
-                    {
-                        case AccountType.GoogleDrive:
-                        case AccountType.Dropbox:
-                            //add offset
-                            which += 1;
-                            break;
-                    }
+                //if for file source
+                if(selectType == AddSelectListAdapter.SelectType.FileSource && Build.VERSION.SDK_INT >= 29)
+                {
+                    //skip SD card
+                    which++;
+                }
+
+                //handle based on account type
+                switch(extra)
+                {
+                    case AccountType.GoogleDrive:
+                    case AccountType.Dropbox:
+                        //add offset
+                        which += 1;
+                        break;
                 }
 
                 //if listener exists
@@ -937,19 +934,15 @@ public abstract class Globals
     }
     public static void showSelectDialog(Context context, String title, byte selectType, Integer[] itemIds, AddSelectListAdapter.OnItemClickListener listener)
     {
-        showSelectDialog(context, -1, title, selectType, AccountType.None, -1, itemIds, listener);
+        showSelectDialog(context, -1, title, selectType, AccountType.None, itemIds, listener);
     }
     public static void showSelectDialog(Context context, int titleIconId, String title, byte selectType, int extra, AddSelectListAdapter.OnItemClickListener listener)
     {
-        showSelectDialog(context, titleIconId, title, selectType, extra, -1, null, listener);
-    }
-    public static void showSelectDialog(Context context, String title, byte selectType, int extra, int extra2, AddSelectListAdapter.OnItemClickListener listener)
-    {
-        showSelectDialog(context, -1, title, selectType, extra, extra2, null, listener);
+        showSelectDialog(context, titleIconId, title, selectType, extra, null, listener);
     }
     public static void showSelectDialog(Context context, String title, byte selectType, AddSelectListAdapter.OnItemClickListener listener)
     {
-        showSelectDialog(context, -1, title, selectType, AccountType.None, -1, null, listener);
+        showSelectDialog(context, -1, title, selectType, AccountType.None, null, listener);
     }
 
     //Tries to get activity from the given context

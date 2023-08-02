@@ -41,20 +41,6 @@
         app:showAsAction="always"
         android:visible="false"/>
 
-    <item android:id="@+id/menu_filter"
-        android:title="@string/title_visible"
-        android:icon="@drawable/ic_filter_alt_white"
-        android:orderInCategory="60"
-        app:showAsAction="always"
-        android:visible="false"/>
-
-    <item android:id="@+id/menu_settings"
-        android:title="@string/title_settings"
-        android:icon="@drawable/ic_settings_white"
-        android:orderInCategory="70"
-        app:showAsAction="always"
-        android:visible="false"/>
-
     <item android:id="@+id/menu_save"
         android:title="@string/title_save"
         android:icon="@drawable/ic_save_white"
@@ -75,4 +61,41 @@
           android:orderInCategory="100"
           app:showAsAction="always"
           android:visible="false"/>
+
+    <item android:id="@+id/menu_overflow"
+        android:title="@string/title_settings"
+        android:icon="@drawable/ic_more_vert_white"
+        android:orderInCategory="110"
+        app:showAsAction="always"
+        android:visible="true">
+        <menu>
+            <item android:id="@+id/menu_sort_by"
+                android:title="@string/title_sort_by"
+                android:icon="@drawable/ic_list_white"
+                android:orderInCategory="10"
+                app:showAsAction="always"
+                android:visible="false"/>
+
+            <item android:id="@+id/menu_filter"
+                android:title="@string/title_filter"
+                android:icon="@drawable/ic_filter_alt_white"
+                android:orderInCategory="20"
+                app:showAsAction="always"
+                android:visible="false"/>
+
+            <item android:id="@+id/menu_visible"
+                android:title="@string/title_visible"
+                android:icon="@drawable/ic_remove_red_eye_white"
+                android:orderInCategory="30"
+                app:showAsAction="always"
+                android:visible="false"/>
+
+            <item android:id="@+id/menu_settings"
+                android:title="@string/title_settings"
+                android:icon="@drawable/ic_settings_white"
+                android:orderInCategory="40"
+                app:showAsAction="always"
+                android:visible="false"/>
+        </menu>
+    </item>
 </menu>

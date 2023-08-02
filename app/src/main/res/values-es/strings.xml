@@ -349,6 +349,7 @@
     <string name="title_file_loading">Cargando archivo</string>
     <string name="title_file_select_source">Seleccionar Fuente de Archivo</string>
     <string name="title_filled">Lleno</string>
+    <string name="title_filter">Filtro</string>
     <string name="title_finish">Terminar</string>
     <string name="title_finished">Terminado</string>
     <string name="title_first_deriv_mean_motion_div_2">Primera Derivada de Movimiento Medio / 2</string>
@@ -365,7 +366,6 @@
     <string name="title_g">G</string>
     <string name="title_getting">Consiguiendo</string>
     <string name="title_globe">Globo</string>
-    <!--string name="title_globe_type">Tipo de Globo</string-->
     <string name="title_globe_view">Vista Globo</string>
     <string name="title_globe_slash_map_view">Vista Globo/Mapa</string>
     <string name="title_golden_hour">Hora Dorada</string>

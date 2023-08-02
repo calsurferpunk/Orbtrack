@@ -94,6 +94,7 @@ public abstract class Settings
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
         static final String MapShowToolbars = "MapShowToolbars";
+        static final String MapOrbitalTypeFilter = "MapOrbitalTypeFilter";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
@@ -2195,9 +2196,9 @@ public abstract class Settings
     //Gets default string value for the given preference
     public static String getDefaultStringValue(String preferenceName)
     {
-        if(preferenceName.equals(PreferenceName.ListOrbitalTypeFilter))
+        if(preferenceName.equals(PreferenceName.ListOrbitalTypeFilter) || preferenceName.equals(PreferenceName.MapOrbitalTypeFilter))
         {
-            return(getListOrbitalTypeFilterString(Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Sun, Database.OrbitalType.Planet));
+            return(getOrbitalTypeFilterString(Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Sun, Database.OrbitalType.Planet));
         }
         else if(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartZoneId, PreferenceName.NotifyFullMoonEndZoneId, PreferenceName.NotifyPassStartZoneId, PreferenceName.NotifyPassEndZoneId))
         {
@@ -2221,6 +2222,68 @@ public abstract class Settings
         {
             getWriteSettings(context).putString(preferenceName, value).apply();
         }
+    }
+
+    //Gets orbital type filter for the given preference
+    private static ArrayList<Byte> getOrbitalTypeFilter(Context context, String preferenceName)
+    {
+        byte byteValue;
+        String listValue = getPreferenceString(context, preferenceName);
+        String[] values = (listValue != null ? listValue.split(",") : null);
+        ArrayList<Byte> orbitalTypes = new ArrayList<>(values != null ? values.length : 0);
+
+        //if values are set
+        if(values != null)
+        {
+            //go through each value
+            for(String currentValue : values)
+            {
+                //if able to get a valid byte value
+                byteValue = Globals.tryParseByte(currentValue);
+                if(byteValue > 0 && byteValue <= Database.OrbitalType.TypeCount)
+                {
+                    //add orbital type
+                    orbitalTypes.add(Byte.parseByte(currentValue));
+                }
+            }
+        }
+
+        //return orbital types
+        return(orbitalTypes);
+    }
+
+    //Gets a formatted orbital type filter string
+    public static String getOrbitalTypeFilterString(Byte... orbitalTypes)
+    {
+        int index;
+        StringBuilder filterString = new StringBuilder();
+
+        //if types are set
+        if(orbitalTypes != null)
+        {
+            //go through each type
+            for(index = 0; index < orbitalTypes.length; index++)
+            {
+                //add type
+                filterString.append(orbitalTypes[index]);
+
+                //if there are more types after current
+                if(index + 1 < orbitalTypes.length)
+                {
+                    //add separator
+                    filterString.append(",");
+                }
+            }
+        }
+
+        //return filter string
+        return(filterString.toString());
+    }
+
+    //Sets orbital type filter for the given preference
+    public static void setOrbitalTypeFilter(Context context, String preferenceName, Byte... orbitalTypes)
+    {
+        setPreferenceString(context, preferenceName, getOrbitalTypeFilterString(orbitalTypes));
     }
 
     //Gets if first run
@@ -2547,63 +2610,13 @@ public abstract class Settings
     //Gets list orbital type filter
     public static ArrayList<Byte> getListOrbitalTypeFilter(Context context)
     {
-        byte byteValue;
-        String listValue = getPreferenceString(context, PreferenceName.ListOrbitalTypeFilter);
-        String[] values = (listValue != null ? listValue.split(",") : null);
-        ArrayList<Byte> orbitalTypes = new ArrayList<>(values != null ? values.length : 0);
-
-        //if values are set
-        if(values != null)
-        {
-            //go through each value
-            for(String currentValue : values)
-            {
-                //if able to get a valid byte value
-                byteValue = Globals.tryParseByte(currentValue);
-                if(byteValue > 0 && byteValue <= Database.OrbitalType.TypeCount)
-                {
-                    //add orbital type
-                    orbitalTypes.add(Byte.parseByte(currentValue));
-                }
-            }
-        }
-
-        //return orbital types
-        return(orbitalTypes);
-    }
-
-    //Gets a formatted list orbital type filter string
-    public static String getListOrbitalTypeFilterString(Byte... orbitalTypes)
-    {
-        int index;
-        StringBuilder filterString = new StringBuilder();
-
-        //if types are set
-        if(orbitalTypes != null)
-        {
-            //go through each type
-            for(index = 0; index < orbitalTypes.length; index++)
-            {
-                //add type
-                filterString.append(orbitalTypes[index]);
-
-                //if there are more types after current
-                if(index + 1 < orbitalTypes.length)
-                {
-                    //add separator
-                    filterString.append(",");
-                }
-            }
-        }
-
-        //return filter string
-        return(filterString.toString());
+        return(getOrbitalTypeFilter(context, PreferenceName.ListOrbitalTypeFilter));
     }
 
     //Sets list orbital type filter
     public static void setListOrbitalTypeFilter(Context context, Byte... orbitalTypes)
     {
-        setPreferenceString(context, PreferenceName.ListOrbitalTypeFilter, getListOrbitalTypeFilterString(orbitalTypes));
+        setOrbitalTypeFilter(context, PreferenceName.ListOrbitalTypeFilter, orbitalTypes);
     }
 
     //Gets map frame rate
@@ -2919,6 +2932,18 @@ public abstract class Settings
     public static void setMapMarkerShowShadow(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.MapMarkerShowShadow, show);
+    }
+
+    //Gets map orbital type filter
+    public static ArrayList<Byte> getMapOrbitalTypeFilter(Context context)
+    {
+        return(getOrbitalTypeFilter(context, PreferenceName.MapOrbitalTypeFilter));
+    }
+
+    //Sets map orbital type filter
+    public static void setMapOrbitalTypeFilter(Context context, Byte... orbitalTypes)
+    {
+        setOrbitalTypeFilter(context, PreferenceName.MapOrbitalTypeFilter, orbitalTypes);
     }
 
     //Gets sort by string id for given sort by value

@@ -117,6 +117,7 @@ public abstract class Settings
         static final String LensHeight = "LensHeight";
         static final String LensShowToolbars = "LensShowToolbars";
         static final String LensShowOutsideArea = "LensShowOutsideArea";
+        static final String LensOrbitalTypeFilter = "LensOrbitalTypeFilter";
         static final String LocationLastLatitude = "LocationLatitude";
         static final String LocationLastLongitude = "LocationLastLongitude";
         static final String LocationLastAltitude = "LocationLastAltitude";
@@ -2200,6 +2201,10 @@ public abstract class Settings
         {
             return(getOrbitalTypeFilterString(Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Sun, Database.OrbitalType.Planet));
         }
+        else if(preferenceName.equals(PreferenceName.LensOrbitalTypeFilter))
+        {
+            return(getOrbitalTypeFilterString(Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Sun, Database.OrbitalType.Planet, Database.OrbitalType.Star, Database.OrbitalType.Constellation));
+        }
         else if(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartZoneId, PreferenceName.NotifyFullMoonEndZoneId, PreferenceName.NotifyPassStartZoneId, PreferenceName.NotifyPassEndZoneId))
         {
             return(TimeZone.getDefault().getID());
@@ -2587,6 +2592,18 @@ public abstract class Settings
     public static void setLensHeight(Context context, float height)
     {
         setPreferenceFloat(context, PreferenceName.LensHeight, height);
+    }
+
+    //Gets lens orbital type filter
+    public static ArrayList<Byte> getLensOrbitalTypeFilter(Context context)
+    {
+        return(getOrbitalTypeFilter(context, PreferenceName.LensOrbitalTypeFilter));
+    }
+
+    //Sets lens orbital type filter
+    public static void setLensOrbitalTypeFilter(Context context, Byte... orbitalTypes)
+    {
+        setOrbitalTypeFilter(context, PreferenceName.LensOrbitalTypeFilter, orbitalTypes);
     }
 
     //Gets list path progress being shown

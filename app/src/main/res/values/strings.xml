@@ -367,6 +367,7 @@
     <string name="title_getting">Getting</string>
     <string name="title_globe">Globe</string>
     <string name="title_globe_view">Globe View</string>
+    <string name="title_globe_slash_map_filter">Globe/Map Filter</string>
     <string name="title_globe_slash_map_view">Globe/Map View</string>
     <string name="title_golden_hour">Golden Hour</string>
     <string name="title_green">Green</string>
@@ -408,11 +409,13 @@
     <string name="title_launch_number_of_year">Launch Number of Year</string>
     <string name="title_length">Length</string>
     <string name="title_lens">Lens</string>
+    <string name="title_lens_filter">Lens Filter</string>
     <string name="title_lens_view">Lens View</string>
     <string name="title_line_1">Line 1</string>
     <string name="title_line_2">Line 2</string>
     <string name="title_line_number">Line Number</string>
     <string name="title_list_all">ALL</string>
+    <string name="title_list_filter">List Filter</string>
     <string name="title_list_getting">Getting List</string>
     <string name="title_list_update">Update List</string>
     <string name="title_list_view">List View</string>
@@ -534,7 +537,6 @@
     <string name="title_select_orbital">Select Orbital</string>
     <string name="title_select_satellites">Select Satellites</string>
     <string name="title_select_source">Select Source</string>
-    <string name="title_select_type">Select Type</string>
     <string name="title_select_visible">Select Visible</string>
     <string name="title_selected_delete">Delete Selected</string>
     <string name="title_semi_major_axis">Semi Major Axis</string>

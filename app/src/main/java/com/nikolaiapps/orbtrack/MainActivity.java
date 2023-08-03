@@ -141,6 +141,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private CalculateService.CalculatePathsTask calculatePassesTask;
     private CalculateService.CalculatePathsTask calculateIntersectionsTask;
     private static final ArrayList<Byte> mapFilterList = new ArrayList<>(0);
+    private static final ArrayList<Byte> lensFilterList = new ArrayList<>(0);
     private static final ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
     private static Database.SatelliteData[] currentSatellites = new Database.SatelliteData[0];
     //
@@ -475,8 +476,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             (data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map)))
                     {
                         //recreate
-                        wasRecreated = true;
-                        this.recreate();
+                        recreate();
                     }
                     else
                     {
@@ -769,7 +769,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean showMap = (onCurrent && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
         boolean showGlobe = (onCurrent && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
         boolean onCurrentNoSelected = (onCurrent && viewLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
-        boolean showFilter = (onCurrentNoSelected && (onSubPageList || onSubPageMap || onSubPageGlobe));
         boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
@@ -779,10 +778,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         menu.findItem(R.id.menu_globe).setVisible(showGlobe);
         menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(this));
         menu.findItem(R.id.menu_sort_by).setVisible(onCurrentCombinedList);
-        menu.findItem(R.id.menu_filter).setVisible(showFilter);
+        menu.findItem(R.id.menu_filter).setVisible(showSettings);
         menu.findItem(R.id.menu_visible).setVisible(showSettings);
         menu.findItem(R.id.menu_settings).setVisible(showSettings);
-        menu.findItem(R.id.menu_overflow).setVisible(showFilter || showSettings);
+        menu.findItem(R.id.menu_overflow).setVisible(showSettings);
         menu.findItem(R.id.menu_edit).setVisible((showSave && !onOrbitalSatellites) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe);
         menu.findItem(R.id.menu_save).setVisible(showSave);
         menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
@@ -835,11 +834,24 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         Globals.setVisible(mainFloatingButton, show);
     }
 
-    private void updateTheme()
+    //Recreates the application
+    @Override
+    public void recreate()
     {
         wasRecreated = true;
+        super.recreate();
+    }
+    public void recreate(boolean setRecreated)
+    {
+        wasRecreated = setRecreated;
+        super.recreate();
+    }
+
+    //Updates the theme
+    private void updateTheme()
+    {
         Settings.Options.Display.setTheme(this);
-        this.recreate();
+        recreate();
     }
 
     @Override
@@ -1374,6 +1386,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //load filters
         mapFilterList.clear();
         mapFilterList.addAll(Settings.getMapOrbitalTypeFilter(this));
+        lensFilterList.clear();
+        lensFilterList.addAll(Settings.getLensOrbitalTypeFilter(this));
 
         //get observer
         loadObserver(!savedState);
@@ -2939,6 +2953,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         int index;
         int subPage = getSubPage();
+        int titleStringId;
         AlertDialog.Builder filterTypeBuilder = new AlertDialog.Builder(this, Globals.getDialogThemeId(this));
         boolean[] checkedArray;
         int[] selections = new int[]{R.string.title_satellites, R.string.title_solar_system, R.string.title_rocket_bodies, R.string.title_debris, R.string.title_constellations, R.string.title_stars};
@@ -2951,15 +2966,23 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         switch(subPage)
         {
             case Globals.SubPageType.List:
+                titleStringId = R.string.title_list_filter;
                 filterList = Settings.getListOrbitalTypeFilter(this);
+                break;
+
+            case Globals.SubPageType.Lens:
+                titleStringId = R.string.title_lens_filter;
+                filterList = Settings.getLensOrbitalTypeFilter(this);
                 break;
 
             case Globals.SubPageType.Map:
             case Globals.SubPageType.Globe:
+                titleStringId = R.string.title_globe_slash_map_filter;
                 filterList = Settings.getMapOrbitalTypeFilter(this);
                 break;
 
             default:
+                titleStringId = R.string.title_unknown;
                 filterList = new ArrayList<>(0);
                 break;
         }
@@ -3024,7 +3047,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //setup and show dialog
-        filterTypeBuilder.setTitle(R.string.title_select_type);
+        filterTypeBuilder.setTitle(titleStringId);
         filterTypeBuilder.setMultiChoiceItems(titleList.toArray(new String[0]), checkedArray, new DialogInterface.OnMultiChoiceClickListener()
         {
             @Override
@@ -3063,11 +3086,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         updateMainPager(false);
                         break;
 
+                    case Globals.SubPageType.Lens:
+                        Settings.setLensOrbitalTypeFilter(MainActivity.this, selectedArray);
+                        recreate(false);
+                        break;
+
                     case Globals.SubPageType.Map:
                     case Globals.SubPageType.Globe:
                         Settings.setMapOrbitalTypeFilter(MainActivity.this, selectedArray);
-                        mapFilterList.clear();
-                        mapFilterList.addAll(selectedOrbitalTypes);
+                        recreate(false);
                         break;
                 }
             }
@@ -4098,7 +4125,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //get current orbital data and remember if in filter
                         Database.SatelliteData currentOrbitalData = currentSatellites[index];
                         byte currentOrbitalType = currentOrbitalData.getOrbitalType();
-                        boolean currentInFilter = (!onMap || mapFilterList.contains(currentOrbitalType));
+                        boolean currentInFilter = (!onMap || mapFilterList.contains(currentOrbitalType)) && (!onLens || lensFilterList.contains(currentOrbitalType));
 
                         //if current orbital TLE is accurate
                         if(currentOrbitalData.getTLEIsAccurate())

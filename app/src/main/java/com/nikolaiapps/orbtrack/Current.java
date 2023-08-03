@@ -1454,6 +1454,7 @@ public abstract class Current
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
         int textSelectedColor = Globals.resolveColorID(context, R.attr.colorAccentLightest);
+        ArrayList<Byte> orbitalFilterList = (forLens ? null : Settings.getMapOrbitalTypeFilter(context));
         ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
 
         //setup selection list
@@ -1477,7 +1478,7 @@ public abstract class Current
         //setup search list
         if(usingSearchList)
         {
-            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), orbitalFilterList, false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
             searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
             searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
             searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));

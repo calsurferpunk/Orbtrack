@@ -771,7 +771,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int heightHalf = height / 2;
         int heightDouble = height * 2;
         int selectedId = Universe.IDs.Invalid;
-        byte currentType;
         byte selectedType = Database.OrbitalType.Satellite;
         boolean selectedCloseArea = false;
         boolean selectedOutsideArea = false;
@@ -835,8 +834,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //if current orbital is set, look angle is set, and using orbital
                 if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
                 {
-                    //remember current color, look, and travel angles
+                    //remember current type, color, look, and travel angles
                     int currentColor = currentOrbital.database.pathColor;
+                    byte currentType = currentOrbital.getOrbitalType();
                     Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
                     CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
 
@@ -982,7 +982,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
                         //remember current ID, type, name
                         currentId = currentOrbital.getSatelliteNum();
-                        currentType = currentOrbital.getOrbitalType();
                         currentName = currentOrbital.getName();
 
                         //determine relative location

@@ -367,6 +367,7 @@
     <string name="title_getting">Consiguiendo</string>
     <string name="title_globe">Globo</string>
     <string name="title_globe_view">Vista Globo</string>
+    <string name="title_globe_slash_map_filter">Filtro Globo/Mapa</string>
     <string name="title_globe_slash_map_view">Vista Globo/Mapa</string>
     <string name="title_golden_hour">Hora Dorada</string>
     <string name="title_green">Verde</string>
@@ -408,11 +409,13 @@
     <string name="title_launch_number_of_year">Lanzamiento Número de Año</string>
     <string name="title_length">Longitud</string>
     <string name="title_lens">Lente</string>
+    <string name="title_lens_filter">Filtro de Lente</string>
     <string name="title_lens_view">Vista Lente</string>
     <string name="title_line_1">Línea 1</string>
     <string name="title_line_2">Línea 2</string>
     <string name="title_line_number">Número Línea</string>
     <string name="title_list_all">TODAS</string>
+    <string name="title_list_filter">Filtro de Lista</string>
     <string name="title_list_getting">Obteniendo Lista</string>
     <string name="title_list_update">Lista Actualizacion</string>
     <string name="title_list_view">Vista Lista</string>
@@ -534,7 +537,6 @@
     <string name="title_select_orbital">Seleccionar Orbital</string>
     <string name="title_select_satellites">Seleccionar Satélites</string>
     <string name="title_select_source">Seleccionar Fuente</string>
-    <string name="title_select_type">Seleccione Tipo</string>
     <string name="title_select_visible">Seleccione Visible</string>
     <string name="title_selected_delete">Eliminar Seleccionado</string>
     <string name="title_semi_major_axis">Semieje Mayor</string>

@@ -275,32 +275,66 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             protected Void doInBackground(Object... params)
             {
                 int index;
-                int icon1Color = (int)params[3];
-                int icon1SelectedColor = (int)params[4];
-                int icon3Color = (int)params[5];
-                int icon3SelectedColor = (int)params[6];
-                int forceColorId = (int)params[7];
+                int icon1Color = (int)params[4];
+                int icon1SelectedColor = (int)params[5];
+                int icon3Color = (int)params[6];
+                int icon3SelectedColor = (int)params[7];
+                int forceColorId = (int)params[8];
                 boolean useIcons;
                 boolean isLocation;
                 boolean useIcon1Color;
                 boolean useIcon3Color;
-                boolean addMulti = (boolean)params[2];
+                boolean addMulti = (boolean)params[3];
                 int offset = (addMulti ? 1 : 0);
                 Context context = (Context)params[0];
                 boolean haveContext = (context != null);
+                Byte[] filterArray =  (Byte[])params[2];
                 Database.DatabaseSatellite[] orbitals = (Database.DatabaseSatellite[])params[1];
+                ArrayList<Database.DatabaseSatellite> filteredOrbitals = new ArrayList<>(orbitals != null ? orbitals.length : 0);
                 IconSpinner.Item[] items;
 
-                //go through each orbital
-                items = new Item[orbitals.length + offset];
+                //if orbitals exist
+                if(orbitals != null)
+                {
+                    //go through each orbital
+                    for(Database.DatabaseSatellite currentOrbital : orbitals)
+                    {
+                        //remember current ID and type
+                        int noradId = currentOrbital.noradId;
+                        byte currentType = currentOrbital.orbitalType;
+
+                        //if filter exists and not none or current location
+                        if(filterArray != null && noradId != Universe.IDs.None && noradId != Universe.IDs.CurrentLocation)
+                        {
+                            //go through filter
+                            for(index = 0; index < filterArray.length; index++)
+                            {
+                                //type is filter type
+                                if(currentType == filterArray[index])
+                                {
+                                    //add orbital
+                                    filteredOrbitals.add(currentOrbital);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            //add orbital to list
+                            filteredOrbitals.add(currentOrbital);
+                        }
+                    }
+                }
+
+                //setup items with filter
+                items = new Item[filteredOrbitals.size() + offset];
                 if(addMulti)
                 {
                     items[0] = new Item((haveContext ? R.drawable.ic_list_white : -1), Globals.resolveColorID(context, android.R.attr.textColor), icon3SelectedColor, (haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
                 }
-                for(index = 0; index < orbitals.length; index++)
+                for(index = 0; index < filteredOrbitals.size(); index++)
                 {
                     //remember current satellite and set item
-                    Database.DatabaseSatellite currentSat = orbitals[index];
+                    Database.DatabaseSatellite currentSat = filteredOrbitals.get(index);
                     isLocation = (currentSat.noradId == Universe.IDs.CurrentLocation);
                     useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
                     useIcon1Color = !useIcons;
@@ -415,7 +449,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
+        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, ArrayList<Byte> listFilter, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
         {
             BaseConstructor(context);
 
@@ -454,11 +488,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                     }
                 }
             });
-            loadItems.execute(context, satellites, addMulti, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
+            loadItems.execute(context, satellites, (listFilter != null ? listFilter.toArray(new Byte[0]) : null), addMulti, icon1Color, icon1SelectedColor, icon3Color, icon3SelectedColor, forceColorId);
         }
         public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti)
         {
-            this(context, listView, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0);
+            this(context, listView, satellites, null, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0);
         }
         public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites)
         {

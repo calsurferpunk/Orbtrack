@@ -524,7 +524,6 @@ public abstract class Current
                 int index = 0;
                 boolean usePathProgress = Settings.getListPathProgress(context);
                 boolean usePassQuality = Settings.getListPassQuality(context);
-                ArrayList<Byte> filterList = Settings.getListOrbitalTypeFilter(context);
                 ArrayList<Item> filteredItems = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
@@ -543,11 +542,8 @@ public abstract class Current
                     //go through each orbital
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
-                        //remember current orbital type
-                        byte currentOrbitalType = currentOrbital.getOrbitalType();
-
                         //if type is in filter
-                        if(filterList.contains(currentOrbitalType))
+                        if(currentOrbital.getInFilter())
                         {
                             //add item
                             filteredItems.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality));
@@ -957,14 +953,20 @@ public abstract class Current
             int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
-            boolean createLens;
-            boolean createMapView;
+            boolean createLens = (subPage == Globals.SubPageType.Lens);
+            boolean createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
             View newView = null;
             Context context = this.getContext();
+            final Selectable.ListBaseAdapter listAdapter;
             Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems();
             Database.SatelliteData[] satellites = MainActivity.getSatellites();
             Database.SatelliteData[] usedSatellites;
-            final Selectable.ListBaseAdapter listAdapter = new Combined.ItemListAdapter(context, savedItems, satellites);
+
+            //apply any filter
+            Globals.applyOrbitalTypeFilter(context, group, subPage, satellites);
+
+            //set adapter
+            listAdapter = new Combined.ItemListAdapter(context, savedItems, satellites);
 
             //set default
             actionButton = null;
@@ -972,10 +974,6 @@ public abstract class Current
             {
                 savedInstanceState = new Bundle();
             }
-
-            //set if need to create lens/map view
-            createLens = (subPage == Globals.SubPageType.Lens);
-            createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
 
             //if need to create lens
             if(createLens)
@@ -1454,7 +1452,6 @@ public abstract class Current
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
         int textSelectedColor = Globals.resolveColorID(context, R.attr.colorAccentLightest);
-        ArrayList<Byte> orbitalFilterList = (forLens ? null : Settings.getMapOrbitalTypeFilter(context));
         ArrayList<Database.DatabaseSatellite> selectedOrbitalList = new ArrayList<>(0);
 
         //setup selection list
@@ -1478,7 +1475,7 @@ public abstract class Current
         //setup search list
         if(usingSearchList)
         {
-            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), orbitalFilterList, false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
             searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
             searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
             searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
@@ -2732,7 +2729,7 @@ public abstract class Current
                 if(!useSavedPath)
                 {
                     //add all orbitals
-                    addOrbitals(context, MainActivity.getSatellites(), null);
+                    addOrbitals(context, selectedOrbitals, null);
                 }
                 else
                 {

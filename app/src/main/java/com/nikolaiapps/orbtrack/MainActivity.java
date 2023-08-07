@@ -140,8 +140,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private CalculateService.CalculatePathsTask currentPassesTask;
     private CalculateService.CalculatePathsTask calculatePassesTask;
     private CalculateService.CalculatePathsTask calculateIntersectionsTask;
-    private static final ArrayList<Byte> mapFilterList = new ArrayList<>(0);
-    private static final ArrayList<Byte> lensFilterList = new ArrayList<>(0);
     private static final ArrayList<Integer> excludeOldNoradIds = new ArrayList<>(0);
     private static Database.SatelliteData[] currentSatellites = new Database.SatelliteData[0];
     //
@@ -1383,12 +1381,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //load orbitals
         loadOrbitals(this, mainDrawerLayout);
 
-        //load filters
-        mapFilterList.clear();
-        mapFilterList.addAll(Settings.getMapOrbitalTypeFilter(this));
-        lensFilterList.clear();
-        lensFilterList.addAll(Settings.getLensOrbitalTypeFilter(this));
-
         //get observer
         loadObserver(!savedState);
 
@@ -2495,7 +2487,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 updateCurrentCalculations();
             }
+
             setCurrentPassCalculations(onCurrent && onCurrentList);
+
             if(onCalculateViewNonInput && calculatePendingPage != Calculate.PageType.View)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
@@ -2505,6 +2499,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     setCalculateViewCalculations(true, (multiNoradId != null && multiNoradId.size() > 0 ? Database.SatelliteData.getSatellites(this, multiNoradId) : new Database.SatelliteData[]{new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId))}), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
                 }
             }
+
             if(onCalculatePassesNonInput && calculatePendingPage != Calculate.PageType.Passes)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Passes);
@@ -2513,6 +2508,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     setCalculatePassCalculations(true, new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId)), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), params.getDouble(Calculate.ParamTypes.ElevationMinDegs, 0.0));
                 }
             }
+
             if(onCalculateCoordinatesNonInput && calculatePendingPage != Calculate.PageType.Coordinates)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Coordinates);
@@ -2522,6 +2518,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     setCalculateCoordinateCalculations(true, (multiNoradId != null && multiNoradId.size() > 0 ? Database.SatelliteData.getSatellites(this, multiNoradId) : new Database.SatelliteData[]{new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId))}), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), Calculate.getDayIncrement(params));
                 }
             }
+
             if(onCalculateIntersectionNonInput && calculatePendingPage != Calculate.PageType.Intersection)
             {
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Intersection);
@@ -4124,8 +4121,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     {
                         //get current orbital data and remember if in filter
                         Database.SatelliteData currentOrbitalData = currentSatellites[index];
-                        byte currentOrbitalType = currentOrbitalData.getOrbitalType();
-                        boolean currentInFilter = (!onMap || mapFilterList.contains(currentOrbitalType)) && (!onLens || lensFilterList.contains(currentOrbitalType));
+                        boolean currentInFilter = currentOrbitalData.getInFilter();
 
                         //if current orbital TLE is accurate
                         if(currentOrbitalData.getTLEIsAccurate())

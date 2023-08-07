@@ -12,7 +12,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Color;
 import android.location.Location;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
@@ -36,28 +35,6 @@ import java.util.TimeZone;
 
 public class Database extends SQLiteOpenHelper
 {
-    private static abstract class ParamTypes
-    {
-        static final String Name = "name";
-        static final String UserName = "userName";
-        static final String Norad = "norad";
-        static final String OwnerCode = "ownerCode";
-        static final String OwnerName = "ownerName";
-        static final String LaunchDate = "launchDate";
-        static final String TLELine1 = "tleLine1";
-        static final String TLELine2 = "tleLine2";
-        static final String TLEDate = "tleDate";
-        static final String GP = "gp";
-        static final String UpdateDate = "updateDate";
-        static final String RightAscensionHours = "rightAscensionHours";
-        static final String DeclinationDegs = "declinationDegs";
-        static final String Magntitude = "magnitude";
-        static final String DistanceLightYears = "distanceLightYears";
-        static final String PathColor = "pathColor";
-        static final String OrbitalType = "orbitalType";
-        static final String IsSelected = "isSelected";
-    }
-
     static abstract class Tables
     {
         static final String Orbital = "[Orbital]";
@@ -1164,19 +1141,14 @@ public class Database extends SQLiteOpenHelper
         public int pathColor;
         public final byte orbitalType;
         public final boolean tleIsAccurate;
+        private boolean inFilter;
         public boolean isSelected;
         public static final Creator<DatabaseSatellite> CREATOR =  new Parcelable.Creator<DatabaseSatellite>()
         {
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)
             {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
-
-                return(new DatabaseSatellite(bundle.getString(ParamTypes.Name), bundle.getString(ParamTypes.UserName), bundle.getInt(ParamTypes.Norad), bundle.getString(ParamTypes.OwnerCode), bundle.getString(ParamTypes.OwnerName), bundle.getLong(ParamTypes.LaunchDate), bundle.getString(ParamTypes.TLELine1), bundle.getString(ParamTypes.TLELine2), bundle.getLong(ParamTypes.TLEDate), bundle.getString(ParamTypes.GP), bundle.getLong(ParamTypes.UpdateDate), bundle.getDouble(ParamTypes.RightAscensionHours), bundle.getDouble(ParamTypes.DeclinationDegs), bundle.getDouble(ParamTypes.Magntitude), bundle.getDouble(ParamTypes.DistanceLightYears), bundle.getInt(ParamTypes.PathColor), bundle.getByte(ParamTypes.OrbitalType), bundle.getBoolean(ParamTypes.IsSelected)));
+                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
             }
 
             @Override
@@ -1186,7 +1158,7 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbitalType, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
         {
             this.name = name;
             this.userName = (userName != null ? userName : "");
@@ -1213,6 +1185,7 @@ public class Database extends SQLiteOpenHelper
             this.distanceLightYears = distanceLightYears;
             this.pathColor = pathColor;
             this.orbitalType = orbitalType;
+            this.inFilter = inFilter;
             this.isSelected = selected;
             this.launchDateMs = launchDate;
 
@@ -1222,6 +1195,10 @@ public class Database extends SQLiteOpenHelper
             }
 
             this.tleIsAccurate = (this.noradId != Universe.IDs.Invalid && this.noradId < 0) || Globals.getTLEIsAccurate(this.tleDateMs);
+        }
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbitalType, boolean selected)
+        {
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathColor, orbitalType, true, selected);
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
         {
@@ -1269,6 +1246,40 @@ public class Database extends SQLiteOpenHelper
             }
         }
 
+        public boolean getInFilter()
+        {
+            return(inFilter);
+        }
+
+        public void setInFilter(ArrayList<Byte> orbitalTypeFilterList)
+        {
+            int index;
+
+            //if using filter
+            if(orbitalTypeFilterList != null)
+            {
+                //reset in filter
+                inFilter = false;
+
+                //go through each filter type while not in filter
+                for(index = 0; index < orbitalTypeFilterList.size() && !inFilter; index++)
+                {
+                    //update in filter
+                    inFilter = orbitalTypeFilterList.contains(orbitalType);
+                }
+            }
+            else
+            {
+                //always use
+                clearInFilter();
+            }
+        }
+
+        public void clearInFilter()
+        {
+            inFilter = true;
+        }
+
         @Override
         public int describeContents()
         {
@@ -1278,28 +1289,25 @@ public class Database extends SQLiteOpenHelper
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            Bundle bundle = new Bundle();
-
-            bundle.putString(ParamTypes.Name, name);
-            bundle.putString(ParamTypes.UserName, userName);
-            bundle.putInt(ParamTypes.Norad, noradId);
-            bundle.putString(ParamTypes.OwnerCode, ownerCode);
-            bundle.putString(ParamTypes.OwnerName, ownerName);
-            bundle.putLong(ParamTypes.LaunchDate, launchDateMs);
-            bundle.putString(ParamTypes.TLELine1, tleLine1);
-            bundle.putString(ParamTypes.TLELine2, tleLine2);
-            bundle.putLong(ParamTypes.TLEDate, tleDateMs);
-            bundle.putString(ParamTypes.GP, gp);
-            bundle.putLong(ParamTypes.UpdateDate, updateDateMs);
-            bundle.putDouble(ParamTypes.RightAscensionHours, rightAscensionHours);
-            bundle.putDouble(ParamTypes.DeclinationDegs, declinationDegs);
-            bundle.putDouble(ParamTypes.Magntitude, magnitude);
-            bundle.putDouble(ParamTypes.DistanceLightYears, distanceLightYears);
-            bundle.putInt(ParamTypes.PathColor, pathColor);
-            bundle.putByte(ParamTypes.OrbitalType, orbitalType);
-            bundle.putBoolean(ParamTypes.IsSelected, isSelected);
-
-            dest.writeBundle(bundle);
+            dest.writeString(name);
+            dest.writeString(userName);
+            dest.writeInt(noradId);
+            dest.writeString(ownerCode);
+            dest.writeString(ownerName);
+            dest.writeLong(launchDateMs);
+            dest.writeString(tleLine1);
+            dest.writeString(tleLine2);
+            dest.writeLong(tleDateMs);
+            dest.writeString(gp);
+            dest.writeLong(updateDateMs);
+            dest.writeDouble(rightAscensionHours);
+            dest.writeDouble(declinationDegs);
+            dest.writeDouble(magnitude);
+            dest.writeDouble(distanceLightYears);
+            dest.writeInt(pathColor);
+            dest.writeByte(orbitalType);
+            dest.writeByte((byte)(inFilter ? 1 : 0));
+            dest.writeByte((byte)(isSelected ? 1 : 0));
         }
     }
 
@@ -1345,6 +1353,19 @@ public class Database extends SQLiteOpenHelper
         public boolean getTLEIsAccurate()
         {
             return(database != null && database.tleIsAccurate);
+        }
+
+        public boolean getInFilter()
+        {
+            return(database != null && database.getInFilter());
+        }
+
+        public void setInFilter(ArrayList<Byte> orbitalTypeFilterList)
+        {
+            if(database != null)
+            {
+                database.setInFilter(orbitalTypeFilterList);
+            }
         }
 
         public boolean equals(SatelliteData other)
@@ -1425,7 +1446,6 @@ public class Database extends SQLiteOpenHelper
     }
 
     public static final byte MAX_ORBITAL_NAME_LENGTH = 24;
-    private static final byte MAX_CONSTELLATION_NAME_LENGTH = 40;
     private static final byte MAX_LOCATION_NAME_LENGTH = 50;
     private static final byte MAX_OWNER_CODE_LENGTH = 8;
     private static final byte MAX_OWNER_NAME_LENGTH = 40;
@@ -1849,8 +1869,6 @@ public class Database extends SQLiteOpenHelper
                 //if previous version before adding stars and constellation table
                 if(updateStatus.previousVersion < 33)
                 {
-                    ArrayList<Integer> fileIds = new ArrayList<>(0);
-
                     //make sure table exists and add indexing
                     if(db == null)
                     {

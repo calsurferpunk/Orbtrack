@@ -3534,6 +3534,40 @@ public abstract class Globals
         return(Globals.getDrawable(context, (isVisible ? R.drawable.ic_remove_red_eye_white : R.drawable.ic_visibility_off_white), true));
     }
 
+    //Applies currently used orbital type filter
+    public static void applyOrbitalTypeFilter(Context context, int group, int subPage, Database.SatelliteData[] orbitals)
+    {
+        ArrayList<Byte> orbitalTypeFilterList = null;
+
+        //get filter
+        if(group == MainActivity.Groups.Current)
+        {
+            //handle based on sub page
+            switch(subPage)
+            {
+                case Globals.SubPageType.List:
+                    orbitalTypeFilterList = Settings.getListOrbitalTypeFilter(context);
+                    break;
+
+                case Globals.SubPageType.Map:
+                case Globals.SubPageType.Globe:
+                    orbitalTypeFilterList = Settings.getMapOrbitalTypeFilter(context);
+                    break;
+
+                case Globals.SubPageType.Lens:
+                    orbitalTypeFilterList = Settings.getLensOrbitalTypeFilter(context);
+                    break;
+            }
+        }
+
+        //go through each orbital
+        for(Database.SatelliteData currentOrbital : orbitals)
+        {
+            //update filter
+            currentOrbital.setInFilter(orbitalTypeFilterList);
+        }
+    }
+
     //Gets an orbital icon ID
     public static int getOrbitalIconId(Context context, int satelliteNum, byte orbitalType)
     {

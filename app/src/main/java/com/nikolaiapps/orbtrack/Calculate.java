@@ -3086,6 +3086,11 @@ public abstract class Calculate
 
         //load objects
         orbitals = Database.getOrbitals(context);
+        for(Database.DatabaseSatellite currentOrbital : orbitals)
+        {
+            //remove any filter
+            currentOrbital.clearInFilter();
+        }
 
         //set orbital list items
         orbitalAdapter = createOrbitalAdapter(context, page.orbitalList, orbitals, usingMulti, (haveSavedInstance ? savedInstanceState.getInt(ParamTypes.NoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE));

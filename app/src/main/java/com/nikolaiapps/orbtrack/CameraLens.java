@@ -831,8 +831,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 boolean currentSelected = (selectedOrbitalIndex == index);
                 Database.SatelliteData currentOrbital = currentOrbitals[index];
 
-                //if current orbital is set, look angle is set, and using orbital
-                if(currentOrbital != null && currentOrbital.database != null && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
+                //if current orbital is set, in filter, look angle is valid, and using orbital
+                if(currentOrbital != null && currentOrbital.database != null && currentOrbital.getInFilter() && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
                 {
                     //remember current type, color, look, and travel angles
                     int currentColor = currentOrbital.database.pathColor;

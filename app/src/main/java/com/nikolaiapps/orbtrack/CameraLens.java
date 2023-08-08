@@ -493,6 +493,24 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
+    private static class IdPoint
+    {
+        public int id;
+        RelativeLocationProperties properties;
+
+        public IdPoint()
+        {
+            this.id = Universe.IDs.None;
+            this.properties = null;
+        }
+
+        public void set(int id, RelativeLocationProperties properties)
+        {
+            this.id = id;
+            this.properties = properties;
+        }
+    }
+
     private static final float CLOSE_AREA_DEGREES = 12f;
     private static final float STAR_SCALE = (1.0f / 3.5f);
 
@@ -576,6 +594,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private Rect[] currentOrbitalAreas;
     private Database.SatelliteData[] currentOrbitals;
     private final Calculations.TopographicDataType[] calibrateAngles;
+    private IdPoint[] currentIdPoints;
     private Calculations.TopographicDataType[] currentLookAngles;
     private CalculateViewsTask.OrbitalView[][] travelLookAngles;
 
@@ -698,6 +717,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentOrbitals = (selectedOrbitals != null ? selectedOrbitals : new Database.SatelliteData[0]);
         currentOrbitalAreas = new Rect[0];
         calibrateAngles = new Calculations.TopographicDataType[3];
+        currentIdPoints = new IdPoint[0];
         currentLookAngles = new Calculations.TopographicDataType[0];
         travelLookAngles = new CalculateViewsTask.OrbitalView[0][0];
     }
@@ -826,13 +846,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //go through each orbital and look angle
             for(index = 0; index < currentOrbitals.length; index++)
             {
-                //remember if on selection and current orbital
+                //remember current orbital, if in filter, and on selection
+                Database.SatelliteData currentOrbital = currentOrbitals[index];
+                boolean haveOrbital = (currentOrbital != null);
+                boolean inFilter = (haveOrbital && currentOrbital.getInFilter());
                 boolean haveSelected = haveSelectedOrbital();
                 boolean currentSelected = (selectedOrbitalIndex == index);
-                Database.SatelliteData currentOrbital = currentOrbitals[index];
 
                 //if current orbital is set, in filter, look angle is valid, and using orbital
-                if(currentOrbital != null && currentOrbital.database != null && currentOrbital.getInFilter() && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
+                if(haveOrbital && currentOrbital.database != null && inFilter && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
                 {
                     //remember current type, color, look, and travel angles
                     int currentColor = currentOrbital.database.pathColor;
@@ -1002,6 +1024,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
                         //draw orbital
                         drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
+
+                        //if a star
+                        if(currentType == Database.OrbitalType.Star)
+                        {
+                            //remember properties for constellation use
+                            currentIdPoints[index].set(currentId, relativeProperties);
+                        }
                     }
                 }
             }
@@ -1403,6 +1432,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //update orbitals and look angles
             currentOrbitals = orbitals;
             currentLookAngles = lookAngles;
+            currentIdPoints = new IdPoint[currentLookAngles.length];
+            for(index = 0; index < currentIdPoints.length; index++)
+            {
+                currentIdPoints[index] = new IdPoint();
+            }
             orbitalsLength = currentOrbitals.length;
 
             //if area has not been set or needs to be changed

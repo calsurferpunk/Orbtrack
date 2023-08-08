@@ -1961,30 +1961,36 @@ public abstract class Current
                     //get current marker, satellite, and period
                     CoordinatesFragment.OrbitalBase currentOrbital = mapView.getOrbital(index);
                     Database.SatelliteData currentData = (currentOrbital != null ? currentOrbital.getData() : null);
-                    Calculations.SatelliteObjectType pathSatellite = new Calculations.SatelliteObjectType(currentData != null ? currentData.satellite : null);
+                    boolean haveData = (currentData != null);
+                    boolean inFilter = (!haveData || currentData.getInFilter());
+                    Calculations.SatelliteObjectType pathSatellite = new Calculations.SatelliteObjectType(haveData ? currentData.satellite : null);
                     ArrayList<CoordinatesFragment.Coordinate> pathPoints = new ArrayList<>(0);
                     period = pathSatellite.orbit.periodMinutes;
                     periodJulianEnd = (period > 0 ? (julianDate + (period / Calculations.MinutesPerDay)) : Double.MAX_VALUE);
 
-                    //update progress
-                    publishProgress(index, Globals.ProgressType.Started);
-
-                    //set to now and shortest of either 1 day later or period end
-                    pathJulianDateStart = julianDate;
-                    pathJulianDateEnd = Math.min((julianDate + 1), periodJulianEnd);
-
-                    //calculate points unless cancelled
-                    for(pathJulianDate = pathJulianDateStart; pathJulianDate < pathJulianDateEnd && !this.isCancelled(); pathJulianDate += (0.01 / 24))        //note: incrementing in fractions of a day
+                    //if in filter
+                    if(inFilter)
                     {
-                        //get next position
-                        Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, true);
+                        //update progress
+                        publishProgress(index, Globals.ProgressType.Started);
 
-                        //add position to list
-                        pathPoints.add(new CoordinatesFragment.Coordinate(pathSatellite.geo.latitude, pathSatellite.geo.longitude, pathSatellite.geo.altitudeKm));
+                        //set to now and shortest of either 1 day later or period end
+                        pathJulianDateStart = julianDate;
+                        pathJulianDateEnd = Math.min((julianDate + 1), periodJulianEnd);
+
+                        //calculate points unless cancelled
+                        for(pathJulianDate = pathJulianDateStart; pathJulianDate < pathJulianDateEnd && !this.isCancelled(); pathJulianDate += (0.01 / 24))        //note: incrementing in fractions of a day
+                        {
+                            //get next position
+                            Calculations.updateOrbitalPosition(pathSatellite, observer, pathJulianDate, true);
+
+                            //add position to list
+                            pathPoints.add(new CoordinatesFragment.Coordinate(pathSatellite.geo.latitude, pathSatellite.geo.longitude, pathSatellite.geo.altitudeKm));
+                        }
+
+                        //update progress
+                        onProgressChanged(index, (!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), pathPoints);
                     }
-
-                    //update progress
-                    onProgressChanged(index, (!this.isCancelled() ? Globals.ProgressType.Success : Globals.ProgressType.Failed), pathPoints);
                 }
 
                 //update status and progress

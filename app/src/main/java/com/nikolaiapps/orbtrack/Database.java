@@ -221,23 +221,11 @@ public class Database extends SQLiteOpenHelper
     private static final int CONSTELLATION_FILE_FULL_COLUMNS = 5;
     private static final int CONSTELLATION_FILE_ROWS = 1;
     private static final String CONSTELLATION_FILE_SEPARATOR = "[|]";
-    private static final String CONSTELLATION_FILE_PAIR_SEPARATOR = "[:]";
-    private static final String CONSTELLATION_FILE_POINT_SEPARATOR = "[,]";
+    private static final String CONSTELLATION_FILE_PAIR_SEPARATOR = ":";
+    private static final String CONSTELLATION_FILE_POINT_SEPARATOR = ",";
 
     public static abstract class LocaleConstellations
     {
-        public static class IdLine
-        {
-            public int startId;
-            public int endId;
-
-            public IdLine(int startId, int endId)
-            {
-                this.startId = startId;
-                this.endId = endId;
-            }
-        }
-
         private static final ArrayList<Integer> noradId = new ArrayList<>(0);
         private static final ArrayList<ArrayList<String>> constellationNames = new ArrayList<>(LanguageIndex.LanguageCount);
 
@@ -896,6 +884,22 @@ public class Database extends SQLiteOpenHelper
             buffer = Database.getOrbitals(context, (String)null);
             needReload = false;
             typeCount = null;
+
+            //go through each orbital
+            for(DatabaseSatellite currentOrbital : buffer)
+            {
+                IdLine[] currentPoints = currentOrbital.points;
+
+                //if on a constellation and there are points
+                if(currentOrbital.orbitalType == OrbitalType.Constellation && currentPoints != null)
+                {
+                    //go through each point
+                    for(IdLine currentLine : currentPoints)
+                    {
+                        //add as parent to ID
+                    }
+                }
+            }
         }
 
         //Sets that orbitals need to be reloaded
@@ -1120,6 +1124,94 @@ public class Database extends SQLiteOpenHelper
     private static final int TIME_ZONE_ROWS = 23427;
     private static final String TIME_ZONE_FILE_SEPARATOR = "\t";
 
+    public static class IdLine
+    {
+        public int startId;
+        public int endId;
+
+        public IdLine(int startId, int endId)
+        {
+            this.startId = startId;
+            this.endId = endId;
+        }
+
+        //Gets ID lines from given string
+        public static IdLine[] fromString(String pointString)
+        {
+            //if point string exists
+            if(pointString != null)
+            {
+                int index;
+                String[] pointPairs = pointString.split(CONSTELLATION_FILE_PAIR_SEPARATOR);
+                IdLine[] points = new IdLine[pointPairs.length];
+
+                //if at least 2 points
+                if(points.length >= 2)
+                {
+                    //go through each pair
+                    for(index = 0; index < pointPairs.length; index++)
+                    {
+                        String[] currentLine = pointPairs[index].split(CONSTELLATION_FILE_POINT_SEPARATOR);
+
+                        //if a starting and ending ID
+                        if(currentLine.length == 2)
+                        {
+                            //set current point
+                            points[index] = new IdLine(Globals.tryParseInt(currentLine[0]), Globals.tryParseInt(currentLine[1]));
+                        }
+                        else
+                        {
+                            //invalid
+                            return(null);
+                        }
+                    }
+
+                    //return points
+                    return(points);
+                }
+            }
+
+            //invalid
+            return(null);
+        }
+
+        //Converts given ID lines to a string
+        public static String toString(IdLine[] points)
+        {
+            //if points exist and at least 2
+            if(points != null && points.length >= 2)
+            {
+                int index;
+                StringBuilder pointString = new StringBuilder();
+
+                //go through each point
+                for(index = 0; index < points.length; index++)
+                {
+                    //remember current ID line
+                    IdLine currentLine = points[index];
+
+                    //add line to string
+                    pointString.append(currentLine.startId);
+                    pointString.append(CONSTELLATION_FILE_POINT_SEPARATOR);
+                    pointString.append(currentLine.endId);
+
+                    //if there are more points
+                    if(index + 1 < points.length)
+                    {
+                        //add separator
+                        pointString.append(CONSTELLATION_FILE_PAIR_SEPARATOR);
+                    }
+                }
+
+                //return point string
+                return(pointString.toString());
+            }
+
+            //invalid
+            return(null);
+        }
+    }
+
     public static class DatabaseSatellite implements Parcelable, Serializable
     {
         public final String name;
@@ -1138,6 +1230,8 @@ public class Database extends SQLiteOpenHelper
         public final double declinationDegs;
         public final double magnitude;
         public final double distanceLightYears;
+        public IdLine[] points;
+        public ArrayList<Integer> parentIds;
         public int pathColor;
         public final byte orbitalType;
         public final boolean tleIsAccurate;
@@ -1148,7 +1242,7 @@ public class Database extends SQLiteOpenHelper
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)
             {
-                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
+                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.createIntArray(), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
             }
 
             @Override
@@ -1158,7 +1252,7 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, int[] parentIds, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
         {
             this.name = name;
             this.userName = (userName != null ? userName : "");
@@ -1183,6 +1277,19 @@ public class Database extends SQLiteOpenHelper
             this.declinationDegs = declinationDegs;
             this.magnitude = magnitude;
             this.distanceLightYears = distanceLightYears;
+            this.points = IdLine.fromString(pointsString);
+            if(parentIds != null)
+            {
+                this.parentIds = new ArrayList<>(parentIds.length);
+                for(int currentId : parentIds)
+                {
+                    this.parentIds.add(currentId);
+                }
+            }
+            else
+            {
+                this.parentIds = null;
+            }
             this.pathColor = pathColor;
             this.orbitalType = orbitalType;
             this.inFilter = inFilter;
@@ -1196,13 +1303,13 @@ public class Database extends SQLiteOpenHelper
 
             this.tleIsAccurate = (this.noradId != Universe.IDs.Invalid && this.noradId < 0) || Globals.getTLEIsAccurate(this.tleDateMs);
         }
-        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, int pathColor, byte orbitalType, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pathString, int pathColor, byte orbitalType, boolean selected)
         {
-            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathColor, orbitalType, true, selected);
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, pathColor, orbitalType, true, selected);
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
         {
-            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, pathColor, orbitalType, selected);
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, null, pathColor, orbitalType, selected);
         }
         public DatabaseSatellite(String name, int noradId, String ownerCode, long launchDate, byte orbitalType)
         {
@@ -1289,6 +1396,9 @@ public class Database extends SQLiteOpenHelper
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
+            int index;
+            int[] parentIdArray;
+
             dest.writeString(name);
             dest.writeString(userName);
             dest.writeInt(noradId);
@@ -1304,6 +1414,21 @@ public class Database extends SQLiteOpenHelper
             dest.writeDouble(declinationDegs);
             dest.writeDouble(magnitude);
             dest.writeDouble(distanceLightYears);
+            dest.writeString(IdLine.toString(points));
+            if(parentIds != null)
+            {
+                parentIdArray = new int[parentIds.size()];
+                for(index = 0; index < parentIdArray.length; index++)
+                {
+                    parentIdArray[index] = parentIds.get(index);
+                }
+
+                dest.writeIntArray(parentIdArray);
+            }
+            else
+            {
+                dest.writeIntArray(null);
+            }
             dest.writeInt(pathColor);
             dest.writeByte(orbitalType);
             dest.writeByte((byte)(inFilter ? 1 : 0));
@@ -2268,7 +2393,7 @@ public class Database extends SQLiteOpenHelper
         String name;
         String ownerCode;
         String localOwnerName;
-        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], " + Tables.Orbital + ".[Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [RA], [DEC], [Magnitude], [Distance_LY], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code] LEFT JOIN " + Tables.Star + " ON " + Tables.Orbital + ".[Norad]=" + Tables.Star + ".[Norad]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
+        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], " + Tables.Orbital + ".[Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [RA], [DEC], [Magnitude], [Distance_LY], [Points], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code] LEFT JOIN " + Tables.Star + " ON " + Tables.Orbital + ".[Norad]=" + Tables.Star + ".[Norad]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
         ArrayList<DatabaseSatellite> list = new ArrayList<>(0);
 
         //go through each satellite
@@ -2276,7 +2401,7 @@ public class Database extends SQLiteOpenHelper
         {
             //get ID, type, and name
             noradId = Integer.parseInt(queryResult[index][2]);
-            orbitalType = Byte.parseByte(queryResult[index][16]);
+            orbitalType = Byte.parseByte(queryResult[index][17]);
             name = (noradId < 0 ? Universe.getName(context, noradId, orbitalType) : queryResult[index][0]);
 
             //get owner code and name
@@ -2284,7 +2409,7 @@ public class Database extends SQLiteOpenHelper
             localOwnerName = LocaleOwner.getName(context, ownerCode);
 
             //add to list
-            list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Globals.tryParseDouble(queryResult[index][11]), Globals.tryParseDouble(queryResult[index][12]), Globals.tryParseDouble(queryResult[index][13]), Globals.tryParseDouble(queryResult[index][14]), Integer.parseInt(queryResult[index][15]), orbitalType, queryResult[index][17].equals("1")));
+            list.add(new DatabaseSatellite(name, queryResult[index][1], noradId, ownerCode, (localOwnerName != null ? localOwnerName : queryResult[index][4]), Long.parseLong(queryResult[index][5]), queryResult[index][6], queryResult[index][7], Long.parseLong(queryResult[index][8]), queryResult[index][9], Long.parseLong(queryResult[index][10]), Globals.tryParseDouble(queryResult[index][11]), Globals.tryParseDouble(queryResult[index][12]), Globals.tryParseDouble(queryResult[index][13]), Globals.tryParseDouble(queryResult[index][14]), queryResult[index][15], Integer.parseInt(queryResult[index][16]), orbitalType, queryResult[index][18].equals("1")));
         }
 
         //return list as array

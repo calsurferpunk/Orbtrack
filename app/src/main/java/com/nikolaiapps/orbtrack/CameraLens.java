@@ -34,6 +34,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 
 
@@ -174,6 +175,30 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             lastAzimuth = copyFrom.lastAzimuth;
             lastElevation = copyFrom.lastElevation;
             angleDirection = copyFrom.angleDirection;
+        }
+    }
+
+    //Parent orbital with child properties
+    private static class ParentOrbital
+    {
+        private static class Comparer implements Comparator<ParentOrbital>
+        {
+            @Override
+            public int compare(ParentOrbital value1, ParentOrbital value2)
+            {
+                return(Globals.intCompare(value1.id, value2.id));
+            }
+        }
+
+        public int id;
+        public int arrayIndex;
+        public RelativeLocationProperties[][] childProperties;
+
+        public ParentOrbital(int id, int arrayIndex, int pointCount)
+        {
+            this.id = id;
+            this.arrayIndex = arrayIndex;
+            this.childProperties = new RelativeLocationProperties[pointCount][2];
         }
     }
 
@@ -493,24 +518,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
-    private static class IdPoint
-    {
-        public int id;
-        RelativeLocationProperties properties;
-
-        public IdPoint()
-        {
-            this.id = Universe.IDs.None;
-            this.properties = null;
-        }
-
-        public void set(int id, RelativeLocationProperties properties)
-        {
-            this.id = id;
-            this.properties = properties;
-        }
-    }
-
     private static final float CLOSE_AREA_DEGREES = 12f;
     private static final float STAR_SCALE = (1.0f / 3.5f);
 
@@ -524,6 +531,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public FloatingActionStateButtonMenu settingsMenu;
 
     private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
+    private static final ParentOrbital parentOrbitalSearch = new ParentOrbital(Universe.IDs.None, 0, 0);
+    private static final ParentOrbital.Comparer parentOrbitalComparer = new ParentOrbital.Comparer();
     private int orientation;
     private int azIndex;
     private int elIndex;
@@ -591,10 +600,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private UpdateThread updateThread;
     private OnStopCalibrationListener stopCalibrationListener;
     private final ArrayList<IconImage> orbitalIcons;
+    private final ArrayList<ParentOrbital> parentOrbitals;
     private Rect[] currentOrbitalAreas;
     private Database.SatelliteData[] currentOrbitals;
     private final Calculations.TopographicDataType[] calibrateAngles;
-    private IdPoint[] currentIdPoints;
     private Calculations.TopographicDataType[] currentLookAngles;
     private CalculateViewsTask.OrbitalView[][] travelLookAngles;
 
@@ -714,10 +723,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         helpText = null;
 
         orbitalIcons = new ArrayList<>(0);
+        parentOrbitals = new ArrayList<>(0);
         currentOrbitals = (selectedOrbitals != null ? selectedOrbitals : new Database.SatelliteData[0]);
         currentOrbitalAreas = new Rect[0];
         calibrateAngles = new Calculations.TopographicDataType[3];
-        currentIdPoints = new IdPoint[0];
         currentLookAngles = new Calculations.TopographicDataType[0];
         travelLookAngles = new CalculateViewsTask.OrbitalView[0][0];
     }
@@ -845,7 +854,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
             //go through each orbital and look angle
             for(index = 0; index < currentOrbitals.length; index++)
-            {
+             {
                 //remember current orbital, if in filter, and on selection
                 Database.SatelliteData currentOrbital = currentOrbitals[index];
                 boolean haveOrbital = (currentOrbital != null);
@@ -1001,6 +1010,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(currentLookAngle != null)
                     {
                         RelativeLocationProperties relativeProperties;
+                        ArrayList<Integer> currentParentIds = (currentType == Database.OrbitalType.Star ? currentOrbital.getParentIds() : null);
 
                         //remember current ID, type, name
                         currentId = currentOrbital.getSatelliteNum();
@@ -1025,11 +1035,39 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         //draw orbital
                         drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
 
-                        //if a star
-                        if(currentType == Database.OrbitalType.Star)
+                        //if have parents
+                        if(currentParentIds != null)
                         {
-                            //remember properties for constellation use
-                            currentIdPoints[index].set(currentId, relativeProperties);
+                            //add location properties to all parents
+                            for(int currentParentId : currentParentIds)
+                            {
+                                int[] indexes;
+
+                                //try to find parent orbital
+                                parentOrbitalSearch.id = currentParentId;
+                                indexes = Globals.divideFind(parentOrbitalSearch, parentOrbitals, parentOrbitalComparer);
+                                if(indexes[0] >= 0)
+                                {
+                                    //get current parent sub orbital, child properties, and array index
+                                    ParentOrbital currentParentSubOrbital = parentOrbitals.get(indexes[0]);
+                                    RelativeLocationProperties[][] currentSubProperties = currentParentSubOrbital.childProperties;
+                                    int arrayIndex = currentParentSubOrbital.arrayIndex;
+
+                                    //if valid
+                                    if(arrayIndex < currentOrbitals.length)
+                                    {
+                                        //get current sub orbital
+                                        Database.SatelliteData currentSubOrbital = currentOrbitals[arrayIndex];
+                                        Database.IdLine[] currentSubLine = currentSubOrbital.getPoints();
+
+                                        //if line and properties length match
+                                        if(currentSubLine != null && currentSubLine.length == currentSubProperties.length)
+                                        {
+                                            //
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -1425,6 +1463,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         int index;
         int orbitalsLength;
+        boolean changed = false;
 
         //if there are orbitals and look angles that match in size
         if(orbitals != null && lookAngles != null && orbitals.length > 0 && (!checkLength || lookAngles.length == orbitals.length))
@@ -1432,11 +1471,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //update orbitals and look angles
             currentOrbitals = orbitals;
             currentLookAngles = lookAngles;
-            currentIdPoints = new IdPoint[currentLookAngles.length];
-            for(index = 0; index < currentIdPoints.length; index++)
-            {
-                currentIdPoints[index] = new IdPoint();
-            }
             orbitalsLength = currentOrbitals.length;
 
             //if area has not been set or needs to be changed
@@ -1450,6 +1484,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     currentOrbitalAreas[index] = new Rect(0, 0, 0, 0);
                     currentOrbitalAreas[index].setEmpty();
                 }
+                changed = true;
             }
 
             //if travel has not been set or needs to be changed
@@ -1462,6 +1497,32 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //set empty
                     travelLookAngles[index] = new CalculateViewsTask.OrbitalView[0];
                 }
+                changed = true;
+            }
+
+            //if parents orbitals not set or need to be changed
+            if(parentOrbitals.size() == 0 || (checkLength && changed))
+            {
+                //clear parent orbitals
+                parentOrbitals.clear();
+
+                //go through each orbital
+                for(index = 0; index < currentOrbitals.length; index++)
+                {
+                    //remember current orbital and points
+                    Database.SatelliteData currentOrbital = currentOrbitals[index];
+                    Database.IdLine[] currentPoints = currentOrbital.getPoints();
+
+                    //if a constellation with children
+                    if(currentOrbital.getOrbitalType() == Database.OrbitalType.Constellation && currentPoints != null)
+                    {
+                        //add to parent orbital list
+                        parentOrbitals.add(new ParentOrbital(currentOrbital.getSatelliteNum(), index, currentPoints.length));
+                    }
+                }
+
+                //sort parent orbitals
+                Collections.sort(parentOrbitals, parentOrbitalComparer);
             }
         }
     }

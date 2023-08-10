@@ -877,6 +877,30 @@ public class Database extends SQLiteOpenHelper
         private static int[] typeCount = null;
         private static DatabaseSatellite[] buffer = null;
 
+        //Add parent ID to the orbital with child ID
+        private static void addParentId(Context context, int parentId, int childId, ArrayList<Integer> usedIds)
+        {
+            //if child ID not already used
+            if(!usedIds.contains(childId))
+            {
+                //if child orbital exists
+                DatabaseSatellite currentChild = getOrbital(context,childId, false);
+                if(currentChild != null)
+                {
+                    //add parent ID to child orbital
+                    if(currentChild.parentIds == null)
+                    {
+                        //initialize list
+                        currentChild.parentIds = new ArrayList<>(0);
+                    }
+                    currentChild.parentIds.add(parentId);
+                }
+
+                //add to used IDs
+                usedIds.add(childId);
+            }
+        }
+
         //Load orbitals from database into buffers
         private static void load(Context context)
         {
@@ -888,15 +912,21 @@ public class Database extends SQLiteOpenHelper
             //go through each orbital
             for(DatabaseSatellite currentOrbital : buffer)
             {
+                //remember current ID and points
+                int currentId = currentOrbital.noradId;
                 IdLine[] currentPoints = currentOrbital.points;
 
                 //if on a constellation and there are points
                 if(currentOrbital.orbitalType == OrbitalType.Constellation && currentPoints != null)
                 {
+                    ArrayList<Integer> usedIds = new ArrayList<>(0);
+
                     //go through each point
                     for(IdLine currentLine : currentPoints)
                     {
-                        //add as parent to ID
+                        //add as parent to IDs
+                        addParentId(context, currentId, currentLine.startId, usedIds);
+                        addParentId(context, currentId, currentLine.endId, usedIds);
                     }
                 }
             }
@@ -1491,6 +1521,16 @@ public class Database extends SQLiteOpenHelper
             {
                 database.setInFilter(orbitalTypeFilterList);
             }
+        }
+
+        public ArrayList<Integer> getParentIds()
+        {
+            return(database != null ? database.parentIds : null);
+        }
+
+        public IdLine[] getPoints()
+        {
+            return(database != null ? database.points : null);
         }
 
         public boolean equals(SatelliteData other)

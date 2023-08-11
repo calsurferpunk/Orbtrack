@@ -890,10 +890,14 @@ public class Database extends SQLiteOpenHelper
                     //add parent ID to child orbital
                     if(currentChild.parentIds == null)
                     {
-                        //initialize list
+                        //initialize lists
                         currentChild.parentIds = new ArrayList<>(0);
+                        currentChild.parentIndexes = new ArrayList<>(0);
+                        //currentChild.parentProperties = new ArrayList<>(0);
                     }
                     currentChild.parentIds.add(parentId);
+                    currentChild.parentIndexes.add(-1);
+                    //currentChild.parentProperties.add(new ParentProperties(parentId, -1));
                 }
 
                 //add to used IDs
@@ -1242,6 +1246,45 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
+    public static class ParentProperties implements Parcelable
+    {
+        public int id;
+        public int index;
+        public static final Creator<ParentProperties> CREATOR = new Creator<ParentProperties>()
+        {
+            @Override
+            public ParentProperties createFromParcel(Parcel source)
+            {
+                return(new ParentProperties(source.readInt(), source.readInt()));
+            }
+
+            @Override
+            public ParentProperties[] newArray(int size)
+            {
+                return(new ParentProperties[size]);
+            }
+        };
+
+        public ParentProperties(int id, int index)
+        {
+            this.id = id;
+            this.index = index;
+        }
+
+        @Override
+        public int describeContents()
+        {
+            return(0);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags)
+        {
+            dest.writeInt(id);
+            dest.writeInt(index);
+        }
+    }
+
     public static class DatabaseSatellite implements Parcelable, Serializable
     {
         public final String name;
@@ -1262,6 +1305,8 @@ public class Database extends SQLiteOpenHelper
         public final double distanceLightYears;
         public IdLine[] points;
         public ArrayList<Integer> parentIds;
+        public ArrayList<Integer> parentIndexes;
+        //public ArrayList<ParentProperties> parentProperties;
         public int pathColor;
         public final byte orbitalType;
         public final boolean tleIsAccurate;
@@ -1272,7 +1317,7 @@ public class Database extends SQLiteOpenHelper
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)
             {
-                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.createIntArray(), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
+                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.createIntArray(), source.createIntArray(), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
             }
 
             @Override
@@ -1282,7 +1327,7 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, int[] parentIds, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, int[] parentIds, int[] parentIndexes, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
         {
             this.name = name;
             this.userName = (userName != null ? userName : "");
@@ -1320,6 +1365,19 @@ public class Database extends SQLiteOpenHelper
             {
                 this.parentIds = null;
             }
+            if(parentIndexes != null)
+            {
+                this.parentIndexes = new ArrayList<>(parentIndexes.length);
+                for(int currentIndex : parentIndexes)
+                {
+                    this.parentIndexes.add(currentIndex);
+                }
+            }
+            else
+            {
+                this.parentIndexes = null;
+            }
+            //this.parentProperties = parentProperties;
             this.pathColor = pathColor;
             this.orbitalType = orbitalType;
             this.inFilter = inFilter;
@@ -1335,7 +1393,7 @@ public class Database extends SQLiteOpenHelper
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pathString, int pathColor, byte orbitalType, boolean selected)
         {
-            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, pathColor, orbitalType, true, selected);
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, null, pathColor, orbitalType, true, selected);
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
         {
@@ -1428,6 +1486,7 @@ public class Database extends SQLiteOpenHelper
         {
             int index;
             int[] parentIdArray;
+            int[] parentIndexesArray;
 
             dest.writeString(name);
             dest.writeString(userName);
@@ -1459,6 +1518,21 @@ public class Database extends SQLiteOpenHelper
             {
                 dest.writeIntArray(null);
             }
+            if(parentIndexes != null)
+            {
+                parentIndexesArray = new int[parentIndexes.size()];
+                for(index = 0; index < parentIndexesArray.length; index++)
+                {
+                    parentIndexesArray[index] = parentIndexes.get(index);
+                }
+
+                dest.writeIntArray(parentIndexesArray);
+            }
+            else
+            {
+                dest.writeIntArray(null);
+            }
+            //dest.writeParcelableArray(parentProperties.toArray(new Parcelable[0]), 0);
             dest.writeInt(pathColor);
             dest.writeByte(orbitalType);
             dest.writeByte((byte)(inFilter ? 1 : 0));
@@ -1527,6 +1601,16 @@ public class Database extends SQLiteOpenHelper
         {
             return(database != null ? database.parentIds : null);
         }
+
+        public ArrayList<Integer> getParentIndexes()
+        {
+            return(database != null ? database.parentIndexes : null);
+        }
+
+        /*public ArrayList<ParentProperties> getParentProperties()
+        {
+            return(database !+ null ? database.parentProperties : null);
+        }*/
 
         public IdLine[] getPoints()
         {

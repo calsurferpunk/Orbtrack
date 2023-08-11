@@ -191,13 +191,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
 
         public int id;
-        public int arrayIndex;
+        public int index;
         public RelativeLocationProperties[][] childProperties;
 
-        public ParentOrbital(int id, int arrayIndex, int pointCount)
+        public ParentOrbital(int id, int index, int pointCount)
         {
             this.id = id;
-            this.arrayIndex = arrayIndex;
+            this.index = index;
             this.childProperties = new RelativeLocationProperties[pointCount][2];
         }
     }
@@ -531,7 +531,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public FloatingActionStateButtonMenu settingsMenu;
 
     private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
-    private static final ParentOrbital parentOrbitalSearch = new ParentOrbital(Universe.IDs.None, 0, 0);
+    private static final ParentOrbital parentOrbitalSearch = new ParentOrbital(Universe.IDs.None, -1, 0);
     private static final ParentOrbital.Comparer parentOrbitalComparer = new ParentOrbital.Comparer();
     private int orientation;
     private int azIndex;
@@ -1010,7 +1010,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(currentLookAngle != null)
                     {
                         RelativeLocationProperties relativeProperties;
-                        ArrayList<Integer> currentParentIds = (currentType == Database.OrbitalType.Star ? currentOrbital.getParentIds() : null);
 
                         //remember current ID, type, name
                         currentId = currentOrbital.getSatelliteNum();
@@ -1032,43 +1031,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             selectedLookAngle = currentLookAngle;
                         }
 
+                        //if a star
+                        if(currentType == Database.OrbitalType.Star)
+                        {
+                            //set parent points
+                            setParentPoints(currentOrbital, relativeProperties);
+                        }
+
                         //draw orbital
                         drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
-
-                        //if have parents
-                        if(currentParentIds != null)
-                        {
-                            //add location properties to all parents
-                            for(int currentParentId : currentParentIds)
-                            {
-                                int[] indexes;
-
-                                //try to find parent orbital
-                                parentOrbitalSearch.id = currentParentId;
-                                indexes = Globals.divideFind(parentOrbitalSearch, parentOrbitals, parentOrbitalComparer);
-                                if(indexes[0] >= 0)
-                                {
-                                    //get current parent sub orbital, child properties, and array index
-                                    ParentOrbital currentParentSubOrbital = parentOrbitals.get(indexes[0]);
-                                    RelativeLocationProperties[][] currentSubProperties = currentParentSubOrbital.childProperties;
-                                    int arrayIndex = currentParentSubOrbital.arrayIndex;
-
-                                    //if valid
-                                    if(arrayIndex < currentOrbitals.length)
-                                    {
-                                        //get current sub orbital
-                                        Database.SatelliteData currentSubOrbital = currentOrbitals[arrayIndex];
-                                        Database.IdLine[] currentSubLine = currentSubOrbital.getPoints();
-
-                                        //if line and properties length match
-                                        if(currentSubLine != null && currentSubLine.length == currentSubProperties.length)
-                                        {
-                                            //
-                                        }
-                                    }
-                                }
-                            }
-                        }
                     }
                 }
             }
@@ -1185,7 +1156,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //if a constellation
         if(isConstellation)
         {
-            //draw connecting stars
+            //placeholder for something like an image
         }
         else
         {
@@ -1535,6 +1506,89 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         {
             //set look angles
             travelLookAngles[index] = currentLookAngles;
+        }
+    }
+
+    //Sets parent points
+    public void setParentPoints(Database.SatelliteData currentOrbital, RelativeLocationProperties relativeProperties)
+    {
+        int index;
+        int idIndex;
+        int pointIndex;
+        int parentIndex;
+        int noradId = currentOrbital.getSatelliteNum();
+        ArrayList<Integer> parentIds = currentOrbital.getParentIds();
+        ArrayList<Integer> parentIndexes = currentOrbital.getParentIndexes();
+        //ArrayList<Database.ParentProperties> parentProperties = currentOrbital.getParentProperties();
+        boolean haveParentIndexes = (parentIndexes != null);
+
+        //if have parents
+        //if(parentProperties != null)
+        if(parentIds != null)
+        {
+            //go through each parent ID
+            //for(idIndex = 0; idIndex < parentProperties.size(); idIndex++)
+            for(idIndex = 0; idIndex < parentIds.size(); idIndex++)
+            {
+                boolean indexCanUseId = (haveParentIndexes && idIndex < parentIndexes.size());
+
+                //try to use saved parent index
+                parentIndex = (indexCanUseId ? parentIndexes.get(idIndex) : -1);
+
+                //if parent index still unknown
+                if(parentIndex < 0)
+                {
+                    //search for parent index
+                    parentOrbitalSearch.id = parentIds.get(idIndex);
+                    //parentOrbitalSearch.id = parentProperties.get(idIndex).id;
+                    parentIndex = Globals.divideFind(parentOrbitalSearch, parentOrbitals, parentOrbitalComparer)[0];
+                    if(indexCanUseId)
+                    {
+                        //update saved parent index
+                        parentIndexes.set(idIndex, parentIndex);
+                    }
+                }
+
+                //if found parent index
+                if(parentIndex >= 0)
+                {
+                    //get current parent orbital and data
+                    ParentOrbital currentParentOrbital = parentOrbitals.get(parentIndex);
+                    index = currentParentOrbital.index;
+                    Database.SatelliteData currentParentOrbitalData = (index >= 0 && index < currentOrbitals.length ? currentOrbitals[index] : null);
+
+                    //if found parent orbital data
+                    if(currentParentOrbitalData != null)
+                    {
+                        //get current points and properties
+                        Database.IdLine[] currentPoints = currentParentOrbitalData.getPoints();
+                        RelativeLocationProperties[][] currentProperties = currentParentOrbital.childProperties;
+
+                        //if line and properties length match
+                        if(currentPoints != null && currentPoints.length == currentProperties.length)
+                        {
+                            //go through each point
+                            for(pointIndex = 0; pointIndex < currentPoints.length; pointIndex++)
+                            {
+                                //remember current point
+                                Database.IdLine currentPoint = currentPoints[pointIndex];
+
+                                //if ID is a match
+                                if(currentPoint.startId == noradId)
+                                {
+                                    //set start location
+                                    currentProperties[pointIndex][0] = relativeProperties;
+                                }
+                                if(currentPoint.endId == noradId)
+                                {
+                                    //set end location
+                                    currentProperties[pointIndex][1] = relativeProperties;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

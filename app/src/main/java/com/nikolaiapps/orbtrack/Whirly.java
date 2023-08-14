@@ -1188,7 +1188,7 @@ class Whirly
 
             //remember if old information and initialize path
             tleIsAccurate = (newSat.database == null || newSat.database.tleIsAccurate);
-            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(context), tleIsAccurate, common.data.database.pathColor);
+            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(context), tleIsAccurate, common.data.getPathColor());
 
             if(forMap)
             {
@@ -1495,7 +1495,7 @@ class Whirly
                 else if(showFootprint && orbitalFootprint == null)
                 {
                     orbitalFootprint = new FlatObject(controller, isStar);
-                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(Settings.getMapFootprintAlpha(currentContext), common.data.database.pathColor)));
+                    orbitalFootprint.setImage(createFootprintImage(Settings.getMapFootprintType(currentContext), Globals.getColor(Settings.getMapFootprintAlpha(currentContext), common.data.getPathColor())));
                 }
             }
         }

@@ -884,20 +884,16 @@ public class Database extends SQLiteOpenHelper
             if(!usedIds.contains(childId))
             {
                 //if child orbital exists
-                DatabaseSatellite currentChild = getOrbital(context,childId, false);
+                DatabaseSatellite currentChild = getOrbital(context, childId, false);
                 if(currentChild != null)
                 {
                     //add parent ID to child orbital
-                    if(currentChild.parentIds == null)
+                    if(currentChild.parentProperties == null)
                     {
-                        //initialize lists
-                        currentChild.parentIds = new ArrayList<>(0);
-                        currentChild.parentIndexes = new ArrayList<>(0);
-                        //currentChild.parentProperties = new ArrayList<>(0);
+                        //initialize list
+                        currentChild.parentProperties = new ArrayList<>(0);
                     }
-                    currentChild.parentIds.add(parentId);
-                    currentChild.parentIndexes.add(-1);
-                    //currentChild.parentProperties.add(new ParentProperties(parentId, -1));
+                    currentChild.parentProperties.add(new ParentProperties(parentId, -1));
                 }
 
                 //add to used IDs
@@ -1089,8 +1085,9 @@ public class Database extends SQLiteOpenHelper
             if(typeCount == null)
             {
                 //initialize type count length
-                typeCount = new int[OrbitalType.TypeCount];
-                for(index = 0; index < OrbitalType.TypeCount; index++)
+                //note: types start at 1
+                typeCount = new int[OrbitalType.TypeCount + 1];
+                for(index = 0; index < typeCount.length; index++)
                 {
                     typeCount[index] = 0;
                 }
@@ -1101,18 +1098,17 @@ public class Database extends SQLiteOpenHelper
                     //remember current type
                     byte currentType = currentOrbital.orbitalType;
 
-                    //if a valid type
-                    //note: types start at 1
-                    if(currentType > 0 && currentType <= typeCount.length)
+                    //if a valid index
+                    if(currentType >= 0 && currentType < typeCount.length)
                     {
                         //update count for type
-                        typeCount[currentType - 1]++;
+                        typeCount[currentType]++;
                     }
                 }
             }
 
             //return count
-            return(orbitalType > 0 && orbitalType <= typeCount.length ? typeCount[orbitalType - 1] : 0);
+            return(orbitalType >= 0 && orbitalType < typeCount.length ? typeCount[orbitalType] : 0);
         }
 
         //Sets path color for orbital with given norad ID
@@ -1304,9 +1300,7 @@ public class Database extends SQLiteOpenHelper
         public final double magnitude;
         public final double distanceLightYears;
         public IdLine[] points;
-        public ArrayList<Integer> parentIds;
-        public ArrayList<Integer> parentIndexes;
-        //public ArrayList<ParentProperties> parentProperties;
+        public ArrayList<ParentProperties> parentProperties;
         public int pathColor;
         public final byte orbitalType;
         public final boolean tleIsAccurate;
@@ -1317,7 +1311,7 @@ public class Database extends SQLiteOpenHelper
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)
             {
-                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.createIntArray(), source.createIntArray(), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
+                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), (ParentProperties[])source.readParcelableArray(ParentProperties.class.getClassLoader()), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
             }
 
             @Override
@@ -1327,7 +1321,7 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, int[] parentIds, int[] parentIndexes, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, Parcelable[] parentProperties, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
         {
             this.name = name;
             this.userName = (userName != null ? userName : "");
@@ -1353,31 +1347,18 @@ public class Database extends SQLiteOpenHelper
             this.magnitude = magnitude;
             this.distanceLightYears = distanceLightYears;
             this.points = IdLine.fromString(pointsString);
-            if(parentIds != null)
+            if(parentProperties instanceof ParentProperties[])
             {
-                this.parentIds = new ArrayList<>(parentIds.length);
-                for(int currentId : parentIds)
+                this.parentProperties = new ArrayList<>(parentProperties.length);
+                for(Parcelable currentProperty : parentProperties)
                 {
-                    this.parentIds.add(currentId);
+                    this.parentProperties.add((ParentProperties)currentProperty);
                 }
             }
             else
             {
-                this.parentIds = null;
+                this.parentProperties = null;
             }
-            if(parentIndexes != null)
-            {
-                this.parentIndexes = new ArrayList<>(parentIndexes.length);
-                for(int currentIndex : parentIndexes)
-                {
-                    this.parentIndexes.add(currentIndex);
-                }
-            }
-            else
-            {
-                this.parentIndexes = null;
-            }
-            //this.parentProperties = parentProperties;
             this.pathColor = pathColor;
             this.orbitalType = orbitalType;
             this.inFilter = inFilter;
@@ -1393,7 +1374,7 @@ public class Database extends SQLiteOpenHelper
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pathString, int pathColor, byte orbitalType, boolean selected)
         {
-            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, null, pathColor, orbitalType, true, selected);
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, pathColor, orbitalType, true, selected);
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
         {
@@ -1484,10 +1465,6 @@ public class Database extends SQLiteOpenHelper
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            int index;
-            int[] parentIdArray;
-            int[] parentIndexesArray;
-
             dest.writeString(name);
             dest.writeString(userName);
             dest.writeInt(noradId);
@@ -1504,35 +1481,14 @@ public class Database extends SQLiteOpenHelper
             dest.writeDouble(magnitude);
             dest.writeDouble(distanceLightYears);
             dest.writeString(IdLine.toString(points));
-            if(parentIds != null)
+            if(parentProperties != null)
             {
-                parentIdArray = new int[parentIds.size()];
-                for(index = 0; index < parentIdArray.length; index++)
-                {
-                    parentIdArray[index] = parentIds.get(index);
-                }
-
-                dest.writeIntArray(parentIdArray);
+                dest.writeParcelableArray(parentProperties.toArray(new Parcelable[0]), 0);
             }
             else
             {
-                dest.writeIntArray(null);
+                dest.writeParcelableArray(null, 0);
             }
-            if(parentIndexes != null)
-            {
-                parentIndexesArray = new int[parentIndexes.size()];
-                for(index = 0; index < parentIndexesArray.length; index++)
-                {
-                    parentIndexesArray[index] = parentIndexes.get(index);
-                }
-
-                dest.writeIntArray(parentIndexesArray);
-            }
-            else
-            {
-                dest.writeIntArray(null);
-            }
-            //dest.writeParcelableArray(parentProperties.toArray(new Parcelable[0]), 0);
             dest.writeInt(pathColor);
             dest.writeByte(orbitalType);
             dest.writeByte((byte)(inFilter ? 1 : 0));
@@ -1579,6 +1535,19 @@ public class Database extends SQLiteOpenHelper
             return(database != null ? database.orbitalType : OrbitalType.Satellite);
         }
 
+        public int getPathColor()
+        {
+            return(database != null ? database.pathColor : Color.DKGRAY);
+        }
+
+        public void setPathColor(int color)
+        {
+            if(database != null)
+            {
+                database.pathColor = color;
+            }
+        }
+
         public boolean getTLEIsAccurate()
         {
             return(database != null && database.tleIsAccurate);
@@ -1597,20 +1566,10 @@ public class Database extends SQLiteOpenHelper
             }
         }
 
-        public ArrayList<Integer> getParentIds()
+        public ArrayList<ParentProperties> getParentProperties()
         {
-            return(database != null ? database.parentIds : null);
+            return(database != null ? database.parentProperties : null);
         }
-
-        public ArrayList<Integer> getParentIndexes()
-        {
-            return(database != null ? database.parentIndexes : null);
-        }
-
-        /*public ArrayList<ParentProperties> getParentProperties()
-        {
-            return(database !+ null ? database.parentProperties : null);
-        }*/
 
         public IdLine[] getPoints()
         {

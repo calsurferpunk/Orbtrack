@@ -3568,6 +3568,39 @@ public abstract class Globals
         }
     }
 
+    //Gets the filtered orbital count for each orbital type
+    public static int[] getOrbitalTypeFilterCount(Database.SatelliteData[] orbitals)
+    {
+        int index;
+        int[] typeCount = new int[Database.OrbitalType.TypeCount + 1];       //note: types start at 1
+
+        //go through each count
+        for(index = 0; index < typeCount.length; index++)
+        {
+            //initialize
+            typeCount[index] = 0;
+        }
+
+        //go through each orbital
+        for(Database.SatelliteData currentOrbital : orbitals)
+        {
+            //if in the filter
+            if(currentOrbital.getInFilter())
+            {
+                //get type index and validate
+                index = currentOrbital.getOrbitalType();
+                if(index >= 0 && index < typeCount.length)
+                {
+                    //add to count
+                    typeCount[index]++;
+                }
+            }
+        }
+
+        //return counts
+        return(typeCount);
+    }
+
     //Gets an orbital icon ID
     public static int getOrbitalIconId(Context context, int satelliteNum, byte orbitalType)
     {

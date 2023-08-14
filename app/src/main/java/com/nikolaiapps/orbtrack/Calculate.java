@@ -1652,7 +1652,7 @@ public abstract class Calculate
 
                                 case Globals.SubPageType.Lens:
                                     selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
-                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState);
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, getUsingConstellations(selectedOrbitals));
                                     break;
                             }
                             break;
@@ -1683,7 +1683,7 @@ public abstract class Calculate
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PassIndex, params.getInt(MainActivity.ParamTypes.PassIndex, 0));
                                     savedInstanceState.putBoolean(MainActivity.ParamTypes.GetPassItems, true);
                                     selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
-                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState);
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, getUsingConstellations(selectedOrbitals));
                                     break;
                             }
                             break;
@@ -1844,6 +1844,13 @@ public abstract class Calculate
 
             //update display
             updateSelectButton();
+        }
+
+        //Returns if there are any constellations in the given orbitals
+        private boolean getUsingConstellations(Database.SatelliteData[] orbitals)
+        {
+            int[] orbitalTypeCount = Globals.getOrbitalTypeFilterCount(orbitals);
+            return(orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
         }
 
         //Updates select button text

@@ -469,11 +469,11 @@ public abstract class Orbitals
                                     //remember current satellite
                                     Database.SatelliteData currentSatellite = currentSatellites[index];
 
-                                    //if current satellite has a database and matches selected satellite
-                                    if(currentSatellite.database != null && currentSatellite.getSatelliteNum() == currentItem.satelliteObject.getSatelliteNum())
+                                    //if current matches selected satellite
+                                    if(currentSatellite.getSatelliteNum() == currentItem.satelliteObject.getSatelliteNum())
                                     {
                                         //update selected satellite
-                                        currentSatellite.database.pathColor = color;
+                                        currentSatellite.setPathColor(color);
                                     }
                                 }
                             }

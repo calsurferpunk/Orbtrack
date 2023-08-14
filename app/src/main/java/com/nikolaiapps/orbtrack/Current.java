@@ -958,12 +958,15 @@ public abstract class Current
             View newView = null;
             Context context = this.getContext();
             final Selectable.ListBaseAdapter listAdapter;
+            int[] orbitalTypeCount;
             Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems();
             Database.SatelliteData[] satellites = MainActivity.getSatellites();
             Database.SatelliteData[] usedSatellites;
 
-            //apply any filter
+            //apply any filter and update status
             Globals.applyOrbitalTypeFilter(context, group, subPage, satellites);
+            orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
+            showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
 
             //set adapter
             listAdapter = new Combined.ItemListAdapter(context, savedItems, satellites);
@@ -985,7 +988,7 @@ public abstract class Current
                 setOrbitalViews(usedSatellites);
 
                 //create view
-                newView = onCreateLensView(this, inflater, container, usedSatellites, savedInstanceState);
+                newView = onCreateLensView(this, inflater, container, usedSatellites, savedInstanceState, showingConstellations);
             }
             //else if need to create map view
             else if(createMapView)
@@ -1333,6 +1336,7 @@ public abstract class Current
     public static boolean mapShowPaths = false;
     public static boolean lensShowPaths = false;
     public static boolean lensShowCalibration = false;
+    public static boolean showingConstellations = false;
     public static long mapMillisecondsPlayBar = 0;
     public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
     public static Calculations.SatelliteObjectType[] orbitalViews = new Calculations.SatelliteObjectType[0];
@@ -1572,7 +1576,7 @@ public abstract class Current
     }
 
     //Creates lens view
-    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState)
+    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean needConstellations)
     {
         final Context context = pageFragment.getContext();
         final Resources res = (context != null ? context.getResources() : null);
@@ -1595,7 +1599,7 @@ public abstract class Current
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
-        final CameraLens cameraView = new CameraLens(context, selectedOrbitals);
+        final CameraLens cameraView = new CameraLens(context, selectedOrbitals, needConstellations);
         cameraView.settingsMenu = rootView.findViewById(R.id.Lens_Settings_Menu);
         final Calculate.Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);

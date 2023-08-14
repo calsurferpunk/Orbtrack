@@ -4119,20 +4119,24 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //go through each satellite
                     for(index = 0; index < currentSatellites.length; index++)
                     {
-                        //get current orbital data and remember if in filter
+                        //get current orbital data, type, if star, and if in filter
                         Database.SatelliteData currentOrbitalData = currentSatellites[index];
+                        byte currentOrbitalType = currentOrbitalData.getOrbitalType();
+                        boolean isStar = (currentOrbitalType == Database.OrbitalType.Star);
                         boolean currentInFilter = currentOrbitalData.getInFilter();
+                        boolean isStarForConstellation = (isStar && Current.showingConstellations && onLens);
 
                         //if current orbital TLE is accurate
                         if(currentOrbitalData.getTLEIsAccurate())
                         {
-                            //get current satellite, location, and look angle
+                            //get current satellite, ID, and look angle
                             boolean changedEnough = false;
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
-
                             currentNoradId = currentOrbital.getSatelliteNum();
                             currentIsSatellite = (currentNoradId > 0);
-                            if(currentInFilter)
+
+                            //if -in filter- or -a star being used in a constellation-
+                            if(currentInFilter || isStarForConstellation)
                             {
                                 Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
                                 topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
@@ -4179,8 +4183,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 }
                             }
 
-                            //if in filter
-                            if(currentInFilter)
+                            //if -in filter- or -a star being used in a constellation-
+                            if(currentInFilter || isStarForConstellation)
                             {
                                 //if not using all satellites and satellite number matches
                                 if((!allViewOrbitals && currentNoradId == viewLensNoradID))
@@ -4198,8 +4202,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     //remember look angle
                                     lookAngles[index] = topographicData;
 
-                                    //if combined list exists and showing list
-                                    if(onList && Current.PageAdapter.hasItems())
+                                    //if in filter, combined list exists, and showing list
+                                    if(currentInFilter && onList && Current.PageAdapter.hasItems())
                                     {
                                         //get current item
                                         Current.Combined.Item currentItem = Current.PageAdapter.getCombinedItemByNorad(currentNoradId);

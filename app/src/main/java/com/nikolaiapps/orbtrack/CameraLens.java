@@ -554,6 +554,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int selectedOrbitalIndex;
     private boolean compassBad;
     private boolean compassHadBad;
+    private final boolean showingConstellations;
     private final boolean arrowDirectionCentered;
     private final boolean showIconIndicatorDirection;
     private final float textSize;
@@ -607,7 +608,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private Calculations.TopographicDataType[] currentLookAngles;
     private CalculateViewsTask.OrbitalView[][] travelLookAngles;
 
-    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals)
+    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals, boolean needConstellations)
     {
         super(context);
 
@@ -722,6 +723,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         calibrateOkayButton = null;
         helpText = null;
 
+        showingConstellations = needConstellations;
+
         orbitalIcons = new ArrayList<>(0);
         parentOrbitals = new ArrayList<>(0);
         currentOrbitals = (selectedOrbitals != null ? selectedOrbitals : new Database.SatelliteData[0]);
@@ -732,7 +735,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
     public CameraLens(Context context)
     {
-        this(context, null);
+        this(context, null, false);
     }
 
     @Override
@@ -854,152 +857,157 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
             //go through each orbital and look angle
             for(index = 0; index < currentOrbitals.length; index++)
-             {
-                //remember current orbital, if in filter, and on selection
+            {
+                //remember current orbital, type, if a star, in filter, and on selection
                 Database.SatelliteData currentOrbital = currentOrbitals[index];
                 boolean haveOrbital = (currentOrbital != null);
+                byte currentType = (haveOrbital ? currentOrbital.getOrbitalType() : Database.OrbitalType.Satellite);
+                boolean isStar = (currentType == Database.OrbitalType.Star);
                 boolean inFilter = (haveOrbital && currentOrbital.getInFilter());
                 boolean haveSelected = haveSelectedOrbital();
                 boolean currentSelected = (selectedOrbitalIndex == index);
 
-                //if current orbital is set, in filter, look angle is valid, and using orbital
-                if(haveOrbital && currentOrbital.database != null && inFilter && index < currentLookAngles.length && (!showCalibration || !haveSelected || currentSelected))
+                 //if current orbital is set, -in filter or a star being used in a constellation-, look angle is valid, and using orbital
+                if(haveOrbital && (inFilter || (isStar && showingConstellations)) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
                 {
                     //remember current type, color, look, and travel angles
-                    int currentColor = currentOrbital.database.pathColor;
-                    byte currentType = currentOrbital.getOrbitalType();
+                    int currentColor = currentOrbital.getPathColor();
                     Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
                     CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
 
-                    //if current look angle or travel angles are set
-                    if(currentLookAngle != null || currentTravel != null)
+                    //if in filter
+                    if(inFilter)
                     {
-                        //setup paint
-                        currentPaint.setColor(Globals.getColor((showCalibration && currentSelected ? 70 : 255), currentColor));
-                        currentPaint.setStrokeWidth(indicatorThickness);
-                    }
-
-                    //if current travel is set, showing paths, not calibrating, and -non selected or on selected-
-                    if(currentTravel != null && showPaths && !showCalibration && (!haveSelected || currentSelected))
-                    {
-                        //remember length
-                        travelLength = currentTravel.length;
-
-                        //if using preset path divisions and at least 2 points
-                        if(pathDivisions != 0 && travelLength > 1)
+                        //if current look angle or travel angles are set
+                        if(currentLookAngle != null || currentTravel != null)
                         {
-                            //get distance between start and end, divided by divisions
-                            pathJulianDelta = (currentTravel[travelLength - 1].julianDate - currentTravel[0].julianDate) / pathDivisions;
-                        }
-                        else
-                        {
-                            //set default path julian delta
-                            pathJulianDelta = defaultPathJulianDelta;
-
-                            //remember look angles, and period
-                            periodMinutes = currentOrbital.satellite.orbit.periodMinutes;
-
-                            //if less than 1 day for period
-                            if(periodMinutes > 0 && periodMinutes < Calculations.MinutesPerDay)
-                            {
-                                //divide path into 12 parts
-                                pathJulianDelta = Globals.truncate((periodMinutes / Calculations.MinutesPerDay) / 12, 8);
-                            }
-                        }
-                        pathJulianEndDelta = pathJulianDelta / 4;
-
-                        //if there are travel views
-                        if(travelLength > 0)
-                        {
-                            //reset first and previous areas
-                            firstArea.setEmpty();
-                            previousArea.setEmpty();
-
                             //setup paint
-                            currentPaint.setStyle(Paint.Style.FILL);
+                            currentPaint.setColor(Globals.getColor((showCalibration && currentSelected ? 70 : 255), currentColor));
+                            currentPaint.setStrokeWidth(indicatorThickness);
+                        }
 
-                            //set julian dates
-                            julianDateStart = currentTravel[0].julianDate;
-                            julianDateEnd = currentTravel[travelLength - 1].julianDate;
+                        //if current travel is set, showing paths, not calibrating, and -non selected or on selected-
+                        if(currentTravel != null && showPaths && !showCalibration && (!haveSelected || currentSelected))
+                        {
+                            //remember length
+                            travelLength = currentTravel.length;
 
-                            //go through each view
-                            for(index2 = 0; index2 < travelLength; index2++)
+                            //if using preset path divisions and at least 2 points
+                            if(pathDivisions != 0 && travelLength > 1)
                             {
-                                //remember current view and status
-                                boolean onFirst = (index2 == 0);
-                                CalculateViewsTask.OrbitalView currentView = currentTravel[index2];
-                                currentAzDelta = Globals.degreeDistance(currentAzDeg, currentView.azimuth);
-                                currentElDelta = Globals.degreeDistance(currentElDeg, currentView.elevation);
+                                //get distance between start and end, divided by divisions
+                                pathJulianDelta = (currentTravel[travelLength - 1].julianDate - currentTravel[0].julianDate) / pathDivisions;
+                            }
+                            else
+                            {
+                                //set default path julian delta
+                                pathJulianDelta = defaultPathJulianDelta;
 
-                                //if on first
-                                if(onFirst)
+                                //remember look angles, and period
+                                periodMinutes = currentOrbital.satellite.orbit.periodMinutes;
+
+                                //if less than 1 day for period
+                                if(periodMinutes > 0 && periodMinutes < Calculations.MinutesPerDay)
                                 {
-                                    //set last point
-                                    azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
-                                    elPx[1] = (float)(heightHalf - (currentElDelta * degToPxHeight));
+                                    //divide path into 12 parts
+                                    pathJulianDelta = Globals.truncate((periodMinutes / Calculations.MinutesPerDay) / 12, 8);
                                 }
+                            }
+                            pathJulianEndDelta = pathJulianDelta / 4;
 
-                                //update line points and status
-                                azPx[0] = azPx[1];
-                                elPx[0] = elPx[1];
-                                azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
-                                elPx[1] = (float)(heightHalf - (currentElDelta * degToPxHeight));
-                                currentAzPxDelta = Math.abs(azPx[0] - azPx[1]);
-                                currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
+                            //if there are travel views
+                            if(travelLength > 0)
+                            {
+                                //reset first and previous areas
+                                firstArea.setEmpty();
+                                previousArea.setEmpty();
 
-                                //if not on first and not too long to draw
-                                if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
+                                //setup paint
+                                currentPaint.setStyle(Paint.Style.FILL);
+
+                                //set julian dates
+                                julianDateStart = currentTravel[0].julianDate;
+                                julianDateEnd = currentTravel[travelLength - 1].julianDate;
+
+                                //go through each view
+                                for(index2 = 0; index2 < travelLength; index2++)
                                 {
-                                    //draw line between last and current view
-                                    currentPaint.setColor(currentColor);
-                                    canvas.drawLine(azPx[0], elPx[0], azPx[1], elPx[1], currentPaint);
-                                }
+                                    //remember current view and status
+                                    boolean onFirst = (index2 == 0);
+                                    CalculateViewsTask.OrbitalView currentView = currentTravel[index2];
+                                    currentAzDelta = Globals.degreeDistance(currentAzDeg, currentView.azimuth);
+                                    currentElDelta = Globals.degreeDistance(currentElDeg, currentView.elevation);
 
-                                //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
-                                if(onFirst || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
-                                {
-                                    RectF bgArea;
-
-                                    //draw circle
-                                    canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
-
-                                    //get text area
-                                    if(currentView.timeArea.isEmpty())
-                                    {
-                                        currentPaint.getTextBounds(currentView.timeString, 0, currentView.timeString.length(), currentView.timeArea);
-                                    }
-                                    currentView.timeArea.offsetTo((int) (azPx[1] - (currentView.timeArea.width() / 2f)), (int) (elPx[1] - textSize));
-
-                                    //get background area
-                                    bgArea = new RectF(currentView.timeArea.left - textPadding, currentView.timeArea.top - textOffset - textPadding, currentView.timeArea.right + textPadding, (currentView.timeArea.bottom - textOffset) + textPadding);
-
-                                    //if -first area empty or not intersecting with current- and -previous area is empty or not intersecting with current-
-                                    if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
-                                    {
-                                        //draw text background
-                                        currentPaint.setColor(textBgColor);
-                                        canvas.drawRect(bgArea, currentPaint);
-
-                                        //draw text border
-                                        currentPaint.setColor(currentColor);
-                                        currentPaint.setStyle(Paint.Style.STROKE);
-                                        canvas.drawRect(bgArea, currentPaint);
-
-                                        //draw text
-                                        currentPaint.setColor(textColor);
-                                        currentPaint.setStyle(Paint.Style.FILL);
-                                        canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
-
-                                        //remember previous area and starting julian date
-                                        previousArea.set(bgArea);
-                                        julianDateStart = currentView.julianDate;
-                                    }
-
-                                    //if were on the first
+                                    //if on first
                                     if(onFirst)
                                     {
-                                        //remember first area
-                                        firstArea.set(bgArea);
+                                        //set last point
+                                        azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
+                                        elPx[1] = (float)(heightHalf - (currentElDelta * degToPxHeight));
+                                    }
+
+                                    //update line points and status
+                                    azPx[0] = azPx[1];
+                                    elPx[0] = elPx[1];
+                                    azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
+                                    elPx[1] = (float)(heightHalf - (currentElDelta * degToPxHeight));
+                                    currentAzPxDelta = Math.abs(azPx[0] - azPx[1]);
+                                    currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
+
+                                    //if not on first and not too long to draw
+                                    if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
+                                    {
+                                        //draw line between last and current view
+                                        currentPaint.setColor(currentColor);
+                                        canvas.drawLine(azPx[0], elPx[0], azPx[1], elPx[1], currentPaint);
+                                    }
+
+                                    //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
+                                    if(onFirst || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
+                                    {
+                                        RectF bgArea;
+
+                                        //draw circle
+                                        canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
+
+                                        //get text area
+                                        if(currentView.timeArea.isEmpty())
+                                        {
+                                            currentPaint.getTextBounds(currentView.timeString, 0, currentView.timeString.length(), currentView.timeArea);
+                                        }
+                                        currentView.timeArea.offsetTo((int) (azPx[1] - (currentView.timeArea.width() / 2f)), (int) (elPx[1] - textSize));
+
+                                        //get background area
+                                        bgArea = new RectF(currentView.timeArea.left - textPadding, currentView.timeArea.top - textOffset - textPadding, currentView.timeArea.right + textPadding, (currentView.timeArea.bottom - textOffset) + textPadding);
+
+                                        //if -first area empty or not intersecting with current- and -previous area is empty or not intersecting with current-
+                                        if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
+                                        {
+                                            //draw text background
+                                            currentPaint.setColor(textBgColor);
+                                            canvas.drawRect(bgArea, currentPaint);
+
+                                            //draw text border
+                                            currentPaint.setColor(currentColor);
+                                            currentPaint.setStyle(Paint.Style.STROKE);
+                                            canvas.drawRect(bgArea, currentPaint);
+
+                                            //draw text
+                                            currentPaint.setColor(textColor);
+                                            currentPaint.setStyle(Paint.Style.FILL);
+                                            canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
+
+                                            //remember previous area and starting julian date
+                                            previousArea.set(bgArea);
+                                            julianDateStart = currentView.julianDate;
+                                        }
+
+                                        //if were on the first
+                                        if(onFirst)
+                                        {
+                                            //remember first area
+                                            firstArea.set(bgArea);
+                                        }
                                     }
                                 }
                             }
@@ -1025,21 +1033,62 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             selectedId = currentId;
                             selectedType = currentType;
                             selectedName = currentName;
-                            selectedColor = currentOrbital.database.pathColor;
+                            selectedColor = currentColor;
                             selectedCloseArea = relativeProperties.closeArea;
                             selectedOutsideArea = relativeProperties.outsideArea;
                             selectedLookAngle = currentLookAngle;
                         }
 
-                        //if a star
-                        if(currentType == Database.OrbitalType.Star)
+                        //if a star and show constellations
+                        if(isStar && showingConstellations)
                         {
                             //set parent points
                             setParentPoints(currentOrbital, relativeProperties);
                         }
 
-                        //draw orbital
-                        drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
+                        //if in filter
+                        if(inFilter)
+                        {
+                            //draw orbital
+                            drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
+                        }
+                    }
+                }
+            }
+
+            //set default paint stroke and width
+            currentPaint.setStyle(Paint.Style.STROKE);
+            currentPaint.setStrokeWidth(indicatorThickness);
+
+            //go through parent orbitals
+            for(index = 0; index < parentOrbitals.size(); index++)
+            {
+                //remember current parent, orbital, and child properties
+                ParentOrbital currentParentOrbital = parentOrbitals.get(index);
+                int orbitalIndex = currentParentOrbital.index;
+                Database.SatelliteData currentOrbital = (orbitalIndex >= 0 && orbitalIndex < currentOrbitals.length ? currentOrbitals[orbitalIndex] : null);
+                RelativeLocationProperties[][] currentChildProperties = currentParentOrbital.childProperties;
+
+                //if able to get orbital, child properties, and in filter
+                if(currentOrbital != null && currentChildProperties != null && currentOrbital.getInFilter())
+                {
+                    //set line color
+                    currentPaint.setColor(currentOrbital.getPathColor());
+
+                    //go through child properties
+                    for(RelativeLocationProperties[] currentPoint : currentChildProperties)
+                    {
+                        //remember points and if have both
+                        boolean haveBothPoints = (currentPoint.length == 2);
+                        RelativeLocationProperties startPoint = (haveBothPoints ? currentPoint[0] : null);
+                        RelativeLocationProperties endPoint = (haveBothPoints ? currentPoint[1] : null);
+
+                        //if both points are set and at least 1 is within view
+                        if(startPoint != null && endPoint != null && (!startPoint.outsideArea || !endPoint.outsideArea))
+                        {
+                            //draw line between points
+                            canvas.drawLine(startPoint.azCenterPx, startPoint.elCenterPx, endPoint.azCenterPx, endPoint.elCenterPx, currentPaint);
+                        }
                     }
                 }
             }
@@ -1153,12 +1202,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentPaint.setColor(currentColor);
         currentPaint.setStyle(Paint.Style.STROKE);
 
-        //if a constellation
-        if(isConstellation)
-        {
-            //placeholder for something like an image
-        }
-        else
+        //if not a constellation
+        if(!isConstellation)
         {
             //draw indicator
             switch(indicator)
@@ -1471,8 +1516,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 changed = true;
             }
 
-            //if parents orbitals not set or need to be changed
-            if(parentOrbitals.size() == 0 || (checkLength && changed))
+            //if -parents orbitals not set and needed- or -need to be changed-
+            if((parentOrbitals.size() == 0 && showingConstellations) || (checkLength && changed))
             {
                 //clear parent orbitals
                 parentOrbitals.clear();
@@ -1513,40 +1558,29 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public void setParentPoints(Database.SatelliteData currentOrbital, RelativeLocationProperties relativeProperties)
     {
         int index;
-        int idIndex;
         int pointIndex;
         int parentIndex;
+        int propertyIndex;
         int noradId = currentOrbital.getSatelliteNum();
-        ArrayList<Integer> parentIds = currentOrbital.getParentIds();
-        ArrayList<Integer> parentIndexes = currentOrbital.getParentIndexes();
-        //ArrayList<Database.ParentProperties> parentProperties = currentOrbital.getParentProperties();
-        boolean haveParentIndexes = (parentIndexes != null);
+        ArrayList<Database.ParentProperties> parentProperties = currentOrbital.getParentProperties();
 
         //if have parents
-        //if(parentProperties != null)
-        if(parentIds != null)
+        if(parentProperties != null)
         {
             //go through each parent ID
-            //for(idIndex = 0; idIndex < parentProperties.size(); idIndex++)
-            for(idIndex = 0; idIndex < parentIds.size(); idIndex++)
+            for(propertyIndex = 0; propertyIndex < parentProperties.size(); propertyIndex++)
             {
-                boolean indexCanUseId = (haveParentIndexes && idIndex < parentIndexes.size());
-
-                //try to use saved parent index
-                parentIndex = (indexCanUseId ? parentIndexes.get(idIndex) : -1);
+                //remember current parent property and index
+                Database.ParentProperties currentParentProperty = parentProperties.get(propertyIndex);
+                parentIndex = currentParentProperty.index;
 
                 //if parent index still unknown
                 if(parentIndex < 0)
                 {
-                    //search for parent index
-                    parentOrbitalSearch.id = parentIds.get(idIndex);
-                    //parentOrbitalSearch.id = parentProperties.get(idIndex).id;
+                    //search for parent index and update
+                    parentOrbitalSearch.id = currentParentProperty.id;
                     parentIndex = Globals.divideFind(parentOrbitalSearch, parentOrbitals, parentOrbitalComparer)[0];
-                    if(indexCanUseId)
-                    {
-                        //update saved parent index
-                        parentIndexes.set(idIndex, parentIndex);
-                    }
+                    currentParentProperty.index = parentIndex;
                 }
 
                 //if found parent index

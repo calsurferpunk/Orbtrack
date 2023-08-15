@@ -1311,7 +1311,7 @@ public class Database extends SQLiteOpenHelper
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)
             {
-                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), (ParentProperties[])source.readParcelableArray(ParentProperties.class.getClassLoader()), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
+                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.readParcelableArray(ParentProperties.class.getClassLoader()), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
             }
 
             @Override
@@ -1422,6 +1422,36 @@ public class Database extends SQLiteOpenHelper
             }
         }
 
+        public Integer[] getChildIds()
+        {
+            ArrayList<Integer> usedIds = new ArrayList<>(0);
+
+            //if there are point
+            if(points != null)
+            {
+                //go through each point
+                for(IdLine currentPoint : points)
+                {
+                    //if start ID not in list
+                    if(!usedIds.contains(currentPoint.startId))
+                    {
+                        //add it
+                        usedIds.add(currentPoint.startId);
+                    }
+
+                    //if end ID not in list
+                    if(!usedIds.contains(currentPoint.endId))
+                    {
+                        //add it
+                        usedIds.add(currentPoint.endId);
+                    }
+                }
+            }
+
+            //return used child IDs
+            return(usedIds.toArray(new Integer[0]));
+        }
+
         public boolean getInFilter()
         {
             return(inFilter);
@@ -1447,13 +1477,12 @@ public class Database extends SQLiteOpenHelper
             else
             {
                 //always use
-                clearInFilter();
+                inFilter = true;
             }
         }
-
-        public void clearInFilter()
+        public void setInFilter(boolean inFilter)
         {
-            inFilter = true;
+            this.inFilter = inFilter;
         }
 
         @Override
@@ -1565,6 +1594,13 @@ public class Database extends SQLiteOpenHelper
                 database.setInFilter(orbitalTypeFilterList);
             }
         }
+        public void setInFilter(boolean inFilter)
+        {
+            if(database != null)
+            {
+                database.setInFilter(inFilter);
+            }
+        }
 
         public ArrayList<ParentProperties> getParentProperties()
         {
@@ -1576,12 +1612,20 @@ public class Database extends SQLiteOpenHelper
             return(database != null ? database.points : null);
         }
 
-        public boolean equals(SatelliteData other)
+        public Integer[] getChildIds()
         {
-            boolean satNull = (satellite == null);
-            boolean otherSatNull = (other == null || other.satellite == null);
+            return(database != null ? database.getChildIds() : new Integer[0]);
+        }
 
-            return((satNull && otherSatNull) || (!satNull && !otherSatNull && satellite.getSatelliteNum() == other.satellite.getSatelliteNum()));
+        @Override
+        public boolean equals(Object other)
+        {
+            boolean isClass = (other instanceof SatelliteData);
+            SatelliteData otherSat = (isClass ? (SatelliteData)other : null);
+            boolean satNull = (satellite == null);
+            boolean otherSatNull = (otherSat == null || otherSat.satellite == null);
+
+            return((satNull && otherSatNull) || (!satNull && !otherSatNull && satellite.getSatelliteNum() == otherSat.satellite.getSatelliteNum()));
         }
 
         public static SatelliteData[] getSatellites(Context context, ArrayList<Integer> noraIds)

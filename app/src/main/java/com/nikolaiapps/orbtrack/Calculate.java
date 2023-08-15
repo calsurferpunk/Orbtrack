@@ -3096,7 +3096,7 @@ public abstract class Calculate
         for(Database.DatabaseSatellite currentOrbital : orbitals)
         {
             //remove any filter
-            currentOrbital.clearInFilter();
+            currentOrbital.setInFilter(true);
         }
 
         //set orbital list items

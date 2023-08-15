@@ -5,3 +5,5 @@
 -15|Mu Andrómedae
 -16|Delta Andrómedae
 -17|Alferatz
+-19|?
+-20|Hormigas Alfa

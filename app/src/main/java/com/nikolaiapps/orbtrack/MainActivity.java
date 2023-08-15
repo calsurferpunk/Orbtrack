@@ -1296,7 +1296,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         for(Database.SatelliteData currentData : currentSatellites)
         {
             //if current data TLE is not accurate and not in exclude list
-            if(currentData.database != null && !currentData.database.tleIsAccurate && !excludeOldNoradIds.contains(currentData.getSatelliteNum()))
+            if(currentData.database != null && !currentData.getTLEIsAccurate() && !excludeOldNoradIds.contains(currentData.getSatelliteNum()))
             {
                 //add to list
                 oldSatellites.add(currentData.database);
@@ -4432,6 +4432,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     {
                         int noradId;
                         int multiCount = 0;
+                        int firstViewsLength;
                         String zoneId;
                         Bundle params;
                         Context context = MainActivity.this;
@@ -4441,15 +4442,20 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         CalculateViewsTask.OrbitalView[] views2 = null;
                         Calculate.Passes.Item[] passesItems;
                         Calculate.ViewAngles.Item[] angleItems;
+                        CalculateViewsTask.OrbitalView[] firstViews;
                         ArrayList<Integer> multiNoradId = null;
+                        ArrayList<Database.SatelliteData> currentChildList = new ArrayList<>(0);
+                        ArrayList<Database.SatelliteData> currentSatelliteList = new ArrayList<>(0);
+                        ArrayList<CalculateViewsTask.OrbitalView[]> currentViewList = new ArrayList<>(0);
 
                         //if using lens and angles list exists
                         if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
                         {
                             //get items
+                            CalculateViewsTask.OrbitalView[][] lensViews;
                             zoneId = observer.timeZone.getID();
                             angleItems = Calculate.PageAdapter.getViewAngleItems();
-                            currentViews = new CalculateViewsTask.OrbitalView[angleItems.length > 0 ? angleItems[0].views.length : 0][angleItems.length];
+                            lensViews = new CalculateViewsTask.OrbitalView[angleItems.length > 0 ? angleItems[0].views.length : 0][angleItems.length];
                             for(index = 0; index < angleItems[0].views.length; index++)
                             {
                                 //go through each item
@@ -4457,13 +4463,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 {
                                     //remember current item and possibly a previous time string
                                     Calculate.ViewAngles.Item currentAngleItem = angleItems[index2];
-                                    CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? currentViews[index - 1][index2] : null);
+                                    CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? lensViews[index - 1][index2] : null);
                                     boolean havePrevious = (previousOrbitalItem != null);
 
                                     //set view
-                                    currentViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
+                                    lensViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
                                 }
                             }
+                            currentViewList.addAll(Arrays.asList(lensViews));
 
                             //set params and current satellite
                             params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
@@ -4527,31 +4534,96 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //if current satellite is set
                         if(currentSatellite1 != null)
                         {
+                            //add satellite to list
+                            currentSatelliteList.add(currentSatellite1);
+
                             //if current satellite 2 is set
                             if(currentSatellite2 != null)
                             {
-                                //use both satellites
-                                currentSatellites = new Database.SatelliteData[]{currentSatellite1, currentSatellite2};
+                                //add satellite 2 to list
+                                currentSatelliteList.add(currentSatellite2);
+
+                                //if both views are set
                                 if(views != null && views2 != null)
                                 {
-                                    currentViews = new CalculateViewsTask.OrbitalView[][]{views, views2};
+                                    //add both satellite views to list
+                                    currentViewList.add(views);
+                                    currentViewList.add(views2);
                                 }
                             }
                             else
                             {
-                                //use first satellite
-                                currentSatellites = new Database.SatelliteData[]{currentSatellite1};
+                                //if views are set
                                 if(views != null)
                                 {
-                                    currentViews = new CalculateViewsTask.OrbitalView[][]{views};
+                                    //add first satellite views to list
+                                    currentViewList.add(views);
                                 }
                             }
                         }
                         //else if multiple satellites
                         else if(multiCount > 0)
                         {
-                            currentSatellites = Database.SatelliteData.getSatellites(context, multiNoradId);
+                            //add selected multiple satellites to list
+                            currentSatelliteList.addAll(Arrays.asList(Database.SatelliteData.getSatellites(context, multiNoradId)));
                         }
+
+                        //remember first views and length
+                        firstViews = (currentViewList.size() > 0 ? currentViewList.get(0) : null);
+                        firstViewsLength = (firstViews != null ? firstViews.length : 0);
+
+                        //go through each satellite
+                        for(Database.SatelliteData currentSatellite : currentSatelliteList)
+                        {
+                            //get any child IDs
+                            Integer[] childIds = currentSatellite.getChildIds();
+
+                            //go through each ID
+                            for(int currentId : childIds)
+                            {
+                                //get child satellite
+                                Database.SatelliteData childSatellite = new Database.SatelliteData(context, currentId);
+
+                                //if not already in child or main list
+                                if(!currentChildList.contains(childSatellite) && !currentSatelliteList.contains(childSatellite))
+                                {
+                                    CalculateViewsTask.OrbitalView[] childViews = new CalculateViewsTask.OrbitalView[firstViewsLength];
+
+                                    //go through first views and add equivalent to list
+                                    for(index = 0; index < firstViewsLength; index++)
+                                    {
+                                        TopographicDataType topographicData;
+                                        CalculateViewsTask.OrbitalView currentView = new CalculateViewsTask.OrbitalView(firstViews[index]);
+
+                                        //set child views
+                                        Calculations.updateOrbitalPosition(childSatellite.satellite, observer, currentView.julianDate, true);
+                                        topographicData = Calculations.getLookAngles(observer, childSatellite.satellite, true);
+                                        currentView.azimuth = topographicData.azimuth;
+                                        currentView.elevation = topographicData.elevation;
+                                        currentView.rangeKm = topographicData.rangeKm;
+                                        childViews[index] = currentView;
+                                    }
+
+                                    //set as not in filter
+                                    childSatellite.setInFilter(false);
+
+                                    //add to lists
+                                    currentChildList.add(childSatellite);
+                                    currentViewList.add(childViews);
+                                }
+                            }
+                        }
+
+                        //if there were children satellites added
+                        if(currentChildList.size() > 0)
+                        {
+                            //add them to the list
+                            currentSatelliteList.addAll(currentChildList);
+                        }
+
+                        //set current satellites and views
+                        currentSatellites = currentSatelliteList.toArray(new Database.SatelliteData[0]);
+                        currentViews = currentViewList.toArray(new CalculateViewsTask.OrbitalView[0][]);
                     }
 
                     //if satellites, views, and bar are set

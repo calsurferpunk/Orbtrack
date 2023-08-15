@@ -1019,7 +1019,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     {
                         RelativeLocationProperties relativeProperties;
 
-                        //remember current ID, type, name
+                        //remember current ID and name
                         currentId = currentOrbital.getSatelliteNum();
                         currentName = currentOrbital.getName();
 

@@ -4410,148 +4410,157 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Creates timer runnable for calculate
     private Runnable createCalculateRunnable()
     {
+        final Globals.BoolObject firstRun = new Globals.BoolObject(true);
+
         return(new Runnable()
         {
+            Database.SatelliteData[] currentSatellites = null;
+            CalculateViewsTask.OrbitalView[][] currentViews = null;
+
             @Override
             public void run()
             {
                 int index;
                 int index2;
-                int noradId;
-                int playIndex;
-                int multiCount = 0;
-                double subProgressPercent;
-                String zoneId;
-                Bundle params;
-                Context context = MainActivity.this;
                 CameraLens cameraView = Current.getCameraView();
-                Database.SatelliteData currentSatellite1 = null;
-                Database.SatelliteData currentSatellite2 = null;
-                Database.SatelliteData[] currentSatellites = null;
-                TopographicDataType[] currentPlayTopographicData;
-                CalculateViewsTask.OrbitalView currentView;
-                CalculateViewsTask.OrbitalView nextView;
-                CalculateViewsTask.OrbitalView[] views = null;
-                CalculateViewsTask.OrbitalView[] views2 = null;
-                CalculateViewsTask.OrbitalView[][] currentViews = null;
-                Calculate.Passes.Item[] passesItems;
-                Calculate.ViewAngles.Item[] angleItems;
-                ArrayList<Integer> multiNoradId = null;
 
                 //if lens exists
                 if(cameraView != null)
                 {
-                    //if using lens and angles list exists
-                    if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
+                    //if first run
+                    if(firstRun.value)
                     {
-                        //get items
-                        zoneId = observer.timeZone.getID();
-                        angleItems = Calculate.PageAdapter.getViewAngleItems();
-                        currentViews = new CalculateViewsTask.OrbitalView[angleItems.length > 0 ? angleItems[0].views.length : 0][angleItems.length];
-                        for(index = 0; index < angleItems[0].views.length; index++)
-                        {
-                            //go through each item
-                            for(index2 = 0; index2 < angleItems.length; index2++)
-                            {
-                                //remember current item and possibly a previous time string
-                                Calculate.ViewAngles.Item currentAngleItem = angleItems[index2];
-                                CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? currentViews[index - 1][index2] : null);
-                                boolean havePrevious = (previousOrbitalItem != null);
+                        int noradId;
+                        int multiCount = 0;
+                        String zoneId;
+                        Bundle params;
+                        Context context = MainActivity.this;
+                        Database.SatelliteData currentSatellite1 = null;
+                        Database.SatelliteData currentSatellite2 = null;
+                        CalculateViewsTask.OrbitalView[] views = null;
+                        CalculateViewsTask.OrbitalView[] views2 = null;
+                        Calculate.Passes.Item[] passesItems;
+                        Calculate.ViewAngles.Item[] angleItems;
+                        ArrayList<Integer> multiNoradId = null;
 
-                                //set view
-                                currentViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
+                        //if using lens and angles list exists
+                        if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
+                        {
+                            //get items
+                            zoneId = observer.timeZone.getID();
+                            angleItems = Calculate.PageAdapter.getViewAngleItems();
+                            currentViews = new CalculateViewsTask.OrbitalView[angleItems.length > 0 ? angleItems[0].views.length : 0][angleItems.length];
+                            for(index = 0; index < angleItems[0].views.length; index++)
+                            {
+                                //go through each item
+                                for(index2 = 0; index2 < angleItems.length; index2++)
+                                {
+                                    //remember current item and possibly a previous time string
+                                    Calculate.ViewAngles.Item currentAngleItem = angleItems[index2];
+                                    CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? currentViews[index - 1][index2] : null);
+                                    boolean havePrevious = (previousOrbitalItem != null);
+
+                                    //set view
+                                    currentViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
+                                }
+                            }
+
+                            //set params and current satellite
+                            params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
+                            if(params != null)
+                            {
+                                noradId = params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid);
+                                multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
+                                multiCount = (multiNoradId != null ? multiNoradId.size() : 0);
+                                if(noradId == Universe.IDs.Invalid && multiCount == 1)
+                                {
+                                    noradId = multiNoradId.get(0);
+                                }
+                                currentSatellite1 = (multiCount > 1 ? null : (new Database.SatelliteData(context, noradId)));
                             }
                         }
 
-                        //set params and current satellite
-                        params = Calculate.PageAdapter.getParams(Calculate.PageType.View);
-                        if(params != null)
+                        //if using lens and passes list exists
+                        if(calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Passes))
                         {
-                            noradId = params.getInt(Calculate.ParamTypes.NoradId, Universe.IDs.Invalid);
-                            multiNoradId = params.getIntegerArrayList(Calculate.ParamTypes.MultiNoradId);
-                            multiCount = (multiNoradId != null ? multiNoradId.size() : 0);
-                            if(noradId == Universe.IDs.Invalid && multiCount == 1)
+                            //get items
+                            passesItems = Calculate.PageAdapter.getPassItems();
+
+                            //if pass index is valid
+                            if(passesPassIndex < passesItems.length)
                             {
-                                noradId = multiNoradId.get(0);
+                                //get views
+                                views = passesItems[passesPassIndex].passViews;
                             }
-                            currentSatellite1 = (multiCount > 1 ? null : (new Database.SatelliteData(context, noradId)));
-                        }
-                    }
 
-                    //if using lens and passes list exists
-                    if(calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Passes))
-                    {
-                        //get items
-                        passesItems = Calculate.PageAdapter.getPassItems();
-
-                        //if pass index is valid
-                        if(passesPassIndex < passesItems.length)
-                        {
-                            //get views
-                            views = passesItems[passesPassIndex].passViews;
-                        }
-
-                        //update
-                        params = Calculate.PageAdapter.getParams(Calculate.PageType.Passes);
-                        if(params != null)
-                        {
-                            currentSatellite1 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId));
-                        }
-                    }
-
-                    //if passes list exists
-                    if(calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Intersection))
-                    {
-                        //get items
-                        passesItems = Calculate.PageAdapter.getIntersectionItems();
-
-                        //if pass index is valid
-                        if(intersectionPassIndex < passesItems.length)
-                        {
-                            //get views
-                            views = passesItems[intersectionPassIndex].passViews;
-                            views2 = passesItems[intersectionPassIndex].passViews2;
-                        }
-
-                        //update
-                        params = Calculate.PageAdapter.getParams(Calculate.PageType.Intersection);
-                        if(params != null)
-                        {
-                            currentSatellite1 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId));
-                            currentSatellite2 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid));
-                        }
-                    }
-                    if(currentSatellite1 != null)
-                    {
-                        if(currentSatellite2 != null)
-                        {
-                            currentSatellites = new Database.SatelliteData[]{currentSatellite1, currentSatellite2};
-                            if(views != null && views2 != null)
+                            //update
+                            params = Calculate.PageAdapter.getParams(Calculate.PageType.Passes);
+                            if(params != null)
                             {
-                                currentViews = new CalculateViewsTask.OrbitalView[][]{views, views2};
+                                currentSatellite1 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId));
                             }
                         }
-                        else
+
+                        //if passes list exists
+                        if(calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Intersection))
                         {
-                            currentSatellites = new Database.SatelliteData[]{currentSatellite1};
-                            if(views != null)
+                            //get items
+                            passesItems = Calculate.PageAdapter.getIntersectionItems();
+
+                            //if pass index is valid
+                            if(intersectionPassIndex < passesItems.length)
                             {
-                                currentViews = new CalculateViewsTask.OrbitalView[][]{views};
+                                //get views
+                                views = passesItems[intersectionPassIndex].passViews;
+                                views2 = passesItems[intersectionPassIndex].passViews2;
+                            }
+
+                            //update
+                            params = Calculate.PageAdapter.getParams(Calculate.PageType.Intersection);
+                            if(params != null)
+                            {
+                                currentSatellite1 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId));
+                                currentSatellite2 = new Database.SatelliteData(context, params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid));
                             }
                         }
-                    }
-                    else if(multiCount > 0)
-                    {
-                        currentSatellites = Database.SatelliteData.getSatellites(context, multiNoradId);
+
+                        //if current satellite is set
+                        if(currentSatellite1 != null)
+                        {
+                            //if current satellite 2 is set
+                            if(currentSatellite2 != null)
+                            {
+                                //use both satellites
+                                currentSatellites = new Database.SatelliteData[]{currentSatellite1, currentSatellite2};
+                                if(views != null && views2 != null)
+                                {
+                                    currentViews = new CalculateViewsTask.OrbitalView[][]{views, views2};
+                                }
+                            }
+                            else
+                            {
+                                //use first satellite
+                                currentSatellites = new Database.SatelliteData[]{currentSatellite1};
+                                if(views != null)
+                                {
+                                    currentViews = new CalculateViewsTask.OrbitalView[][]{views};
+                                }
+                            }
+                        }
+                        //else if multiple satellites
+                        else if(multiCount > 0)
+                        {
+                            currentSatellites = Database.SatelliteData.getSatellites(context, multiNoradId);
+                        }
                     }
 
                     //if satellites, views, and bar are set
                     if(currentSatellites != null && currentViews != null && cameraView.playBar != null)
                     {
                         //get play index and progress and set topographic data
-                        playIndex = cameraView.playBar.getValue();
-                        subProgressPercent = cameraView.playBar.getSubProgressPercent();
-                        currentPlayTopographicData = new TopographicDataType[currentViews.length];
+                        int playIndex = cameraView.playBar.getValue();
+                        double subProgressPercent = cameraView.playBar.getSubProgressPercent();
+                        TopographicDataType[] currentPlayTopographicData = new TopographicDataType[currentViews.length];
 
                         //go through each view set
                         for(index = 0; index < currentViews.length; index++)
@@ -4564,13 +4573,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             if(playIndex < currentSatelliteViews.length)
                             {
                                 //remember current view
-                                currentView = currentSatelliteViews[playIndex];
+                                CalculateViewsTask.OrbitalView currentView = currentSatelliteViews[playIndex];
 
                                 //if more indexes after current
                                 if(playIndex + 1 < currentSatelliteViews.length)
                                 {
                                     //get add distance index percentage to current view
-                                    nextView = currentSatelliteViews[playIndex + 1];
+                                    CalculateViewsTask.OrbitalView nextView = currentSatelliteViews[playIndex + 1];
                                     currentTopographicData = new TopographicDataType();
                                     currentTopographicData.azimuth = Globals.normalizeAngle(currentView.azimuth + (Globals.degreeDistance(currentView.azimuth, nextView.azimuth) * subProgressPercent));
                                     currentTopographicData.elevation = Globals.normalizeAngle(currentView.elevation + (Globals.degreeDistance(currentView.elevation, nextView.elevation) * subProgressPercent));
@@ -4607,6 +4616,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //update delay
                         timerDelay = lensTimerDelay;
                     }
+
+                    //update status
+                    firstRun.value = false;
                 }
             }
         });

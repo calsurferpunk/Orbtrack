@@ -69,6 +69,7 @@ public class Database extends SQLiteOpenHelper
         static final byte SpaceTrack = 2;
         static final byte NASA = 3;
         static final byte HeavensAbove = 4;
+        static final byte TheSkyLive = 126;
         static final byte SpaceDotCom = 127;
     }
 
@@ -341,7 +342,7 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
-    private static final int INFO_FILE_COLUMNS = 2;
+    private static final int INFO_FILE_COLUMNS = 3;
     private static final int INFO_FILE_ROWS = 11;
     private static final String INFO_FILE_SEPARATOR = "[|]";
 
@@ -397,7 +398,7 @@ public class Database extends SQLiteOpenHelper
                             {
                                 noradId.add(Integer.valueOf(columns[0]));
                             }
-                            infoList.add(columns[1]);
+                            infoList.add(columns[2]);
                         }
                     }
                     languageInfo.add(infoList);
@@ -912,17 +913,17 @@ public class Database extends SQLiteOpenHelper
             //go through each orbital
             for(DatabaseSatellite currentOrbital : buffer)
             {
-                //remember current ID and points
+                //remember current ID and lines
                 int currentId = currentOrbital.noradId;
-                IdLine[] currentPoints = currentOrbital.points;
+                IdLine[] currentLines = currentOrbital.lines;
 
-                //if on a constellation and there are points
-                if(currentOrbital.orbitalType == OrbitalType.Constellation && currentPoints != null)
+                //if on a constellation and there are lines
+                if(currentOrbital.orbitalType == OrbitalType.Constellation && currentLines != null)
                 {
                     ArrayList<Integer> usedIds = new ArrayList<>(0);
 
-                    //go through each point
-                    for(IdLine currentLine : currentPoints)
+                    //go through each line
+                    for(IdLine currentLine : currentLines)
                     {
                         //add as parent to IDs
                         addParentId(context, currentId, currentLine.startId, usedIds);
@@ -1173,10 +1174,10 @@ public class Database extends SQLiteOpenHelper
             {
                 int index;
                 String[] pointPairs = pointString.split(CONSTELLATION_FILE_PAIR_SEPARATOR);
-                IdLine[] points = new IdLine[pointPairs.length];
+                IdLine[] lines = new IdLine[pointPairs.length];
 
-                //if at least 2 points
-                if(points.length >= 2)
+                //if at least 1 line
+                if(lines.length >= 1)
                 {
                     //go through each pair
                     for(index = 0; index < pointPairs.length; index++)
@@ -1186,8 +1187,8 @@ public class Database extends SQLiteOpenHelper
                         //if a starting and ending ID
                         if(currentLine.length == 2)
                         {
-                            //set current point
-                            points[index] = new IdLine(Globals.tryParseInt(currentLine[0]), Globals.tryParseInt(currentLine[1]));
+                            //set current line
+                            lines[index] = new IdLine(Globals.tryParseInt(currentLine[0]), Globals.tryParseInt(currentLine[1]));
                         }
                         else
                         {
@@ -1196,8 +1197,8 @@ public class Database extends SQLiteOpenHelper
                         }
                     }
 
-                    //return points
-                    return(points);
+                    //return lines
+                    return(lines);
                 }
             }
 
@@ -1206,27 +1207,27 @@ public class Database extends SQLiteOpenHelper
         }
 
         //Converts given ID lines to a string
-        public static String toString(IdLine[] points)
+        public static String toString(IdLine[] lines)
         {
-            //if points exist and at least 2
-            if(points != null && points.length >= 2)
+            //if lines exist and at least 1
+            if(lines != null && lines.length >= 1)
             {
                 int index;
                 StringBuilder pointString = new StringBuilder();
 
-                //go through each point
-                for(index = 0; index < points.length; index++)
+                //go through each line
+                for(index = 0; index < lines.length; index++)
                 {
                     //remember current ID line
-                    IdLine currentLine = points[index];
+                    IdLine currentLine = lines[index];
 
-                    //add line to string
+                    //add line points to string
                     pointString.append(currentLine.startId);
                     pointString.append(CONSTELLATION_FILE_POINT_SEPARATOR);
                     pointString.append(currentLine.endId);
 
-                    //if there are more points
-                    if(index + 1 < points.length)
+                    //if there are more lines
+                    if(index + 1 < lines.length)
                     {
                         //add separator
                         pointString.append(CONSTELLATION_FILE_PAIR_SEPARATOR);
@@ -1299,7 +1300,7 @@ public class Database extends SQLiteOpenHelper
         public final double declinationDegs;
         public final double magnitude;
         public final double distanceLightYears;
-        public IdLine[] points;
+        public IdLine[] lines;
         public ArrayList<ParentProperties> parentProperties;
         public int pathColor;
         public final byte orbitalType;
@@ -1346,7 +1347,7 @@ public class Database extends SQLiteOpenHelper
             this.declinationDegs = declinationDegs;
             this.magnitude = magnitude;
             this.distanceLightYears = distanceLightYears;
-            this.points = IdLine.fromString(pointsString);
+            this.lines = IdLine.fromString(pointsString);
             if(parentProperties instanceof ParentProperties[])
             {
                 this.parentProperties = new ArrayList<>(parentProperties.length);
@@ -1426,24 +1427,24 @@ public class Database extends SQLiteOpenHelper
         {
             ArrayList<Integer> usedIds = new ArrayList<>(0);
 
-            //if there are point
-            if(points != null)
+            //if there are lines
+            if(lines != null)
             {
-                //go through each point
-                for(IdLine currentPoint : points)
+                //go through each line
+                for(IdLine currentLine : lines)
                 {
                     //if start ID not in list
-                    if(!usedIds.contains(currentPoint.startId))
+                    if(!usedIds.contains(currentLine.startId))
                     {
                         //add it
-                        usedIds.add(currentPoint.startId);
+                        usedIds.add(currentLine.startId);
                     }
 
                     //if end ID not in list
-                    if(!usedIds.contains(currentPoint.endId))
+                    if(!usedIds.contains(currentLine.endId))
                     {
                         //add it
-                        usedIds.add(currentPoint.endId);
+                        usedIds.add(currentLine.endId);
                     }
                 }
             }
@@ -1509,7 +1510,7 @@ public class Database extends SQLiteOpenHelper
             dest.writeDouble(declinationDegs);
             dest.writeDouble(magnitude);
             dest.writeDouble(distanceLightYears);
-            dest.writeString(IdLine.toString(points));
+            dest.writeString(IdLine.toString(lines));
             if(parentProperties != null)
             {
                 dest.writeParcelableArray(parentProperties.toArray(new Parcelable[0]), 0);
@@ -1607,9 +1608,9 @@ public class Database extends SQLiteOpenHelper
             return(database != null ? database.parentProperties : null);
         }
 
-        public IdLine[] getPoints()
+        public IdLine[] getLines()
         {
-            return(database != null ? database.points : null);
+            return(database != null ? database.lines : null);
         }
 
         public Integer[] getChildIds()
@@ -1937,6 +1938,25 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
+    //Add information
+    private static void addInformation(Context context, Database instance, SQLiteDatabase db)
+    {
+        Resources res = (context != null ? context.getResources() : null);
+
+        //if no context or no resources
+        if(context == null || res == null)
+        {
+            //stop
+            return;
+        }
+
+        //load information
+        initTable(instance, db, res, Tables.Information, "([Norad], [Source], [Language], [Info]) VALUES(?, ?, ?, ?)", new Object[]{null, null, "en", null}, new byte[]{SQLBindType.String, SQLBindType.String, SQLBindType.String, SQLBindType.String}, R.raw.information_en, INFO_FILE_SEPARATOR, INFO_FILE_ROWS, INFO_FILE_COLUMNS, R.string.title_information);
+
+        //update locale information
+        LocaleInformation.initData(context);
+    }
+
     //Sets up database with initial data
     private void initData(Context context, SQLiteDatabase db)
     {
@@ -2013,11 +2033,8 @@ public class Database extends SQLiteOpenHelper
         //if there is no information
         if(runQuery(context, "SELECT [Info] FROM " + Tables.Information + " LIMIT 1", null).length == 0)
         {
-            //load information
-            initTable(db, res, Tables.Information, "([Norad], [Source], [Language], [Info]) VALUES(?, ?, ?, ?)", new Object[]{null, String.valueOf(UpdateSource.SpaceDotCom), "en", null}, new byte[]{SQLBindType.String, SQLBindType.String, SQLBindType.String, SQLBindType.String}, R.raw.information_en, INFO_FILE_SEPARATOR, INFO_FILE_ROWS, INFO_FILE_COLUMNS, R.string.title_information);
-
-            //update locale information
-            LocaleInformation.initData(context);
+            //add information
+            addInformation(context, this, db);
         }
 
         //if there are no owners
@@ -2149,6 +2166,9 @@ public class Database extends SQLiteOpenHelper
                     //add all stars and constellations
                     addStars(context, null, db);
                     addConstellations(context, null, db);
+
+                    //add/update information
+                    addInformation(context, null, db);
                 }
 
                 //if ISS Zarya exists and is older than hard coded TLE
@@ -3319,7 +3339,7 @@ public class Database extends SQLiteOpenHelper
     {
         String info;
         String localeInfo;
-        String[][] queryResult = runQuery(context, "SELECT DISTINCT [Info] FROM " + Tables.Information + " WHERE " + Tables.Information + ".[Norad]=" + noradId + " AND " + Tables.Information + ".[Language]='" + language + "' AND (" + Tables.Information + ".[Source]='" + updateSource + "' OR " + Tables.Information + ".[Source]='" + UpdateSource.SpaceDotCom + "')", null);
+        String[][] queryResult = runQuery(context, "SELECT DISTINCT [Info] FROM " + Tables.Information + " WHERE " + Tables.Information + ".[Norad]=" + noradId + " AND " + Tables.Information + ".[Language]='" + language + "' AND " + Tables.Information + ".[Source] IN('" + updateSource + "', '" + UpdateSource.TheSkyLive + "', '" + UpdateSource.SpaceDotCom + "')", null);
 
         //return any information
         info = (queryResult.length > 0 ? queryResult[0][0] : null);

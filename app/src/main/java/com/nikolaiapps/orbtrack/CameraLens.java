@@ -1525,15 +1525,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //go through each orbital
                 for(index = 0; index < currentOrbitals.length; index++)
                 {
-                    //remember current orbital and points
+                    //remember current orbital and lines
                     Database.SatelliteData currentOrbital = currentOrbitals[index];
-                    Database.IdLine[] currentPoints = currentOrbital.getPoints();
+                    Database.IdLine[] currentLines = currentOrbital.getLines();
 
                     //if a constellation with children
-                    if(currentOrbital.getOrbitalType() == Database.OrbitalType.Constellation && currentPoints != null)
+                    if(currentOrbital.getOrbitalType() == Database.OrbitalType.Constellation && currentLines != null)
                     {
                         //add to parent orbital list
-                        parentOrbitals.add(new ParentOrbital(currentOrbital.getSatelliteNum(), index, currentPoints.length));
+                        parentOrbitals.add(new ParentOrbital(currentOrbital.getSatelliteNum(), index, currentLines.length));
                     }
                 }
 
@@ -1558,7 +1558,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public void setParentPoints(Database.SatelliteData currentOrbital, RelativeLocationProperties relativeProperties)
     {
         int index;
-        int pointIndex;
+        int lineIndex;
         int parentIndex;
         int propertyIndex;
         int noradId = currentOrbital.getSatelliteNum();
@@ -1594,29 +1594,29 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //if found parent orbital data
                     if(currentParentOrbitalData != null)
                     {
-                        //get current points and properties
-                        Database.IdLine[] currentPoints = currentParentOrbitalData.getPoints();
+                        //get current lines and properties
+                        Database.IdLine[] currentLines = currentParentOrbitalData.getLines();
                         RelativeLocationProperties[][] currentProperties = currentParentOrbital.childProperties;
 
-                        //if line and properties length match
-                        if(currentPoints != null && currentPoints.length == currentProperties.length)
+                        //if lines and properties lengths match
+                        if(currentLines != null && currentLines.length == currentProperties.length)
                         {
-                            //go through each point
-                            for(pointIndex = 0; pointIndex < currentPoints.length; pointIndex++)
+                            //go through each line
+                            for(lineIndex = 0; lineIndex < currentLines.length; lineIndex++)
                             {
-                                //remember current point
-                                Database.IdLine currentPoint = currentPoints[pointIndex];
+                                //remember current line
+                                Database.IdLine currentLine = currentLines[lineIndex];
 
                                 //if ID is a match
-                                if(currentPoint.startId == noradId)
+                                if(currentLine.startId == noradId)
                                 {
                                     //set start location
-                                    currentProperties[pointIndex][0] = relativeProperties;
+                                    currentProperties[lineIndex][0] = relativeProperties;
                                 }
-                                if(currentPoint.endId == noradId)
+                                if(currentLine.endId == noradId)
                                 {
                                     //set end location
-                                    currentProperties[pointIndex][1] = relativeProperties;
+                                    currentProperties[lineIndex][1] = relativeProperties;
                                 }
                             }
                         }

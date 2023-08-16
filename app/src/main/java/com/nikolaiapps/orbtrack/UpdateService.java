@@ -1181,6 +1181,15 @@ public class UpdateService extends NotifyService
                 sourceString = "<p>Space.com</p><a>https://www.space.com</a>";
                 useInternet = false;
                 break;
+
+            default:
+                if(noradId < 0)
+                {
+                    updateSource = Database.UpdateSource.TheSkyLive;
+                    sourceString = "<p>The Sky Live</p><a>https://theskylive.com/</a>";
+                    useInternet = false;
+                }
+                break;
         }
 
         //handle based on update source

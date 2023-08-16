@@ -7,3 +7,6 @@
 -17|Alferatz
 -19|?
 -20|Hormigas Alfa
+-22|Beta Ápodis
+-23|Gamma Ápodis
+-24|Alfa Apodis

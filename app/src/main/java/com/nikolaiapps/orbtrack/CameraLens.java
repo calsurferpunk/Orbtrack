@@ -918,6 +918,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             //if there are travel views
                             if(travelLength > 0)
                             {
+                                //remember colors
+                                int usedTextColor = (currentSelected ? textColor : Globals.getColor(30, textColor));
+                                int usedTextBgColor = (currentSelected ? textBgColor : Globals.getColor(30, textBgColor));
+                                int usedCurrentColor = (currentSelected ? currentColor : Globals.getColor(30, currentColor));
+
                                 //reset first and previous areas
                                 firstArea.setEmpty();
                                 previousArea.setEmpty();
@@ -958,7 +963,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
                                     {
                                         //draw line between last and current view
-                                        currentPaint.setColor(currentColor);
+                                        currentPaint.setColor(usedCurrentColor);
                                         canvas.drawLine(azPx[0], elPx[0], azPx[1], elPx[1], currentPaint);
                                     }
 
@@ -984,16 +989,16 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                         if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
                                         {
                                             //draw text background
-                                            currentPaint.setColor(textBgColor);
+                                            currentPaint.setColor(usedTextBgColor);
                                             canvas.drawRect(bgArea, currentPaint);
 
                                             //draw text border
-                                            currentPaint.setColor(currentColor);
+                                            currentPaint.setColor(usedCurrentColor);
                                             currentPaint.setStyle(Paint.Style.STROKE);
                                             canvas.drawRect(bgArea, currentPaint);
 
                                             //draw text
-                                            currentPaint.setColor(textColor);
+                                            currentPaint.setColor(usedTextColor);
                                             currentPaint.setStyle(Paint.Style.FILL);
                                             canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
 

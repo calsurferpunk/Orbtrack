@@ -130,6 +130,7 @@ public interface CoordinatesFragment
         abstract boolean getInfoVisible();
         abstract void setVisible(boolean visible);
         abstract void setPath(ArrayList<Coordinate> points);
+        abstract void setPathSelected(boolean selected);
         abstract void setPathVisible(boolean visible);
         abstract void moveLocation(double latitude, double longitude, double altitudeKm);
         abstract void remove();
@@ -309,17 +310,31 @@ public interface CoordinatesFragment
 
         void setPath(int orbitalIndex, ArrayList<Coordinate> points)
         {
-            if(orbitalIndex >= 0 && orbitalIndex < orbitalObjects.size())
+            OrbitalBase currentOrbital = getOrbital(orbitalIndex);
+
+            if(currentOrbital != null)
             {
-                orbitalObjects.get(orbitalIndex).setPath(points);
+                currentOrbital.setPath(points);
+            }
+        }
+
+        void setPathSelected(int orbitalIndex, boolean selected)
+        {
+            OrbitalBase currentOrbital = getOrbital(orbitalIndex);
+
+            if(currentOrbital != null)
+            {
+                currentOrbital.setPathSelected(selected);
             }
         }
 
         void setPathVisible(int orbitalIndex, boolean visible)
         {
-            if(orbitalIndex >= 0 && orbitalIndex < orbitalObjects.size())
+            OrbitalBase currentOrbital = getOrbital(orbitalIndex);
+
+            if(currentOrbital != null)
             {
-                orbitalObjects.get(orbitalIndex).setPathVisible(visible);
+                currentOrbital.setPathVisible(visible);
             }
         }
 
@@ -515,7 +530,8 @@ public interface CoordinatesFragment
 
         public int getOrbitalNoradId(int orbitalIndex)
         {
-            return(orbitalIndex >= 0 && orbitalIndex < orbitalObjects.size() ? orbitalObjects.get(orbitalIndex).getData().getSatelliteNum() : Universe.IDs.Invalid);
+            OrbitalBase currentOrbital = getOrbital(orbitalIndex);
+            return(currentOrbital != null ? currentOrbital.getData().getSatelliteNum() : Universe.IDs.Invalid);
         }
 
         public OrbitalBase getOrbital(int orbitalIndex)
@@ -553,6 +569,9 @@ public interface CoordinatesFragment
             {
                 //update ID
                 selectedNoradId = noradId;
+
+                //update path selection
+                setPathSelected(selectedOrbitalIndex, true);
 
                 //send event
                 itemSelectionChanged(noradId, true);
@@ -594,6 +613,9 @@ public interface CoordinatesFragment
 
         public void selectCurrent(int noradId)
         {
+            //deselect any selected
+            deselectCurrent();
+
             //if changing
             if(noradId != selectedNoradId)
             {
@@ -610,6 +632,9 @@ public interface CoordinatesFragment
             //if changing
             if(selectedNoradId != Universe.IDs.None)
             {
+                //deselect any path
+                setPathSelected(selectedOrbitalIndex, false);
+
                 //hide info window
                 setSelectedInfoVisible(selectedNoradId, false);
             }

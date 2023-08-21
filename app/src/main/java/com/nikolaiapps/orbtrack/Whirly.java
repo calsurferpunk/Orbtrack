@@ -545,6 +545,8 @@ class Whirly
         private boolean isVisible;
         private final boolean useVectors;
         private final boolean tleIsAccurate;
+        private final int selectedColor;
+        private final int nonSelectedColor;
         private VectorObject flatPath;
         private ShapeLinear elevatedPath;
         private final VectorInfo flatPathInfo;
@@ -557,13 +559,13 @@ class Whirly
             useVectors = isFlat;
             tleIsAccurate = tleIsAcc;
             controller = orbitalController;
+            selectedColor = color;
+            nonSelectedColor = Globals.getColor(10, Color.rgb(Color.red(selectedColor) / 4, Color.green(selectedColor) / 4, Color.blue(selectedColor) / 4));
 
             if(useVectors)
             {
                 flatPath = new VectorObject();
                 flatPathInfo = new VectorInfo();
-                flatPathInfo.setColor(color);
-                flatPathInfo.setLineWidth(4f);
                 flatPathInfo.setDrawPriority(DrawPriority.Path);
 
                 elevatedPathInfo = null;
@@ -572,12 +574,11 @@ class Whirly
             {
                 elevatedPath = new ShapeLinear();
                 elevatedPathInfo = new ShapeInfo();
-                elevatedPathInfo.setColor(color);
-                elevatedPathInfo.setLineWidth(4f);
                 elevatedPathInfo.setDrawPriority(DrawPriority.Path);
 
                 flatPathInfo = null;
             }
+            setColor(false);
 
             pathObject = null;
 
@@ -715,6 +716,31 @@ class Whirly
                 elevatedPath.setCoords(setElevatedPoints.toArray(new Point3d[0]));
             }
 
+            add();
+        }
+
+        private void setColor(boolean selected)
+        {
+            int color = (selected ? selectedColor : nonSelectedColor);
+            float width = (selected ? 4f : 2f);
+
+            if(flatPathInfo != null)
+            {
+                flatPathInfo.setColor(color);
+                flatPathInfo.setLineWidth(width);
+            }
+
+            if(elevatedPathInfo != null)
+            {
+                elevatedPathInfo.setColor(color);
+                elevatedPathInfo.setLineWidth(width);
+            }
+        }
+
+        public void setSelected(boolean selected)
+        {
+            remove();
+            setColor(selected);
             add();
         }
 
@@ -1624,6 +1650,12 @@ class Whirly
         void setPath(ArrayList<CoordinatesFragment.Coordinate> points)
         {
             orbitalPath.setPath(points);
+        }
+
+        @Override
+        void setPathSelected(boolean selected)
+        {
+            orbitalPath.setSelected(selected);
         }
 
         @Override
@@ -2724,9 +2756,6 @@ class Whirly
         @Override
         public void selectOrbital(int noradId)
         {
-            //deselect current
-            common.deselectCurrent();
-
             //update selected
             common.selectCurrent(noradId);
         }

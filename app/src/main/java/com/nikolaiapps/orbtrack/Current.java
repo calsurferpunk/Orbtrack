@@ -994,7 +994,7 @@ public abstract class Current
             else if(createMapView)
             {
                 //create view
-                newView = Current.onCreateMapView(this, inflater, container, (MainActivity.mapViewNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                newView = onCreateMapView(this, inflater, container, (MainActivity.mapViewNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
             }
 
             //if view is not set yet
@@ -2608,7 +2608,7 @@ public abstract class Current
         final CoordinatesFragment mapView = (forGlobe ? new Whirly.GlobeFragment() : new Whirly.MapFragment());
         mapViewReference = new WeakReference<>(mapView);
         mapInfoTextReference = new WeakReference<>(mapInfoText);
-        Current.fullscreenButtonReference = new WeakReference<>(fullscreenButton);
+        fullscreenButtonReference = new WeakReference<>(fullscreenButton);
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
         mapView.setArguments(args);
         searchList = (multiSelected ? rootView.findViewById(R.id.Map_Search_List) : null);
@@ -2757,6 +2757,7 @@ public abstract class Current
                         //show info and selected footprint
                         playbackMarker.setInfoVisible(true);
                         playbackMarker.setShowSelectedFootprint((firstPoint.noradId > 0) && Settings.usingMapFootprintAndSelected());
+                        selectOrbital(firstPoint.noradId, false);
                     }
                 }
 

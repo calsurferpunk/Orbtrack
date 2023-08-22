@@ -780,7 +780,7 @@ public interface CoordinatesFragment
             double z = altitudeKm * 100;
             double zoom = (z / Whirly.ZoomToZValue) * 3;
 
-            if(altitudeKm >= MaxDrawDistanceKm)
+            if(Double.isNaN(altitudeKm) || altitudeKm >= MaxDrawDistanceKm)
             {
                 return(DefaultFarZoom);
             }

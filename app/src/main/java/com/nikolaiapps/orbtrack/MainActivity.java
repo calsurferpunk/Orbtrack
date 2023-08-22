@@ -4243,13 +4243,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         double currentLatitude = currentOrbital.geo.latitude;
                                         double currentLongitude = currentOrbital.geo.longitude;
                                         double currentAltitudeKm = currentOrbital.geo.altitudeKm;
+                                        boolean selectionChanged = (currentNoradId != lastNoradId);
                                         boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
 
                                         //update showing selected footprint
                                         currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
 
                                         //if current is selected and selection changed
-                                        if(currentOrbitalSelected && currentNoradId != lastNoradId)
+                                        if(currentOrbitalSelected && selectionChanged)
                                         {
                                             //if a single playback marker
                                             if(singlePlaybackMarker)
@@ -4272,10 +4273,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                                 currentMarker.setText(coordinateString);
                                             }
 
-                                            //if julian date changed
-                                            if(julianDate != lastJulianDate)
+                                            //if selection or julian date changed
+                                            if(selectionChanged || julianDate != lastJulianDate)
                                             {
-                                                mapView.moveCamera(currentLatitude, currentLongitude, (lastNoradId != currentNoradId && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm) : mapView.getCameraZoom()));
+                                                mapView.moveCamera(currentLatitude, currentLongitude, (selectionChanged && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm) : mapView.getCameraZoom()));
                                             }
 
                                             //update last

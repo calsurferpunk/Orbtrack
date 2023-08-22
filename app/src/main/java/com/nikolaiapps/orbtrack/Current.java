@@ -2300,6 +2300,8 @@ public abstract class Current
             playBar.setTimeZone(MainActivity.getTimeZone());
             playBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
             {
+                private int lastNoradId = Universe.IDs.None;
+
                 @Override
                 public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
                 {
@@ -2360,6 +2362,7 @@ public abstract class Current
                                 {
                                     Database.SatelliteData currentOrbital = currentMarker.getData();
                                     int currentNoradId = currentOrbital.getSatelliteNum();
+                                    boolean selectionChanged = (currentNoradId != lastNoradId);
                                     boolean currentIsSatellite = (currentNoradId > 0);
                                     boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapSelectedNoradId);
                                     boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
@@ -2387,8 +2390,11 @@ public abstract class Current
                                         if(mapView != null)
                                         {
                                             //update map view
-                                            mapView.moveCamera(latitude, longitude);
+                                            mapView.moveCamera(latitude, longitude, (selectionChanged && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(altitudeKm) : mapView.getCameraZoom()));
                                         }
+
+                                        //update last
+                                        lastNoradId = currentNoradId;
                                     }
                                     else if(infoUnderTitle)
                                     {

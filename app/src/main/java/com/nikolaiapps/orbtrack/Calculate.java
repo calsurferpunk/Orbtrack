@@ -175,25 +175,27 @@ public abstract class Calculate
 
             public void updateDisplays(Context context, int widthDp, boolean haveSun, boolean haveMoon)
             {
+                CalculateViewsTask.ViewData currentView = views[0];
+
                 if(azText != null)
                 {
-                    azText.setText(views[0].azimuth != Float.MAX_VALUE ? Globals.getDegreeString(views[0].azimuth) : "-");
+                    azText.setText(currentView.azimuth != Float.MAX_VALUE ? Globals.getDegreeString(currentView.azimuth) : "-");
                 }
                 if(elText != null)
                 {
-                    elText.setText(views[0].elevation != Float.MAX_VALUE ? Globals.getDegreeString(views[0].elevation) : "-");
+                    elText.setText(currentView.elevation != Float.MAX_VALUE ? Globals.getDegreeString(currentView.elevation) : "-");
                 }
                 if(rangeText != null)
                 {
-                    rangeText.setText(views[0].rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(views[0].rangeKm, 0) : "-");
+                    rangeText.setText(currentView.rangeKm != Float.MAX_VALUE && !Float.isInfinite(currentView.rangeKm) ? Globals.getKmUnitValueString(currentView.rangeKm, 0) : "-");
                 }
                 if(phaseText != null)
                 {
-                    phaseText.setText(views[0].phaseName == null ? "-" : views[0].phaseName);
+                    phaseText.setText(currentView.phaseName == null ? "-" : currentView.phaseName);
                 }
                 if(illuminationText != null)
                 {
-                    illuminationText.setText(Globals.getIlluminationString(views[0].illumination));
+                    illuminationText.setText(Globals.getIlluminationString(currentView.illumination));
                 }
                 if(timeText != null && time != null && context != null)
                 {
@@ -501,7 +503,7 @@ public abstract class Calculate
                     isMoon = (currentData.noradId == Universe.IDs.Moon);
                     ((TextView)convertView.findViewById(R.id.View_Az_Text)).setText(Globals.getDegreeString(currentViewData.azimuth));
                     ((TextView)convertView.findViewById(R.id.View_El_Text)).setText(Globals.getDegreeString(currentViewData.elevation));
-                    ((TextView)convertView.findViewById(R.id.View_Range_Text)).setText(Globals.getKmUnitValueString(currentViewData.rangeKm, 0));
+                    ((TextView)convertView.findViewById(R.id.View_Range_Text)).setText(!Float.isInfinite(currentViewData.rangeKm) ? Globals.getKmUnitValueString(currentViewData.rangeKm, 0) : "");
                     phaseText = convertView.findViewById(R.id.View_Phase_Text);
                     if(phaseText != null)
                     {
@@ -1122,22 +1124,23 @@ public abstract class Calculate
                 String text;
                 Context context = (latitudeText != null ? latitudeText.getContext() : longitudeText != null ? longitudeText.getContext() : subList != null ? subList.getContext() : null);
                 Resources res = (context != null ? context.getResources() : null);
+                CalculateCoordinatesTask.CoordinateData currentCoordinate = coordinates[0];
 
                 if(latitudeText != null)
                 {
-                    latitudeText.setText(coordinates[0].latitude != Float.MAX_VALUE ? Globals.getLatitudeDirectionString(res, coordinates[0].latitude, 2) : "-");
+                    latitudeText.setText(currentCoordinate.latitude != Float.MAX_VALUE ? Globals.getLatitudeDirectionString(res, currentCoordinate.latitude, 2) : "-");
                 }
                 if(longitudeText != null)
                 {
-                    longitudeText.setText(coordinates[0].longitude != Float.MAX_VALUE ? Globals.getLongitudeDirectionString(res, coordinates[0].longitude, 2) : "-");
+                    longitudeText.setText(currentCoordinate.longitude != Float.MAX_VALUE ? Globals.getLongitudeDirectionString(res, currentCoordinate.longitude, 2) : "-");
                 }
                 if(altitudeText != null)
                 {
-                    altitudeText.setText(coordinates[0].altitudeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(coordinates[0].altitudeKm, 0) : "-");
+                    altitudeText.setText(currentCoordinate.altitudeKm != Float.MAX_VALUE && !Float.isInfinite(currentCoordinate.altitudeKm) ? Globals.getKmUnitValueString(currentCoordinate.altitudeKm, 0) : "-");
                 }
                 if(speedText != null)
                 {
-                    text = (coordinates[0].speedKms != Double.MAX_VALUE ? Globals.getKmUnitValueString(coordinates[0].speedKms) : "-");
+                    text = (currentCoordinate.speedKms != Double.MAX_VALUE ? Globals.getKmUnitValueString(currentCoordinate.speedKms) : "-");
                     speedText.setText(text);
                 }
                 if(timeText != null)
@@ -1384,7 +1387,7 @@ public abstract class Calculate
                     CalculateCoordinatesTask.CoordinateData currentCoordinateData = (CalculateCoordinatesTask.CoordinateData)currentData;
                     ((TextView)convertView.findViewById(R.id.Coordinate_Latitude_Text)).setText(Globals.getLatitudeDirectionString(res, currentCoordinateData.latitude, 2));
                     ((TextView)convertView.findViewById(R.id.Coordinate_Longitude_Text)).setText(Globals.getLongitudeDirectionString(res, currentCoordinateData.longitude, 2));
-                    ((TextView)convertView.findViewById(R.id.Coordinate_Altitude_Text)).setText(Globals.getKmUnitValueString(currentCoordinateData.altitudeKm, 0));
+                    ((TextView)convertView.findViewById(R.id.Coordinate_Altitude_Text)).setText(!Float.isInfinite(currentCoordinateData.altitudeKm) ? Globals.getKmUnitValueString(currentCoordinateData.altitudeKm, 0) : "");
                     speedText = convertView.findViewById(R.id.Coordinate_Speed_Text);
                     if(speedText != null)
                     {

@@ -732,6 +732,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         calibrateAngles = new Calculations.TopographicDataType[3];
         currentLookAngles = new Calculations.TopographicDataType[0];
         travelLookAngles = new CalculateViewsTask.OrbitalView[0][0];
+
+        resetParentIndexes(currentOrbitals);
     }
     public CameraLens(Context context)
     {
@@ -1490,9 +1492,14 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         if(orbitals != null && lookAngles != null && orbitals.length > 0 && (!checkLength || lookAngles.length == orbitals.length))
         {
             //update orbitals and look angles
+            orbitalsLength = orbitals.length;
+            if(checkLength && currentOrbitals.length != orbitalsLength)
+            {
+                //reset parent indexes
+                resetParentIndexes(orbitals);
+            }
             currentOrbitals = orbitals;
             currentLookAngles = lookAngles;
-            orbitalsLength = currentOrbitals.length;
 
             //if area has not been set or needs to be changed
             if(currentOrbitalAreas.length == 0 || (checkLength && currentOrbitalAreas.length != orbitalsLength))
@@ -1559,8 +1566,28 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
+    //Resets parent indexes
+    private void resetParentIndexes(Database.SatelliteData[] orbitals)
+    {
+        //go through each orbital
+        for(Database.SatelliteData currentOrbital : orbitals)
+        {
+            //remember any parent properties
+            ArrayList<Database.ParentProperties> currentParentProperties = currentOrbital.getParentProperties();
+            if(currentParentProperties != null)
+            {
+                //go through parent properties
+                for(Database.ParentProperties currentParentProperty : currentParentProperties)
+                {
+                    //clear old index
+                    currentParentProperty.index = -1;
+                }
+            }
+        }
+    }
+
     //Sets parent points
-    public void setParentPoints(Database.SatelliteData currentOrbital, RelativeLocationProperties relativeProperties)
+    private void setParentPoints(Database.SatelliteData currentOrbital, RelativeLocationProperties relativeProperties)
     {
         int index;
         int lineIndex;
@@ -1589,7 +1616,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 }
 
                 //if found parent index
-                if(parentIndex >= 0)
+                if(parentIndex >= 0 && parentIndex < parentOrbitals.size())
                 {
                     //get current parent orbital and data
                     ParentOrbital currentParentOrbital = parentOrbitals.get(parentIndex);

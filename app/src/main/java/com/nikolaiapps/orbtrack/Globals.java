@@ -2547,7 +2547,7 @@ public abstract class Globals
     public static String getCoordinateString(Context context, double latitude, double longitude, double altitude)
     {
         Resources res = (context != null ? context.getResources() : null);
-        return(res != null ? res.getString(R.string.abbrev_latitude) + ": " + getLatitudeDirectionString(res, latitude, 3) + "\n" + res.getString(R.string.abbrev_longitude) + ": " + getLongitudeDirectionString(res, longitude, 3) + "\n" + res.getString(R.string.abbrev_altitude) + ": " + getKmUnitValueString(altitude) + " " + getKmLabel(res) : "");
+        return(res != null ? res.getString(R.string.abbrev_latitude) + ": " + getLatitudeDirectionString(res, latitude, 3) + "\n" + res.getString(R.string.abbrev_longitude) + ": " + getLongitudeDirectionString(res, longitude, 3) + (!Double.isNaN(altitude) && !Double.isInfinite(altitude) ? "\n" + res.getString(R.string.abbrev_altitude) + ": " + getKmUnitValueString(altitude) + " " + getKmLabel(res) : "") : "");
     }
 
     //Gets azimuth compass direction

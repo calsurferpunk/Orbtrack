@@ -440,7 +440,7 @@ public abstract class Current
 
                 if(rangeText != null)
                 {
-                    text = (rangeKm != Float.MAX_VALUE ? (Globals.getKmUnitValueString(rangeKm, 0) + " " + kmUnit) : "-");
+                    text = (rangeKm != Float.MAX_VALUE && !Float.isInfinite(rangeKm) ? (Globals.getKmUnitValueString(rangeKm, 0) + " " + kmUnit) : "-");
                     rangeText.setText(text);
                 }
 
@@ -774,7 +774,7 @@ public abstract class Current
                                             break;
 
                                         case 2:
-                                            text = (currentItem.rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(currentItem.rangeKm) : "-") + " " + kmUnit;
+                                            text = (!Float.isInfinite(currentItem.rangeKm) ? ((currentItem.rangeKm != Float.MAX_VALUE ? Globals.getKmUnitValueString(currentItem.rangeKm) : "-") + " " + kmUnit) : "-");
                                             break;
 
                                         case 3:
@@ -786,7 +786,7 @@ public abstract class Current
                                             break;
 
                                         case 5:
-                                            text = (haveGeo ? Globals.getKmUnitValueString(currentItem.altitudeKm) : "-") + " " + kmUnit;
+                                            text = (!Float.isInfinite(currentItem.altitudeKm) ? ((haveGeo ? Globals.getKmUnitValueString(currentItem.altitudeKm) : "-") + " " + kmUnit) : "-");
                                             break;
 
                                         case 6:
@@ -953,8 +953,12 @@ public abstract class Current
             int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
+            boolean onCurrent = (group == MainActivity.Groups.Current);
             boolean createLens = (subPage == Globals.SubPageType.Lens);
             boolean createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
+            boolean mapMultiOrbitals = (createMapView && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
+            boolean lensMultiOrbitals = (createLens && MainActivity.viewLensNoradID == Integer.MAX_VALUE);
+            boolean lensSingleOrbital = (createLens && MainActivity.viewLensNoradID != Integer.MAX_VALUE);
             View newView = null;
             Context context = this.getContext();
             final Selectable.ListBaseAdapter listAdapter;
@@ -964,7 +968,8 @@ public abstract class Current
             Database.SatelliteData[] usedSatellites;
 
             //apply any filter and update status
-            Globals.applyOrbitalTypeFilter(context, group, subPage, satellites);
+            //note: single lens view uses list filter since it came from there
+            Globals.applyOrbitalTypeFilter(context, group, (onCurrent && lensSingleOrbital ? Globals.SubPageType.List : subPage), satellites);
             orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
             showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
 
@@ -982,7 +987,7 @@ public abstract class Current
             if(createLens)
             {
                 //get used satellites
-                usedSatellites = (MainActivity.viewLensNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)});
+                usedSatellites = (lensMultiOrbitals ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)});
 
                 //set orbital views
                 setOrbitalViews(usedSatellites);
@@ -994,7 +999,7 @@ public abstract class Current
             else if(createMapView)
             {
                 //create view
-                newView = onCreateMapView(this, inflater, container, (MainActivity.mapViewNoradID == Integer.MAX_VALUE ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
+                newView = onCreateMapView(this, inflater, container, (mapMultiOrbitals ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.mapViewNoradID)}), (subPage == Globals.SubPageType.Globe), savedInstanceState);
             }
 
             //if view is not set yet

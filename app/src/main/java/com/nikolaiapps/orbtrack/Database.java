@@ -1423,7 +1423,7 @@ public class Database extends SQLiteOpenHelper
             }
         }
 
-        public Integer[] getChildIds()
+        public ArrayList<Integer> getChildIds()
         {
             ArrayList<Integer> usedIds = new ArrayList<>(0);
 
@@ -1450,7 +1450,7 @@ public class Database extends SQLiteOpenHelper
             }
 
             //return used child IDs
-            return(usedIds.toArray(new Integer[0]));
+            return(usedIds);
         }
 
         public boolean getInFilter()
@@ -1613,9 +1613,9 @@ public class Database extends SQLiteOpenHelper
             return(database != null ? database.lines : null);
         }
 
-        public Integer[] getChildIds()
+        public ArrayList<Integer> getChildIds()
         {
-            return(database != null ? database.getChildIds() : new Integer[0]);
+            return(database != null ? database.getChildIds() : new ArrayList<>(0));
         }
 
         @Override
@@ -1847,9 +1847,9 @@ public class Database extends SQLiteOpenHelper
             //do nothing
         }
     }
-    private void initTable(SQLiteDatabase db, Resources res, String tableName, String tableValues, Object[] sqlBindConstants,  @NonNull byte[] sqlBindTypes, int fileId, String fileSeparator, int rowCount, int columnCount, int progressTitleId)
+    private void initTable(SQLiteDatabase db, Resources res, String tableName, String tableValues, @NonNull byte[] sqlBindTypes, int fileId, String fileSeparator, int rowCount, int columnCount, int progressTitleId)
     {
-        initTable(this, db, res, tableName, tableValues, sqlBindConstants, sqlBindTypes, fileId, fileSeparator, rowCount, columnCount, progressTitleId);
+        initTable(this, db, res, tableName, tableValues, null, sqlBindTypes, fileId, fileSeparator, rowCount, columnCount, progressTitleId);
     }
 
     //Adds indexing to tables
@@ -1913,7 +1913,7 @@ public class Database extends SQLiteOpenHelper
     private static void addConstellations(Context context, Database instance, SQLiteDatabase db)
     {
         Resources res = (context != null ? context.getResources() : null);
-        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.gray, null) : Color.TRANSPARENT);
+        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.white, null) : Color.TRANSPARENT);
         ArrayList<Integer> ids;
 
         //if no context or no resources
@@ -2041,7 +2041,7 @@ public class Database extends SQLiteOpenHelper
         if(runQuery(context, "SELECT [Code] FROM " + Tables.Owner + " LIMIT 1", null).length == 0)
         {
             //load owners
-            initTable(db, res, Tables.Owner, "([Code], [Name]) VALUES(?, ?)", null, new byte[]{SQLBindType.String, SQLBindType.String}, R.raw.owners_en, OWNERS_FILE_SEPARATOR, OWNERS_FILE_ROWS, OWNERS_FILE_COLUMNS, R.string.title_owners);
+            initTable(db, res, Tables.Owner, "([Code], [Name]) VALUES(?, ?)", new byte[]{SQLBindType.String, SQLBindType.String}, R.raw.owners_en, OWNERS_FILE_SEPARATOR, OWNERS_FILE_ROWS, OWNERS_FILE_COLUMNS, R.string.title_owners);
 
             //update locale owners
             LocaleOwner.initData(context);
@@ -2058,7 +2058,7 @@ public class Database extends SQLiteOpenHelper
         if(runQuery(context, "SELECT [ZoneId] FROM " + Tables.TimeZone + " LIMIT 1", null).length == 0)
         {
             //load time zones
-            initTable(db, res, Tables.TimeZone, "([Latitude], [Longitude], [ZoneId]) VALUES(?, ?, ?)", null, new byte[]{SQLBindType.Double, SQLBindType.Double, SQLBindType.String}, R.raw.timezones, TIME_ZONE_FILE_SEPARATOR, TIME_ZONE_ROWS, TIME_ZONE_COLUMNS, R.string.title_time_zone_locations);
+            initTable(db, res, Tables.TimeZone, "([Latitude], [Longitude], [ZoneId]) VALUES(?, ?, ?)", new byte[]{SQLBindType.Double, SQLBindType.Double, SQLBindType.String}, R.raw.timezones, TIME_ZONE_FILE_SEPARATOR, TIME_ZONE_ROWS, TIME_ZONE_COLUMNS, R.string.title_time_zone_locations);
         }
 
         //done with first load

@@ -4068,12 +4068,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 int currentNoradId;
                 boolean currentIsSatellite;
                 boolean updateElapsed = false;
-                boolean allViewOrbitals = (viewLensNoradID == Integer.MAX_VALUE);
-                boolean multiOrbitals = (mapViewNoradID == Integer.MAX_VALUE);
                 boolean onMap = (currentSubPage == Globals.SubPageType.Map || currentSubPage == Globals.SubPageType.Globe);
                 boolean onList = (currentSubPage == Globals.SubPageType.List);
                 boolean onLens = (currentSubPage == Globals.SubPageType.Lens);
+                boolean mapMultiOrbitals = (onMap && mapViewNoradID == Integer.MAX_VALUE);
+                boolean lensMultiOrbitals = (onLens && viewLensNoradID == Integer.MAX_VALUE);
+                boolean lensSingleOrbital = (onLens && viewLensNoradID != Integer.MAX_VALUE);
                 boolean updateList = false;
+                boolean onCurrentLensId;
+                boolean onCurrentLensChildId;
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 double julianDate;
@@ -4082,9 +4085,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 CameraLens cameraView = Current.getCameraView();
                 CoordinatesFragment mapView = Current.getMapViewIfReady();
                 TopographicDataType topographicData;
+                Database.DatabaseSatellite currentLensOrbital = (lensSingleOrbital ? Database.getOrbital(MainActivity.this, viewLensNoradID) : null);
+                ArrayList<Integer> currentLensChildIds = (currentLensOrbital != null ? currentLensOrbital.getChildIds() : null);
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
-                TopographicDataType[] selectedLookAngles = null;
-                Database.SatelliteData[] selectedSatellites = null;
+                ArrayList<TopographicDataType> selectedLookAngles = (lensSingleOrbital ? new ArrayList<>(0) : null);
+                ArrayList<Database.SatelliteData> selectedSatellites = (lensSingleOrbital ? new ArrayList<>(0) : null);
 
                 //if not waiting on location update
                 if(!pendingLocationUpdate)
@@ -4134,6 +4139,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
                             currentNoradId = currentOrbital.getSatelliteNum();
                             currentIsSatellite = (currentNoradId > 0);
+                            onCurrentLensId = (onLens && currentNoradId == viewLensNoradID);
+                            onCurrentLensChildId = (onLens && currentLensChildIds != null && currentLensChildIds.contains(currentNoradId));
 
                             //if -in filter- or -a star being used in a constellation-
                             if(currentInFilter || isStarForConstellation)
@@ -4183,21 +4190,29 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 }
                             }
 
-                            //if -in filter- or -a star being used in a constellation-
-                            if(currentInFilter || isStarForConstellation)
+                            //if -on current lens orbital- or -on lens child being used- or -in filter- or -a star being used in a constellation-
+                            if(onCurrentLensId || onCurrentLensChildId || currentInFilter || isStarForConstellation)
                             {
-                                //if not using all satellites and satellite number matches
-                                if((!allViewOrbitals && currentNoradId == viewLensNoradID))
+                                //if on current lens orbital or lens child being used
+                                if(onCurrentLensId || onCurrentLensChildId)
                                 {
-                                    //set array with current satellite
-                                    selectedSatellites = new Database.SatelliteData[1];
-                                    selectedSatellites[0] = currentSatellites[index];
-                                    selectedLookAngles = new TopographicDataType[1];
-                                    selectedLookAngles[0] = topographicData;
+                                    //if on current lens orbital
+                                    if(onCurrentLensId)
+                                    {
+                                        //always add current lens orbital to front
+                                        selectedSatellites.add(0, currentOrbitalData);
+                                        selectedLookAngles.add(0, topographicData);
+                                    }
+                                    else
+                                    {
+                                        //add child lens
+                                        selectedSatellites.add(currentOrbitalData);
+                                        selectedLookAngles.add(topographicData);
+                                    }
                                 }
 
-                                //if not viewing a specific orbital or norad ID matches
-                                if(allViewOrbitals || currentNoradId == viewLensNoradID)
+                                //if -on list- or -viewing multiple lens orbitals- or -on current lens orbital-
+                                if(onList || lensMultiOrbitals || onCurrentLensId)
                                 {
                                     //remember look angle
                                     lookAngles[index] = topographicData;
@@ -4237,7 +4252,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapView.getSelectedNoradId());
 
                                     //if -in filter- and -using multiple orbitals or current is selected-
-                                    if(currentInFilter && (multiOrbitals || currentOrbitalSelected))
+                                    if(currentInFilter && (mapMultiOrbitals || currentOrbitalSelected))
                                     {
                                         //remember latitude, longitude, and if info under title
                                         double currentLatitude = currentOrbital.geo.latitude;
@@ -4363,7 +4378,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     if(onLens && cameraView != null)
                     {
                         //update positions
-                        cameraView.updatePositions((selectedSatellites != null ? selectedSatellites : currentSatellites), (selectedLookAngles != null ? selectedLookAngles : lookAngles), true);
+                        cameraView.updatePositions((selectedSatellites != null ? selectedSatellites.toArray(new Database.SatelliteData[0]) : currentSatellites), (selectedLookAngles != null ? selectedLookAngles.toArray(new TopographicDataType[0]) : lookAngles), true);
 
                         //set to lens delay
                         timerDelay = lensTimerDelay;
@@ -4577,7 +4592,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         for(Database.SatelliteData currentSatellite : currentSatelliteList)
                         {
                             //get any child IDs
-                            Integer[] childIds = currentSatellite.getChildIds();
+                            ArrayList<Integer> childIds = currentSatellite.getChildIds();
 
                             //go through each ID
                             for(int currentId : childIds)

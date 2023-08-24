@@ -82,18 +82,20 @@ public abstract class Orbitals
         final TextView itemText;
         final LinearLayout itemLayout;
         final LinearLayout tleAgeLayout;
+        final LinearLayout itemAgeTextLayout;
         final TextView tleAgeText;
         final View tleUnder;
         final BorderButton colorButton;
         final AppCompatButton visibleButton;
         final CircularProgressIndicator progress;
 
-        public PageListItemHolder(View viewItem, int itemLayoutId, int itemImageId, int itemTextId, int tleAgeLayoutId, int tleAgeTextId, int tleAgeUnderId, int colorButtonId, int visibleButtonId, int progressId)
+        public PageListItemHolder(View viewItem, int itemLayoutId, int itemImageId, int itemTextId, int itemAgeTextLayoutId, int tleAgeLayoutId, int tleAgeTextId, int tleAgeUnderId, int colorButtonId, int visibleButtonId, int progressId)
         {
             super(viewItem, -1);
             itemLayout = viewItem.findViewById(itemLayoutId);
             itemImage = viewItem.findViewById(itemImageId);
             itemText = viewItem.findViewById(itemTextId);
+            itemAgeTextLayout = viewItem.findViewById(itemAgeTextLayoutId);
             tleAgeLayout = viewItem.findViewById(tleAgeLayoutId);
             tleAgeText = viewItem.findViewById(tleAgeTextId);
             tleUnder = viewItem.findViewById(tleAgeUnderId);
@@ -383,7 +385,7 @@ public abstract class Orbitals
         public PageListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Layout, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
+            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Layout, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_Item_Text_Age_Layout, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
 
             setItemSelector(itemView);
             setViewClickListeners(itemView, itemHolder);
@@ -394,7 +396,9 @@ public abstract class Orbitals
         public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
         {
             final boolean onSatellites = (currentPage == PageType.Satellites);
-            final Resources res = (haveContext() ? currentContext.getResources() : null);
+            final boolean usingContext = haveContext();
+            final int backgroundColor = (usingContext ? Globals.resolveColorID(currentContext, android.R.attr.colorBackground) : Color.WHITE);
+            final Resources res = (usingContext ? currentContext.getResources() : null);
             final boolean haveRes = (res != null);
             final PageListItemHolder itemHolder = (PageListItemHolder)holder;
             final OrbitalFilterList.Item filterItem = (position < displayedItems.size() ? displayedItems.get(position) : null);
@@ -425,7 +429,19 @@ public abstract class Orbitals
                 //set displays
                 itemIcon = Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType, (Settings.getDarkTheme(currentContext) ? R.color.white : R.color.black));
                 itemHolder.itemImage.setImageDrawable(itemIcon);
+                if(simple)
+                {
+                    itemHolder.itemImage.setBackgroundColor(backgroundColor);
+                }
                 itemHolder.itemText.setText(currentItem.text);
+                if(simple)
+                {
+                    itemHolder.itemText.setBackgroundColor(backgroundColor);
+                }
+                if(itemHolder.itemAgeTextLayout != null && simple)
+                {
+                    itemHolder.itemAgeTextLayout.setBackgroundColor(backgroundColor);
+                }
                 if(itemHolder.tleAgeLayout != null)
                 {
                     itemHolder.tleAgeLayout.setVisibility(onSatellites ? View.VISIBLE : View.GONE);
@@ -435,6 +451,10 @@ public abstract class Orbitals
                 if(onSatellites)
                 {
                     itemHolder.tleAgeText.setText(dayText);
+                    if(simple)
+                    {
+                        itemHolder.tleAgeText.setBackgroundColor(backgroundColor);
+                    }
                     if(ageDays > 2)
                     {
                         itemHolder.tleUnder.setBackgroundColor(ageDays >= 14 ? Color.RED : ageDays >= 7 ? 0xFFFFA500 : Color.YELLOW);

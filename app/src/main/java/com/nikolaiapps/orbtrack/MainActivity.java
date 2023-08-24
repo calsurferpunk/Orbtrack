@@ -4058,7 +4058,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         return(new Runnable()
         {
-            private int lastNoradId = Universe.IDs.None;
+            private int lastMapNoradId = Universe.IDs.None;
             private double lastJulianDate = Double.MAX_VALUE;
 
             @Override
@@ -4072,9 +4072,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean onList = (currentSubPage == Globals.SubPageType.List);
                 boolean onLens = (currentSubPage == Globals.SubPageType.Lens);
                 boolean mapMultiOrbitals = (onMap && mapViewNoradID == Integer.MAX_VALUE);
+                boolean mapSingleOrbital = (onMap && mapViewNoradID != Integer.MAX_VALUE);
                 boolean lensMultiOrbitals = (onLens && viewLensNoradID == Integer.MAX_VALUE);
                 boolean lensSingleOrbital = (onLens && viewLensNoradID != Integer.MAX_VALUE);
                 boolean updateList = false;
+                boolean onCurrentMapId;
                 boolean onCurrentLensId;
                 boolean onCurrentLensChildId;
                 long travelSeconds;
@@ -4139,6 +4141,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
                             currentNoradId = currentOrbital.getSatelliteNum();
                             currentIsSatellite = (currentNoradId > 0);
+                            onCurrentMapId = (onMap && currentNoradId == mapViewNoradID);
                             onCurrentLensId = (onLens && currentNoradId == viewLensNoradID);
                             onCurrentLensChildId = (onLens && currentLensChildIds != null && currentLensChildIds.contains(currentNoradId));
 
@@ -4240,16 +4243,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 }
                             }
 
-                            //if the orbital markers exist and showing map/globe
-                            if(onMap && mapView != null && mapView.getOrbitalCount() > 0)
+                            //if on map, -on current map orbital or using multiple-, map exists, and the orbital markers exist
+                            if(onMap && (onCurrentMapId || mapMultiOrbitals) && mapView != null && mapView.getOrbitalCount() > 0)
                             {
                                 //get current marker
-                                final CoordinatesFragment.OrbitalBase currentMarker = mapView.getOrbital(index);
+                                final CoordinatesFragment.OrbitalBase currentMarker = mapView.getOrbital(mapSingleOrbital ? 0 : index);
                                 if(currentMarker != null)
                                 {
                                     //remember if current orbital is selected
-                                    boolean singlePlaybackMarker = (mapViewNoradID == currentNoradId);
-                                    boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapView.getSelectedNoradId());
+                                    boolean currentOrbitalSelected = (onCurrentMapId || currentNoradId == mapView.getSelectedNoradId());
 
                                     //if -in filter- and -using multiple orbitals or current is selected-
                                     if(currentInFilter && (mapMultiOrbitals || currentOrbitalSelected))
@@ -4258,7 +4260,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         double currentLatitude = currentOrbital.geo.latitude;
                                         double currentLongitude = currentOrbital.geo.longitude;
                                         double currentAltitudeKm = currentOrbital.geo.altitudeKm;
-                                        boolean selectionChanged = (currentNoradId != lastNoradId);
+                                        boolean selectionChanged = (currentNoradId != lastMapNoradId);
                                         boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
 
                                         //update showing selected footprint
@@ -4268,7 +4270,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         if(currentOrbitalSelected && selectionChanged)
                                         {
                                             //if a single playback marker
-                                            if(singlePlaybackMarker)
+                                            if(onCurrentMapId)
                                             {
                                                 //keep selection
                                                 mapView.selectOrbital(currentNoradId);
@@ -4294,8 +4296,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                                 mapView.moveCamera(currentLatitude, currentLongitude, (selectionChanged && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm) : mapView.getCameraZoom()));
                                             }
 
-                                            //update last
-                                            lastNoradId = currentNoradId;
+                                            //update last map ID
+                                            lastMapNoradId = currentNoradId;
                                         }
                                         else if(infoUnderTitle)
                                         {
@@ -4374,7 +4376,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
                     Current.handleMarkerScale();
 
-                    //update camera view
+                    //if on lens and it exists
                     if(onLens && cameraView != null)
                     {
                         //update positions
@@ -4383,6 +4385,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //set to lens delay
                         timerDelay = lensTimerDelay;
                     }
+                    //else if on map and it exists
                     else if(onMap && mapView != null)
                     {
                         //set time map delay

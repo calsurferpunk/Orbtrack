@@ -1017,7 +1017,7 @@ public abstract class Calculate
                                         if(currentDetailText != null && text != null)
                                         {
                                             //set text
-                                            currentDetailText.setText(text);
+                                            currentDetailText.setText(text.replace("\r\n", ", "));
                                         }
 
                                         //if display exists and title is set

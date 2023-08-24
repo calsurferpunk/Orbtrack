@@ -861,7 +861,7 @@ public abstract class Current
                                     if(currentDetailText != null && text != null)
                                     {
                                         //set text
-                                        currentDetailText.setText(text);
+                                        currentDetailText.setText(text.replace("\r\n", ", "));
                                     }
 
                                     //if display exists and title is set
@@ -957,6 +957,7 @@ public abstract class Current
             boolean createLens = (subPage == Globals.SubPageType.Lens);
             boolean createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
             boolean mapMultiOrbitals = (createMapView && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
+            boolean mapSingleOrbital = (createMapView && MainActivity.mapViewNoradID != Integer.MAX_VALUE);
             boolean lensMultiOrbitals = (createLens && MainActivity.viewLensNoradID == Integer.MAX_VALUE);
             boolean lensSingleOrbital = (createLens && MainActivity.viewLensNoradID != Integer.MAX_VALUE);
             View newView = null;
@@ -968,8 +969,8 @@ public abstract class Current
             Database.SatelliteData[] usedSatellites;
 
             //apply any filter and update status
-            //note: single lens view uses list filter since it came from there
-            Globals.applyOrbitalTypeFilter(context, group, (onCurrent && lensSingleOrbital ? Globals.SubPageType.List : subPage), satellites);
+            //note: current single views use list filter since it came from there
+            Globals.applyOrbitalTypeFilter(context, group, (onCurrent && (mapSingleOrbital || lensSingleOrbital) ? Globals.SubPageType.List : subPage), satellites);
             orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
             showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
 
@@ -1795,6 +1796,31 @@ public abstract class Current
                 {
                     //close, note: only shown when showing calibration, so will always close
                     showCalibrationButton.performClick();
+                }
+            }
+        });
+        cameraView.setOnReadyListener(new CameraLens.OnReadyListener()
+        {
+            @Override public void ready()
+            {
+                //if there is 1 selected orbital
+                if(selectedOrbitals != null && selectedOrbitals.length == 1)
+                {
+                    //get selected orbital and ID
+                    Database.SatelliteData selectedOrbital = selectedOrbitals[0];
+                    int noradId = (selectedOrbital != null ? selectedOrbital.getSatelliteNum() : Universe.IDs.None);
+
+                    //if using search list and not hiding
+                    if(searchList != null && lensShowToolbars)
+                    {
+                        //set list value
+                        searchList.setSelectedValue(noradId);
+                    }
+                    else
+                    {
+                        //select ID
+                        selectOrbital(noradId, true);
+                    }
                 }
             }
         });
@@ -2772,12 +2798,6 @@ public abstract class Current
                     }
                 }
 
-                //select current location
-                if(searchList != null)
-                {
-                    searchList.setSelectedValue(Universe.IDs.CurrentLocation);
-                }
-
                 //send selection changes
                 mapView.setOnItemSelectionChangedListener(new CoordinatesFragment.OnItemSelectionChangedListener()
                 {
@@ -2831,6 +2851,13 @@ public abstract class Current
 
                 //setup play bar
                 setupPlayBar(page.getActivity(), page.playBar, (useSavedPath ? savedItems : null), playbackMarkers);
+
+                //if no specific orbital selected
+                if(!haveSelected || selectedOrbitals.length > 1)
+                {
+                    //select current location
+                    selectOrbital(Universe.IDs.CurrentLocation, false);
+                }
 
                 //ready to show displays and use
                 if(showToolbarsButton != null)

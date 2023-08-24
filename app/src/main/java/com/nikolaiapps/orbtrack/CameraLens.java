@@ -40,6 +40,11 @@ import java.util.Comparator;
 
 public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, SensorUpdate.OnSensorChangedListener
 {
+    public interface OnReadyListener
+    {
+        void ready();
+    }
+
     public interface OnStopCalibrationListener
     {
         void stopCalibration();
@@ -599,6 +604,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final SurfaceHolder currentHolder;
     private SensorUpdate sensorUpdater;
     private UpdateThread updateThread;
+    private OnReadyListener readyListener;
     private OnStopCalibrationListener stopCalibrationListener;
     private final ArrayList<IconImage> orbitalIcons;
     private final ArrayList<ParentOrbital> parentOrbitals;
@@ -722,6 +728,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         updateThread = null;
         calibrateOkayButton = null;
         helpText = null;
+        readyListener = null;
+        stopCalibrationListener = null;
 
         showingConstellations = needConstellations;
 
@@ -741,7 +749,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     @Override
-    public void surfaceCreated(@NonNull SurfaceHolder holder) {}
+    public void surfaceCreated(@NonNull SurfaceHolder holder)
+    {
+        //if listener set
+        if(readyListener != null)
+        {
+            //call it
+            readyListener.ready();
+        }
+    }
 
     @Override
     public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height)
@@ -1972,6 +1988,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             sensorUpdater.stopUpdates();
             sensorUpdater = null;
         }
+    }
+
+    //Sets on ready listener
+    public void setOnReadyListener(OnReadyListener listener)
+    {
+        readyListener = listener;
     }
 
     //Sets stop calibration listener

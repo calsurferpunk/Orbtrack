@@ -244,7 +244,7 @@ public abstract class Orbitals
         public void onAttachedToRecyclerView(@NonNull RecyclerView view)
         {
             super.onAttachedToRecyclerView(view);
-            loadItems.execute(currentContext, currentPage, simple);
+            loadItems();
         }
 
         @Override
@@ -291,6 +291,14 @@ public abstract class Orbitals
             }
 
             super.setColumnTitles(listColumns, categoryText, page);
+        }
+
+        public void loadItems()
+        {
+            if(loadItems != null)
+            {
+                loadItems.execute(currentContext, currentPage, simple);
+            }
         }
 
         private void setText(TextView view, String text)
@@ -509,27 +517,99 @@ public abstract class Orbitals
                     public void onClick(View v)
                     {
                         int noradId = currentItem.id;
-                        Database.DatabaseSatellite currentOrbital;
+                        byte orbitalType = currentItem.satellite.orbitalType;
+                        Database.DatabaseSatellite currentOrbital = Database.getOrbital(currentContext, noradId);
+                        boolean haveOrbital = (currentOrbital != null);
+                        ArrayList<Database.ParentProperties> currentProperties = (haveOrbital ? currentOrbital.parentProperties : null);
+                        ArrayList<Database.DatabaseSatellite> usedParentOrbitals = new ArrayList<>(0);
 
-                        //update visibility and save orbital in database
-                        currentItem.isVisible = !currentItem.isVisible;
-                        itemHolder.visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, currentItem.isVisible));
-                        Database.saveSatelliteVisible(currentContext, noradId, currentItem.isVisible);
-
-                        //if item is visible again
-                        if(currentItem.isVisible)
+                        //if a star in a constellation
+                        if(orbitalType == Database.OrbitalType.Star && currentProperties != null && currentProperties.size() > 0)
                         {
-                            //if not a valid TLE
-                            currentOrbital = Database.getOrbital(currentContext, noradId);
-                            if(currentOrbital != null && !currentOrbital.tleIsAccurate)
+                            //go through each parent
+                            for(Database.ParentProperties currentProperty : currentProperties)
                             {
-                                //make sure not in excluded old norad IDs
-                                MainActivity.updateExcludedOldNoradIds(noradId, false);
+                                //if current parent is used and not in the list yet
+                                Database.DatabaseSatellite currentParent = Database.getOrbital(currentContext, currentProperty.id);
+                                if(currentParent != null && currentParent.isSelected && !usedParentOrbitals.contains(currentParent))
+                                {
+                                    //add parent to used list
+                                    usedParentOrbitals.add(currentParent);
+                                }
                             }
                         }
 
-                        //update current usage
-                        MainActivity.loadOrbitals(currentContext, holder.itemView);
+                        //if trying to disable orbital used by any selected parents
+                        if(currentItem.isVisible && usedParentOrbitals.size() > 0)
+                        {
+                            //if resources exist
+                            if(haveRes)
+                            {
+                                int index;
+                                StringBuilder parentsMessage = new StringBuilder();
+
+                                //build used parents message
+                                for(index = 0; index < usedParentOrbitals.size(); index++)
+                                {
+                                    //if after first
+                                    if(index > 0)
+                                    {
+                                        //add separator
+                                        parentsMessage.append(", ");
+
+                                        //if no more after this
+                                        if(index + 1 >= usedParentOrbitals.size())
+                                        {
+                                            //add "and "
+                                            parentsMessage.append(res.getString(R.string.text_and));
+                                            parentsMessage.append(" ");
+                                        }
+                                    }
+
+                                    //add parent name
+                                    parentsMessage.append(usedParentOrbitals.get(index).getName());
+                                }
+
+                                //show error dialog
+                                Globals.showConfirmDialog(currentContext, res.getString(R.string.title_cant_disable), res.getQuantityString(R.plurals.desc_used_by_constellation, usedParentOrbitals.size(), currentOrbital.getName(), parentsMessage.toString()), res.getString(R.string.title_ok), null, true, null, null, null);
+                            }
+                        }
+                        else
+                        {
+                            //update visibility and save orbital in database
+                            currentItem.isVisible = !currentItem.isVisible;
+                            itemHolder.visibleButton.setBackgroundDrawable(Globals.getVisibleIcon(currentContext, currentItem.isVisible));
+                            Database.saveSatelliteVisible(currentContext, noradId, currentItem.isVisible);
+
+                            //if item is visible again and orbital is set
+                            if(currentItem.isVisible && haveOrbital)
+                            {
+                                //if a constellation
+                                if(orbitalType == Database.OrbitalType.Constellation)
+                                {
+                                    //go through all children
+                                    ArrayList<Integer> childIds = currentOrbital.getChildIds();
+                                    for(Integer childId : childIds)
+                                    {
+                                        //enable child
+                                        Database.saveSatelliteVisible(currentContext, childId, true);
+                                    }
+
+                                    //update stars displays
+                                    PageAdapter.updatePage(PageType.Stars);
+                                }
+
+                                //if not a valid TLE
+                                if(!currentOrbital.tleIsAccurate)
+                                {
+                                    //make sure not in excluded old norad IDs
+                                    MainActivity.updateExcludedOldNoradIds(noradId, false);
+                                }
+                            }
+
+                            //update current usage
+                            MainActivity.loadOrbitals(currentContext, holder.itemView);
+                        }
                     }
                 });
             }
@@ -868,6 +948,15 @@ public abstract class Orbitals
         {
             refreshActionMode();
             setItemClicksEnabled(true);
+        }
+
+        //Updates displays
+        public void updateDisplays()
+        {
+            if(listAdapter != null)
+            {
+                listAdapter.loadItems();
+            }
         }
 
         //Gets update progress dialog
@@ -1247,6 +1336,7 @@ public abstract class Orbitals
         private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnPreview3dChangedListener[] preview3dChangedListeners = new Selectable.ListFragment.OnPreview3dChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
+        private static final Selectable.ListFragment.OnUpdatePageListener[] updatePageListeners = new Selectable.ListFragment.OnUpdatePageListener[PageType.PageCount];
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener)
         {
@@ -1256,7 +1346,18 @@ public abstract class Orbitals
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, -1, new Page()));
+            final Page newPage = new Page();
+
+            updatePageListeners[position] = new Selectable.ListFragment.OnUpdatePageListener()
+            {
+                @Override
+                public void updatePage(int page, int subPage)
+                {
+                    newPage.updateDisplays();
+                }
+            };
+
+            return(this.getItem(group, position, -1, newPage));
         }
 
         @Override
@@ -1329,6 +1430,15 @@ public abstract class Orbitals
             if(page != null)
             {
                 page.runTaskSelectedItems(UpdateService.UpdateType.UpdateSatellites);
+            }
+        }
+
+        //Updates page at position
+        public static void updatePage(int position)
+        {
+            if(position < updatePageListeners.length && updatePageListeners[position] != null)
+            {
+                updatePageListeners[position].updatePage(position, -1);
             }
         }
 

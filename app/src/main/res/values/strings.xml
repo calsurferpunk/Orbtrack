@@ -5,6 +5,10 @@
     <string name="title_norad" translatable="false">NORAD</string>
     <string name="title_placeholder" translatable="false">-</string>
 
+    <plurals name="desc_used_by_constellation">
+        <item quantity="one">%s is used by %s. It would have to be disabled first.</item>
+        <item quantity="other">%s is used by %s. They would have to be disabled first.</item>
+    </plurals>
     <plurals name="text_days">
         <item quantity="one">%d day</item>
         <item quantity="other">%d days</item>
@@ -196,6 +200,7 @@
     <string name="text_30">30</string>
     <string name="text_90_plus_minus">+/-90</string>
     <string name="text_180_plus_minus">+/-180</string>
+    <string name="text_and">and</string>
     <string name="text_at">at</string>
     <string name="text_camera_error">Error using camera</string>
     <string name="text_download_failed">Download failed</string>
@@ -288,6 +293,7 @@
     <string name="title_camera">Camera</string>
     <string name="title_cancel">Cancel</string>
     <string name="title_canceled">Canceled</string>
+    <string name="title_cant_disable">Can\'t Disable</string>
     <string name="title_catalog">Catalog</string>
     <string name="title_categories">Categories</string>
     <string name="title_caution">Caution</string>

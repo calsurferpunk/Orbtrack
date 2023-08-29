@@ -1,10 +1,14 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingQuantity">
 
 
 
 
 
 
+    <plurals name="desc_used_by_constellation">
+        <item quantity="one">%s es utilizado por %s. Primero habría que desactivarlo.</item>
+        <item quantity="other">%s es utilizado por %s. Primero habría que desactivarlos.</item>
+    </plurals>
     <plurals name="text_days">
         <item quantity="one">%d día</item>
         <item quantity="other">%d días</item>
@@ -196,6 +200,7 @@
     <string name="text_30">30</string>
     <string name="text_90_plus_minus">+/-90</string>
     <string name="text_180_plus_minus">+/-180</string>
+    <string name="text_and"> y </string>
     <string name="text_at">a</string>
     <string name="text_camera_error">Error al usar la cámara</string>
     <string name="text_download_failed">Descarga fracasó</string>
@@ -288,6 +293,7 @@
     <string name="title_camera">Cámara</string>
     <string name="title_cancel">Cancelar</string>
     <string name="title_canceled">Cancelada</string>
+    <string name="title_cant_disable">No Se Puede Desactivar</string>
     <string name="title_catalog">Catalogar</string>
     <string name="title_categories">Categorías</string>
     <string name="title_caution">Precaución</string>

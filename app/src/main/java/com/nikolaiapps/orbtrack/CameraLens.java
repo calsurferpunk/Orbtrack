@@ -1047,7 +1047,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         currentName = currentOrbital.getName();
 
                         //determine relative location
-                        relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight);
+                        relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, !isStar || !showingConstellations);
 
                         //if on selection
                         if(currentSelected)
@@ -1188,7 +1188,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             if(haveSelectedOrbital())
             {
                 Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
-                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight) : null);
+                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, true) : null);
                 boolean haveProperties = (relativeCalibrateProperties != null);
                 boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
                 boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
@@ -1459,7 +1459,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     //Gets relative location properties
-    private RelativeLocationProperties getRelativeLocationProperties(double currentAzDeg, double currentElDeg, double locationAzDeg, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight)
+    private RelativeLocationProperties getRelativeLocationProperties(double currentAzDeg, double currentElDeg, double locationAzDeg, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight, boolean normalize)
     {
         float azCenterPx;
         float elCenterPx;
@@ -1472,23 +1472,35 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         azCenterPx = (width / 2f) + (azDeltaDegrees * degToPxWidth);
         if(azCenterPx > width)
         {
-            azCenterPx = width;
+            if(normalize)
+            {
+                azCenterPx = width;
+            }
             outsideArea = true;
         }
         else if(azCenterPx < 0)
         {
-            azCenterPx = 0;
+            if(normalize)
+            {
+                azCenterPx = 0;
+            }
             outsideArea = true;
         }
         elCenterPx = (height / 2f) - (elDeltaDegrees * degToPxHeight);
         if(elCenterPx > height)
         {
-            elCenterPx = height;
+            if(normalize)
+            {
+                elCenterPx = height;
+            }
             outsideArea = true;
         }
         else if(elCenterPx < 0)
         {
-            elCenterPx = 0;
+            if(normalize)
+            {
+                elCenterPx = 0;
+            }
             outsideArea = true;
         }
         closeArea = (Math.abs(azDeltaDegrees) <= CLOSE_AREA_DEGREES && Math.abs(elDeltaDegrees) <= CLOSE_AREA_DEGREES);

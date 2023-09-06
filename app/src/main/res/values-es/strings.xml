@@ -160,6 +160,7 @@
     <string name="desc_satellite_icon">Ícono a usar para pantallas satelitales</string>
     <string name="desc_sensor_smoothing">Aumenta la estabilidad (más alta) o disminuye la demora (más baja).</string>
     <string name="desc_show_3d_paths">Use caminos elevados o planos</string>
+    <string name="desc_show_all_path_times">Mostrar etiquetas de tiempo en el camino fuera de la vista cercana</string>
     <string name="desc_show_clouds">Mostrar/ocultar nubes en la superficie</string>
     <string name="desc_show_direction_centered">Mantenga la dirección de la guía centrada en la pantalla</string>
     <string name="desc_show_footprint">Mostrar áreas visibles de orbitales en la superficie</string>
@@ -557,6 +558,7 @@
     <string name="title_shared_source">Fuente Compartida</string>
     <string name="title_share_translations_online">Compartir Traducciones en Línea</string>
     <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
+    <string name="title_show_all_path_times">Mostrar Todos Los Tiempos de Ruta</string>
     <string name="title_show_background">Mostrar Fondo</string>
     <string name="title_show_clouds">Mostrar Nubes</string>
     <string name="title_show_direction_centered">Mostrar Dirección Guía Centrada</string>

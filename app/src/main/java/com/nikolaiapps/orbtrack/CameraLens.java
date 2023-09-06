@@ -524,13 +524,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     private static final float CLOSE_AREA_DEGREES = 12f;
-    private static final float STAR_SCALE = (1.0f / 3.5f);
+    private static final float STAR_IMAGE_SCALE = (1.0f / 3.5f);
+    private static final float STAR_TEXT_SCALE = 0.75f;
 
     public int pathDivisions;
     public boolean showPaths;
     public boolean showHorizon;
     public boolean showCalibration;
     public boolean showOutsideArea;
+    public boolean showAllPathTimes;
     public TextView helpText;
     public PlayBar playBar;
     public FloatingActionStateButtonMenu settingsMenu;
@@ -565,6 +567,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float textSize;
     private final float textOffset;
     private final float textPadding;
+    private final float starTextSize;
+    private final float starTextOffset;
     private float compassCenterX;
     private float compassCenterY;
     private final float indicatorThickness;
@@ -635,16 +639,19 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
+        showAllPathTimes = Settings.getLensShowAllPathTimes(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, metrics);
         textOffset = textSize / 1.5f;
         textPadding = (textSize * 0.15f);
+        starTextSize = textSize * STAR_TEXT_SCALE;
+        starTextOffset = textOffset * STAR_TEXT_SCALE;
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
         iconLength = (int)dpPixels[4];
         iconHalfLength = (iconLength / 2);
         iconScaleOffset = (iconHalfLength / 2);
-        starLength = (int)(dpPixels[4] * STAR_SCALE);
+        starLength = (int)(dpPixels[4] * STAR_IMAGE_SCALE);
         starHalfLength = (starLength / 2);
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
@@ -989,11 +996,18 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     if(onFirst || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
                                     {
                                         RectF bgArea;
+                                        boolean closeArea = (Math.abs(currentAzDelta) <= CLOSE_AREA_DEGREES && Math.abs(currentElDelta) <= CLOSE_AREA_DEGREES);
+                                        boolean showPathTime = (showAllPathTimes || closeArea);
 
-                                        //draw circle
-                                        canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
+                                        //if showing path time
+                                        if(showPathTime)
+                                        {
+                                            //draw circle
+                                            canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
+                                        }
 
                                         //get text area
+                                        currentPaint.setTextSize(textSize);
                                         if(currentView.timeArea.isEmpty())
                                         {
                                             currentPaint.getTextBounds(currentView.timeString, 0, currentView.timeString.length(), currentView.timeArea);
@@ -1006,19 +1020,23 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                         //if -first area empty or not intersecting with current- and -previous area is empty or not intersecting with current-
                                         if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
                                         {
-                                            //draw text background
-                                            currentPaint.setColor(usedTextBgColor);
-                                            canvas.drawRect(bgArea, currentPaint);
+                                            //if showing path time
+                                            if(showPathTime)
+                                            {
+                                                //draw text background
+                                                currentPaint.setColor(usedTextBgColor);
+                                                canvas.drawRect(bgArea, currentPaint);
 
-                                            //draw text border
-                                            currentPaint.setColor(usedCurrentColor);
-                                            currentPaint.setStyle(Paint.Style.STROKE);
-                                            canvas.drawRect(bgArea, currentPaint);
+                                                //draw text border
+                                                currentPaint.setColor(usedCurrentColor);
+                                                currentPaint.setStyle(Paint.Style.STROKE);
+                                                canvas.drawRect(bgArea, currentPaint);
 
-                                            //draw text
-                                            currentPaint.setColor(usedTextColor);
-                                            currentPaint.setStyle(Paint.Style.FILL);
-                                            canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
+                                                //draw text
+                                                currentPaint.setColor(usedTextColor);
+                                                currentPaint.setStyle(Paint.Style.FILL);
+                                                canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
+                                            }
 
                                             //remember previous area and starting julian date
                                             previousArea.set(bgArea);
@@ -1212,7 +1230,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         boolean isStar = (currentType == Database.OrbitalType.Star);
         boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
-        float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isStar ? STAR_SCALE : 1);
+        float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isStar ? STAR_IMAGE_SCALE : 1);
+        float usedTextSize = (isStar ? starTextSize : textSize);
+        float usedTextOffset = (isStar ? starTextOffset : textOffset);
 
         //if not selected, outside of area, and not showing
         if(!isSelected && outsideArea && !showOutsideArea)
@@ -1346,11 +1366,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
         //get text area
         currentPaint.setStrokeWidth(2);
+        currentPaint.setTextSize(usedTextSize);
         if(currentArea.isEmpty())
         {
             currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
         }
-        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - textSize) + (textOffset * (isStar || indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
+        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 3.5f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
         if(currentArea.left < 20)
         {
             currentArea.offsetTo(20, currentArea.top);

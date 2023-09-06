@@ -116,6 +116,7 @@ public abstract class Settings
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
         static final String LensShowToolbars = "LensShowToolbars";
+        static final String LensShowAllPathTimes = "LensShowAllPathTimes";
         static final String LensShowOutsideArea = "LensShowOutsideArea";
         static final String LensOrbitalTypeFilter = "LensOrbitalTypeFilter";
         static final String LocationLastLatitude = "LocationLatitude";
@@ -2496,6 +2497,12 @@ public abstract class Settings
     public static void setLensShowToolbars(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
+    }
+
+    //Returns lens show all path times
+    public static boolean getLensShowAllPathTimes(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensShowAllPathTimes));
     }
 
     //Returns lens showing outside visible area

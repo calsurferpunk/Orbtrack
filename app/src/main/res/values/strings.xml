@@ -160,6 +160,7 @@
     <string name="desc_satellite_icon">Icon to use for satellite displays</string>
     <string name="desc_sensor_smoothing">Increase stability (higher) or decrease delay (lower).</string>
     <string name="desc_show_3d_paths">Use elevated or flat paths</string>
+    <string name="desc_show_all_path_times">Show time labels on path outside nearby view</string>
     <string name="desc_show_clouds">Show/hide clouds on surface</string>
     <string name="desc_show_direction_centered">Keep guide direction centered on display</string>
     <string name="desc_show_footprint">Show orbitals visible areas on surface</string>
@@ -557,6 +558,7 @@
     <string name="title_shared_source">Shared Source</string>
     <string name="title_share_translations_online">Share Translations Online</string>
     <string name="title_show_3d_paths">Show 3d Paths</string>
+    <string name="title_show_all_path_times">Show All Path Times</string>
     <string name="title_show_background">Show Background</string>
     <string name="title_show_clouds">Show Clouds</string>
     <string name="title_show_direction_centered">Show Guide Direction Centered</string>

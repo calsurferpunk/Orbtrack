@@ -158,6 +158,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
                         SwitchPreference lensShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.LensShowToolbars);
+                        SwitchPreference lensShowAllPathTimes = this.findPreference(Settings.PreferenceName.LensShowAllPathTimes);
                         SwitchPreference lensShowOutsideAreaSwitch = this.findPreference(Settings.PreferenceName.LensShowOutsideArea);
                         SwitchPreference lensDirectionCentered = this.findPreference(Settings.PreferenceName.LensDirectionCentered);
                         SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
@@ -177,6 +178,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitch(useCameraSwitch);
                         setupSwitch(rotateSwitch);
                         setupSwitch(lensShowToolbarsSwitch);
+                        setupSwitch(lensShowAllPathTimes);
                         setupSwitch(lensShowOutsideAreaSwitch);
                         setupSwitch(lensDirectionCentered);
                         setupSwitch(lensShowIconDirection);
@@ -1551,6 +1553,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
                         case Settings.PreferenceName.LensShowToolbars:
+                        case Settings.PreferenceName.LensShowAllPathTimes:
                         case Settings.PreferenceName.LensShowOutsideArea:
                             //lens needs recreate
                             setLensRecreateNeed();

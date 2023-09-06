@@ -17,3 +17,4 @@
 -146|?
 -152|Casiopeia
 -169|Centauro
+-175|Cefeo

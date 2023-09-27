@@ -29,6 +29,7 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+import com.google.android.material.slider.Slider;
 import com.nikolaiapps.orbtrack.Calculations.*;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -1457,7 +1458,7 @@ public abstract class Current
     }
 
     //Setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, Slider zoomBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
     {
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
@@ -1520,6 +1521,7 @@ public abstract class Current
                 public void onClick(View v)
                 {
                     boolean showToolbars;
+                    int toolVisibility;
                     CameraLens cameraView = (forLens ? getCameraView() : null);
                     CoordinatesFragment mapView = (forLens ? null : getMapView());
 
@@ -1541,13 +1543,18 @@ public abstract class Current
                     showToolbarsButton.setChecked(showToolbars);
 
                     //update visibility
+                    toolVisibility = (showToolbars ? View.VISIBLE : View.GONE);
                     if(searchListLayout != null)
                     {
-                        searchListLayout.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                        searchListLayout.setVisibility(toolVisibility);
+                    }
+                    if(zoomBar != null && cameraView != null && cameraView.canZoom())
+                    {
+                        zoomBar.setVisibility(toolVisibility);
                     }
                     if(pagePlayBar != null)
                     {
-                        pagePlayBar.setVisibility(showToolbars ? View.VISIBLE : View.GONE);
+                        pagePlayBar.setVisibility(toolVisibility);
                     }
 
                     //if search list and exists and showing toolbars
@@ -1631,17 +1638,33 @@ public abstract class Current
         cameraView.helpText = rootView.findViewById(R.id.Lens_Help_Text);
         cameraView.pathDivisions = pathDivisions;
         cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
+        cameraView.zoomBar = rootView.findViewById(R.id.Lens_Zoom_Bar);
         cameraView.showPaths = (lensShowPaths || useSaved);         //if showing paths or using a saved path
         lensLayout.addView(cameraView, 0);                          //add before menu
 
         //setup search displays
         searchList = rootView.findViewById(R.id.Lens_Search_List);
-        setupSearch(context, showToolbarsButton, searchList, searchListLayout, cameraView.playBar, selectedOrbitals, true);
+        setupSearch(context, showToolbarsButton, searchList, searchListLayout, cameraView.zoomBar, cameraView.playBar, selectedOrbitals, true);
         if(showToolbarsButton != null)
         {
             //toggle displays
             showToolbarsButton.performClick();
         }
+
+        //setup zoom bar
+        cameraView.zoomBar.addOnChangeListener(new Slider.OnChangeListener()
+        {
+            @Override
+            public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
+            {
+                //if from the user
+                if(fromUser)
+                {
+                    //update zoom
+                    cameraView.setZoom((int)value);
+                }
+            }
+        });
 
         //setup calibration button
         lensShowCalibration = false;
@@ -1673,13 +1696,19 @@ public abstract class Current
 
                     //update display
                     cameraView.showCalibration = lensShowCalibration;
-                    if(!lensShowCalibration)
+                    if(lensShowCalibration)
+                    {
+                        //reset zoom
+                        cameraView.setZoom(1);
+                    }
+                    else
                     {
                         //reset alignment status and select any previous selection
                         cameraView.resetAlignmentStatus();
                         cameraView.selectOrbital(lastSelectedNoradId);
                         lastSelectedNoradId = Universe.IDs.None;
                     }
+                    cameraView.zoomBar.setVisibility(lensShowCalibration || !lensShowToolbars || !cameraView.canZoom() ? View.GONE : View.VISIBLE);
                     buttonLayout.setVisibility(lensShowCalibration ? View.VISIBLE : View.GONE);
                     selectButton.setText(R.string.title_select);
                     resetButton.setVisibility(View.VISIBLE);
@@ -2661,7 +2690,7 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, searchList, searchListLayout, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+        setupSearch(context, showToolbarsButton, searchList, searchListLayout, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
 
         //if map info text exists and not using background
         if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))

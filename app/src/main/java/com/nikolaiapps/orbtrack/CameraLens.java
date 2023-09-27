@@ -33,9 +33,12 @@ import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import com.google.android.material.slider.LabelFormatter;
+import com.google.android.material.slider.Slider;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 
 public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, SensorUpdate.OnSensorChangedListener
@@ -535,14 +538,16 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public boolean showAllPathTimes;
     public TextView helpText;
     public PlayBar playBar;
+    public Slider zoomBar;
     public FloatingActionStateButtonMenu settingsMenu;
 
     private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
     private static final ParentOrbital parentOrbitalSearch = new ParentOrbital(Universe.IDs.None, -1, 0);
     private static final ParentOrbital.Comparer parentOrbitalComparer = new ParentOrbital.Comparer();
-    private int orientation;
     private int azIndex;
     private int elIndex;
+    private int orientation;
+    private int cameraMaxZoom;
     private final int compassWidth;
     private final int indicator;
     private final int iconLength;
@@ -561,6 +566,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int selectedOrbitalIndex;
     private boolean compassBad;
     private boolean compassHadBad;
+    private boolean haveZoomValues;
     private final boolean showingConstellations;
     private final boolean arrowDirectionCentered;
     private final boolean showIconIndicatorDirection;
@@ -569,6 +575,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float textPadding;
     private final float starTextSize;
     private final float starTextOffset;
+    private float currentTouchDistance;
     private float compassCenterX;
     private float compassCenterY;
     private final float indicatorThickness;
@@ -582,6 +589,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float[] trianglePoints = new float[12];
     private float cameraDegWidth;
     private float cameraDegHeight;
+    private float currentZoomRatio;
     private float useCameraDegWidth;
     private float useCameraDegHeight;
     private float cameraHardwareDegWidth;
@@ -610,6 +618,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private UpdateThread updateThread;
     private OnReadyListener readyListener;
     private OnStopCalibrationListener stopCalibrationListener;
+    private List<Integer> cameraZoomRatios;
     private final ArrayList<IconImage> orbitalIcons;
     private final ArrayList<ParentOrbital> parentOrbitals;
     private Rect[] currentOrbitalAreas;
@@ -655,6 +664,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         starHalfLength = (starLength / 2);
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
+        currentZoomRatio = 1;
         indicator = Settings.getIndicator(context);
         indicatorPxRadius = Globals.dpToPixels(context, 36);
         resetAlignmentStatus();
@@ -664,7 +674,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         previousArea = new RectF();
         azIndex = elIndex = pathDivisions = 0;
         azUserOffset = Settings.getLensAzimuthUserOffset(context);
-        azDeclination = 0;
+        azDeclination = currentTouchDistance = 0;
         defaultPathJulianDelta = Globals.truncate(1.0 / 24, 8);      //1 hour interval      note: setting to 8 places prevents rounding errors for 1 hour intervals
         azDegArray = new float[averageCount];
         elDegArray = new float[averageCount];
@@ -740,6 +750,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
         showingConstellations = needConstellations;
 
+        cameraMaxZoom = 0;
+        cameraZoomRatios = null;
+        haveZoomValues = false;
         orbitalIcons = new ArrayList<>(0);
         parentOrbitals = new ArrayList<>(0);
         currentOrbitals = (selectedOrbitals != null ? selectedOrbitals : new Database.SatelliteData[0]);
@@ -789,22 +802,51 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
+        int action = event.getAction();
+        int pointerCount = event.getPointerCount();
         float x = event.getX();
         float y = event.getY();
         float compassHalfWidth = compassWidth / 2.0f;
         float compassHalfHeight = compassHeight / 2.0f;
+        Camera.Parameters cameraParams = (currentCamera != null ? currentCamera.getParameters() : null);
 
-        //if compass reading is bad and within compass image bounds
-        if(compassBad && x >= (compassCenterX - compassHalfWidth) && x <= (compassCenterX + compassHalfWidth) && (y >= compassCenterY - compassHalfHeight) && (y <= compassCenterY + compassHalfHeight))
+        //if multi touch and have zoom values
+        if(pointerCount > 1 && haveZoomValues)
+        {
+            //if 2 points down
+            if((action & MotionEvent.ACTION_POINTER_DOWN) != 0 && (action & MotionEvent.ACTION_POINTER_2_DOWN) != 0)
+            {
+                //update touch distance
+                currentTouchDistance = getTouchDistance(event);
+            }
+            //else if moving and have camera params
+            else if(action == MotionEvent.ACTION_MOVE && cameraParams != null)
+            {
+                //stop focus and handle touch zoom
+                handleFocus(cameraParams, false);
+                handleTouchZoom(event, cameraParams);
+            }
+        }
+        //else if compass reading is bad and within compass image bounds
+        else if(compassBad && x >= (compassCenterX - compassHalfWidth) && x <= (compassCenterX + compassHalfWidth) && (y >= compassCenterY - compassHalfHeight) && (y <= compassCenterY + compassHalfHeight))
         {
             showCompassErrorDialog();
-            return(false);
         }
+        //else if released
+        else if(action == MotionEvent.ACTION_UP)
+        {
+            //start focus
+            handleFocus(cameraParams, true);
+        }
+        //else normal click
         else
         {
             performClick();
-            return(super.onTouchEvent(event));
+            super.onTouchEvent(event);
         }
+
+        //return handled
+        return(true);
     }
 
     @Override
@@ -1065,7 +1107,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         currentName = currentOrbital.getName();
 
                         //determine relative location
-                        relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, !isStar || !showingConstellations);
+                        relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, currentZoomRatio, !isStar || !showingConstellations);
 
                         //if on selection
                         if(currentSelected)
@@ -1206,7 +1248,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             if(haveSelectedOrbital())
             {
                 Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
-                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, true) : null);
+                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, currentZoomRatio, true) : null);
                 boolean haveProperties = (relativeCalibrateProperties != null);
                 boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
                 boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
@@ -1216,13 +1258,106 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 {
                     //draw arrow direction
                     angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
-                    Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * degToPxHeight)), (float)(angleDirection + 90), currentPaint);
+                    Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / currentZoomRatio))), (float)(angleDirection + 90), currentPaint);
                 }
             }
         }
 
         //draw
         super.onDraw(canvas);
+    }
+
+    //Gets the distance between 2 touch points
+    private float getTouchDistance(MotionEvent event)
+    {
+        float x = event.getX(0) - event.getX(1);
+        float y = event.getY(0) - event.getY(1);
+
+        return((float)Math.sqrt((x * x) + (y * y)));
+    }
+
+    //Sets zoom
+    private void setZoom(int zoom, Camera.Parameters params)
+    {
+        //if camera, params, and zoom values exist
+        if(currentCamera != null && params != null && haveZoomValues)
+        {
+            //update zoom properties
+            currentZoomRatio = (zoom >= 0 && zoom < cameraZoomRatios.size() ? (cameraZoomRatios.get(zoom) / 100f) : 1);
+            params.setZoom(zoom);
+            currentCamera.setParameters(params);
+
+            //if bar exists and is changing
+            if(zoomBar != null && (int)zoomBar.getValue() != zoom)
+            {
+                //update bar
+                zoomBar.setValue(zoom);
+            }
+        }
+    }
+    public void setZoom(int zoom)
+    {
+        setZoom(zoom, (currentCamera != null ? currentCamera.getParameters() : null));
+    }
+
+    //Handles touch zoom
+    private void handleTouchZoom(MotionEvent event, Camera.Parameters params)
+    {
+        //if camera and params exist
+        if(currentCamera != null && params != null)
+        {
+            int currentZoom = params.getZoom();
+            float touchDistance = getTouchDistance(event);
+
+            //if expanding distance and can zoom in more
+            if(touchDistance > currentTouchDistance && currentZoom < cameraMaxZoom)
+            {
+                //zoom in
+                currentZoom++;
+            }
+            //else if shrinking distance and can zoom out more
+            else if(touchDistance < currentTouchDistance && currentZoom > 0)
+            {
+                //zoom out
+                currentZoom--;
+            }
+
+            //update distance and zoom
+            currentTouchDistance = touchDistance;
+            setZoom(currentZoom, params);
+        }
+    }
+
+    //Handles focus
+    private void handleFocus(Camera.Parameters params, boolean use)
+    {
+        //if camera exists
+        if(currentCamera != null)
+        {
+            //if using
+            if(use)
+            {
+                //if there are focus modes and auto being used
+                List<String> focusModes = (params != null ? params.getSupportedFocusModes() : null);
+                if(focusModes != null && focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO))
+                {
+                    //start focus
+                    currentCamera.autoFocus(new Camera.AutoFocusCallback()
+                    {
+                        @Override
+                        public void onAutoFocus(boolean success, Camera camera)
+                        {
+                            //do nothing
+                        }
+                    });
+                }
+            }
+            else
+            {
+                //stop focus
+                currentCamera.cancelAutoFocus();
+            }
+        }
     }
 
     //Draws orbital at the given position
@@ -1470,17 +1605,17 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     //Gets degree to pixel conversion for given width
     private float getDegreeToPixelWidth(int width)
     {
-        return(width / (useCameraDegWidth != Float.MAX_VALUE ? useCameraDegWidth : 1));
+        return((width / (useCameraDegWidth != Float.MAX_VALUE ? useCameraDegWidth : 1)) * currentZoomRatio);
     }
 
     //Gets degree to pixel conversion for given height
     private float getDegreeToPixelHeight(int height)
     {
-        return(height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1));
+        return((height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1)) * currentZoomRatio);
     }
 
     //Gets relative location properties
-    private RelativeLocationProperties getRelativeLocationProperties(double currentAzDeg, double currentElDeg, double locationAzDeg, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight, boolean normalize)
+    private RelativeLocationProperties getRelativeLocationProperties(double currentAzDeg, double currentElDeg, double locationAzDeg, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight, float zoomRatio, boolean normalize)
     {
         float azCenterPx;
         float elCenterPx;
@@ -1524,7 +1659,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
             outsideArea = true;
         }
-        closeArea = (Math.abs(azDeltaDegrees) <= CLOSE_AREA_DEGREES && Math.abs(elDeltaDegrees) <= CLOSE_AREA_DEGREES);
+        closeArea = (Math.abs(azDeltaDegrees) <= (CLOSE_AREA_DEGREES / zoomRatio) && Math.abs(elDeltaDegrees) <= (CLOSE_AREA_DEGREES / zoomRatio));
 
         //return results
         return(new RelativeLocationProperties(closeArea, outsideArea, azCenterPx, elCenterPx));
@@ -1829,6 +1964,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         return(selectedNoradId);
     }
 
+    //Returns if able to zoom
+    public boolean canZoom()
+    {
+        return(haveZoomValues);
+    }
+
     //Returns if any valid orbital is selected
     public boolean haveSelectedOrbital()
     {
@@ -2088,6 +2229,34 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 cameraHardwareDegHeight = cameraParams.getVerticalViewAngle();
                 cameraDegWidth = (useAutoWidth ? cameraHardwareDegWidth : userDegWidth);
                 cameraDegHeight = (useAutoHeight ? cameraHardwareDegHeight : userDegHeight);
+
+                //setup zom
+                cameraMaxZoom = cameraParams.getMaxZoom();
+                cameraZoomRatios = cameraParams.getZoomRatios();
+                haveZoomValues = (cameraZoomRatios != null && cameraZoomRatios.size() > 1);
+                if(zoomBar != null)
+                {
+                    //if have zoom values
+                    if(haveZoomValues)
+                    {
+                        //setup bar
+                        zoomBar.setValueFrom(0);
+                        zoomBar.setValueTo(cameraMaxZoom);
+                        zoomBar.setLabelFormatter(new LabelFormatter()
+                        {
+                            @NonNull @Override
+                            public String getFormattedValue(float value)
+                            {
+                                //return zoom value multiplier
+                                return(Globals.getNumberString(cameraZoomRatios.get((int)value) / 100f, 1) + res.getString(R.string.text_x));
+                            }
+                        });
+                    }
+
+                    //set visibility
+                    zoomBar.setVisibility(haveZoomValues ? View.VISIBLE : View.GONE);
+                }
+                setZoom(0, cameraParams);
 
                 //start sensors
                 startSensors = true;

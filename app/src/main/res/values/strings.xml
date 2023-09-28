@@ -134,6 +134,8 @@
     <string name="desc_finished_setup">All done! If you wish to change anything later, look under settings in the main menu.</string>
     <string name="desc_force_rotate">Force camera rotation if view appears upside down</string>
     <string name="desc_google_play_services_fail">Sorry. There is an unknown problem with Google Play services.</string>
+    <string name="desc_hide_constellation_star_paths">Hide star paths when showing constellations</string>
+    <string name="desc_hide_distant_path_times">Hide time labels on path outside nearby view</string>
     <string name="desc_imperial">Imperial (mi/ft)</string>
     <string name="desc_information_source">Descriptions and details of satellites</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
@@ -160,7 +162,6 @@
     <string name="desc_satellite_icon">Icon to use for satellite displays</string>
     <string name="desc_sensor_smoothing">Increase stability (higher) or decrease delay (lower).</string>
     <string name="desc_show_3d_paths">Use elevated or flat paths</string>
-    <string name="desc_show_all_path_times">Show time labels on path outside nearby view</string>
     <string name="desc_show_clouds">Show/hide clouds on surface</string>
     <string name="desc_show_direction_centered">Keep guide direction centered on display</string>
     <string name="desc_show_footprint">Show orbitals visible areas on surface</string>
@@ -169,6 +170,7 @@
     <string name="desc_show_grid">Show latitude/longitude grid</string>
     <string name="desc_show_horizon">Show horizon level on display</string>
     <string name="desc_show_path_progress">Show path progress line</string>
+    <string name="desc_show_path_time_names">Show name in front of times in path</string>
     <string name="desc_show_pass_quality">Show pass quality line</string>
     <string name="desc_show_orbital_direction">Orbitals point in path direction</string>
     <string name="desc_show_orbital_direction_limit">Show direction if within visible orbital count\nNote: Required for Mali and PowerVR GPUs</string>
@@ -382,6 +384,8 @@
     <string name="title_grid_color">Grid Color</string>
     <string name="title_grid_view">Grid View</string>
     <string name="title_group">Group</string>
+    <string name="title_hide_constellation_star_paths">Hide Constellation Star Paths</string>
+    <string name="title_hide_distant_path_times">Hide Distant Path Times</string>
     <string name="title_hide_selected">Hide Selected</string>
     <string name="title_high">High</string>
     <string name="title_horizon_color">Horizon Color</string>
@@ -497,6 +501,7 @@
     <string name="title_pass_start">Pass Start</string>
     <string name="title_passes">Passes</string>
     <string name="title_password">Password</string>
+    <string name="title_paths">Paths</string>
     <string name="title_perigee">Perigee</string>
     <string name="title_period">Period</string>
     <string name="title_permission">Permission</string>
@@ -558,7 +563,6 @@
     <string name="title_shared_source">Shared Source</string>
     <string name="title_share_translations_online">Share Translations Online</string>
     <string name="title_show_3d_paths">Show 3d Paths</string>
-    <string name="title_show_all_path_times">Show All Path Times</string>
     <string name="title_show_background">Show Background</string>
     <string name="title_show_clouds">Show Clouds</string>
     <string name="title_show_direction_centered">Show Guide Direction Centered</string>
@@ -572,6 +576,7 @@
     <string name="title_show_orbital_direction_limit">Limit Orbital Direction</string>
     <string name="title_show_outside_visible_area">Show Outside Visible Area</string>
     <string name="title_show_path">Show Path</string>
+    <string name="title_show_path_time_names">Show Path Time Names</string>
     <string name="title_show_selected">Show Selected</string>
     <string name="title_show_selected_footprint">Show Selected Footprint</string>
     <string name="title_show_shadows">Show Shadows</string>

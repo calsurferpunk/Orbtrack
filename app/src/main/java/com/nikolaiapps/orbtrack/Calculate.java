@@ -2853,7 +2853,7 @@ public abstract class Calculate
             //set views
             satelliteObjects[index] = new Calculations.SatelliteObjectType(satellites[index].satellite);
         }
-        task.execute(context, satelliteObjects, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
+        task.execute(context, satelliteObjects, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
 
         //return task
         return(task);

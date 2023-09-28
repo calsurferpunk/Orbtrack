@@ -3000,7 +3000,7 @@ public class UpdateService extends NotifyService
                 if(!tleLines[0].equals("") && !tleLines[1].equals(""))
                 {
                     //get current satellite
-                    currentSatellite = Calculations.loadSatellite(tleLines[0], tleLines[1]);
+                    currentSatellite = Calculations.loadSatellite(satelliteName, tleLines[0], tleLines[1]);
                 }
             }
 

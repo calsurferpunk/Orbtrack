@@ -1386,9 +1386,9 @@ public abstract class Current
     {
         CalculateViewsTask task;
 
-        //start calculating for 1 day, 12 minute increments
+        //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, orbitalViews, null, observer, julianStartDate, julianEndDate, dayIncrement, true, true, true, true);
+        task.execute(context, orbitalViews, null, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true);
 
         //return task
         return(task);

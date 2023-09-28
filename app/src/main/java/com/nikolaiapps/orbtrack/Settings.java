@@ -116,7 +116,9 @@ public abstract class Settings
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
         static final String LensShowToolbars = "LensShowToolbars";
-        static final String LensShowAllPathTimes = "LensShowAllPathTimes";
+        static final String LensHideConstellationStarPaths = "LensHideConstellationStarPaths";
+        static final String LensShowPathTimeNames = "LensShowPathTimeNames";
+        static final String LensHideDistantPathTimes = "LensHideDistantPathTimes";
         static final String LensShowOutsideArea = "LensShowOutsideArea";
         static final String LensOrbitalTypeFilter = "LensOrbitalTypeFilter";
         static final String LocationLastLatitude = "LocationLatitude";
@@ -1958,6 +1960,9 @@ public abstract class Settings
             case PreferenceName.LensUseCamera:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
+            case PreferenceName.LensHideConstellationStarPaths:
+            case PreferenceName.LensShowPathTimeNames:
+            case PreferenceName.LensHideDistantPathTimes:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
             case PreferenceName.MapMarkerShowShadow:
@@ -2499,10 +2504,22 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
     }
 
-    //Returns lens show all path times
-    public static boolean getLensShowAllPathTimes(Context context)
+    //Returns hide constellation star paths
+    public static boolean getLensHideConstellationStarPaths(Context context)
     {
-        return(getPreferenceBoolean(context, PreferenceName.LensShowAllPathTimes));
+        return(getPreferenceBoolean(context, PreferenceName.LensHideConstellationStarPaths));
+    }
+
+    //Returns show path time names
+    public static boolean getLensShowPathTimeNames(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensShowPathTimeNames));
+    }
+
+    //Returns lens hide distant path times
+    public static boolean getLensHideDistantPathTimes(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensHideDistantPathTimes));
     }
 
     //Returns lens showing outside visible area

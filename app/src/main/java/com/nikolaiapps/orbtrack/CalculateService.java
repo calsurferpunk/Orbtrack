@@ -1596,11 +1596,11 @@ public class CalculateService extends NotifyService
 
                             //update view(s) and add to list
                             Calculations.updateOrbitalPosition(satellite1, observer, pathJulianDate, false);
-                            pathViewsList.add(new CalculateViewsTask.OrbitalView(context, Calculations.getLookAngles(observer, satellite1, true), pathJulianDate, zoneId, onFirstOrLast));
+                            pathViewsList.add(new CalculateViewsTask.OrbitalView(context, Calculations.getLookAngles(observer, satellite1, true), pathJulianDate, zoneId, currentItem.name, onFirstOrLast));
                             if(forIntersection)
                             {
                                 Calculations.updateOrbitalPosition(satellite2, observer, pathJulianDate, false);
-                                pathViewsList2.add(new CalculateViewsTask.OrbitalView(context, Calculations.getLookAngles(observer, satellite2, true), pathJulianDate, zoneId, onFirstOrLast));
+                                pathViewsList2.add(new CalculateViewsTask.OrbitalView(context, Calculations.getLookAngles(observer, satellite2, true), pathJulianDate, zoneId, null, onFirstOrLast));
                             }
 
                             //if date is before end date and next date would be after

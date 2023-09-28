@@ -134,6 +134,8 @@
     <string name="desc_finished_setup">¡Todo listo! Si desea cambiar algo más tarde, busque en la configuración en el menú principal.</string>
     <string name="desc_force_rotate">Forzar la rotación de la cámara si la vista aparece al revés</string>
     <string name="desc_google_play_services_fail">Lo siento. Hay un problema desconocido con los servicios de Google Play.</string>
+    <string name="desc_hide_constellation_star_paths">Ocultar trayectorias de estrellas al mostrar constelaciones</string>
+    <string name="desc_hide_distant_path_times">Ocultar etiquetas de tiempo en el camino fuera de la vista cercana</string>
     <string name="desc_imperial">Imperial (mi/pies)</string>
     <string name="desc_information_source">Descripciones y detalles de satélites.</string>
     <string name="desc_location_disable">Los servicios de ubicación están deshabilitados. ¿Desea cambiar la configuración?</string>
@@ -160,7 +162,6 @@
     <string name="desc_satellite_icon">Ícono a usar para pantallas satelitales</string>
     <string name="desc_sensor_smoothing">Aumenta la estabilidad (más alta) o disminuye la demora (más baja).</string>
     <string name="desc_show_3d_paths">Use caminos elevados o planos</string>
-    <string name="desc_show_all_path_times">Mostrar etiquetas de tiempo en el camino fuera de la vista cercana</string>
     <string name="desc_show_clouds">Mostrar/ocultar nubes en la superficie</string>
     <string name="desc_show_direction_centered">Mantenga la dirección de la guía centrada en la pantalla</string>
     <string name="desc_show_footprint">Mostrar áreas visibles de orbitales en la superficie</string>
@@ -169,6 +170,7 @@
     <string name="desc_show_grid">Mostrar cuadrícula de latitud/longitud</string>
     <string name="desc_show_horizon">Mostrar el horizonte en la pantalla</string>
     <string name="desc_show_path_progress">Mostrar línea de progreso de ruta</string>
+    <string name="desc_show_path_time_names">Mostrar el nombre delante de las horas en la ruta</string>
     <string name="desc_show_pass_quality">Mostrar línea de calidad de pase</string>
     <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria</string>
     <string name="desc_show_orbital_direction_limit">Mostrar dirección si está dentro del conteo orbital visible\nNota: Obligatorio para las GPU Mali y PowerVR</string>
@@ -382,6 +384,8 @@
     <string name="title_grid_color">Color Cuadrícula</string>
     <string name="title_grid_view">Vista Cuadrícula</string>
     <string name="title_group">Grupo</string>
+    <string name="title_hide_constellation_star_paths">Ocultar Caminos Estelares de Constelaciones</string>
+    <string name="title_hide_distant_path_times">Ocultar Tiempos de Ruta Distantes</string>
     <string name="title_hide_selected">Ocultar Seleccionado</string>
     <string name="title_high">Alto</string>
     <string name="title_horizon_color">Color Horizonte</string>
@@ -497,6 +501,7 @@
     <string name="title_pass_start">Inicio Pase</string>
     <string name="title_passes">Pases</string>
     <string name="title_password">Contraseña</string>
+    <string name="title_paths">Caminos</string>
     <string name="title_perigee">Perigeo</string>
     <string name="title_period">Período</string>
     <string name="title_permission">Permiso</string>
@@ -558,7 +563,6 @@
     <string name="title_shared_source">Fuente Compartida</string>
     <string name="title_share_translations_online">Compartir Traducciones en Línea</string>
     <string name="title_show_3d_paths">Mostrar Rutas en 3D</string>
-    <string name="title_show_all_path_times">Mostrar Todos Los Tiempos de Ruta</string>
     <string name="title_show_background">Mostrar Fondo</string>
     <string name="title_show_clouds">Mostrar Nubes</string>
     <string name="title_show_direction_centered">Mostrar Dirección Guía Centrada</string>
@@ -572,6 +576,7 @@
     <string name="title_show_orbital_direction_limit">Dirección Orbital Límite</string>
     <string name="title_show_outside_visible_area">Mostrar Área Visible Exterior</string>
     <string name="title_show_path">Mostrar Ruta</string>
+    <string name="title_show_path_time_names">Mostrar Nombres de Tiempo de Ruta</string>
     <string name="title_show_selected">Mostrar Seleccionado</string>
     <string name="title_show_selected_footprint">Mostrar Huella Seleccionada</string>
     <string name="title_show_shadows">Mostrar Sombras</string>

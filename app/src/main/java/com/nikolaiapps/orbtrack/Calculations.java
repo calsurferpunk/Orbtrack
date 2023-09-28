@@ -676,6 +676,7 @@ public abstract class Calculations
     //Satellite object
     public static class SatelliteObjectType implements Parcelable
     {
+        public String name;
         public EciDataType eci;					//eci position
         public GeodeticDataType geo;			//geodetic position
         public GeodeticDataType savedGeo;       //saved geodetic position
@@ -688,7 +689,7 @@ public abstract class Calculations
             @Override
             public SatelliteObjectType createFromParcel(Parcel source)
             {
-                return(new SatelliteObjectType(source.readParcelable(EciDataType.class.getClassLoader()), source.readParcelable(GeodeticDataType.class.getClassLoader()), source.readParcelable(TLEDataType.class.getClassLoader()), source.readParcelable(OrbitDataType.class.getClassLoader()), source.readParcelable(PlanetDataType.class.getClassLoader())));
+                return(new SatelliteObjectType(source.readString(), source.readParcelable(EciDataType.class.getClassLoader()), source.readParcelable(GeodeticDataType.class.getClassLoader()), source.readParcelable(TLEDataType.class.getClassLoader()), source.readParcelable(OrbitDataType.class.getClassLoader()), source.readParcelable(PlanetDataType.class.getClassLoader())));
             }
 
             @Override
@@ -700,6 +701,7 @@ public abstract class Calculations
 
         private void baseConstructor()
         {
+            name = null;
             eci = new EciDataType();
             geo = new GeodeticDataType();
             savedGeo = new GeodeticDataType();
@@ -713,8 +715,9 @@ public abstract class Calculations
         {
             baseConstructor();
         }
-        SatelliteObjectType(EciDataType e, GeodeticDataType g, TLEDataType t, OrbitDataType o, PlanetDataType p)
+        SatelliteObjectType(String nm, EciDataType e, GeodeticDataType g, TLEDataType t, OrbitDataType o, PlanetDataType p)
         {
+            name = nm;
             eci = new EciDataType(e);
             geo = new GeodeticDataType(g);
             savedGeo = new GeodeticDataType();
@@ -727,6 +730,7 @@ public abstract class Calculations
         {
             if(copyFrom != null)
             {
+                name = copyFrom.name;
                 eci = new EciDataType(copyFrom.eci);
                 geo = new GeodeticDataType(copyFrom.geo);
                 savedGeo = new GeodeticDataType();
@@ -750,11 +754,17 @@ public abstract class Calculations
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
+            dest.writeString(name);
             dest.writeParcelable(eci, 0);
             dest.writeParcelable(geo, 0);
             dest.writeParcelable(tle, 0);
             dest.writeParcelable(orbit, 0);
             dest.writeParcelable(planetData, 0);
+        }
+
+        public String getName()
+        {
+            return(("").equals(name) ? null : name);
         }
 
         public int getSatelliteNum()
@@ -1236,6 +1246,36 @@ public abstract class Calculations
         return(String.valueOf(sum % 10));
     }
 
+    //Loads multiple name from given json objects
+    public static String[] loadNames(JSONObject[] data)
+    {
+        int index;
+        ArrayList<String> nameList = new ArrayList<>(0);
+
+        //go through each object
+        for(index = 0; index < data.length; index++)
+        {
+            String currentName;
+            JSONObject dataItem = data[index];
+
+            //try to get name
+            try
+            {
+                currentName = dataItem.getString(GPParams.Name);
+            }
+            catch(Exception ex)
+            {
+                currentName = null;
+            }
+
+            //add name to list
+            nameList.add(currentName);
+        }
+
+        //return list
+        return(nameList.toArray(new String[0]));
+    }
+
     //Loads multiple TLEs from given json objects
     public static TLEDataType[] loadTLEs(JSONObject[] data)
     {
@@ -1593,21 +1633,22 @@ public abstract class Calculations
     }
 
     //Loads a satellite object
-    public static SatelliteObjectType loadSatellite(TLEDataType tle)
+    public static SatelliteObjectType loadSatellite(String name, TLEDataType tle)
     {
         SatelliteObjectType satObj = new SatelliteObjectType();
+        satObj.name = name;
         satObj.tle = tle;
         satObj.orbit = loadOrbit(satObj.tle);
         satObj.norad = loadNorad(satObj.orbit, satObj.tle);
         return(satObj);
     }
-    public static SatelliteObjectType loadSatellite(String tleLine1, String tleLine2)
+    public static SatelliteObjectType loadSatellite(String name, String tleLine1, String tleLine2)
     {
-        return(loadSatellite(loadTLE(tleLine1, tleLine2)));
+        return(loadSatellite(name, loadTLE(tleLine1, tleLine2)));
     }
     public static SatelliteObjectType loadSatellite(Database.DatabaseSatellite currentSat)
     {
-        return(loadSatellite(currentSat.tle));
+        return(loadSatellite(currentSat.getName(), currentSat.tle));
     }
 
     //Loads satellite objects
@@ -1617,13 +1658,14 @@ public abstract class Calculations
         int index;
         SatelliteObjectType[] satObjects;
         TLEDataType[] tles = loadTLEs(data);
+        String[] names = loadNames(data);
 
         //go through each TLE
         satObjects = new SatelliteObjectType[tles.length];
         for(index = 0; index < tles.length; index++)
         {
             //set current satellite
-            satObjects[index] = (tles[index] != null ? loadSatellite(tles[index]) : null);
+            satObjects[index] = (tles[index] != null ? loadSatellite(names[index], tles[index]) : null);
         }
 
         //return satellites
@@ -1636,6 +1678,7 @@ public abstract class Calculations
         byte currentType = currentSat.orbitalType;
         SatelliteObjectType nonSatObj = new SatelliteObjectType();
 
+        nonSatObj.name = currentSat.getName();
         nonSatObj.tle.satelliteNum = currentSat.noradId;
         if(currentType == Database.OrbitalType.Sun || currentType == Database.OrbitalType.Star || currentType == Database.OrbitalType.Constellation)
         {

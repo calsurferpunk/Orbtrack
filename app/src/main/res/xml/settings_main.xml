@@ -308,11 +308,6 @@
                     android:summary="@string/desc_show_horizon"/>
 
                 <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_show_all_path_times"
-                    android:key="LensShowAllPathTimes"
-                    android:summary="@string/desc_show_all_path_times"/>
-
-                <com.nikolaiapps.orbtrack.SwitchPreference
                     android:title="@string/title_show_outside_visible_area"
                     android:key="LensShowOutsideArea"
                     android:summary="@string/desc_show_outside_visible_area"/>
@@ -321,6 +316,23 @@
                     android:title="@string/title_show_direction_centered"
                     android:key="LensDirectionCentered"
                     android:summary="@string/desc_show_direction_centered"/>
+
+                <PreferenceCategory android:title="@string/title_paths">
+                    <com.nikolaiapps.orbtrack.SwitchPreference
+                        android:title="@string/title_hide_constellation_star_paths"
+                        android:key="LensHideConstellationStarPaths"
+                        android:summary="@string/desc_hide_constellation_star_paths"/>
+
+                    <com.nikolaiapps.orbtrack.SwitchPreference
+                        android:title="@string/title_show_path_time_names"
+                        android:key="LensShowPathTimeNames"
+                        android:summary="@string/desc_show_path_time_names"/>
+
+                    <com.nikolaiapps.orbtrack.SwitchPreference
+                        android:title="@string/title_hide_distant_path_times"
+                        android:key="LensHideDistantPathTimes"
+                        android:summary="@string/desc_hide_distant_path_times"/>
+                </PreferenceCategory>
 
                 <PreferenceCategory android:title="@string/title_rates">
                     <com.nikolaiapps.orbtrack.IconListPreference

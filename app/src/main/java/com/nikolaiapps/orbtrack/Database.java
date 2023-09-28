@@ -1884,7 +1884,7 @@ public class Database extends SQLiteOpenHelper
     private static void addStars(Context context, Database instance, SQLiteDatabase db)
     {
         Resources res = (context != null ? context.getResources() : null);
-        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.very_light_gray, null) : Color.TRANSPARENT);
+        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.dark_gray, null) : Color.TRANSPARENT);
         ArrayList<Integer> ids;
 
         //if no context or no resources
@@ -1913,7 +1913,7 @@ public class Database extends SQLiteOpenHelper
     private static void addConstellations(Context context, Database instance, SQLiteDatabase db)
     {
         Resources res = (context != null ? context.getResources() : null);
-        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.white, null) : Color.TRANSPARENT);
+        int pathColor = (res != null ? ResourcesCompat.getColor(res, R.color.gray, null) : Color.TRANSPARENT);
         ArrayList<Integer> ids;
 
         //if no context or no resources

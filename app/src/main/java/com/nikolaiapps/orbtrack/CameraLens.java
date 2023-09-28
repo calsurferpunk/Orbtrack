@@ -535,7 +535,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public boolean showHorizon;
     public boolean showCalibration;
     public boolean showOutsideArea;
-    public boolean showAllPathTimes;
+    public boolean showPathTimeNames;
+    public boolean hideDistantPathTimes;
+    public boolean hideConstellationStarPaths;
     public TextView helpText;
     public PlayBar playBar;
     public Slider zoomBar;
@@ -589,7 +591,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float[] trianglePoints = new float[12];
     private float cameraDegWidth;
     private float cameraDegHeight;
-    private float currentZoomRatio;
+    private float cameraZoomRatio;
     private float useCameraDegWidth;
     private float useCameraDegHeight;
     private float cameraHardwareDegWidth;
@@ -648,7 +650,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
-        showAllPathTimes = Settings.getLensShowAllPathTimes(context);
+        hideDistantPathTimes = Settings.getLensHideDistantPathTimes(context);
+        showPathTimeNames = Settings.getLensShowPathTimeNames(context);
+        hideConstellationStarPaths = Settings.getLensHideConstellationStarPaths(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, metrics);
         textOffset = textSize / 1.5f;
@@ -664,7 +668,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         starHalfLength = (starLength / 2);
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
-        currentZoomRatio = 1;
+        cameraZoomRatio = 1;
         indicator = Settings.getIndicator(context);
         indicatorPxRadius = Globals.dpToPixels(context, 36);
         resetAlignmentStatus();
@@ -862,6 +866,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int index2;
         int currentId;
         int travelLength;
+        int lastTravelIndex;
         int selectedColor = Color.WHITE;
         int width = getWidth();
         int widthHalf = width / 2;
@@ -925,7 +930,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //go through each orbital and look angle
             for(index = 0; index < currentOrbitals.length; index++)
             {
-                //remember current orbital, type, if a star, in filter, and on selection
+                //remember current orbital, type, if a star, in filter, selection, and if a star in a shown constellation
                 Database.SatelliteData currentOrbital = currentOrbitals[index];
                 boolean haveOrbital = (currentOrbital != null);
                 byte currentType = (haveOrbital ? currentOrbital.getOrbitalType() : Database.OrbitalType.Satellite);
@@ -933,9 +938,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 boolean inFilter = (haveOrbital && currentOrbital.getInFilter());
                 boolean haveSelected = haveSelectedOrbital();
                 boolean currentSelected = (selectedOrbitalIndex == index);
+                boolean isStarInShownConstellation = (isStar && showingConstellations);
 
-                 //if current orbital is set, -in filter or a star being used in a constellation-, look angle is valid, and using orbital
-                if(haveOrbital && (inFilter || (isStar && showingConstellations)) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
+                 //if current orbital is set, -in filter or a star in a shown constellation-, look angle is valid, and using orbital
+                if(haveOrbital && (inFilter || isStarInShownConstellation) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
                 {
                     //remember current type, color, look, and travel angles
                     int currentColor = currentOrbital.getPathColor();
@@ -953,17 +959,18 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             currentPaint.setStrokeWidth(indicatorThickness);
                         }
 
-                        //if current travel is set, showing paths, not calibrating, and -non selected or on selected-
-                        if(currentTravel != null && showPaths && !showCalibration && (!haveSelected || currentSelected))
+                        //if current travel is set, showing paths, not calibrating, and -on selection or -none selected and --not a star- or -not hiding constellation star paths- or -not showing constellations----
+                        if(currentTravel != null && showPaths && !showCalibration && (currentSelected || (!haveSelected && (!isStar || !hideConstellationStarPaths || !showingConstellations))))
                         {
-                            //remember length
+                            //remember length and last index
                             travelLength = currentTravel.length;
+                            lastTravelIndex = (travelLength - 1);
 
                             //if using preset path divisions and at least 2 points
                             if(pathDivisions != 0 && travelLength > 1)
                             {
                                 //get distance between start and end, divided by divisions
-                                pathJulianDelta = (currentTravel[travelLength - 1].julianDate - currentTravel[0].julianDate) / pathDivisions;
+                                pathJulianDelta = (currentTravel[lastTravelIndex].julianDate - currentTravel[0].julianDate) / pathDivisions;
                             }
                             else
                             {
@@ -986,7 +993,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             if(travelLength > 0)
                             {
                                 //remember colors
-                                int usedTextColor = (currentSelected ? textColor : Globals.getColor(30, textColor));
+                                int usedTextColor = (currentSelected ? textColor : Globals.getColor(75, textColor));
                                 int usedTextBgColor = (currentSelected ? textBgColor : Globals.getColor(30, textBgColor));
                                 int usedCurrentColor = (currentSelected ? currentColor : Globals.getColor(30, currentColor));
 
@@ -999,7 +1006,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
                                 //set julian dates
                                 julianDateStart = currentTravel[0].julianDate;
-                                julianDateEnd = currentTravel[travelLength - 1].julianDate;
+                                julianDateEnd = currentTravel[lastTravelIndex].julianDate;
 
                                 //go through each view
                                 for(index2 = 0; index2 < travelLength; index2++)
@@ -1035,11 +1042,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     }
 
                                     //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
-                                    if(onFirst || (index2 == travelLength - 1) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
+                                    if(onFirst || (index2 == lastTravelIndex) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
                                     {
                                         RectF bgArea;
-                                        boolean closeArea = (Math.abs(currentAzDelta) <= CLOSE_AREA_DEGREES && Math.abs(currentElDelta) <= CLOSE_AREA_DEGREES);
-                                        boolean showPathTime = (showAllPathTimes || closeArea);
+                                        boolean closeArea = (Math.abs(currentAzDelta) <= (CLOSE_AREA_DEGREES / cameraZoomRatio) && Math.abs(currentElDelta) <= (CLOSE_AREA_DEGREES / cameraZoomRatio));
+                                        boolean showPathTime = (!hideDistantPathTimes || closeArea);
+                                        String usedTimeString = (showPathTimeNames ? currentView.getNameTimeString() : currentView.timeString);
 
                                         //if showing path time
                                         if(showPathTime)
@@ -1052,7 +1060,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                         currentPaint.setTextSize(textSize);
                                         if(currentView.timeArea.isEmpty())
                                         {
-                                            currentPaint.getTextBounds(currentView.timeString, 0, currentView.timeString.length(), currentView.timeArea);
+                                            currentPaint.getTextBounds(usedTimeString, 0, usedTimeString.length(), currentView.timeArea);
                                         }
                                         currentView.timeArea.offsetTo((int) (azPx[1] - (currentView.timeArea.width() / 2f)), (int) (elPx[1] - textSize));
 
@@ -1077,7 +1085,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                                 //draw text
                                                 currentPaint.setColor(usedTextColor);
                                                 currentPaint.setStyle(Paint.Style.FILL);
-                                                canvas.drawText(currentView.timeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
+                                                canvas.drawText(usedTimeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
                                             }
 
                                             //remember previous area and starting julian date
@@ -1097,17 +1105,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
                     }
 
-                    //if current look angle is set
-                    if(currentLookAngle != null)
+                    //if -current look angle is set- and -on selection, a star in a shown constellation, or in filter-
+                    if(currentLookAngle != null && (currentSelected || isStarInShownConstellation || inFilter))
                     {
-                        RelativeLocationProperties relativeProperties;
-
-                        //remember current ID and name
+                        //determine relative location and remember current ID and name
+                        RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !showingConstellations);
                         currentId = currentOrbital.getSatelliteNum();
                         currentName = currentOrbital.getName();
-
-                        //determine relative location
-                        relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, currentZoomRatio, !isStar || !showingConstellations);
 
                         //if on selection
                         if(currentSelected)
@@ -1122,8 +1126,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             selectedLookAngle = currentLookAngle;
                         }
 
-                        //if a star and show constellations
-                        if(isStar && showingConstellations)
+                        //if a star in a shown constellation
+                        if(isStarInShownConstellation)
                         {
                             //set parent points
                             setParentPoints(currentOrbital, relativeProperties);
@@ -1248,7 +1252,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             if(haveSelectedOrbital())
             {
                 Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
-                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, currentZoomRatio, true) : null);
+                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, true) : null);
                 boolean haveProperties = (relativeCalibrateProperties != null);
                 boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
                 boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
@@ -1258,7 +1262,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 {
                     //draw arrow direction
                     angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
-                    Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / currentZoomRatio))), (float)(angleDirection + 90), currentPaint);
+                    Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / cameraZoomRatio))), (float)(angleDirection + 90), currentPaint);
                 }
             }
         }
@@ -1283,7 +1287,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         if(currentCamera != null && params != null && haveZoomValues)
         {
             //update zoom properties
-            currentZoomRatio = (zoom >= 0 && zoom < cameraZoomRatios.size() ? (cameraZoomRatios.get(zoom) / 100f) : 1);
+            cameraZoomRatio = (zoom >= 0 && zoom < cameraZoomRatios.size() ? (cameraZoomRatios.get(zoom) / 100f) : 1);
             params.setZoom(zoom);
             currentCamera.setParameters(params);
 
@@ -1605,13 +1609,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     //Gets degree to pixel conversion for given width
     private float getDegreeToPixelWidth(int width)
     {
-        return((width / (useCameraDegWidth != Float.MAX_VALUE ? useCameraDegWidth : 1)) * currentZoomRatio);
+        return((width / (useCameraDegWidth != Float.MAX_VALUE ? useCameraDegWidth : 1)) * cameraZoomRatio);
     }
 
     //Gets degree to pixel conversion for given height
     private float getDegreeToPixelHeight(int height)
     {
-        return((height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1)) * currentZoomRatio);
+        return((height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1)) * cameraZoomRatio);
     }
 
     //Gets relative location properties

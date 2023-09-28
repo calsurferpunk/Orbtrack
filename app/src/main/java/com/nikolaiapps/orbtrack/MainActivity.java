@@ -4451,6 +4451,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     {
                         int noradId;
                         int multiCount = 0;
+                        int orbitalCount;
                         int firstViewsLength;
                         String zoneId;
                         Bundle params;
@@ -4470,23 +4471,39 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //if using lens and angles list exists
                         if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
                         {
-                            //get items
                             CalculateViewsTask.OrbitalView[][] lensViews;
+                            Database.DatabaseSatellite[] currentOrbitals;
+
+                            //get items
                             zoneId = observer.timeZone.getID();
                             angleItems = Calculate.PageAdapter.getViewAngleItems();
-                            lensViews = new CalculateViewsTask.OrbitalView[angleItems.length > 0 ? angleItems[0].views.length : 0][angleItems.length];
-                            for(index = 0; index < angleItems[0].views.length; index++)
+                            orbitalCount = (angleItems.length > 0 ? angleItems[0].views.length : 0);
+                            lensViews = new CalculateViewsTask.OrbitalView[orbitalCount][angleItems.length];
+                            currentOrbitals = new Database.DatabaseSatellite[orbitalCount];
+                            for(index = 0; index < orbitalCount; index++)
                             {
+                                //if on the first index
+                                if(index == 0)
+                                {
+                                    //go through each view
+                                    for(index2 = 0; index2 < orbitalCount; index2++)
+                                    {
+                                        //set orbital
+                                        currentOrbitals[index2] = Database.getOrbital(context, angleItems[0].views[index2].noradId);
+                                    }
+                                }
+
                                 //go through each item
                                 for(index2 = 0; index2 < angleItems.length; index2++)
                                 {
-                                    //remember current item and possibly a previous time string
+                                    //remember current item, orbital, and possibly a previous time string
                                     Calculate.ViewAngles.Item currentAngleItem = angleItems[index2];
+                                    Database.DatabaseSatellite currentOrbital = currentOrbitals[index];
                                     CalculateViewsTask.OrbitalView previousOrbitalItem = (index > 0 ? lensViews[index - 1][index2] : null);
                                     boolean havePrevious = (previousOrbitalItem != null);
 
                                     //set view
-                                    lensViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
+                                    lensViews[index][index2] = new CalculateViewsTask.OrbitalView(context, currentAngleItem.views[index].azimuth, currentAngleItem.views[index].elevation, currentAngleItem.views[index].rangeKm, currentAngleItem.julianDate, (havePrevious ? previousOrbitalItem.gmtTime : null), zoneId, currentAngleItem.views[index].illumination, (currentOrbital != null ? currentOrbital.getName() : null), currentAngleItem.views[index].phaseName, (havePrevious ? previousOrbitalItem.timeString : null));
                                 }
                             }
                             currentViewList.addAll(Arrays.asList(lensViews));

@@ -4657,9 +4657,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             currentSatelliteList.addAll(currentChildList);
                         }
 
-                        //set current satellites and views
+                        //set current satellites, views, and manually reset camera parent states
                         currentSatellites = currentSatelliteList.toArray(new Database.SatelliteData[0]);
                         currentViews = currentViewList.toArray(new CalculateViewsTask.OrbitalView[0][]);
+                        cameraView.resetParentStates(currentSatellites);
                     }
 
                     //if satellites, views, and bar are set

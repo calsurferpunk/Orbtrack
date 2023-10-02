@@ -1284,6 +1284,13 @@ public class Database extends SQLiteOpenHelper
 
     public static class DatabaseSatellite implements Parcelable, Serializable
     {
+        private static abstract class ParentFilterState
+        {
+            static final byte Unknown = 0;
+            static final byte Yes = 1;
+            static final byte No = 2;
+        }
+
         public final String name;
         private final String userName;
         public final int noradId;
@@ -1306,13 +1313,14 @@ public class Database extends SQLiteOpenHelper
         public final byte orbitalType;
         public final boolean tleIsAccurate;
         private boolean inFilter;
+        private byte inParentFilterState;
         public boolean isSelected;
         public static final Creator<DatabaseSatellite> CREATOR =  new Parcelable.Creator<DatabaseSatellite>()
         {
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)
             {
-                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.readParcelableArray(ParentProperties.class.getClassLoader()), source.readInt(), source.readByte(), (source.readByte() == 1), (source.readByte() == 1)));
+                return(new DatabaseSatellite(source.readString(), source.readString(), source.readInt(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readString(), source.readParcelableArray(ParentProperties.class.getClassLoader()), source.readInt(), source.readByte(), (source.readByte() == 1), source.readByte(), (source.readByte() == 1)));
             }
 
             @Override
@@ -1322,7 +1330,7 @@ public class Database extends SQLiteOpenHelper
             }
         };
 
-        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, Parcelable[] parentProperties, int pathColor, byte orbitalType, boolean inFilter, boolean selected)
+        public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pointsString, Parcelable[] parentProperties, int pathColor, byte orbitalType, boolean inFilter, byte inParentFilterState, boolean selected)
         {
             this.name = name;
             this.userName = (userName != null ? userName : "");
@@ -1363,6 +1371,7 @@ public class Database extends SQLiteOpenHelper
             this.pathColor = pathColor;
             this.orbitalType = orbitalType;
             this.inFilter = inFilter;
+            this.inParentFilterState = inParentFilterState;
             this.isSelected = selected;
             this.launchDateMs = launchDate;
 
@@ -1375,7 +1384,7 @@ public class Database extends SQLiteOpenHelper
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, double rightAscensionHours, double declinationDegs, double magnitude, double distanceLightYears, String pathString, int pathColor, byte orbitalType, boolean selected)
         {
-            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, pathColor, orbitalType, true, selected);
+            this(name, userName, noradId, ownerCode, ownerName, launchDate, tleLine1, tleLine2, tleDateMs, gp, updateDateMs, rightAscensionHours, declinationDegs, magnitude, distanceLightYears, pathString, null, pathColor, orbitalType, true, ParentFilterState.Unknown, selected);
         }
         public DatabaseSatellite(String name, String userName, int noradId, String ownerCode, String ownerName, long launchDate, String tleLine1, String tleLine2, long tleDateMs, String gp, long updateDateMs, int pathColor, byte orbitalType, boolean selected)
         {
@@ -1486,6 +1495,26 @@ public class Database extends SQLiteOpenHelper
             this.inFilter = inFilter;
         }
 
+        public boolean getInParentFilterSet()
+        {
+            return(inParentFilterState != ParentFilterState.Unknown);
+        }
+
+        public boolean getInParentFilter()
+        {
+            return(inParentFilterState != ParentFilterState.No);
+        }
+
+        public void setInParentFilter(boolean inFilter)
+        {
+            inParentFilterState = (inFilter ? ParentFilterState.Yes : ParentFilterState.No);
+        }
+
+        public void resetInParentFilter()
+        {
+            inParentFilterState = ParentFilterState.Unknown;
+        }
+
         @Override
         public int describeContents()
         {
@@ -1522,6 +1551,7 @@ public class Database extends SQLiteOpenHelper
             dest.writeInt(pathColor);
             dest.writeByte(orbitalType);
             dest.writeByte((byte)(inFilter ? 1 : 0));
+            dest.writeByte(inParentFilterState);
             dest.writeByte((byte)(isSelected ? 1 : 0));
         }
     }
@@ -1600,6 +1630,32 @@ public class Database extends SQLiteOpenHelper
             if(database != null)
             {
                 database.setInFilter(inFilter);
+            }
+        }
+
+        public boolean getInParentFilterSet()
+        {
+            return(database != null && database.getInParentFilterSet());
+        }
+
+        public boolean getInParentFilter()
+        {
+            return(database != null && database.getInParentFilter());
+        }
+
+        public void setInParentFilter(boolean inFilter)
+        {
+            if(database != null)
+            {
+                database.setInParentFilter(inFilter);
+            }
+        }
+
+        public void resetInParentFilter()
+        {
+            if(database != null)
+            {
+                database.resetInParentFilter();
             }
         }
 

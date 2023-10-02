@@ -569,6 +569,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private boolean compassBad;
     private boolean compassHadBad;
     private boolean haveZoomValues;
+    private boolean pendingOnDraw;
+    private boolean pendingSetInParentFilter;
     private final boolean showingConstellations;
     private final boolean arrowDirectionCentered;
     private final boolean showIconIndicatorDirection;
@@ -765,7 +767,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentLookAngles = new Calculations.TopographicDataType[0];
         travelLookAngles = new CalculateViewsTask.OrbitalView[0][0];
 
-        resetParentIndexes(currentOrbitals);
+        resetParentStates(currentOrbitals);
     }
     public CameraLens(Context context)
     {
@@ -936,12 +938,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 byte currentType = (haveOrbital ? currentOrbital.getOrbitalType() : Database.OrbitalType.Satellite);
                 boolean isStar = (currentType == Database.OrbitalType.Star);
                 boolean inFilter = (haveOrbital && currentOrbital.getInFilter());
+                boolean inParentFilter = (haveOrbital && (!currentOrbital.getInParentFilterSet() || currentOrbital.getInParentFilter()));
                 boolean haveSelected = haveSelectedOrbital();
                 boolean currentSelected = (selectedOrbitalIndex == index);
-                boolean isStarInShownConstellation = (isStar && showingConstellations);
 
-                 //if current orbital is set, -in filter or a star in a shown constellation-, look angle is valid, and using orbital
-                if(haveOrbital && (inFilter || isStarInShownConstellation) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
+                 //if current orbital is set, -in filter or parent filter-, look angle is valid, and using orbital
+                if(haveOrbital && (inFilter || inParentFilter) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
                 {
                     //remember current type, color, look, and travel angles
                     int currentColor = currentOrbital.getPathColor();
@@ -959,8 +961,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             currentPaint.setStrokeWidth(indicatorThickness);
                         }
 
-                        //if current travel is set, showing paths, not calibrating, and -on selection or -none selected and --not a star- or -not hiding constellation star paths- or -not showing constellations----
-                        if(currentTravel != null && showPaths && !showCalibration && (currentSelected || (!haveSelected && (!isStar || !hideConstellationStarPaths || !showingConstellations))))
+                        //if current travel is set, showing paths, not calibrating, and -on selection or -none selected and -not a star, not in parent filter, or not hiding constellation star paths---
+                        if(currentTravel != null && showPaths && !showCalibration && (currentSelected || (!haveSelected && (!isStar || !inParentFilter || !hideConstellationStarPaths))))
                         {
                             //remember length and last index
                             travelLength = currentTravel.length;
@@ -1105,11 +1107,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
                     }
 
-                    //if -current look angle is set- and -on selection, a star in a shown constellation, or in filter-
-                    if(currentLookAngle != null && (currentSelected || isStarInShownConstellation || inFilter))
+                    //if -current look angle is set- and -on selection, a star in parent filter, or in filter-
+                    if(currentLookAngle != null && (currentSelected || (isStar && inParentFilter) || inFilter))
                     {
                         //determine relative location and remember current ID and name
-                        RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !showingConstellations);
+                        RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !inParentFilter);
                         currentId = currentOrbital.getSatelliteNum();
                         currentName = currentOrbital.getName();
 
@@ -1127,7 +1129,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
 
                         //if a star in a shown constellation
-                        if(isStarInShownConstellation)
+                        if(isStar && inParentFilter)
                         {
                             //set parent points
                             setParentPoints(currentOrbital, relativeProperties);
@@ -1265,6 +1267,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / cameraZoomRatio))), (float)(angleDirection + 90), currentPaint);
                 }
             }
+
+            //update status
+            pendingOnDraw = false;
         }
 
         //draw
@@ -1506,31 +1511,34 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //get text area
         currentPaint.setStrokeWidth(2);
         currentPaint.setTextSize(usedTextSize);
-        if(currentArea.isEmpty())
+        if(currentArea != null)
         {
-            currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
-        }
-        currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 3.5f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
-        if(currentArea.left < 20)
-        {
-            currentArea.offsetTo(20, currentArea.top);
-        }
-        if(currentArea.right > canvasWidth)
-        {
-            currentArea.offsetTo(canvasWidth - currentArea.width(), currentArea.top);
-        }
-        if(currentArea.top < 20)
-        {
-            currentArea.offsetTo(currentArea.left, 20);
-        }
-        if(currentArea.bottom > canvasHeight)
-        {
-            currentArea.offsetTo(currentArea.left, canvasHeight - currentArea.height());
-        }
+            if(currentArea.isEmpty())
+            {
+                currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
+            }
+            currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 3.5f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
+            if(currentArea.left < 20)
+            {
+                currentArea.offsetTo(20, currentArea.top);
+            }
+            if(currentArea.right > canvasWidth)
+            {
+                currentArea.offsetTo(canvasWidth - currentArea.width(), currentArea.top);
+            }
+            if(currentArea.top < 20)
+            {
+                currentArea.offsetTo(currentArea.left, 20);
+            }
+            if(currentArea.bottom > canvasHeight)
+            {
+                currentArea.offsetTo(currentArea.left, canvasHeight - currentArea.height());
+            }
 
-        //draw text
-        currentPaint.setStyle(Paint.Style.FILL);
-        canvas.drawText(currentName, currentArea.left, currentArea.top, currentPaint);
+            //draw text
+            currentPaint.setStyle(Paint.Style.FILL);
+            canvas.drawText(currentName, currentArea.left, currentArea.top, currentPaint);
+        }
     }
 
     public void showCompassAlignmentDialog(DialogInterface.OnClickListener positiveListener)
@@ -1683,8 +1691,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             orbitalsLength = orbitals.length;
             if(checkLength && currentOrbitals.length != orbitalsLength)
             {
-                //reset parent indexes
-                resetParentIndexes(orbitals);
+                //reset parent states
+                resetParentStates(orbitals);
             }
             currentOrbitals = orbitals;
             currentLookAngles = lookAngles;
@@ -1740,6 +1748,14 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //sort parent orbitals
                 Collections.sort(parentOrbitals, parentOrbitalComparer);
             }
+
+            //if no change, need to set in parent filter status, and not waiting for a draw
+            if(!changed && pendingSetInParentFilter && !pendingOnDraw)
+            {
+                //update parent in filter status
+                updateInParentFilter();
+                pendingSetInParentFilter = false;
+            }
         }
     }
 
@@ -1754,8 +1770,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
-    //Resets parent indexes
-    private void resetParentIndexes(Database.SatelliteData[] orbitals)
+    //Resets parent states
+    public void resetParentStates(Database.SatelliteData[] orbitals)
     {
         //go through each orbital
         for(Database.SatelliteData currentOrbital : orbitals)
@@ -1771,7 +1787,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     currentParentProperty.index = -1;
                 }
             }
+
+            //reset in parent filter status
+            currentOrbital.resetInParentFilter();
         }
+
+        //need wait for a draw and to set in parent filter status
+        pendingOnDraw = pendingSetInParentFilter = true;
     }
 
     //Sets parent points
@@ -1843,6 +1865,58 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     }
                 }
             }
+        }
+    }
+
+    //Updates if orbitals are in parent filter
+    //note: if no parents, parent is considered to be main filter
+    public void updateInParentFilter()
+    {
+        int index;
+        int parentIndex;
+        int orbitalIndex;
+        boolean inFilter;
+
+        //go through each orbital
+        for(Database.SatelliteData currentOrbital : currentOrbitals)
+        {
+            //get any parents
+            ArrayList<Database.ParentProperties> parentProperties = currentOrbital.getParentProperties();
+
+            //if no parents
+            if(parentProperties == null || parentProperties.size() < 1)
+            {
+                //remember if in filter directly
+                inFilter = currentOrbital.getInFilter();
+            }
+            else
+            {
+                //reset
+                inFilter = false;
+
+                //go through each parent while not in filter
+                for(index = 0; index < parentProperties.size() && !inFilter; index++)
+                {
+                    //remember current property
+                    Database.ParentProperties currentProperty = parentProperties.get(index);
+
+                    //if a valid parent index
+                    parentIndex = currentProperty.index;
+                    if(parentIndex >= 0 && parentIndex < parentOrbitals.size())
+                    {
+                        //if parent has a valid orbital index and is in filter
+                        orbitalIndex = parentOrbitals.get(parentIndex).index;
+                        if(orbitalIndex >= 0 && orbitalIndex < currentOrbitals.length && currentOrbitals[orbitalIndex].getInFilter())
+                        {
+                            //orbital used by parent in filter
+                            inFilter = true;
+                        }
+                    }
+                }
+            }
+
+            //set if in parent filter
+            currentOrbital.setInParentFilter(inFilter);
         }
     }
 

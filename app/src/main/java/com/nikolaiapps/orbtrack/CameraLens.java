@@ -559,6 +559,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int starHalfLength;
     private final int compassHeight;
     private int compassBorderWidth;
+    private final int compassMargin;
     private final int textColor;
     private final int textBgColor;
     private final int horizonColor;
@@ -640,7 +641,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         boolean darkTheme = Settings.getDarkTheme(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
-        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42);
+        float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42, 14);
 
         selectedOrbitalIndex = -1;
         selectedNoradId = Universe.IDs.None;
@@ -712,6 +713,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         compassWidth = compassDirection.getWidth();
         compassHeight = compassDirection.getHeight();
         compassCenterX = compassCenterY = compassBorderWidth = 0;
+        compassMargin = (int)dpPixels[5];
         compassBadAnimator = ValueAnimator.ofInt((int)dpPixels[2], (int)dpPixels[3]);
         compassBadAnimator.setDuration(300);
         compassBadAnimator.setRepeatCount(5);                                               //forward, reverse, forward, reverse, forward
@@ -1247,7 +1249,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //has been bad
                     compassHadBad = true;
                 }
-                Globals.drawBitmap(canvas, compassDirection, compassCenterX, compassCenterY, currentAzDeg, currentPaint);
+                Globals.drawBitmap(canvas, compassDirection, compassCenterX - compassMargin, compassCenterY + compassMargin, currentAzDeg, currentPaint);
             }
 
             //if have a selection

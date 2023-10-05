@@ -17,6 +17,8 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spanned;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -931,6 +933,12 @@ public abstract class Current
     {
         public FloatingActionStateButton actionButton;
 
+        public Page()
+        {
+            super();
+            this.setHasOptionsMenu(true);
+        }
+
         @Override
         protected int getListColumns(Context context, int page)
         {
@@ -1023,6 +1031,42 @@ public abstract class Current
 
             //return view
             return(newView);
+        }
+
+        @Override
+        public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
+        {
+            //create options menu
+            inflater.inflate(R.menu.menu_main_layout, menu);
+            super.onCreateOptionsMenu(menu, inflater);
+        }
+
+        @Override
+        public void onPrepareOptionsMenu(@NonNull Menu menu)
+        {
+            Context context = this.getContext();
+            int subPage = getSubPageParam();
+            int mapDisplayType = Settings.getMapDisplayType(context);
+            boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
+            boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
+            boolean onSubPageList = (subPage == Globals.SubPageType.List);
+            boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
+            boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
+            boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
+            boolean onCurrentNoSelected = (MainActivity.viewLensNoradID == Integer.MAX_VALUE && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
+            boolean showMap = ((usingMapDisplay && onSubPageList) || onSubPageGlobe);
+            boolean showGlobe = ((usingGlobeDisplay && onSubPageList) || onSubPageMap);
+            boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
+
+            menu.findItem(R.id.menu_list).setVisible(!onSubPageList);
+            menu.findItem(R.id.menu_map).setVisible(showMap);
+            menu.findItem(R.id.menu_globe).setVisible(showGlobe);
+            menu.findItem(R.id.menu_lens).setVisible(onSubPageList && SensorUpdate.havePositionSensors(context));
+            menu.findItem(R.id.menu_sort_by).setVisible(onSubPageList);
+            menu.findItem(R.id.menu_filter).setVisible(showSettings);
+            menu.findItem(R.id.menu_visible).setVisible(showSettings);
+            menu.findItem(R.id.menu_settings).setVisible(showSettings);
+            menu.findItem(R.id.menu_overflow).setVisible(showSettings);
         }
 
         @Override
@@ -1588,6 +1632,49 @@ public abstract class Current
         }
     }
 
+    //Shows first calibration dialog
+    private static void showFirstCalibrateDialog(CameraLens cameraView, FloatingActionStateButton showCalibrationButton)
+    {
+        //show alignment dialog
+        cameraView.showCompassAlignmentDialog(new DialogInterface.OnClickListener()
+        {
+            @Override
+            public void onClick(DialogInterface dialog, int which)
+            {
+                //if button exists
+                if(showCalibrationButton != null)
+                {
+                    //click it to show
+                    showCalibrationButton.performClick();
+                }
+            }
+        });
+    }
+
+    //Shows first run dialog
+    private static void showFirstRunDialog(Context context, CameraLens cameraView, FloatingActionStateButton showCalibrationButton, boolean useSaved, boolean firstCalibrate)
+    {
+        Resources res = (context != null ? context.getResources() : null);
+
+        //show AR warning about importance of parental supervision and being aware of surroundings
+        Globals.showConfirmDialog(context, Globals.getDrawable(context, R.drawable.ic_warning_black, true), (res != null ? res.getString(R.string.title_caution) : ""), (res != null ? res.getString(R.string.desc_ar_warning) : ""), (res != null ? res.getString(R.string.title_ok) : ""), null, false, null, null, new DialogInterface.OnDismissListener()
+        {
+            @Override
+            public void onDismiss(DialogInterface dialogInterface)
+            {
+                //done with first run
+                Settings.setLensFirstRun(context, false);
+
+                //if not using a saved path and on first calibration
+                if(!useSaved && firstCalibrate)
+                {
+                    //show first calibration dialog
+                    showFirstCalibrateDialog(cameraView, showCalibrationButton);
+                }
+            }
+        });
+    }
+
     //Creates lens view
     public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean needConstellations)
     {
@@ -1602,6 +1689,8 @@ public abstract class Current
         int group = pageFragment.getGroupParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
         int pathDivisions = savedState.getInt(MainActivity.ParamTypes.PathDivisions, 8);
+        boolean firstRun = Settings.getLensFirstRun(context);
+        boolean firstCalibrate = Settings.getLensFirstCalibrate(context);
         boolean onCalculate = (group == MainActivity.Groups.Calculate);
         boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
         boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
@@ -1875,35 +1964,22 @@ public abstract class Current
         lensShowHorizon = !lensShowHorizon;
         showHorizonButton.performClick();
 
-        //if lens first run
-        if(Settings.getLensFirstRun(context))
+        //if lens first run or calibrate
+        if(firstRun || firstCalibrate)
         {
-            //show AR warning about importance of parental supervision and being aware of surroundings
-            Globals.showConfirmDialog(context, Globals.getDrawable(context, R.drawable.ic_warning_black, true), (res != null ? res.getString(R.string.title_caution) : ""), (res != null ? res.getString(R.string.desc_ar_warning) : ""), (res != null ? res.getString(R.string.title_ok) : ""), null, false, null, null, new DialogInterface.OnDismissListener()
+            //if first run
+            if(firstRun)
             {
-                @Override
-                public void onDismiss(DialogInterface dialogInterface)
-                {
-                    //if not using a saved path
-                    if(!useSaved)
-                    {
-                        //show alignment dialog
-                        cameraView.showCompassAlignmentDialog(new DialogInterface.OnClickListener()
-                        {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which)
-                            {
-                                //if button exists
-                                if(showCalibrationButton != null)
-                                {
-                                    //click it to show
-                                    showCalibrationButton.performClick();
-                                }
-                            }
-                        });
-                    }
-                }
-            });
+                //show first run dialog
+                //note: also shows calibration if needed
+                showFirstRunDialog(context, cameraView, showCalibrationButton, useSaved, firstCalibrate);
+            }
+            //else if not using a saved path
+            else if(!useSaved)
+            {
+                //show first calibrate dialog only
+                showFirstCalibrateDialog(cameraView, showCalibrationButton);
+            }
         }
 
         //if using a saved path

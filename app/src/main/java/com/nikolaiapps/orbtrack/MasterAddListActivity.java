@@ -23,8 +23,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -414,7 +414,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private SelectListInterface ownerList;
     private SelectListInterface groupList;
     private SelectListInterface ageList;
-    private EditText searchText;
+    private SearchView searchView;
     private AppCompatImageButton showButton;
     private MaterialButton addButton;
     private MultiProgressDialog downloadProgress;
@@ -689,9 +689,6 @@ public class MasterAddListActivity extends BaseInputActivity
                                                     //setup inputs
                                                     searchLayout.setVisibility(View.VISIBLE);
                                                     setupInputs(addAdapter, usedOwners, usedCategories);
-
-                                                    //focus on search text
-                                                    searchText.requestFocus();
                                                 }
                                             });
                                         }
@@ -769,7 +766,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private void setupInputs(MasterListAdapter listAdapter, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories)
     {
         //setup inputs
-        listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchText, showButton, usedOwners, usedCategories, addAdapter.getHasLaunchDates());
+        listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchView, showButton, usedOwners, usedCategories, addAdapter.getHasLaunchDates());
 
         //update title
         updateTitleCount();
@@ -800,7 +797,6 @@ public class MasterAddListActivity extends BaseInputActivity
         groupList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
         ageList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
         addList = this.findViewById(R.id.Master_Add_List);
-        searchText = this.findViewById(R.id.Orbital_Search_Text);
         ageLayout = this.findViewById(R.id.Orbital_Search_Age_Layout);
         if(ageLayout == null)
         {
@@ -1044,8 +1040,13 @@ public class MasterAddListActivity extends BaseInputActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
+        MenuItem searchMenu;
+
         //create options menu
         getMenuInflater().inflate(R.menu.menu_master_layout, menu);
+        searchMenu = menu.findItem(R.id.menu_search);
+        searchView = (searchMenu != null ? (SearchView)searchMenu.getActionView() : null);
+
         return(super.onCreateOptionsMenu(menu));
     }
 

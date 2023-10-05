@@ -1,17 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
-    <item android:id="@+id/menu_all"
-        android:title="@string/title_all"
-        android:icon="@drawable/ic_check_box_white"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools" tools:ignore="AlwaysShowAction">
+    <item
+        android:id="@+id/menu_search"
+        android:title="@string/title_search"
+        android:icon="@drawable/ic_search_white"
         android:orderInCategory="10"
-        app:showAsAction="ifRoom"
-        android:visible="true"/>
+        app:showAsAction="collapseActionView|always"
+        app:actionViewClass="android.widget.SearchView"/>
 
-    <item android:id="@+id/menu_none"
-        android:title="@string/title_none"
-        android:icon="@drawable/ic_check_none_box_white"
+    <item
+        android:id="@+id/menu_overflow"
+        android:title="@string/title_settings"
+        android:icon="@drawable/ic_more_vert_white"
         android:orderInCategory="20"
-        app:showAsAction="ifRoom"
-        android:visible="true"/>
+        app:showAsAction="always"
+        android:visible="true">
+        <menu>
+            <item
+                android:id="@+id/menu_all"
+                android:title="@string/title_all"
+                android:icon="@drawable/ic_check_box_white"
+                android:orderInCategory="10"
+                app:showAsAction="always"
+                android:visible="true"/>
+
+            <item android:id="@+id/menu_none"
+                android:title="@string/title_none"
+                android:icon="@drawable/ic_check_none_box_white"
+                android:orderInCategory="20"
+                app:showAsAction="always"
+                android:visible="true"/>
+        </menu>
+    </item>
 </menu>

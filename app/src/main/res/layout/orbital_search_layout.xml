@@ -64,26 +64,6 @@
                 android:layout_weight="1"
                 android:enabled="false"/>
         </TableRow>
-
-        <TableRow android:padding="2dp">
-            <androidx.appcompat.widget.AppCompatImageView
-                android:layout_width="32dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                app:srcCompat="@drawable/ic_search_black"
-                android:tint="?attr/colorAccentLightest"/>
-
-            <EditText
-                android:id="@+id/Orbital_Search_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:singleLine="true"
-                android:inputType="textNoSuggestions"
-                android:autofillHints="@string/title_name_or_id"
-                android:hint="@string/title_name_or_id"
-                android:enabled="false"/>
-        </TableRow>
     </TableLayout>
 
     <androidx.appcompat.widget.AppCompatImageButton

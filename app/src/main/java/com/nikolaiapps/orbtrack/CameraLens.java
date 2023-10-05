@@ -1553,7 +1553,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             @Override
             public void onDismiss(DialogInterface dialog)
             {
-                Settings.setLensFirstRun(context, false);
+                Settings.setLensFirstCalibrate(context, false);
             }
         });
     }

@@ -16,6 +16,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.os.Parcelable;
 import android.text.Spanned;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
@@ -1582,6 +1584,12 @@ public abstract class Calculate
         private OnStartCalculationListener startCalculationListener;
         private boolean[] orbitalIsSelected;
 
+        public Page()
+        {
+            super();
+            this.setHasOptionsMenu(true);
+        }
+
         @Override
         protected int getListColumns(Context context, int page)
         {
@@ -1741,6 +1749,64 @@ public abstract class Calculate
 
             //return view
             return(newView);
+        }
+
+        @Override
+        public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
+        {
+            //create options menu
+            inflater.inflate(R.menu.menu_main_layout, menu);
+            optionsMenu = menu;
+            super.onCreateOptionsMenu(menu, inflater);
+        }
+
+        @Override
+        public void onPrepareOptionsMenu(@NonNull Menu menu)
+        {
+            Context context = this.getContext();
+            MainActivity mainActivity = (context instanceof MainActivity ? (MainActivity)context : null);
+            boolean haveMainActivity = (mainActivity != null);
+            CalculateViewsTask calculateViewAnglesTask = (haveMainActivity ? mainActivity.getCalculateViewAnglesTask() : null);
+            CalculateCoordinatesTask calculateCoordinatesTask = (haveMainActivity ? mainActivity.getCalculateCoordinatesTask() : null);
+            CalculateService.CalculatePathsTask calculatePassesTask = (haveMainActivity ? mainActivity.getCalculatePassesTask() : null);
+            CalculateService.CalculatePathsTask calculateIntersectionsTask = (haveMainActivity ? mainActivity.getCalculateIntersectionsTask() : null);
+            int subPage = getSubPageParam();
+            int mapDisplayType = Settings.getMapDisplayType(context);
+            boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
+            boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
+            boolean onSubPageList = (subPage == Globals.SubPageType.List);
+            boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
+            boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
+            boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
+            boolean onCalculateView = (pageNum == Calculate.PageType.View);
+            boolean onCalculatePasses = (pageNum == Calculate.PageType.Passes);
+            boolean onCalculateCoordinates = (pageNum == Calculate.PageType.Coordinates);
+            boolean onCalculateIntersection = (pageNum == Calculate.PageType.Intersection);
+            boolean onCalculateViewList = (onCalculateView && onSubPageList);
+            boolean onCalculateViewLens = (onCalculateView && onSubPageLens);
+            boolean onCalculatePassesList = (onCalculatePasses && onSubPageList);
+            boolean onCalculatePassesLens = (onCalculatePasses && onSubPageLens);
+            boolean onCalculateCoordinatesList = (onCalculateCoordinates && onSubPageList);
+            boolean onCalculateCoordinatesMap = (onCalculateCoordinates && onSubPageMap);
+            boolean onCalculateCoordinatesGlobe = (onCalculateCoordinates && onSubPageGlobe);
+            boolean onCalculateIntersectionList = (onCalculateIntersection && onSubPageList);
+            boolean onCalculateIntersectionLens = (onCalculateIntersection && onSubPageLens);
+            boolean calculatingViews = (calculateViewAnglesTask != null && calculateViewAnglesTask.isRunning());
+            boolean calculatingPasses = (calculatePassesTask != null && calculatePassesTask.isRunning());
+            boolean calculatingCoordinates = (calculateCoordinatesTask != null && calculateCoordinatesTask.calculatingCoordinates);
+            boolean calculatingIntersection = (calculateIntersectionsTask != null && calculateIntersectionsTask.isRunning());
+            boolean showLens = (onCalculateViewList && !calculatingViews);
+            boolean showList = onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
+            boolean showMap = (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
+            boolean showGlobe = (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
+            boolean showSave = (onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection);
+
+            menu.findItem(R.id.menu_list).setVisible(showList);
+            menu.findItem(R.id.menu_map).setVisible(showMap);
+            menu.findItem(R.id.menu_globe).setVisible(showGlobe);
+            menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(context));
+            menu.findItem(R.id.menu_edit).setVisible(showSave || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe);
+            menu.findItem(R.id.menu_save).setVisible(showSave);
         }
 
         @Override
@@ -2159,6 +2225,7 @@ public abstract class Calculate
             });
             PageAdapter.setGraphChangedListener(page, createOnGraphChangedListener(listAdapter));
             PageAdapter.setInformationChangedListener(page, createOnInformationChangedListener(listAdapter));
+            //PageAdapter.setOnUpdateOptionsMenuListener(page, createOnUpdateOptionsMenuListener());
         }
     }
 

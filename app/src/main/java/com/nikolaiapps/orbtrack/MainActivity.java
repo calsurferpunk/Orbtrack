@@ -715,16 +715,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    @Override
+    /*@Override
     public boolean onCreateOptionsMenu(Menu menu)
     {
         //create options menu
         getMenuInflater().inflate(R.menu.menu_main_layout, menu);
         optionsMenu = menu;
         return(super.onCreateOptionsMenu(menu));
-    }
+    }*/
 
-    @Override
+    /*@Override
     public boolean onPrepareOptionsMenu(Menu menu)
     {
         int page = getMainPage();
@@ -770,8 +770,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
         boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
 
+        menu.findItem(R.id.menu_search).setVisible(onOrbitalSatellitesExistNoModify);
         menu.findItem(R.id.menu_list).setVisible(showList);
-        menu.findItem(R.id.menu_grid).setVisible(false);
         menu.findItem(R.id.menu_map).setVisible(showMap);
         menu.findItem(R.id.menu_globe).setVisible(showGlobe);
         menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(this));
@@ -785,7 +785,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
 
         return(super.onPrepareOptionsMenu(menu));
-    }
+    }*/
 
     //Updates the options menu
     private void updateOptionsMenu(boolean updateFloatingButton)
@@ -795,6 +795,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             //refresh menu
             onPrepareOptionsMenu(optionsMenu);
+        }
+        if(mainGroup == Groups.Calculate)
+        {
+            calculatePageAdapter.notifyUpdateOptionsMenu(getMainPage());
         }
 
         //if updating floating button
@@ -1305,6 +1309,30 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //return list
         return(oldSatellites);
+    }
+
+    //Returns calculate view angles task
+    public CalculateViewsTask getCalculateViewAnglesTask()
+    {
+        return(calculateViewAnglesTask);
+    }
+
+    //Returns calculate coordinates task
+    public CalculateCoordinatesTask getCalculateCoordinatesTask()
+    {
+        return(calculateCoordinatesTask);
+    }
+
+    //Returns calculate passes task
+    public CalculateService.CalculatePathsTask getCalculatePassesTask()
+    {
+        return(calculatePassesTask);
+    }
+
+    //Returns calculate intersections task
+    public CalculateService.CalculatePathsTask getCalculateIntersectionsTask()
+    {
+        return(calculateIntersectionsTask);
     }
 
     //Handles any needed first run

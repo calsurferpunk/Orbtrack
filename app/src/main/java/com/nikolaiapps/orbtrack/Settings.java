@@ -101,6 +101,7 @@ public abstract class Settings
         static final String ListShowPassQuality = "ListShowPassQuality";
         static final String ListOrbitalTypeFilter = "ListOrbitalTypeFilter";
         static final String LensFirstRun = "LensFirstRun";
+        static final String LensFirstCalibrate = "LensFirstCalibrate";
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
         static final String LensDirectionCentered = "LensDirectionCentered";
@@ -1957,6 +1958,7 @@ public abstract class Settings
             case PreferenceName.AskInternet:
             case PreferenceName.FirstRun:
             case PreferenceName.LensFirstRun:
+            case PreferenceName.LensFirstCalibrate:
             case PreferenceName.LensUseCamera:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
@@ -2490,6 +2492,18 @@ public abstract class Settings
     public static void setLensFirstRun(Context context, boolean first)
     {
         setPreferenceBoolean(context, PreferenceName.LensFirstRun, first);
+    }
+
+    //Get lens first calibrate
+    public static boolean getLensFirstCalibrate(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensFirstCalibrate));
+    }
+
+    //Sets lens first calibrate
+    public static void setLensFirstCalibrate(Context context, boolean first)
+    {
+        setPreferenceBoolean(context, PreferenceName.LensFirstCalibrate, first);
     }
 
     //Returns lens showing toolbars

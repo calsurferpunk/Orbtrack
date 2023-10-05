@@ -24,11 +24,13 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import android.text.Spanned;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.SearchView;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
@@ -630,11 +632,11 @@ public abstract class Orbitals
         private PageListAdapter listAdapter;
         private View ageLayout;
         private View searchGroup;
+        private SearchView searchView;
         private LinearLayout searchLayout;
         private SelectListInterface ownerList;
         private SelectListInterface groupList;
         private SelectListInterface ageList;
-        private EditText searchText;
         private AppCompatImageButton showButton;
         public static WeakReference<MultiProgressDialog> updateProgressReference;
 
@@ -643,12 +645,14 @@ public abstract class Orbitals
             super();
             this.simple = simple;
             this.categoryTitle = title;
+            this.setHasOptionsMenu(false);
         }
         public Page()
         {
             super();
             this.simple = false;
             this.categoryTitle = null;
+            this.setHasOptionsMenu(true);
         }
 
         @Override
@@ -684,7 +688,7 @@ public abstract class Orbitals
                                 {
                                     //setup inputs and collapse
                                     searchLayout.setVisibility(simple ? View.GONE : View.VISIBLE);
-                                    listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchText, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
+                                    listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchView, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
                                     listAdapter.showSearchInputs(false);
                                 }
                             });
@@ -700,7 +704,6 @@ public abstract class Orbitals
             ownerList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
             groupList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
             ageList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
-            searchText = newView.findViewById(R.id.Orbital_Search_Text);
             ageLayout = newView.findViewById(R.id.Orbital_Search_Age_Layout);
             if(ageLayout == null)
             {
@@ -770,6 +773,28 @@ public abstract class Orbitals
             }
 
             super.onDestroy();
+        }
+
+        @Override
+        public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
+        {
+            //create options menu
+            inflater.inflate(R.menu.menu_main_layout, menu);
+            super.onCreateOptionsMenu(menu, inflater);
+        }
+
+        @Override
+        public void onPrepareOptionsMenu(@NonNull Menu menu)
+        {
+            boolean onOrbitalSatellites = (pageNum == PageType.Satellites);
+            boolean haveSatellites = (onOrbitalSatellites && getListItemCount() > 0);
+            boolean onOrbitalSatellitesExistNoModify = (haveSatellites && !UpdateService.modifyingSatellites());
+
+            MenuItem searchMenu = menu.findItem(R.id.menu_search);
+            searchMenu.setVisible(onOrbitalSatellitesExistNoModify);
+            searchView = (SearchView)searchMenu.getActionView();
+            menu.findItem(R.id.menu_save).setVisible(onOrbitalSatellitesExistNoModify);
+            menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
         }
 
         @Override

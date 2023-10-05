@@ -1161,7 +1161,7 @@ public abstract class Selectable
             void editModeChanged(boolean editMode);
         }
 
-        //On update needed
+        //On update needed listener
         public interface OnUpdateNeededListener
         {
             void updateNeeded();
@@ -1227,6 +1227,12 @@ public abstract class Selectable
             void informationChanged(Spanned text);
         }
 
+        //On update options menu listener
+        public interface OnUpdateOptionsMenuListener
+        {
+            void update();
+        }
+
         //On adapter set listener
         public interface OnAdapterSetListener
         {
@@ -1284,6 +1290,7 @@ public abstract class Selectable
 
         protected boolean usingMaterial;
         private Menu actionMenu;
+        protected Menu optionsMenu;
         private ActionMode actionModeMenu;
         private ListBaseAdapter selectListAdapter;
         protected TextView categoryText;
@@ -1633,6 +1640,17 @@ public abstract class Selectable
                     //close it
                     actionModeMenu.finish();
                 }
+            }
+        }
+
+        //Updates the options menu
+        public void updateOptionsMenu()
+        {
+            //if menu exists
+            if(optionsMenu != null)
+            {
+                //refresh menu
+                onPrepareOptionsMenu(optionsMenu);
             }
         }
 
@@ -2085,6 +2103,18 @@ public abstract class Selectable
             });
         }
 
+        //Creates and on update options menu listener
+        protected OnUpdateOptionsMenuListener createOnUpdateOptionsMenuListener()
+        {
+            return(new OnUpdateOptionsMenuListener()
+            {
+                @Override public void update()
+                {
+                    updateOptionsMenu();
+                }
+            });
+        }
+
         //Creates a local broadcast listener
         private Observer<Intent> createLocalBroadcastReceiver()
         {
@@ -2222,8 +2252,9 @@ public abstract class Selectable
         private final ListFragment.OnItemCheckChangedListener itemCheckChangedListener;
         private final ListFragment.OnItemDetailButtonClickListener itemDetailButtonClickListener;
         private final ListFragment.OnAdapterSetListener adapterSetListener;
-        protected final Selectable.ListFragment.OnPageSetListener pageSetListener;
+        protected final ListFragment.OnPageSetListener pageSetListener;
         private final ListFragment.OnPageResumeListener pageResumeListener;
+        private final Selectable.ListFragment.OnUpdateOptionsMenuListener[] updateOptionsMenuListeners = new Selectable.ListFragment.OnUpdateOptionsMenuListener[getCount()];
 
         public ListFragmentAdapter(FragmentManager fm, View parentView, ListFragment.OnItemSelectedListener selectedListener, ListFragment.OnUpdateNeededListener updateListener, ListFragment.OnItemCheckChangedListener checkChangedListener, ListFragment.OnItemDetailButtonClickListener detailButtonClickListener, ListFragment.OnAdapterSetListener adapterListener, ListFragment.OnPageSetListener setListener, ListFragment.OnPageResumeListener resumeListener, int grp, int[] subPg)
         {
@@ -2237,7 +2268,19 @@ public abstract class Selectable
             itemCheckChangedListener = checkChangedListener;
             itemDetailButtonClickListener = detailButtonClickListener;
             adapterSetListener = adapterListener;
-            pageSetListener = setListener;
+            pageSetListener = new ListFragment.OnPageSetListener()
+            {
+                @Override
+                public void onPageSet(ListFragment page, int pageNum, int subPageNum)
+                {
+                    ListFragmentAdapter.this.setOnUpdateOptionsMenuListener(pageNum, page.createOnUpdateOptionsMenuListener());
+
+                    if(setListener != null)
+                    {
+                        setListener.onPageSet(page, pageNum, subPageNum);
+                    }
+                }
+            };
             pageResumeListener = resumeListener;
         }
 
@@ -2341,6 +2384,28 @@ public abstract class Selectable
             if(page < subPage.length)
             {
                 subPage[page] = subPg;
+            }
+        }
+
+        //Sets on update options menu listener for the given page
+        public void setOnUpdateOptionsMenuListener(int position, Selectable.ListFragment.OnUpdateOptionsMenuListener listener)
+        {
+            //if a valid page
+            if(position >= 0 && position < getCount())
+            {
+                //set listener
+                updateOptionsMenuListeners[position] = listener;
+            }
+        }
+
+        //Calls update options menu listener for the given page
+        public void notifyUpdateOptionsMenu(int position)
+        {
+            //if a valid page and listener exists
+            if(position >= 0 && position < getCount() && updateOptionsMenuListeners[position] != null)
+            {
+                //call listener
+                updateOptionsMenuListeners[position].update();
             }
         }
     }

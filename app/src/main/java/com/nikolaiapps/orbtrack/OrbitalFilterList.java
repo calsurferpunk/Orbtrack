@@ -5,12 +5,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.EditText;
+import android.widget.SearchView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
@@ -386,12 +384,10 @@ public class OrbitalFilterList
         }
 
         //Sets up inputs
-        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, View ageLayout, EditText searchText, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
+        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, View ageLayout, SearchView searchView, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
         {
             this.searchTable = searchGroup;
             this.showButton = showButton;
-
-            searchText.setText("");
 
             AdapterView.OnItemSelectedListener itemSelectedListener = new AdapterView.OnItemSelectedListener()
             {
@@ -399,30 +395,11 @@ public class OrbitalFilterList
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
                     //update visible items
-                    OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), searchText.getText().toString());
+                    OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), (searchView != null ? searchView.getQuery().toString() : ""));
                 }
 
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) { }
-            };
-
-            TextWatcher textChangedListener = new TextWatcher()
-            {
-                @Override
-                public void beforeTextChanged(CharSequence s, int start, int count, int after){ }
-
-                @Override
-                public void onTextChanged(CharSequence s, int start, int before, int count) { }
-
-                @Override
-                public void afterTextChanged(Editable s)
-                {
-                    //update visible items
-                    if(ownerList != null && groupList != null && ageList != null)
-                    {
-                        OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), s.toString());
-                    }
-                }
             };
 
             //get colors
@@ -443,9 +420,37 @@ public class OrbitalFilterList
                 ageLayout.setVisibility(hasLaunchDates ? View.VISIBLE : View.GONE);
             }
 
-            //setup name text
-            searchText.addTextChangedListener(textChangedListener);
-            searchText.setEnabled(true);
+            //setup search view
+            if(searchView != null)
+            {
+                searchView.setQueryHint(searchView.getContext().getString(R.string.title_name_or_id));
+                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+                {
+                    private void updateItems(String searchString)
+                    {
+                        //if owner, group, and age list exist
+                        if(ownerList != null && groupList != null && ageList != null)
+                        {
+                            //update visible items
+                            OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), searchString);
+                        }
+                    }
+
+                    @Override
+                    public boolean onQueryTextSubmit(String query)
+                    {
+                        updateItems(query);
+                        return(false);
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText)
+                    {
+                        updateItems(newText);
+                        return(false);
+                    }
+                });
+            }
 
             //setup show button
             showButton.setOnClickListener(new View.OnClickListener()

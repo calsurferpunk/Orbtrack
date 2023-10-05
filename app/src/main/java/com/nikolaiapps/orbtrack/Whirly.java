@@ -165,10 +165,17 @@ class Whirly
             }
 
             //update size
-            snippetLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
-            width = Math.max(snippetLayout.getMeasuredWidth(), 1);
-            height = Math.max(snippetLayout.getMeasuredHeight(), 1);
-            snippetLayout.layout(0, 0, width, height);
+            try
+            {
+                snippetLayout.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED), View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+                width = Math.max(snippetLayout.getMeasuredWidth(), 1);
+                height = Math.max(snippetLayout.getMeasuredHeight(), 1);
+                snippetLayout.layout(0, 0, width, height);
+            }
+            catch(Exception ex)
+            {
+                width = height = 1;
+            }
 
             //get image
             snippetImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -2241,10 +2248,13 @@ class Whirly
 
         private void addLayer(int mapLayerType, boolean addAtmosphere, boolean addSunlight)
         {
+            Activity activity = this.getActivity();
+            boolean haveActivity = (activity != null);
             int index;
             int maxZoom;
             String name;
-            Activity activity = this.getActivity();
+            String maptiler_key_string = (haveActivity ? activity.getString(R.string.maptiler_api_key) : "");
+            String stamen_key_string = (haveActivity ? activity.getString(R.string.stamen_map_key) : "");
             Light sunLight;
             Point3d sunDirection;
             Atmosphere atmosphere;
@@ -2253,7 +2263,7 @@ class Whirly
             ArrayList<RemoteTileInfoNew> layerSources = new ArrayList<>(0);
 
             //if activity is set
-            if(activity != null)
+            if(haveActivity)
             {
                 //if not a map and adding atmosphere or sunlight
                 if(!isMap() && (addAtmosphere || addSunlight))
@@ -2290,12 +2300,12 @@ class Whirly
                 {
                     case MapLayerType.Hybrid:
                         drawPriorities.add(DrawPriority.LayerHybridLabels);
-                        cacheDirNames.add("hybridLabels");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-labels/{z}/{x}/{y}.png", 0, 17));
+                        cacheDirNames.add("hybridLabels_stamen");
+                        layerSources.add(new RemoteTileInfoNew("https://tiles.stadiamaps.com/tiles/stamen_terrain_labels/{z}/{x}/{y}@2x.png?api_key=" + stamen_key_string, 0, 17));
 
                         drawPriorities.add(DrawPriority.LayerHybridLines);
-                        cacheDirNames.add("hybridLines");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain-lines/{z}/{x}/{y}.png", 0, 12));
+                        cacheDirNames.add("hybridLines_stamen");
+                        layerSources.add(new RemoteTileInfoNew("https://tiles.stadiamaps.com/tiles/stamen_terrain_lines/{z}/{x}/{y}@2x.png?api_key=" + stamen_key_string, 0, 12));
                         //fall through
 
                     case MapLayerType.Satellite:
@@ -2308,7 +2318,7 @@ class Whirly
                         else
                         {
                             cacheDirNames.add("satelliteLand");
-                            layerSources.add(new RemoteTileInfoNew("https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=" + activity.getString(R.string.maptiler_api_key), 0, 10));
+                            layerSources.add(new RemoteTileInfoNew("https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=" + maptiler_key_string, 0, 10));
                         }
                         break;
 
@@ -2382,8 +2392,8 @@ class Whirly
                     default:
                     case MapLayerType.Normal:
                         drawPriorities.add(DrawPriority.Layer);
-                        cacheDirNames.add("normal");
-                        layerSources.add(new RemoteTileInfoNew("http://tile.stamen.com/terrain/{z}/{x}/{y}.png", 0, 17));
+                        cacheDirNames.add("normal_stamen");
+                        layerSources.add(new RemoteTileInfoNew("https://tiles.stadiamaps.com/tiles/stamen_terrain_background/{z}/{x}/{y}@2x.png?api_key=" + stamen_key_string, 0, 17));
                         break;
                 }
 

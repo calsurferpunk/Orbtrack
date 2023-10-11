@@ -344,7 +344,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         private OnSettingChangedListener settingChangedListener;
 
         @Override
-        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             byte index;
             int page = this.getPageParam();

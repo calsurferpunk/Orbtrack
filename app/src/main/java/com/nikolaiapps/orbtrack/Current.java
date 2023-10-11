@@ -15,7 +15,6 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -957,7 +956,7 @@ public abstract class Current
         }
 
         @Override
-        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             int group = this.getGroupParam();
             int page = this.getPageParam();
@@ -1021,13 +1020,6 @@ public abstract class Current
 
             //set change listeners
             setChangeListeners(selectList, listAdapter, page);
-
-            //if listener is set
-            if(pageSetListener != null)
-            {
-                //send event
-                pageSetListener.onPageSet(this, page, subPage);
-            }
 
             //return view
             return(newView);
@@ -1144,9 +1136,6 @@ public abstract class Current
                         }
                     }
                 });
-                PageAdapter.setGraphChangedListener(createOnGraphChangedListener(listAdapter));
-                PageAdapter.setPreview3dChangedListener(createOnPreview3dChangedListener(listAdapter));
-                PageAdapter.setInformationChangedListener(createOnInformationChangedListener(listAdapter));
             }
         }
     }
@@ -1160,9 +1149,6 @@ public abstract class Current
         private static ArrayList<Items.NoradIndex> combinedNoradIndex;
         private static Selectable.ListFragment.OnOrientationChangedListener orientationChangedListener = null;
         private static Selectable.ListFragment.OnItemsChangedListener itemsChangedListener = null;
-        private static Selectable.ListFragment.OnGraphChangedListener graphChangedListener = null;
-        private static Selectable.ListFragment.OnPreview3dChangedListener preview3dChangedListener = null;
-        private static Selectable.ListFragment.OnInformationChangedListener informationChangedListener = null;
         private static Object[] savedItems = null;
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int subPg)
@@ -1177,13 +1163,10 @@ public abstract class Current
         }
 
         @Override
-        public @NonNull Object instantiateItem(@NonNull  ViewGroup container, int position)
+        public @NonNull Object instantiateItem(@NonNull ViewGroup container, int position)
         {
             Bundle params;
-            Page newPage = (Page)setupItem((Page)super.instantiateItem(container, position));
-
-            //setup page
-            newPage.setOnPageSetListener(pageSetListener);
+            Page newPage = (Page)super.instantiateItem(container, position);
 
             //set params
             params = newPage.getArguments();
@@ -1307,27 +1290,6 @@ public abstract class Current
             itemsChangedListener = listener;
         }
 
-        //Sets graph changed listener
-        public static void setGraphChangedListener(Selectable.ListFragment.OnGraphChangedListener listener)
-        {
-            //set listener
-            graphChangedListener = listener;
-        }
-
-        //Sets preview 3d changed listener
-        public static void setPreview3dChangedListener(Selectable.ListFragment.OnPreview3dChangedListener listener)
-        {
-            //set listener
-            preview3dChangedListener = listener;
-        }
-
-        //Sets information changed listener
-        public static void setInformationChangedListener(Selectable.ListFragment.OnInformationChangedListener listener)
-        {
-            //set listener
-            informationChangedListener = listener;
-        }
-
         //Calls orientation changed listener
         public static void notifyOrientationChangedListener()
         {
@@ -1347,39 +1309,6 @@ public abstract class Current
             {
                 //call listener
                 itemsChangedListener.itemsChanged();
-            }
-        }
-
-        //Call graph changed listener
-        public static void notifyGraphChanged(Database.SatelliteData orbital, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
-        {
-            //if listener exists
-            if(graphChangedListener != null)
-            {
-                //call listener
-                graphChangedListener.graphChanged(orbital, pathPoints, null, null);
-            }
-        }
-
-        //Call preview 3d changed listener
-        public static void notifyPreview3dChanged(int noradId)
-        {
-            //if listener exists
-            if(preview3dChangedListener != null)
-            {
-                //call listener
-                preview3dChangedListener.preview3dChanged(noradId);
-            }
-        }
-
-        //Calls information changed listener
-        public static void notifyInformationChanged(Spanned text)
-        {
-            //if listener exists
-            if(informationChangedListener != null)
-            {
-                //call listener
-                informationChangedListener.informationChanged(text);
             }
         }
     }
@@ -1679,7 +1608,6 @@ public abstract class Current
     public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean needConstellations)
     {
         final Context context = pageFragment.getContext();
-        final Resources res = (context != null ? context.getResources() : null);
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_lens_view, container, false);
         final FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);

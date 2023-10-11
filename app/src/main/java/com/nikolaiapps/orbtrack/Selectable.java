@@ -1257,6 +1257,9 @@ public abstract class Selectable
             void resumed(ListFragment page);
         }
 
+        //Creates view
+        protected abstract View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState);
+
         //Sets action mode item properties
         protected abstract boolean setupActionModeItems(MenuItem all, MenuItem none, MenuItem edit, MenuItem delete, MenuItem save, MenuItem sync);
 
@@ -1382,6 +1385,23 @@ public abstract class Selectable
             }
 
             super.onDestroy();
+        }
+
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        {
+            //create view
+            View newView = createView(inflater, container, savedInstanceState);
+
+            //if listener is set
+            if(pageSetListener != null)
+            {
+                //send event
+                pageSetListener.onPageSet(this, getPageParam(), getSubPageParam());
+            }
+
+            //return view
+            return(newView);
         }
 
         @Override
@@ -2078,7 +2098,7 @@ public abstract class Selectable
                     Activity activity = ListFragment.this.getActivity();
 
                     //if view and activity exist
-                    if(listAdapter.informationGroup != null && activity != null)
+                    if(listAdapter != null && listAdapter.informationGroup != null && activity != null)
                     {
                         //get displays
                         final CircularProgressIndicator infoProgress = listAdapter.informationGroup.findViewById(R.id.Item_Detail_Info_Progress);
@@ -2254,6 +2274,9 @@ public abstract class Selectable
         private final ListFragment.OnAdapterSetListener adapterSetListener;
         protected final ListFragment.OnPageSetListener pageSetListener;
         private final ListFragment.OnPageResumeListener pageResumeListener;
+        private final Selectable.ListFragment.OnGraphChangedListener[] graphChangedListeners = new ListFragment.OnGraphChangedListener[getCount()];
+        private final Selectable.ListFragment.OnPreview3dChangedListener[] preview3dChangedListeners = new ListFragment.OnPreview3dChangedListener[getCount()];
+        private final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[getCount()];
         private final Selectable.ListFragment.OnUpdateOptionsMenuListener[] updateOptionsMenuListeners = new Selectable.ListFragment.OnUpdateOptionsMenuListener[getCount()];
 
         public ListFragmentAdapter(FragmentManager fm, View parentView, ListFragment.OnItemSelectedListener selectedListener, ListFragment.OnUpdateNeededListener updateListener, ListFragment.OnItemCheckChangedListener checkChangedListener, ListFragment.OnItemDetailButtonClickListener detailButtonClickListener, ListFragment.OnAdapterSetListener adapterListener, ListFragment.OnPageSetListener setListener, ListFragment.OnPageResumeListener resumeListener, int grp, int[] subPg)
@@ -2273,6 +2296,11 @@ public abstract class Selectable
                 @Override
                 public void onPageSet(ListFragment page, int pageNum, int subPageNum)
                 {
+                    ListBaseAdapter pageAdapter = page.getAdapter();
+
+                    ListFragmentAdapter.this.setGraphChangedListener(pageNum, page.createOnGraphChangedListener(pageAdapter));
+                    ListFragmentAdapter.this.setPreview3dChangedListener(pageNum, page.createOnPreview3dChangedListener(pageAdapter));
+                    ListFragmentAdapter.this.setInformationChangedListener(pageNum, page.createOnInformationChangedListener(pageAdapter));
                     ListFragmentAdapter.this.setOnUpdateOptionsMenuListener(pageNum, page.createOnUpdateOptionsMenuListener());
 
                     if(setListener != null)
@@ -2306,9 +2334,10 @@ public abstract class Selectable
         }
 
         //Sets up item
-        protected Fragment setupItem(ListFragment newPage)
+        private Fragment setupItem(ListFragment newPage)
         {
             newPage.setParentView(currentParentVIew);
+            newPage.setOnPageSetListener(pageSetListener);
             newPage.setOnItemSelectedListener(itemSelectedListener);
             newPage.setOnUpdateNeededListener(updateNeededListener);
             newPage.setOnItemCheckChangedListener(itemCheckChangedListener);
@@ -2317,6 +2346,37 @@ public abstract class Selectable
             newPage.setOnPageResumeListener(pageResumeListener);
 
             return(newPage);
+        }
+
+        @Override
+        public @NonNull Object instantiateItem(@NonNull ViewGroup container, int position)
+        {
+            int pageNum;
+            int subPageNum;
+            boolean needCallPageSet;
+            Object item = super.instantiateItem(container, position);
+            ListFragment page = null;
+
+            //if a page with ListFragment base
+            if(item instanceof ListFragment)
+            {
+                //set page properties
+                page = (ListFragment)item;
+                needCallPageSet = (page.pageSetListener == null);
+                pageNum = page.getPageParam();
+                subPageNum = page.getSubPageParam();
+                setupItem(page);
+
+                //if need to call page set listener and it exists
+                if(needCallPageSet && pageSetListener != null)
+                {
+                    //send event
+                    pageSetListener.onPageSet(page, pageNum, subPageNum);
+                }
+            }
+
+            //if page exists, return it, otherwise item
+            return(page != null ? page : item);
         }
 
         @Override
@@ -2387,11 +2447,83 @@ public abstract class Selectable
             }
         }
 
+        //Returns if page is a valid number
+        private boolean validPage(int position)
+        {
+            return(position >= 0 && position < getCount());
+        }
+
+        //Sets graph changed listener for the given page
+        public void setGraphChangedListener(int position, Selectable.ListFragment.OnGraphChangedListener listener)
+        {
+            //if a valid page
+            if(validPage(position))
+            {
+                //set listener
+                graphChangedListeners[position] = listener;
+            }
+        }
+
+        //Call graph changed listener for the given page
+        public void notifyGraphChanged(int position, Database.SatelliteData orbital, ArrayList<CalculateViewsTask.OrbitalView> pathPoints, Database.SatelliteData orbital2, ArrayList<CalculateViewsTask.OrbitalView> path2Points)
+        {
+            //if a valid page and listener exists
+            if(validPage(position) && graphChangedListeners[position] != null)
+            {
+                //call listener
+                graphChangedListeners[position].graphChanged(orbital, pathPoints, orbital2, path2Points);
+            }
+        }
+
+        //Sets preview 3d changed listener for the given page
+        public void setPreview3dChangedListener(int position, Selectable.ListFragment.OnPreview3dChangedListener listener)
+        {
+            //if a valid page
+            if(validPage(position))
+            {
+                //set listener
+                preview3dChangedListeners[position] = listener;
+            }
+        }
+
+        //Call preview 3d changed listener for the given page
+        public void notifyPreview3dChanged(int position, int noradId)
+        {
+            //if a valid page and listener exists
+            if(validPage(position) && preview3dChangedListeners[position] != null)
+            {
+                //call listener
+                preview3dChangedListeners[position].preview3dChanged(noradId);
+            }
+        }
+
+        //Sets information changed listener for the given page
+        public void setInformationChangedListener(int position, Selectable.ListFragment.OnInformationChangedListener listener)
+        {
+            //if a valid page
+            if(validPage(position))
+            {
+                //set listener
+                informationChangedListeners[position] = listener;
+            }
+        }
+
+        //Calls information changed listener for the given page
+        public void notifyInformationChanged(int position, Spanned text)
+        {
+            //if a valid page and listener exists
+            if(validPage(position) && informationChangedListeners[position] != null)
+            {
+                //call listener
+                informationChangedListeners[position].informationChanged(text);
+            }
+        }
+
         //Sets on update options menu listener for the given page
         public void setOnUpdateOptionsMenuListener(int position, Selectable.ListFragment.OnUpdateOptionsMenuListener listener)
         {
             //if a valid page
-            if(position >= 0 && position < getCount())
+            if(validPage(position))
             {
                 //set listener
                 updateOptionsMenuListeners[position] = listener;
@@ -2402,7 +2534,7 @@ public abstract class Selectable
         public void notifyUpdateOptionsMenu(int position)
         {
             //if a valid page and listener exists
-            if(position >= 0 && position < getCount() && updateOptionsMenuListeners[position] != null)
+            if(validPage(position) && updateOptionsMenuListeners[position] != null)
             {
                 //call listener
                 updateOptionsMenuListeners[position].update();

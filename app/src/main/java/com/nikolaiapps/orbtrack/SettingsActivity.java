@@ -1009,7 +1009,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     public static class SetupPage extends Selectable.ListFragment
     {
         @Override
-        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             int page = this.getPageParam();
             boolean onWelcome = (page == SetupPageType.Welcome);

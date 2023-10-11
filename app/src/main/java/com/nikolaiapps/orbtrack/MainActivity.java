@@ -715,78 +715,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    /*@Override
-    public boolean onCreateOptionsMenu(Menu menu)
-    {
-        //create options menu
-        getMenuInflater().inflate(R.menu.menu_main_layout, menu);
-        optionsMenu = menu;
-        return(super.onCreateOptionsMenu(menu));
-    }*/
-
-    /*@Override
-    public boolean onPrepareOptionsMenu(Menu menu)
-    {
-        int page = getMainPage();
-        boolean onCurrent = (mainGroup == Groups.Current);
-        boolean onCalculate = (mainGroup == Groups.Calculate);
-        boolean onOrbitals = (mainGroup == Groups.Orbitals);
-        int subPage = getSubPage();
-        int mapDisplayType = Settings.getMapDisplayType(this);
-        boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
-        boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
-        boolean onSubPageList = (subPage == Globals.SubPageType.List);
-        boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
-        boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
-        boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
-        boolean onCurrentCombinedList = (onCurrent && onSubPageList);
-        boolean onCurrentCombinedMap = (onCurrent && onSubPageMap);
-        boolean onCurrentCombinedGlobe = (onCurrent && onSubPageGlobe);
-        boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
-        boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
-        boolean onCalculateCoordinates = (onCalculate && page == Calculate.PageType.Coordinates);
-        boolean onCalculateIntersection = (onCalculate && page == Calculate.PageType.Intersection);
-        boolean onCalculateViewList = (onCalculateView && onSubPageList);
-        boolean onCalculateViewLens = (onCalculateView && onSubPageLens);
-        boolean onCalculatePassesList = (onCalculatePasses && onSubPageList);
-        boolean onCalculatePassesLens = (onCalculatePasses && onSubPageLens);
-        boolean onCalculateCoordinatesList = (onCalculateCoordinates && onSubPageList);
-        boolean onCalculateCoordinatesMap = (onCalculateCoordinates && onSubPageMap);
-        boolean onCalculateCoordinatesGlobe = (onCalculateCoordinates && onSubPageGlobe);
-        boolean onCalculateIntersectionList = (onCalculateIntersection && onSubPageList);
-        boolean onCalculateIntersectionLens = (onCalculateIntersection && onSubPageLens);
-        boolean onOrbitalSatellites = (onOrbitals && page == Orbitals.PageType.Satellites);
-        boolean haveSatellites = (onOrbitalSatellites && orbitalPageAdapter != null && orbitalPageAdapter.getPageItemCount(mainPager, Orbitals.PageType.Satellites) > 0);
-        boolean onOrbitalSatellitesExistNoModify = (onOrbitalSatellites && haveSatellites && !UpdateService.modifyingSatellites());
-        boolean calculatingViews = (calculateViewAnglesTask != null && calculateViewAnglesTask.isRunning());
-        boolean calculatingPasses = (calculatePassesTask != null && calculatePassesTask.isRunning());
-        boolean calculatingCoordinates = (calculateCoordinatesTask != null && calculateCoordinatesTask.calculatingCoordinates);
-        boolean calculatingIntersection = (calculateIntersectionsTask != null && calculateIntersectionsTask.isRunning());
-        boolean showLens = onCurrentCombinedList || (onCalculateViewList && !calculatingViews);
-        boolean showList = (onCurrent && !onSubPageList) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
-        boolean showMap = (onCurrent && ((usingMapDisplay && onCurrentCombinedList) || onCurrentCombinedGlobe)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
-        boolean showGlobe = (onCurrent && ((usingGlobeDisplay && onCurrentCombinedList) || onCurrentCombinedMap)) || (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
-        boolean onCurrentNoSelected = (onCurrent && viewLensNoradID == Integer.MAX_VALUE && mapViewNoradID == Integer.MAX_VALUE);
-        boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
-        boolean showSave = ((onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection) || onOrbitalSatellitesExistNoModify);
-
-        menu.findItem(R.id.menu_search).setVisible(onOrbitalSatellitesExistNoModify);
-        menu.findItem(R.id.menu_list).setVisible(showList);
-        menu.findItem(R.id.menu_map).setVisible(showMap);
-        menu.findItem(R.id.menu_globe).setVisible(showGlobe);
-        menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(this));
-        menu.findItem(R.id.menu_sort_by).setVisible(onCurrentCombinedList);
-        menu.findItem(R.id.menu_filter).setVisible(showSettings);
-        menu.findItem(R.id.menu_visible).setVisible(showSettings);
-        menu.findItem(R.id.menu_settings).setVisible(showSettings);
-        menu.findItem(R.id.menu_overflow).setVisible(showSettings);
-        menu.findItem(R.id.menu_edit).setVisible((showSave && !onOrbitalSatellites) || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe);
-        menu.findItem(R.id.menu_save).setVisible(showSave);
-        menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
-
-        return(super.onPrepareOptionsMenu(menu));
-    }*/
-
     //Updates the options menu
     private void updateOptionsMenu(boolean updateFloatingButton)
     {
@@ -2819,15 +2747,30 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     switch(index)
                     {
                         case Groups.Current:
-                            Current.PageAdapter.notifyInformationChanged(infoText);
+                            //if adapter exists
+                            if(currentPageAdapter != null)
+                            {
+                                //notify change
+                                currentPageAdapter.notifyInformationChanged(page, infoText);
+                            }
                             break;
 
                         case Groups.Calculate:
-                            Calculate.PageAdapter.notifyInformationChanged(page, infoText);
+                            //if adapter exists
+                            if(calculatePageAdapter != null)
+                            {
+                                //notify change
+                                calculatePageAdapter.notifyInformationChanged(page, infoText);
+                            }
                             break;
 
                         case Groups.Orbitals:
-                            Orbitals.PageAdapter.notifyInformationChanged(page, infoText);
+                            //if adapter exists
+                            if(orbitalPageAdapter != null)
+                            {
+                                //notify change
+                                orbitalPageAdapter.notifyInformationChanged(page, infoText);
+                            }
                             break;
                     }
                 }
@@ -3352,7 +3295,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(new Selectable.ListFragment.OnItemDetailButtonClickListener()
         {
             @Override
-            public void onClick(final int group, final int pageType, int itemID, Selectable.ListItem item, int buttonNum)
+            public void onClick(final int group, final int pageNum, int itemID, Selectable.ListItem item, int buttonNum)
             {
                 final Activity activity = MainActivity.this;
 
@@ -3364,19 +3307,19 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             case Groups.Current:
                                 //update sub page and norad ID
-                                setSubPage(group, pageType, Globals.SubPageType.Lens);
+                                setSubPage(group, pageNum, Globals.SubPageType.Lens);
                                 viewLensNoradID = itemID;
                                 setMainGroup(mainGroup, true);
                                 break;
 
                             case Groups.Calculate:
-                                switch(pageType)
+                                switch(pageNum)
                                 {
                                     case Calculate.PageType.Passes:
                                     case Calculate.PageType.Intersection:
                                         //update sub page and norad ID
-                                        setSubPage(group, pageType, Globals.SubPageType.Lens);
-                                        if(pageType == Calculate.PageType.Intersection)
+                                        setSubPage(group, pageNum, Globals.SubPageType.Lens);
+                                        if(pageNum == Calculate.PageType.Intersection)
                                         {
                                             intersectionPassIndex = item.listIndex;
                                         }
@@ -3396,7 +3339,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         if(group == Groups.Current)
                         {
                             //update sub page and norad ID
-                            setSubPage(group, pageType, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
+                            setSubPage(group, pageNum, (buttonNum == Selectable.ListBaseAdapter.DetailButtonType.GlobeView ? Globals.SubPageType.Globe : Globals.SubPageType.Map));
                             mapViewNoradID = itemID;
                             setMainGroup(mainGroup, true);
                         }
@@ -3425,11 +3368,21 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 switch(group)
                                 {
                                     case Groups.Current:
-                                        Current.PageAdapter.notifyPreview3dChanged(itemID);
+                                        //if adapter exists
+                                        if(currentPageAdapter != null)
+                                        {
+                                            //notify change
+                                            currentPageAdapter.notifyPreview3dChanged(pageNum, itemID);
+                                        }
                                         break;
 
                                     case Groups.Orbitals:
-                                        Orbitals.PageAdapter.notifyPreview3dChanged(pageType, itemID);
+                                        //if adapter exists
+                                        if(orbitalPageAdapter != null)
+                                        {
+                                            //notify change
+                                            orbitalPageAdapter.notifyPreview3dChanged(pageNum, itemID);
+                                        }
                                         break;
                                 }
                                 break;
@@ -3455,11 +3408,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                                 switch(group)
                                                 {
                                                     case Groups.Current:
-                                                        Current.PageAdapter.notifyGraphChanged(currentOrbital, pathPoints);
+                                                        //if adapter exists
+                                                        if(currentPageAdapter != null)
+                                                        {
+                                                            //notify change
+                                                            currentPageAdapter.notifyGraphChanged(pageNum, currentOrbital, pathPoints, null, null);
+                                                        }
                                                         break;
 
                                                     case Groups.Calculate:
-                                                        if(progressType == Globals.ProgressType.Success && pageType == Calculate.PageType.Intersection && currentOrbital2 != null)
+                                                        if(progressType == Globals.ProgressType.Success && pageNum == Calculate.PageType.Intersection && currentOrbital2 != null)
                                                         {
                                                             //calculate remaining views
                                                             Calculate.calculateViews(activity, new Database.SatelliteData[]{currentOrbital2}, null, observer, julianStartDate, julianEndDate, dayIncrement, new CalculateViewsTask.OnProgressChangedListener()
@@ -3471,15 +3429,22 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                                                     {
                                                                         case Globals.ProgressType.Success:
                                                                         case Globals.ProgressType.Failed:
-                                                                            Calculate.PageAdapter.notifyGraphChanged(pageType, currentOrbital, pathPoints, currentOrbital2, path2Points);
+                                                                            //if adapter exists
+                                                                            if(calculatePageAdapter != null)
+                                                                            {
+                                                                                //notify change
+                                                                                calculatePageAdapter.notifyGraphChanged(pageNum, currentOrbital, pathPoints, currentOrbital2, path2Points);
+                                                                            }
                                                                             break;
                                                                     }
                                                                 }
                                                             });
                                                         }
-                                                        else
+                                                        //else if adapter exists
+                                                        else if(calculatePageAdapter != null)
                                                         {
-                                                            Calculate.PageAdapter.notifyGraphChanged(pageType, currentOrbital, pathPoints, null, null);
+                                                            //notify change
+                                                            calculatePageAdapter.notifyGraphChanged(pageNum, currentOrbital, pathPoints, null, null);
                                                         }
                                                         break;
                                                 }
@@ -4934,8 +4899,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Starts/stops current view calculations
     private void setCurrentViewCalculations(boolean run, double julianDate)
     {
-        final FloatingActionStateButton actionButton;
-
         //if task was running
         if(currentViewAnglesTask != null)
         {
@@ -4943,12 +4906,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             currentViewAnglesTask.cancel(true);
         }
 
-        //get action button
-        actionButton = getCurrentActionButton();
-
         //if want to run and have items
         if(run && Current.orbitalViews != null && Current.orbitalViews.length > 0)
         {
+            //get action button
+            final FloatingActionStateButton actionButton = getCurrentActionButton();
+
+            //create and run task
             currentViewAnglesTask = Current.calculateViews(this, observer, julianDate, julianDate + 1, 0.2 / 24, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
@@ -5096,7 +5060,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Starts/stops current coordinate calculations
     private void setCurrentCoordinateCalculations(boolean run, double julianDate)
     {
-        final FloatingActionStateButton actionButton;
+        ;
         final CoordinatesFragment mapView = Current.getMapViewIfReady();
 
         //if task was running
@@ -5106,12 +5070,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             currentCoordinatesTask.cancel(true);
         }
 
-        //get action button
-        actionButton = getCurrentActionButton();
-
         //if want to run and have items
         if(run && mapView != null && mapView.getOrbitalCount() > 0)
         {
+            //get action button
+            final FloatingActionStateButton actionButton = getCurrentActionButton();
+
+            //run task
             currentCoordinatesTask = Current.calculateCoordinates(observer, julianDate, new Current.CalculatePathTask.OnProgressChangedListener()
             {
                 @Override

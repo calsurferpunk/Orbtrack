@@ -14,7 +14,6 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 import android.os.Parcelable;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -1608,7 +1607,7 @@ public abstract class Calculate
         }
 
         @Override
-        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             int group = this.getGroupParam();
             int page = this.getPageParam();
@@ -1738,13 +1737,6 @@ public abstract class Calculate
             {
                 //create view
                 newView = Calculate.onCreateView(this, inflater, container, savedInstanceState);
-            }
-
-            //if listener is set
-            if(pageSetListener != null)
-            {
-                //send event
-                pageSetListener.onPageSet(this, page, subPage);
             }
 
             //return view
@@ -2223,9 +2215,6 @@ public abstract class Calculate
                     }
                 }
             });
-            PageAdapter.setGraphChangedListener(page, createOnGraphChangedListener(listAdapter));
-            PageAdapter.setInformationChangedListener(page, createOnInformationChangedListener(listAdapter));
-            //PageAdapter.setOnUpdateOptionsMenuListener(page, createOnUpdateOptionsMenuListener());
         }
     }
 
@@ -2243,8 +2232,6 @@ public abstract class Calculate
         private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnItemsChangedListener[] itemsChangedListeners = new Selectable.ListFragment.OnItemsChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnHeaderChangedListener[] headerChangedListeners = new Selectable.ListFragment.OnHeaderChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnGraphChangedListener[] graphChangedListeners = new Selectable.ListFragment.OnGraphChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg, Bundle savedInstanceState)
         {
@@ -2284,13 +2271,12 @@ public abstract class Calculate
             Bundle savedParams;
             Calendar dateNow = Calendar.getInstance();
             Calendar dateLater = Calendar.getInstance();
-            Page newPage = (Page)setupItem((Page)super.instantiateItem(container, position));
+            Page newPage = (Page)super.instantiateItem(container, position);
 
             //set later date for later
             dateLater.add(Calendar.DATE, (position == PageType.Passes || position == PageType.Intersection ? 7 : 1));
 
             //setup page
-            newPage.setOnPageSetListener(pageSetListener);
             newPage.setOnPageResumeListener(new Selectable.ListFragment.OnPageResumeListener()
             {
                 @Override
@@ -2785,28 +2771,6 @@ public abstract class Calculate
             }
         }
 
-        //Sets graph changed listener for the given page
-        public static void setGraphChangedListener(int position, Selectable.ListFragment.OnGraphChangedListener listener)
-        {
-            //if a valid page
-            if(position >= 0 && position < PageType.PageCount)
-            {
-                //set listener
-                graphChangedListeners[position] = listener;
-            }
-        }
-
-        //Sets information changed listener for the given page
-        public static void setInformationChangedListener(int position, Selectable.ListFragment.OnInformationChangedListener listener)
-        {
-            //if a valid page
-            if(position >= 0 && position < PageType.PageCount)
-            {
-                //set listener
-                informationChangedListeners[position] = listener;
-            }
-        }
-
         //Calls orientation changed listener for the given page
         public static void notifyOrientationChangedListener(int position)
         {
@@ -2837,28 +2801,6 @@ public abstract class Calculate
             {
                 //call listener
                 headerChangedListeners[position].headerChanged(id, text);
-            }
-        }
-
-        //Call graph changed listener for the given page
-        public static void notifyGraphChanged(int position, Database.SatelliteData orbital1, ArrayList<CalculateViewsTask.OrbitalView> pathPoints, Database.SatelliteData orbital2, ArrayList<CalculateViewsTask.OrbitalView> path2Points)
-        {
-            //if a valid page and listener exists
-            if(position >= 0 && position < PageType.PageCount && graphChangedListeners[position] != null)
-            {
-                //call listener
-                graphChangedListeners[position].graphChanged(orbital1, pathPoints, orbital2, path2Points);
-            }
-        }
-
-        //Calls information changed listener for the given page
-        public static void notifyInformationChanged(int position, Spanned text)
-        {
-            //if a valid page and listener exists
-            if(position >= 0 && position < PageType.PageCount && informationChangedListeners[position] != null)
-            {
-                //call listener
-                informationChangedListeners[position].informationChanged(text);
             }
         }
     }

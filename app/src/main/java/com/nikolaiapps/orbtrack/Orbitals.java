@@ -22,7 +22,6 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
-import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -656,7 +655,7 @@ public abstract class Orbitals
         }
 
         @Override
-        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
+        public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Context context = Page.this.getContext();
             int group = this.getGroupParam();
@@ -745,7 +744,7 @@ public abstract class Orbitals
                         listAdapter.colorDialog.reload();
                     }
                 }
-            }, createOnPreview3dChangedListener(listAdapter), createOnInformationChangedListener(listAdapter));
+            });
 
             //return view
             return(newView);
@@ -1359,8 +1358,6 @@ public abstract class Orbitals
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
         private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnPreview3dChangedListener[] preview3dChangedListeners = new Selectable.ListFragment.OnPreview3dChangedListener[PageType.PageCount];
-        private static final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnUpdatePageListener[] updatePageListeners = new Selectable.ListFragment.OnUpdatePageListener[PageType.PageCount];
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener)
@@ -1468,37 +1465,13 @@ public abstract class Orbitals
         }
 
         //Sets information changed listener for the given page
-        public static void setChangeListeners(int position, Selectable.ListFragment.OnOrientationChangedListener orientationChangedListener, Selectable.ListFragment.OnPreview3dChangedListener preview3dChangedListener, Selectable.ListFragment.OnInformationChangedListener informationChangedListener)
+        public static void setChangeListeners(int position, Selectable.ListFragment.OnOrientationChangedListener orientationChangedListener)
         {
             //if a valid page
             if(position < PageType.PageCount)
             {
                 //set listeners
                 orientationChangedListeners[position] = orientationChangedListener;
-                preview3dChangedListeners[position] = preview3dChangedListener;
-                informationChangedListeners[position] = informationChangedListener;
-            }
-        }
-
-        //Call preview 3d changed listener for the given page
-        public static void notifyPreview3dChanged(int position, int noradId)
-        {
-            //if a valid page and listener exists
-            if(position < PageType.PageCount && preview3dChangedListeners[position] != null)
-            {
-                //call listener
-                preview3dChangedListeners[position].preview3dChanged(noradId);
-            }
-        }
-
-        //Calls information changed listener for the given page
-        public static void notifyInformationChanged(int position, Spanned text)
-        {
-            //if a valid page and listener exists
-            if(position < PageType.PageCount && informationChangedListeners[position] != null)
-            {
-                //call listener
-                informationChangedListeners[position].informationChanged(text);
             }
         }
     }

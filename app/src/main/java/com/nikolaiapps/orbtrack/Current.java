@@ -1088,22 +1088,24 @@ public abstract class Current
         @Override
         protected void onUpdateFinished(boolean success) {}
 
+        @Override
+        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, final int page)
+        {
+            return(new OnOrientationChangedListener()
+            {
+                @Override
+                public void orientationChanged()
+                {
+                    View rootView = Page.this.getView();
+                    View listColumns = (rootView != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+
+                    Page.this.setListColumns(Page.this.getContext(), listColumns, page);
+                }
+            });
+        }
+
         public void setChangeListeners(final RecyclerView selectList, final Selectable.ListBaseAdapter listAdapter, final int page)
         {
-            if(selectList != null)
-            {
-                PageAdapter.setOrientationChangedListener(new OnOrientationChangedListener()
-                {
-                    @Override
-                    public void orientationChanged()
-                    {
-                        View rootView = Page.this.getView();
-                        View listColumns = (rootView != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
-
-                        Page.this.setListColumns(Page.this.getContext(), listColumns, page);
-                    }
-                });
-            }
             if(listAdapter != null)
             {
                 PageAdapter.setItemChangedListener(new OnItemsChangedListener()
@@ -1147,7 +1149,6 @@ public abstract class Current
         private static Combined.Item[] combinedItems;
         private static final Items.NoradIndex.Comparer noradIndexComparer = new Items.NoradIndex.Comparer();
         private static ArrayList<Items.NoradIndex> combinedNoradIndex;
-        private static Selectable.ListFragment.OnOrientationChangedListener orientationChangedListener = null;
         private static Selectable.ListFragment.OnItemsChangedListener itemsChangedListener = null;
         private static Object[] savedItems = null;
 
@@ -1276,29 +1277,11 @@ public abstract class Current
             savedItems = saveItems;
         }
 
-        //Sets orientation changed listener
-        public static void setOrientationChangedListener(Selectable.ListFragment.OnOrientationChangedListener listener)
-        {
-            //set listener
-            orientationChangedListener = listener;
-        }
-
         //Sets item changed listener
         public static void setItemChangedListener(Selectable.ListFragment.OnItemsChangedListener listener)
         {
             //set listener
             itemsChangedListener = listener;
-        }
-
-        //Calls orientation changed listener
-        public static void notifyOrientationChangedListener()
-        {
-            //if listener exists
-            if(orientationChangedListener != null)
-            {
-                //call listener
-                orientationChangedListener.orientationChanged();
-            }
         }
 
         //Calls item changed listener

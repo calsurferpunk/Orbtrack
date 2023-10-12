@@ -2135,15 +2135,16 @@ public abstract class Calculate
             }
         }
 
-        public void setChangeListeners(final Selectable.ListBaseAdapter listAdapter, final int page)
+        @Override
+        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, int page)
         {
-            PageAdapter.setOrientationChangedListener(page, new OnOrientationChangedListener()
+            return(new OnOrientationChangedListener()
             {
                 @Override
                 public void orientationChanged()
                 {
                     View rootView = Page.this.getView();
-                    View listColumns = (rootView != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+                    View listColumns = (rootView != null && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
                     Selectable.ListBaseAdapter adapter;
 
                     if(listColumns != null)
@@ -2154,7 +2155,7 @@ public abstract class Calculate
                     adapter = Page.this.getAdapter();
                     if(adapter != null)
                     {
-                       setOrientationHeaderText(adapter.headerView);
+                        setOrientationHeaderText(adapter.headerView);
                     }
                     if(Page.this.listParentView != null)
                     {
@@ -2162,6 +2163,10 @@ public abstract class Calculate
                     }
                 }
             });
+        }
+
+        public void setChangeListeners(final Selectable.ListBaseAdapter listAdapter, final int page)
+        {
             PageAdapter.setItemChangedListener(page, new OnItemsChangedListener()
             {
                 @Override @SuppressLint("NotifyDataSetChanged")
@@ -2229,7 +2234,6 @@ public abstract class Calculate
         private final Bundle[] savedInputs;
         private final Bundle[] savedSubInputs;
         private static final Object[][] savedItems = new Object[PageType.PageCount][];
-        private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnItemsChangedListener[] itemsChangedListeners = new Selectable.ListFragment.OnItemsChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnHeaderChangedListener[] headerChangedListeners = new Selectable.ListFragment.OnHeaderChangedListener[PageType.PageCount];
 
@@ -2738,17 +2742,6 @@ public abstract class Calculate
             }
         }
 
-        //Sets orientation changed listener for the given page
-        public static void setOrientationChangedListener(int position, Selectable.ListFragment.OnOrientationChangedListener listener)
-        {
-            //if a valid page
-            if(position >= 0 && position < PageType.PageCount)
-            {
-                //set listener
-                orientationChangedListeners[position] = listener;
-            }
-        }
-
         //Sets item changed listener for the given page
         public static void setItemChangedListener(int position, Selectable.ListFragment.OnItemsChangedListener listener)
         {
@@ -2768,17 +2761,6 @@ public abstract class Calculate
             {
                 //set listener
                 headerChangedListeners[position] = listener;
-            }
-        }
-
-        //Calls orientation changed listener for the given page
-        public static void notifyOrientationChangedListener(int position)
-        {
-            //if a valid page and listener exists
-            if(position >= 0 && position < PageType.PageCount && orientationChangedListeners[position] != null)
-            {
-                //call listener
-                orientationChangedListeners[position].orientationChanged();
             }
         }
 

@@ -367,10 +367,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         switch(mainGroup)
         {
             case Groups.Current:
+                //need camera restart if on lens
                 restartCamera = (currentSubPage == Globals.SubPageType.Lens);
 
-                //update columns on page
-                Current.PageAdapter.notifyOrientationChangedListener();
+                //if adapter exists
+                if(currentPageAdapter != null)
+                {
+                    //send event
+                    currentPageAdapter.notifyOrientationChangedListener(page);
+                }
                 break;
 
             case Groups.Calculate:
@@ -379,14 +384,29 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     case Calculate.PageType.View:
                     case Calculate.PageType.Passes:
                     case Calculate.PageType.Intersection:
+                        //need camera restart if on lens
                         restartCamera = (calculateSubPage[page] == Globals.SubPageType.Lens);
                         break;
                 }
 
-                //update columns on all pages
-                for(index = 0; index < Calculate.PageType.PageCount; index++)
+                //if adapter exists
+                if(calculatePageAdapter != null)
                 {
-                    Calculate.PageAdapter.notifyOrientationChangedListener(index);
+                    //go through every page
+                    for(index = 0; index < Calculate.PageType.PageCount; index++)
+                    {
+                        //send event
+                        calculatePageAdapter.notifyOrientationChangedListener(index);
+                    }
+                }
+                break;
+
+            case Groups.Orbitals:
+                //if adapter exists
+                if(orbitalPageAdapter != null)
+                {
+                    //send event
+                    orbitalPageAdapter.notifyOrientationChangedListener(page);
                 }
                 break;
         }

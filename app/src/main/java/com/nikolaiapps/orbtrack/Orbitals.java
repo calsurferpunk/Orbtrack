@@ -6,7 +6,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Typeface;
@@ -732,20 +731,6 @@ public abstract class Orbitals
                 }
             }
 
-            //set change listeners
-            PageAdapter.setChangeListeners(page, new OnOrientationChangedListener()
-            {
-                @Override
-                public void orientationChanged()
-                {
-                    //update display
-                    if(listAdapter.colorDialog != null)
-                    {
-                        listAdapter.colorDialog.reload();
-                    }
-                }
-            });
-
             //return view
             return(newView);
         }
@@ -794,25 +779,6 @@ public abstract class Orbitals
             searchView = (SearchView)searchMenu.getActionView();
             menu.findItem(R.id.menu_save).setVisible(onOrbitalSatellitesExistNoModify);
             menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
-        }
-
-        @Override
-        public void onConfigurationChanged(@NonNull Configuration newConfig)
-        {
-            super.onConfigurationChanged(newConfig);
-
-            int index;
-
-            //update displays
-            for(index =  0; index < PageType.PageCount; index++)
-            {
-                //if listener is set
-                if(PageAdapter.orientationChangedListeners[index] != null)
-                {
-                    //call listener
-                    PageAdapter.orientationChangedListeners[index].orientationChanged();
-                }
-            }
         }
 
         @Override
@@ -972,6 +938,32 @@ public abstract class Orbitals
         {
             refreshActionMode();
             setItemClicksEnabled(true);
+        }
+
+        @Override
+        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, int page)
+        {
+            if(listAdapter instanceof PageListAdapter)
+            {
+                PageListAdapter adapter = (PageListAdapter)listAdapter;
+
+                return(new OnOrientationChangedListener()
+                {
+                    @Override
+                    public void orientationChanged()
+                    {
+                        //update display
+                        if(adapter.colorDialog != null)
+                        {
+                            adapter.colorDialog.reload();
+                        }
+                    }
+                });
+            }
+            else
+            {
+                return(null);
+            }
         }
 
         //Updates displays
@@ -1357,7 +1349,6 @@ public abstract class Orbitals
     //Page adapter
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
-        private static final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[PageType.PageCount];
         private static final Selectable.ListFragment.OnUpdatePageListener[] updatePageListeners = new Selectable.ListFragment.OnUpdatePageListener[PageType.PageCount];
 
         public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnUpdateNeededListener updateListener, Selectable.ListFragment.OnPageResumeListener resumeListener)
@@ -1461,17 +1452,6 @@ public abstract class Orbitals
             if(position < updatePageListeners.length && updatePageListeners[position] != null)
             {
                 updatePageListeners[position].updatePage(position, -1);
-            }
-        }
-
-        //Sets information changed listener for the given page
-        public static void setChangeListeners(int position, Selectable.ListFragment.OnOrientationChangedListener orientationChangedListener)
-        {
-            //if a valid page
-            if(position < PageType.PageCount)
-            {
-                //set listeners
-                orientationChangedListeners[position] = orientationChangedListener;
             }
         }
     }

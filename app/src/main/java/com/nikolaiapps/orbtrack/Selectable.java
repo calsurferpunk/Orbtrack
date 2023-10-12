@@ -1403,6 +1403,70 @@ public abstract class Selectable
             //return view
             return(newView);
         }
+        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page, boolean useListColumns)
+        {
+            int viewIndex;
+            View header;
+            View listColumns;
+            Context context = this.getContext();
+            ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_material_view : R.layout.list_view), container, false);
+
+            //remember group and page
+            group = grp;
+            pageNum = page;
+
+            //setup header
+            header = Globals.replaceView(R.id.List_Header, R.layout.header_text_view, inflater, rootView);
+
+            //setup columns
+            listColumns = rootView.findViewById(R.id.List_View_Columns);
+            viewIndex = rootView.indexOfChild(listColumns);
+            rootView.removeViewAt(viewIndex);
+            if(useListColumns && listAdapter != null && listAdapter.itemsRefID > -1)
+            {
+                listColumns = inflater.inflate(listAdapter.forSubItems ? listAdapter.itemsRefSubId : listAdapter.itemsRefID, rootView, false);
+                rootView.addView(listColumns, viewIndex);
+                listAdapter.itemsRootViewID = listColumns.getId();
+            }
+            else
+            {
+                listColumns = null;
+            }
+
+            //setup category
+            categoryText = rootView.findViewById(android.R.id.title);
+            ((View)categoryText.getParent()).setVisibility(View.GONE);
+
+            //setup list
+            selectList = rootView.findViewById(R.id.List_View_List);
+            selectList.setHasFixedSize(true);
+            selectListAdapter = listAdapter;
+            if(selectListAdapter != null)
+            {
+                setListColumns(context, listColumns, pageNum);
+
+                selectListAdapter.setHeader(header);
+                selectList.setAdapter(selectListAdapter);
+                if(adapterSetListener != null)
+                {
+                    adapterSetListener.setAdapter(this, group, pageNum, selectListAdapter);
+                }
+                selectListAdapter.setOnItemClickedListener(createOnItemClickListener());
+                selectListAdapter.setOnItemLongClickedListener(createOnItemLongClickListener());
+                selectListAdapter.setOnItemDetailButtonClickedListener(createOnItemDetailButtonClickListener());
+                if(selectListAdapter.forSubItems)
+                {
+                    rootView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
+                }
+            }
+
+            //return view
+            return(rootView);
+        }
+        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page)
+        {
+            return(onCreateView(inflater, container, listAdapter, grp, page, true));
+        }
 
         @Override
         public void setArguments(@Nullable Bundle args)
@@ -1491,71 +1555,6 @@ public abstract class Selectable
                     selectListAdapter.setColumnTitles((ViewGroup)listColumns, categoryText, pageNum);
                 }
             }
-        }
-
-        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page, boolean useListColumns)
-        {
-            int viewIndex;
-            View header;
-            View listColumns;
-            Context context = this.getContext();
-            ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_material_view : R.layout.list_view), container, false);
-
-            //remember group and page
-            group = grp;
-            pageNum = page;
-
-            //setup header
-            header = Globals.replaceView(R.id.List_Header, R.layout.header_text_view, inflater, rootView);
-
-            //setup columns
-            listColumns = rootView.findViewById(R.id.List_View_Columns);
-            viewIndex = rootView.indexOfChild(listColumns);
-            rootView.removeViewAt(viewIndex);
-            if(useListColumns && listAdapter != null && listAdapter.itemsRefID > -1)
-            {
-                listColumns = inflater.inflate(listAdapter.forSubItems ? listAdapter.itemsRefSubId : listAdapter.itemsRefID, rootView, false);
-                rootView.addView(listColumns, viewIndex);
-                listAdapter.itemsRootViewID = listColumns.getId();
-            }
-            else
-            {
-                listColumns = null;
-            }
-
-            //setup category
-            categoryText = rootView.findViewById(android.R.id.title);
-            ((View)categoryText.getParent()).setVisibility(View.GONE);
-
-            //setup list
-            selectList = rootView.findViewById(R.id.List_View_List);
-            selectList.setHasFixedSize(true);
-            selectListAdapter = listAdapter;
-            if(selectListAdapter != null)
-            {
-                setListColumns(context, listColumns, pageNum);
-
-                selectListAdapter.setHeader(header);
-                selectList.setAdapter(selectListAdapter);
-                if(adapterSetListener != null)
-                {
-                    adapterSetListener.setAdapter(this, group, pageNum, selectListAdapter);
-                }
-                selectListAdapter.setOnItemClickedListener(createOnItemClickListener());
-                selectListAdapter.setOnItemLongClickedListener(createOnItemLongClickListener());
-                selectListAdapter.setOnItemDetailButtonClickedListener(createOnItemDetailButtonClickListener());
-                if(selectListAdapter.forSubItems)
-                {
-                    rootView.setBackgroundColor(Globals.resolveColorID(context, R.attr.pageHighlightBackground));
-                }
-            }
-
-            //return view
-            return(rootView);
-        }
-        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page)
-        {
-            return(onCreateView(inflater, container, listAdapter, grp, page, true));
         }
 
         @Override
@@ -1836,6 +1835,12 @@ public abstract class Selectable
             return(selectListAdapter);
         }
 
+        //Gets list
+        protected RecyclerView getList()
+        {
+            return(selectList);
+        }
+
         //Gets if list is loading items
         public boolean isListLoadingItems()
         {
@@ -1969,6 +1974,12 @@ public abstract class Selectable
                     }
                 }
             });
+        }
+
+        //Creates an orientation changed listener
+        protected OnOrientationChangedListener createOnOrientationChangedListener(final RecyclerView list, final ListBaseAdapter listAdapter, final int page)
+        {
+            return(null);
         }
 
         //Creates an on graph changed listener
@@ -2274,6 +2285,7 @@ public abstract class Selectable
         private final ListFragment.OnAdapterSetListener adapterSetListener;
         protected final ListFragment.OnPageSetListener pageSetListener;
         private final ListFragment.OnPageResumeListener pageResumeListener;
+        private final Selectable.ListFragment.OnOrientationChangedListener[] orientationChangedListeners = new Selectable.ListFragment.OnOrientationChangedListener[getCount()];
         private final Selectable.ListFragment.OnGraphChangedListener[] graphChangedListeners = new ListFragment.OnGraphChangedListener[getCount()];
         private final Selectable.ListFragment.OnPreview3dChangedListener[] preview3dChangedListeners = new ListFragment.OnPreview3dChangedListener[getCount()];
         private final Selectable.ListFragment.OnInformationChangedListener[] informationChangedListeners = new Selectable.ListFragment.OnInformationChangedListener[getCount()];
@@ -2296,8 +2308,10 @@ public abstract class Selectable
                 @Override
                 public void onPageSet(ListFragment page, int pageNum, int subPageNum)
                 {
+                    RecyclerView pageList = page.getList();
                     ListBaseAdapter pageAdapter = page.getAdapter();
 
+                    ListFragmentAdapter.this.setOrientationChangedListener(pageNum, page.createOnOrientationChangedListener(pageList, pageAdapter, pageNum));
                     ListFragmentAdapter.this.setGraphChangedListener(pageNum, page.createOnGraphChangedListener(pageAdapter));
                     ListFragmentAdapter.this.setPreview3dChangedListener(pageNum, page.createOnPreview3dChangedListener(pageAdapter));
                     ListFragmentAdapter.this.setInformationChangedListener(pageNum, page.createOnInformationChangedListener(pageAdapter));
@@ -2451,6 +2465,28 @@ public abstract class Selectable
         private boolean validPage(int position)
         {
             return(position >= 0 && position < getCount());
+        }
+
+        //Sets orientation changed listener for the given page
+        public void setOrientationChangedListener(int position, Selectable.ListFragment.OnOrientationChangedListener listener)
+        {
+            //if a valid page
+            if(validPage(position))
+            {
+                //set listener
+                orientationChangedListeners[position] = listener;
+            }
+        }
+
+        //Calls orientation changed listener for the given page
+        public void notifyOrientationChangedListener(int position)
+        {
+            //if a valid page and listener exists
+            if(validPage(position) && orientationChangedListeners[position] != null)
+            {
+                //call listener
+                orientationChangedListeners[position].orientationChanged();
+            }
         }
 
         //Sets graph changed listener for the given page

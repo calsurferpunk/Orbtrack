@@ -7,7 +7,7 @@
         android:icon="@drawable/ic_search_white"
         android:orderInCategory="10"
         app:showAsAction="collapseActionView|always"
-        app:actionViewClass="android.widget.SearchView"
+        app:actionViewClass="com.nikolaiapps.orbtrack.CustomSearchView"
         android:visible="false"/>
 
     <item

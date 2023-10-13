@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
-import android.widget.SearchView;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
@@ -414,7 +413,7 @@ public class MasterAddListActivity extends BaseInputActivity
     private SelectListInterface ownerList;
     private SelectListInterface groupList;
     private SelectListInterface ageList;
-    private SearchView searchView;
+    private CustomSearchView searchView;
     private AppCompatImageButton showButton;
     private MaterialButton addButton;
     private MultiProgressDialog downloadProgress;
@@ -1045,7 +1044,7 @@ public class MasterAddListActivity extends BaseInputActivity
         //create options menu
         getMenuInflater().inflate(R.menu.menu_master_layout, menu);
         searchMenu = menu.findItem(R.id.menu_search);
-        searchView = (searchMenu != null ? (SearchView)searchMenu.getActionView() : null);
+        searchView = (searchMenu != null ? (CustomSearchView)searchMenu.getActionView() : null);
 
         return(super.onCreateOptionsMenu(menu));
     }

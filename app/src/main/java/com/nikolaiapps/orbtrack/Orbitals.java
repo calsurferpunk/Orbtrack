@@ -21,6 +21,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.PagerTitleStrip;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -28,7 +29,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.SearchView;
 import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
@@ -630,7 +630,7 @@ public abstract class Orbitals
         private PageListAdapter listAdapter;
         private View ageLayout;
         private View searchGroup;
-        private SearchView searchView;
+        private CustomSearchView searchView;
         private LinearLayout searchLayout;
         private SelectListInterface ownerList;
         private SelectListInterface groupList;
@@ -685,7 +685,6 @@ public abstract class Orbitals
                                 public void run()
                                 {
                                     //setup inputs and collapse
-                                    searchLayout.setVisibility(simple ? View.GONE : View.VISIBLE);
                                     listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchView, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
                                     listAdapter.showSearchInputs(false);
                                 }
@@ -776,7 +775,27 @@ public abstract class Orbitals
 
             MenuItem searchMenu = menu.findItem(R.id.menu_search);
             searchMenu.setVisible(onOrbitalSatellitesExistNoModify);
-            searchView = (SearchView)searchMenu.getActionView();
+            searchView = (CustomSearchView)searchMenu.getActionView();
+            if(searchView != null)
+            {
+                searchView.setOnSearchStateChangedListener(new CustomSearchView.OnSearchStateChangedListener()
+                {
+                    @Override
+                    public void onSearchStateChanged(boolean visible)
+                    {
+                        PagerTitleStrip mainPagerTitles = MainActivity.getPagerTitles();
+
+                        if(mainPagerTitles != null)
+                        {
+                            mainPagerTitles.setVisibility(visible ? View.GONE : View.VISIBLE);
+                        }
+                        if(searchLayout != null)
+                        {
+                            searchLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+                        }
+                    }
+                });
+            }
             menu.findItem(R.id.menu_save).setVisible(onOrbitalSatellitesExistNoModify);
             menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
         }

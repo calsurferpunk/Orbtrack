@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.SearchView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.recyclerview.widget.RecyclerView;
@@ -384,7 +383,7 @@ public class OrbitalFilterList
         }
 
         //Sets up inputs
-        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, View ageLayout, SearchView searchView, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
+        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, View ageLayout, CustomSearchView searchView, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
         {
             this.searchTable = searchGroup;
             this.showButton = showButton;
@@ -424,7 +423,7 @@ public class OrbitalFilterList
             if(searchView != null)
             {
                 searchView.setQueryHint(searchView.getContext().getString(R.string.title_name_or_id));
-                searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener()
+                searchView.setOnQueryTextListener(new CustomSearchView.OnQueryTextListener()
                 {
                     private void updateItems(String searchString)
                     {

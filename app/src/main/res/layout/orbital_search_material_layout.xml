@@ -7,7 +7,7 @@
     android:paddingLeft="4dp"
     android:paddingRight="4dp"
     android:orientation="vertical"
-    android:background="?attr/colorAccentDark"
+    android:background="?attr/colorAccentDarkest"
     android:animateLayoutChanges="true"
     android:focusableInTouchMode="true">
     <LinearLayout
@@ -54,5 +54,5 @@
         android:layout_width="match_parent"
         android:layout_height="36dp"
         app:srcCompat="@drawable/ic_expand_less"
-        android:background="?attr/colorAccentDark"/>
+        android:background="?attr/colorAccentDarkest"/>
 </LinearLayout>

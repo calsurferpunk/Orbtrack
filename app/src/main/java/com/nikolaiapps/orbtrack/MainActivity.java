@@ -42,6 +42,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -101,6 +102,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private Bundle savedStateBundle;
     //
     //Displays
+    private static WeakReference<PagerTitleStrip> mainPagerTitlesReference;
     private Menu optionsMenu;
     private View sideActionDivider;
     private RecyclerView sideActionMenu;
@@ -220,6 +222,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         mainDrawerLayout.addDrawerListener(mainDrawerToggle);
         mainPager = this.findViewById(R.id.Main_Pager);
         mainPagerTitles = this.findViewById(R.id.Main_Pager_Titles);
+        mainPagerTitlesReference = new WeakReference<>(mainPagerTitles);
 
         //create receivers
         startCalculationListener = createOnStartCalculationListener();
@@ -1219,6 +1222,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     public ActivityResultLauncher<Intent> getResultLauncher()
     {
         return(getResultLauncher(BaseInputActivity.RequestCode.None));
+    }
+
+    //Returns pager titles
+    public static PagerTitleStrip getPagerTitles()
+    {
+        return(mainPagerTitlesReference != null ? mainPagerTitlesReference.get() : null);
     }
 
     //Returns observer
@@ -5080,7 +5089,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Starts/stops current coordinate calculations
     private void setCurrentCoordinateCalculations(boolean run, double julianDate)
     {
-        ;
         final CoordinatesFragment mapView = Current.getMapViewIfReady();
 
         //if task was running

@@ -9,7 +9,7 @@
         android:id="@+id/Orbital_Search_Table"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorAccentDark"
+        android:background="?attr/colorAccentDarkest"
         android:focusableInTouchMode="true">
         <TableRow android:padding="2dp">
             <TextView
@@ -71,5 +71,5 @@
         android:layout_width="match_parent"
         android:layout_height="36dp"
         app:srcCompat="@drawable/ic_expand_less"
-        android:background="?attr/colorAccentDark"/>
+        android:background="?attr/colorAccentDarkest"/>
 </LinearLayout>

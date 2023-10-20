@@ -507,6 +507,7 @@
     <string name="title_phase">Fase</string>
     <string name="title_piece_of_launch">Pieza de Lanzamiento</string>
     <string name="title_pink">Rosado</string>
+    <string name="title_planets">Planetas</string>
     <string name="title_pluto">Plutón</string>
     <string name="title_privacy_policy">Política Privacidad</string>
     <string name="title_purple">Púrpura</string>
@@ -546,7 +547,7 @@
     <string name="title_select_folder">Seleccione Carpeta</string>
     <string name="title_select_list_filter">Seleccionar Filtro de Lista</string>
     <string name="title_select_orbital">Seleccionar Orbital</string>
-    <string name="title_select_satellites">Seleccionar Satélites</string>
+    <string name="title_select_orbitals">Seleccionar Orbitales</string>
     <string name="title_select_source">Seleccionar Fuente</string>
     <string name="title_select_visible">Seleccione Visible</string>
     <string name="title_selected_delete">Eliminar Seleccionado</string>

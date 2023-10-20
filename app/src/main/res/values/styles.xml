@@ -606,6 +606,23 @@
 
     <style name="OrbitalSearchMaterialList" parent="TextViewMaterialList">
         <item name="android:textColor">?titleTextColor</item>
+        <item name="android:enabled">false</item>
+    </style>
+
+    <style name="OrbitalSearchList">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:enabled">false</item>
+    </style>
+
+    <style name="OrbitalSearchText">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_gravity">center|end</item>
+        <item name="android:paddingLeft">3dp</item>
+        <item name="android:paddingRight">3dp</item>
+        <item name="android:textColor">?attr/colorAccentLightest</item>
     </style>
 
     <!--Combined Layout-->

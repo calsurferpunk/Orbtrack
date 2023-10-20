@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 
 public class OrbitalFilterList
@@ -57,7 +58,7 @@ public class OrbitalFilterList
 
         public Item(UpdateService.MasterSatellite satellite, String owner, boolean startCheck)
         {
-            super(-1, -1, false, false, true, startCheck);
+            super(satellite.noradId, -1, false, false, true, startCheck);
 
             this.satellite = satellite;
             ownerCodes = new ArrayList<>(0);
@@ -81,7 +82,7 @@ public class OrbitalFilterList
             Resources res = (haveContext ? context.getResources() : null);
             String[][] groups = (haveContext ? Database.getSatelliteCategoriesEnglish(context, satellite.noradId) : new String[0][0]);
 
-            this.satellite = new UpdateService.MasterSatellite(satellite.noradId, satellite.name, satellite.ownerCode, satellite.ownerName, satellite.launchDateMs);
+            this.satellite = new UpdateService.MasterSatellite(satellite.noradId, satellite.name, satellite.ownerCode, satellite.ownerName, satellite.orbitalType, satellite.launchDateMs);
             ownerCodes = new ArrayList<>(0);
             ownerCodes.add(satellite.ownerCode);
             categories = new ArrayList<>(0);
@@ -136,6 +137,7 @@ public class OrbitalFilterList
         private static int listTitleTextColor;
         private static int listBgSelectedColor;
         private static int listTextSelectedColor;
+        private String listAllString;
         private View searchTable;
         private AppCompatImageButton showButton;
 
@@ -144,11 +146,13 @@ public class OrbitalFilterList
         {
             final ArrayList<UpdateService.MasterOwner> owners;
             final ArrayList<String> categories;
+            final ArrayList<Byte> types;
 
-            public UsedData(ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories)
+            public UsedData(ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, ArrayList<Byte> usedTypes)
             {
                 owners = usedOwners;
                 categories = usedCategories;
+                types = usedTypes;
             }
         }
 
@@ -158,10 +162,13 @@ public class OrbitalFilterList
 
         private void baseConstructor(Context context)
         {
+            boolean haveContext = (context != null);
+
             foundLaunchDate = false;
             displayedItems = new ArrayList<>(0);
             allItems = new Item[0];
-            listTitleTextColor = (context != null ? Globals.resolveColorID(context, R.attr.titleTextColor) : Color.WHITE);
+            listTitleTextColor = (haveContext ? Globals.resolveColorID(context, R.attr.titleTextColor) : Color.WHITE);
+            listAllString = (haveContext ? context.getString(R.string.title_list_all) : "");
         }
 
         public OrbitalListAdapter(Context context)
@@ -187,6 +194,11 @@ public class OrbitalFilterList
             return(loadingItems ? 1 : displayedItems.size());
         }
 
+        public int getAllItemCount()
+        {
+            return(allItems != null ? allItems.length : 0);
+        }
+
         @Override
         public OrbitalFilterList.Item getItem(int position)
         {
@@ -201,10 +213,9 @@ public class OrbitalFilterList
 
         //Sets visibility of views by group
         @SuppressLint("NotifyDataSetChanged")
-        protected void showViews(String ownerCode, String categoryName, long currentMs, int ageValue, String searchString)
+        private void showViews(String ownerCode, String categoryName, long currentMs, int ageValue, byte typeValue, String searchString)
         {
             int index;
-            String listAllString = (haveContext() ? currentContext.getString(R.string.title_list_all) : null);
             String searchStringInsensitive = searchString.trim().toLowerCase();
 
             //clear current items
@@ -217,7 +228,7 @@ public class OrbitalFilterList
                 OrbitalFilterList.Item item = allItems[index];
 
                 //add to displayed if -category is "ALL" or matches given- and -age is any or within day range- and -search string is "" or contains given-
-                if((ownerCode.equals(listAllString) || item.ownerCodes.contains(ownerCode)) && (categoryName.equals(listAllString) || item.categories.contains(categoryName)) && (ageValue == -1 || ((currentMs - item.launchDateMs) <= (ageValue * Calculations.MsPerDay))) && (searchStringInsensitive.equals("") || item.satellite.name.toLowerCase().contains(searchStringInsensitive) || String.valueOf(item.satellite.noradId).contains(searchStringInsensitive)))
+                if((ownerCode.equals(listAllString) || item.ownerCodes.contains(ownerCode)) && (categoryName.equals(listAllString) || item.categories.contains(categoryName)) && (ageValue == -1 || ((currentMs - item.launchDateMs) <= (ageValue * Calculations.MsPerDay))) && (typeValue == -1 || item.satellite.orbitalType == typeValue) && (searchStringInsensitive.equals("") || item.satellite.name.toLowerCase().contains(searchStringInsensitive) || String.valueOf(item.satellite.noradId).contains(searchStringInsensitive)))
                 {
                     //add to displayed items
                     displayedItems.add(item);
@@ -226,6 +237,10 @@ public class OrbitalFilterList
 
             //refresh list
             this.notifyDataSetChanged();
+        }
+        private void showViews(SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, SelectListInterface typeList, CustomSearchView searchView)
+        {
+            showViews((ownerList != null ? (String)ownerList.getSelectedValue(listAllString) : listAllString), (groupList != null ? groupList.getSelectedValue(listAllString).toString() : listAllString), System.currentTimeMillis(), (ageList != null ? (int)ageList.getSelectedValue(-1) : -1), (typeList != null ? (byte)typeList.getSelectedValue(-1) : -1), (searchView != null ? searchView.getQuery().toString() : ""));
         }
 
         //Returns if a launch date was found
@@ -242,14 +257,16 @@ public class OrbitalFilterList
             ArrayList<UpdateService.MasterOwner> usedOwners = new ArrayList<>(0);
             ArrayList<String> usedOwnerCodes = new ArrayList<>(0);
             ArrayList<String> usedCategories = new ArrayList<>(0);
+            ArrayList<Byte> usedTypes = new ArrayList<>(0);
 
             //get owners and categories
             for(index = 0; index < allItems.length; index++)
             {
-                //remember current item, owner, and code
+                //remember current item, owner, code, and type
                 OrbitalFilterList.Item currentItem = allItems[index];
                 UpdateService.MasterOwner currentOwner = new UpdateService.MasterOwner(currentItem.satellite.ownerCode, currentItem.satellite.ownerName);
                 String ownerCode = currentOwner.code;
+                byte currentType = currentItem.satellite.orbitalType;
 
                 //if owner is not in the list
                 if(ownerCode != null && !usedOwnerCodes.contains(ownerCode))
@@ -272,14 +289,38 @@ public class OrbitalFilterList
                         usedCategories.add(currentCategory);
                     }
                 }
+
+                //if type is not in the list
+                if(!usedTypes.contains(currentType))
+                {
+                    //add it
+                    usedTypes.add(currentType);
+                }
             }
 
-            //sort owners and categories
+            //sort owners, categories, and types
             Collections.sort(usedOwners);
             Collections.sort(usedCategories);
+            Collections.sort(usedTypes);
 
             //return used data
-            return(new UsedData(usedOwners, usedCategories));
+            return(new UsedData(usedOwners, usedCategories, usedTypes));
+        }
+
+        //Sets up list adapter
+        private void setupListAdapter(SelectListInterface inputList, IconSpinner.CustomAdapter listAdapter, AdapterView.OnItemSelectedListener itemSelectedListener)
+        {
+            if(inputList != null)
+            {
+                inputList.setAdapter(listAdapter);
+                inputList.setBackgroundColor(listBgColor);
+                inputList.setBackgroundItemColor(listBgItemColor);
+                inputList.setBackgroundItemSelectedColor(listBgSelectedColor);
+                inputList.setTextColor(listTextColor, listTitleTextColor);
+                inputList.setTextSelectedColor(listTextSelectedColor);
+                inputList.setOnItemSelectedListener(itemSelectedListener);
+                inputList.setEnabled(true);
+            }
         }
 
         //Sets up owner list
@@ -288,32 +329,23 @@ public class OrbitalFilterList
             int index;
             String listAllString = (haveContext() ? currentContext.getString(R.string.title_list_all) : null);
             String unknown = Globals.getUnknownString(currentContext);
-            IconSpinner.CustomAdapter listAdapter;
             IconSpinner.Item[] owners;
 
-            if(unknown != null)
+            if(usedOwners != null)
             {
-                unknown = unknown.toUpperCase();
-            }
-            owners = new IconSpinner.Item[usedOwners.size() + 1];
-            owners[0] = new IconSpinner.Item(listAllString, listAllString);
-            for(index = 0; index < usedOwners.size(); index++)
-            {
-                UpdateService.MasterOwner currentItem = usedOwners.get(index);
-                int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
-                owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
-            }
-            listAdapter = new IconSpinner.CustomAdapter(currentContext, owners);
-            if(ownerList != null)
-            {
-                ownerList.setAdapter(listAdapter);
-                ownerList.setBackgroundColor(listBgColor);
-                ownerList.setBackgroundItemColor(listBgItemColor);
-                ownerList.setBackgroundItemSelectedColor(listBgSelectedColor);
-                ownerList.setTextColor(listTextColor, listTitleTextColor);
-                ownerList.setTextSelectedColor(listTextSelectedColor);
-                ownerList.setOnItemSelectedListener(itemSelectedListener);
-                ownerList.setEnabled(true);
+                if(unknown != null)
+                {
+                    unknown = unknown.toUpperCase();
+                }
+                owners = new IconSpinner.Item[usedOwners.size() + 1];
+                owners[0] = new IconSpinner.Item(listAllString, listAllString);
+                for(index = 0; index < usedOwners.size(); index++)
+                {
+                    UpdateService.MasterOwner currentItem = usedOwners.get(index);
+                    int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
+                    owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
+                }
+                setupListAdapter(ownerList, new IconSpinner.CustomAdapter(currentContext, owners), itemSelectedListener);
             }
         }
 
@@ -322,18 +354,11 @@ public class OrbitalFilterList
         {
             ArrayList<String> groups;
 
-            groups = usedCategories;
-            groups.add(0, (haveContext() ? currentContext.getString(R.string.title_list_all) : null));
-            if(groupList != null)
+            if(usedCategories != null)
             {
-                groupList.setAdapter(new IconSpinner.CustomAdapter(currentContext, groups.toArray(new String[0])));
-                groupList.setBackgroundColor(listBgColor);
-                groupList.setBackgroundItemColor(listBgItemColor);
-                groupList.setBackgroundItemSelectedColor(listBgSelectedColor);
-                groupList.setTextColor(listTextColor, listTitleTextColor);
-                groupList.setTextSelectedColor(listTextSelectedColor);
-                groupList.setOnItemSelectedListener(itemSelectedListener);
-                groupList.setEnabled(true);
+                groups = usedCategories;
+                groups.add(0, (haveContext() ? currentContext.getString(R.string.title_list_all) : null));
+                setupListAdapter(groupList, new IconSpinner.CustomAdapter(currentContext, groups.toArray(new String[0])), itemSelectedListener);
             }
         }
 
@@ -345,27 +370,79 @@ public class OrbitalFilterList
             String daysString = (res != null ? res.getString(R.string.title_days) : null);
             String monthsString = (res != null ? res.getString(R.string.title_months) : null);
 
-            if(ageList != null)
+            setupListAdapter(ageList, new IconSpinner.CustomAdapter(currentContext, res != null ? (new IconSpinner.Item[]
             {
-                ageList.setAdapter(new IconSpinner.CustomAdapter(currentContext, res != null ? (new IconSpinner.Item[]
+                new IconSpinner.Item(res.getString(R.string.title_any), -1),
+                new IconSpinner.Item(res.getString(R.string.title_today), 0),
+                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + daysString, 3),
+                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_7) + " " + daysString, 7),
+                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_14) + " " + daysString, 14),
+                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_30) + " " + daysString, 30),
+                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + monthsString, 93),
+                new IconSpinner.Item(lastString + " " + res.getString(R.string.text_6) + " " + monthsString, 183),
+                new IconSpinner.Item(res.getString(R.string.title_this_year), 366)
+            }) : new IconSpinner.Item[0]), itemSelectedListener);
+        }
+
+        //Sets up type list
+        private void setupTypeList(SelectListInterface typeList, List<Byte> usedTypes, AdapterView.OnItemSelectedListener itemSelectedListener)
+        {
+            int index;
+            Resources res = (haveContext() ? currentContext.getResources() : null);
+            boolean haveRes = (res != null);
+            String listAllString = (haveRes ? res.getString(R.string.title_list_all) : null);
+            String unknown = Globals.getUnknownString(currentContext);
+            IconSpinner.Item[] types;
+
+            if(usedTypes != null)
+            {
+                types = new IconSpinner.Item[usedTypes.size() + 1];
+                types[0] = new IconSpinner.Item(listAllString, (byte)-1);
+                for(index = 0; index < usedTypes.size(); index++)
                 {
-                    new IconSpinner.Item(res.getString(R.string.title_any), -1),
-                    new IconSpinner.Item(res.getString(R.string.title_today), 0),
-                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + daysString, 3),
-                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_7) + " " + daysString, 7),
-                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_14) + " " + daysString, 14),
-                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_30) + " " + daysString, 30),
-                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_3) + " " + monthsString, 93),
-                    new IconSpinner.Item(lastString + " " + res.getString(R.string.text_6) + " " + monthsString, 183),
-                    new IconSpinner.Item(res.getString(R.string.title_this_year), 366)
-                }) : new IconSpinner.Item[0]));
-                ageList.setBackgroundColor(listBgColor);
-                ageList.setBackgroundItemColor(listBgItemColor);
-                ageList.setBackgroundItemSelectedColor(listBgSelectedColor);
-                ageList.setTextColor(listTextColor, listTitleTextColor);
-                ageList.setTextSelectedColor(listTextSelectedColor);
-                ageList.setOnItemSelectedListener(itemSelectedListener);
-                ageList.setEnabled(true);
+                    int currentId = Integer.MIN_VALUE;
+                    byte currentType = usedTypes.get(index);
+                    String currentTypeString;
+
+                    switch(currentType)
+                    {
+                        case Database.OrbitalType.Star:
+                        case Database.OrbitalType.Sun:
+                            currentTypeString = (haveRes ? res.getString(R.string.title_stars) : null);
+                            break;
+
+                        case Database.OrbitalType.Planet:
+                            currentId = Universe.IDs.Saturn;
+                            currentTypeString = (haveRes ? res.getString(R.string.title_planets) : null);
+                            break;
+
+                        case Database.OrbitalType.Satellite:
+                            currentId = 1;
+                            currentTypeString = (haveRes ? res.getString(R.string.title_satellites) : null);
+                            break;
+
+                        case Database.OrbitalType.RocketBody:
+                            currentId = 1;
+                            currentTypeString = (haveRes ? res.getString(R.string.title_rocket_bodies) : null);
+                            break;
+
+                        case Database.OrbitalType.Debris:
+                            currentId = 1;
+                            currentTypeString = (haveRes ? res.getString(R.string.title_debris) : null);
+                            break;
+
+                        case Database.OrbitalType.Constellation:
+                            currentTypeString = (haveRes ? res.getString(R.string.title_constellations) : null);
+                            break;
+
+                        default:
+                            currentTypeString = unknown;
+                            break;
+                    }
+
+                    types[index + 1] = new IconSpinner.Item(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentId, currentType), currentTypeString, currentType);
+                }
+                setupListAdapter(typeList, new IconSpinner.CustomAdapter(currentContext, types), itemSelectedListener);
             }
         }
 
@@ -383,8 +460,13 @@ public class OrbitalFilterList
         }
 
         //Sets up inputs
-        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, View ageLayout, CustomSearchView searchView, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, boolean hasLaunchDates)
+        public void setupInputs(View searchGroup, SelectListInterface ownerList, SelectListInterface groupList, SelectListInterface ageList, SelectListInterface typeList, View ageLayout, View groupLayout, View ownerLayout, View typeLayout, CustomSearchView searchView, AppCompatImageButton showButton, ArrayList<UpdateService.MasterOwner> usedOwners, ArrayList<String> usedCategories, List<Byte> usedTypes, boolean hasLaunchDates)
         {
+            boolean usingOwners = (ownerList != null);
+            boolean usingGroups = (groupList != null);
+            boolean usingAge = (ageList != null);
+            boolean usingType = (typeList != null);
+
             this.searchTable = searchGroup;
             this.showButton = showButton;
 
@@ -394,7 +476,7 @@ public class OrbitalFilterList
                 public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
                 {
                     //update visible items
-                    OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), (searchView != null ? searchView.getQuery().toString() : ""));
+                    OrbitalListAdapter.this.showViews(ownerList, groupList, ageList, typeList, searchView);
                 }
 
                 @Override
@@ -409,14 +491,39 @@ public class OrbitalFilterList
             listTextSelectedColor = Globals.resolveColorID(currentContext, R.attr.colorAccentLightest);
 
             //get owners, groups, and ages
-            setupOwnerList(ownerList, usedOwners, itemSelectedListener);
-            setupGroupList(groupList, usedCategories, itemSelectedListener);
-            setupAgeList(ageList, itemSelectedListener);
+            if(usingOwners)
+            {
+                setupOwnerList(ownerList, usedOwners, itemSelectedListener);
+            }
+            if(usingGroups)
+            {
+                setupGroupList(groupList, usedCategories, itemSelectedListener);
+            }
+            if(usingAge)
+            {
+                setupAgeList(ageList, itemSelectedListener);
+            }
+            if(usingType)
+            {
+                setupTypeList(typeList, usedTypes, itemSelectedListener);
+            }
 
-            //update age row visibility
+            //update visibility
+            if(ownerLayout != null)
+            {
+                ownerLayout.setVisibility(usingOwners ? View.VISIBLE : View.GONE);
+            }
+            if(groupLayout != null)
+            {
+                groupLayout.setVisibility(usingGroups ? View.VISIBLE : View.GONE);
+            }
             if(ageLayout != null)
             {
-                ageLayout.setVisibility(hasLaunchDates ? View.VISIBLE : View.GONE);
+                ageLayout.setVisibility(hasLaunchDates && usingAge ? View.VISIBLE : View.GONE);
+            }
+            if(typeLayout != null)
+            {
+                typeLayout.setVisibility(usingType ? View.VISIBLE : View.GONE);
             }
 
             //setup search view
@@ -425,27 +532,23 @@ public class OrbitalFilterList
                 searchView.setQueryHint(searchView.getContext().getString(R.string.title_name_or_id));
                 searchView.setOnQueryTextListener(new CustomSearchView.OnQueryTextListener()
                 {
-                    private void updateItems(String searchString)
+                    private void updateItems()
                     {
-                        //if owner, group, and age list exist
-                        if(ownerList != null && groupList != null && ageList != null)
-                        {
-                            //update visible items
-                            OrbitalListAdapter.this.showViews((String)ownerList.getSelectedValue(""), groupList.getSelectedValue("").toString(), System.currentTimeMillis(), (int)ageList.getSelectedValue(0), searchString);
-                        }
+                        //update visible items
+                        OrbitalListAdapter.this.showViews(ownerList, groupList, ageList, typeList, searchView);
                     }
 
                     @Override
                     public boolean onQueryTextSubmit(String query)
                     {
-                        updateItems(query);
+                        updateItems();
                         return(false);
                     }
 
                     @Override
                     public boolean onQueryTextChange(String newText)
                     {
-                        updateItems(newText);
+                        updateItems();
                         return(false);
                     }
                 });

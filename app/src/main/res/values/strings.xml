@@ -507,6 +507,7 @@
     <string name="title_phase">Phase</string>
     <string name="title_piece_of_launch">Piece of Launch</string>
     <string name="title_pink">Pink</string>
+    <string name="title_planets">Planets</string>
     <string name="title_pluto">Pluto</string>
     <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_purple">Purple</string>
@@ -546,7 +547,7 @@
     <string name="title_select_folder">Select Folder</string>
     <string name="title_select_list_filter">Select List Filter</string>
     <string name="title_select_orbital">Select Orbital</string>
-    <string name="title_select_satellites">Select Satellites</string>
+    <string name="title_select_orbitals">Select Orbitals</string>
     <string name="title_select_source">Select Source</string>
     <string name="title_select_visible">Select Visible</string>
     <string name="title_selected_delete">Delete Selected</string>

@@ -70,7 +70,7 @@ public abstract class Orbitals
             satelliteObject = Calculations.loadSatellite(currentSat);
             if(satellite != null)
             {
-                satellite.orbitalType = currentSat.orbitalType;;
+                satellite.orbitalType = currentSat.orbitalType;
             }
         }
     }
@@ -629,12 +629,16 @@ public abstract class Orbitals
         private Globals.PendingFile pendingSaveFile;
         private PageListAdapter listAdapter;
         private View ageLayout;
+        private View groupLayout;
+        private View ownerLayout;
+        private View typeLayout;
         private View searchGroup;
         private CustomSearchView searchView;
         private LinearLayout searchLayout;
         private SelectListInterface ownerList;
         private SelectListInterface groupList;
         private SelectListInterface ageList;
+        private SelectListInterface typeList;
         private AppCompatImageButton showButton;
         public static WeakReference<MultiProgressDialog> updateProgressReference;
 
@@ -659,7 +663,7 @@ public abstract class Orbitals
             Context context = Page.this.getContext();
             int group = this.getGroupParam();
             int page = this.getPageParam();
-            final boolean onSatellites = (page == PageType.Satellites);
+            boolean onSatellites = (page == PageType.Satellites);
             View newView;
             Intent serviceIntent;
             ArrayList<Database.DatabaseSatellite> satelliteList;
@@ -670,26 +674,18 @@ public abstract class Orbitals
                 @Override
                 public void onLoaded(ArrayList<OrbitalFilterList.Item> items, boolean foundLaunchDate)
                 {
-                    //if for satellites
-                    if(onSatellites)
+                    //if started from an activity
+                    if(context instanceof Activity)
                     {
-                        //get used data
-                        final OrbitalFilterList.OrbitalListAdapter.UsedData used = listAdapter.getUsed();
-
-                        //if started from an activity
-                        if(context instanceof Activity)
+                        ((Activity)context).runOnUiThread(new Runnable()
                         {
-                            ((Activity)context).runOnUiThread(new Runnable()
+                            @Override
+                            public void run()
                             {
-                                @Override
-                                public void run()
-                                {
-                                    //setup inputs and collapse
-                                    listAdapter.setupInputs(searchGroup, ownerList, groupList, ageList, ageLayout, searchView, showButton, used.owners, used.categories, listAdapter.getHasLaunchDates());
-                                    listAdapter.showSearchInputs(false);
-                                }
-                            });
-                        }
+                                //update inputs for page
+                                setupInputs(page);
+                            }
+                        });
                     }
                 }
             });
@@ -701,11 +697,11 @@ public abstract class Orbitals
             ownerList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
             groupList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
             ageList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
-            ageLayout = newView.findViewById(R.id.Orbital_Search_Age_Layout);
-            if(ageLayout == null)
-            {
-                ageLayout = newView.findViewById(R.id.Orbital_Search_Age_Row);
-            }
+            typeList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Type_Text_List : R.id.Orbital_Search_Type_List);
+            ownerLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Layout : R.id.Orbital_Search_Owner_Row);
+            groupLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Layout : R.id.Orbital_Search_Group_Row);
+            ageLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Layout : R.id.Orbital_Search_Age_Row);
+            typeLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Type_Layout : R.id.Orbital_Search_Type_Row);
             showButton = newView.findViewById(R.id.Orbital_Search_Show_Button);
 
             //if for satellites
@@ -770,11 +766,12 @@ public abstract class Orbitals
         public void onPrepareOptionsMenu(@NonNull Menu menu)
         {
             boolean onOrbitalSatellites = (pageNum == PageType.Satellites);
-            boolean haveSatellites = (onOrbitalSatellites && getListItemCount() > 0);
+            int itemCount = (onOrbitalSatellites && listAdapter != null ? listAdapter.getAllItemCount() : getListItemCount());
+            boolean haveSatellites = (onOrbitalSatellites && itemCount > 0);
             boolean onOrbitalSatellitesExistNoModify = (haveSatellites && !UpdateService.modifyingSatellites());
 
             MenuItem searchMenu = menu.findItem(R.id.menu_search);
-            searchMenu.setVisible(onOrbitalSatellitesExistNoModify);
+            searchMenu.setVisible(!onOrbitalSatellites || onOrbitalSatellitesExistNoModify);
             searchView = (CustomSearchView)searchMenu.getActionView();
             if(searchView != null)
             {
@@ -784,20 +781,36 @@ public abstract class Orbitals
                     public void onSearchStateChanged(boolean visible)
                     {
                         PagerTitleStrip mainPagerTitles = MainActivity.getPagerTitles();
+                        SwipeStateViewPager mainPager = MainActivity.getPager();
 
+                        //if pager titles exists
                         if(mainPagerTitles != null)
                         {
+                            //show when search hidden
                             mainPagerTitles.setVisibility(visible ? View.GONE : View.VISIBLE);
                         }
+
+                        //if pager exists
+                        if(mainPager != null)
+                        {
+                            //disable swiping searching
+                            mainPager.setSwipeEnabled(!visible);
+                        }
+
+                        //if search layout exists
                         if(searchLayout != null)
                         {
-                            searchLayout.setVisibility(visible ? View.VISIBLE : View.GONE);
+                            //update visibility
+                            searchLayout.setVisibility(visible && onOrbitalSatellitesExistNoModify ? View.VISIBLE : View.GONE);
                         }
                     }
                 });
             }
             menu.findItem(R.id.menu_save).setVisible(onOrbitalSatellitesExistNoModify);
             menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
+
+            //update inputs for page
+            setupInputs(pageNum);
         }
 
         @Override
@@ -982,6 +995,21 @@ public abstract class Orbitals
             else
             {
                 return(null);
+            }
+        }
+
+        //Sets up inputs
+        private void setupInputs(int page)
+        {
+            //if adapter exists
+            if(listAdapter != null)
+            {
+                boolean onSatellites = (page == PageType.Satellites);
+                OrbitalFilterList.OrbitalListAdapter.UsedData used = listAdapter.getUsed();
+
+                //setup inputs and collapse
+                listAdapter.setupInputs(searchGroup, (onSatellites ? ownerList : null), (onSatellites ? groupList : null), (onSatellites ? ageList : null), null, ageLayout, groupLayout, ownerLayout, typeLayout, searchView, showButton, used.owners, used.categories, used.types, listAdapter.getHasLaunchDates());
+                listAdapter.showSearchInputs(false);
             }
         }
 

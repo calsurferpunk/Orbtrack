@@ -150,7 +150,7 @@ public class CalculateService extends NotifyService
 
         protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
         {
-            super((sat != null ? sat.getSatelliteNum() : Universe.IDs.None), index, false, false, false, false);
+            super((sat != null ? sat.getSatelliteNum() : Universe.IDs.None), index);
             this.satellite = (sat != null ? new Calculations.SatelliteObjectType(sat) : null);
             this.satellite2 = (sat2 != null ? new Calculations.SatelliteObjectType(sat2) : null);
             this.id2 = (sat2 != null ? sat2.getSatelliteNum() : Universe.IDs.Invalid);

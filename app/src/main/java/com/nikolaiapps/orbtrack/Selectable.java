@@ -28,6 +28,8 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.text.Spanned;
 import android.util.TypedValue;
 import android.view.ContextThemeWrapper;
@@ -63,7 +65,7 @@ public abstract class Selectable
     }
 
     //Select list item
-    protected static class ListItem
+    protected static class ListItem implements Parcelable
     {
         public static class Comparer implements Comparator<ListItem>
         {
@@ -81,6 +83,20 @@ public abstract class Selectable
         public final boolean canCheck;
         public boolean isChecked;
         public CheckBox checkBoxView;
+        public static final Creator<ListItem> CREATOR = new Creator<ListItem>()
+        {
+            @Override
+            public ListItem createFromParcel(Parcel source)
+            {
+                return(new ListItem(source.readInt(), source.readInt(), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1)));
+            }
+
+            @Override
+            public ListItem[] newArray(int size)
+            {
+                return new ListItem[size];
+            }
+        };
 
         public ListItem(int idNum, int index, boolean canEd, boolean isSel, boolean canCh, boolean isCh)
         {
@@ -90,6 +106,27 @@ public abstract class Selectable
             isSelected = isSel;
             canCheck = canCh;
             isChecked = isCh;
+        }
+        public ListItem(int idNum, int index)
+        {
+            this(idNum, index, false, false, false, false);
+        }
+
+        @Override
+        public int describeContents()
+        {
+            return(0);
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags)
+        {
+            dest.writeInt(id);
+            dest.writeInt(listIndex);
+            dest.writeByte((byte)(canEdit ? 1 : 0));
+            dest.writeByte((byte)(isSelected ? 1 : 0));
+            dest.writeByte((byte)(canCheck ? 1 : 0));
+            dest.writeByte((byte)(isChecked ? 1 : 0));
         }
 
         public void setChecked(boolean checked)

@@ -22,8 +22,7 @@
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Owner_Text_List"
                 style="@style/OrbitalSearchMaterialList"
-                android:hint="@string/title_owner"
-                android:enabled="false"/>
+                android:hint="@string/title_owner"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -33,8 +32,7 @@
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Group_Text_List"
                 style="@style/OrbitalSearchMaterialList"
-                android:hint="@string/title_group"
-                android:enabled="false"/>
+                android:hint="@string/title_group"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
@@ -44,8 +42,17 @@
             <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                 android:id="@+id/Orbital_Search_Age_Text_List"
                 style="@style/OrbitalSearchMaterialList"
-                android:hint="@string/title_age"
-                android:enabled="false"/>
+                android:hint="@string/title_age"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/Orbital_Search_Type_Layout"
+            style="@style/OrbitalSearchTextInputLayout"
+            android:hint="@string/title_type">
+            <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                android:id="@+id/Orbital_Search_Type_Text_List"
+                style="@style/OrbitalSearchMaterialList"
+                android:hint="@string/title_type"/>
         </com.google.android.material.textfield.TextInputLayout>
     </LinearLayout>
 

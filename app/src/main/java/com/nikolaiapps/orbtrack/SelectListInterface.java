@@ -3,12 +3,14 @@ package com.nikolaiapps.orbtrack;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 
 
 public interface SelectListInterface
 {
+    void setOnClickListener(View.OnClickListener listener);
     void setOnItemSelectedListener(AdapterView.OnItemSelectedListener listener);
     AdapterView.OnItemSelectedListener getOnItemSelectedListener();
     void loadAdapter();
@@ -29,6 +31,7 @@ public interface SelectListInterface
     int getSelectedItemPosition();
     Object getSelectedValue(Object defaultValue);
     void setDropDownWidth(int width);
+    void setDropDownHeight(int height);
     void setEnabled(boolean enabled);
     void setVisibility(int visibility);
 

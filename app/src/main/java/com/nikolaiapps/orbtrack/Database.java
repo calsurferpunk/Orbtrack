@@ -3439,7 +3439,7 @@ public class Database extends SQLiteOpenHelper
             currentID = Integer.parseInt(queryResult[index][0]);
 
             //create new satellite
-            UpdateService.MasterSatellite newSatellite = new UpdateService.MasterSatellite(currentID, queryResult[index][1], queryResult[index][2], queryResult[index][3], Long.parseLong(queryResult[index][4]));
+            UpdateService.MasterSatellite newSatellite = new UpdateService.MasterSatellite(currentID, queryResult[index][1], queryResult[index][2], queryResult[index][3], (byte)-1, Long.parseLong(queryResult[index][4]));
 
             //add all categories
             do

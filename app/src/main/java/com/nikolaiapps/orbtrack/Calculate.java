@@ -21,7 +21,6 @@ import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -60,7 +59,8 @@ public abstract class Calculate
         static final String NoradId2Old = "id2Old";
         static final String MultiNoradId = "multiId";
         static final String MultiNoradIdOld = "multiIdOld";
-        static final String OrbitalIsSelected = "orbitalIsSelected";
+        static final String SelectedOrbitals = "selectedOrbitals";
+        static final String SelectedOrbitals2 = "selectedOrbitals2";
         static final String StartDateMs = "startDate";
         static final String EndDateMs = "endDate";
         static final String IncrementUnit = "incUnit";
@@ -150,7 +150,7 @@ public abstract class Calculate
 
             public Item(int index, int viewCount)
             {
-                super(Integer.MAX_VALUE, index, false, false, false, false);
+                super(Integer.MAX_VALUE, index);
 
                 isLoading = (viewCount < 1);
                 if(isLoading)
@@ -1096,7 +1096,7 @@ public abstract class Calculate
 
             public Item(int index, int coordinateCount)
             {
-                super(Integer.MAX_VALUE, index, false, false, false, false);
+                super(Integer.MAX_VALUE, index);
 
                 isLoading = (coordinateCount < 1);
                 if(isLoading)
@@ -1579,9 +1579,9 @@ public abstract class Calculate
         public DateInputView endDateText;
         public TimeInputView startTimeText;
         public TimeInputView endTimeText;
-        public MaterialButton selectButton;
         private OnStartCalculationListener startCalculationListener;
-        private boolean[] orbitalIsSelected;
+        private ArrayList<Selectable.ListItem> orbitalsSelected;
+        private ArrayList<Selectable.ListItem> orbitalsSelected2;
 
         public Page()
         {
@@ -1631,7 +1631,8 @@ public abstract class Calculate
             savedInstanceState.putInt(Selectable.ParamTypes.PageNumber, page);
             savedInstanceState.putInt(ParamTypes.NoradId, params.getInt(ParamTypes.NoradId));
             savedInstanceState.putInt(ParamTypes.NoradId2, params.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
-            savedInstanceState.putBooleanArray(ParamTypes.OrbitalIsSelected, params.getBooleanArray(ParamTypes.OrbitalIsSelected));
+            savedInstanceState.putParcelableArrayList(ParamTypes.SelectedOrbitals, params.getParcelableArrayList(ParamTypes.SelectedOrbitals));
+            savedInstanceState.putParcelableArrayList(ParamTypes.SelectedOrbitals2, params.getParcelableArrayList(ParamTypes.SelectedOrbitals2));
             savedInstanceState.putIntegerArrayList(ParamTypes.MultiNoradId, multiNoradId);
             savedInstanceState.putLong(ParamTypes.StartDateMs, params.getLong(ParamTypes.StartDateMs));
             savedInstanceState.putLong(ParamTypes.EndDateMs, params.getLong(ParamTypes.EndDateMs));
@@ -1873,23 +1874,40 @@ public abstract class Calculate
             }
         }
 
-        //Sets orbital is selected
-        private void setOrbitalIsSelected(boolean[] isSelected)
+        //Sets selected orbitals
+        private void setOrbitalsSelected(ArrayList<Selectable.ListItem> selected, int listNumber)
         {
-            //update value and display
-            orbitalIsSelected = isSelected;
-            updateSelectButton();
+            //update value
+            if(listNumber == 1)
+            {
+                orbitalsSelected = selected;
+            }
+            else
+            {
+                orbitalsSelected2 = selected;
+            }
         }
-        private void setOrbitalIsSelected(Database.DatabaseSatellite[] orbitals)
+        private void setOrbitalsSelected(Database.DatabaseSatellite[] orbitals)
         {
             int index;
             boolean haveOrbitals = (orbitals != null);
 
-            //if orbitals length changed
-            if(!haveOrbitals || orbitalIsSelected == null || orbitalIsSelected.length != orbitals.length)
+            //clear selected orbitals
+            if(orbitalsSelected == null)
             {
-                //resize selected orbitals
-                orbitalIsSelected = new boolean[haveOrbitals ? orbitals.length : 0];
+                orbitalsSelected = new ArrayList<>(0);
+            }
+            else
+            {
+                orbitalsSelected.clear();
+            }
+            if(orbitalsSelected2 == null)
+            {
+                orbitalsSelected2 = new ArrayList<>(0);
+            }
+            else
+            {
+                orbitalsSelected2.clear();
             }
 
             //if have orbitals
@@ -1898,13 +1916,19 @@ public abstract class Calculate
                 //go through each orbital
                 for(index = 0; index < orbitals.length; index++)
                 {
-                    //update if selected
-                    orbitalIsSelected[index] = orbitals[index].isSelected;
+                    //remember current orbital
+                    Database.DatabaseSatellite currentOrbital = orbitals[index];
+
+                    //if current is selected
+                    if(currentOrbital.isSelected)
+                    {
+                        //add to selected
+                        //note: creates separate item for each list
+                        orbitalsSelected.add(new Selectable.ListItem(currentOrbital.noradId, index));
+                        orbitalsSelected2.add(new Selectable.ListItem(currentOrbital.noradId, index));
+                    }
                 }
             }
-
-            //update display
-            updateSelectButton();
         }
 
         //Returns if there are any constellations in the given orbitals
@@ -1912,32 +1936,6 @@ public abstract class Calculate
         {
             int[] orbitalTypeCount = Globals.getOrbitalTypeFilterCount(orbitals);
             return(orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
-        }
-
-        //Updates select button text
-        private void updateSelectButton()
-        {
-            int count = 0;
-            String text;
-
-            //if button exists
-            if(selectButton != null)
-            {
-                //go through each value
-                for(boolean isSelected : orbitalIsSelected)
-                {
-                    //if selected
-                    if(isSelected)
-                    {
-                        //add to count
-                        count++;
-                    }
-                }
-
-                //update text with selected count
-                text = this.getString(R.string.title_select) + " (" + count + ")";
-                selectButton.setText(text);
-            }
         }
 
         //Gets input values
@@ -1960,7 +1958,6 @@ public abstract class Calculate
             Bundle pageParams = new Bundle();
             Resources res = (context != null ? context.getResources() : null);
             ArrayList<Integer> idList;
-            Database.DatabaseSatellite[] orbitals;
 
             //if missing a date/time display or resources
             if(startDateText == null || startTimeText == null || endDateText == null || endTimeText == null || res == null)
@@ -2048,8 +2045,9 @@ public abstract class Calculate
                     }
                     if(validInputs)
                     {
-                        //add units to params
+                        //add units to params and selected orbital
                         pageParams.putDouble(ParamTypes.IntersectionDegs, intersection);
+                        pageParams.putParcelableArrayList(ParamTypes.SelectedOrbitals2, orbitalsSelected2);
                     }
                     //fall through
 
@@ -2090,25 +2088,16 @@ public abstract class Calculate
                 pageParams.putInt(ParamTypes.NoradId2, noradId2);
                 if(allowMultiNoradId && noradId == Universe.IDs.Invalid)
                 {
-                    //get orbitals and check for matching select length
-                    orbitals = Database.getOrbitals(context);
-                    if(orbitalIsSelected.length == orbitals.length)
+                    //go through each orbital selection
+                    idList = new ArrayList<>(0);
+                    for(index = 0; index < orbitalsSelected.size(); index++)
                     {
-                        //go through each orbital selection
-                        idList = new ArrayList<>(0);
-                        for(index = 0; index < orbitalIsSelected.length; index++)
-                        {
-                            //if selected
-                            if(orbitalIsSelected[index])
-                            {
-                                //add ID to list
-                                idList.add(orbitals[index].noradId);
-                            }
-                        }
-                        pageParams.putIntegerArrayList(ParamTypes.MultiNoradId, idList);
+                        //add ID to list
+                        idList.add(orbitalsSelected.get(index).id);
                     }
+                    pageParams.putIntegerArrayList(ParamTypes.MultiNoradId, idList);
                 }
-                pageParams.putBooleanArray(ParamTypes.OrbitalIsSelected, orbitalIsSelected);
+                pageParams.putParcelableArrayList(ParamTypes.SelectedOrbitals, orbitalsSelected);
                 pageParams.putLong(ParamTypes.StartDateMs, startTime.getTimeInMillis());
                 pageParams.putLong(ParamTypes.EndDateMs, endTime.getTimeInMillis());
 
@@ -2330,7 +2319,8 @@ public abstract class Calculate
             params.putInt(Selectable.ParamTypes.PageNumber, position);
             params.putInt(ParamTypes.NoradId, Integer.MAX_VALUE);
             params.putInt(ParamTypes.NoradId2, Universe.IDs.Invalid);
-            params.putBooleanArray(ParamTypes.OrbitalIsSelected, null);
+            params.putParcelableArrayList(ParamTypes.SelectedOrbitals, null);
+            params.putParcelableArrayList(ParamTypes.SelectedOrbitals2, null);
             if(position == PageType.View || position == PageType.Coordinates)
             {
                 params.putIntegerArrayList(ParamTypes.MultiNoradId, (haveSavedParams ? savedParams.getIntegerArrayList(ParamTypes.MultiNoradId) : null));
@@ -2723,11 +2713,17 @@ public abstract class Calculate
             //if a valid page
             if(pageNum >= 0 && pageNum < savedInputs.length)
             {
-                //if a bool array
-                if(value instanceof boolean[])
+                //if an array of Selectable.ListItem
+                if(value instanceof Selectable.ListItem[])
                 {
-                    //set array
-                    savedInputs[pageNum].putBooleanArray(paramName, (boolean[])value);
+                    Selectable.ListItem[] valueArray = (Selectable.ListItem[])value;
+                    ArrayList<Selectable.ListItem> valueList = new ArrayList<>(0);
+
+                    //add to list
+                    valueList.addAll(Arrays.asList(valueArray));
+
+                    //set list
+                    savedInputs[pageNum].putParcelableArrayList(paramName, valueList);
                 }
             }
         }
@@ -2879,12 +2875,15 @@ public abstract class Calculate
         int pageNumber = PageType.View;
         int incrementType = IncrementType.Minutes;
         int incrementUnit = 10;
+        int selectedOrbitalCount;
+        int selectedOrbital2Count;
         double elMin = 0.0;
         double intersectionDegrees = 0.2;
         Calendar dateNow = Calendar.getInstance();
         Calendar dateLater = Calendar.getInstance();
-        boolean[] orbitalIsSelected = null;
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
+        ArrayList<Selectable.ListItem> selectedOrbitals = null;
+        ArrayList<Selectable.ListItem> selectedOrbitals2 = null;
 
         //if there is a saved state
         if(savedInstanceState != null)
@@ -2894,7 +2893,8 @@ public abstract class Calculate
                 //get values
                 orbitalId = savedInstanceState.getInt(ParamTypes.NoradId, orbitalId);
                 orbitalId2 = savedInstanceState.getInt(ParamTypes.NoradId2, orbitalId2);
-                orbitalIsSelected = savedInstanceState.getBooleanArray(ParamTypes.OrbitalIsSelected);
+                selectedOrbitals = savedInstanceState.getParcelableArrayList(ParamTypes.SelectedOrbitals);
+                selectedOrbitals2 = savedInstanceState.getParcelableArrayList(ParamTypes.SelectedOrbitals2);
                 pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
                 dateNow.setTimeInMillis(savedInstanceState.getLong(ParamTypes.StartDateMs));
                 dateLater.setTimeInMillis(savedInstanceState.getLong(ParamTypes.EndDateMs));
@@ -2907,19 +2907,21 @@ public abstract class Calculate
             {
                 //do nothing
             }
+            selectedOrbitalCount = (selectedOrbitals != null ? selectedOrbitals.size() : 0);
+            selectedOrbital2Count = (selectedOrbitals2 != null ? selectedOrbitals2.size() : 0);
 
-            //if orbital is valid
-            if(orbitalId != Integer.MAX_VALUE)
+            //if selected orbitals exist
+            if(selectedOrbitalCount > 0)
             {
-                //set orbital
+                //if list exists
                 if(page.orbitalList != null)
                 {
-                    page.orbitalList.setSelectedValue(orbitalId);
+                    //set selected
+                    page.orbitalList.setSelectedValue(selectedOrbitalCount > 1 ? Universe.IDs.Invalid : selectedOrbitals.get(0).id);
                 }
-            }
-            if(orbitalIsSelected != null)
-            {
-                page.setOrbitalIsSelected(orbitalIsSelected);
+
+                //remember selected
+                page.setOrbitalsSelected(selectedOrbitals, 1);
             }
 
             //set dates and times
@@ -2961,14 +2963,18 @@ public abstract class Calculate
                     break;
 
                 case PageType.Intersection:
-                    //if orbital 2 is valid
-                    if(orbitalId2 != Universe.IDs.Invalid)
+                    //if selected orbitals exist
+                    if(selectedOrbital2Count > 0)
                     {
-                        //set orbital 2
+                        //if list exists
                         if(page.orbital2List != null)
                         {
-                            page.orbital2List.setSelectedValue(orbitalId2);
+                            //set selected
+                            page.orbital2List.setSelectedValue(selectedOrbital2Count > 1 ? Universe.IDs.Invalid : selectedOrbitals2.get(0).id);
                         }
+
+                        //remember selected
+                        page.setOrbitalsSelected(selectedOrbitals2, 2);
                     }
                     //fall through
 
@@ -3015,18 +3021,32 @@ public abstract class Calculate
     }
 
     //Sets up given orbital list
-    private static void setupOrbitalList(SelectListInterface orbitalList, IconSpinner.CustomAdapter orbitalAdapter, int backgroundColor, AdapterView.OnItemSelectedListener listener)
+    private static void setupOrbitalList(Page page, IconSpinner.CustomAdapter orbitalAdapter, boolean usingMulti, int backgroundColor, int listNumber)
     {
+        SelectListInterface orbitalList = (listNumber == 1 ? page.orbitalList : page.orbital2List);
+
         //if list exists
         if(orbitalList != null)
         {
+            //get activity
+            Activity activity = page.getActivity();
+
             //set adapter, background, and listener
             orbitalList.setAdapter(orbitalAdapter);
             orbitalList.setBackgroundColor(backgroundColor);
-            if(listener != null)
+            orbitalList.setDropDownHeight(0);
+            orbitalList.setOnClickListener(new View.OnClickListener()
             {
-                orbitalList.setOnItemSelectedListener(listener);
-            }
+                @Override
+                public void onClick(View v)
+                {
+                    if(activity instanceof MainActivity)
+                    {
+                        MainActivity mainActivity = (MainActivity)activity;
+                        MasterAddListActivity.showList(mainActivity, mainActivity.getResultLauncher(), (usingMulti ? MasterAddListActivity.ListType.SelectMultipleList : MasterAddListActivity.ListType.SelectSingleList), BaseInputActivity.RequestCode.OrbitalSelectList, (listNumber == 1 ? page.orbitalsSelected : page.orbitalsSelected2), listNumber);
+                    }
+                }
+            });
         }
     }
 
@@ -3041,13 +3061,13 @@ public abstract class Calculate
     //Create page
     private static View onCreateView(final Page page, LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
     {
-        Context context = page.getContext();
+        Activity activity = page.getActivity();
         final boolean haveSavedInstance = (savedInstanceState != null);
         final int pageNumber = (haveSavedInstance ? savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View) : PageType.View);
-        final int backgroundColor = Globals.resolveColorID(context, android.R.attr.colorBackground);
+        final int backgroundColor = Globals.resolveColorID(activity, android.R.attr.colorBackground);
         final boolean onIntersection = (pageNumber == PageType.Intersection);
         final boolean usingMulti = (pageNumber == PageType.View || pageNumber == PageType.Coordinates);
-        final boolean usingMaterial = Settings.getMaterialTheme(context);
+        final boolean usingMaterial = Settings.getMaterialTheme(activity);
         int viewRowVisibility = View.VISIBLE;
         int elevationMinVisibility = View.VISIBLE;
         int intersectionVisibility = (onIntersection ? View.VISIBLE : View.GONE);
@@ -3058,7 +3078,6 @@ public abstract class Calculate
         View intersectionUnitLayout = rootView.findViewById(R.id.Calculate_Intersection_Unit_Layout);
         View elevationMinRow = rootView.findViewById(R.id.Calculate_Elevation_Min_Row);
         View elevationMinUnitLayout = rootView.findViewById(R.id.Calculate_Elevation_Min_Unit_Layout);
-        View selectButtonLayout = rootView.findViewById(R.id.Calculate_Select_Layout);
         TextView orbital2ListTitle = rootView.findViewById(R.id.Calculate_Orbital2_List_Title);
         TextInputLayout endDateLayout = rootView.findViewById(R.id.Calculate_End_Date_Layout);
         TextInputLayout endTimeLayout = rootView.findViewById(R.id.Calculate_End_Time_Layout);
@@ -3069,8 +3088,7 @@ public abstract class Calculate
         IconSpinner.CustomAdapter orbitalAdapter;
         IconSpinner.CustomAdapter orbital2Adapter;
         IconSpinner.CustomAdapter incrementAdapter;
-        AdapterView.OnItemSelectedListener itemSelectedListener;
-        String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);
+        String[] incrementTypeArray = (activity != null ? getIncrementTypes(activity) : null);
 
         //set page displays
         page.viewUnitText = rootView.findViewById(R.id.Calculate_View_Unit_Text);
@@ -3083,10 +3101,9 @@ public abstract class Calculate
         page.endDateText = rootView.findViewById(R.id.Calculate_End_Date_Text);
         page.startTimeText = rootView.findViewById(R.id.Calculate_Start_Time_Text);
         page.endTimeText = rootView.findViewById(R.id.Calculate_End_Time_Text);
-        page.selectButton = rootView.findViewById(R.id.Calculate_Select_Button);
 
         //load objects
-        orbitals = Database.getOrbitals(context);
+        orbitals = Database.getOrbitals(activity);
         for(Database.DatabaseSatellite currentOrbital : orbitals)
         {
             //remove any filter
@@ -3094,41 +3111,13 @@ public abstract class Calculate
         }
 
         //set orbital list items
-        orbitalAdapter = createOrbitalAdapter(context, page.orbitalList, orbitals, usingMulti, (haveSavedInstance ? savedInstanceState.getInt(ParamTypes.NoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE));
-        itemSelectedListener = new AdapterView.OnItemSelectedListener()
-        {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
-            {
-                selectButtonLayout.setVisibility((usingMulti && position == 0) ? View.VISIBLE : View.GONE);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        };
-        setupOrbitalList(page.orbitalList, orbitalAdapter, backgroundColor, itemSelectedListener);
-        if(usingMulti)
-        {
-            page.selectButton.setOnClickListener(new View.OnClickListener()
-            {
-                @Override
-                public void onClick(View v)
-                {
-                    Activity activity = page.getActivity();
-                    if(activity instanceof MainActivity)
-                    {
-                        MainActivity mainActivity = (MainActivity)activity;
-                        MasterAddListActivity.showList(mainActivity, mainActivity.getResultLauncher(), MasterAddListActivity.ListType.SelectList, BaseInputActivity.RequestCode.OrbitalSelectList, page.orbitalIsSelected);
-                    }
-                }
-            });
-            page.setOrbitalIsSelected(orbitals);
-            selectButtonLayout.setVisibility(View.VISIBLE);
-        }
+        orbitalAdapter = createOrbitalAdapter(activity, page.orbitalList, orbitals, usingMulti, (haveSavedInstance ? savedInstanceState.getInt(ParamTypes.NoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE));
+        page.setOrbitalsSelected(orbitals);
+        setupOrbitalList(page, orbitalAdapter, usingMulti, backgroundColor, 1);
         if(onIntersection)
         {
-            orbital2Adapter = createOrbitalAdapter(context, page.orbital2List, orbitals, false, savedInstanceState.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
-            setupOrbitalList(page.orbital2List, orbital2Adapter, backgroundColor, null);
+            orbital2Adapter = createOrbitalAdapter(activity, page.orbital2List, orbitals, false, savedInstanceState.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid));
+            setupOrbitalList(page, orbital2Adapter, false, backgroundColor, 2);
         }
         if(page.orbital2List instanceof IconSpinner)
         {
@@ -3144,19 +3133,19 @@ public abstract class Calculate
         }
         if(startDateLayout != null)
         {
-            startDateLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_calendar_month_white, 24, true, true));
+            startDateLayout.setStartIconDrawable(Globals.getDrawableYesNo(activity, R.drawable.ic_calendar_month_white, 24, true, true));
         }
         if(startTimeLayout != null)
         {
-            startTimeLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_clock_black, 24, true, true));
+            startTimeLayout.setStartIconDrawable(Globals.getDrawableYesNo(activity, R.drawable.ic_clock_black, 24, true, true));
         }
         if(endDateLayout != null)
         {
-            endDateLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_calendar_month_white, 24, true, false));
+            endDateLayout.setStartIconDrawable(Globals.getDrawableYesNo(activity, R.drawable.ic_calendar_month_white, 24, true, false));
         }
         if(endTimeLayout != null)
         {
-            endTimeLayout.setStartIconDrawable(Globals.getDrawableYesNo(context, R.drawable.ic_clock_black, 24, true, false));
+            endTimeLayout.setStartIconDrawable(Globals.getDrawableYesNo(activity, R.drawable.ic_clock_black, 24, true, false));
         }
 
         //setup date and time listeners
@@ -3188,7 +3177,7 @@ public abstract class Calculate
                 if(incrementTypeArray != null)
                 {
                     //set unit adapter
-                    incrementAdapter = new IconSpinner.CustomAdapter(context, incrementTypeArray);
+                    incrementAdapter = new IconSpinner.CustomAdapter(activity, incrementTypeArray);
                     if(page.viewUnitList != null)
                     {
                         page.viewUnitList.setAdapter(incrementAdapter);

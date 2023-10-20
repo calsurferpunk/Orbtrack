@@ -100,7 +100,7 @@ public class UpdateService extends NotifyService
         ArrayList<Integer> categoryIndexes;
         final ArrayList<String> categories;
 
-        public MasterSatellite(int noradId, String name, String ownerCode, String ownerName, long launchDateMs)
+        public MasterSatellite(int noradId, String name, String ownerCode, String ownerName, byte orbitalType, long launchDateMs)
         {
             String lowerName = name.toLowerCase();
 
@@ -109,7 +109,11 @@ public class UpdateService extends NotifyService
             this.name = name;
             this.ownerCode = Globals.normalizeOwnerCode(ownerCode);
             this.ownerName = Globals.normalizeOwnerName(ownerName);
-            if(lowerName.contains("r/b"))
+            if(orbitalType > 0)
+            {
+                this.orbitalType = orbitalType;
+            }
+            else if(lowerName.contains("r/b"))
             {
                 this.orbitalType = Database.OrbitalType.RocketBody;
             }
@@ -2145,7 +2149,7 @@ public class UpdateService extends NotifyService
                             }
 
                             //create new satellite
-                            newSatellite = new MasterSatellite(currentSatellite.noradId, currentSatellite.name, currentValue, currentValue2, (currentSatellite.launchDate != null ? currentSatellite.launchDate.getTimeInMillis() : Globals.UNKNOWN_DATE_MS));
+                            newSatellite = new MasterSatellite(currentSatellite.noradId, currentSatellite.name, currentValue, currentValue2, (byte)-1, (currentSatellite.launchDate != null ? currentSatellite.launchDate.getTimeInMillis() : Globals.UNKNOWN_DATE_MS));
                             newSatellite.orbitalType = currentSatellite.orbitalType;
 
                             //go through each category
@@ -2338,7 +2342,7 @@ public class UpdateService extends NotifyService
                                                                 if(noradId != Integer.MAX_VALUE && urls != null && linkIndex < urls.length)
                                                                 {
                                                                     //create satellite
-                                                                    MasterSatellite newSatellite = new MasterSatellite(noradId, currentName, "", "", Globals.UNKNOWN_DATE_MS);
+                                                                    MasterSatellite newSatellite = new MasterSatellite(noradId, currentName, "", "", (byte)-1, Globals.UNKNOWN_DATE_MS);
 
                                                                     //if -loading rocket bodies or not a rocket body- and -loading debris or not debris-
                                                                     if((loadRocketBodies || newSatellite.orbitalType != Database.OrbitalType.RocketBody) && (loadDebris || newSatellite.orbitalType != Database.OrbitalType.Debris))
@@ -2466,7 +2470,7 @@ public class UpdateService extends NotifyService
                                                 {
                                                     //create satellite
                                                     noradId = Globals.tryParseInt(dataItem.getString(SpaceTrackSatellite.Constants.NoradID));
-                                                    MasterSatellite newSatellite = new MasterSatellite(noradId, dataItem.getString(SpaceTrackSatellite.Constants.ObjectName), "", "", Globals.UNKNOWN_DATE_MS);
+                                                    MasterSatellite newSatellite = new MasterSatellite(noradId, dataItem.getString(SpaceTrackSatellite.Constants.ObjectName), "", "", (byte)-1, Globals.UNKNOWN_DATE_MS);
 
                                                     //if -loading rocket bodies or not a rocket body- and -loading debris or not debris-
                                                     if((loadRocketBodies || newSatellite.orbitalType != Database.OrbitalType.RocketBody) && (loadDebris || newSatellite.orbitalType != Database.OrbitalType.Debris))

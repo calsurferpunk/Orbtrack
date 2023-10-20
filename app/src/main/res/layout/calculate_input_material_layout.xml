@@ -32,16 +32,6 @@
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
-            android:id="@+id/Calculate_Select_Layout"
-            style="@style/CalculateEditRowMaterial"
-            android:visibility="gone">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/Calculate_Select_Button"
-                style="@style/ResultButtonRound"
-                android:text="@string/title_select"/>
-        </LinearLayout>
-
-        <LinearLayout
             style="@style/CalculateEditRowMaterial">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Calculate_Start_Date_Layout"

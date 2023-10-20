@@ -23,7 +23,7 @@ public class SideMenuListAdapter extends BaseExpandableListAdapter
 
         public Item(String txt, Drawable icn)
         {
-            super(-1, -1, false, false, false, false);
+            super(-1, -1);
             icon = icn;
             text = txt;
         }

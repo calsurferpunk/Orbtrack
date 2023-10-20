@@ -1483,7 +1483,7 @@ public abstract class Settings
 
             public Item(int id, int index, String nm, String loc, Class<?> wClass)
             {
-                super(id, index, false, false, false, false);
+                super(id, index);
                 name = nm;
                 location = loc;
                 widgetClass = wClass;

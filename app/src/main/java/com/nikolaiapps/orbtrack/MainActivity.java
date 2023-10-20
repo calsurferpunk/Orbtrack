@@ -103,6 +103,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //
     //Displays
     private static WeakReference<PagerTitleStrip> mainPagerTitlesReference;
+    private static WeakReference<SwipeStateViewPager> mainPagerReference;
     private Menu optionsMenu;
     private View sideActionDivider;
     private RecyclerView sideActionMenu;
@@ -223,6 +224,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         mainPager = this.findViewById(R.id.Main_Pager);
         mainPagerTitles = this.findViewById(R.id.Main_Pager_Titles);
         mainPagerTitlesReference = new WeakReference<>(mainPagerTitles);
+        mainPagerReference = new WeakReference<>(mainPager);
 
         //create receivers
         startCalculationListener = createOnStartCalculationListener();
@@ -536,7 +538,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 if(isOkay)
                 {
                     //get selected
-                    boolean[] orbitalIsSelected = data.getBooleanArrayExtra(MasterAddListActivity.ParamTypes.OrbitalIsSelected);
+                    int listNumber = data.getIntExtra(MasterAddListActivity.ParamTypes.ListNumber, 1);
+                    ArrayList<Selectable.ListItem> selectedOrbitals = data.getParcelableArrayListExtra(MasterAddListActivity.ParamTypes.SelectedOrbitals);
 
                     //if calculate adapter exists
                     if(calculatePageAdapter != null)
@@ -547,7 +550,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         {
                             //set selected
                             //note: sets saved value to use when page resumes
-                            calculatePageAdapter.setSavedInput(calculatePage.getPageParam(), Calculate.ParamTypes.OrbitalIsSelected, orbitalIsSelected);
+                            calculatePageAdapter.setSavedInput(calculatePage.getPageParam(), (listNumber == 1 ? Calculate.ParamTypes.SelectedOrbitals : Calculate.ParamTypes.SelectedOrbitals2), selectedOrbitals.toArray(new Selectable.ListItem[0]));
                         }
                     }
                 }
@@ -1222,6 +1225,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     public ActivityResultLauncher<Intent> getResultLauncher()
     {
         return(getResultLauncher(BaseInputActivity.RequestCode.None));
+    }
+
+    //Returns pager
+    public static SwipeStateViewPager getPager()
+    {
+        return(mainPagerReference != null ? mainPagerReference.get() : null);
     }
 
     //Returns pager titles
@@ -2926,7 +2935,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Shows orbital view list
     private void showOrbitalViewList()
     {
-        MasterAddListActivity.showList(this, resultLauncher, MasterAddListActivity.ListType.VisibleList, BaseInputActivity.RequestCode.OrbitalViewList, null);
+        MasterAddListActivity.showList(this, resultLauncher, MasterAddListActivity.ListType.VisibleList, BaseInputActivity.RequestCode.OrbitalViewList, null, -1);
     }
 
     //Shows a sorting dialog

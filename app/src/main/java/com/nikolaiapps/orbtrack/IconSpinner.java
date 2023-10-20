@@ -1020,4 +1020,10 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
 
         return(value != null ? value : defaultValue);
     }
+
+    @Override
+    public void setDropDownHeight(int height)
+    {
+        //do nothing
+    }
 }

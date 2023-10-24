@@ -1942,7 +1942,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             orbitalsPageAdapter = new Orbitals.PageAdapter(manager, settingsLayout, new Selectable.ListFragment.OnItemDetailButtonClickListener()
             {
                 @Override
-                public void onClick(int group, int pageType, int itemID, Selectable.ListItem item, int buttonNum)
+                public void onClick(int group, int pageType, int itemID, Selectable.ListDisplayItem item, int buttonNum)
                 {
                     //if info button
                     if(buttonNum == Selectable.ListBaseAdapter.DetailButtonType.Info)
@@ -2009,10 +2009,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 if(inEditMode)
                 {
                     //get selected items
-                    ArrayList<Selectable.ListItem> selectedItems = getSettingsPage(currentPageKey).getSelectedItems();
+                    ArrayList<Selectable.ListDisplayItem> selectedItems = getSettingsPage(currentPageKey).getSelectedItems();
 
                     //go through selected items
-                    for(Selectable.ListItem currentItem : selectedItems)
+                    for(Selectable.ListDisplayItem currentItem : selectedItems)
                     {
                         //edit account
                         accountsListAdapter.editAccount(currentItem.id);
@@ -2254,7 +2254,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         return(new Selectable.ListFragment.OnItemCheckChangedListener()
         {
             @Override
-            public void itemCheckedChanged(int page, Selectable.ListItem item)
+            public void itemCheckedChanged(int page, Selectable.ListDisplayItem item)
             {
                 Context context = SettingsActivity.this;
 
@@ -2818,7 +2818,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         int index;
         final Resources res = this.getResources();
         final Fragment setupFragment = (showSetup ? getFragment(SetupPageType.Location) : null);
-        ArrayList<Selectable.ListItem> selectedItems = (showSetup && setupFragment instanceof Selectable.ListFragment ? (Selectable.ListFragment)setupFragment : getSettingsPage(currentPageKey)).getSelectedItems();
+        ArrayList<Selectable.ListDisplayItem> selectedItems = (showSetup && setupFragment instanceof Selectable.ListFragment ? (Selectable.ListFragment)setupFragment : getSettingsPage(currentPageKey)).getSelectedItems();
         int itemCount = selectedItems.size();
         final int[] ids = new int[itemCount];
         final double[] numberValues = new double[itemCount];

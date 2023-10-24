@@ -98,7 +98,7 @@ public class CalculateService extends NotifyService
     }
 
     //Item
-    public static class PassData extends Selectable.ListItem implements Parcelable
+    public static class PassData extends Selectable.ListDisplayItem implements Parcelable
     {
         public int id2;
         public Calculations.SatelliteObjectType satellite;

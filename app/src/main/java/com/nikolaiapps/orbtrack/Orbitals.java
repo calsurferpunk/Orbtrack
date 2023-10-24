@@ -76,7 +76,7 @@ public abstract class Orbitals
     }
 
     //Page list item holder
-    public static class PageListItemHolder extends Selectable.ListItemHolder
+    public static class PageListItemHolder extends Selectable.ListDisplayItemHolder
     {
         final AppCompatImageView itemImage;
         final TextView itemText;
@@ -310,7 +310,7 @@ public abstract class Orbitals
         }
 
         @Override
-        protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+        protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
         {
             final Item currentItem = (Item)item;
             final Calculations.OrbitDataType currentOrbit = currentItem.satelliteObject.orbit;
@@ -638,7 +638,6 @@ public abstract class Orbitals
         private SelectListInterface ownerList;
         private SelectListInterface groupList;
         private SelectListInterface ageList;
-        private SelectListInterface typeList;
         private AppCompatImageButton showButton;
         public static WeakReference<MultiProgressDialog> updateProgressReference;
 
@@ -697,7 +696,6 @@ public abstract class Orbitals
             ownerList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
             groupList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
             ageList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
-            typeList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Type_Text_List : R.id.Orbital_Search_Type_List);
             ownerLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Layout : R.id.Orbital_Search_Owner_Row);
             groupLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Layout : R.id.Orbital_Search_Group_Row);
             ageLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Layout : R.id.Orbital_Search_Age_Row);
@@ -848,10 +846,10 @@ public abstract class Orbitals
         {
             int deleteCount = 0;
             Context context = listParentView.getContext();
-            Selectable.ListItem[] items = selectedItems.toArray(new Selectable.ListItem[0]);
+            Selectable.ListDisplayItem[] items = selectedItems.toArray(new Selectable.ListDisplayItem[0]);
 
             //go through selected items and close database
-            for(Selectable.ListItem currentItem : items)
+            for(Selectable.ListDisplayItem currentItem : items)
             {
                 //delete satellite from database
                 if(Database.deleteSatellite(context, currentItem.id))
@@ -1751,7 +1749,7 @@ public abstract class Orbitals
     private static void showEditDetailsDialog(Activity context, SwipeStateViewPager pager, Selectable.ListFragmentAdapter adapter)
     {
         int index;
-        ArrayList<Selectable.ListItem> selectedListItems = adapter.getSelectedItems(pager, PageType.Satellites);
+        ArrayList<Selectable.ListDisplayItem> selectedListItems = adapter.getSelectedItems(pager, PageType.Satellites);
         ArrayList<Item> selectedItems = new ArrayList<>(selectedListItems.size());
 
         //go through each item
@@ -1769,7 +1767,7 @@ public abstract class Orbitals
     public static void showEditDialog(Activity context, SwipeStateViewPager pager, Selectable.ListFragmentAdapter adapter)
     {
         Resources res = context.getResources();
-        ArrayList<Selectable.ListItem> selectedItems = adapter.getSelectedItems(pager, PageType.Satellites);
+        ArrayList<Selectable.ListDisplayItem> selectedItems = adapter.getSelectedItems(pager, PageType.Satellites);
         int selectedItemCount = selectedItems.size();
         String editString = res.getString(R.string.title_edit);
 
@@ -1810,7 +1808,7 @@ public abstract class Orbitals
                     {
                         case AddSelectListAdapter.EditType.Color:
                             //sort items to keep in list order
-                            Collections.sort(selectedItems, new Selectable.ListItem.Comparer());
+                            Collections.sort(selectedItems, new Selectable.ListDisplayItem.Comparer());
 
                             //get colors using first and last selected item colors
                             new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()
@@ -1839,7 +1837,7 @@ public abstract class Orbitals
                                     }
 
                                     //go through each selected item
-                                    for(Selectable.ListItem currentItem : selectedItems)
+                                    for(Selectable.ListDisplayItem currentItem : selectedItems)
                                     {
                                         //save color
                                         Database.saveSatellitePathColor(context, currentItem.id, (isTransition ? Color.rgb((int)currentRed, (int)currentGreen, (int)currentBlue) : color1));
@@ -1861,7 +1859,7 @@ public abstract class Orbitals
                             int visibleCount = 0;
 
                             //get visible count
-                            for(Selectable.ListItem currentItem : selectedItems)
+                            for(Selectable.ListDisplayItem currentItem : selectedItems)
                             {
                                 //if current item is visible
                                 if(((Item)currentItem).isVisible)
@@ -1878,7 +1876,7 @@ public abstract class Orbitals
                                 public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
                                 {
                                     //go through each selected item
-                                    for(Selectable.ListItem currentItem : selectedItems)
+                                    for(Selectable.ListDisplayItem currentItem : selectedItems)
                                     {
                                         //get current norad ID and orbital
                                         int currentNoradId = currentItem.id;

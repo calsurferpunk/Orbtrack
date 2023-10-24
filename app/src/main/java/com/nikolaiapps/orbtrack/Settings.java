@@ -427,7 +427,7 @@ public abstract class Settings
         public static abstract class Accounts
         {
             //Item
-            public static class Item extends Selectable.ListItem
+            public static class Item extends Selectable.ListDisplayItem
             {
                 final String loginName;
 
@@ -459,7 +459,7 @@ public abstract class Settings
             }
 
             //Item holder
-            public static class ItemHolder extends Selectable.ListItemHolder
+            public static class ItemHolder extends Selectable.ListDisplayItemHolder
             {
                 final AppCompatImageView accountImage;
                 final TextView nameText;
@@ -582,7 +582,7 @@ public abstract class Settings
                 }
 
                 @Override
-                protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+                protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
                 {
                     final Item currentItem = (Item)item;
                     final int accountType = currentItem.id;
@@ -950,7 +950,7 @@ public abstract class Settings
     public static abstract class Locations
     {
         //Item
-        public static class Item extends Selectable.ListItem
+        public static class Item extends Selectable.ListDisplayItem
         {
             public final String name;
             public double latitude;
@@ -972,7 +972,7 @@ public abstract class Settings
         }
 
         //Item holder
-        public static class ItemHolder extends Selectable.ListItemHolder
+        public static class ItemHolder extends Selectable.ListDisplayItemHolder
         {
             final AppCompatImageView locationImage;
             final TextView locationText;
@@ -1066,7 +1066,7 @@ public abstract class Settings
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+            protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
             {
                 final Item currentItem = (Item)item;
                 final boolean usingContext = haveContext();
@@ -1220,7 +1220,7 @@ public abstract class Settings
     public static abstract class Notifications
     {
         //Item
-        public static class Item extends Selectable.ListItem
+        public static class Item extends Selectable.ListDisplayItem
         {
             public final String name;
             public final CalculateService.AlarmNotifySettings passStartSettings;
@@ -1240,7 +1240,7 @@ public abstract class Settings
         }
 
         //Item holder
-        public static class ItemHolder extends Selectable.ListItemHolder
+        public static class ItemHolder extends Selectable.ListDisplayItemHolder
         {
             final AppCompatImageView notifyImage;
             final TextView nameText;
@@ -1322,7 +1322,7 @@ public abstract class Settings
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+            protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
             {
                 Item currentItem = (Item)item;
                 int noradId = currentItem.id;
@@ -1475,7 +1475,7 @@ public abstract class Settings
     public static abstract class Widgets
     {
         //Item
-        public static class Item extends Selectable.ListItem
+        public static class Item extends Selectable.ListDisplayItem
         {
             public final String name;
             public final String location;
@@ -1491,7 +1491,7 @@ public abstract class Settings
         }
 
         //Item holder
-        public static class ItemHolder extends Selectable.ListItemHolder
+        public static class ItemHolder extends Selectable.ListDisplayItemHolder
         {
             final AppCompatImageView widgetImage;
             final TextView nameText;
@@ -1564,7 +1564,7 @@ public abstract class Settings
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+            protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
             {
                 Item currentItem = (Item)item;
                 int widgetId = currentItem.id;
@@ -1740,10 +1740,10 @@ public abstract class Settings
             int deleteCount = 0;
             boolean needLocation = false;
             Context context = (listParentView != null ? listParentView.getContext() : null);
-            Selectable.ListItem[] items = selectedItems.toArray(new Selectable.ListItem[0]);
+            Selectable.ListDisplayItem[] items = selectedItems.toArray(new Selectable.ListDisplayItem[0]);
 
             //go through selected items
-            for(Selectable.ListItem currentItem : items)
+            for(Selectable.ListDisplayItem currentItem : items)
             {
                 //handle based on page
                 switch(pageNum)

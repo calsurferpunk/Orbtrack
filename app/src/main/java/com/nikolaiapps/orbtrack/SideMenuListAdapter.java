@@ -16,7 +16,7 @@ import java.util.ArrayList;
 
 public class SideMenuListAdapter extends BaseExpandableListAdapter
 {
-    public static class Item extends Selectable.ListItem
+    public static class Item extends Selectable.ListDisplayItem
     {
         private final Drawable icon;
         private final String text;

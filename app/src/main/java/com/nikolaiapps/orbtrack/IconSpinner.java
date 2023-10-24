@@ -275,6 +275,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             protected Void doInBackground(Object... params)
             {
                 int index;
+                int multiColor;
                 int icon1Color = (int)params[3];
                 int icon1SelectedColor = (int)params[4];
                 int icon3Color = (int)params[5];
@@ -285,7 +286,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 boolean useIcon1Color;
                 boolean useIcon3Color;
                 boolean addMulti = (boolean)params[2];
-                int offset = (addMulti ? 1 : 0);
+                int offset = (addMulti ? 2 : 0);
                 Context context = (Context)params[0];
                 boolean haveContext = (context != null);
                 Database.DatabaseSatellite[] orbitals = (Database.DatabaseSatellite[])params[1];
@@ -323,7 +324,9 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 items = new Item[filteredOrbitals.size() + offset];
                 if(addMulti)
                 {
-                    items[0] = new Item((haveContext ? R.drawable.ic_list_white : -1), Globals.resolveColorID(context, android.R.attr.textColor), icon3SelectedColor, (haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
+                    multiColor = Globals.resolveColorID(context, android.R.attr.textColor);
+                    items[0] = new Item((haveContext ? R.drawable.ic_search_white : -1), multiColor, icon3SelectedColor, (haveContext ? context.getString(R.string.title_select) : ""), Universe.IDs.Invalid2);
+                    items[1] = new Item((haveContext ? R.drawable.ic_list_white : -1), multiColor, icon3SelectedColor, (haveContext ? context.getString(R.string.title_multiple) : ""), Universe.IDs.Invalid);
                 }
                 for(index = 0; index < filteredOrbitals.size(); index++)
                 {

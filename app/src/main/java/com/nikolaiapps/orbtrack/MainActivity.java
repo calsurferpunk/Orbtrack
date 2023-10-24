@@ -3333,7 +3333,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(new Selectable.ListFragment.OnItemDetailButtonClickListener()
         {
             @Override
-            public void onClick(final int group, final int pageNum, int itemID, Selectable.ListItem item, int buttonNum)
+            public void onClick(final int group, final int pageNum, int itemID, Selectable.ListDisplayItem item, int buttonNum)
             {
                 final Activity activity = MainActivity.this;
 

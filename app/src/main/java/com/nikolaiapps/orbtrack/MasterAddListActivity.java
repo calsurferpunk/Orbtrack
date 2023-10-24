@@ -88,7 +88,8 @@ public class MasterAddListActivity extends BaseInputActivity
                 UpdateService.MasterListType masterList = (UpdateService.MasterListType)params[1];
                 ArrayList<OrbitalFilterList.Item> items = new ArrayList<>(0);
                 Selectable.ListItem[] selectedOrbitals = (Selectable.ListItem[])params[2];
-                boolean haveSelectedOrbitals = (selectedOrbitals != null);
+                boolean useAllSelected = (boolean)params[3];
+                boolean haveSelectedOrbitals = (!useAllSelected && selectedOrbitals != null);
 
                 //if master list is set
                 if(masterList != null)
@@ -254,7 +255,7 @@ public class MasterAddListActivity extends BaseInputActivity
         }
 
         //List item holder
-        public static class ListItemHolder extends Selectable.ListItemHolder
+        public static class ListItemHolder extends Selectable.ListDisplayItemHolder
         {
             final AppCompatImageView orbitalImage;
             final AppCompatImageView ownerImage;
@@ -272,13 +273,14 @@ public class MasterAddListActivity extends BaseInputActivity
         }
 
         private final int listNumber;
-        private final boolean singleSelect;
+        private final boolean isSingleSelect;
+        private final boolean isVisibleSelect;
         private final LoadItemsTask loadItems;
         private final UpdateService.MasterListType masterList;
         private final OnItemCheckChangedListener itemCheckChangedListener;
         private final ArrayList<Selectable.ListItem> selectedOrbitals;
 
-        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, ArrayList<Selectable.ListItem> selectedOrbitals, Globals.OnProgressChangedListener progressChangedListener, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener, int listNumber, boolean singleSelect)
+        public MasterListAdapter(final Context context, UpdateService.MasterListType masterList, ArrayList<Selectable.ListItem> selectedOrbitals, Globals.OnProgressChangedListener progressChangedListener, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener, int listNumber, byte listType)
         {
             super(context);
 
@@ -288,7 +290,8 @@ public class MasterAddListActivity extends BaseInputActivity
 
             //set items and check changed listener
             this.listNumber = listNumber;
-            this.singleSelect = singleSelect;
+            this.isSingleSelect = (listType == ListType.SelectSingleList);
+            this.isVisibleSelect = (listType == ListType.VisibleList);
             this.masterList = masterList;
             this.selectedOrbitals = (selectedOrbitals != null ? selectedOrbitals : new ArrayList<>(0));
             this.itemCheckChangedListener = checkChangedListener;
@@ -321,16 +324,16 @@ public class MasterAddListActivity extends BaseInputActivity
                 }
             });
         }
-        public MasterListAdapter(Context context, ArrayList<Selectable.ListItem> selectedOrbitals, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener, int listNumber, boolean singleSelect)
+        public MasterListAdapter(Context context, ArrayList<Selectable.ListItem> selectedOrbitals, OrbitalFilterList.OnLoadItemsListener loadItemsListener, OnItemCheckChangedListener checkChangedListener, int listNumber, byte listType)
         {
-            this(context, null, selectedOrbitals, null, loadItemsListener, checkChangedListener, listNumber, singleSelect);
+            this(context, null, selectedOrbitals, null, loadItemsListener, checkChangedListener, listNumber, listType);
         }
 
         @Override
         public void onAttachedToRecyclerView(@NonNull RecyclerView view)
         {
             super.onAttachedToRecyclerView(view);
-            loadItems.execute(currentContext, masterList, selectedOrbitals.toArray(new Selectable.ListItem[0]));
+            loadItems.execute(currentContext, masterList, selectedOrbitals.toArray(new Selectable.ListItem[0]), isVisibleSelect);
         }
 
         @Override @NonNull
@@ -340,7 +343,7 @@ public class MasterAddListActivity extends BaseInputActivity
             final ListItemHolder itemHolder = new ListItemHolder(itemView, R.id.Item_Checked_Image2, R.id.Item_Checked_Image1, R.id.Item_Checked_Text, R.id.Item_Checked_Progress);
 
             //if not selecting a single item
-            if(!singleSelect)
+            if(!isSingleSelect)
             {
                 //setup item click
                 itemView.setOnClickListener(new View.OnClickListener()
@@ -364,7 +367,7 @@ public class MasterAddListActivity extends BaseInputActivity
             final ListItemHolder itemHolder = (ListItemHolder)holder;
             int showText = (loadingItems ? View.GONE : View.VISIBLE);
             int showProgress = (loadingItems ? View.VISIBLE : View.GONE);
-            int showCheckbox = (!singleSelect ? showText : View.GONE);
+            int showCheckbox = (!isSingleSelect ? showText : View.GONE);
 
             //update visibility
             itemHolder.itemText.setVisibility(showText);
@@ -382,7 +385,7 @@ public class MasterAddListActivity extends BaseInputActivity
                 itemHolder.orbitalImage.setVisibility(View.VISIBLE);
                 itemHolder.ownerImage.setBackgroundDrawable(Globals.getDrawableCombined(currentContext, Globals.getOwnerIconIDs(currentItem.satellite.ownerCode)));
                 itemHolder.itemText.setText(currentItem.satellite.name);
-                if(singleSelect)
+                if(isSingleSelect)
                 {
                     //setup item click
                     itemHolder.itemView.setOnClickListener(new View.OnClickListener()
@@ -770,7 +773,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                 }
                                             });
                                         }
-                                    }, checkChangedListener, -1, false);
+                                    }, checkChangedListener, -1, ListType.MasterList);
                                     addList.setAdapter(addAdapter);
 
                                     //don't dismiss
@@ -846,10 +849,8 @@ public class MasterAddListActivity extends BaseInputActivity
         //setup inputs
         listAdapter.setupInputs(searchGroup, (usedOwners != null ? ownerList : null), (usedCategories != null ? groupList : null), (useAges ? ageList : null), (usedTypes != null && usedTypes.size() > 1 ? typeList : null), ageLayout, groupLayout, ownerLayout, typeLayout, searchView, showButton, usedOwners, usedCategories, usedTypes, addAdapter.getHasLaunchDates());
 
-        //update title
-        updateTitleCount();
-
         //update displays
+        updateTitleCount();
         addButton.setEnabled(true);
     }
 
@@ -863,7 +864,7 @@ public class MasterAddListActivity extends BaseInputActivity
         //get intent, source, and displays
         Intent addIntent = this.getIntent();
         byte listType = addIntent.getByteExtra(ParamTypes.ListType, ListType.VisibleList);
-        boolean isFilterList = (listType == ListType.VisibleList);
+        boolean isVisibleList = (listType == ListType.VisibleList);
         isSelectSingleList = (listType == ListType.SelectSingleList);
         boolean isSelectMultipleList = (listType == ListType.SelectMultipleList);
         boolean askUpdate = addIntent.getBooleanExtra(ParamTypes.AskUpdate, false);
@@ -902,7 +903,7 @@ public class MasterAddListActivity extends BaseInputActivity
 
         //setup title
         itemSelectedCount = 0;
-        startTitle = this.getString(isFilterList ? R.string.title_select_visible : isSelectSingleList ? R.string.title_select_orbital : R.string.title_select_orbitals);
+        startTitle = this.getString(isVisibleList ? R.string.title_select_visible : isSelectSingleList ? R.string.title_select_orbital : R.string.title_select_orbital_or_orbitals);
         this.setTitle(startTitle);
 
         //setup cancel button
@@ -936,13 +937,14 @@ public class MasterAddListActivity extends BaseInputActivity
                     itemSelectedCount--;
                 }
 
-                //update title
+                //update title and add button
                 updateTitleCount(itemSelectedCount);
+                addButton.setEnabled(itemSelectedCount > 0);
             }
         };
 
         //if for visible or a select list
-        if(isFilterList || isSelectSingleList || isSelectMultipleList)
+        if(isVisibleList || isSelectSingleList || isSelectMultipleList)
         {
             //create adapter
             addAdapter = new MasterListAdapter(this, selectedOrbitals, new OrbitalFilterList.OnLoadItemsListener()
@@ -963,14 +965,36 @@ public class MasterAddListActivity extends BaseInputActivity
                             searchLayout.setVisibility(View.VISIBLE);
                             setupInputs(addAdapter, null, null, false, used.types);
                             addAdapter.showSearchInputs(false);
+                            addButton.setEnabled(isVisibleList);
                         }
                     });
                 }
-            }, checkChangedListener, listNumber, isSelectSingleList);
+            }, checkChangedListener, listNumber, listType);
+            addAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver()
+            {
+                @Override public void onChanged()
+                {
+                    super.onChanged();
+
+                    //if there are selected orbitals
+                    if(selectedOrbitals != null && selectedOrbitals.size() > 0)
+                    {
+                        //get first selected position
+                        int position = selectedOrbitals.get(0).listIndex;
+
+                        //if position is valid
+                        if(position >= 0)
+                        {
+                            //scroll to it
+                            addList.scrollToPosition(position);
+                        }
+                    }
+                }
+            });
             addList.setAdapter(addAdapter);
 
             //setup add button
-            if(isFilterList || isSelectMultipleList)
+            if(isVisibleList || isSelectMultipleList)
             {
                 //add click event and set text
                 addButton.setOnClickListener(new View.OnClickListener()
@@ -1164,8 +1188,9 @@ public class MasterAddListActivity extends BaseInputActivity
                 currentItem.setChecked(isAll);
             }
 
-            //update title
+            //update displays
             updateTitleCount();
+            addButton.setEnabled(addAdapter.getSelectedItems().length > 0);
 
             //update display
             addAdapter.notifyDataSetChanged();

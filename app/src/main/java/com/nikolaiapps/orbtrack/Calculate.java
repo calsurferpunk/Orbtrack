@@ -132,7 +132,7 @@ public abstract class Calculate
     public static abstract class ViewAngles
     {
         //Item
-        public static class Item extends Selectable.ListItem
+        public static class Item extends Selectable.ListDisplayItem
         {
             public boolean isLoading;
             public double julianDate;
@@ -837,7 +837,7 @@ public abstract class Calculate
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+            protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
             {
                 final Item currentItem = (Item)item;
 
@@ -1079,7 +1079,7 @@ public abstract class Calculate
     public static abstract class Coordinates
     {
         //Item
-        public static class Item extends Selectable.ListItem
+        public static class Item extends Selectable.ListDisplayItem
         {
             public boolean isLoading;
             public double julianDate;
@@ -1833,7 +1833,7 @@ public abstract class Calculate
         protected void onUpdateFinished(boolean success) { }
 
         //Gets selected orbitals from inputs
-        private Database.SatelliteData[] getSelectedOrbitals(Context context, ArrayList<Integer> multiNoradId, Selectable.ListItem[] savedItems)
+        private Database.SatelliteData[] getSelectedOrbitals(Context context, ArrayList<Integer> multiNoradId, Selectable.ListDisplayItem[] savedItems)
         {
             //if multi norad ID exists
             if(multiNoradId != null)
@@ -1845,7 +1845,7 @@ public abstract class Calculate
             else if(savedItems != null && savedItems.length > 0)
             {
                 //remember first item and orbitals
-                Selectable.ListItem firstItem = savedItems[0];
+                Selectable.ListDisplayItem firstItem = savedItems[0];
                 Database.SatelliteData firstOrbital = new Database.SatelliteData(context, firstItem.id);
                 Database.SatelliteData secondOrbital = null;
 
@@ -1887,11 +1887,10 @@ public abstract class Calculate
                 orbitalsSelected2 = selected;
             }
         }
-        private void setOrbitalsSelected(Database.DatabaseSatellite[] orbitals)
-        {
-            int index;
-            boolean haveOrbitals = (orbitals != null);
 
+        //Clears selected orbitals
+        private void clearOrbitalsSelected()
+        {
             //clear selected orbitals
             if(orbitalsSelected == null)
             {
@@ -1908,26 +1907,6 @@ public abstract class Calculate
             else
             {
                 orbitalsSelected2.clear();
-            }
-
-            //if have orbitals
-            if(haveOrbitals)
-            {
-                //go through each orbital
-                for(index = 0; index < orbitals.length; index++)
-                {
-                    //remember current orbital
-                    Database.DatabaseSatellite currentOrbital = orbitals[index];
-
-                    //if current is selected
-                    if(currentOrbital.isSelected)
-                    {
-                        //add to selected
-                        //note: creates separate item for each list
-                        orbitalsSelected.add(new Selectable.ListItem(currentOrbital.noradId, index));
-                        orbitalsSelected2.add(new Selectable.ListItem(currentOrbital.noradId, index));
-                    }
-                }
             }
         }
 
@@ -2870,8 +2849,6 @@ public abstract class Calculate
     private static void setPageInputValues(Page page, Bundle savedInstanceState)
     {
         Context context = page.getContext();
-        int orbitalId = Integer.MAX_VALUE;
-        int orbitalId2 = Universe.IDs.Invalid;
         int pageNumber = PageType.View;
         int incrementType = IncrementType.Minutes;
         int incrementUnit = 10;
@@ -2891,8 +2868,6 @@ public abstract class Calculate
             try
             {
                 //get values
-                orbitalId = savedInstanceState.getInt(ParamTypes.NoradId, orbitalId);
-                orbitalId2 = savedInstanceState.getInt(ParamTypes.NoradId2, orbitalId2);
                 selectedOrbitals = savedInstanceState.getParcelableArrayList(ParamTypes.SelectedOrbitals);
                 selectedOrbitals2 = savedInstanceState.getParcelableArrayList(ParamTypes.SelectedOrbitals2);
                 pageNumber = savedInstanceState.getInt(Selectable.ParamTypes.PageNumber, PageType.View);
@@ -3112,7 +3087,7 @@ public abstract class Calculate
 
         //set orbital list items
         orbitalAdapter = createOrbitalAdapter(activity, page.orbitalList, orbitals, usingMulti, (haveSavedInstance ? savedInstanceState.getInt(ParamTypes.NoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE));
-        page.setOrbitalsSelected(orbitals);
+        page.clearOrbitalsSelected();
         setupOrbitalList(page, orbitalAdapter, usingMulti, backgroundColor, 1);
         if(onIntersection)
         {
@@ -3230,7 +3205,7 @@ public abstract class Calculate
                     multiNoradId = inputParams.getIntegerArrayList(ParamTypes.MultiNoradId);
 
                     //-not using multi or valid ID or valid multi IDs- or -not on intersection or different ID selections-
-                    if((!usingMulti || (noradId != Universe.IDs.Invalid || (multiNoradId != null && multiNoradId.size() >= 1))) && (!onIntersection || noradId != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
+                    if((!usingMulti || ((noradId != Universe.IDs.Invalid && noradId != Universe.IDs.Invalid2) || (multiNoradId != null && multiNoradId.size() >= 1))) && (!onIntersection || noradId != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
                     {
                         //start calculation
                         page.startCalculation(inputParams);

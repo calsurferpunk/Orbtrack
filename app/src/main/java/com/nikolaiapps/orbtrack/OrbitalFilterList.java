@@ -26,7 +26,7 @@ public class OrbitalFilterList
     }
 
     //Select orbital filter list item
-    protected static class Item extends Selectable.ListItem
+    protected static class Item extends Selectable.ListDisplayItem
     {
         public final long launchDateMs;
         public final UpdateService.MasterSatellite satellite;
@@ -387,21 +387,18 @@ public class OrbitalFilterList
         //Sets up type list
         private void setupTypeList(SelectListInterface typeList, List<Byte> usedTypes, AdapterView.OnItemSelectedListener itemSelectedListener)
         {
-            int index;
             Resources res = (haveContext() ? currentContext.getResources() : null);
             boolean haveRes = (res != null);
             String listAllString = (haveRes ? res.getString(R.string.title_list_all) : null);
             String unknown = Globals.getUnknownString(currentContext);
-            IconSpinner.Item[] types;
+            ArrayList<IconSpinner.Item> types = new ArrayList<>(0);
 
             if(usedTypes != null)
             {
-                types = new IconSpinner.Item[usedTypes.size() + 1];
-                types[0] = new IconSpinner.Item(listAllString, (byte)-1);
-                for(index = 0; index < usedTypes.size(); index++)
+                types.add(new IconSpinner.Item(listAllString, (byte)-1));
+                for(byte currentType : usedTypes)
                 {
                     int currentId = Integer.MIN_VALUE;
-                    byte currentType = usedTypes.get(index);
                     String currentTypeString;
 
                     switch(currentType)
@@ -440,9 +437,11 @@ public class OrbitalFilterList
                             break;
                     }
 
-                    types[index + 1] = new IconSpinner.Item(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentId, currentType), currentTypeString, currentType);
+                    types.add(new IconSpinner.Item(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentId, currentType), currentTypeString, currentType));
                 }
-                setupListAdapter(typeList, new IconSpinner.CustomAdapter(currentContext, types), itemSelectedListener);
+
+                Collections.sort(types, new IconSpinner.Item.Comparer());
+                setupListAdapter(typeList, new IconSpinner.CustomAdapter(currentContext, types.toArray(new IconSpinner.Item[0])), itemSelectedListener);
             }
         }
 

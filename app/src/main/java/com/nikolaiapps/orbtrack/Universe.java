@@ -78,6 +78,7 @@ public abstract class Universe
         static final int Neptune = -9;
         static final int Pluto = -10;
         static final int Polaris = -11;
+        static final int Invalid2 = Integer.MIN_VALUE + 1;
         static final int Invalid = Integer.MIN_VALUE;
     }
 

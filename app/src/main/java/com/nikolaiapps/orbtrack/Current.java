@@ -668,7 +668,7 @@ public abstract class Current
             }
 
             @Override
-            protected void onItemNonEditClick(Selectable.ListItem item, int pageNum)
+            protected void onItemNonEditClick(Selectable.ListDisplayItem item, int pageNum)
             {
                 final Item currentItem = (Item)item;
 
@@ -1900,7 +1900,7 @@ public abstract class Current
             TextView header = (TextView)Globals.replaceView(R.id.Lens_Header, R.layout.header_text_view, inflater, rootView);
             Calendar startTime = (useSavedViewPath ? savedViewItems[0].time : havePassViews ? passViews[0].gmtTime : null);
             Calendar endTime = (useSavedViewPath ? savedViewItems[savedViewItems.length - 1].time : havePassViews ? passViews[passViews.length - 1].gmtTime : null);
-            header.setTag(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathItem != null ? currentSavedPathItem.name : currentSatellite.getName()), startTime, endTime));
+            header.setTag(Globals.getHeaderText(context, (onCalculateIntersection && currentSavedPathItem != null ? currentSavedPathItem.name : selectedOrbitals == null || selectedOrbitals.length == 1 ? currentSatellite.getName() : null), startTime, endTime));
             Calculate.setOrientationHeaderText(header);
             header.setVisibility(View.VISIBLE);
 
@@ -2691,7 +2691,7 @@ public abstract class Current
         {
             //setup header
             TextView header = (TextView)Globals.replaceView(R.id.Map_Header, R.layout.header_text_view, inflater, rootView);
-            header.setTag(Globals.getHeaderText(context, (currentSatellite != null ? currentSatellite.getName() : null), savedItems[0].time, savedItems[savedItems.length - 1].time));
+            header.setTag(Globals.getHeaderText(context, ((selectedOrbitals == null || selectedOrbitals.length == 1) && currentSatellite != null ? currentSatellite.getName() : null), savedItems[0].time, savedItems[savedItems.length - 1].time));
             Calculate.setOrientationHeaderText(header);
         }
 

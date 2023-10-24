@@ -78,17 +78,12 @@ public abstract class Selectable
 
         public int id;
         public int listIndex;
-        public final boolean canEdit;
-        public boolean isSelected;
-        public final boolean canCheck;
-        public boolean isChecked;
-        public CheckBox checkBoxView;
         public static final Creator<ListItem> CREATOR = new Creator<ListItem>()
         {
             @Override
             public ListItem createFromParcel(Parcel source)
             {
-                return(new ListItem(source.readInt(), source.readInt(), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1)));
+                return(new ListItem(source.readInt(), source.readInt()));
             }
 
             @Override
@@ -98,18 +93,10 @@ public abstract class Selectable
             }
         };
 
-        public ListItem(int idNum, int index, boolean canEd, boolean isSel, boolean canCh, boolean isCh)
+        public ListItem(int idNum, int index)
         {
             id = idNum;
             listIndex = index;
-            canEdit = canEd;
-            isSelected = isSel;
-            canCheck = canCh;
-            isChecked = isCh;
-        }
-        public ListItem(int idNum, int index)
-        {
-            this(idNum, index, false, false, false, false);
         }
 
         @Override
@@ -123,10 +110,29 @@ public abstract class Selectable
         {
             dest.writeInt(id);
             dest.writeInt(listIndex);
-            dest.writeByte((byte)(canEdit ? 1 : 0));
-            dest.writeByte((byte)(isSelected ? 1 : 0));
-            dest.writeByte((byte)(canCheck ? 1 : 0));
-            dest.writeByte((byte)(isChecked ? 1 : 0));
+        }
+    }
+
+    //Select list display item
+    protected static class ListDisplayItem extends ListItem
+    {
+        public final boolean canEdit;
+        public boolean isSelected;
+        public final boolean canCheck;
+        public boolean isChecked;
+        public CheckBox checkBoxView;
+
+        public ListDisplayItem(int idNum, int index, boolean canEd, boolean isSel, boolean canCh, boolean isCh)
+        {
+            super(idNum, index);
+            canEdit = canEd;
+            isSelected = isSel;
+            canCheck = canCh;
+            isChecked = isCh;
+        }
+        public ListDisplayItem(int idNum, int index)
+        {
+            this(idNum, index, false, false, false, false);
         }
 
         public void setChecked(boolean checked)
@@ -146,12 +152,12 @@ public abstract class Selectable
         }
     }
 
-    //Select list view holder
-    protected static class ListItemHolder extends RecyclerView.ViewHolder
+    //Select list display item holder
+    protected static class ListDisplayItemHolder extends RecyclerView.ViewHolder
     {
         public final CheckBox checkBoxView;
 
-        public ListItemHolder(View itemView, int checkBoxID)
+        public ListDisplayItemHolder(View itemView, int checkBoxID)
         {
             super(itemView);
             checkBoxView = (checkBoxID != -1 ? itemView.findViewById(checkBoxID) : null);
@@ -170,7 +176,7 @@ public abstract class Selectable
         }
         public interface OnItemDetailButtonClickListener
         {
-            void onClick(int pageType, int itemID, ListItem item, int buttonNum);
+            void onClick(int pageType, int itemID, ListDisplayItem item, int buttonNum);
         }
 
         //Detail button type
@@ -660,7 +666,7 @@ public abstract class Selectable
                 return(Globals.getDrawable(context, imageId, true));
             }
 
-            public void setupItemDetailButton(AppCompatImageButton button, final ListBaseAdapter listAdapter, final int pageType, final int itemID, final ListItem item, final int buttonNum)
+            public void setupItemDetailButton(AppCompatImageButton button, final ListBaseAdapter listAdapter, final int pageType, final int itemID, final ListDisplayItem item, final int buttonNum)
             {
                 int mapLayerType = ListBaseAdapter.getMapLayerType(noradIds.length > 0 ? noradIds[0] : Universe.IDs.Invalid);
 
@@ -861,7 +867,7 @@ public abstract class Selectable
                 });
             }
 
-            public AppCompatImageButton addButton(final int pageType, final int itemID, final ListItem item, final int buttonNum)
+            public AppCompatImageButton addButton(final int pageType, final int itemID, final ListDisplayItem item, final int buttonNum)
             {
                 AppCompatImageButton button = new AppCompatImageButton(new ContextThemeWrapper(currentContext, R.style.DetailButton));
 
@@ -1028,7 +1034,7 @@ public abstract class Selectable
         }
 
         //Handles a non editable item click
-        protected void onItemNonEditClick(ListItem item, int pageNum)
+        protected void onItemNonEditClick(ListDisplayItem item, int pageNum)
         {
             //needs to be overridden
         }
@@ -1116,7 +1122,7 @@ public abstract class Selectable
         }
 
         //Gets an item
-        protected ListItem getItem(int position)
+        protected ListDisplayItem getItem(int position)
         {
             //needs to be overridden
             return(null);
@@ -1219,7 +1225,7 @@ public abstract class Selectable
         //On item checked listener
         public interface OnItemCheckChangedListener
         {
-            void itemCheckedChanged(int page, ListItem item);
+            void itemCheckedChanged(int page, ListDisplayItem item);
         }
 
         //On items changed listener
@@ -1243,7 +1249,7 @@ public abstract class Selectable
         //On item detail button click listener
         public interface OnItemDetailButtonClickListener
         {
-            void onClick(int group, int pageType, int itemID, ListItem item, int buttonNum);
+            void onClick(int group, int pageType, int itemID, ListDisplayItem item, int buttonNum);
         }
 
         //On graph changed listener
@@ -1342,7 +1348,7 @@ public abstract class Selectable
         protected View listParentView;
         protected PlayBar playBar;
         protected PlayBar scaleBar;
-        protected final ArrayList<ListItem> selectedItems;
+        protected final ArrayList<ListDisplayItem> selectedItems;
 
         public ListFragment()
         {
@@ -1735,7 +1741,7 @@ public abstract class Selectable
             if(position >= 0 && selectListAdapter != null && position < selectListAdapter.getItemCount())
             {
                 //remember current item and view
-                ListItem currentItem = selectListAdapter.getItem(position);
+                ListDisplayItem currentItem = selectListAdapter.getItem(position);
                 RecyclerView.LayoutManager selectListManager = selectList.getLayoutManager();
                 View itemView = (selectListManager != null ? selectListManager.findViewByPosition(position) : null);
 
@@ -1795,7 +1801,7 @@ public abstract class Selectable
                 for(index = 0; index < selectListAdapter.getItemCount(); index++)
                 {
                     //remember current item
-                    ListItem currentItem = selectListAdapter.getItem(index);
+                    ListDisplayItem currentItem = selectListAdapter.getItem(index);
 
                     //update item
                     wasChecked = currentItem.isChecked;
@@ -1818,7 +1824,7 @@ public abstract class Selectable
             for(position = 0; position < count; position++)
             {
                 //if current item ID matches
-                ListItem currentItem = selectListAdapter.getItem(position);
+                ListDisplayItem currentItem = selectListAdapter.getItem(position);
                 if(currentItem != null && currentItem.id == id)
                 {
                     //found position
@@ -1891,7 +1897,7 @@ public abstract class Selectable
         }
 
         //Gets selected items
-        public ArrayList<ListItem> getSelectedItems()
+        public ArrayList<ListDisplayItem> getSelectedItems()
         {
             return(selectedItems);
         }
@@ -1949,7 +1955,7 @@ public abstract class Selectable
                 @Override
                 public void onItemClicked(View view, int position)
                 {
-                    ListItem currentItem = (selectListAdapter != null ? selectListAdapter.getItem(position) : null);
+                    ListDisplayItem currentItem = (selectListAdapter != null ? selectListAdapter.getItem(position) : null);
                     if(currentItem != null)
                     {
                         //if not in edit mode and item can be checked
@@ -1982,7 +1988,7 @@ public abstract class Selectable
                 @Override
                 public void onItemLongClicked(View view, int position)
                 {
-                    ListItem currentItem = (selectListAdapter != null ? selectListAdapter.getItem(position) : null);
+                    ListDisplayItem currentItem = (selectListAdapter != null ? selectListAdapter.getItem(position) : null);
 
                     //if not in edit mode and item can be edited
                     if(!inEditMode && currentItem != null && currentItem.canEdit)
@@ -2002,7 +2008,7 @@ public abstract class Selectable
             return(new ListBaseAdapter.OnItemDetailButtonClickListener()
             {
                 @Override
-                public void onClick(int pageType, int itemID, ListItem item, int buttonNum)
+                public void onClick(int pageType, int itemID, ListDisplayItem item, int buttonNum)
                 {
                     //if listener is set
                     if(itemDetailButtonClickListener != null)
@@ -2287,7 +2293,7 @@ public abstract class Selectable
         }
 
         //Calls on item check changed listener
-        private void onItemCheckChanged(ListItem item)
+        private void onItemCheckChanged(ListDisplayItem item)
         {
             if(itemCheckChangedListener != null)
             {
@@ -2450,7 +2456,7 @@ public abstract class Selectable
         }
 
         //Returns selected items
-        public ArrayList<ListItem> getSelectedItems(ViewGroup container, int pageNum)
+        public ArrayList<ListDisplayItem> getSelectedItems(ViewGroup container, int pageNum)
         {
             ListFragment page = getPage(container, pageNum);
             return(page != null ? page.getSelectedItems() : new ArrayList<>(0));

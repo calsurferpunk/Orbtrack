@@ -1041,10 +1041,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean exitFullScreen = false;
         boolean cancelCalibration = false;
         boolean closedSettings = false;
+        boolean closedSearchText = false;
         int page = getMainPage();
         int desiredSubPage;
         Calendar currentTime = Globals.getGMTTime();
         CameraLens cameraView = Current.getCameraView();
+        CustomSearchView searchText;
         FloatingActionButton fullscreenButton = null;
         ActionBar mainActionBar = this.getSupportActionBar();
         boolean inFullscreen = (mainActionBar != null && !mainActionBar.isShowing());
@@ -1058,118 +1060,128 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             return;
         }
 
-        //handle based on group
+        //look for common scenarios
         switch(mainGroup)
         {
             case Groups.Current:
-                //if in fullscreen and button exists
+            case Groups.Calculate:
+                //get common properties
+                searchText = Current.getSearchText();
                 fullscreenButton = Current.getFullScreenButton();
+
+                //if in fullscreen and button exists
                 if(inFullscreen && fullscreenButton != null)
                 {
                     //exit fullscreen
                     exitFullScreen = true;
-                    break;
                 }
-
-                //handle based on sub page
-                switch(currentSubPage)
+                //else if search text exists and was able to close
+                else if(searchText != null && searchText.close())
                 {
-                    case Globals.SubPageType.Lens:
-                        //if camera view exists
-                        if(cameraView != null)
-                        {
-                            //if calibrating
-                            if(Current.lensShowCalibration)
-                            {
-                                cancelCalibration = true;
-                                break;
-                            }
-                            //else if able to close settings menu
-                            else if(cameraView.closeSettingsMenu())
-                            {
-                                closedSettings = true;
-                                break;
-                            }
-                        }
-                        //else fall through
-
-                    //go back to list
-                    case Globals.SubPageType.Map:
-                    case Globals.SubPageType.Globe:
-                        //if not on lens and able to close settings menu
-                        if(currentSubPage != Globals.SubPageType.Lens && Current.closeMapSettingsMenu())
-                        {
-                            closedSettings = true;
-                        }
-                        else
-                        {
-                            setSubPage(Groups.Current, page, Globals.SubPageType.List);
-                            updateDisplay = true;
-                        }
-                        break;
+                    //closed search text
+                    closedSearchText = true;
                 }
                 break;
+        }
 
-            case Groups.Calculate:
-                //if in fullscreen and button exists
-                fullscreenButton = Current.getFullScreenButton();
-                if(inFullscreen && fullscreenButton != null)
-                {
-                    //exit fullscreen
-                    exitFullScreen = true;
-                    break;
-                }
-
-                desiredSubPage = Globals.SubPageType.Input;
-
-                //handle based on page
-                switch(page)
-                {
-                    case Calculate.PageType.View:
-                    case Calculate.PageType.Passes:
-                    case Calculate.PageType.Coordinates:
-                    case Calculate.PageType.Intersection:
-                        //if on view lens or map
-                        switch(calculateSubPage[page])
-                        {
-                            case Globals.SubPageType.Map:
-                            case Globals.SubPageType.Globe:
-                                //if able to close settings menu
-                                if(Current.closeMapSettingsMenu())
+        //if not already handled
+        if(!exitFullScreen && !closedSearchText)
+        {
+            //look for group specific scenarios
+            switch(mainGroup)
+            {
+                case Groups.Current:
+                    //handle based on sub page
+                    switch(currentSubPage)
+                    {
+                        case Globals.SubPageType.Lens:
+                            //if camera view exists
+                            if(cameraView != null)
+                            {
+                                //if calibrating
+                                if(Current.lensShowCalibration)
+                                {
+                                    cancelCalibration = true;
+                                    break;
+                                }
+                                //else if able to close settings menu
+                                else if(cameraView.closeSettingsMenu())
                                 {
                                     closedSettings = true;
                                     break;
                                 }
-                                //else fall through
+                            }
+                            //else fall through
 
-                                //go back to list
-                            case Globals.SubPageType.Lens:
-                                desiredSubPage = Globals.SubPageType.List;
-                                break;
-                        }
-                        //fall through
-
-                    default:
-                        //if closed settings
-                        if(closedSettings)
-                        {
-                            //stop
+                        //go back to list
+                        case Globals.SubPageType.Map:
+                        case Globals.SubPageType.Globe:
+                            //if not on lens and able to close settings menu
+                            if(currentSubPage != Globals.SubPageType.Lens && Current.closeMapSettingsMenu())
+                            {
+                                closedSettings = true;
+                            }
+                            else
+                            {
+                                setSubPage(Groups.Current, page, Globals.SubPageType.List);
+                                updateDisplay = true;
+                            }
                             break;
-                        }
+                    }
+                    break;
 
-                        //stop any running task on page
-                        stopPageTask();
+                case Groups.Calculate:
+                    desiredSubPage = Globals.SubPageType.Input;
 
-                        //if not on desired sub page
-                        if(calculateSubPage[page] != desiredSubPage)
-                        {
-                            //go back to desired sub page
-                            setSubPage(Groups.Calculate, page, desiredSubPage);
-                            updateDisplay = true;
-                        }
-                        break;
-                }
-                break;
+                    //handle based on page
+                    switch(page)
+                    {
+                        case Calculate.PageType.View:
+                        case Calculate.PageType.Passes:
+                        case Calculate.PageType.Coordinates:
+                        case Calculate.PageType.Intersection:
+                            //if on view lens or map
+                            switch(calculateSubPage[page])
+                            {
+                                case Globals.SubPageType.Map:
+                                case Globals.SubPageType.Globe:
+                                    //if able to close settings menu
+                                    if(Current.closeMapSettingsMenu())
+                                    {
+                                        closedSettings = true;
+                                        break;
+                                    }
+                                    //else fall through
+
+                                    //go back to list
+                                case Globals.SubPageType.Lens:
+                                    desiredSubPage = Globals.SubPageType.List;
+                                    break;
+                            }
+                            //fall through
+
+                        default:
+                            //if closed settings
+                            if(closedSettings)
+                            {
+                                //stop
+                                break;
+                            }
+
+                            //stop any running task on page
+                            stopPageTask();
+
+                            //if not on desired sub page
+                            if(calculateSubPage[page] != desiredSubPage)
+                            {
+                                //go back to desired sub page
+                                setSubPage(Groups.Calculate, page, desiredSubPage);
+                                updateDisplay = true;
+                            }
+                            break;
+                    }
+                    break;
+            }
         }
 
         //if updating display
@@ -1192,7 +1204,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             cameraView.stopCalibration();
         }
         //else if more than 3 seconds between presses
-        else if(!closedSettings && currentTime.getTimeInMillis() - backPressTime.getTimeInMillis() > 3000)
+        else if(!closedSettings && !closedSearchText && currentTime.getTimeInMillis() - backPressTime.getTimeInMillis() > 3000)
         {
             //update time pressed
             backPressTime = currentTime;
@@ -1200,7 +1212,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //show message
             Toast.makeText(this, res.getString(R.string.text_press_back_again_exit), Toast.LENGTH_SHORT).show();
         }
-        else if(!closedSettings)
+        else if(!closedSettings && !closedSearchText)
         {
             //call super
             super.onBackPressed();

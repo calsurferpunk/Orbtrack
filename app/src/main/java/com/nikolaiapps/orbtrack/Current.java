@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatImageButton;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -1019,7 +1020,7 @@ public abstract class Current
             }
 
             //set change listeners
-            setChangeListeners(selectList, listAdapter, page);
+            setChangeListeners(listAdapter);
 
             //return view
             return(newView);
@@ -1104,7 +1105,7 @@ public abstract class Current
             });
         }
 
-        public void setChangeListeners(final RecyclerView selectList, final Selectable.ListBaseAdapter listAdapter, final int page)
+        public void setChangeListeners(final Selectable.ListBaseAdapter listAdapter)
         {
             if(listAdapter != null)
             {
@@ -1316,6 +1317,7 @@ public abstract class Current
     private static Calculations.ObserverType currentLocation = new Calculations.ObserverType();
     private static WeakReference<TextView> mapInfoTextReference;
     private static WeakReference<CameraLens> cameraViewReference;
+    private static WeakReference<CustomSearchView> currentSearchTextReference;
     private static WeakReference<CoordinatesFragment> mapViewReference;
     private static WeakReference<FloatingActionButton> fullscreenButtonReference;
 
@@ -1335,6 +1337,12 @@ public abstract class Current
     public static FloatingActionButton getFullScreenButton()
     {
         return(fullscreenButtonReference != null ? fullscreenButtonReference.get() : null);
+    }
+
+    //Gets search text
+    public static CustomSearchView getSearchText()
+    {
+        return(currentSearchTextReference != null ? currentSearchTextReference.get() : null);
     }
 
     //Begin calculating view information
@@ -1413,8 +1421,28 @@ public abstract class Current
         }
     }
 
+    //Creates a search adapter
+    private static IconSpinner.CustomAdapter createSearchAdapter(Context context, IconSpinner searchList, ArrayList<Database.DatabaseSatellite> selectedOrbitalList, int textColor, int textSelectedColor, IconSpinner.CustomAdapter.OnLoadItemsListener listener)
+    {
+        return(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black), listener));
+    }
+
+    //Shows/hides search displays
+    private static void setSearchDisplaysVisible(IconSpinner searchList, AppCompatImageButton searchButton, CustomSearchView searchText, boolean show)
+    {
+        //show search or list
+        searchList.setVisibility(show ? View.GONE : View.VISIBLE);
+        searchText.setVisibility(show ? View.VISIBLE : View.GONE);
+        searchButton.setVisibility(show ? View.GONE : View.VISIBLE);
+        if(show)
+        {
+            searchText.setIconified(false);
+            searchText.requestFocus();
+        }
+    }
+
     //Setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final View searchListLayout, Slider zoomBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, Slider zoomBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
     {
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
@@ -1439,10 +1467,11 @@ public abstract class Current
             }
         }
 
-        //setup search list
+        //setup search
         if(usingSearchList)
         {
-            searchList.setAdapter(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black)));
+            //set search list
+            searchList.setAdapter(createSearchAdapter(context, searchList, selectedOrbitalList, textColor, textSelectedColor, null));
             searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
             searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
             searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
@@ -1465,6 +1494,75 @@ public abstract class Current
                 public void onNothingSelected(AdapterView<?> parent) {}
             });
             searchList.setSelectedValue(Universe.IDs.None);
+
+            //if using search button and text
+            if(searchButton != null && searchText != null)
+            {
+                //create search view adapter
+                IconSpinner.CustomAdapter searchViewAdapter = createSearchAdapter(context, searchList, selectedOrbitalList, textColor, textSelectedColor, new IconSpinner.CustomAdapter.OnLoadItemsListener()
+                {
+                    @Override
+                    public void onLoaded(IconSpinner.CustomAdapter adapter, IconSpinner.Item[] loadedItems)
+                    {
+                        //set adapter
+                        searchText.setAdapter(adapter);
+                    }
+                });
+                searchViewAdapter.setAllowFilter(true);
+
+                //setup search button
+                searchButton.setOnClickListener(new View.OnClickListener()
+                {
+                    @Override
+                    public void onClick(View v)
+                    {
+                        //show search
+                        setSearchDisplaysVisible(searchList, searchButton, searchText, true);
+                    }
+                });
+
+                //setup search text
+                searchText.setOnCloseListener(new CustomSearchView.OnCloseListener()
+                {
+                    @Override public boolean onClose()
+                    {
+                        //show list
+                        setSearchDisplaysVisible(searchList, searchButton, searchText, false);
+                        return(true);
+                    }
+                });
+                searchText.setOnQueryTextListener(new CustomSearchView.OnQueryTextListener()
+                {
+                    private void updateAdapter(String query)
+                    {
+                        searchText.updateSuggestions(query);
+                    }
+
+                    @Override
+                    public boolean onQueryTextSubmit(String query)
+                    {
+                        updateAdapter(query);
+                        return(true);
+                    }
+
+                    @Override
+                    public boolean onQueryTextChange(String newText)
+                    {
+                        updateAdapter(newText);
+                        return(true);
+                    }
+                });
+                searchText.setOnSuggestionSelectedListener(new CustomSearchView.OnSuggestionSelectedListener()
+                {
+                    @Override
+                    public void onSuggestionSelected(IconSpinner.Item item)
+                    {
+                        //set list selection and show it again
+                        searchList.setSelectedValue(item.value);
+                        setSearchDisplaysVisible(searchList, searchButton, searchText, false);
+                    }
+                });
+            }
         }
 
         //if show toolbars button exists
@@ -1596,6 +1694,8 @@ public abstract class Current
         final FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
         final LinearLayout searchListLayout = rootView.findViewById(R.id.Lens_Search_List_Layout);
         final IconSpinner searchList;
+        final AppCompatImageButton searchButton;
+        final CustomSearchView searchText;
         int page = pageFragment.getPageParam();
         int group = pageFragment.getGroupParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
@@ -1644,7 +1744,10 @@ public abstract class Current
 
         //setup search displays
         searchList = rootView.findViewById(R.id.Lens_Search_List);
-        setupSearch(context, showToolbarsButton, searchList, searchListLayout, cameraView.zoomBar, cameraView.playBar, selectedOrbitals, true);
+        searchButton = rootView.findViewById(R.id.Lens_Search_Button);
+        searchText = rootView.findViewById(R.id.Lens_Search_Text);
+        currentSearchTextReference = new WeakReference<>(searchText);
+        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, cameraView.zoomBar, cameraView.playBar, selectedOrbitals, true);
         if(showToolbarsButton != null)
         {
             //toggle displays
@@ -2627,6 +2730,8 @@ public abstract class Current
         final FrameLayout mapFrameLayout = rootView.findViewById(R.id.Map_Frame_Layout);
         final LinearLayout searchListLayout = rootView.findViewById(R.id.Map_Search_List_Layout);
         final IconSpinner searchList;
+        final AppCompatImageButton searchButton;
+        final CustomSearchView searchText;
 
         //setup lists and status
         final Calculate.Coordinates.Item[] savedItems = (savedInstanceState != null ? (Calculate.Coordinates.Item[]) Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
@@ -2665,6 +2770,10 @@ public abstract class Current
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
         mapView.setArguments(args);
         searchList = (multiSelected ? rootView.findViewById(R.id.Map_Search_List) : null);
+        searchButton = (multiSelected ? rootView.findViewById(R.id.Map_Search_Button) : null);
+        searchText = (multiSelected ? rootView.findViewById(R.id.Map_Search_Text) : null);
+        currentSearchTextReference = new WeakReference<>(searchText);
+
         page.playBar = rootView.findViewById(R.id.Map_Coordinate_Play_Bar);
         page.scaleBar = rootView.findViewById(R.id.Map_Coordinate_Scale_Bar);
         page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
@@ -2677,7 +2786,7 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, searchList, searchListLayout, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
 
         //if map info text exists and not using background
         if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))

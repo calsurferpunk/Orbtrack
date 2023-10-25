@@ -4,6 +4,8 @@ package com.nikolaiapps.orbtrack;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.Resources;
+import android.database.Cursor;
+import android.database.MatrixCursor;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
@@ -13,8 +15,10 @@ import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSpinner;
+import androidx.cursoradapter.widget.CursorAdapter;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -141,6 +145,39 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             this(txt, val);
             icon3 = new ColorDrawable(ContextCompat.getColor(context, colorID));
         }
+        public Item(Item copyFrom)
+        {
+            int index;
+
+            rotate = copyFrom.rotate;
+            text = copyFrom.text;
+            subText = copyFrom.subText;
+            value = copyFrom.value;
+            icon1 = (copyFrom.icon1 != null ? copyFrom.icon1.mutate() : null);
+            icon3 = (copyFrom.icon3 != null ? copyFrom.icon3.mutate() : null);
+            icon1Id = copyFrom.icon1Id;
+            icon2Id = copyFrom.icon2Id;
+            icon3Id = copyFrom.icon3Id;
+            icon1Color = copyFrom.icon1Color;
+            icon1SelectedColor = copyFrom.icon1SelectedColor;
+            icon3Color = copyFrom.icon3Color;
+            icon3TintColor = copyFrom.icon3TintColor;
+            icon3SelectedColor = copyFrom.icon3SelectedColor;
+            iconsUseThemeTint = copyFrom.iconsUseThemeTint;
+
+            if(copyFrom.icon1Ids != null)
+            {
+                icon1Ids = new int[copyFrom.icon1Ids.length];
+                for(index = 0; index < copyFrom.icon1Ids.length; index++)
+                {
+                    icon1Ids[index] = copyFrom.icon1Ids[index];
+                }
+            }
+            else
+            {
+                icon1Ids = null;
+            }
+        }
 
         public void loadIcons(Context context, int iconHeightPx)
         {
@@ -201,10 +238,32 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         private class ItemFilter extends Filter
         {
             private final boolean useFilter;
+            private final Item[] allItems;
 
             public ItemFilter(boolean allowFilter)
             {
+                int index;
+
+                //update status
                 useFilter = allowFilter;
+
+                //if using filter and items are set
+                if(useFilter && items != null)
+                {
+                    //remember all items before filter applied
+                    allItems = new Item[items.length];
+                    for(index = 0; index < items.length; index++)
+                    {
+                        //copy current item
+                        allItems[index] = new Item(items[index]);
+                    }
+                }
+                else
+                {
+                    //set empty
+                    allItems = null;
+                }
+
             }
 
             @Override
@@ -212,14 +271,14 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             {
                 FilterResults results = new FilterResults();
 
-                //if using filter and constraint is set
-                if(useFilter && constraint != null && constraint.length() > 1)
+                //if using filter, have all items, and constraint is set
+                if(useFilter && allItems != null && constraint != null && constraint.length() > 1)
                 {
                     String constraintValue = constraint.toString().toLowerCase();
                     ArrayList<Item> resultItems = new ArrayList<>();
 
                     //go through each item
-                    for(Item currentItem : items)
+                    for(Item currentItem : allItems)
                     {
                         //remember current value
                         String currentValue = (currentItem.text != null ? currentItem.text.toLowerCase() : "");
@@ -258,11 +317,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         //On load items listener
         public interface OnLoadItemsListener
         {
-            void onLoaded(Item[] loadedItems);
+            void onLoaded(CustomAdapter adapter, Item[] loadedItems);
         }
 
         //Load items task
-        private static class LoadItemsTask extends ThreadTask<Object, Void, Void>
+        private class LoadItemsTask extends ThreadTask<Object, Void, Void>
         {
             private final OnLoadItemsListener loadItemsListener;
 
@@ -336,7 +395,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                     useIcons = (currentSat.noradId != Integer.MAX_VALUE && !isLocation);
                     useIcon1Color = !useIcons;
                     useIcon3Color = (useIcons && currentSat.noradId > 0 && (currentSat.orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)));
-                    int[] ownerIconIds = (useIcons ? Globals.getOwnerIconIDs(currentSat.ownerCode) : new int[]{isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_search_black});
+                    int[] ownerIconIds = (useIcons ? Globals.getOwnerIconIDs(currentSat.ownerCode) : new int[]{isLocation ? R.drawable.ic_my_location_black : R.drawable.ic_no});
                     items[index + offset] = new Item(ownerIconIds[0], (useIcon1Color ? icon1Color : Color.TRANSPARENT), (useIcon1Color ? icon1SelectedColor : Color.TRANSPARENT), (ownerIconIds.length > 1 ? ownerIconIds[1] : -1), (useIcons ? Globals.getOrbitalIcon(context, MainActivity.getObserver(), currentSat.noradId, currentSat.orbitalType, forceColorId) : null), (useIcon3Color ? icon3Color : Color.TRANSPARENT), (useIcon3Color ? icon3SelectedColor : Color.TRANSPARENT), !useIcons, currentSat.getName(), currentSat.noradId);
                 }
 
@@ -344,7 +403,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                 if(loadItemsListener != null)
                 {
                     //send event
-                    loadItemsListener.onLoaded(items);
+                    loadItemsListener.onLoaded(CustomAdapter.this, items);
                 }
 
                 //done
@@ -365,6 +424,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         private boolean usingIcon3;
         private boolean usingIcon3Only;
         private boolean usingMaterial;
+        private boolean allowFilter = false;
         private boolean loadingItems = false;
         private ItemFilter filter;
         private LayoutInflater listInflater;
@@ -446,7 +506,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
 
             BaseConstructor(context);
         }
-        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId)
+        public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti, int icon1Color, int icon1SelectedColor, int icon3Color, int icon3SelectedColor, int forceColorId, OnLoadItemsListener listener)
         {
             BaseConstructor(context);
 
@@ -457,7 +517,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             LoadItemsTask loadItems = new LoadItemsTask(new OnLoadItemsListener()
             {
                 @Override
-                public void onLoaded(Item[] loadedItems)
+                public void onLoaded(CustomAdapter adapter, Item[] loadedItems)
                 {
                     items = loadedItems;
                     updateUsing();
@@ -480,6 +540,13 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                                     //load adapter again
                                     listView.loadAdapter();
                                 }
+
+                                //if listener is set
+                                if(listener != null)
+                                {
+                                    //send event
+                                    listener.onLoaded(CustomAdapter.this, loadedItems);
+                                }
                             }
                         });
                     }
@@ -489,7 +556,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         }
         public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites, boolean addMulti)
         {
-            this(context, listView, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0);
+            this(context, listView, satellites, addMulti, Color.TRANSPARENT, Color.TRANSPARENT, (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), (Settings.getDarkTheme(context) ? Color.WHITE : Color.BLACK), 0, null);
         }
         public CustomAdapter(Context context, SelectListInterface listView, Database.DatabaseSatellite[] satellites)
         {
@@ -601,7 +668,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             if(filter == null)
             {
                 //set it
-                filter = new ItemFilter(false);
+                filter = new ItemFilter(allowFilter);
             }
 
             //return filter
@@ -612,6 +679,12 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public View getView(int position, View convertView, ViewGroup parent)
         {
             boolean isSelected = (position == selectedIndex);
+            Item currentItem = (items != null && position >= 0 && position < items.length ? items[position] : new Item("", ""));
+            return(getView(currentItem, isSelected, convertView, parent));
+        }
+
+        public View getView(Item currentItem, boolean isSelected, View convertView, ViewGroup parent)
+        {
             boolean haveItemImage1;
             boolean haveItemImage2;
             boolean haveItemImage3;
@@ -628,7 +701,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             TextView itemText;
             TextView itemSubText;
             CircularProgressIndicator itemProgress;
-            Item currentItem = (items != null && position >= 0 && position < items.length ? items[position] : new Item("", ""));
 
             //set view
             if(convertView == null)
@@ -671,111 +743,120 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             haveItemImage2 = (itemImage2 != null);
             haveItemImage3 = (itemImage3 != null);
 
-            //get icons
-            icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
-            if(haveItemImage1 || haveItemImage3)
+            //if current item exists
+            if(currentItem != null)
             {
-                px = (haveItemImage3 ? itemImage3 : itemImage1).getMeasuredHeight();
-            }
-            if(px <= 0)
-            {
-                px = defaultIconPx;
-            }
-            currentItem.loadIcons(context, px);
+                //get icons
+                icon2 = (currentItem.icon2Id > 0 ? Globals.getDrawable(context, currentItem.icon2Id, currentItem.iconsUseThemeTint) : null);
+                if(haveItemImage1 || haveItemImage3)
+                {
+                    px = (haveItemImage3 ? itemImage3 : itemImage1).getMeasuredHeight();
+                }
+                if(px <= 0)
+                {
+                    px = defaultIconPx;
+                }
+                currentItem.loadIcons(context, px);
 
-            //if not loading items
-            if(!loadingItems)
-            {
-                //update displays
-                if(haveItemImage1)
+                //if not loading items
+                if(!loadingItems)
                 {
-                    itemImage1.setBackgroundColor(currentBackgroundColor);
-                    if(currentItem.usingIcon1Colors())
+                    //update displays
+                    if(haveItemImage1)
                     {
-                        color = (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color);
-                        itemImage1.setImageDrawable(Globals.getDrawableTinted(currentItem.icon1, color));
-                        itemImage1.setColorFilter(color);
-                    }
-                    else
-                    {
-                        itemImage1.setImageDrawable(currentItem.icon1);
-                        itemImage1.setColorFilter(Color.TRANSPARENT);
-                    }
-                    if(!usingIcon1)
-                    {
-                        itemImage1.setVisibility(View.GONE);
-                    }
-                }
-                if(haveItemImage2)
-                {
-                    itemImage2.setBackgroundColor(currentBackgroundColor);
-                    itemImage2.setImageDrawable(icon2);
-                    if(icon2 != null && itemImage1 != null)
-                    {
-                        LayoutParams viewParams = itemImage1.getLayoutParams();
-                        viewParams.width = itemImage2.getLayoutParams().width;
-                        itemImage1.setLayoutParams(viewParams);
-                        itemImage2.setVisibility(View.VISIBLE);
-                    }
-                }
-                if(haveItemImage3)
-                {
-                    itemImage3.setBackgroundColor(currentBackgroundColor);
-                    if(currentItem.usingIcon3Colors())
-                    {
-                        color = (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color);
-                        itemImage3.setImageDrawable(Globals.getDrawableTinted(currentItem.icon3, color));
-                        itemImage3.setColorFilter(color);
-                    }
-                    else
-                    {
-                        itemImage3.setImageDrawable(currentItem.icon3);
-                        itemImage3.setColorFilter(Color.TRANSPARENT);
-                    }
-                    if(!usingIcon3)
-                    {
-                        itemImage3.setVisibility(View.GONE);
-                    }
-                    if(usingIcon3Only)
-                    {
-                        LayoutParams imageParams = itemImage3.getLayoutParams();
-                        iconBounds = (currentItem.icon3 != null ? currentItem.icon3.getBounds() : new Rect());
-                        if(iconBounds.width() > 0)
+                        itemImage1.setBackgroundColor(currentBackgroundColor);
+                        if(currentItem.usingIcon1Colors())
                         {
-                            imageParams.width = iconBounds.width();
-                            imageParams.height = iconBounds.height();
+                            color = (isSelected ? currentItem.icon1SelectedColor : currentItem.icon1Color);
+                            itemImage1.setImageDrawable(Globals.getDrawableTinted(currentItem.icon1, color));
+                            itemImage1.setColorFilter(color);
                         }
                         else
                         {
-                            imageParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
-                            imageParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                            itemImage1.setImageDrawable(currentItem.icon1);
+                            itemImage1.setColorFilter(Color.TRANSPARENT);
                         }
-                        itemImage3.setLayoutParams(imageParams);
+                        if(!usingIcon1)
+                        {
+                            itemImage1.setVisibility(View.GONE);
+                        }
                     }
-                }
-                if(itemText != null)
-                {
-                    itemText.setBackgroundColor(currentBackgroundColor);
-                    itemText.setText(currentItem.text);
-                    itemText.setTextColor(isSelected ? textSelectedColor : textColor);
-                }
-                if(itemSubText != null)
-                {
-                    itemSubText.setBackgroundColor(currentBackgroundColor);
-                    if(currentItem.subText != null)
+                    if(haveItemImage2)
                     {
-                        itemSubText.setText(currentItem.subText);
-                        itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
+                        itemImage2.setBackgroundColor(currentBackgroundColor);
+                        itemImage2.setImageDrawable(icon2);
+                        if(icon2 != null && itemImage1 != null)
+                        {
+                            LayoutParams viewParams = itemImage1.getLayoutParams();
+                            viewParams.width = itemImage2.getLayoutParams().width;
+                            itemImage1.setLayoutParams(viewParams);
+                            itemImage2.setVisibility(View.VISIBLE);
+                        }
                     }
-                    else
+                    if(haveItemImage3)
                     {
-                        itemSubText.setVisibility(View.GONE);
+                        itemImage3.setBackgroundColor(currentBackgroundColor);
+                        if(currentItem.usingIcon3Colors())
+                        {
+                            color = (isSelected ? currentItem.icon3SelectedColor : currentItem.icon3Color);
+                            itemImage3.setImageDrawable(Globals.getDrawableTinted(currentItem.icon3, color));
+                            itemImage3.setColorFilter(color);
+                        }
+                        else
+                        {
+                            itemImage3.setImageDrawable(currentItem.icon3);
+                            itemImage3.setColorFilter(Color.TRANSPARENT);
+                        }
+                        if(!usingIcon3)
+                        {
+                            itemImage3.setVisibility(View.GONE);
+                        }
+                        if(usingIcon3Only)
+                        {
+                            LayoutParams imageParams = itemImage3.getLayoutParams();
+                            iconBounds = (currentItem.icon3 != null ? currentItem.icon3.getBounds() : new Rect());
+                            if(iconBounds.width() > 0)
+                            {
+                                imageParams.width = iconBounds.width();
+                                imageParams.height = iconBounds.height();
+                            }
+                            else
+                            {
+                                imageParams.width = LinearLayout.LayoutParams.WRAP_CONTENT;
+                                imageParams.height = LinearLayout.LayoutParams.WRAP_CONTENT;
+                            }
+                            itemImage3.setLayoutParams(imageParams);
+                        }
+                    }
+                    if(itemText != null)
+                    {
+                        itemText.setBackgroundColor(currentBackgroundColor);
+                        itemText.setText(currentItem.text);
+                        itemText.setTextColor(isSelected ? textSelectedColor : textColor);
+                    }
+                    if(itemSubText != null)
+                    {
+                        itemSubText.setBackgroundColor(currentBackgroundColor);
+                        if(currentItem.subText != null)
+                        {
+                            itemSubText.setText(currentItem.subText);
+                            itemSubText.setTextColor(isSelected ? textSelectedColor : textColor);
+                        }
+                        else
+                        {
+                            itemSubText.setVisibility(View.GONE);
+                        }
                     }
                 }
             }
 
             //return view
             return(convertView);
+        }
+
+        public void setAllowFilter(boolean allow)
+        {
+            allowFilter = allow;
         }
 
         public int getBackgroundColor()
@@ -854,6 +935,49 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         }
     }
 
+    public static class CustomCursorAdapter extends CursorAdapter
+    {
+        private final CustomAdapter adapter;
+
+        public CustomCursorAdapter(Context context, Cursor cursor, CustomAdapter adapter)
+        {
+            super(context, cursor, false);
+
+            this.adapter = adapter;
+        }
+
+        @Override
+        public View newView(Context context, Cursor cursor, ViewGroup parent)
+        {
+            return(adapter != null ? adapter.getView((Item)adapter.getItem(cursor.getPosition()), false, null, parent) : null);
+        }
+
+        @Override
+        public void bindView(View view, Context context, Cursor cursor)
+        {
+            //do nothing
+        }
+
+        public static Cursor getCursor(CustomAdapter adapter)
+        {
+            int id = 0;
+            Item[] items = (adapter != null ? adapter.getItems() : new Item[0]);
+
+            try(MatrixCursor cursor = new MatrixCursor(new String[]{"_id", "text"}))
+            {
+                for(Item currentItem : items)
+                {
+                    cursor.addRow(new Object[]{id++, currentItem.text});
+                }
+                return(cursor);
+            }
+            catch(Exception ex)
+            {
+                return(null);
+            }
+        }
+    }
+
     private CustomAdapter currentAdapter;
     private OnItemSelectedListener itemSelectedListener;
 
@@ -909,6 +1033,36 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
     public IconSpinner(Context context)
     {
         this(context, -1);
+    }
+
+    @Override
+    public void setOnClickListener(OnClickListener listener)
+    {
+        //use touch listener instead
+        super.setOnTouchListener(new OnTouchListener()
+        {
+            @Override
+            public boolean onTouch(View view, MotionEvent event)
+            {
+                //if initial press
+                if(event.getAction() == MotionEvent.ACTION_DOWN)
+                {
+                    //if listener is set
+                    if(listener != null)
+                    {
+                        //call it
+                        listener.onClick(view);
+                    }
+                    else
+                    {
+                        //normal click
+                        performClick();
+                    }
+                }
+
+                return(true);
+            }
+        });
     }
 
     @Override

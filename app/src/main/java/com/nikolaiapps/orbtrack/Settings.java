@@ -547,7 +547,7 @@ public abstract class Settings
 
                 //Reloads items
                 @SuppressLint("NotifyDataSetChanged")
-                public void reloadItems()
+                public void reload()
                 {
                     initItems();
                     notifyDataSetChanged();
@@ -688,7 +688,7 @@ public abstract class Settings
                                     public void run()
                                     {
                                         //reload items
-                                        reloadItems();
+                                        reload();
                                     }
                                 });
                             }
@@ -756,7 +756,7 @@ public abstract class Settings
                     }
 
                     //reload items
-                    reloadItems();
+                    reload();
                 }
             }
         }
@@ -1005,6 +1005,7 @@ public abstract class Settings
                 columnTitleStringId = titleStringId;
 
                 this.itemsRefID = R.layout.settings_location_item;
+                reload();
             }
             public ItemListAdapter(View parentView, String title)
             {

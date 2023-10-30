@@ -1800,7 +1800,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 if(accountsListAdapter != null)
                 {
                     //reload items
-                    accountsListAdapter.reloadItems();
+                    accountsListAdapter.reload();
                 }
                 break;
 
@@ -2793,7 +2793,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                                 public void run()
                                                 {
                                                     //reload items
-                                                    accountsListAdapter.reloadItems();
+                                                    accountsListAdapter.reload();
                                                 }
                                             });
                                         }

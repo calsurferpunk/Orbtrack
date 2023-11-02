@@ -886,6 +886,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         float elDeltaDeg;
         float alignCenterX;
         float alignCenterY;
+        float currentAzPx;
+        float currentElPx;
         float currentAzDeg = getAzDeg();
         float currentElDeg = getElDeg();
         float degToPxWidth = getDegreeToPixelWidth(width);
@@ -904,6 +906,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         String selectedName = "";
         Context context = getContext();
         Calculations.TopographicDataType selectedLookAngle = null;
+        float[] centerPx;
 
         //if camera area has been calculated
         if(useCameraDegWidth != Float.MAX_VALUE && useCameraDegHeight != Float.MAX_VALUE)
@@ -1020,20 +1023,23 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     CalculateViewsTask.OrbitalView currentView = currentTravel[index2];
                                     currentAzDelta = Globals.degreeDistance(currentAzDeg, currentView.azimuth);
                                     currentElDelta = Globals.degreeDistance(currentElDeg, currentView.elevation);
+                                    centerPx = getCorrectedScreenPoints(currentAzDelta, currentElDelta, currentView.elevation, width, height, degToPxWidth, degToPxHeight);
+                                    currentAzPx = centerPx[0];
+                                    currentElPx = centerPx[1];
 
                                     //if on first
                                     if(onFirst)
                                     {
                                         //set last point
-                                        azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
-                                        elPx[1] = (float)(heightHalf - (currentElDelta * degToPxHeight));
+                                        azPx[1] = currentAzPx;
+                                        elPx[1] = currentElPx;
                                     }
 
                                     //update line points and status
                                     azPx[0] = azPx[1];
                                     elPx[0] = elPx[1];
-                                    azPx[1] = (float)(widthHalf + (currentAzDelta * degToPxWidth));
-                                    elPx[1] = (float)(heightHalf - (currentElDelta * degToPxHeight));
+                                    azPx[1] = currentAzPx;
+                                    elPx[1] = currentElPx;
                                     currentAzPxDelta = Math.abs(azPx[0] - azPx[1]);
                                     currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
 
@@ -1230,8 +1236,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             else
             {
                 //draw compass
-                compassCenterX = (width - (compassWidth / 2f)) - 5;
-                compassCenterY = 5 + (compassHeight / 2f);
+                compassCenterX = ((width - (compassWidth / 2f)) - 5) - compassMargin;
+                compassCenterY = (5 + (compassHeight / 2f)) + compassMargin;
                 if(compassBad)
                 {
                     //if hasn't been bad yet
@@ -1249,20 +1255,21 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     //has been bad
                     compassHadBad = true;
                 }
-                Globals.drawBitmap(canvas, compassDirection, compassCenterX - compassMargin, compassCenterY + compassMargin, currentAzDeg, currentPaint);
+                Globals.drawBitmap(canvas, compassDirection, compassCenterX, compassCenterY, currentAzDeg, currentPaint);
             }
 
             //if have a selection
             if(haveSelectedOrbital())
             {
                 Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
-                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && usedLookAngle != null ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, true) : null);
+                boolean haveLookAngle = (usedLookAngle != null);
+                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && haveLookAngle ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, true) : null);
                 boolean haveProperties = (relativeCalibrateProperties != null);
                 boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
                 boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
 
                 //if not too close and have look angles
-                if(!closeArea && usedLookAngle != null)
+                if(!closeArea && haveLookAngle)
                 {
                     //draw arrow direction
                     angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
@@ -1628,18 +1635,35 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         return((height / (useCameraDegHeight != Float.MAX_VALUE ? useCameraDegHeight : 1)) * cameraZoomRatio);
     }
 
+    //Gets screen points with spherical correction
+    private float[] getCorrectedScreenPoints(double azDeltaDegrees, double elDeltaDegrees, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight)
+    {
+        float azPx;
+        float elPx;
+        float currentAzScale = (float)Math.cos(Math.toRadians(locationElDeg));
+        float elDeltaReference = (float)(locationElDeg > 0 ? (90 - locationElDeg) : (locationElDeg + 90));
+        float elDeltaMultiply = (float)((Math.cos(Math.toRadians(azDeltaDegrees)) - 1) * -1);
+        float elOffset = (elDeltaReference * elDeltaMultiply) * (locationElDeg > 0 ? 1 : -1) * (1 - currentAzScale);
+
+        azPx = (width / 2f) + (float)(azDeltaDegrees * degToPxWidth * currentAzScale);
+        elPx = (height / 2f) - (float)((elDeltaDegrees + elOffset) * degToPxHeight);
+        return(new float[]{azPx, elPx});
+    }
+
     //Gets relative location properties
     private RelativeLocationProperties getRelativeLocationProperties(double currentAzDeg, double currentElDeg, double locationAzDeg, double locationElDeg, int width, int height, float degToPxWidth, float degToPxHeight, float zoomRatio, boolean normalize)
     {
         float azCenterPx;
         float elCenterPx;
-        float azDeltaDegrees = (float)Globals.degreeDistance(currentAzDeg, locationAzDeg);
-        float elDeltaDegrees = (float)Globals.degreeDistance(currentElDeg, locationElDeg);
+        float usedCloseDegrees = (CLOSE_AREA_DEGREES / zoomRatio);
+        double azDeltaDegrees = Globals.degreeDistance(currentAzDeg, locationAzDeg);
+        double elDeltaDegrees = Globals.degreeDistance(currentElDeg, locationElDeg);
         boolean closeArea;
         boolean outsideArea = false;
+        float[] centerPx = getCorrectedScreenPoints(azDeltaDegrees, elDeltaDegrees, locationElDeg, width, height, degToPxWidth, degToPxHeight);
 
         //get centers and area properties
-        azCenterPx = (width / 2f) + (azDeltaDegrees * degToPxWidth);
+        azCenterPx = centerPx[0];
         if(azCenterPx > width)
         {
             if(normalize)
@@ -1656,7 +1680,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
             outsideArea = true;
         }
-        elCenterPx = (height / 2f) - (elDeltaDegrees * degToPxHeight);
+        elCenterPx = centerPx[1];
         if(elCenterPx > height)
         {
             if(normalize)
@@ -1673,7 +1697,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
             outsideArea = true;
         }
-        closeArea = (Math.abs(azDeltaDegrees) <= (CLOSE_AREA_DEGREES / zoomRatio) && Math.abs(elDeltaDegrees) <= (CLOSE_AREA_DEGREES / zoomRatio));
+        closeArea = (Math.abs(azDeltaDegrees) <= usedCloseDegrees && Math.abs(elDeltaDegrees) <= usedCloseDegrees);
 
         //return results
         return(new RelativeLocationProperties(closeArea, outsideArea, azCenterPx, elCenterPx));

@@ -1098,7 +1098,7 @@ public abstract class Current
                 public void orientationChanged()
                 {
                     View rootView = Page.this.getView();
-                    View listColumns = (rootView != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+                    View listColumns = (rootView != null && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
 
                     Page.this.setListColumns(Page.this.getContext(), listColumns, page);
                 }

@@ -819,7 +819,7 @@ public abstract class Globals
     }
     public static void showConfirmDialog(Context context, String titleText, CharSequence messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
     {
-        float[] dpPixels = dpsToPixels(context, 15, 5, 320);
+        float[] dpPixels = dpsToPixels(context, 15, 5, 364);
         int viewPadding = (int)dpPixels[0];
         int scrollPadding = (int)dpPixels[1];
         ScrollView messageScroll = new ScrollView(context);

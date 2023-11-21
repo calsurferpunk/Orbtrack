@@ -67,14 +67,17 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         public static final String Accounts = "accounts";
         public static final String Display = "display";
         public static final String LensView = "lensView";
+        public static final String LensViewDisplay = "lensViewDisplay";
+        public static final String LensViewPaths = "lensViewPaths";
+        public static final String LensViewLens = "lensViewLens";
         public static final String ListView = "listView";
         public static final String Locations = "locations";
         public static final String GlobeMapView = "globeMapView";
+        public static final String MapViewDisplay = "mapViewDisplay";
         public static final String MapViewGlobe = "mapViewGlobe";
         public static final String MapViewMap = "mapViewMap";
         public static final String MapViewFootprint = "mapViewFootprint";
         public static final String MapViewLabelData = "mapViewLabelData";
-        public static final String MapViewDisplay = "mapViewDisplay";
         public static final String Notifications = "notifications";
         public static final String Updates = "updates";
         public static final String Widgets = "widgets";
@@ -154,19 +157,11 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupCategory(iconsCategory);
                         break;
 
-                    case ScreenKey.LensView:
-                        SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
-                        SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
+                    case ScreenKey.LensViewDisplay:
                         SwitchPreference lensShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.LensShowToolbars);
-                        SwitchPreference lensHideConstellationStarPaths = this.findPreference(Settings.PreferenceName.LensHideConstellationStarPaths);
-                        SwitchPreference lensShowPathTimeNames = this.findPreference(Settings.PreferenceName.LensShowPathTimeNames);
-                        SwitchPreference lensHideDistantPathTimes = this.findPreference(Settings.PreferenceName.LensHideDistantPathTimes);
                         SwitchPreference lensShowOutsideAreaSwitch = this.findPreference(Settings.PreferenceName.LensShowOutsideArea);
                         SwitchPreference lensDirectionCentered = this.findPreference(Settings.PreferenceName.LensDirectionCentered);
                         SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
-                        SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
-                        SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
-                        SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
                         SwitchButtonPreference lensUseHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
                         IconListPreference lensOrbitalIconList = this.findPreference(Settings.PreferenceName.LensIndicator);
                         IconListPreference lensUpdateRateList = this.findPreference(Settings.PreferenceName.LensUpdateDelay);
@@ -177,22 +172,40 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         Settings.Options.Rates.initValues(context);
 
                         //setup displays
-                        setupSwitch(useCameraSwitch);
-                        setupSwitch(rotateSwitch);
                         setupSwitch(lensShowToolbarsSwitch);
-                        setupSwitch(lensHideConstellationStarPaths);
-                        setupSwitch(lensShowPathTimeNames);
-                        setupSwitch(lensHideDistantPathTimes);
                         setupSwitch(lensShowOutsideAreaSwitch);
                         setupSwitch(lensDirectionCentered);
                         setupSwitch(lensShowIconDirection);
                         setupSwitchButton(lensUseHorizonSwitch);
-                        setupSwitchText(lensWidthSwitch);
-                        setupSwitchText(lensHeightSwitch);
-                        setupSwitchText(lensAzimuthOffsetSwitch);
                         setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, lensShowIconDirection);
                         setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
+                        break;
+
+                    case ScreenKey.LensViewPaths:
+                        SwitchPreference lensHideConstellationStarPaths = this.findPreference(Settings.PreferenceName.LensHideConstellationStarPaths);
+                        SwitchPreference lensShowPathTimeNames = this.findPreference(Settings.PreferenceName.LensShowPathTimeNames);
+                        SwitchPreference lensHideDistantPathTimes = this.findPreference(Settings.PreferenceName.LensHideDistantPathTimes);
+
+                        //setup displays
+                        setupSwitch(lensHideConstellationStarPaths);
+                        setupSwitch(lensShowPathTimeNames);
+                        setupSwitch(lensHideDistantPathTimes);
+                        break;
+
+                    case ScreenKey.LensViewLens:
+                        SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
+                        SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
+                        SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
+                        SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
+                        SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
+
+                        //setup displays
+                        setupSwitch(useCameraSwitch);
+                        setupSwitch(rotateSwitch);
+                        setupSwitchText(lensWidthSwitch);
+                        setupSwitchText(lensHeightSwitch);
+                        setupSwitchText(lensAzimuthOffsetSwitch);
                         break;
 
                     case ScreenKey.ListView:
@@ -207,6 +220,35 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitch(pathProgressSwitch);
                         setupSwitch(passQualitySwitch);
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
+                        break;
+
+                    case ScreenKey.MapViewDisplay:
+                        SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
+                        SwitchPreference mapShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
+                        SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
+                        SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
+                        SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
+                        SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
+                        SwitchTextPreference showOrbitalDirectionLimit = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirectionLimit);
+                        SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
+                        SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
+                        IconListPreference mapFrameRateList = this.findPreference(Settings.PreferenceName.MapFrameRate);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+                        Settings.Options.Rates.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
+                        setupSwitch(mapShowToolbarsSwitch);
+                        setupSwitch(showZoomSwitch);
+                        setupSwitch(showLabelsAlwaysSwitch);
+                        setupSwitch(showShadowsSwitch);
+                        setupSwitch(showStarsSwitch);
+                        setupSwitchText(showOrbitalDirectionLimit);
+                        setupSwitchButton(showGridSwitch);
+                        setupSlider(iconScaleSlider);
+                        setupList(mapFrameRateList, Settings.Options.Rates.frameRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.MapViewGlobe:
@@ -281,35 +323,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(showInformationBackgroundSwitch);
                         setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
-                        break;
-
-                    case ScreenKey.MapViewDisplay:
-                        SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
-                        SwitchPreference mapShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
-                        SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
-                        SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
-                        SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
-                        SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
-                        SwitchTextPreference showOrbitalDirectionLimit = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirectionLimit);
-                        SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
-                        SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
-                        IconListPreference mapFrameRateList = this.findPreference(Settings.PreferenceName.MapFrameRate);
-
-                        //initialize values
-                        Settings.Options.MapView.initValues(context);
-                        Settings.Options.Rates.initValues(context);
-
-                        //setup displays
-                        setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
-                        setupSwitch(mapShowToolbarsSwitch);
-                        setupSwitch(showZoomSwitch);
-                        setupSwitch(showLabelsAlwaysSwitch);
-                        setupSwitch(showShadowsSwitch);
-                        setupSwitch(showStarsSwitch);
-                        setupSwitchText(showOrbitalDirectionLimit);
-                        setupSwitchButton(showGridSwitch);
-                        setupSlider(iconScaleSlider);
-                        setupList(mapFrameRateList, Settings.Options.Rates.frameRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.Updates:

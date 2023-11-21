@@ -66,6 +66,70 @@
             android:icon="@drawable/ic_globe_white"
             android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
             <PreferenceCategory android:title="@string/title_globe_slash_map_view">
+                <PreferenceScreen android:title="@string/title_display"
+                    android:key="mapViewDisplay"
+                    app:icon="@drawable/ic_tablet_white"
+                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_frame_rate"
+                            android:key="MapFrameRate"/>
+
+                        <com.nikolaiapps.orbtrack.SliderPreference
+                            app:titleText="@string/title_icon_scale"
+                            android:key="MapMarkerScale"
+                            app:minValue="20"
+                            app:maxValue="200"
+                            app:scaleType="Percent"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_orbital_direction"
+                            android:key="MapShowOrbitalDirection"
+                            android:summary="@string/desc_show_orbital_direction"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchTextPreference
+                            app:titleText="@string/title_show_orbital_direction_limit"
+                            android:key="MapShowOrbitalDirectionLimit"
+                            app:switchKey="MapShowOrbitalDirectionUseLimit"
+                            app:paddingLeft="32dp"
+                            app:minValue="1"
+                            app:maxValue="1000"
+                            app:valueType="Integer"
+                            app:reverseEnabled="true"
+                            android:summary="@string/desc_show_orbital_direction_limit"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_toolbars"
+                            android:key="MapShowToolbars"
+                            android:summary="@string/desc_show_toolbars"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_zoom"
+                            android:key="MapShowZoom"
+                            android:summary="@string/desc_show_zoom"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_labels_always"
+                            android:key="MapShowLabelsAlways"
+                            android:summary="@string/desc_show_labels_always"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_shadows"
+                            android:key="MapMarkerShowShadow"
+                            android:summary="@string/desc_show_shadows"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_stars"
+                            android:key="MapShowStars"
+                            android:summary="@string/desc_show_stars"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchButtonPreference
+                            app:titleText="@string/title_show_grid"
+                            android:key="MapShowGrid"
+                            android:summary="@string/desc_show_grid"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
+
                 <PreferenceScreen android:title="@string/title_globe"
                     android:key="mapViewGlobe"
                     app:icon="@drawable/ic_globe_white"
@@ -203,70 +267,6 @@
                             android:summary="@string/desc_show_label_background"/>
                     </PreferenceCategory>
                 </PreferenceScreen>
-
-                <PreferenceScreen android:title="@string/title_display"
-                    android:key="mapViewDisplay"
-                    app:icon="@drawable/ic_tablet_white"
-                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-                    <PreferenceCategory android:title="@string/title_display">
-                        <com.nikolaiapps.orbtrack.IconListPreference
-                            app:titleText="@string/title_frame_rate"
-                            android:key="MapFrameRate"/>
-
-                        <com.nikolaiapps.orbtrack.SliderPreference
-                            app:titleText="@string/title_icon_scale"
-                            android:key="MapMarkerScale"
-                            app:minValue="20"
-                            app:maxValue="200"
-                            app:scaleType="Percent"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_orbital_direction"
-                            android:key="MapShowOrbitalDirection"
-                            android:summary="@string/desc_show_orbital_direction"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchTextPreference
-                            app:titleText="@string/title_show_orbital_direction_limit"
-                            android:key="MapShowOrbitalDirectionLimit"
-                            app:switchKey="MapShowOrbitalDirectionUseLimit"
-                            app:paddingLeft="32dp"
-                            app:minValue="1"
-                            app:maxValue="1000"
-                            app:valueType="Integer"
-                            app:reverseEnabled="true"
-                            android:summary="@string/desc_show_orbital_direction_limit"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_toolbars"
-                            android:key="MapShowToolbars"
-                            android:summary="@string/desc_show_toolbars"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_zoom"
-                            android:key="MapShowZoom"
-                            android:summary="@string/desc_show_zoom"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_labels_always"
-                            android:key="MapShowLabelsAlways"
-                            android:summary="@string/desc_show_labels_always"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_shadows"
-                            android:key="MapMarkerShowShadow"
-                            android:summary="@string/desc_show_shadows"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_stars"
-                            android:key="MapShowStars"
-                            android:summary="@string/desc_show_stars"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchButtonPreference
-                            app:titleText="@string/title_show_grid"
-                            android:key="MapShowGrid"
-                            android:summary="@string/desc_show_grid"/>
-                    </PreferenceCategory>
-                </PreferenceScreen>
             </PreferenceCategory>
         </PreferenceScreen>
 
@@ -275,108 +275,125 @@
             android:icon="@drawable/ic_photo_camera_white"
             android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
             <PreferenceCategory android:title="@string/title_lens_view">
-                <com.nikolaiapps.orbtrack.IconListPreference
-                    app:titleText="@string/title_orbital_icon"
-                    android:key="LensIndicator"
-                    android:summary="@string/desc_orbital_icon"/>
+                <PreferenceScreen android:title="@string/title_display"
+                    android:key="lensViewDisplay"
+                    android:icon="@drawable/ic_tablet_white"
+                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_orbital_icon"
+                            android:key="LensIndicator"
+                            android:summary="@string/desc_orbital_icon"/>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_show_orbital_direction"
-                    android:key="LensIndicatorIconShowDirection"
-                    app:paddingLeft="32dp"
-                    android:summary="@string/desc_show_orbital_direction"
-                    app:isPreferenceVisible="false"/>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_orbital_direction"
+                            android:key="LensIndicatorIconShowDirection"
+                            app:paddingLeft="32dp"
+                            android:summary="@string/desc_show_orbital_direction"
+                            app:isPreferenceVisible="false"/>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_use_camera"
-                    android:key="LensUseCamera"
-                    android:summary="@string/desc_use_camera"/>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_toolbars"
+                            android:key="LensShowToolbars"
+                            android:summary="@string/desc_show_toolbars"/>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_force_rotate"
-                    android:key="LensRotate"
-                    android:summary="@string/desc_force_rotate"/>
+                        <com.nikolaiapps.orbtrack.SwitchButtonPreference
+                            app:titleText="@string/title_show_horizon"
+                            android:key="LensUseHorizon"
+                            android:summary="@string/desc_show_horizon"/>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_show_toolbars"
-                    android:key="LensShowToolbars"
-                    android:summary="@string/desc_show_toolbars"/>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_outside_visible_area"
+                            android:key="LensShowOutsideArea"
+                            android:summary="@string/desc_show_outside_visible_area"/>
 
-                <com.nikolaiapps.orbtrack.SwitchButtonPreference
-                    app:titleText="@string/title_show_horizon"
-                    android:key="LensUseHorizon"
-                    android:summary="@string/desc_show_horizon"/>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_direction_centered"
+                            android:key="LensDirectionCentered"
+                            android:summary="@string/desc_show_direction_centered"/>
+                    </PreferenceCategory>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_show_outside_visible_area"
-                    android:key="LensShowOutsideArea"
-                    android:summary="@string/desc_show_outside_visible_area"/>
+                    <PreferenceCategory android:title="@string/title_rates">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_update_rate"
+                            android:key="LensUpdateDelay"
+                            android:summary="@string/desc_update_rate_lens"/>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_show_direction_centered"
-                    android:key="LensDirectionCentered"
-                    android:summary="@string/desc_show_direction_centered"/>
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_sensor_smoothing"
+                            android:key="LensAverageCount"
+                            android:summary="@string/desc_sensor_smoothing"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
 
-                <PreferenceCategory android:title="@string/title_paths">
-                    <com.nikolaiapps.orbtrack.SwitchPreference
-                        android:title="@string/title_hide_constellation_star_paths"
-                        android:key="LensHideConstellationStarPaths"
-                        android:summary="@string/desc_hide_constellation_star_paths"/>
+                <PreferenceScreen android:title="@string/title_paths"
+                    android:key="lensViewPaths"
+                    android:icon="@drawable/orbit"
+                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+                    <PreferenceCategory android:title="@string/title_paths">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_hide_constellation_star_paths"
+                            android:key="LensHideConstellationStarPaths"
+                            android:summary="@string/desc_hide_constellation_star_paths"/>
 
-                    <com.nikolaiapps.orbtrack.SwitchPreference
-                        android:title="@string/title_show_path_time_names"
-                        android:key="LensShowPathTimeNames"
-                        android:summary="@string/desc_show_path_time_names"/>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_path_time_names"
+                            android:key="LensShowPathTimeNames"
+                            android:summary="@string/desc_show_path_time_names"/>
 
-                    <com.nikolaiapps.orbtrack.SwitchPreference
-                        android:title="@string/title_hide_distant_path_times"
-                        android:key="LensHideDistantPathTimes"
-                        android:summary="@string/desc_hide_distant_path_times"/>
-                </PreferenceCategory>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_hide_distant_path_times"
+                            android:key="LensHideDistantPathTimes"
+                            android:summary="@string/desc_hide_distant_path_times"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
 
-                <PreferenceCategory android:title="@string/title_rates">
-                    <com.nikolaiapps.orbtrack.IconListPreference
-                        app:titleText="@string/title_update_rate"
-                        android:key="LensUpdateDelay"
-                        android:summary="@string/desc_update_rate_lens"/>
+                <PreferenceScreen android:title="@string/title_lens"
+                    android:key="lensViewLens"
+                    android:icon="@drawable/ic_photo_camera_white"
+                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+                    <PreferenceCategory android:title="@string/title_lens">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_use_camera"
+                            android:key="LensUseCamera"
+                            android:summary="@string/desc_use_camera"/>
 
-                    <com.nikolaiapps.orbtrack.IconListPreference
-                        app:titleText="@string/title_sensor_smoothing"
-                        android:key="LensAverageCount"
-                        android:summary="@string/desc_sensor_smoothing"/>
-                </PreferenceCategory>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_force_rotate"
+                            android:key="LensRotate"
+                            android:summary="@string/desc_force_rotate"/>
 
-                <PreferenceCategory android:title="@string/title_lens">
-                    <com.nikolaiapps.orbtrack.SwitchTextPreference
-                        app:titleText="@string/title_auto_width"
-                        app:suffixText="@string/title_degs"
-                        android:key="LensWidth"
-                        app:switchKey="LensUseAutoWidth"
-                        app:minValue="0"
-                        app:maxValue="360"
-                        app:valueType="Float"
-                        android:summary="@string/desc_auto_width"/>
+                        <com.nikolaiapps.orbtrack.SwitchTextPreference
+                            app:titleText="@string/title_auto_width"
+                            app:suffixText="@string/title_degs"
+                            android:key="LensWidth"
+                            app:switchKey="LensUseAutoWidth"
+                            app:minValue="0"
+                            app:maxValue="360"
+                            app:valueType="Float"
+                            android:summary="@string/desc_auto_width"/>
 
-                    <com.nikolaiapps.orbtrack.SwitchTextPreference
-                        app:titleText="@string/title_auto_height"
-                        app:suffixText="@string/title_degs"
-                        android:key="LensHeight"
-                        app:switchKey="LensUseAutoHeight"
-                        app:minValue="0"
-                        app:maxValue="360"
-                        app:valueType="Float"
-                        android:summary="@string/desc_auto_height"/>
+                        <com.nikolaiapps.orbtrack.SwitchTextPreference
+                            app:titleText="@string/title_auto_height"
+                            app:suffixText="@string/title_degs"
+                            android:key="LensHeight"
+                            app:switchKey="LensUseAutoHeight"
+                            app:minValue="0"
+                            app:maxValue="360"
+                            app:valueType="Float"
+                            android:summary="@string/desc_auto_height"/>
 
-                    <com.nikolaiapps.orbtrack.SwitchTextPreference
-                        app:titleText="@string/title_azimuth_offset"
-                        app:suffixText="@string/title_degs"
-                        android:key="LensAzimuthUserOffset"
-                        app:showSwitch="false"
-                        app:minValue="-180"
-                        app:maxValue="360"
-                        app:valueType="Float"
-                        android:summary="@string/desc_azimuth_offset"/>
-                </PreferenceCategory>
+                        <com.nikolaiapps.orbtrack.SwitchTextPreference
+                            app:titleText="@string/title_azimuth_offset"
+                            app:suffixText="@string/title_degs"
+                            android:key="LensAzimuthUserOffset"
+                            app:showSwitch="false"
+                            app:minValue="-180"
+                            app:maxValue="360"
+                            app:valueType="Float"
+                            android:summary="@string/desc_azimuth_offset"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
             </PreferenceCategory>
         </PreferenceScreen>
 

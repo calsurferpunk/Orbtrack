@@ -6,7 +6,7 @@
     <TextView
         android:id="@android:id/title"
         style="?android:attr/listSeparatorTextViewStyle"
-        android:textColor="?android:textColor"
+        android:textColor="?attr/colorAccent"
         android:textAllCaps="false"/>
 
     <View android:id="@+id/Divider_View_Divider" style="@style/DividerThin"/>

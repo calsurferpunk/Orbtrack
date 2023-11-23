@@ -58,7 +58,7 @@ import java.util.Date;
 
 class Whirly
 {
-    private static final float StarScale = (1.0f / 3.5f);
+    private static final float StarScale = (1.0f / 6.0f);
     private static final float DefaultImageScale = 0.15f;
     private static final float DefaultTextScale = 0.2f;
     public static final double ZoomToZValue = 6356965.15661353;

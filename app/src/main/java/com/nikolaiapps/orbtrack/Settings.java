@@ -2212,7 +2212,7 @@ public abstract class Settings
         }
         else if(preferenceName.equals(PreferenceName.LensOrbitalTypeFilter))
         {
-            return(getOrbitalTypeFilterString(Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Sun, Database.OrbitalType.Planet, Database.OrbitalType.Star, Database.OrbitalType.Constellation));
+            return(getOrbitalTypeFilterString(Database.OrbitalType.Satellite, Database.OrbitalType.RocketBody, Database.OrbitalType.Debris, Database.OrbitalType.Sun, Database.OrbitalType.Planet, Database.OrbitalType.Constellation));
         }
         else if(Globals.startsWith(preferenceName, PreferenceName.NotifyFullMoonStartZoneId, PreferenceName.NotifyFullMoonEndZoneId, PreferenceName.NotifyPassStartZoneId, PreferenceName.NotifyPassEndZoneId))
         {

@@ -526,8 +526,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
-    private static final float CLOSE_AREA_DEGREES = 12f;
-    private static final float STAR_IMAGE_SCALE = (1.0f / 3.5f);
+    private static final float CLOSE_AREA_DEGREES = 15f;
+    private static final float STAR_IMAGE_SCALE = (1.0f / 6.0f);
     private static final float STAR_TEXT_SCALE = 0.75f;
 
     public int pathDivisions;
@@ -1169,8 +1169,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 //if able to get orbital, child properties, and in filter
                 if(currentOrbital != null && currentChildProperties != null && currentOrbital.getInFilter())
                 {
+                    boolean notSelected = (currentOrbital.getSatelliteNum() != selectedNoradId);
+
                     //set line color
                     currentPaint.setColor(currentOrbital.getPathColor());
+
+                    //make transparent
+                    currentPaint.setAlpha(notSelected ? 20 : 120);
 
                     //go through child properties
                     for(RelativeLocationProperties[] currentPoint : currentChildProperties)
@@ -1187,6 +1192,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             canvas.drawLine(startPoint.azCenterPx, startPoint.elCenterPx, endPoint.azCenterPx, endPoint.elCenterPx, currentPaint);
                         }
                     }
+
+                    //restore transparency
+                    currentPaint.setAlpha(255);
                 }
             }
 
@@ -1383,6 +1391,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         boolean isStar = (currentType == Database.OrbitalType.Star);
         boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
+        boolean setAlpha = ((isStar || isConstellation) && !isSelected);
         float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isStar ? STAR_IMAGE_SCALE : 1);
         float usedTextSize = (isStar ? starTextSize : textSize);
         float usedTextOffset = (isStar ? starTextOffset : textOffset);
@@ -1526,7 +1535,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             {
                 currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
             }
-            currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 3.5f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
+            currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 5.0f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
             if(currentArea.left < 20)
             {
                 currentArea.offsetTo(20, currentArea.top);
@@ -1543,10 +1552,19 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             {
                 currentArea.offsetTo(currentArea.left, canvasHeight - currentArea.height());
             }
+            if(setAlpha)
+            {
+                currentPaint.setAlpha(isStar ? 100 : 150);
+            }
 
             //draw text
             currentPaint.setStyle(Paint.Style.FILL);
             canvas.drawText(currentName, currentArea.left, currentArea.top, currentPaint);
+
+            if(setAlpha)
+            {
+                currentPaint.setAlpha(255);
+            }
         }
     }
 

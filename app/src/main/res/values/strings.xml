@@ -146,6 +146,7 @@
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
     <string name="desc_orbital_icon">Icon to show orbital position</string>
     <string name="desc_orbital_icons">Icons to use for orbital displays</string>
+    <string name="desc_path_style">Path drawing style</string>
     <string name="desc_permission_camera">Camera is needed to visualize object locations.</string>
     <string name="desc_permission_camera_deny">Camera permission denied</string>
     <string name="desc_permission_location">At least rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
@@ -311,6 +312,7 @@
     <string name="title_color">Color</string>
     <string name="title_colors">Colors</string>
     <string name="title_color_theme">Color Theme</string>
+    <string name="title_color_text">Color Text</string>
     <string name="title_compass_align">Compass Align</string>
     <string name="title_compass_calibrate">Calibrate Compass</string>
     <string name="title_compass_inaccurate_fix">Compass Inaccurate [Fix]</string>
@@ -358,6 +360,7 @@
     <string name="title_file_loading">Loading File</string>
     <string name="title_file_select_source">Select File Source</string>
     <string name="title_filled">Filled</string>
+    <string name="title_filled_box">Filled Box</string>
     <string name="title_filter">Filter</string>
     <string name="title_finish">Finish</string>
     <string name="title_finished">Finished</string>
@@ -501,6 +504,7 @@
     <string name="title_passes">Passes</string>
     <string name="title_password">Password</string>
     <string name="title_paths">Paths</string>
+    <string name="title_path_style">Path Style</string>
     <string name="title_perigee">Perigee</string>
     <string name="title_period">Period</string>
     <string name="title_permission">Permission</string>

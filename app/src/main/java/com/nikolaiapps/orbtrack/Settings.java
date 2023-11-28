@@ -117,6 +117,7 @@ public abstract class Settings
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
         static final String LensShowToolbars = "LensShowToolbars";
+        static final String LensPathType = "LensPathType";
         static final String LensHideConstellationStarPaths = "LensHideConstellationStarPaths";
         static final String LensShowPathTimeNames = "LensShowPathTimeNames";
         static final String LensHideDistantPathTimes = "LensHideDistantPathTimes";
@@ -200,8 +201,18 @@ public abstract class Settings
                 static final int Icon = 3;
             }
 
+            //Path types
+            public static abstract class PathType
+            {
+                static final int FilledBox = 0;
+                static final int ColorText = 1;
+            }
+
             //Indicator items
             public static IconSpinner.Item[] indicatorItems;
+
+            //Path type items
+            public static IconSpinner.Item[] pathTypeItems;
 
             //Sensor smoothing items
             public static IconSpinner.Item[] sensorSmoothingItems;
@@ -217,10 +228,19 @@ public abstract class Settings
                     //init indicator items
                     indicatorItems = new IconSpinner.Item[]
                     {
-                        new IconSpinner.Item(Settings.getSatelliteIconImageId(context), Settings.getSatelliteIconImageIsThemeable(context), res.getString(R.string.title_icon), LensView.IndicatorType.Icon),
-                        new IconSpinner.Item(R.drawable.shape_circle_black, res.getString(R.string.title_circle), LensView.IndicatorType.Circle),
-                        new IconSpinner.Item(R.drawable.shape_square_black, res.getString(R.string.title_square), LensView.IndicatorType.Square),
-                        new IconSpinner.Item(R.drawable.shape_triangle_black, res.getString(R.string.title_triangle), LensView.IndicatorType.Triangle)
+                        new IconSpinner.Item(Settings.getSatelliteIconImageId(context), Settings.getSatelliteIconImageIsThemeable(context), res.getString(R.string.title_icon), IndicatorType.Icon),
+                        new IconSpinner.Item(R.drawable.shape_circle_black, res.getString(R.string.title_circle), IndicatorType.Circle),
+                        new IconSpinner.Item(R.drawable.shape_square_black, res.getString(R.string.title_square), IndicatorType.Square),
+                        new IconSpinner.Item(R.drawable.shape_triangle_black, res.getString(R.string.title_triangle), IndicatorType.Triangle)
+                    };
+                }
+                if(pathTypeItems == null || pathTypeItems.length == 0)
+                {
+                    //set path type items
+                    pathTypeItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_filled_box), PathType.FilledBox),
+                        new IconSpinner.Item(res.getString(R.string.title_color_text), PathType.ColorText)
                     };
                 }
                 if(sensorSmoothingItems == null || sensorSmoothingItems.length == 0)
@@ -2050,6 +2070,9 @@ public abstract class Settings
             case PreferenceName.LensIndicator:
                 return(Options.LensView.IndicatorType.Icon);
 
+            case PreferenceName.LensPathType:
+                return(Options.LensView.PathType.ColorText);
+
             case PreferenceName.LensAverageCount:
                 return(40);
 
@@ -2517,6 +2540,12 @@ public abstract class Settings
     public static void setLensShowToolbars(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
+    }
+
+    //Gets lens path type
+    public static int getLensPathType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensPathType));
     }
 
     //Returns hide constellation star paths

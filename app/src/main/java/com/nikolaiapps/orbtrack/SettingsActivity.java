@@ -186,11 +186,16 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference lensHideConstellationStarPaths = this.findPreference(Settings.PreferenceName.LensHideConstellationStarPaths);
                         SwitchPreference lensShowPathTimeNames = this.findPreference(Settings.PreferenceName.LensShowPathTimeNames);
                         SwitchPreference lensHideDistantPathTimes = this.findPreference(Settings.PreferenceName.LensHideDistantPathTimes);
+                        IconListPreference lensPathTypeList = this.findPreference(Settings.PreferenceName.LensPathType);
+
+                        //initialize values
+                        Settings.Options.LensView.initValues(context);
 
                         //setup displays
                         setupSwitch(lensHideConstellationStarPaths);
                         setupSwitch(lensShowPathTimeNames);
                         setupSwitch(lensHideDistantPathTimes);
+                        setupList(lensPathTypeList, Settings.Options.LensView.pathTypeItems, null, null, null, null);
                         break;
 
                     case ScreenKey.LensViewLens:
@@ -482,6 +487,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     return(true);
                                 }
                             };
+                            break;
+
+                        case Settings.PreferenceName.LensPathType:
+                            currentValue = Settings.getLensPathType(context);
                             break;
 
                         case Settings.PreferenceName.LensAverageCount:
@@ -1570,6 +1579,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
                         case Settings.PreferenceName.LensShowToolbars:
+                        case Settings.PreferenceName.LensPathType:
                         case Settings.PreferenceName.LensHideConstellationStarPaths:
                         case Settings.PreferenceName.LensShowPathTimeNames:
                         case Settings.PreferenceName.LensHideDistantPathTimes:

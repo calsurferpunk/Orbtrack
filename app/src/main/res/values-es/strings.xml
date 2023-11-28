@@ -146,6 +146,7 @@
     <string name="desc_no_connection">Es posible que no tenga una conexión a Internet. ¿Intentar de todos modos?</string>
     <string name="desc_orbital_icon">Icono para mostrar la posición orbital</string>
     <string name="desc_orbital_icons">Iconos para usar en pantallas orbitales</string>
+    <string name="desc_path_style">Estilo de dibujo de ruta</string>
     <string name="desc_permission_camera">La cámara es necesaria para visualizar ubicaciones de objetos.</string>
     <string name="desc_permission_camera_deny">Permiso de cámara rechazado</string>
     <string name="desc_permission_location">Se necesita al menos una ubicación aproximada para calcular los ángulos de visión de su ubicación. Si no está permitido, solo se utilizarán las ubicaciones manuales/guardadas.</string>
@@ -311,6 +312,7 @@
     <string name="title_color">Color</string>
     <string name="title_colors">Colores</string>
     <string name="title_color_theme">Tema Color</string>
+    <string name="title_color_text">Texto Color</string>
     <string name="title_compass_align">Alinear Brújula</string>
     <string name="title_compass_calibrate">Calibrar Brújula</string>
     <string name="title_compass_inaccurate_fix">Brújula Inexacta [Reparar]</string>
@@ -358,6 +360,7 @@
     <string name="title_file_loading">Cargando archivo</string>
     <string name="title_file_select_source">Seleccionar Fuente de Archivo</string>
     <string name="title_filled">Lleno</string>
+    <string name="title_filled_box">Caja Lleno</string>
     <string name="title_filter">Filtro</string>
     <string name="title_finish">Terminar</string>
     <string name="title_finished">Terminado</string>
@@ -501,6 +504,7 @@
     <string name="title_passes">Pases</string>
     <string name="title_password">Contraseña</string>
     <string name="title_paths">Caminos</string>
+    <string name="title_path_style">Estilo de Ruta</string>
     <string name="title_perigee">Perigeo</string>
     <string name="title_period">Período</string>
     <string name="title_permission">Permiso</string>

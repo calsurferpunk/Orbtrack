@@ -564,6 +564,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int textBgColor;
     private final int horizonColor;
     private final int horizonLineColor;
+    private final int textShadowColor;
+    private final int textShadowOffset;
     private int calibrateIndex;
     private int selectedNoradId;
     private int selectedOrbitalIndex;
@@ -572,6 +574,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private boolean haveZoomValues;
     private boolean pendingOnDraw;
     private boolean pendingSetInParentFilter;
+    private final boolean usingFilledBoxPath;
+    private final boolean usingColorTextPath;
     private final boolean showingConstellations;
     private final boolean arrowDirectionCentered;
     private final boolean showIconIndicatorDirection;
@@ -637,6 +641,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         super(context);
 
         int index;
+        int pathType;
         int averageCount = Settings.getLensAverageCount(context);
         boolean darkTheme = Settings.getDarkTheme(context);
         Resources currentResources = context.getResources();
@@ -650,6 +655,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         textBgColor = (darkTheme ? Color.argb(50, 0, 0, 0) : Color.argb(50, 255, 255, 255));
         horizonLineColor = Settings.getLensHorizonColor(context);
         horizonColor = Globals.getColor(70, horizonLineColor);
+        textShadowColor = 0x50000000;
+        textShadowOffset = 3;
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
@@ -657,7 +664,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         showPathTimeNames = Settings.getLensShowPathTimeNames(context);
         hideConstellationStarPaths = Settings.getLensHideConstellationStarPaths(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
-        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 16, metrics);
+        textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13, metrics);
         textOffset = textSize / 1.5f;
         textPadding = (textSize * 0.15f);
         starTextSize = textSize * STAR_TEXT_SCALE;
@@ -674,6 +681,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         cameraZoomRatio = 1;
         indicator = Settings.getIndicator(context);
         indicatorPxRadius = Globals.dpToPixels(context, 36);
+        pathType = Settings.getLensPathType(context);
+        usingFilledBoxPath = (pathType == Settings.Options.LensView.PathType.FilledBox);
+        usingColorTextPath = (pathType == Settings.Options.LensView.PathType.ColorText);
         resetAlignmentStatus();
         iconArea = new Rect();
         iconScaledArea = new Rect();
@@ -1000,9 +1010,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             if(travelLength > 0)
                             {
                                 //remember colors
-                                int usedTextColor = (currentSelected ? textColor : Globals.getColor(75, textColor));
+                                int baseTextColor = (usingFilledBoxPath ? textColor : currentColor);
+                                int usedTextColor = (currentSelected ? baseTextColor : Globals.getColor(75, baseTextColor));
                                 int usedTextBgColor = (currentSelected ? textBgColor : Globals.getColor(30, textBgColor));
-                                int usedCurrentColor = (currentSelected ? currentColor : Globals.getColor(30, currentColor));
+                                int usedCurrentColor = Globals.getColor(currentSelected ? 150 : 20, currentColor);
 
                                 //reset first and previous areas
                                 firstArea.setEmpty();
@@ -1083,18 +1094,32 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                             //if showing path time
                                             if(showPathTime)
                                             {
-                                                //draw text background
-                                                currentPaint.setColor(usedTextBgColor);
-                                                canvas.drawRect(bgArea, currentPaint);
+                                                //if using filled boxed
+                                                if(usingFilledBoxPath)
+                                                {
+                                                    //draw text background
+                                                    currentPaint.setColor(usedTextBgColor);
+                                                    canvas.drawRect(bgArea, currentPaint);
 
-                                                //draw text border
-                                                currentPaint.setColor(usedCurrentColor);
-                                                currentPaint.setStyle(Paint.Style.STROKE);
-                                                canvas.drawRect(bgArea, currentPaint);
+                                                    //draw text border
+                                                    currentPaint.setColor(usedCurrentColor);
+                                                    currentPaint.setStyle(Paint.Style.STROKE);
+                                                    canvas.drawRect(bgArea, currentPaint);
+                                                }
+
+                                                //set text draw style
+                                                currentPaint.setStyle(Paint.Style.FILL);
+
+                                                //if using color text
+                                                if(usingColorTextPath)
+                                                {
+                                                    //draw shadow
+                                                    currentPaint.setColor(textShadowColor);
+                                                    canvas.drawText(usedTimeString, currentView.timeArea.left + textShadowOffset, currentView.timeArea.top + textShadowOffset, currentPaint);
+                                                }
 
                                                 //draw text
                                                 currentPaint.setColor(usedTextColor);
-                                                currentPaint.setStyle(Paint.Style.FILL);
                                                 canvas.drawText(usedTimeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
                                             }
 
@@ -1393,7 +1418,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
         boolean setAlpha = ((isStar || isConstellation) && !isSelected);
         float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isStar ? STAR_IMAGE_SCALE : 1);
-        float usedTextSize = (isStar ? starTextSize : textSize);
+        float usedTextSize = (isStar ? starTextSize : (textSize * 1.2f));
         float usedTextOffset = (isStar ? starTextOffset : textOffset);
 
         //if not selected, outside of area, and not showing
@@ -1533,36 +1558,48 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         {
             if(currentArea.isEmpty())
             {
+                //get area
                 currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
             }
             currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 5.0f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
             if(currentArea.left < 20)
             {
+                //keep within left
                 currentArea.offsetTo(20, currentArea.top);
             }
             if(currentArea.right > canvasWidth)
             {
+                //keep within right
                 currentArea.offsetTo(canvasWidth - currentArea.width(), currentArea.top);
             }
             if(currentArea.top < 20)
             {
+                //keep within top
                 currentArea.offsetTo(currentArea.left, 20);
             }
             if(currentArea.bottom > canvasHeight)
             {
+                //keep within bottom
                 currentArea.offsetTo(currentArea.left, canvasHeight - currentArea.height());
             }
-            if(setAlpha)
-            {
-                currentPaint.setAlpha(isStar ? 100 : 150);
-            }
+
+            //draw shadow
+            currentPaint.setColor(textShadowColor);
+            currentPaint.setStyle(Paint.Style.FILL);
+            canvas.drawText(currentName, currentArea.left + textShadowOffset, currentArea.top + textShadowOffset, currentPaint);
 
             //draw text
-            currentPaint.setStyle(Paint.Style.FILL);
+            currentPaint.setColor(currentColor);
+            if(setAlpha)
+            {
+                //set transparency
+                currentPaint.setAlpha(100);
+            }
             canvas.drawText(currentName, currentArea.left, currentArea.top, currentPaint);
 
             if(setAlpha)
             {
+                //restore transparency
                 currentPaint.setAlpha(255);
             }
         }
@@ -1994,10 +2031,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             for(index = 0; index < currentLookAngles.length; index++)
             {
                 //remember current look angle
-                Calculations.TopographicDataType currentLookAngle = (currentOrbitals[index] != null ? currentLookAngles[index] : null);
+                Database.SatelliteData currentOrbital = currentOrbitals[index];
+                int currentId = (currentOrbital != null ? currentOrbital.getSatelliteNum() : Universe.IDs.Invalid);
+                Calculations.TopographicDataType currentLookAngle = (currentOrbital != null ? currentLookAngles[index] : null);
 
-                //if above the horizon and being used
-                if(currentLookAngle != null && currentLookAngle.elevation >= 0)
+                //if above the horizon, being used, and a normally easily visible orbital
+                if(currentLookAngle != null && currentLookAngle.elevation >= 0 && currentId >= Universe.IDs.Polaris && currentId <= Universe.IDs.Sun)
                 {
                     //determine relative location
                     azDeltaDeg = (float)Math.abs(Globals.degreeDistance(currentAzDeg, currentLookAngle.azimuth));

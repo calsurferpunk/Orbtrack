@@ -331,6 +331,11 @@
                     android:icon="@drawable/orbit"
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
                     <PreferenceCategory android:title="@string/title_paths">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_path_style"
+                            android:key="LensPathType"
+                            android:summary="@string/desc_path_style"/>
+
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_hide_constellation_star_paths"
                             android:key="LensHideConstellationStarPaths"

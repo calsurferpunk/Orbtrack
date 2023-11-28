@@ -552,6 +552,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int cameraMaxZoom;
     private final int compassWidth;
     private final int indicator;
+    private final int iconAlpha;
     private final int iconLength;
     private final int iconHalfLength;
     private final int iconScaleOffset;
@@ -560,6 +561,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int compassHeight;
     private int compassBorderWidth;
     private final int compassMargin;
+    private final int textAlpha;
     private final int textColor;
     private final int textBgColor;
     private final int horizonColor;
@@ -606,7 +608,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float indicatorPxRadius;
     private final double defaultPathJulianDelta;
     private Camera currentCamera;
-    private final Paint iconPaint;
     private final Paint currentPaint;
     private Rect selectedArea;
     private final Rect iconArea;
@@ -651,6 +652,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         selectedOrbitalIndex = -1;
         selectedNoradId = Universe.IDs.None;
         orientation = getCameraOrientation();
+        textAlpha = Settings.getLensTextAlpha(context);
         textColor = (darkTheme ? Color.argb(160, 255, 255, 255) : Color.argb(160, 0, 0, 0));
         textBgColor = (darkTheme ? Color.argb(50, 0, 0, 0) : Color.argb(50, 255, 255, 255));
         horizonLineColor = Settings.getLensHorizonColor(context);
@@ -671,6 +673,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         starTextOffset = textOffset * STAR_TEXT_SCALE;
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
+        iconAlpha = Settings.getLensIndicatorAlpha(context);
         iconLength = (int)dpPixels[4];
         iconHalfLength = (iconLength / 2);
         iconScaleOffset = (iconHalfLength / 2);
@@ -680,10 +683,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
         cameraZoomRatio = 1;
         indicator = Settings.getIndicator(context);
-        indicatorPxRadius = Globals.dpToPixels(context, 36);
-        pathType = Settings.getLensPathType(context);
-        usingFilledBoxPath = (pathType == Settings.Options.LensView.PathType.FilledBox);
-        usingColorTextPath = (pathType == Settings.Options.LensView.PathType.ColorText);
+        indicatorPxRadius = Globals.dpToPixels(context, 24);
+        pathType = Settings.getLensPathLabelType(context);
+        usingFilledBoxPath = (pathType == Settings.Options.LensView.PathLabelType.FilledBox);
+        usingColorTextPath = (pathType == Settings.Options.LensView.PathLabelType.ColorText);
         resetAlignmentStatus();
         iconArea = new Rect();
         iconScaledArea = new Rect();
@@ -704,12 +707,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentPaint.setAntiAlias(true);
         currentPaint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         currentPaint.setTextSize(textSize);
-        iconPaint = new Paint();
-        if(indicator == Settings.Options.LensView.IndicatorType.Icon)
-        {
-            iconPaint.setAntiAlias(true);
-            iconPaint.setAlpha(80);
-        }
 
         currentHolder = this.getHolder();
         currentHolder.addCallback(this);
@@ -1416,7 +1413,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         boolean isStar = (currentType == Database.OrbitalType.Star);
         boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
-        boolean setAlpha = ((isStar || isConstellation) && !isSelected);
         float drawPxRadius = (indicatorPxRadius / (outsideArea ? 2 : 1)) * (isStar ? STAR_IMAGE_SCALE : 1);
         float usedTextSize = (isStar ? starTextSize : (textSize * 1.2f));
         float usedTextOffset = (isStar ? starTextOffset : textOffset);
@@ -1431,6 +1427,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //setup paint
         currentPaint.setColor(currentColor);
         currentPaint.setStyle(Paint.Style.STROKE);
+        currentPaint.setAlpha(iconAlpha);
 
         //if not a constellation
         if(!isConstellation)
@@ -1476,7 +1473,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             }
 
                             //draw image
-                            canvas.drawBitmap(starIconImage, centerX - starHalfLength, centerY - starHalfLength, iconPaint);
+                            canvas.drawBitmap(starIconImage, centerX - starHalfLength, centerY - starHalfLength, currentPaint);
                         }
                         else
                         {
@@ -1533,11 +1530,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             if(outsideArea)
                             {
                                 iconScaledArea.set(iconArea.left + iconScaleOffset, iconArea.top + iconScaleOffset, iconArea.right - iconScaleOffset, iconArea.bottom - iconScaleOffset);
-                                canvas.drawBitmap(indicatorIcon.image, null, iconScaledArea, iconPaint);
+                                canvas.drawBitmap(indicatorIcon.image, null, iconScaledArea, currentPaint);
                             }
                             else
                             {
-                                canvas.drawBitmap(indicatorIcon.image, iconArea.left, iconArea.top, iconPaint);
+                                canvas.drawBitmap(indicatorIcon.image, iconArea.left, iconArea.top, currentPaint);
                             }
                         }
                         break;
@@ -1590,14 +1587,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
             //draw text
             currentPaint.setColor(currentColor);
-            if(setAlpha)
-            {
-                //set transparency
-                currentPaint.setAlpha(100);
-            }
+            currentPaint.setAlpha(isSelected ? 255 : textAlpha);
             canvas.drawText(currentName, currentArea.left, currentArea.top, currentPaint);
 
-            if(setAlpha)
+            //if not selected
+            if(!isSelected)
             {
                 //restore transparency
                 currentPaint.setAlpha(255);

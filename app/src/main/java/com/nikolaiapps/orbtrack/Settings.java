@@ -107,6 +107,8 @@ public abstract class Settings
         static final String LensDirectionCentered = "LensDirectionCentered";
         static final String LensIndicator = "LensIndicator";
         static final String LensIndicatorIconShowDirection = "LensIndicatorIconShowDirection";
+        static final String LensIndicatorAlpha = "LensIndicatorAlpha";
+        static final String LensTextAlpha = "LensTextAlpha";
         static final String LensHorizonColor = "LensHorizonColor";
         static final String LensUseHorizon = "LensUseHorizon";
         static final String LensUseCamera = "LensUseCamera";
@@ -117,7 +119,7 @@ public abstract class Settings
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
         static final String LensShowToolbars = "LensShowToolbars";
-        static final String LensPathType = "LensPathType";
+        static final String LensPathLabelType = "LensPathLabelType";
         static final String LensHideConstellationStarPaths = "LensHideConstellationStarPaths";
         static final String LensShowPathTimeNames = "LensShowPathTimeNames";
         static final String LensHideDistantPathTimes = "LensHideDistantPathTimes";
@@ -202,7 +204,7 @@ public abstract class Settings
             }
 
             //Path types
-            public static abstract class PathType
+            public static abstract class PathLabelType
             {
                 static final int FilledBox = 0;
                 static final int ColorText = 1;
@@ -212,7 +214,7 @@ public abstract class Settings
             public static IconSpinner.Item[] indicatorItems;
 
             //Path type items
-            public static IconSpinner.Item[] pathTypeItems;
+            public static IconSpinner.Item[] pathLabelTypeItems;
 
             //Sensor smoothing items
             public static IconSpinner.Item[] sensorSmoothingItems;
@@ -234,13 +236,13 @@ public abstract class Settings
                         new IconSpinner.Item(R.drawable.shape_triangle_black, res.getString(R.string.title_triangle), IndicatorType.Triangle)
                     };
                 }
-                if(pathTypeItems == null || pathTypeItems.length == 0)
+                if(pathLabelTypeItems == null || pathLabelTypeItems.length == 0)
                 {
                     //set path type items
-                    pathTypeItems = new IconSpinner.Item[]
+                    pathLabelTypeItems = new IconSpinner.Item[]
                     {
-                        new IconSpinner.Item(res.getString(R.string.title_filled_box), PathType.FilledBox),
-                        new IconSpinner.Item(res.getString(R.string.title_color_text), PathType.ColorText)
+                        new IconSpinner.Item(res.getString(R.string.title_filled_box), PathLabelType.FilledBox),
+                        new IconSpinner.Item(res.getString(R.string.title_color_text), PathLabelType.ColorText)
                     };
                 }
                 if(sensorSmoothingItems == null || sensorSmoothingItems.length == 0)
@@ -2070,8 +2072,8 @@ public abstract class Settings
             case PreferenceName.LensIndicator:
                 return(Options.LensView.IndicatorType.Icon);
 
-            case PreferenceName.LensPathType:
-                return(Options.LensView.PathType.ColorText);
+            case PreferenceName.LensPathLabelType:
+                return(Options.LensView.PathLabelType.ColorText);
 
             case PreferenceName.LensAverageCount:
                 return(40);
@@ -2177,6 +2179,12 @@ public abstract class Settings
     {
         switch(preferenceName)
         {
+            case PreferenceName.LensIndicatorAlpha:
+                return(0.32f);
+
+            case PreferenceName.LensTextAlpha:
+                return(0.68f);
+
             case PreferenceName.LensWidth:
                 return(39.279f);
 
@@ -2530,6 +2538,20 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensFirstCalibrate, first);
     }
 
+    //Returns lens indicator alpha
+    //note: converts from 0 - 1.0 to alpha 0 - 255
+    public static int getLensIndicatorAlpha(Context context)
+    {
+        return((int)(getPreferenceFloat(context, PreferenceName.LensIndicatorAlpha) * 255));
+    }
+
+    //Returns lens text alpha
+    //note: converts from 0 - 1.0 to alpha 0 - 255
+    public static int getLensTextAlpha(Context context)
+    {
+        return((int)(getPreferenceFloat(context, PreferenceName.LensTextAlpha) * 255));
+    }
+
     //Returns lens showing toolbars
     public static boolean getLensShowToolbars(Context context)
     {
@@ -2542,10 +2564,10 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
     }
 
-    //Gets lens path type
-    public static int getLensPathType(Context context)
+    //Gets lens path label type
+    public static int getLensPathLabelType(Context context)
     {
-        return(getPreferenceInt(context, PreferenceName.LensPathType));
+        return(getPreferenceInt(context, PreferenceName.LensPathLabelType));
     }
 
     //Returns hide constellation star paths

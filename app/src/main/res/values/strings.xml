@@ -138,6 +138,7 @@
     <string name="desc_hide_distant_path_times">Hide time labels on path outside nearby view</string>
     <string name="desc_imperial">Imperial (mi/ft)</string>
     <string name="desc_information_source">Descriptions and details of satellites</string>
+    <string name="desc_label_style">Label drawing style</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
     <string name="desc_material_design_notice">Material design is now the default layout. If you wish to view the legacy design, you can revert back by going to Settings > Display > Theme > Material Theme.</string>
@@ -146,7 +147,6 @@
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
     <string name="desc_orbital_icon">Icon to show orbital position</string>
     <string name="desc_orbital_icons">Icons to use for orbital displays</string>
-    <string name="desc_path_style">Path drawing style</string>
     <string name="desc_permission_camera">Camera is needed to visualize object locations.</string>
     <string name="desc_permission_camera_deny">Camera permission denied</string>
     <string name="desc_permission_location">At least rough location is needed to calculate viewing angles for your location. If not allowed, only manual/saved locations will be used.</string>
@@ -396,6 +396,7 @@
     <string name="title_hybrid">Hybrid</string>
     <string name="title_icon">Icon</string>
     <string name="title_icons">Icons</string>
+    <string name="title_icon_opacity">Icon Opacity</string>
     <string name="title_icon_scale">Icon Scale</string>
     <string name="title_id">ID</string>
     <string name="title_ignore">Ignore</string>
@@ -411,6 +412,7 @@
     <string name="title_italic">Italic</string>
     <string name="title_jupiter">Jupiter</string>
     <string name="title_label_data">Label Data</string>
+    <string name="title_label_style">Label Style</string>
     <string name="title_last_2_digits_of_year">Last 2 Digits of Year</string>
     <string name="title_last_plural">Last</string>
     <string name="title_last_quarter">Last Quarter</string>
@@ -504,7 +506,6 @@
     <string name="title_passes">Passes</string>
     <string name="title_password">Password</string>
     <string name="title_paths">Paths</string>
-    <string name="title_path_style">Path Style</string>
     <string name="title_perigee">Perigee</string>
     <string name="title_period">Period</string>
     <string name="title_permission">Permission</string>
@@ -608,6 +609,7 @@
     <string name="title_sunrise">Sunrise</string>
     <string name="title_sunset">Sunset</string>
     <string name="title_text">Text</string>
+    <string name="title_text_opacity">Text Opacity</string>
     <string name="title_theme">Theme</string>
     <string name="title_this_year">This Year</string>
     <string name="title_time">Time</string>

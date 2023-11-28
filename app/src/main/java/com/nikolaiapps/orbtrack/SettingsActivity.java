@@ -163,6 +163,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference lensDirectionCentered = this.findPreference(Settings.PreferenceName.LensDirectionCentered);
                         SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
                         SwitchButtonPreference lensUseHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
+                        SliderPreference lensIndicatorAlphaSlider = this.findPreference(Settings.PreferenceName.LensIndicatorAlpha);
+                        SliderPreference lensTextAlphaSlider = this.findPreference(Settings.PreferenceName.LensTextAlpha);
                         IconListPreference lensOrbitalIconList = this.findPreference(Settings.PreferenceName.LensIndicator);
                         IconListPreference lensUpdateRateList = this.findPreference(Settings.PreferenceName.LensUpdateDelay);
                         IconListPreference lensSensorSmoothingList = this.findPreference(Settings.PreferenceName.LensAverageCount);
@@ -186,7 +188,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference lensHideConstellationStarPaths = this.findPreference(Settings.PreferenceName.LensHideConstellationStarPaths);
                         SwitchPreference lensShowPathTimeNames = this.findPreference(Settings.PreferenceName.LensShowPathTimeNames);
                         SwitchPreference lensHideDistantPathTimes = this.findPreference(Settings.PreferenceName.LensHideDistantPathTimes);
-                        IconListPreference lensPathTypeList = this.findPreference(Settings.PreferenceName.LensPathType);
+                        IconListPreference lensPathLabelTypeList = this.findPreference(Settings.PreferenceName.LensPathLabelType);
 
                         //initialize values
                         Settings.Options.LensView.initValues(context);
@@ -195,7 +197,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitch(lensHideConstellationStarPaths);
                         setupSwitch(lensShowPathTimeNames);
                         setupSwitch(lensHideDistantPathTimes);
-                        setupList(lensPathTypeList, Settings.Options.LensView.pathTypeItems, null, null, null, null);
+                        setupList(lensPathLabelTypeList, Settings.Options.LensView.pathLabelTypeItems, null, null, null, null);
                         break;
 
                     case ScreenKey.LensViewLens:
@@ -489,8 +491,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             };
                             break;
 
-                        case Settings.PreferenceName.LensPathType:
-                            currentValue = Settings.getLensPathType(context);
+                        case Settings.PreferenceName.LensPathLabelType:
+                            currentValue = Settings.getLensPathLabelType(context);
                             break;
 
                         case Settings.PreferenceName.LensAverageCount:
@@ -828,6 +830,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         max = Settings.IconScaleMax;
                         break;
 
+                    case Settings.PreferenceName.LensIndicatorAlpha:
+                    case Settings.PreferenceName.LensTextAlpha:
                     case Settings.PreferenceName.MapFootprintAlpha:
                         min = 0;
                         max = 100;
@@ -957,12 +961,12 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         disabledValue = (isWidth ? Settings.getLensWidth(context) : Settings.getLensHeight(context));
 
                         //set values
-                        preference.setValueText(String.valueOf(enabledValue), String.valueOf(disabledValue));
+                        preference.setValueText(Globals.getNumberString(enabledValue, 3), Globals.getNumberString(disabledValue, 3));
                         break;
 
                     case Settings.PreferenceName.LensAzimuthUserOffset:
                         //set value
-                        value = String.valueOf(Settings.getLensAzimuthUserOffset(context));
+                        value = Globals.getNumberString(Settings.getLensAzimuthUserOffset(context), 3);
                         break;
 
                     case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
@@ -1569,6 +1573,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensDirectionCentered:
                         case Settings.PreferenceName.LensIndicator:
                         case Settings.PreferenceName.LensIndicatorIconShowDirection:
+                        case Settings.PreferenceName.LensIndicatorAlpha:
+                        case Settings.PreferenceName.LensTextAlpha:
                         case Settings.PreferenceName.LensHorizonColor:
                         case Settings.PreferenceName.LensUseHorizon:
                         case Settings.PreferenceName.LensUseCamera:
@@ -1579,7 +1585,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
                         case Settings.PreferenceName.LensShowToolbars:
-                        case Settings.PreferenceName.LensPathType:
+                        case Settings.PreferenceName.LensPathLabelType:
                         case Settings.PreferenceName.LensHideConstellationStarPaths:
                         case Settings.PreferenceName.LensShowPathTimeNames:
                         case Settings.PreferenceName.LensHideDistantPathTimes:

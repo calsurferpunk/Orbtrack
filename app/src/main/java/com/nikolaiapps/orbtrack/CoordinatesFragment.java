@@ -91,6 +91,7 @@ public interface CoordinatesFragment
         abstract void setInfoLocation();
         abstract boolean getInfoVisible();
         abstract void setVisible(boolean visible);
+        abstract void setSkipLayout(boolean skip);
         abstract void moveLocation(double latitude, double longitude, double altitudeKm);
         abstract void remove();
     }
@@ -115,6 +116,7 @@ public interface CoordinatesFragment
 
         abstract Calculations.GeodeticDataType getGeo();
         abstract Database.SatelliteData getData();
+        abstract int getSatelliteNum();
         abstract void setImage(Bitmap image);
         abstract void setRotation(double rotationRads);
         abstract void setText(String text);
@@ -129,6 +131,7 @@ public interface CoordinatesFragment
         abstract void setInfoVisible(boolean visible);
         abstract boolean getInfoVisible();
         abstract void setVisible(boolean visible);
+        abstract void setSkipLayout(boolean skip);
         abstract void setPath(ArrayList<Coordinate> points);
         abstract void setPathSelected(boolean selected);
         abstract void setPathVisible(boolean visible);
@@ -509,15 +512,14 @@ public interface CoordinatesFragment
         public int getOrbitalIndex(int noradId)
         {
             int index;
+            int currentNoradId;
 
             //go through each orbital
             for(index = 0; index < orbitalObjects.size(); index++)
             {
-                //get data
-                Database.SatelliteData currentData = orbitalObjects.get(index).getData();
-
                 //if norad ID matches
-                if(currentData.getSatelliteNum() == noradId)
+                currentNoradId = orbitalObjects.get(index).getSatelliteNum();
+                if(currentNoradId == noradId)
                 {
                     //return index
                     return(index);
@@ -531,7 +533,7 @@ public interface CoordinatesFragment
         public int getOrbitalNoradId(int orbitalIndex)
         {
             OrbitalBase currentOrbital = getOrbital(orbitalIndex);
-            return(currentOrbital != null ? currentOrbital.getData().getSatelliteNum() : Universe.IDs.Invalid);
+            return(currentOrbital != null ? currentOrbital.getSatelliteNum() : Universe.IDs.Invalid);
         }
 
         public OrbitalBase getOrbital(int orbitalIndex)
@@ -847,7 +849,7 @@ public interface CoordinatesFragment
     int getOrbitalNoradId(int orbitalIndex);
     OrbitalBase getSelectedOrbital();
     OrbitalBase getOrbital(int orbitalIndex);
-    OrbitalBase addOrbital(Context context, Database.SatelliteData newSat, Calculations.ObserverType observerLocation);
+    OrbitalBase addOrbital(Context context, Database.SatelliteData orbitalData, Calculations.ObserverType observerLocation);
     void removeOrbital(OrbitalBase object);
 
     int getSelectedNoradId();

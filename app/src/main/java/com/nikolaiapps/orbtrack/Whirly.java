@@ -209,6 +209,7 @@ class Whirly
     private static class Board
     {
         private boolean isVisible;
+        private boolean skipLayout;
         private final boolean isStar;
         private final boolean tleIsAccurate;
         private final float imageScale;
@@ -227,6 +228,7 @@ class Whirly
         {
             Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
 
+            skipLayout = false;
             tleIsAccurate = tleIsAc;
             zValue = 0;
             rotateDegrees = imageRotateDegrees;
@@ -347,6 +349,21 @@ class Whirly
             boardInfo.setEnable(visible);
         }
 
+        void setSkipLayout(boolean skip)
+        {
+            if(skip)
+            {
+                remove();
+            }
+
+            skipLayout = skip;
+
+            if(!skip)
+            {
+                add();
+            }
+        }
+
         void moveLocation(double latitude, double longitude, double altitudeKm, boolean limitAltitude)
         {
             //get initial z value in scaled meters
@@ -381,7 +398,7 @@ class Whirly
 
         private void add()
         {
-            if(tleIsAccurate && boardObject == null)
+            if(!skipLayout && tleIsAccurate && boardObject == null)
             {
                 boardObject = controller.addBillboards(billboardList, boardInfo, BaseController.ThreadMode.ThreadAny);
             }
@@ -389,7 +406,7 @@ class Whirly
 
         public void remove()
         {
-            if(boardObject != null)
+            if(!skipLayout && boardObject != null)
             {
                 controller.removeObject(boardObject, BaseController.ThreadMode.ThreadAny);
                 boardObject = null;
@@ -400,6 +417,7 @@ class Whirly
     private static class FlatObject
     {
         private boolean isVisible;
+        private boolean skipLayout;
         private double flatScale;
         private double zoomScale;
         private int imageId;
@@ -415,6 +433,8 @@ class Whirly
         FlatObject(BaseController boardController, boolean forStar)
         {
             controller = boardController;
+
+            skipLayout = false;
 
             flatTexture = null;
             flatObject = null;
@@ -491,6 +511,21 @@ class Whirly
             flatInfo.setEnable(visible);
         }
 
+        void setSkipLayout(boolean skip)
+        {
+            if(skip)
+            {
+                remove();
+            }
+
+            skipLayout = skip;
+
+            if(!skip)
+            {
+                add();
+            }
+        }
+
         private void move(double latitude, double longitude, double halfLatitudeRadsWidth, double halfLongitudeRadsWidth, boolean show)
         {
             double latitudeRads;
@@ -531,7 +566,7 @@ class Whirly
 
         private void add()
         {
-            if(flatObject == null)
+            if(!skipLayout && flatObject == null)
             {
                 flatObject = controller.addStickers(flatList, flatInfo, BaseController.ThreadMode.ThreadAny);
             }
@@ -539,7 +574,7 @@ class Whirly
 
         private void remove()
         {
-            if(flatObject != null)
+            if(!skipLayout && flatObject != null)
             {
                 controller.removeObject(flatObject, BaseController.ThreadMode.ThreadAny);
                 flatObject = null;
@@ -806,6 +841,7 @@ class Whirly
         private ComponentObject infoMarkerObj;
         private boolean showInfo;
         private boolean usingInfo;
+        private boolean skipLayout;
         private boolean alwaysShowTitle;
         private boolean showBackground;
         private float markerScale;
@@ -862,7 +898,7 @@ class Whirly
                 markerObj = null;
                 markerInfo.setDrawPriority(DrawPriority.BoardFlat + 100);
 
-                showInfo = false;
+                showInfo = skipLayout = false;
                 showBackground = usingBackground;
                 alwaysShowTitle = startWithTitleShown && (noradId != Universe.IDs.CurrentLocation);
                 usingInfo = (infoLocation == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
@@ -1022,6 +1058,22 @@ class Whirly
         }
 
         @Override
+        void setSkipLayout(boolean skip)
+        {
+            if(skip)
+            {
+                remove();
+            }
+
+            skipLayout = skip;
+
+            if(!skip)
+            {
+                add();
+            }
+        }
+
+        @Override
         void moveLocation(double latitude, double longitude, double altitudeKm)
         {
             remove();
@@ -1039,7 +1091,7 @@ class Whirly
 
         public void add()
         {
-            if(common.tleIsAccurate)
+            if(!skipLayout && common.tleIsAccurate)
             {
                 if(markerObj == null && markerInfo != null)
                 {
@@ -1061,20 +1113,23 @@ class Whirly
         @Override
         public void remove()
         {
-            if(markerObj != null)
+            if(!skipLayout)
             {
-                controller.removeObject(markerObj, BaseController.ThreadMode.ThreadAny);
-                markerObj = null;
-            }
-            if(infoMarkerObj != null)
-            {
-                controller.removeObject(infoMarkerObj, BaseController.ThreadMode.ThreadAny);
-                infoMarkerObj = null;
-            }
-            if(titleMarkerObj != null)
-            {
-                controller.removeObject(titleMarkerObj, BaseController.ThreadMode.ThreadAny);
-                titleMarkerObj = null;
+                if(markerObj != null)
+                {
+                    controller.removeObject(markerObj, BaseController.ThreadMode.ThreadAny);
+                    markerObj = null;
+                }
+                if(infoMarkerObj != null)
+                {
+                    controller.removeObject(infoMarkerObj, BaseController.ThreadMode.ThreadAny);
+                    infoMarkerObj = null;
+                }
+                if(titleMarkerObj != null)
+                {
+                    controller.removeObject(titleMarkerObj, BaseController.ThreadMode.ThreadAny);
+                    titleMarkerObj = null;
+                }
             }
         }
     }
@@ -1119,14 +1174,16 @@ class Whirly
         private final Path orbitalPath;
         private final BaseController controller;
 
-        OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData newSat, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
+        OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData orbitalData, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
             byte orbitalType;
+            boolean haveOrbital;
             Bitmap titleImage;
             Bitmap orbitalImage = null;
             Drawable orbitalBgImage;
             Drawable orbitalDrawable;
+            String name;
 
             currentContext = context;
             common = new Shared();
@@ -1143,106 +1200,121 @@ class Whirly
             markerScale = markerScaling;
             orbitalRotation = lastMoveZoom = lastOrbitalRotation = 0;
             lastInfo = null;
-            common.data = newSat;
+            common.data = orbitalData;
+            haveOrbital = (common.data != null);
             orbitalShadow = null;
             orbitalFootprint = null;
             orbitalSelectedFootprint = null;
-            noradId = common.data.getSatelliteNum();
-            orbitalType = common.data.getOrbitalType();
+            name = (haveOrbital ? common.data.getName() : null);
+            noradId = (haveOrbital ? common.data.getSatelliteNum() : Universe.IDs.Invalid);
+            orbitalType = (haveOrbital ? common.data.getOrbitalType() : Database.OrbitalType.Star);
             isStar = false;
 
-            //try to use saved image
-            switch(orbitalType)
+            //if have orbital
+            if(haveOrbital)
             {
-                case Database.OrbitalType.Star:
-                    orbitalImage = Globals.copyBitmap(starImage);
-                    isStar = true;
-                    break;
-
-                case Database.OrbitalType.Satellite:
-                    orbitalImage = Globals.copyBitmap(satelliteImage);
-                    break;
-
-                case Database.OrbitalType.RocketBody:
-                    orbitalImage = Globals.copyBitmap(rocketBodyImage);
-                    break;
-
-                case Database.OrbitalType.Debris:
-                    orbitalImage = Globals.copyBitmap(debrisImage);
-                    break;
-            }
-
-            //if image not set yet
-            if(orbitalImage == null && orbitalType != Database.OrbitalType.Constellation)
-            {
-                //get image
-                iconId = Globals.getOrbitalIconId(context, noradId, orbitalType);
-                if(orbitalType == Database.OrbitalType.Star)
-                {
-                    orbitalDrawable = Globals.getOrbitalIcon(context, observerLocation, noradId, orbitalType);
-                    orbitalImage = Globals.getBitmapSized(context, iconId, (int)(orbitalDrawable.getIntrinsicWidth() * StarScale), (int)(orbitalDrawable.getIntrinsicHeight() * StarScale), 0);
-                }
-                else
-                {
-                    orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(context, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(context, iconId, (noradId > 0 && (orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? Color.WHITE : 0)));
-                    if(noradId > 0)
-                    {
-                        //add outline
-                        orbitalBgImage = Globals.getDrawableSized(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
-                        orbitalImage = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
-                    }
-                }
-
-                //save image for repeat use
+                //try to use saved image
                 switch(orbitalType)
                 {
                     case Database.OrbitalType.Star:
-                        starImage = Globals.copyBitmap(orbitalImage);
+                        orbitalImage = Globals.copyBitmap(starImage);
+                        isStar = true;
                         break;
 
                     case Database.OrbitalType.Satellite:
-                        satelliteImage = Globals.copyBitmap(orbitalImage);
+                        orbitalImage = Globals.copyBitmap(satelliteImage);
                         break;
 
                     case Database.OrbitalType.RocketBody:
-                        rocketBodyImage = Globals.copyBitmap(orbitalImage);
+                        orbitalImage = Globals.copyBitmap(rocketBodyImage);
                         break;
 
                     case Database.OrbitalType.Debris:
-                        debrisImage = Globals.copyBitmap(orbitalImage);
+                        orbitalImage = Globals.copyBitmap(debrisImage);
                         break;
                 }
-            }
-            if(selectedFootprintImage == null)
-            {
-                //set/draw footprint image for repeat use
-                selectedFootprintImage = createFootprintImage(Settings.getMapFootprintType(context), Settings.getMapSelectedFootprintColor(context));
+
+                //if image not set yet
+                if(orbitalImage == null && orbitalType != Database.OrbitalType.Constellation)
+                {
+                    //get image
+                    iconId = Globals.getOrbitalIconId(context, noradId, orbitalType);
+                    if(orbitalType == Database.OrbitalType.Star)
+                    {
+                        orbitalDrawable = Globals.getOrbitalIcon(context, observerLocation, noradId, orbitalType);
+                        orbitalImage = Globals.getBitmapSized(context, iconId, (int)(orbitalDrawable.getIntrinsicWidth() * StarScale), (int)(orbitalDrawable.getIntrinsicHeight() * StarScale), 0);
+                    }
+                    else
+                    {
+                        orbitalImage = (noradId == Universe.IDs.Moon ? Universe.Moon.getPhaseImage(context, observerLocation, System.currentTimeMillis()) : Globals.getBitmap(context, iconId, (noradId > 0 && (orbitalType != Database.OrbitalType.Satellite || Settings.getSatelliteIconImageIsThemeable(context)) ? Color.WHITE : 0)));
+                        if(noradId > 0)
+                        {
+                            //add outline
+                            orbitalBgImage = Globals.getDrawableSized(context, iconId, orbitalImage.getWidth(), orbitalImage.getHeight(), R.color.black, false);
+                            orbitalImage = Globals.getBitmap(Globals.getDrawableCombined(context, 2, 2, true, new BitmapDrawable(context.getResources(), orbitalImage), orbitalBgImage));
+                        }
+                    }
+
+                    //save image for repeat use
+                    switch(orbitalType)
+                    {
+                        case Database.OrbitalType.Star:
+                            starImage = Globals.copyBitmap(orbitalImage);
+                            break;
+
+                        case Database.OrbitalType.Satellite:
+                            satelliteImage = Globals.copyBitmap(orbitalImage);
+                            break;
+
+                        case Database.OrbitalType.RocketBody:
+                            rocketBodyImage = Globals.copyBitmap(orbitalImage);
+                            break;
+
+                        case Database.OrbitalType.Debris:
+                            debrisImage = Globals.copyBitmap(orbitalImage);
+                            break;
+                    }
+                }
+                if(selectedFootprintImage == null)
+                {
+                    //set/draw footprint image for repeat use
+                    selectedFootprintImage = createFootprintImage(Settings.getMapFootprintType(context), Settings.getMapSelectedFootprintColor(context));
+                }
             }
 
             //remember if old information and initialize path
-            tleIsAccurate = (newSat.database == null || newSat.database.tleIsAccurate);
-            orbitalPath = new Path(controller, forMap || !Settings.getMapShow3dPaths(context), tleIsAccurate, common.data.getPathColor());
+            tleIsAccurate = (haveOrbital && (common.data.database == null || common.data.database.tleIsAccurate));
+            orbitalPath = (haveOrbital ? new Path(controller, forMap || !Settings.getMapShow3dPaths(context), tleIsAccurate, common.data.getPathColor()) : null);
 
             if(forMap)
             {
                 //create marker
-                orbitalMarker = new MarkerObject(context, controller, newSat.getSatelliteNum(), observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
-                orbitalMarker.setTitle(newSat.getName());
-                orbitalMarker.setImage(orbitalImage);
+                orbitalMarker = new MarkerObject(context, controller, noradId, observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
+                if(haveOrbital)
+                {
+                    orbitalMarker.setTitle(name);
+                    orbitalMarker.setImage(orbitalImage);
+                }
             }
             else
             {
                 //create board
                 orbitalBoard = new Board(controller, tleIsAccurate, isStar, true);
-                orbitalBoard.setImage(orbitalImage, markerScale);
+                if(haveOrbital)
+                {
+                    orbitalBoard.setImage(orbitalImage, markerScale);
+                }
 
                 //add/remove shadow
                 setShowShadow(showShadow);
 
                 //set title
-                titleImage = getInfoCreator().get(context, common.data.getName(), null);
                 infoBoard = new Board(controller, tleIsAccurate, isStar, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage != null ? (orbitalImage.getHeight() / 2f) : 1) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
+                if(haveOrbital)
+                {
+                    titleImage = getInfoCreator().get(context, name, null);
+                    infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage != null ? (orbitalImage.getHeight() / 2f) : 1) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
+                }
             }
 
             //set defaults
@@ -1358,6 +1430,12 @@ class Whirly
         public Database.SatelliteData getData()
         {
             return(common.data);
+        }
+
+        @Override
+        int getSatelliteNum()
+        {
+            return(common.data != null ? common.data.getSatelliteNum() : Universe.IDs.Invalid);
         }
 
         @Override
@@ -1654,21 +1732,66 @@ class Whirly
         }
 
         @Override
+        void setSkipLayout(boolean skip)
+        {
+            if(forMap)
+            {
+                if(orbitalMarker != null)
+                {
+                    orbitalMarker.setSkipLayout(skip);
+                }
+            }
+            else
+            {
+                if(infoBoard != null)
+                {
+                    infoBoard.setSkipLayout(skip);
+                }
+                if(orbitalBoard != null)
+                {
+                    orbitalBoard.setSkipLayout(skip);
+                }
+                if(orbitalShadow != null)
+                {
+                    orbitalShadow.setSkipLayout(skip);
+                }
+            }
+
+            if(orbitalFootprint != null)
+            {
+                orbitalFootprint.setSkipLayout(skip);
+            }
+            if(orbitalSelectedFootprint != null)
+            {
+                orbitalSelectedFootprint.setSkipLayout(skip);
+            }
+        }
+
+        @Override
         void setPath(ArrayList<CoordinatesFragment.Coordinate> points)
         {
-            orbitalPath.setPath(points);
+            if(orbitalPath != null)
+            {
+                orbitalPath.setPath(points);
+            }
         }
 
         @Override
         void setPathSelected(boolean selected)
         {
-            orbitalPath.setSelected(selected);
+            if(orbitalPath != null)
+            {
+                orbitalPath.setSelected(selected);
+            }
         }
 
         @Override
         void setPathVisible(boolean visible)
         {
-            orbitalPath.setVisible(visible);
+            if(orbitalPath != null)
+            {
+                orbitalPath.setVisible(visible);
+            }
         }
 
         @Override
@@ -1841,7 +1964,10 @@ class Whirly
                 orbitalSelectedFootprint.remove();
             }
 
-            orbitalPath.remove();
+            if(orbitalPath != null)
+            {
+                orbitalPath.remove();
+            }
         }
     }
 
@@ -2708,13 +2834,13 @@ class Whirly
         }
 
         @Override
-        public OrbitalObject addOrbital(Context context, Database.SatelliteData newSat, Calculations.ObserverType observerLocation)
+        public OrbitalObject addOrbital(Context context, Database.SatelliteData orbitalData, Calculations.ObserverType observerLocation)
         {
             int currentCount = common.getOrbitalCount();
             int limitCount = common.getOrbitalDirectionLimitCount();
             boolean useDirection = common.getShowOrbitalDirection();
             boolean overLimit = (useDirection && (limitCount > 0) && (currentCount + 1 > limitCount));
-            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), newSat, observerLocation, common.getMarkerScale(), common.getShowBackground(), (useDirection && !overLimit), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
+            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), orbitalData, observerLocation, common.getMarkerScale(), common.getShowBackground(), (useDirection && !overLimit), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
 
             //if able to create object
             if(newObject != null)

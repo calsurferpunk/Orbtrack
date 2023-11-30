@@ -2510,12 +2510,14 @@ public abstract class Current
                                 //update marker
                                 if(currentMarker != null)
                                 {
-                                    Database.SatelliteData currentOrbital = currentMarker.getData();
-                                    int currentNoradId = currentOrbital.getSatelliteNum();
+                                    int currentNoradId = currentMarker.getSatelliteNum();
                                     boolean selectionChanged = (currentNoradId != lastNoradId);
                                     boolean currentIsSatellite = (currentNoradId > 0);
                                     boolean currentOrbitalSelected = (singlePlaybackMarker || currentNoradId == mapSelectedNoradId);
                                     boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
+
+                                    //skip layout until done
+                                    currentMarker.setSkipLayout(true);
 
                                     //update showing selected footprint
                                     currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
@@ -2556,6 +2558,9 @@ public abstract class Current
                                     currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Settings.usingMapShowFootprint());
                                     currentMarker.moveLocation(latitude, longitude, altitudeKm);
                                     currentMarker.setVisible(true);
+
+                                    //update layout
+                                    currentMarker.setSkipLayout(false);
                                 }
                             }
                         }
@@ -2637,9 +2642,11 @@ public abstract class Current
 
                     if(currentLocationMarker != null)
                     {
+                        currentLocationMarker.setSkipLayout(true);
                         currentLocationMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
                         currentLocationMarker.setText(Globals.getCoordinateString(activity, currentLatitude, currentLongitude, currentAltitudeKm));
                         currentLocationMarker.setVisible(currentLatitude != 0 || currentLongitude != 0 || currentAltitudeKm != 0);
+                        currentLocationMarker.setSkipLayout(false);
                     }
                     if(moonMarker != null)
                     {
@@ -2672,13 +2679,13 @@ public abstract class Current
             {
                 //add orbital
                 Database.SatelliteData currentOrbital = orbitals[index];
-                CoordinatesFragment.OrbitalBase newOrbital = mapView.addOrbital(context, currentOrbital, currentLocation);
+                CoordinatesFragment.OrbitalBase newOrbital = mapView.addOrbital(context, (currentOrbital.getInFilter() ? currentOrbital : null), currentLocation);
 
                 //remember marker
                 markers[index] = newOrbital;
 
                 //if the moon
-                if(newOrbital.getData().getSatelliteNum() == Universe.IDs.Moon)
+                if(newOrbital.getSatelliteNum() == Universe.IDs.Moon)
                 {
                     //remember it
                     moonMarker = newOrbital;

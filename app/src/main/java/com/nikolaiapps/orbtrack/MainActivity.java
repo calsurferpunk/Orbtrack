@@ -4306,6 +4306,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         boolean selectionChanged = (currentNoradId != lastMapNoradId);
                                         boolean infoUnderTitle = Settings.usingMapMarkerInfoTitle();
 
+                                        //skip layout until done
+                                        currentMarker.setSkipLayout(true);
+
                                         //update showing selected footprint
                                         currentMarker.setShowSelectedFootprint(currentIsSatellite && currentOrbitalSelected && Settings.usingMapFootprintAndSelected());
 
@@ -4352,18 +4355,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Settings.usingMapShowFootprint());
                                         currentMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
                                         currentMarker.setVisible(true);
+
+                                        //update layout
+                                        currentMarker.setSkipLayout(false);
                                     }
                                     else
                                     {
                                         //hide marker
                                         currentMarker.setVisible(false);
-
-                                        //if not in filter
-                                        if(!currentInFilter)
-                                        {
-                                            //remove completely
-                                            currentMarker.remove();
-                                        }
                                     }
                                 }
                             }

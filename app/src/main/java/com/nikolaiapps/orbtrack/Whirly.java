@@ -850,7 +850,7 @@ class Whirly
         private String infoText;
         private BaseController controller;
 
-        MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation)
+        MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation, boolean isStar)
         {
             int locationIconType;
             float sizeDp;
@@ -882,7 +882,7 @@ class Whirly
                         break;
 
                     default:
-                        sizeDp = 46 * (noradId < 0 ? StarScale : 1);
+                        sizeDp = 46 * (isStar ? StarScale : 1);
                         break;
                 }
                 markerBaseSizeValue = Globals.dpToPixels(currentContext, sizeDp);
@@ -890,7 +890,7 @@ class Whirly
                 marker = new ScreenMarker();
                 markerInfo = new MarkerInfo();
                 locationIconType = Settings.getMapMarkerLocationIcon(context);
-                marker.image = Globals.getBitmap(currentContext, Globals.getLocationIconTypeIconID(locationIconType), Settings.getMapMarkerLocationIconUsedTintColor(context, locationIconType));
+                marker.image = (noradId != Universe.IDs.Invalid ? Globals.getBitmap(currentContext, Globals.getLocationIconTypeIconID(locationIconType), Settings.getMapMarkerLocationIconUsedTintColor(context, locationIconType)) : null);
                 marker.size = new Point2d(markerBaseSizeValue * markerScale, markerBaseSizeValue * markerScale);
                 marker.userObject = noradId;
                 marker.selectable = true;
@@ -1140,6 +1140,7 @@ class Whirly
         private static Bitmap debrisImage;
         private static Bitmap satelliteImage;
         private static Bitmap rocketBodyImage;
+        private static Bitmap constellationImage;
         private static Bitmap selectedFootprintImage;
         private static WeakReference<InfoImageCreator> infoCreator;
 
@@ -1232,14 +1233,18 @@ class Whirly
                     case Database.OrbitalType.Debris:
                         orbitalImage = Globals.copyBitmap(debrisImage);
                         break;
+
+                    case Database.OrbitalType.Constellation:
+                        orbitalImage = Globals.copyBitmap(constellationImage);
+                        break;
                 }
 
                 //if image not set yet
-                if(orbitalImage == null && orbitalType != Database.OrbitalType.Constellation)
+                if(orbitalImage == null)
                 {
                     //get image
                     iconId = Globals.getOrbitalIconId(context, noradId, orbitalType);
-                    if(orbitalType == Database.OrbitalType.Star)
+                    if(isStar)
                     {
                         orbitalDrawable = Globals.getOrbitalIcon(context, observerLocation, noradId, orbitalType);
                         orbitalImage = Globals.getBitmapSized(context, iconId, (int)(orbitalDrawable.getIntrinsicWidth() * StarScale), (int)(orbitalDrawable.getIntrinsicHeight() * StarScale), 0);
@@ -1273,6 +1278,10 @@ class Whirly
                         case Database.OrbitalType.Debris:
                             debrisImage = Globals.copyBitmap(orbitalImage);
                             break;
+
+                        case Database.OrbitalType.Constellation:
+                            constellationImage = Globals.copyBitmap(orbitalImage);
+                            break;
                     }
                 }
                 if(selectedFootprintImage == null)
@@ -1289,7 +1298,7 @@ class Whirly
             if(forMap)
             {
                 //create marker
-                orbitalMarker = new MarkerObject(context, controller, noradId, observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation);
+                orbitalMarker = new MarkerObject(context, controller, noradId, observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation, isStar);
                 if(haveOrbital)
                 {
                     orbitalMarker.setTitle(name);
@@ -1333,6 +1342,7 @@ class Whirly
             debrisImage = null;
             satelliteImage = null;
             rocketBodyImage = null;
+            constellationImage = null;
             selectedFootprintImage = null;
         }
 
@@ -2787,7 +2797,7 @@ class Whirly
         @Override
         public MarkerObject addMarker(Context context, int noradId, Calculations.ObserverType markerLocation)
         {
-            MarkerObject newMarker = (getControl() != null ? new MarkerObject(context, getControl(), noradId, markerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowTitleAlways(), true, common.getInfoLocation()) : null);
+            MarkerObject newMarker = (getControl() != null ? new MarkerObject(context, getControl(), noradId, markerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowTitleAlways(), true, common.getInfoLocation(), false) : null);
 
             if(newMarker != null)
             {

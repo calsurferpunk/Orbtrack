@@ -4122,8 +4122,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean onCurrentMapId;
                 boolean onCurrentLensId;
                 boolean onCurrentLensChildId;
+                boolean havePendingMarkerScale = Current.getHaveMapPendingMarkerScale();
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
+                float pendingMarkerScale = Current.getMapPendingMarkerScale();
                 double julianDate;
                 String coordinateString = null;
                 TextView mapInfoText = Current.getMapInfoText();
@@ -4353,6 +4355,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                                         //move marker location and update status
                                         currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Settings.usingMapShowFootprint());
+                                        if(havePendingMarkerScale)
+                                        {
+                                            currentMarker.setScale(pendingMarkerScale);
+                                        }
                                         currentMarker.moveLocation(currentLatitude, currentLongitude, currentAltitudeKm);
                                         currentMarker.setVisible(true);
 
@@ -4416,7 +4422,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //update list
                         Current.PageAdapter.notifyItemsChanged();
                     }
-                    Current.handleMarkerScale();
+                    if(havePendingMarkerScale)
+                    {
+                        //clear pending scale
+                        Current.clearMapPendingMarkerScale();
+                    }
 
                     //if on lens and it exists
                     if(onLens && cameraView != null)

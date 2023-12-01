@@ -209,9 +209,9 @@ class Whirly
     private static class Board
     {
         private boolean isVisible;
-        private boolean skipLayout;
         private final boolean isStar;
         private final boolean tleIsAccurate;
+        private int skipLayoutCount;
         private final float imageScale;
         private double zValue;
         private double rotateDegrees;
@@ -228,9 +228,8 @@ class Whirly
         {
             Shader eyeShader = boardController.getShader(Shader.BillboardEyeShader);
 
-            skipLayout = false;
             tleIsAccurate = tleIsAc;
-            zValue = 0;
+            zValue = skipLayoutCount = 0;
             rotateDegrees = imageRotateDegrees;
             controller = boardController;
             isStar = forStar;
@@ -349,18 +348,23 @@ class Whirly
             boardInfo.setEnable(visible);
         }
 
-        void setSkipLayout(boolean skip)
+        public void setSkipLayout(boolean skip)
         {
             if(skip)
             {
-                remove();
+                if(skipLayoutCount == 0)
+                {
+                    remove();
+                }
+                skipLayoutCount++;
             }
-
-            skipLayout = skip;
-
-            if(!skip)
+            else
             {
-                add();
+                skipLayoutCount--;
+                if(skipLayoutCount == 0)
+                {
+                    add();
+                }
             }
         }
 
@@ -398,7 +402,7 @@ class Whirly
 
         private void add()
         {
-            if(!skipLayout && tleIsAccurate && boardObject == null)
+            if(skipLayoutCount <= 0 && tleIsAccurate && boardObject == null)
             {
                 boardObject = controller.addBillboards(billboardList, boardInfo, BaseController.ThreadMode.ThreadAny);
             }
@@ -406,7 +410,7 @@ class Whirly
 
         public void remove()
         {
-            if(!skipLayout && boardObject != null)
+            if(skipLayoutCount <= 0 && boardObject != null)
             {
                 controller.removeObject(boardObject, BaseController.ThreadMode.ThreadAny);
                 boardObject = null;
@@ -417,10 +421,10 @@ class Whirly
     private static class FlatObject
     {
         private boolean isVisible;
-        private boolean skipLayout;
         private double flatScale;
         private double zoomScale;
         private int imageId;
+        private int skipLayoutCount;
         private final float imageScale;
         private final Sticker flatSticker;
         private final StickerInfo flatInfo;
@@ -434,7 +438,7 @@ class Whirly
         {
             controller = boardController;
 
-            skipLayout = false;
+            skipLayoutCount = 0;
 
             flatTexture = null;
             flatObject = null;
@@ -511,18 +515,23 @@ class Whirly
             flatInfo.setEnable(visible);
         }
 
-        void setSkipLayout(boolean skip)
+        public void setSkipLayout(boolean skip)
         {
             if(skip)
             {
-                remove();
+                if(skipLayoutCount == 0)
+                {
+                    remove();
+                }
+                skipLayoutCount++;
             }
-
-            skipLayout = skip;
-
-            if(!skip)
+            else
             {
-                add();
+                skipLayoutCount--;
+                if(skipLayoutCount == 0)
+                {
+                    add();
+                }
             }
         }
 
@@ -566,7 +575,7 @@ class Whirly
 
         private void add()
         {
-            if(!skipLayout && flatObject == null)
+            if(skipLayoutCount <= 0 && flatObject == null)
             {
                 flatObject = controller.addStickers(flatList, flatInfo, BaseController.ThreadMode.ThreadAny);
             }
@@ -574,7 +583,7 @@ class Whirly
 
         private void remove()
         {
-            if(!skipLayout && flatObject != null)
+            if(skipLayoutCount <= 0 && flatObject != null)
             {
                 controller.removeObject(flatObject, BaseController.ThreadMode.ThreadAny);
                 flatObject = null;
@@ -587,6 +596,7 @@ class Whirly
         private boolean isVisible;
         private final boolean useVectors;
         private final boolean tleIsAccurate;
+        private int skipLayoutCount;
         private final int selectedColor;
         private final int nonSelectedColor;
         private VectorObject flatPath;
@@ -598,6 +608,7 @@ class Whirly
 
         Path(BaseController orbitalController, boolean isFlat, boolean tleIsAcc, int color)
         {
+            skipLayoutCount = 0;
             useVectors = isFlat;
             tleIsAccurate = tleIsAcc;
             controller = orbitalController;
@@ -806,9 +817,29 @@ class Whirly
             }
         }
 
+        public void setSkipLayout(boolean skip)
+        {
+            if(skip)
+            {
+                if(skipLayoutCount == 0)
+                {
+                    remove();
+                }
+                skipLayoutCount++;
+            }
+            else
+            {
+                skipLayoutCount--;
+                if(skipLayoutCount == 0)
+                {
+                    add();
+                }
+            }
+        }
+
         public void add()
         {
-            if(tleIsAccurate && pathObject == null)
+            if(skipLayoutCount <= 0 && tleIsAccurate && pathObject == null)
             {
                 pathObject = (useVectors ? controller.addVector(flatPath, flatPathInfo, BaseController.ThreadMode.ThreadAny) : controller.addShapes(Collections.singletonList(elevatedPath), elevatedPathInfo, RenderControllerInterface.ThreadMode.ThreadAny));
             }
@@ -816,7 +847,7 @@ class Whirly
 
         public void remove()
         {
-            if(pathObject != null)
+            if(skipLayoutCount <= 0 && pathObject != null)
             {
                 controller.removeObject(pathObject, BaseController.ThreadMode.ThreadAny);
                 pathObject = null;
@@ -841,16 +872,16 @@ class Whirly
         private ComponentObject infoMarkerObj;
         private boolean showInfo;
         private boolean usingInfo;
-        private boolean skipLayout;
         private boolean alwaysShowTitle;
         private boolean showBackground;
+        private int skipLayoutCount;
         private float markerScale;
         private double markerBaseSizeValue;
         private String titleText;
         private String infoText;
         private BaseController controller;
 
-        MarkerObject(Context context, BaseController markerController, int noradId, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation, boolean isStar)
+        MarkerObject(Context context, BaseController markerController, int noradId, String title, Bitmap image, Calculations.ObserverType markerLocation, float markerScaling, boolean usingBackground, boolean startWithTitleShown, boolean tleIsAccurate, int infoLocation, boolean isStar)
         {
             int locationIconType;
             float sizeDp;
@@ -864,6 +895,7 @@ class Whirly
                 common.tleIsAccurate = tleIsAccurate;
 
                 controller = markerController;
+                skipLayoutCount = 0;
                 markerScale = markerScaling;
                 switch(noradId)
                 {
@@ -890,7 +922,6 @@ class Whirly
                 marker = new ScreenMarker();
                 markerInfo = new MarkerInfo();
                 locationIconType = Settings.getMapMarkerLocationIcon(context);
-                marker.image = (noradId != Universe.IDs.Invalid ? Globals.getBitmap(currentContext, Globals.getLocationIconTypeIconID(locationIconType), Settings.getMapMarkerLocationIconUsedTintColor(context, locationIconType)) : null);
                 marker.size = new Point2d(markerBaseSizeValue * markerScale, markerBaseSizeValue * markerScale);
                 marker.userObject = noradId;
                 marker.selectable = true;
@@ -898,7 +929,7 @@ class Whirly
                 markerObj = null;
                 markerInfo.setDrawPriority(DrawPriority.BoardFlat + 100);
 
-                showInfo = skipLayout = false;
+                showInfo = false;
                 showBackground = usingBackground;
                 alwaysShowTitle = startWithTitleShown && (noradId != Universe.IDs.CurrentLocation);
                 usingInfo = (infoLocation == CoordinatesFragment.MapMarkerInfoLocation.UnderTitle);
@@ -916,7 +947,14 @@ class Whirly
                 titleText = "...";
                 titleMarkerInfo.setDrawPriority(DrawPriority.BoardFlat + 300);
 
+                setSkipLayout(true);
                 moveLocation(markerLocation.geo.latitude, markerLocation.geo.longitude, markerLocation.geo.altitudeKm);
+                if(title != null)
+                {
+                    setTitle(title);
+                }
+                setImage((noradId == Universe.IDs.CurrentLocation ? Globals.getBitmap(currentContext, Globals.getLocationIconTypeIconID(locationIconType), Settings.getMapMarkerLocationIconUsedTintColor(context, locationIconType)) : image));
+                setSkipLayout(false);
             }
         }
 
@@ -1062,14 +1100,19 @@ class Whirly
         {
             if(skip)
             {
-                remove();
+                if(skipLayoutCount == 0)
+                {
+                    remove();
+                }
+                skipLayoutCount++;
             }
-
-            skipLayout = skip;
-
-            if(!skip)
+            else
             {
-                add();
+                skipLayoutCount--;
+                if(skipLayoutCount == 0)
+                {
+                    add();
+                }
             }
         }
 
@@ -1091,7 +1134,7 @@ class Whirly
 
         public void add()
         {
-            if(!skipLayout && common.tleIsAccurate)
+            if(skipLayoutCount <= 0 && common.tleIsAccurate && controller != null)
             {
                 if(markerObj == null && markerInfo != null)
                 {
@@ -1113,7 +1156,7 @@ class Whirly
         @Override
         public void remove()
         {
-            if(!skipLayout)
+            if(skipLayoutCount <= 0 && controller != null)
             {
                 if(markerObj != null)
                 {
@@ -1298,12 +1341,7 @@ class Whirly
             if(forMap)
             {
                 //create marker
-                orbitalMarker = new MarkerObject(context, controller, noradId, observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation, isStar);
-                if(haveOrbital)
-                {
-                    orbitalMarker.setTitle(name);
-                    orbitalMarker.setImage(orbitalImage);
-                }
+                orbitalMarker = new MarkerObject(context, controller, noradId, (haveOrbital ? name : null), (haveOrbital ? orbitalImage : null), observerLocation, markerScale, usingBackground, alwaysShowTitle, tleIsAccurate, infoLocation, isStar);
             }
             else
             {
@@ -1332,8 +1370,10 @@ class Whirly
             common.lastBearingGeo = new Calculations.GeodeticDataType(common.geo);
 
             //don't show anything until used
+            setSkipLayout(true);
             setVisible(false);
             setInfoVisible(false);
+            setSkipLayout(false);
         }
 
         public static void clearImages()
@@ -1689,6 +1729,9 @@ class Whirly
 
             if(forMap)
             {
+                //pause updates
+                orbitalMarker.setSkipLayout(true);
+
                 //if want visible and not visible yet
                 if(visible && !orbitalMarker.getInfoVisible())
                 {
@@ -1698,6 +1741,9 @@ class Whirly
 
                 //update visibility
                 orbitalMarker.setInfoVisible(showingInfo);
+
+                //resume updates
+                orbitalMarker.setSkipLayout(false);
             }
             else
             {
@@ -1774,6 +1820,10 @@ class Whirly
             if(orbitalSelectedFootprint != null)
             {
                 orbitalSelectedFootprint.setSkipLayout(skip);
+            }
+            if(orbitalPath != null)
+            {
+                orbitalPath.setSkipLayout(skip);
             }
         }
 
@@ -2797,7 +2847,7 @@ class Whirly
         @Override
         public MarkerObject addMarker(Context context, int noradId, Calculations.ObserverType markerLocation)
         {
-            MarkerObject newMarker = (getControl() != null ? new MarkerObject(context, getControl(), noradId, markerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowTitleAlways(), true, common.getInfoLocation(), false) : null);
+            MarkerObject newMarker = (getControl() != null ? new MarkerObject(context, getControl(), noradId, null, null, markerLocation, common.getMarkerScale(), common.getShowBackground(), common.getShowTitleAlways(), true, common.getInfoLocation(), false) : null);
 
             if(newMarker != null)
             {

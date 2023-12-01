@@ -2209,18 +2209,22 @@ public abstract class Current
         return(mapViewReady ? getMapView() : null);
     }
 
-    //Handles any pending marker scale
-    public static void handleMarkerScale()
+    //Gets current pending marker scale
+    public static float getMapPendingMarkerScale()
     {
-        CoordinatesFragment mapView = getMapViewIfReady();
+        return(mapPendingMarkerScale);
+    }
 
-        //if map view is ready and there is a pending marker scale
-        if(mapView != null && mapPendingMarkerScale != Float.MAX_VALUE)
-        {
-            //set scale and update status
-            mapView.setMarkerScale(mapPendingMarkerScale);
-            mapPendingMarkerScale = Float.MAX_VALUE;
-        }
+    //Clears pending marker scale
+    public static void clearMapPendingMarkerScale()
+    {
+        mapPendingMarkerScale = Float.MAX_VALUE;
+    }
+
+    //Gets if have pending marker scale
+    public static boolean getHaveMapPendingMarkerScale()
+    {
+        return(mapPendingMarkerScale != Float.MAX_VALUE);
     }
 
     //Setup zoom buttons
@@ -2465,6 +2469,8 @@ public abstract class Current
                         {
                             int index;
                             int currentItemIndex = (int)Math.floor(progressValue + subProgressPercent);
+                            boolean havePendingMarkerScale = getHaveMapPendingMarkerScale();
+                            float pendingMarkerScale = getMapPendingMarkerScale();
                             double latitude;
                             double longitude;
                             double altitudeKm;
@@ -2556,12 +2562,23 @@ public abstract class Current
 
                                     //move marker location and update status
                                     currentMarker.setShowFootprint(currentIsSatellite && !currentOrbitalSelected && Settings.usingMapShowFootprint());
+                                    if(havePendingMarkerScale)
+                                    {
+                                        currentMarker.setScale(pendingMarkerScale);
+                                    }
                                     currentMarker.moveLocation(latitude, longitude, altitudeKm);
                                     currentMarker.setVisible(true);
 
                                     //update layout
                                     currentMarker.setSkipLayout(false);
                                 }
+                            }
+
+                            //handle any needed update
+                            if(havePendingMarkerScale)
+                            {
+                                //clear pending scale
+                                clearMapPendingMarkerScale();
                             }
                         }
                         else
@@ -2573,9 +2590,6 @@ public abstract class Current
 
                         //update time
                         playBar.setValueText(timeString);
-
-                        //handle any needed update
-                        handleMarkerScale();
                     }
                 }
             });

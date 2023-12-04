@@ -1179,54 +1179,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             currentPaint.setStyle(Paint.Style.STROKE);
             currentPaint.setStrokeWidth(indicatorThickness);
 
-            //go through parent orbitals
-            for(index = 0; index < parentOrbitals.size(); index++)
-            {
-                //remember current parent, orbital, and child properties
-                ParentOrbital currentParentOrbital = parentOrbitals.get(index);
-                int orbitalIndex = currentParentOrbital.index;
-                Database.SatelliteData currentOrbital = (orbitalIndex >= 0 && orbitalIndex < currentOrbitals.length ? currentOrbitals[orbitalIndex] : null);
-                RelativeLocationProperties[][] currentChildProperties = currentParentOrbital.childProperties;
-
-                //if able to get orbital, child properties, and in filter
-                if(currentOrbital != null && currentChildProperties != null && currentOrbital.getInFilter())
-                {
-                    boolean notSelected = (currentOrbital.getSatelliteNum() != selectedNoradId);
-
-                    //set line color
-                    currentPaint.setColor(currentOrbital.getPathColor());
-
-                    //make transparent
-                    currentPaint.setAlpha(notSelected ? 20 : 120);
-
-                    //go through child properties
-                    for(RelativeLocationProperties[] currentPoint : currentChildProperties)
-                    {
-                        //remember points and if have both
-                        boolean haveBothPoints = (currentPoint.length == 2);
-                        RelativeLocationProperties startPoint = (haveBothPoints ? currentPoint[0] : null);
-                        RelativeLocationProperties endPoint = (haveBothPoints ? currentPoint[1] : null);
-
-                        //if both points are set and at least 1 is within view
-                        if(startPoint != null && endPoint != null && (!startPoint.outsideArea || !endPoint.outsideArea))
-                        {
-                            //draw line between points
-                            canvas.drawLine(startPoint.azCenterPx, startPoint.elCenterPx, endPoint.azCenterPx, endPoint.elCenterPx, currentPaint);
-                        }
-                    }
-
-                    //restore transparency
-                    currentPaint.setAlpha(255);
-                }
-            }
-
             //if calibrating
             if(showCalibration)
             {
-                //set default paint stroke and width
-                currentPaint.setStyle(Paint.Style.STROKE);
-                currentPaint.setStrokeWidth(indicatorThickness);
-
                 //if selected nearest orbital
                 if(haveSelectedNearestOrbital())
                 {
@@ -1265,6 +1220,47 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
             else
             {
+                //go through parent orbitals
+                for(index = 0; index < parentOrbitals.size(); index++)
+                {
+                    //remember current parent, orbital, and child properties
+                    ParentOrbital currentParentOrbital = parentOrbitals.get(index);
+                    int orbitalIndex = currentParentOrbital.index;
+                    Database.SatelliteData currentOrbital = (orbitalIndex >= 0 && orbitalIndex < currentOrbitals.length ? currentOrbitals[orbitalIndex] : null);
+                    RelativeLocationProperties[][] currentChildProperties = currentParentOrbital.childProperties;
+
+                    //if able to get orbital, child properties, and in filter
+                    if(currentOrbital != null && currentChildProperties != null && currentOrbital.getInFilter())
+                    {
+                        boolean notSelected = (currentOrbital.getSatelliteNum() != selectedNoradId);
+
+                        //set line color
+                        currentPaint.setColor(currentOrbital.getPathColor());
+
+                        //make transparent
+                        currentPaint.setAlpha(notSelected ? 20 : 120);
+
+                        //go through child properties
+                        for(RelativeLocationProperties[] currentPoint : currentChildProperties)
+                        {
+                            //remember points and if have both
+                            boolean haveBothPoints = (currentPoint.length == 2);
+                            RelativeLocationProperties startPoint = (haveBothPoints ? currentPoint[0] : null);
+                            RelativeLocationProperties endPoint = (haveBothPoints ? currentPoint[1] : null);
+
+                            //if both points are set and at least 1 is within view
+                            if(startPoint != null && endPoint != null && (!startPoint.outsideArea || !endPoint.outsideArea))
+                            {
+                                //draw line between points
+                                canvas.drawLine(startPoint.azCenterPx, startPoint.elCenterPx, endPoint.azCenterPx, endPoint.elCenterPx, currentPaint);
+                            }
+                        }
+
+                        //restore transparency
+                        currentPaint.setAlpha(255);
+                    }
+                }
+
                 //draw compass
                 compassCenterX = ((width - (compassWidth / 2f)) - 5) - compassMargin;
                 compassCenterY = (5 + (compassHeight / 2f)) + compassMargin;
@@ -1417,8 +1413,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         float usedTextSize = (isStar ? starTextSize : (textSize * 1.2f));
         float usedTextOffset = (isStar ? starTextOffset : textOffset);
 
-        //if not selected, outside of area, and not showing
-        if(!isSelected && outsideArea && !showOutsideArea)
+        //if -not selected, outside of area, and not showing- or -showing calibration and -is a star or constellation--
+        if((!isSelected && outsideArea && !showOutsideArea) || (showCalibration && (isStar || isConstellation)))
         {
             //stop and don't draw
             return;
@@ -1689,10 +1685,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     {
         float azPx;
         float elPx;
-        float currentAzScale = (float)Math.cos(Math.toRadians(locationElDeg));
-        float elDeltaReference = (float)(locationElDeg > 0 ? (90 - locationElDeg) : (locationElDeg + 90));
-        float elDeltaMultiply = (float)((Math.cos(Math.toRadians(azDeltaDegrees)) - 1) * -1);
-        float elOffset = (elDeltaReference * elDeltaMultiply) * (locationElDeg > 0 ? 1 : -1) * (1 - currentAzScale);
+        float currentAzScale = (showCalibration ? 1 : (float)Math.cos(Math.toRadians(locationElDeg)));
+        float elDeltaReference = (showCalibration ? 0 : (float)(locationElDeg > 0 ? (90 - locationElDeg) : (locationElDeg + 90)));
+        float elDeltaMultiply = (showCalibration ? 0 : (float)((Math.cos(Math.toRadians(azDeltaDegrees)) - 1) * -1));
+        float elOffset = (showCalibration ? 0 : (elDeltaReference * elDeltaMultiply) * (locationElDeg > 0 ? 1 : -1) * (1 - currentAzScale));
 
         azPx = (width / 2f) + (float)(azDeltaDegrees * degToPxWidth * currentAzScale);
         elPx = (height / 2f) - (float)((elDeltaDegrees + elOffset) * degToPxHeight);
@@ -2029,8 +2025,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 int currentId = (currentOrbital != null ? currentOrbital.getSatelliteNum() : Universe.IDs.Invalid);
                 Calculations.TopographicDataType currentLookAngle = (currentOrbital != null ? currentLookAngles[index] : null);
 
-                //if above the horizon, being used, and a normally easily visible orbital
-                if(currentLookAngle != null && currentLookAngle.elevation >= 0 && currentId >= Universe.IDs.Polaris && currentId <= Universe.IDs.Sun)
+                //if above the horizon, being used, a normally easily visible orbital, and the -current is the selected or there is no selected-
+                if(currentLookAngle != null && currentLookAngle.elevation >= 0 && currentId >= Universe.IDs.Polaris && currentId <= Universe.IDs.Sun && (currentId == selectedNoradId || selectedNoradId == Universe.IDs.None))
                 {
                     //determine relative location
                     azDeltaDeg = (float)Math.abs(Globals.degreeDistance(currentAzDeg, currentLookAngle.azimuth));

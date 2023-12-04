@@ -1797,6 +1797,13 @@ public abstract class Current
                         searchList.setEnabled(true);
                     }
 
+                    //if button is set
+                    if(searchButton != null)
+                    {
+                        //make sure button can be used
+                        searchButton.setEnabled(true);
+                    }
+
                     //update display
                     cameraView.showCalibration = lensShowCalibration;
                     if(lensShowCalibration)
@@ -1809,6 +1816,11 @@ public abstract class Current
                         //reset alignment status and select any previous selection
                         cameraView.resetAlignmentStatus();
                         cameraView.selectOrbital(lastSelectedNoradId);
+                        if(searchList != null)
+                        {
+                            //update list selection
+                            searchList.setSelectedValue(lastSelectedNoradId);
+                        }
                         lastSelectedNoradId = Universe.IDs.None;
                     }
                     cameraView.zoomBar.setVisibility(lensShowCalibration || !lensShowToolbars || !cameraView.canZoom() ? View.GONE : View.VISIBLE);
@@ -1837,6 +1849,16 @@ public abstract class Current
                                         //update selection and disable list until finished
                                         searchList.setSelectedValue(cameraView.getSelectedNoradId());
                                         searchList.setEnabled(false);
+                                    }
+                                    if(searchButton != null)
+                                    {
+                                        //disable button until finished
+                                        searchButton.setEnabled(false);
+                                    }
+                                    if(searchText != null)
+                                    {
+                                        //close text if open
+                                        searchText.close();
                                     }
                                     selectButton.setText(R.string.title_align);
                                     resetButton.setVisibility(View.GONE);

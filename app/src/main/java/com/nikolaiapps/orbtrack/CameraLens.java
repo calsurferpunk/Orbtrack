@@ -1017,7 +1017,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                 previousArea.setEmpty();
 
                                 //setup paint
-                                currentPaint.setStyle(Paint.Style.FILL);
+                                currentPaint.setStyle(Paint.Style.STROKE);
 
                                 //set julian dates
                                 julianDateStart = currentTravel[0].julianDate;

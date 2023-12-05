@@ -3395,12 +3395,14 @@ public class Database extends SQLiteOpenHelper
     {
         String info;
         String localeInfo;
+        String usedInfo;
         String[][] queryResult = runQuery(context, "SELECT DISTINCT [Info] FROM " + Tables.Information + " WHERE " + Tables.Information + ".[Norad]=" + noradId + " AND " + Tables.Information + ".[Language]='" + language + "' AND " + Tables.Information + ".[Source] IN('" + updateSource + "', '" + UpdateSource.TheSkyLive + "', '" + UpdateSource.SpaceDotCom + "')", null);
 
         //return any information
         info = (queryResult.length > 0 ? queryResult[0][0] : null);
         localeInfo = LocaleInformation.getInformation(context, noradId);
-        return(localeInfo != null ? localeInfo : info);
+        usedInfo = (localeInfo != null ? localeInfo : info);
+        return(usedInfo != null ? usedInfo.replace("</p><p>", "<p><br/></p>") : null);
     }
     public static String[][] getInformation(Context context, int noradId)
     {

@@ -111,7 +111,7 @@ public class AddressUpdateService extends NotifyService
         ArrayList<String> addressData;
 
         //handle if need to start in foreground
-        Globals.startForeground(this, Globals.ChannelIds.Address, notifyBuilder, runForeground);
+        Globals.startForeground(this, Globals.ChannelIds.Address, notifyBuilder, runForeground, Globals.ForegroundServiceType.DATA_SYNC);
 
         //get location and receiver
         addressLocation = intent.getParcelableExtra(LOCATION_DATA_EXTRA);

@@ -590,7 +590,7 @@ public class LocationService extends Service implements LocationListener
                     //close notification
                     notifyManager.cancel(Globals.ChannelIds.Location);
                 }
-                Globals.startForeground(this, Globals.ChannelIds.Location, notifyBuilder, useForeground);
+                Globals.startForeground(this, Globals.ChannelIds.Location, notifyBuilder, useForeground, Globals.ForegroundServiceType.LOCATION);
 
                 //setup local broadcast
                 getLocalBroadcast();

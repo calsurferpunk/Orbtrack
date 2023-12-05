@@ -1,6 +1,9 @@
 package com.nikolaiapps.orbtrack;
 
 
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
+import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_SPECIAL_USE;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -261,6 +264,14 @@ public abstract class Globals
     {
         static final String English = new Locale("en").getLanguage();
         static final String Spanish = new Locale("es").getLanguage();
+    }
+
+    //Foreground types
+    public static abstract class ForegroundServiceType
+    {
+        static final int DATA_SYNC = (Build.VERSION.SDK_INT >= 29 ? FOREGROUND_SERVICE_TYPE_DATA_SYNC : 1);
+        static final int LOCATION = (Build.VERSION.SDK_INT >= 29 ? FOREGROUND_SERVICE_TYPE_LOCATION : 8);
+        static final int SPECIAL_USE = (Build.VERSION.SDK_INT >= 34 ? FOREGROUND_SERVICE_TYPE_SPECIAL_USE : 1073741824);
     }
 
     //Channel IDs
@@ -1676,13 +1687,20 @@ public abstract class Globals
     }
 
     //Starts the given service in foreground if needed
-    public static void startForeground(Service service, int id, NotificationCompat.Builder notifyBuilder, boolean runForeground)
+    public static void startForeground(Service service, int id, NotificationCompat.Builder notifyBuilder, boolean runForeground, int foregroundType)
     {
         //if need to start in foreground and android >= 8.0
         if(runForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
         {
             //start in foreground
-            service.startForeground(id, notifyBuilder.setChannelId(getChannelId(id)).build());
+            if(Build.VERSION.SDK_INT >= 29)
+            {
+                service.startForeground(id, notifyBuilder.setChannelId(getChannelId(id)).build(), foregroundType);
+            }
+            else
+            {
+                service.startForeground(id, notifyBuilder.setChannelId(getChannelId(id)).build());
+            }
         }
     }
 
@@ -2466,6 +2484,7 @@ public abstract class Globals
         }
         else
         {
+            //noinspection MalformedFormatString
             return(String.format(Locale.US, "%3." + Math.max(3, decimalPlaces) + "e", number));
         }
     }

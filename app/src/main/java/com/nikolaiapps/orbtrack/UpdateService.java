@@ -876,7 +876,7 @@ public class UpdateService extends NotifyService
         }
 
         //handle if need to start in foreground
-        Globals.startForeground(this, Globals.ChannelIds.Update, notifyBuilder, runForeground);
+        Globals.startForeground(this, Globals.ChannelIds.Update, notifyBuilder, runForeground, Globals.ForegroundServiceType.DATA_SYNC);
 
         //update intent and status
         currentIntent[updateType] = intent;

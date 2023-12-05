@@ -1013,7 +1013,7 @@ public class CalculateService extends NotifyService
         ArrayList<PassData> passItems = intent.getParcelableArrayListExtra(ParamTypes.PassItems);
 
         //handle if need to start in foreground
-        Globals.startForeground(this, Globals.ChannelIds.Calculate, notifyBuilder, runForeground);
+        Globals.startForeground(this, Globals.ChannelIds.Calculate, notifyBuilder, runForeground, Globals.ForegroundServiceType.SPECIAL_USE);
 
         //update intent and status
         showNotification[calculateType] = runForeground;

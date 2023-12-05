@@ -2,13 +2,11 @@ package com.nikolaiapps.orbtrack;
 
 
 import android.content.Context;
-import android.content.IntentFilter;
 
 
 public class WidgetPassSmallProvider extends WidgetPassBaseProvider
 {
     private static boolean firstUpdate = true;
-    private AlarmReceiver alarm;
 
     //Receiver to get alarm updates
     public static class AlarmReceiver extends WidgetPassBaseProvider.AlarmBaseReceiver
@@ -39,18 +37,7 @@ public class WidgetPassSmallProvider extends WidgetPassBaseProvider
     @Override
     public void setActionReceivers(Context context, boolean use)
     {
-        if(use)
-        {
-            alarm = new AlarmReceiver();
-            context.registerReceiver(this, new IntentFilter(ACTION_SETTINGS_CLICK));
-            context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_PASS_ALARM));
-            context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_WIDGETS_ALARM));
-            context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_LOCATION_ALARM));
-        }
-        else if(alarm != null)
-        {
-            context.unregisterReceiver(alarm);
-        }
+        setActionReceivers(context, (use ? new AlarmReceiver() : null), use);
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.nikolaiapps.orbtrack;
 
 
+import android.annotation.SuppressLint;
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -9,12 +10,14 @@ import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
 import androidx.appcompat.app.AppCompatDelegate;
+import android.os.Build;
 import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
@@ -134,6 +137,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     }
 
     private static LocationReceiver locationReceiver;
+    protected AlarmBaseReceiver alarm;
 
     //needs to be implemented
     public abstract void setActionReceivers(Context context, boolean use);
@@ -304,6 +308,34 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         //remove action receivers
         setActionReceivers(context.getApplicationContext(), false);
         createLocationReceiver(context, false, false);
+    }
+
+    //Sets up receivers
+    @SuppressLint("UnspecifiedRegisterReceiverFlag")
+    public void setActionReceivers(Context context, AlarmBaseReceiver newAlarm, boolean use)
+    {
+        if(use)
+        {
+            alarm = newAlarm;
+            if(Build.VERSION.SDK_INT >= 33)
+            {
+                context.registerReceiver(this, new IntentFilter(ACTION_SETTINGS_CLICK), Context.RECEIVER_NOT_EXPORTED);
+                context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_PASS_ALARM), Context.RECEIVER_NOT_EXPORTED);
+                context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_WIDGETS_ALARM), Context.RECEIVER_NOT_EXPORTED);
+                context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_LOCATION_ALARM), Context.RECEIVER_NOT_EXPORTED);
+            }
+            else
+            {
+                context.registerReceiver(this, new IntentFilter(ACTION_SETTINGS_CLICK));
+                context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_PASS_ALARM));
+                context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_WIDGETS_ALARM));
+                context.registerReceiver(alarm, new IntentFilter(ACTION_UPDATE_LOCATION_ALARM));
+            }
+        }
+        else if(alarm != null)
+        {
+            context.unregisterReceiver(alarm);
+        }
     }
 
     //Gets satellite for given widget ID

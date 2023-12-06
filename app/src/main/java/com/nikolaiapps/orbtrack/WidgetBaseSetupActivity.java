@@ -14,6 +14,9 @@ import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
@@ -39,8 +42,13 @@ import java.util.ArrayList;
 import java.util.Map;
 
 
-public abstract class WidgetBaseSetupActivity extends BaseInputActivity
+public abstract class WidgetBaseSetupActivity extends BaseInputActivity implements ActivityResultCallback<ActivityResult>
 {
+    public interface OnOrbitalChangedListener
+    {
+        void onOrbitalChanged(int noradId, int listIndex);
+    }
+
     private static abstract class PreferenceName
     {
         private static final String Name = "name";
@@ -76,6 +84,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         private static final String LocationTextWeight = "locationTextWeight";
         private static final String BorderColor = "borderColor";
         private static final String BorderType = "borderType";
+        private static final String BorderPadding = "borderPadding";
         private static final String GlobalImage = "globalImage";
         private static final String GlobalImageColor = "globalImageColor";
         private static final String OrbitalImageColor = "orbitalImageColor";
@@ -229,6 +238,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         int topBackgroundColor;
         int middleBackgroundColor;
         int bottomBackgroundColor;
+        float borderPadding;
         final TextSettings[] text;
         final String[][] textSettingsNames;
         final LocationSettings location;
@@ -250,6 +260,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             topBackgroundColor = getTopBackgroundColor(context, widgetId);
             middleBackgroundColor = getMiddleBackgroundColor(context, widgetId);
             bottomBackgroundColor = getBottomBackgroundColor(context, widgetId);
+            borderPadding = getBorderPadding(context, widgetId);
 
             text = new TextSettings[TextType.TextCount];
             text[TextType.Global] = new TextSettings(getGlobalTextSize(context, widgetClass, widgetId), getGlobalTextColor(context, widgetId), getGlobalTextWeight(context, widgetId));
@@ -312,6 +323,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         private SelectListInterface intervalList;
         private SelectListInterface globalBorderStyleList;
         private SelectListInterface borderStyleList;
+        private SelectListInterface borderPaddingList;
         private SelectListInterface[] textSizeList;
         private RadioGroup currentLocationGroup;
         private AppCompatRadioButton followRadio;
@@ -353,8 +365,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             final ViewGroup rootViewConst;
             final Resources res = (context != null ? context.getResources() : null);
             final Database.DatabaseLocation[] locations;
-            final Database.DatabaseSatellite[] satellites;
+            final Database.DatabaseSatellite[] orbitals;
             final Float[] fontSizes = new Float[]{6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f};
+            final Float[] paddingSizes = new Float[]{0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f};
             final IconSpinner.Item[] borderStyles = (res != null ? new IconSpinner.Item[]{new IconSpinner.Item(res.getString(R.string.title_round), BorderType.Round), new IconSpinner.Item(res.getString(R.string.title_rectangle), BorderType.Square)} : null);
             final IconSpinner.Item[] intervalItems = (res != null ? new IconSpinner.Item[]
             {
@@ -374,33 +387,47 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                 case TabPage.Data:
                     rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_data_material_view : R.layout.widget_setup_data_view), container, false);
 
-                    satellites = Database.getOrbitals(context);
+                    orbitals = Database.getOrbitals(context);
+                    Globals.clearOrbitalFilter(orbitals);
                     locations = Database.getLocations(context, "[Type] <> " + Database.LocationType.Current);
 
                     outdatedText = rootView.findViewById(R.id.Widget_Setup_Outdated_Text);
                     orbitalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Orbital_Text_List : R.id.Widget_Setup_Orbital_List);
-                    orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitalList, satellites));
-                    orbitalList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                    orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitalList, orbitals));
+                    orbitalList.setDropDownHeight(0);
+                    orbitalList.setOnClickListener(new View.OnClickListener()
                     {
                         @Override
-                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                        public void onClick(View v)
                         {
-                            widgetSettings.noradId = satellites[position].noradId;
-
-                            //update image tab and preview displays
-                            TabAdapter.updatePage(TabPage.Images);
-                            onSettingChanged(context, PreferenceName.NoradID, widgetSettings.noradId);
-
-                            //update display
-                            if(outdatedText != null)
+                            if(context instanceof Activity)
                             {
-                                outdatedText.setVisibility(satellites[position].tleIsAccurate ? View.GONE : View.VISIBLE);
+                                Activity activity = (Activity)context;
+                                ArrayList<Selectable.ListItem> selectedOrbitalList = new ArrayList<>(0);
+
+                                selectedOrbitalList.add(new Selectable.ListItem(widgetSettings.noradId, getListIndex(widgetSettings.noradId, orbitals)));
+                                MasterAddListActivity.showList(activity, resultLauncher, MasterAddListActivity.ListType.SelectSingleList, RequestCode.OrbitalSelectList, selectedOrbitalList, 0);
                             }
                         }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parent) {}
                     });
+                    noradIdChangedListener = new OnOrbitalChangedListener()
+                    {
+                        @Override
+                        public void onOrbitalChanged(int noradId, int listIndex)
+                        {
+                            //if a valid list index
+                            if(listIndex >= 0 && listIndex < orbitals.length)
+                            {
+                                //update selected
+                                setSelectedOrbital(noradId, orbitals[listIndex].tleIsAccurate);
+                            }
+                        }
+                    };
+                    if(widgetSettings.noradId == Universe.IDs.Invalid)
+                    {
+                        //select sun as default
+                        setSelectedOrbital(Universe.IDs.Sun, true);
+                    }
 
                     locationList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Location_Source_Text_List : R.id.Widget_Setup_Location_Source_List);
                     if(res != null)
@@ -683,6 +710,21 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     bottomRow = rootView.findViewById(R.id.Widget_Setup_Bottom_Background_Row);
                     bottomColorButton = rootView.findViewById(R.id.Widget_Setup_Bottom_Background_Color_Button);
                     bottomColorButton.setOnClickListener(createOnColorButtonClickListener(bottomRow, true));
+
+                    borderPaddingList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Border_Padding_Text_List : R.id.Widget_Setup_Border_Padding_List);
+                    borderPaddingList.setAdapter(new IconSpinner.CustomAdapter(context, paddingSizes));
+                    borderPaddingList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
+                    {
+                        @Override
+                        public void onItemSelected(AdapterView<?> parent, View view, int position, long id)
+                        {
+                            widgetSettings.borderPadding = paddingSizes[position];
+                            onSettingChanged(context, PreferenceName.BorderPadding, widgetSettings.borderPadding);
+                        }
+
+                        @Override
+                        public void onNothingSelected(AdapterView<?> parent) {}
+                    });
                     break;
 
                 case TabPage.Text:
@@ -870,6 +912,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         {
             byte index;
             int page = this.getPageParam();
+            int visibility;
             Class<?> widgetClass = this.getWidgetClassParam();
             boolean useNormal = (widgetClass != null && !widgetClass.equals(WidgetPassTinyProvider.class));
             boolean useExtended = (widgetClass != null && widgetClass.equals(WidgetPassMediumProvider.class));
@@ -877,7 +920,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             switch(page)
             {
                 case TabPage.Data:
-                    int visibility;
                     String currentText;
 
                     if(orbitalList != null)
@@ -1065,6 +1107,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                     {
                         borderDivider.setVisibility(nonGlobalBackgroundVisibility);
                     }
+                    if(borderPaddingList != null)
+                    {
+                        borderPaddingList.setSelectedValue(widgetSettings.borderPadding);
+                    }
 
                     if(topRow != null)
                     {
@@ -1180,6 +1226,48 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
             }
         }
 
+        //Gets list index
+        private int getListIndex(int noradId, Database.DatabaseSatellite[] orbitals)
+        {
+            int index;
+            int listIndex = -1;
+
+            //go through each orbital while list index not found
+            for(index = 0; index < orbitals.length && listIndex == -1; index++)
+            {
+                //if norad ID matches
+                if(orbitals[index].noradId == noradId)
+                {
+                    //set list index
+                    listIndex = index;
+                }
+            }
+
+            //return list index
+            return(listIndex);
+        }
+
+        //Sets selected orbital
+        private void setSelectedOrbital(int noradId, boolean tleIsAccurate)
+        {
+            //update norad ID
+            widgetSettings.noradId = noradId;
+
+            //update image tab and preview displays
+            TabAdapter.updatePage(TabPage.Images);
+            onSettingChanged(this.getContext(), PreferenceName.NoradID, widgetSettings.noradId);
+
+            //update displays
+            if(orbitalList != null)
+            {
+                orbitalList.setSelectedValue(widgetSettings.noradId);
+            }
+            if(outdatedText != null)
+            {
+                outdatedText.setVisibility(tleIsAccurate ? View.GONE : View.VISIBLE);
+            }
+        }
+
         //Gets background color of given view
         private int getViewBackgroundColor(View view)
         {
@@ -1255,6 +1343,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                 case PreferenceName.BorderColor:
                 case PreferenceName.BorderType:
                     setBorder(context, previewId, (int)value, (int)value2);
+                    break;
+
+                case PreferenceName.BorderPadding:
+                    setBorderPadding(context, previewId, (float)value);
                     break;
 
                 case PreferenceName.TopBackgroundColor:
@@ -1499,6 +1591,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
     private MaterialButton okButton;
     private static int dpWidth;
     private static WidgetSettings widgetSettings;
+    private static OnOrbitalChangedListener noradIdChangedListener;
+    private static ActivityResultLauncher<Intent> resultLauncher;
 
     @Override
     public void onCreate(Bundle savedInstanceState)
@@ -1552,6 +1646,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         //get settings
         dpWidth = Globals.getDeviceDp(this);
         widgetSettings = new WidgetSettings(this, widgetClass, widgetId);
+        noradIdChangedListener = null;
+        resultLauncher = Globals.createActivityLauncher(this, this);
 
         //get views
         parentView = this.findViewById(R.id.Widget_Setup_Layout);
@@ -1683,6 +1779,31 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
+    @Override
+    public void onActivityResult(ActivityResult result)
+    {
+        Intent data = result.getData();
+        ArrayList<Selectable.ListItem> selectedOrbitals;
+
+        //if no data
+        if(data == null)
+        {
+            //set to empty
+            data = new Intent();
+        }
+
+        //if there is a selected orbital
+        selectedOrbitals = data.getParcelableArrayListExtra(MasterAddListActivity.ParamTypes.SelectedOrbitals);
+        if(selectedOrbitals != null && selectedOrbitals.size() > 0 && noradIdChangedListener != null)
+        {
+            //remember item
+            Selectable.ListItem currentItem = selectedOrbitals.get(0);
+
+            //call it
+            noradIdChangedListener.onOrbitalChanged(currentItem.id, currentItem.listIndex);
+        }
+    }
+
     //Creates an on click listener
     private View.OnClickListener createOnClickListener(final Class<?> widgetClass, final Class<?> alarmReceiverClass, final int widgetId, final boolean forOk)
     {
@@ -1803,6 +1924,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
                                 setMiddleBackgroundColor(context, widgetId, widgetSettings.middleBackgroundColor);
                                 setBottomBackgroundColor(context, widgetId, widgetSettings.bottomBackgroundColor);
                             }
+                            setBorderPadding(context, widgetId, widgetSettings.borderPadding);
                             setGlobalText(context, widgetId, useGlobalText);
                             if(useGlobalText)
                             {
@@ -2460,6 +2582,21 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity
     public static int getBorderType(Context context, int widgetId)
     {
         return(getPreferences(context).getInt(PreferenceName.BorderType + getIdString(widgetId), BorderType.Round));
+    }
+
+    //Sets border padding for the given ID
+    public static void setBorderPadding(Context context, int widgetId, float padding)
+    {
+        SharedPreferences.Editor writeSettings = getWriteSettings(context);
+
+        writeSettings.putFloat(PreferenceName.BorderPadding + getIdString(widgetId), padding);
+        writeSettings.apply();
+    }
+
+    //Gets the border padding for the given ID
+    public static float getBorderPadding(Context context, int widgetId)
+    {
+        return(getPreferences(context).getFloat(PreferenceName.BorderPadding + getIdString(widgetId), 0.0f));
     }
 
     //Sets top background color for the given widget ID

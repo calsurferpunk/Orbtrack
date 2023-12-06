@@ -493,6 +493,7 @@
     <string name="title_overall">General</string>
     <string name="title_owner">Propietario</string>
     <string name="title_owners">Propietarios</string>
+    <string name="title_padding">Relleno</string>
     <string name="title_parsing">Analizando</string>
     <string name="title_pass">Pasar</string>
     <string name="title_pass_az_end">Pase Final Az</string>

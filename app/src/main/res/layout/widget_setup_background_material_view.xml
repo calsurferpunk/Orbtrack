@@ -90,5 +90,18 @@
                     style="@style/ColorButton"/>
             </LinearLayout>
         </TableRow>
+
+        <TableRow android:id="@+id/Widget_Setup_Border_Padding_Row" style="@style/WidgetSetupRow">
+            <TextView
+                style="@style/WidgetSetupStartTitle"
+                android:text="@string/title_padding"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/WidgetSetupListInputLayout">
+                <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
+                    android:id="@+id/Widget_Setup_Border_Padding_Text_List"
+                    style="@style/WidgetSetupMaterialList"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </TableRow>
     </TableLayout>
 </ScrollView>

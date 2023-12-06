@@ -97,5 +97,17 @@
                     style="@style/ColorButton"/>
             </LinearLayout>
         </TableRow>
+
+        <View android:id="@+id/Widget_Setup_Border_Padding_Divider" style="@style/Divider"/>
+
+        <TableRow android:id="@+id/Widget_Setup_Border_Padding_Row" style="@style/WidgetSetupRow">
+            <TextView
+                style="@style/WidgetSetupStartTitle"
+                android:text="@string/title_border"/>
+
+            <com.nikolaiapps.orbtrack.IconSpinner
+                android:id="@+id/Widget_Setup_Border_Padding_List"
+                style="@style/WidgetSetupList"/>
+        </TableRow>
     </TableLayout>
 </ScrollView>

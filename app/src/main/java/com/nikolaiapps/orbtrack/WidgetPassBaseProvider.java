@@ -404,6 +404,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         int argbColor = Color.BLACK;
         int borderType = WidgetBaseSetupActivity.BorderType.Round;
         int resourceId;
+        int paddingDp = (int)Globals.dpToPixels(context, WidgetBaseSetupActivity.getBorderPadding(context, widgetId));
         boolean useParent = (parent != null);
         boolean useGlobalBackground = WidgetBaseSetupActivity.getGlobalBackground(context, widgetId);
 
@@ -440,6 +441,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 currentView.setColorFilter(color);
                 currentView.setImageAlpha(alpha);
             }
+
+            //set border padding
+            parent.setPadding(paddingDp, paddingDp, paddingDp, paddingDp);
         }
         else
         {
@@ -449,6 +453,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //set border color and opacity
             views.setInt(viewId, "setColorFilter", color);
             views.setInt(viewId, "setImageAlpha", alpha);
+
+            //set border padding
+            views.setViewPadding(R.id.Widget_Pass_View, paddingDp, paddingDp, paddingDp, paddingDp);
         }
     }
 

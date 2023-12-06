@@ -165,6 +165,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchButtonPreference lensUseHorizonSwitch = this.findPreference(Settings.PreferenceName.LensUseHorizon);
                         SliderPreference lensIndicatorAlphaSlider = this.findPreference(Settings.PreferenceName.LensIndicatorAlpha);
                         SliderPreference lensTextAlphaSlider = this.findPreference(Settings.PreferenceName.LensTextAlpha);
+                        SliderPreference lensConstellationAlphaSlider = this.findPreference(Settings.PreferenceName.LensConstellationAlpha);
                         IconListPreference lensOrbitalIconList = this.findPreference(Settings.PreferenceName.LensIndicator);
                         IconListPreference lensUpdateRateList = this.findPreference(Settings.PreferenceName.LensUpdateDelay);
                         IconListPreference lensSensorSmoothingList = this.findPreference(Settings.PreferenceName.LensAverageCount);
@@ -179,6 +180,9 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitch(lensDirectionCentered);
                         setupSwitch(lensShowIconDirection);
                         setupSwitchButton(lensUseHorizonSwitch);
+                        setupSlider(lensIndicatorAlphaSlider);
+                        setupSlider(lensTextAlphaSlider);
+                        setupSlider(lensConstellationAlphaSlider);
                         setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, lensShowIconDirection);
                         setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
@@ -832,6 +836,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                     case Settings.PreferenceName.LensIndicatorAlpha:
                     case Settings.PreferenceName.LensTextAlpha:
+                    case Settings.PreferenceName.LensConstellationAlpha:
                     case Settings.PreferenceName.MapFootprintAlpha:
                         min = 0;
                         max = 100;
@@ -1575,6 +1580,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensIndicatorIconShowDirection:
                         case Settings.PreferenceName.LensIndicatorAlpha:
                         case Settings.PreferenceName.LensTextAlpha:
+                        case Settings.PreferenceName.LensConstellationAlpha:
                         case Settings.PreferenceName.LensHorizonColor:
                         case Settings.PreferenceName.LensUseHorizon:
                         case Settings.PreferenceName.LensUseCamera:

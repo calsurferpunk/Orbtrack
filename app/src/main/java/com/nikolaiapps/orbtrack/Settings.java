@@ -109,6 +109,7 @@ public abstract class Settings
         static final String LensIndicatorIconShowDirection = "LensIndicatorIconShowDirection";
         static final String LensIndicatorAlpha = "LensIndicatorAlpha";
         static final String LensTextAlpha = "LensTextAlpha";
+        static final String LensConstellationAlpha = "LensConstellationAlpha";
         static final String LensHorizonColor = "LensHorizonColor";
         static final String LensUseHorizon = "LensUseHorizon";
         static final String LensUseCamera = "LensUseCamera";
@@ -2185,6 +2186,9 @@ public abstract class Settings
             case PreferenceName.LensTextAlpha:
                 return(0.68f);
 
+            case PreferenceName.LensConstellationAlpha:
+                return(0.10f);
+
             case PreferenceName.LensWidth:
                 return(39.279f);
 
@@ -2550,6 +2554,13 @@ public abstract class Settings
     public static int getLensTextAlpha(Context context)
     {
         return((int)(getPreferenceFloat(context, PreferenceName.LensTextAlpha) * 255));
+    }
+
+    //Returns lens constellation alpha
+    //note: converts from 0 - 1.0 to alpha 0 - 255
+    public static int getLensConstellationAlpha(Context context)
+    {
+        return((int)(getPreferenceFloat(context, PreferenceName.LensConstellationAlpha) * 255));
     }
 
     //Returns lens showing toolbars

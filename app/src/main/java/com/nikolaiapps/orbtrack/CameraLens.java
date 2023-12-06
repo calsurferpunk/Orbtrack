@@ -568,6 +568,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final int horizonLineColor;
     private final int textShadowColor;
     private final int textShadowOffset;
+    private final int constellationAlpha;
+    private final int constellationSelectedAlpha;
     private int calibrateIndex;
     private int selectedNoradId;
     private int selectedOrbitalIndex;
@@ -644,6 +646,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int index;
         int pathType;
         int averageCount = Settings.getLensAverageCount(context);
+        int possibleAlpha;
         boolean darkTheme = Settings.getDarkTheme(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
@@ -659,6 +662,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         horizonColor = Globals.getColor(70, horizonLineColor);
         textShadowColor = 0x50000000;
         textShadowOffset = 3;
+        constellationAlpha = Settings.getLensConstellationAlpha(context);
+        possibleAlpha = constellationAlpha + 100;
+        constellationSelectedAlpha = (possibleAlpha > 200 ? Math.max(200, constellationAlpha) : Math.max(120, possibleAlpha));
         showPaths = showCalibration = compassBad = compassHadBad = false;
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
@@ -1238,7 +1244,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         currentPaint.setColor(currentOrbital.getPathColor());
 
                         //make transparent
-                        currentPaint.setAlpha(notSelected ? 20 : 120);
+                        currentPaint.setAlpha(notSelected ? constellationAlpha : constellationSelectedAlpha);
 
                         //go through child properties
                         for(RelativeLocationProperties[] currentPoint : currentChildProperties)

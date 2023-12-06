@@ -317,6 +317,7 @@
     <string name="title_compass_calibrate">Calibrate Compass</string>
     <string name="title_compass_inaccurate_fix">Compass Inaccurate [Fix]</string>
     <string name="title_constellations">Constellations</string>
+    <string name="title_constellation_opacity">Constellation Opacity</string>
     <string name="title_coordinates">Coordinates</string>
     <string name="title_current">Current</string>
     <string name="title_current_input_colon">"Current Input: "</string>

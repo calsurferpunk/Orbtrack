@@ -306,6 +306,13 @@
                             app:maxValue="100"
                             app:scaleType="Percent"/>
 
+                        <com.nikolaiapps.orbtrack.SliderPreference
+                            app:titleText="@string/title_constellation_opacity"
+                            android:key="LensConstellationAlpha"
+                            app:minValue="0"
+                            app:maxValue="100"
+                            app:scaleType="Percent"/>
+
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_toolbars"
                             android:key="LensShowToolbars"

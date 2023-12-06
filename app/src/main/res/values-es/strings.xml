@@ -317,6 +317,7 @@
     <string name="title_compass_calibrate">Calibrar Brújula</string>
     <string name="title_compass_inaccurate_fix">Brújula Inexacta [Reparar]</string>
     <string name="title_constellations">Constelaciones</string>
+    <string name="title_constellation_opacity">Opacidad Constelación</string>
     <string name="title_coordinates">Coordenadas</string>
     <string name="title_current">Corriente</string>
     <string name="title_current_input_colon">"Entrada Actual: "</string>

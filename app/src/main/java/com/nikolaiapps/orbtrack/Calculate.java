@@ -3077,13 +3077,9 @@ public abstract class Calculate
         page.startTimeText = rootView.findViewById(R.id.Calculate_Start_Time_Text);
         page.endTimeText = rootView.findViewById(R.id.Calculate_End_Time_Text);
 
-        //load objects
+        //load objects and remove any filter
         orbitals = Database.getOrbitals(activity);
-        for(Database.DatabaseSatellite currentOrbital : orbitals)
-        {
-            //remove any filter
-            currentOrbital.setInFilter(true);
-        }
+        Globals.clearOrbitalFilter(orbitals);
 
         //set orbital list items
         orbitalAdapter = createOrbitalAdapter(activity, page.orbitalList, orbitals, usingMulti, (haveSavedInstance ? savedInstanceState.getInt(ParamTypes.NoradId, Integer.MAX_VALUE) : Integer.MAX_VALUE));

@@ -3587,6 +3587,17 @@ public abstract class Globals
         }
     }
 
+    //Removes any filter from given orbitals
+    public static void clearOrbitalFilter(Database.DatabaseSatellite[] orbitals)
+    {
+        //go through each orbital
+        for(Database.DatabaseSatellite currentOrbital : orbitals)
+        {
+            //remove any filter
+            currentOrbital.setInFilter(true);
+        }
+    }
+
     //Gets the filtered orbital count for each orbital type
     public static int[] getOrbitalTypeFilterCount(Database.SatelliteData[] orbitals)
     {

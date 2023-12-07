@@ -80,7 +80,6 @@ public abstract class Orbitals
     {
         final AppCompatImageView itemImage;
         final TextView itemText;
-        final LinearLayout itemLayout;
         final LinearLayout tleAgeLayout;
         final LinearLayout itemAgeTextLayout;
         final TextView tleAgeText;
@@ -89,10 +88,9 @@ public abstract class Orbitals
         final AppCompatButton visibleButton;
         final CircularProgressIndicator progress;
 
-        public PageListItemHolder(View viewItem, int itemLayoutId, int itemImageId, int itemTextId, int itemAgeTextLayoutId, int tleAgeLayoutId, int tleAgeTextId, int tleAgeUnderId, int colorButtonId, int visibleButtonId, int progressId)
+        public PageListItemHolder(View viewItem, int itemImageId, int itemTextId, int itemAgeTextLayoutId, int tleAgeLayoutId, int tleAgeTextId, int tleAgeUnderId, int colorButtonId, int visibleButtonId, int progressId)
         {
             super(viewItem, -1);
-            itemLayout = viewItem.findViewById(itemLayoutId);
             itemImage = viewItem.findViewById(itemImageId);
             itemText = viewItem.findViewById(itemTextId);
             itemAgeTextLayout = viewItem.findViewById(itemAgeTextLayoutId);
@@ -393,7 +391,7 @@ public abstract class Orbitals
         public PageListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Layout, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_Item_Text_Age_Layout, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
+            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_Item_Text_Age_Layout, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
 
             setItemSelector(itemView);
             setViewClickListeners(itemView, itemHolder);

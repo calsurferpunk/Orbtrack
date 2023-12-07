@@ -224,12 +224,6 @@ public class CalculateService extends NotifyService
         }
 
         @Override
-        public int describeContents()
-        {
-            return(0);
-        }
-
-        @Override
         public void writeToParcel(Parcel dest, int flags)
         {
             Bundle bundle = new Bundle();

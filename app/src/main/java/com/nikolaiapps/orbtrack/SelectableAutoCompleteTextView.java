@@ -14,7 +14,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
-import com.google.android.material.internal.CheckableImageButton;
+import android.widget.ImageView;
 import com.google.android.material.textfield.TextInputLayout;
 
 
@@ -102,7 +102,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                                     //get layout and icon view
                                     TextInputLayout inputLayout = (TextInputLayout)frameParent;
                                     View iconView = inputLayout.findViewById(R.id.text_input_start_icon);
-                                    CheckableImageButton iconButton = (iconView instanceof CheckableImageButton ? (CheckableImageButton)iconView : null);
+                                    ImageView iconButton = (iconView instanceof ImageView ? (ImageView)iconView : null);
 
                                     //set icon to selected item icon
                                     inputLayout.setStartIconDrawable(selectedItem.getIcon(context, 96, 32));

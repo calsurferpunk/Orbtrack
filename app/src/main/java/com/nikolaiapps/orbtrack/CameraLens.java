@@ -199,8 +199,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
 
         public int id;
-        public int index;
-        public RelativeLocationProperties[][] childProperties;
+        public final int index;
+        public final RelativeLocationProperties[][] childProperties;
 
         public ParentOrbital(int id, int index, int pointCount)
         {
@@ -534,10 +534,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public boolean showPaths;
     public boolean showHorizon;
     public boolean showCalibration;
-    public boolean showOutsideArea;
-    public boolean showPathTimeNames;
-    public boolean hideDistantPathTimes;
-    public boolean hideConstellationStarPaths;
+    public final boolean showOutsideArea;
+    public final boolean showPathTimeNames;
+    public final boolean hideDistantPathTimes;
+    public final boolean hideConstellationStarPaths;
     public TextView helpText;
     public PlayBar playBar;
     public Slider zoomBar;

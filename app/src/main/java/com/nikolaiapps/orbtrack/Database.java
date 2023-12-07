@@ -1157,8 +1157,8 @@ public class Database extends SQLiteOpenHelper
 
     public static class IdLine
     {
-        public int startId;
-        public int endId;
+        public final int startId;
+        public final int endId;
 
         public IdLine(int startId, int endId)
         {
@@ -1245,7 +1245,7 @@ public class Database extends SQLiteOpenHelper
 
     public static class ParentProperties implements Parcelable
     {
-        public int id;
+        public final int id;
         public int index;
         public static final Creator<ParentProperties> CREATOR = new Creator<ParentProperties>()
         {
@@ -1307,7 +1307,7 @@ public class Database extends SQLiteOpenHelper
         public final double declinationDegs;
         public final double magnitude;
         public final double distanceLightYears;
-        public IdLine[] lines;
+        public final IdLine[] lines;
         public ArrayList<ParentProperties> parentProperties;
         public int pathColor;
         public final byte orbitalType;

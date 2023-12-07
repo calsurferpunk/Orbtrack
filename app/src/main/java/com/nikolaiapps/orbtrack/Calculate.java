@@ -315,12 +315,6 @@ public abstract class Calculate
             }
 
             @Override
-            protected boolean showColumnTitles(int page)
-            {
-                return(true);
-            }
-
-            @Override
             protected void setColumnTitles(ViewGroup listColumns, TextView categoryText, int page)
             {
                 String text;
@@ -758,12 +752,6 @@ public abstract class Calculate
             {
                 super.setHeader(header);
                 header.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            protected boolean showColumnTitles(int page)
-            {
-                return(true);
             }
 
             @Override
@@ -1262,12 +1250,6 @@ public abstract class Calculate
             {
                 super.setHeader(header);
                 header.setVisibility(View.VISIBLE);
-            }
-
-            @Override
-            protected boolean showColumnTitles(int page)
-            {
-                return(true);
             }
 
             @Override

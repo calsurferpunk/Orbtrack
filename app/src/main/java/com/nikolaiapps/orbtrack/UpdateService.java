@@ -495,22 +495,22 @@ public class UpdateService extends NotifyService
         public int lastID;
         public SpaceTrackSatellite[] satellites;
 
-        public SpaceTrackSatelliteGroup(SpaceTrackSatellite[] sats)
+        public SpaceTrackSatelliteGroup(SpaceTrackSatellite[] satellites)
         {
             int index;
 
-            firstID = Integer.MAX_VALUE;
-            lastID = 0;
-            satellites = new SpaceTrackSatellite[0];
+            this.firstID = Integer.MAX_VALUE;
+            this.lastID = 0;
+            this.satellites = new SpaceTrackSatellite[0];
 
             //if satellites are set
-            if(sats != null)
+            if(satellites != null)
             {
                 //go through satellites
-                for(index = 0; index < sats.length; index++)
+                for(index = 0; index < satellites.length; index++)
                 {
                     //remember current satellite
-                    SpaceTrackSatellite currentSatellite = sats[index];
+                    SpaceTrackSatellite currentSatellite = satellites[index];
 
                     //if lowest ID so far
                     if(currentSatellite.noradId < firstID)
@@ -531,14 +531,14 @@ public class UpdateService extends NotifyService
                 if(lastID > firstID)
                 {
                     //create satellites list
-                    satellites = new SpaceTrackSatellite[(lastID - firstID) + 1];
-                    for(index = 0; index < sats.length; index++)
+                    this.satellites = new SpaceTrackSatellite[(lastID - firstID) + 1];
+                    for(index = 0; index < satellites.length; index++)
                     {
                         //remember current satellite
-                        SpaceTrackSatellite currentSatellite = sats[index];
+                        SpaceTrackSatellite currentSatellite = satellites[index];
 
                         //set satellite
-                        satellites[currentSatellite.noradId - firstID] = currentSatellite;
+                        this.satellites[currentSatellite.noradId - firstID] = currentSatellite;
                     }
                 }
             }

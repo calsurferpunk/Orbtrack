@@ -54,7 +54,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             @Override
             public OrbitalView createFromParcel(Parcel source)
             {
-                double azimuth = source.readDouble();;
+                double azimuth = source.readDouble();
                 double elevation = source.readDouble();
                 double rangeKm = source.readDouble();
                 double julianDate = source.readDouble();

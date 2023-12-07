@@ -371,7 +371,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                     }
 
                     //if list exists and has items
-                    if(list != null && list.length > 0)
+                    if(list != null)
                     {
                         //go through each item
                         for(ItemBase currentFile : list)

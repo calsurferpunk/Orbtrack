@@ -2274,15 +2274,15 @@ public class Database extends SQLiteOpenHelper
         if(previousVersion <= 29 && DB_VERSION > 29 && !Settings.getMaterialDesignShown(context))
         {
             //show notice
-            Globals.showConfirmDialog(context, res.getQuantityString(R.plurals.title_updates, 1), res.getString(R.string.desc_material_design_notice), res.getString(R.string.title_ok), null, true, null, null, new DialogInterface.OnDismissListener()
+            Globals.showNotificationDialog(context, res.getQuantityString(R.plurals.title_updates, 1), res.getString(R.string.desc_material_design_notice), R.string.title_ok, -1, false, new DialogInterface.OnClickListener()
             {
                 @Override
-                public void onDismiss(DialogInterface dialog)
+                public void onClick(DialogInterface dialog, int which)
                 {
                     //remember shown
                     Settings.setMaterialDesignShown(context, true);
                 }
-            });
+            }, null);
         }
     }
 

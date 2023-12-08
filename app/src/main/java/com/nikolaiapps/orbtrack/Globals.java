@@ -764,11 +764,10 @@ public abstract class Globals
     }
 
     //Shows a confirm dialog
-    public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, int heightPx, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
+    public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
     {
         boolean sdkAtLeast21 = (Build.VERSION.SDK_INT >= 21);
         ImageView iconView;
-        Window dialogWindow;
         AlertDialog confirmDialog;
         AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(context, getDialogThemeId(context));
 
@@ -799,12 +798,6 @@ public abstract class Globals
         confirmDialog = confirmBuilder.create();
         confirmDialog.show();
 
-        if(heightPx != WindowManager.LayoutParams.MATCH_PARENT)
-        {
-            dialogWindow = confirmDialog.getWindow();
-            dialogWindow.setLayout(dialogWindow.getAttributes().width, heightPx);
-        }
-
         iconView = confirmDialog.findViewById(android.R.id.icon);
         if(iconView != null && !(sdkAtLeast21 && icon instanceof VectorDrawable) && !(icon instanceof VectorDrawableCompat))
         {
@@ -820,39 +813,113 @@ public abstract class Globals
 
         return(new Button[]{confirmDialog.getButton(AlertDialog.BUTTON_POSITIVE), confirmDialog.getButton(AlertDialog.BUTTON_NEUTRAL), confirmDialog.getButton(AlertDialog.BUTTON_NEGATIVE)});
     }
-    public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
-    {
-        return(showConfirmDialog(context, icon, dialogView, WindowManager.LayoutParams.MATCH_PARENT, titleText, messageText, positiveText, negativeText, neutralText, canCancel, positiveListener, negativeListener, neutralListener, dismissListener));
-    }
     public static void showConfirmDialog(Context context, Drawable icon, String titleText, String messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnDismissListener dismissListener)
     {
         showConfirmDialog(context, icon, null, titleText, messageText, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, dismissListener);
     }
-    public static void showConfirmDialog(Context context, String titleText, CharSequence messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
+    public static void showConfirmDialog(Context context, String titleText, String messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnDismissListener dismissListener)
+    {
+        showConfirmDialog(context, null, titleText, messageText, positiveText, negativeText, canCancel, positiveListener, negativeListener, dismissListener);
+    }
+
+    //Shows a notification dialog
+    public static void showNotificationDialog(Context context, String[] titleStrings, String[] messageStrings, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
     {
         float[] dpPixels = dpsToPixels(context, 15, 5, 364);
         int viewPadding = (int)dpPixels[0];
         int scrollPadding = (int)dpPixels[1];
-        ScrollView messageScroll = new ScrollView(context);
-        TextView messageView = new TextView(context);
-        ViewGroup.LayoutParams messageParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+        int height = (int)dpPixels[2];
+        int titleCount = (titleStrings != null ? titleStrings.length : 0);
+        int messageCount = (messageStrings != null ? messageStrings.length : 0);
+        Window dialogWindow;
+        TextView messageView;
+        ScrollView messageScroll;
+        AlertDialog confirmDialog;
+        AlertDialog.Builder confirmBuilder;
 
-        messageView.setLayoutParams(messageParams);
+        //if no context or messages
+        if(context == null || titleCount == 0 || messageCount == 0)
+        {
+            //stop
+            return;
+        }
+
+        messageView = new TextView(context);
+        messageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
         messageView.setPadding(viewPadding, viewPadding, viewPadding, viewPadding);
         messageView.setMovementMethod(LinkMovementMethod.getInstance());
         messageView.setBackgroundColor(resolveColorID(context, android.R.attr.colorBackground));
-        messageView.setText(messageText);
+        messageView.setText(messageStrings[0]);
         messageView.setTextColor(resolveColorID(context, android.R.attr.textColor));
 
+        messageScroll = new ScrollView(context);
         messageScroll.setPadding(scrollPadding, scrollPadding, scrollPadding, scrollPadding);
         messageScroll.setScrollbarFadingEnabled(false);
         messageScroll.addView(messageView);
 
-        showConfirmDialog(context, null, messageScroll, (int)dpPixels[2], titleText, null, positiveText, negativeText, null, canCancel, positiveListener, negativeListener, null, null);
+        confirmBuilder = new AlertDialog.Builder(context, getDialogThemeId(context));
+        confirmBuilder.setCancelable(canCancel);
+        confirmBuilder.setView(messageScroll);
+        confirmBuilder.setTitle(titleStrings[0]);
+        confirmBuilder.setPositiveButton((messageCount > 1 ? R.string.title_next : positiveStringId), null);
+        if(negativeStringId != -1)
+        {
+            confirmBuilder.setNegativeButton(negativeStringId, negativeListener);
+        }
+        confirmDialog = confirmBuilder.create();
+        confirmDialog.show();
+
+        confirmDialog.getButton(DialogInterface.BUTTON_POSITIVE).setOnClickListener(new View.OnClickListener()
+        {
+            int notificationIndex = 0;
+
+            @Override
+            public void onClick(View v)
+            {
+                //if listener is set
+                if(positiveListener != null)
+                {
+                    //call it
+                    positiveListener.onClick(confirmDialog, notificationIndex);
+                }
+
+                //go to next notification
+                notificationIndex++;
+
+                //if there are more titles
+                if(notificationIndex < titleCount)
+                {
+                    //set to next title
+                    confirmDialog.setTitle(titleStrings[notificationIndex]);
+                }
+
+                //if there are more messages
+                if(notificationIndex < messageCount)
+                {
+                    //set to next message
+                    messageView.setText(messageStrings[notificationIndex]);
+
+                    //if the last notification
+                    if(notificationIndex + 1 >= messageCount)
+                    {
+                        //update button
+                        confirmDialog.getButton(DialogInterface.BUTTON_POSITIVE).setText(positiveStringId);
+                    }
+                }
+                else
+                {
+                    //close dialog
+                    confirmDialog.dismiss();
+                }
+            }
+        });
+
+        dialogWindow = confirmDialog.getWindow();
+        dialogWindow.setLayout(dialogWindow.getAttributes().width, height);
     }
-    public static void showConfirmDialog(Context context, String titleText, String messageText, String positiveText, String negativeText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnDismissListener dismissListener)
+    public static void showNotificationDialog(Context context, String titleString, String messageString, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
     {
-        showConfirmDialog(context, null, titleText, messageText, positiveText, negativeText, canCancel, positiveListener, negativeListener, dismissListener);
+        showNotificationDialog(context, new String[]{titleString}, new String[]{messageString}, positiveStringId, negativeStringId, canCancel, positiveListener, negativeListener);
     }
 
     //Shows a confirm internet dialog
@@ -1411,7 +1478,7 @@ public abstract class Globals
                 {
                     //show error now
                     res = context.getResources();
-                    showConfirmDialog(context, res.getString(R.string.title_failed), res.getString(R.string.desc_google_play_services_fail) + "(" + result + ")", res.getString(R.string.title_ok), null, true, null, null);
+                    showNotificationDialog(context, res.getString(R.string.title_failed), res.getString(R.string.desc_google_play_services_fail) + "(" + result + ")", R.string.title_ok, -1, true, null, null);
                 }
             }
         }

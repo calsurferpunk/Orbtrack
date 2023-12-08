@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         else
         {
             //ask for acceptance
-            Globals.showConfirmDialog(this, res.getString(R.string.title_privacy_policy), res.getText(R.string.desc_privacy_policy), res.getString(R.string.title_accept), res.getString(R.string.title_deny), false, new DialogInterface.OnClickListener()
+            Globals.showNotificationDialog(this, res.getString(R.string.title_privacy_policy), res.getString(R.string.desc_privacy_policy), R.string.title_accept, R.string.title_deny, false, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)

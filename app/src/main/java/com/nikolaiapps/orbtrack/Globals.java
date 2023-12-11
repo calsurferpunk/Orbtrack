@@ -5706,7 +5706,7 @@ public abstract class Globals
     {
         String data;
         String key = context.getResources().getString(R.string.nikolai_apps_translate_key);
-        WebPageData translatedData = getWebPage("http://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
+        WebPageData translatedData = getWebPage("https://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, null, null, null);
         JSONObject rootNode;
 
         //if got data and valid

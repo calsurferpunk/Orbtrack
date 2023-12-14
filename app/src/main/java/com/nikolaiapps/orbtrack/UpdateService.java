@@ -3758,7 +3758,7 @@ public class UpdateService extends NotifyService
                             rowData = dataRows[subRowIndex];
 
                             //go through each column
-                            for(colIndex = 0; colIndex < rowData.length; colIndex++)
+                            for(colIndex = 0; colIndex < rowData.length && colIndex < columns.length; colIndex++)
                             {
                                 //add column
                                 rowNode.put(columns[colIndex], rowData[colIndex]);

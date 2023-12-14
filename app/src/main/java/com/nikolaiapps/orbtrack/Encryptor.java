@@ -44,7 +44,7 @@ public abstract class Encryptor
     private static SecretKey getAESKey(String storedKey)
     {
         int keyLength = 256;
-        int iterationCount = 1000;
+        int iterationCount = 100001;
         PBEKeySpec keySpec;
         SecretKeyFactory keyFactory;
         byte[] salt = new byte[keyLength / 8];

@@ -9,6 +9,7 @@ import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.database.sqlite.SQLiteQueryBuilder;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Color;
 import android.location.Location;
@@ -1909,15 +1910,18 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Adds indexing to tables
-    private static void initIndexing(SQLiteDatabase db, String... tables)
+    private static void initIndexing(SQLiteDatabase db, boolean starsOnly)
     {
+        final String[] tables = (starsOnly ? new String[]{Tables.Star} : new String[]{Tables.Orbital, Tables.Star, Tables.Location, Tables.LocationName, Tables.TimeZone, Tables.Altitude, Tables.MasterSatellite, Tables.Owner, Tables.Category, Tables.SatelliteCategory, Tables.Information});
+
         //go through each table
         for(String currentTable : tables)
         {
             try
             {
                 //add index to table
-                db.execSQL("CREATE INDEX IF NOT EXISTS [" + currentTable.replace("[", "").replace("]", "") + "_Index] ON " + currentTable + "([ID])");
+                String currentName = currentTable.replace("[", "").replace("]", "");
+                db.execSQL("CREATE INDEX IF NOT EXISTS [" + currentName + "_Index] ON [" + currentName + "]([ID])");
             }
             catch(Exception ex)
             {
@@ -1927,7 +1931,7 @@ public class Database extends SQLiteOpenHelper
     }
     private static void initIndexing(SQLiteDatabase db)
     {
-        initIndexing(db, Tables.Orbital, Tables.Star, Tables.Location, Tables.LocationName, Tables.TimeZone, Tables.Altitude, Tables.MasterSatellite, Tables.Owner, Tables.Category, Tables.SatelliteCategory, Tables.Information);
+        initIndexing(db, false);
     }
 
     //Creates star table
@@ -2045,7 +2049,7 @@ public class Database extends SQLiteOpenHelper
         initIndexing(db);
 
         //if there are no orbitals
-        if(runQuery(context, "SELECT [Name] FROM " + Tables.Orbital + " WHERE [Type]=" + OrbitalType.Sun + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Orbital, "[Name]", "[Type]=?", String.valueOf(OrbitalType.Sun)).length == 0)
         {
             //add sun
             addOrbital(context, Universe.IDs.Sun, Color.YELLOW, OrbitalType.Sun);
@@ -2063,7 +2067,7 @@ public class Database extends SQLiteOpenHelper
         }
 
         //if there are no stars
-        if(runQuery(context, "SELECT [Norad] FROM " + Tables.Star + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Star, "[Norad]", null, null).length == 0)
         {
             //add stars and constellations
             addStars(context, this, db);
@@ -2071,7 +2075,7 @@ public class Database extends SQLiteOpenHelper
         }
 
         //if there are no locations
-        if(runQuery(context, "SELECT [Name] FROM " + Tables.Location + " WHERE [Type]=" + LocationType.Current + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Location, "[Name]", "[Type]=?", String.valueOf(LocationType.Current)).length == 0)
         {
             String zoneId = TimeZone.getDefault().getID();
 
@@ -2080,21 +2084,21 @@ public class Database extends SQLiteOpenHelper
         }
 
         //if there are no groups
-        if(runQuery(context, "SELECT [Name] FROM " + Tables.Category + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Category, "[Name]", null, null).length == 0)
         {
             //add none group
             runInsert(context, Tables.Category, getCategoryValues("None", 0));
         }
 
         //if there is no information
-        if(runQuery(context, "SELECT [Info] FROM " + Tables.Information + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Information, "[Info]", null, null).length == 0)
         {
             //add information
             addInformation(context, this, db);
         }
 
         //if there are no owners
-        if(runQuery(context, "SELECT [Code] FROM " + Tables.Owner + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Owner, "[Code]", null, null).length == 0)
         {
             //load owners
             initTable(db, res, Tables.Owner, "([Code], [Name]) VALUES(?, ?)", new byte[]{SQLBindType.String, SQLBindType.String}, R.raw.owners_en, OWNERS_FILE_SEPARATOR, OWNERS_FILE_ROWS, OWNERS_FILE_COLUMNS, R.string.title_owners);
@@ -2104,14 +2108,14 @@ public class Database extends SQLiteOpenHelper
         }
 
         //if there are no satellites
-        if(runQuery(context, "SELECT [Name] FROM " + Tables.Orbital + " WHERE [Type]='" + OrbitalType.Satellite + "' LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.Orbital, "[Name]", "[Type]=?", String.valueOf(OrbitalType.Satellite)).length == 0)
         {
             //load default satellites
             saveSatellite(context, "ISS (ZARYA)", ISS_ZARYA_NORAD_ID, "ISS", 911548800000L, TLELines.ISSZarya1, TLELines.ISSZarya2, TLELines.ISSZaryaDate, null, TLELines.ISSZaryaDate, OrbitalType.Satellite);
         }
 
         //if there are no time zones
-        if(runQuery(context, "SELECT [ZoneId] FROM " + Tables.TimeZone + " LIMIT 1", null).length == 0)
+        if(runQueryFirst(context, Tables.TimeZone, "[ZoneId]", null, null).length == 0)
         {
             //load time zones
             initTable(db, res, Tables.TimeZone, "([Latitude], [Longitude], [ZoneId]) VALUES(?, ?, ?)", new byte[]{SQLBindType.Double, SQLBindType.Double, SQLBindType.String}, R.raw.timezones, TIME_ZONE_FILE_SEPARATOR, TIME_ZONE_ROWS, TIME_ZONE_COLUMNS, R.string.title_time_zone_locations);
@@ -2200,7 +2204,7 @@ public class Database extends SQLiteOpenHelper
                         db = DatabaseManager.get(context, true);
                     }
                     createStars(db);
-                    initIndexing(db, Tables.Star);
+                    initIndexing(db, true);
 
                     //if sun is already in orbitals
                     if(Database.getOrbital(context, Universe.IDs.Sun) != null)
@@ -2307,8 +2311,8 @@ public class Database extends SQLiteOpenHelper
         }
     }
 
-    //Runs a query
-    private static String[][] runQuery(Context context, String sql, String[] replacements)
+    //Runs a query on a single table
+    private static String[][] runQuery(Context context, String table, String[] columns, String where, String[] whereArgs, String orderBy, int limit, boolean distinct)
     {
         int index;
         int index2;
@@ -2321,7 +2325,7 @@ public class Database extends SQLiteOpenHelper
             SQLiteDatabase db = DatabaseManager.get(context, false);
 
             //run query
-            queryResult = db.rawQuery(sql, replacements);
+            queryResult = db.query(distinct, table, columns, where, whereArgs, null, null, orderBy, (limit > 0 ? String.valueOf(limit) : null));
             if(queryResult != null)
             {
                 //get query results
@@ -2346,6 +2350,64 @@ public class Database extends SQLiteOpenHelper
         }
 
         return(queryResults);
+    }
+    private static String[][] runQuery(Context context, String table, String[] columns, String where, String[] whereArgs, String orderBy, int limit)
+    {
+        return(runQuery(context, table, columns, where, whereArgs, orderBy, limit, false));
+    }
+    private static String[][] runQuery(Context context, String table, String[] columns, String where, String[] whereArgs, int limit)
+    {
+        return(runQuery(context, table, columns, where, whereArgs, null, limit));
+    }
+
+    //Runs a query on multiple tables
+    private static String[][] runQueryJoin(Context context, String tables, String[] columns, String where, String[] whereArgs, String orderBy, boolean distinct)
+    {
+        int index;
+        int index2;
+        int column_count;
+        Cursor queryResult;
+        SQLiteQueryBuilder builder = new SQLiteQueryBuilder();
+        String[][] queryResults = new String[0][0];
+
+        try
+        {
+            SQLiteDatabase db = DatabaseManager.get(context, false);
+
+            //run query
+            builder.setTables(tables);
+            builder.setDistinct(distinct);
+            queryResult = builder.query(db, columns, where, whereArgs, null, null, orderBy, null);
+            if(queryResult != null)
+            {
+                //get query results
+                column_count = queryResult.getColumnCount();
+                queryResults = new String[queryResult.getCount()][column_count];
+                for(index = 0; index < queryResults.length && queryResult.moveToNext(); index++)
+                {
+                    //go through each column
+                    for(index2 = 0; index2 < column_count; index2++)
+                    {
+                        //get column value
+                        queryResults[index][index2] = queryResult.getString(index2);
+                    }
+                }
+                queryResult.close();
+            }
+        }
+        catch(Exception ex)
+        {
+            //show error
+            showError(context, ex);
+        }
+
+        return(queryResults);
+    }
+
+    //Runs a query for the first returned item
+    private static String[][] runQueryFirst(Context context, String table, String column, String where, String whereArg)
+    {
+        return(runQuery(context, table, new String[]{column}, where, (whereArg != null ? new String[]{whereArg} : null), 1));
     }
 
     //Runs an insert and returns ID
@@ -2432,7 +2494,7 @@ public class Database extends SQLiteOpenHelper
     //Gets all satellite data for the given norad ID
     public static String[][] getSatelliteData(Context context, int noradId)
     {
-        return(runQuery(context, "SELECT [Name], [User_Name], [Norad], [Owner_Code], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId, null));
+        return(runQuery(context, Tables.Orbital, new String[]{"[Name]", "[User_Name]", "[Norad]", "[Owner_Code]", "[Launch_Date]", "[TLE_Line1]", "[TLE_Line2]", "[TLE_Date]", "[GP]", "[Update_Date]", "[Path_Color]", "[Type]", "[Selected]"}, "[Norad]=?", new String[]{String.valueOf(noradId)}, 0));
     }
 
     //Gets satellite values
@@ -2596,7 +2658,7 @@ public class Database extends SQLiteOpenHelper
         String name;
         String ownerCode;
         String localOwnerName;
-        String[][] queryResult = runQuery(context, "SELECT " + Tables.Orbital + ".[Name], [User_Name], " + Tables.Orbital + ".[Norad], [Code], " + Tables.Owner + ".[Name], [Launch_Date], [TLE_Line1], [TLE_Line2], [TLE_Date], [GP], [Update_Date], [RA], [DEC], [Magnitude], [Distance_LY], [Points], [Path_Color], [Type], [Selected] FROM " + Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code] LEFT JOIN " + Tables.Star + " ON " + Tables.Orbital + ".[Norad]=" + Tables.Star + ".[Norad]" + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", null);
+        String[][] queryResult = runQueryJoin(context, Tables.Orbital + " LEFT JOIN " + Tables.Owner + " ON [Owner_Code]=[Code] LEFT JOIN " + Tables.Star + " ON " + Tables.Orbital + ".[Norad]=" + Tables.Star + ".[Norad]", new String[]{Tables.Orbital + ".[Name]", "[User_Name]", Tables.Orbital + ".[Norad]", "[Code]", Tables.Owner + ".[Name]", "[Launch_Date]", "[TLE_Line1]", "[TLE_Line2]", "[TLE_Date]", "[GP]", "[Update_Date]", "[RA]", "[DEC]", "[Magnitude]", "[Distance_LY]", "[Points]", "[Path_Color]", "[Type]", "[Selected]"}, sqlConditions, null, "CASE WHEN [User_Name] IS NULL OR [User_Name]='' THEN " + Tables.Orbital + ".[Name] ELSE [User_Name] END ASC", false);
         ArrayList<DatabaseSatellite> list = new ArrayList<>(0);
 
         //go through each satellite
@@ -2677,7 +2739,7 @@ public class Database extends SQLiteOpenHelper
     private static long getSatelliteId(Context context, int noradId)
     {
         //run query
-        String[][] queryResult = runQuery(context,"SELECT [ID] FROM " + Tables.Orbital + " WHERE [Norad]=" + noradId + " LIMIT 1", null);
+        String[][] queryResult = runQueryFirst(context, Tables.Orbital, "[ID]", "[Norad]=?", String.valueOf(noradId));
         return(queryResult.length > 0 ? Long.parseLong(queryResult[0][0]) : -1);
     }
 
@@ -2824,7 +2886,7 @@ public class Database extends SQLiteOpenHelper
         String maxLat = Globals.getNumberString(latitude + absDelta, 5, false);
         String minLon = Globals.getNumberString(longitude - delta, 5, false);
         String maxLon = Globals.getNumberString(longitude + delta, 5, false);
-        String[][] queryResult = runQuery(context, "SELECT [Latitude], [Longitude], " + column + " FROM " + table + " WHERE([Latitude] >= " + minLat + " AND [Latitude] <= " + maxLat + " AND [Longitude] >= " + minLon + " AND [Longitude] <= " + maxLon + ") ORDER BY [Latitude], [Longitude] ASC", null);
+        String[][] queryResult = runQuery(context, table, new String[]{"[Latitude]", "[Longitude]", column}, "[Latitude] >= ? AND [Latitude] <= ? AND [Longitude] >= ? AND [Longitude] <= ?", new String[]{minLat, maxLat, minLon, maxLon}, "[Latitude], [Longitude] ASC", 0);
 
         //if there are results
         if(queryResult.length > 0)
@@ -2922,7 +2984,7 @@ public class Database extends SQLiteOpenHelper
         byte locationType;
         Resources res = (context != null ? context.getResources() : null);
         String name;
-        String[][] queryResult = runQuery(context, "SELECT [ID], [Name], [Latitude], [Longitude], [Altitude], [ZoneId], [Type], [Selected] FROM " + Tables.Location + (sqlConditions != null ? (" WHERE " + sqlConditions) : "") + " ORDER BY [Type], [Name] ASC", null);
+        String[][] queryResult = runQuery(context, Tables.Location, new String[]{"[ID]", "[Name]", "[Latitude]", "[Longitude]", "[Altitude]", "[ZoneId]", "[Type]", "[Selected]"}, sqlConditions, null, " [Type], [Name] ASC", 0);
         ArrayList<DatabaseLocation> list = new ArrayList<>(0);
 
         //go through each location
@@ -3017,7 +3079,8 @@ public class Database extends SQLiteOpenHelper
     private static long getLocationID(Context context, String name, byte locationType)
     {
         //run query
-        String[][] queryResult = runQuery(context, "SELECT [ID] FROM " + Tables.Location + " WHERE [Name]=? " + (locationType == LocationType.Current ? (" OR [Type]=" + LocationType.Current + " ") : "") + "LIMIT 1", new String[]{name});
+        boolean usingCurrent = (locationType == LocationType.Current);
+        String[][] queryResult = runQuery(context, Tables.Location, new String[]{"[ID]"}, "[Name]=? " + (usingCurrent ? "OR [Type]=?" : "AND 1=?"), new String[]{name, (String.valueOf(usingCurrent ? LocationType.Current : 1))}, 1);
         return(queryResult.length > 0 ? Long.parseLong(queryResult[0][0]) : -1);
     }
 
@@ -3083,7 +3146,7 @@ public class Database extends SQLiteOpenHelper
     //Gets desired owners in English from the database for the given norad ID
     public static String[][] getOwnersEnglish(Context context, int noradId)
     {
-        return(runQuery(context, "SELECT [Code], " + Tables.Owner + ".[Name] FROM " + Tables.Owner + " JOIN " + Tables.Orbital + " ON " + Tables.Owner + ".[Code]=" + Tables.Orbital + ".[Owner_Code] WHERE [Norad]=" + noradId + " ORDER BY " + Tables.Owner + ".[Name]", null));
+        return(runQueryJoin(context, Tables.Owner + " JOIN " + Tables.Orbital + " ON " + Tables.Owner + ".[Code]=" + Tables.Orbital + ".[Owner_Code]", new String[]{"[Code]", Tables.Owner + ".[Name]"}, "[Norad]=?", new String[]{String.valueOf(noradId)}, Tables.Owner + ".[Name]", false));
     }
 
     //Gets owners from the database in the current locale
@@ -3092,8 +3155,7 @@ public class Database extends SQLiteOpenHelper
         int index;
         String code;
         String localeName;
-        //String[][] queryResult = runQuery(context, "SELECT [Code], [Name] FROM " + Tables.Owner + " ORDER BY [Name]", null);
-        String[][] queryResult = runQuery(context, "SELECT [Code], [Name] FROM " + Tables.Owner + " ORDER BY [Code]", null);
+        String[][] queryResult = runQuery(context, Tables.Owner, new String[]{"[Code]", "[Name]"}, null, null, "[Code]", 0);
         ArrayList<UpdateService.MasterOwner> list = new ArrayList<>(0);
 
         //go through each owner
@@ -3181,7 +3243,7 @@ public class Database extends SQLiteOpenHelper
     {
         int index;
         Resources res = context.getResources();
-        String[][] queryResult = runQuery(context, "SELECT [Name], [Indx] FROM " + Tables.Category + "ORDER BY [Name], [Indx]", null);
+        String[][] queryResult = runQuery(context, Tables.Category, new String[]{"[Name]", "[Indx]"}, null, null, "[Name], [Indx]", 0);
         ArrayList<UpdateService.MasterCategory> list = new ArrayList<>(0);
 
         //go through each category
@@ -3267,7 +3329,7 @@ public class Database extends SQLiteOpenHelper
     @SuppressWarnings("SpellCheckingInspection")
     public static String[][] getSatelliteCategoriesEnglish(Context context, int noradId, boolean getIndex)
     {
-        return(runQuery(context, "SELECT DISTINCT '" + noradId + "', [Name]" + (getIndex ? ", [Indx]" : "") + " FROM " + Tables.Category + " JOIN " + Tables.SatelliteCategory + " ON " + Tables.Category + ".[Indx]=" + Tables.SatelliteCategory + ".[Category_Index] WHERE " + Tables.SatelliteCategory + ".[Norad]=" + noradId, null));
+        return(runQueryJoin(context, Tables.Category + " JOIN " + Tables.SatelliteCategory + " ON " + Tables.Category + ".[Indx]=" + Tables.SatelliteCategory + ".[Category_Index]", new String[]{"'" + noradId + "'", "[Name]", "[Indx]"}, Tables.SatelliteCategory + ".[Norad]=?", new String[]{String.valueOf(noradId)}, null, true));
     }
     public static String[][] getSatelliteCategoriesEnglish(Context context, int noradId)
     {
@@ -3276,7 +3338,7 @@ public class Database extends SQLiteOpenHelper
     public static ArrayList<UpdateService.MasterSatelliteCategory> getSatelliteCategoriesEnglish(Context context)
     {
         int index;
-        String[][] queryResult = runQuery(context, "SELECT [Norad], [Category_Index] FROM " + Tables.SatelliteCategory + " ORDER BY [Norad], [Category_Index] ASC", null);
+        String[][] queryResult = runQuery(context, Tables.SatelliteCategory, new String[]{"[Norad]", "[Category_Index]"}, null, null, "[Norad], [Category_Index] ASC", 0);
         ArrayList<UpdateService.MasterSatelliteCategory> list = new ArrayList<>(0);
 
         //go through each item
@@ -3396,7 +3458,7 @@ public class Database extends SQLiteOpenHelper
         String info;
         String localeInfo;
         String usedInfo;
-        String[][] queryResult = runQuery(context, "SELECT DISTINCT [Info] FROM " + Tables.Information + " WHERE " + Tables.Information + ".[Norad]=" + noradId + " AND " + Tables.Information + ".[Language]='" + language + "' AND " + Tables.Information + ".[Source] IN('" + updateSource + "', '" + UpdateSource.TheSkyLive + "', '" + UpdateSource.SpaceDotCom + "')", null);
+        String[][] queryResult = runQuery(context, Tables.Information, new String[]{"[Info]"}, "[Norad]=? AND [Language]=? AND [Source] IN(?, ?, ?)", new String[]{String.valueOf(noradId), language, String.valueOf(updateSource), String.valueOf(UpdateSource.TheSkyLive), String.valueOf(UpdateSource.SpaceDotCom)}, null, 0, true);
 
         //return any information
         info = (queryResult.length > 0 ? queryResult[0][0] : null);
@@ -3406,7 +3468,7 @@ public class Database extends SQLiteOpenHelper
     }
     public static String[][] getInformation(Context context, int noradId)
     {
-        return(runQuery(context, "SELECT DISTINCT [Norad], [Info], [Language], [Source] FROM " + Tables.Information + " WHERE " + Tables.Information + ".[Norad]=" + noradId, null));
+        return(runQuery(context, Tables.Information, new String[]{"[Norad]", "[Info]", "[Language]", "[Source]"}, "[Norad]=?", new String[]{String.valueOf(noradId)}, null, 0, true));
     }
 
     //Gets master satellite values
@@ -3431,7 +3493,7 @@ public class Database extends SQLiteOpenHelper
     {
         int index;
         int currentID;
-        String[][] queryResult = runQuery(context, "SELECT " + Tables.MasterSatellite + ".[Norad], " + Tables.MasterSatellite + ".[Name], [Owner_Code], " + Tables.Owner + ".[Name], " + Tables.MasterSatellite + ".[Launch_Date], " + Tables.SatelliteCategory + ".[Category_Index], " + Tables.Category + ".[Name] FROM " + Tables.MasterSatellite + " LEFT JOIN " + Tables.Owner + " ON " + Tables.MasterSatellite + ".[Owner_Code]=" + Tables.Owner + ".[Code] LEFT JOIN " + Tables.SatelliteCategory + " ON " + Tables.MasterSatellite + ".[Norad]=" + Tables.SatelliteCategory + ".[Norad] LEFT JOIN " + Tables.Category + " ON [Category_Index]=[Indx] ORDER BY " + Tables.MasterSatellite + ".[Norad], [Category_Index]", null);
+        String[][] queryResult = runQueryJoin(context, Tables.MasterSatellite + " LEFT JOIN " + Tables.Owner + " ON " + Tables.MasterSatellite + ".[Owner_Code]=" + Tables.Owner + ".[Code] LEFT JOIN " + Tables.SatelliteCategory + " ON " + Tables.MasterSatellite + ".[Norad]=" + Tables.SatelliteCategory + ".[Norad] LEFT JOIN " + Tables.Category + " ON [Category_Index]=[Indx]", new String[]{Tables.MasterSatellite + ".[Norad]", Tables.MasterSatellite + ".[Name]", "[Owner_Code]", Tables.Owner + ".[Name]", Tables.MasterSatellite + ".[Launch_Date]", Tables.SatelliteCategory + ".[Category_Index]", Tables.Category + ".[Name]"}, null, null, Tables.MasterSatellite + ".[Norad], [Category_Index]", false);
         ArrayList<UpdateService.MasterSatellite> list = new ArrayList<>(0);
 
         //go through each satellite

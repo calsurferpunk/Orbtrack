@@ -2590,7 +2590,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             if(!UpdateService.updatingSatellites())
             {
                 //get satellites
-                satellites = Database.getOrbitals(this, Database.getSatelliteConditions());
+                satellites = Database.getOrbitals(this, true);
                 for(index = 0; index < satellites.length; index++)
                 {
                     //add satellite to list

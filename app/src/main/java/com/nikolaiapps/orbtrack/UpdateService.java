@@ -663,7 +663,7 @@ public class UpdateService extends NotifyService
                     break;
 
                 case UpdateType.UpdateSatellites:
-                    satellites = Database.getOrbitals(context, Database.getSatelliteConditions());
+                    satellites = Database.getOrbitals(context, true);
                     updateSatellites(context, res.getQuantityString(R.plurals.title_satellites_updating, satellites.length), new ArrayList<>(Arrays.asList(satellites)), true);
                     break;
             }

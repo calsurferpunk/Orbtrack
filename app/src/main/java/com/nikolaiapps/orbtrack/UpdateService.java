@@ -3527,7 +3527,7 @@ public class UpdateService extends NotifyService
         {
             //possibly add any missing existing categories
             MasterSatellite currentSatellite = masterList.satellites.get(index);
-            String[][] currentCategories = Database.getSatelliteCategoriesEnglish(this, currentSatellite.noradId, true);
+            String[][] currentCategories = Database.getSatelliteCategoriesEnglish(this, currentSatellite.noradId);
             for(index2 = 0; index2 < currentCategories.length; index2++)
             {
                 //add category if missing
@@ -3867,8 +3867,12 @@ public class UpdateService extends NotifyService
                     //save satellites
                     savedSatellites = saveSatellitesFile(this, this, satellites, fileType, outStream);
 
-                    //close stream
-                    outStream.close();
+                    //if stream exists
+                    if(outStream != null)
+                    {
+                        //close stream
+                        outStream.close();
+                    }
                 }
                 catch(Exception ex)
                 {

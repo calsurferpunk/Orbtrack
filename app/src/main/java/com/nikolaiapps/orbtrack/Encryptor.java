@@ -4,7 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
-import java.util.Random;
+import java.security.SecureRandom;
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
@@ -24,9 +24,8 @@ public abstract class Encryptor
     }
 
     //Constants
-    @SuppressWarnings("SpellCheckingInspection")
-    private static final String RandomChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567890[]'<>/?!@#$%^&*()+-";
-    private static final int RandomCharsLength = RandomChars.length();
+    private static final String StoredKey = "storedEncryptionKey";
+    private static final String OldStoredKey = "storedKey";
 
     //Variables
     private static byte algorithmType;
@@ -92,33 +91,33 @@ public abstract class Encryptor
 
     //Initializes keys
     @SuppressWarnings("SpellCheckingInspection")
-    private static void init(Context context)
+    private static void init(Context context, String sourceKey)
     {
-        int index;
-        Random rand;
+        SecureRandom rand;
         SharedPreferences settings = getPreferences(context);
         SharedPreferences.Editor writeSettings;
-        String storedKey = settings.getString("storedKey", null);
+        String storedKey = settings.getString(sourceKey, null);
         StringBuilder randString;
+        byte[] randomBytes;
 
         //if no stored key yet
         if(storedKey == null)
         {
-            rand = new Random();
+            rand = new SecureRandom();
+            randomBytes = rand.generateSeed(20);
             randString = new StringBuilder();
             writeSettings = settings.edit();
 
-            //while less than 20 chars
-            while(randString.length() < 20)
+            //go through each byte
+            for(byte currentByte : randomBytes)
             {
-                //get next random char
-                index = (int)(rand.nextFloat() * RandomCharsLength);
-                randString.append(RandomChars.charAt(index));
+                //add byte as character
+                randString.append((char)currentByte);
             }
 
             //use and save stored key
             storedKey = randString.toString();
-            writeSettings.putString("storedKey", storedKey);
+            writeSettings.putString(sourceKey, storedKey);
             writeSettings.apply();
         }
 
@@ -162,7 +161,7 @@ public abstract class Encryptor
         String header;
 
         //make sure initialized
-        init(context);
+        init(context, StoredKey);
 
         try
         {
@@ -196,13 +195,13 @@ public abstract class Encryptor
     }
 
     //Decrypt value
-    public static String decrypt(Context context, String value)
+    private static String decrypt(Context context, String value, String sourceKey)
     {
         Cipher cipher;
         String[] sections;
 
         //make sure initialized
-        init(context);
+        init(context, sourceKey);
 
         try
         {
@@ -237,5 +236,16 @@ public abstract class Encryptor
             //return original value
             return(value);
         }
+    }
+    public static String decrypt(Context context, String value)
+    {
+        return(decrypt(context, value, StoredKey));
+    }
+
+    //Decrypt value with old key if it exists
+    public static String decryptOld(Context context, String value)
+    {
+        boolean haveOldEncryptionKey = (getPreferences(context).getString(OldStoredKey, null) != null);
+        return(haveOldEncryptionKey ? decrypt(context, value, OldStoredKey) : null);
     }
 }

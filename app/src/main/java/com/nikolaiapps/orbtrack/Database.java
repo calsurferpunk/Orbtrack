@@ -2150,6 +2150,7 @@ public class Database extends SQLiteOpenHelper
     //Handles any needed updates
     public static void handleUpdates(Context context)
     {
+        String stringValue;
         SQLiteDatabase db = null;
         DatabaseSatellite issZarya;
 
@@ -2195,9 +2196,17 @@ public class Database extends SQLiteOpenHelper
                     Settings.setIndicator(context, Settings.Options.LensView.IndicatorType.Icon);
                 }
 
-                //if previous version before adding stars and constellation table
+                //if previous version before changing encryption and adding stars and constellation tables
                 if(updateStatus.previousVersion < 33)
                 {
+                    //if have Space-Track password saved
+                    stringValue = Settings.getEncryptedSpaceTrackPassword(context);
+                    if(stringValue != null)
+                    {
+                        //decrypt with old key and encrypt with new key
+                        Encryptor.encrypt(context, Encryptor.decryptOld(context, stringValue));
+                    }
+
                     //make sure table exists and add indexing
                     if(db == null)
                     {
@@ -3079,7 +3088,7 @@ public class Database extends SQLiteOpenHelper
     //Deletes a location
     public static boolean deleteLocation(Context context, String name, byte locationType)
     {
-        return(runDelete(context, Tables.Location, "[ID]=?", new String[]{String.valueOf(getLocationID(context, name, locationType) + "'")}));
+        return(runDelete(context, Tables.Location, "[ID]=?", new String[]{String.valueOf(getLocationID(context, name, locationType))}));
     }
 
 	//Gets owner values
@@ -3282,13 +3291,9 @@ public class Database extends SQLiteOpenHelper
 
     //Gets master satellite categories from the database in English
     @SuppressWarnings("SpellCheckingInspection")
-    public static String[][] getSatelliteCategoriesEnglish(Context context, int noradId, boolean getIndex)
-    {
-        return(runQuery(context, Tables.Category + " JOIN " + Tables.SatelliteCategory + " ON " + Tables.Category + ".[Indx]=" + Tables.SatelliteCategory + ".[Category_Index]", new String[]{"'" + noradId + "'", "[Name]", "[Indx]"}, Tables.SatelliteCategory + ".[Norad]=?", new String[]{String.valueOf(noradId)}, null, 0, true));
-    }
     public static String[][] getSatelliteCategoriesEnglish(Context context, int noradId)
     {
-        return(getSatelliteCategoriesEnglish(context, noradId, false));
+        return(runQuery(context, Tables.Category + " JOIN " + Tables.SatelliteCategory + " ON " + Tables.Category + ".[Indx]=" + Tables.SatelliteCategory + ".[Category_Index]", new String[]{"'" + noradId + "'", "[Name]", "[Indx]"}, Tables.SatelliteCategory + ".[Norad]=?", new String[]{String.valueOf(noradId)}, null, 0, true));
     }
     public static ArrayList<UpdateService.MasterSatelliteCategory> getSatelliteCategoriesEnglish(Context context)
     {

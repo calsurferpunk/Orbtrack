@@ -3333,10 +3333,16 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.ShareTranslations));
     }
 
+    //Gets encrypted Space-Track password
+    public static String getEncryptedSpaceTrackPassword(Context context)
+    {
+        return(getPreferenceString(context, PreferenceName.SpaceTrackPassword));
+    }
+
     //Gets login name and password
     public static String[] getLogin(Context context, int accountType)
     {
-        return(accountType == Globals.AccountType.SpaceTrack ? new String[]{getPreferenceString(context, PreferenceName.SpaceTrackUser), Encryptor.decrypt(context, getPreferenceString(context, PreferenceName.SpaceTrackPassword))} : new String[]{null, null});
+        return(accountType == Globals.AccountType.SpaceTrack ? new String[]{getPreferenceString(context, PreferenceName.SpaceTrackUser), Encryptor.decrypt(context, getEncryptedSpaceTrackPassword(context))} : new String[]{null, null});
     }
 
     //Sets space-track login name and password

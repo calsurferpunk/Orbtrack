@@ -51,6 +51,21 @@ public class Database extends SQLiteOpenHelper
         static final String Information = "[Information]";
     }
 
+    static abstract class IndexTables
+    {
+        static final String Orbital = "[Orbital_Index]";
+        static final String Star = "[Star_Index]";
+        static final String Location = "[Location_Index]";
+        static final String LocationName = "[LocationName_Index]";
+        static final String TimeZone = "[TimeZone_Index]";
+        static final String Altitude = "[Altitude_Index]";
+        static final String MasterSatellite = "[MasterSatellite_Index]";
+        static final String Owner = "[Owner_Index]";
+        static final String Category = "[Category_Index]";
+        static final String SatelliteCategory = "[SatelliteCategory_Index]";
+        static final String Information = "[Information_Index]";
+    }
+
     public static abstract class OrbitalType
     {
         static final byte Star = 1;
@@ -1912,21 +1927,19 @@ public class Database extends SQLiteOpenHelper
     //Adds indexing to tables
     private static void initIndexing(SQLiteDatabase db, boolean starsOnly)
     {
-        final String[] tables = (starsOnly ? new String[]{Tables.Star} : new String[]{Tables.Orbital, Tables.Star, Tables.Location, Tables.LocationName, Tables.TimeZone, Tables.Altitude, Tables.MasterSatellite, Tables.Owner, Tables.Category, Tables.SatelliteCategory, Tables.Information});
-
-        //go through each table
-        for(String currentTable : tables)
+        db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Star + " ON " + Tables.Star + "([ID])");
+        if(!starsOnly)
         {
-            try
-            {
-                //add index to table
-                String currentName = currentTable.replace("[", "").replace("]", "");
-                db.execSQL("CREATE INDEX IF NOT EXISTS [" + currentName + "_Index] ON [" + currentName + "]([ID])");
-            }
-            catch(Exception ex)
-            {
-                //do nothing
-            }
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Orbital + " ON " + Tables.Orbital + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Location + " ON " + Tables.Location + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.LocationName + " ON " + Tables.LocationName + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.TimeZone + " ON " + Tables.TimeZone + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Altitude + " ON " + Tables.Altitude + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.MasterSatellite + " ON " + Tables.MasterSatellite + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Owner + " ON " + Tables.Owner + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Category + " ON " + Tables.Category + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.SatelliteCategory + " ON " + Tables.SatelliteCategory + "([ID])");
+            db.execSQL("CREATE INDEX IF NOT EXISTS " + IndexTables.Information + " ON " + Tables.Information + "([ID])");
         }
     }
     private static void initIndexing(SQLiteDatabase db)

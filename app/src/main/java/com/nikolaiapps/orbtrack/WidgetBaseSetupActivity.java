@@ -389,7 +389,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
                     orbitals = Database.getOrbitals(context);
                     Globals.clearOrbitalFilter(orbitals);
-                    locations = Database.getLocations(context, "[Type] <> " + Database.LocationType.Current);
+                    locations = Database.getLocations(context, Database.QueryId.GetLocationsType);
 
                     outdatedText = rootView.findViewById(R.id.Widget_Setup_Outdated_Text);
                     orbitalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Orbital_Text_List : R.id.Widget_Setup_Orbital_List);
@@ -2796,7 +2796,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
         if(locationId != -1)
         {
-            Database.DatabaseLocation[] locations = Database.getLocations(context, "[ID]=" + locationId);
+            Database.DatabaseLocation[] locations = Database.getLocations(context, Database.QueryId.GetLocationsId, locationId);
             return(locations.length > 0 ? locations[0].name : unknown);
         }
         else

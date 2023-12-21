@@ -823,7 +823,7 @@ public abstract class Globals
     }
 
     //Shows a notification dialog
-    public static void showNotificationDialog(Context context, String[] titleStrings, String[] messageStrings, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
+    public static void showNotificationDialog(Context context, Drawable icon, String[] titleStrings, String[] messageStrings, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, boolean adjustHeight)
     {
         float[] dpPixels = dpsToPixels(context, 15, 5, 364);
         int viewPadding = (int)dpPixels[0];
@@ -859,6 +859,10 @@ public abstract class Globals
 
         confirmBuilder = new AlertDialog.Builder(context, getDialogThemeId(context));
         confirmBuilder.setCancelable(canCancel);
+        if(icon != null)
+        {
+            confirmBuilder.setIcon(icon);
+        }
         confirmBuilder.setView(messageScroll);
         confirmBuilder.setTitle(titleStrings[0]);
         confirmBuilder.setPositiveButton((messageCount > 1 ? R.string.title_next : positiveStringId), null);
@@ -914,12 +918,15 @@ public abstract class Globals
             }
         });
 
-        dialogWindow = confirmDialog.getWindow();
-        dialogWindow.setLayout(dialogWindow.getAttributes().width, height);
+        if(adjustHeight)
+        {
+            dialogWindow = confirmDialog.getWindow();
+            dialogWindow.setLayout(dialogWindow.getAttributes().width, height);
+        }
     }
-    public static void showNotificationDialog(Context context, String titleString, String messageString, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener)
+    public static void showNotificationDialog(Context context, Drawable icon, String titleString, String messageString, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, boolean adjustHeight)
     {
-        showNotificationDialog(context, new String[]{titleString}, new String[]{messageString}, positiveStringId, negativeStringId, canCancel, positiveListener, negativeListener);
+        showNotificationDialog(context, icon, new String[]{titleString}, new String[]{messageString}, positiveStringId, negativeStringId, canCancel, positiveListener, negativeListener, adjustHeight);
     }
 
     //Shows a confirm internet dialog
@@ -1478,7 +1485,7 @@ public abstract class Globals
                 {
                     //show error now
                     res = context.getResources();
-                    showNotificationDialog(context, res.getString(R.string.title_failed), res.getString(R.string.desc_google_play_services_fail) + "(" + result + ")", R.string.title_ok, -1, true, null, null);
+                    showNotificationDialog(context, getDrawable(context, R.drawable.ic_warning_black, true),  res.getString(R.string.title_failed), res.getString(R.string.desc_google_play_services_fail) + "(" + result + ")", R.string.title_ok, -1, true, null, null, false);
                 }
             }
         }

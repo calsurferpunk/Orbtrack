@@ -182,6 +182,7 @@
     <string name="desc_show_sunlight">Mostrar/ocultar la luz diurna actual en la superficie</string>
     <string name="desc_show_toolbars">Mostrar barras herramientas en los bordes de la pantalla</string>
     <string name="desc_show_zoom">Mostrar botones de enfocar</string>
+    <string name="desc_stars_constellation_notice">¡Ahora se pueden rastrear estrellas y constelaciones! Si desea verlos, seleccione la configuración de filtro en la parte superior derecha de cada pantalla. De forma predeterminada, se muestran solo en vistas de lentes, pero se pueden agregar al globo terráqueo, listas, etc.</string>
     <string name="desc_time_zone_source">Localización zona horaria detección</string>
     <string name="desc_unit_size_error">Debe ser más grande (demasiados incrementos)</string>
     <string name="desc_update_now">Actualizar ahora</string>

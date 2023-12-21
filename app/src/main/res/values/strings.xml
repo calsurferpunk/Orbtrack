@@ -182,6 +182,7 @@
     <string name="desc_show_sunlight">Show/hide current daylight on surface</string>
     <string name="desc_show_toolbars">Show toolbars on screen edges</string>
     <string name="desc_show_zoom">Show zoom buttons</string>
+    <string name="desc_stars_constellation_notice">Stars and constellations can now be tracked! If you wish to view them, select filter settings on the top right of each display screen.\n\nThey default to being shown on lens views only, but can be added to the globe, lists, etc.</string>
     <string name="desc_time_zone_source">Location time zone detection</string>
     <string name="desc_unit_size_error">Must be larger (too many increments)</string>
     <string name="desc_update_now">Update now</string>

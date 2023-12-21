@@ -243,7 +243,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         else
         {
             //ask for acceptance
-            Globals.showNotificationDialog(this, res.getString(R.string.title_privacy_policy), res.getString(R.string.desc_privacy_policy), R.string.title_accept, R.string.title_deny, false, new DialogInterface.OnClickListener()
+            Globals.showNotificationDialog(this, Globals.getDrawable(this, R.drawable.ic_launcher_clear), res.getString(R.string.title_privacy_policy), res.getString(R.string.desc_privacy_policy), R.string.title_accept, R.string.title_deny, false, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
@@ -262,7 +262,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //denied privacy policy
                     MainActivity.this.finish();
                 }
-            });
+            }, true);
         }
     }
 

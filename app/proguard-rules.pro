@@ -22,3 +22,5 @@
     public static ** valueOf(java.lang.String);
 }
 -dontwarn org.apache.http.**
+-dontwarn io.grpc.internal.DnsNameResolverProvider
+-dontwarn io.grpc.internal.PickFirstLoadBalancerProvider

@@ -137,9 +137,9 @@ public class Database extends SQLiteOpenHelper
 
     private static abstract class TLELines
     {
-        static final String ISSZarya1 = "1 25544U 98067A   23184.70990191  .00010129  00000-0  18119-3 0  9990";
-        static final String ISSZarya2 = "2 25544  51.6418 246.6181 0004736  98.2457  48.5828 15.50625415404355";
-        static final long ISSZaryaDate = 1688423100541L;
+        static final String ISSZarya1 = "1 25544U 98067A   24002.57542584  .00017158  00000-0  30777-3 0  9997";
+        static final String ISSZarya2 = "2 25544  51.6439  60.8900 0003210 345.8136 161.5649 15.50015879432719";
+        static final long ISSZaryaDate = 1704222346783L;
     }
 
     private static final int ISS_ZARYA_NORAD_ID = 25544;

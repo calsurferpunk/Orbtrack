@@ -72,7 +72,7 @@ public abstract class Selectable
             @Override
             public int compare(ListItem value1, ListItem value2)
             {
-                return(Globals.intCompare(value1.listIndex, value2.listIndex));
+                return(Integer.compare(value1.listIndex, value2.listIndex));
             }
         }
 

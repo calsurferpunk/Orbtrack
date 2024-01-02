@@ -137,7 +137,6 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.net.ssl.X509TrustManager;
 import okhttp3.FormBody;
 import okhttp3.HttpUrl;
 import okhttp3.MediaType;
@@ -729,7 +728,7 @@ public abstract class Globals
     private static final SimpleDateFormat dateParser = new SimpleDateFormat("yyyy-MM-dd", Locale.US);
     private static ArrayList<TimeZone> timeZoneList = null;
     private static final int[] fileSources = new int[]{FileSource.SDCard, FileSource.GoogleDrive, FileSource.Dropbox, FileSource.Others};
-    public static final int[] fileSourceImageIds = new int[]{(Build.VERSION.SDK_INT >= 29 ? -1 : R.drawable.ic_sd_card_black), R.drawable.org_gdrive, R.drawable.org_dbox, (Build.VERSION.SDK_INT >= 21 ? R.drawable.ic_folder_open_black : -1)};
+    public static final int[] fileSourceImageIds = new int[]{Build.VERSION.SDK_INT >= 29 ? -1 : R.drawable.ic_sd_card_black, R.drawable.org_google_drive, R.drawable.org_dropbox, R.drawable.ic_folder_open_black};
     public static final String[] fileDataExtensions = new String[]{".tle", ".json", ".txt"};
 
     //Variables
@@ -750,23 +749,19 @@ public abstract class Globals
     public static String[] getFileLocations(Context context)
     {
         Resources res = context.getResources();
-        return(new String[]{(Build.VERSION.SDK_INT >= 29 ? null : res.getString(R.string.title_downloads)), FileLocationType.GoogleDrive, FileLocationType.Dropbox, (Build.VERSION.SDK_INT >= 21 ? res.getString(R.string.title_other) : null)});
+        return new String[]{Build.VERSION.SDK_INT >= 29 ? null : res.getString(R.string.title_downloads), FileLocationType.GoogleDrive, FileLocationType.Dropbox, res.getString(R.string.title_other)};
     }
 
     //Show others folder browser
     public static void showOthersFolderSelect(ActivityResultLauncher<Intent> launcher)
     {
-        if(Build.VERSION.SDK_INT >= 21)
-        {
-            Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
-            startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.OthersSave);
-        }
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        startActivityForResult(launcher, intent, BaseInputActivity.RequestCode.OthersSave);
     }
 
     //Shows a confirm dialog
     public static Button[] showConfirmDialog(Context context, Drawable icon, View dialogView, String titleText, String messageText, String positiveText, String negativeText, String neutralText, Boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, DialogInterface.OnClickListener neutralListener, DialogInterface.OnDismissListener dismissListener)
     {
-        boolean sdkAtLeast21 = (Build.VERSION.SDK_INT >= 21);
         ImageView iconView;
         AlertDialog confirmDialog;
         AlertDialog.Builder confirmBuilder = new AlertDialog.Builder(context, getDialogThemeId(context));
@@ -799,16 +794,9 @@ public abstract class Globals
         confirmDialog.show();
 
         iconView = confirmDialog.findViewById(android.R.id.icon);
-        if(iconView != null && !(sdkAtLeast21 && icon instanceof VectorDrawable) && !(icon instanceof VectorDrawableCompat))
+        if(iconView != null && !(icon instanceof VectorDrawable) && !(icon instanceof VectorDrawableCompat))
         {
-            if(sdkAtLeast21)
-            {
-                iconView.setImageTintList(null);
-            }
-            else
-            {
-                iconView.setColorFilter(null);
-            }
+            iconView.setImageTintList(null);
         }
 
         return(new Button[]{confirmDialog.getButton(AlertDialog.BUTTON_POSITIVE), confirmDialog.getButton(AlertDialog.BUTTON_NEUTRAL), confirmDialog.getButton(AlertDialog.BUTTON_NEGATIVE)});
@@ -1115,18 +1103,7 @@ public abstract class Globals
             }
 
             //show legacy dialog instead
-            if(Build.VERSION.SDK_INT <= 20)
-            {
-                legacyDateDialog = new DatePickerDialog(context, listener, year, month, dayOfMonth);
-                if(legacyDateDialog.getWindow() != null)
-                {
-                    legacyDateDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                }
-            }
-            else
-            {
-                legacyDateDialog = new DatePickerDialog(context, themeID, listener, year, month, dayOfMonth);
-            }
+            legacyDateDialog = new DatePickerDialog(context, themeID, listener, year, month, dayOfMonth);
             legacyDateDialog.show();
         }
     }
@@ -1538,20 +1515,15 @@ public abstract class Globals
     {
         try
         {
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.P)
+            if(Build.VERSION.SDK_INT >= 28)
             {
                 LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
                 return(manager != null && manager.isLocationEnabled());
             }
-            else if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-            {
-                //noinspection deprecation
-                return(android.provider.Settings.Secure.getInt(context.getContentResolver(), android.provider.Settings.Secure.LOCATION_MODE, android.provider.Settings.Secure.LOCATION_MODE_OFF) != android.provider.Settings.Secure.LOCATION_MODE_OFF);
-            }
             else
             {
                 //noinspection deprecation
-                return(!TextUtils.isEmpty(android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.LOCATION_PROVIDERS_ALLOWED)));
+                return(android.provider.Settings.Secure.getInt(context.getContentResolver(), android.provider.Settings.Secure.LOCATION_MODE, android.provider.Settings.Secure.LOCATION_MODE_OFF) != android.provider.Settings.Secure.LOCATION_MODE_OFF);
             }
         }
         catch(Exception ex)
@@ -1745,7 +1717,7 @@ public abstract class Globals
     {
         try
         {
-            if(runForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            if(runForeground && Build.VERSION.SDK_INT >= 26)
             {
                 context.startForegroundService(intent);
             }
@@ -1764,7 +1736,7 @@ public abstract class Globals
     public static void startForeground(Service service, int id, NotificationCompat.Builder notifyBuilder, boolean runForeground, int foregroundType)
     {
         //if need to start in foreground and android >= 8.0
-        if(runForeground && Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        if(runForeground && Build.VERSION.SDK_INT >= 26)
         {
             //start in foreground
             if(Build.VERSION.SDK_INT >= 29)
@@ -1784,7 +1756,7 @@ public abstract class Globals
         NotificationManager manager;
 
         //if a notification channel needs to be set
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+        if(Build.VERSION.SDK_INT >= 26)
         {
             //get manager and create channel
             manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -1856,7 +1828,7 @@ public abstract class Globals
     {
         int alarmType = (wakeup ? AlarmManager.RTC_WAKEUP : AlarmManager.RTC);
 
-        if(Build.VERSION.SDK_INT >= 19 && haveExactAlarmPermission(context))
+        if(haveExactAlarmPermission(context))
         {
             manager.setExact(alarmType, timeMs, intent);
         }
@@ -2770,11 +2742,7 @@ public abstract class Globals
                     ids[index] = valueArray.getResourceId(index, -1);
                     valueArray.recycle();
                 }
-                catch(NoSuchMethodError noMethod)
-                {
-                    //do nothing
-                }
-                catch(Exception ex)
+                catch(NoSuchMethodError | Exception noMethod)
                 {
                     //do nothing
                 }
@@ -3090,7 +3058,7 @@ public abstract class Globals
         int[] size = new int[2];
 
         //get starting width and height by type
-        if(Build.VERSION.SDK_INT >= 21 && image instanceof VectorDrawable)
+        if(image instanceof VectorDrawable)
         {
             VectorDrawable currentImage = (VectorDrawable)image;
 
@@ -3120,21 +3088,7 @@ public abstract class Globals
 
     private static Drawable tryGetDrawable(Context context, int resId)
     {
-        if(Build.VERSION.SDK_INT >= 21)
-        {
-            return(context != null ? ContextCompat.getDrawable(context, resId) : null);
-        }
-        else
-        {
-            try
-            {
-                return(ContextCompat.getDrawable(context, resId));
-            }
-            catch(Exception ex)
-            {
-                return(context != null ? ContextCompat.getDrawable(context, R.drawable.ic_launcher_clear) : null);
-            }
-        }
+        return (context != null ? ContextCompat.getDrawable(context, resId) : null);
     }
 
     //Gets a drawable with optional tint
@@ -4724,7 +4678,7 @@ public abstract class Globals
     //Compares 2 pass durations
     public static int passDurationCompare(Calendar timeStart1, Calendar timeEnd1, Calendar timeStart2, Calendar timeEnd2)
     {
-        return(longCompare(normalizePassDurationMs(timeStart1, timeEnd1), normalizePassDurationMs(timeStart2, timeEnd2)));
+        return(Long.compare(normalizePassDurationMs(timeStart1, timeEnd1), normalizePassDurationMs(timeStart2, timeEnd2)));
     }
 
     //Compares 2 pass maximum elevations
@@ -4740,34 +4694,6 @@ public abstract class Globals
         }
 
         return(Double.compare(passElMax1, passElMax2));
-    }
-
-    //Compares 2 longs
-    @SuppressWarnings("UseCompareMethod")
-    public static int longCompare(long value1, long value2)
-    {
-        if(Build.VERSION.SDK_INT >= 19)
-        {
-            return(Long.compare(value1, value2));
-        }
-        else
-        {
-            return(Long.valueOf(value1).compareTo(value2));
-        }
-    }
-
-    //Compares 2 integers
-    @SuppressWarnings("UseCompareMethod")
-    public static int intCompare(int value1, int value2)
-    {
-        if(Build.VERSION.SDK_INT >= 19)
-        {
-            return(Integer.compare(value1, value2));
-        }
-        else
-        {
-            return(Integer.valueOf(value1).compareTo((value2)));
-        }
     }
 
     //Tries to return a byte from the given input
@@ -5511,21 +5437,10 @@ public abstract class Globals
             }
             if(postData != null)
             {
-                siteRequestBuilder.post(RequestBody.create(MediaType.parse(contentType), postData));
+                siteRequestBuilder.post(RequestBody.create(postData, MediaType.parse(contentType)));
             }
             clientBuilder = new OkHttpClient.Builder().writeTimeout(12, TimeUnit.SECONDS).readTimeout(12, TimeUnit.SECONDS);
             clientBuilder.cookieJar(cookies);
-            if(Build.VERSION.SDK_INT <= 20)
-            {
-                //create TLS backwards compatibility
-                TLSSocketFactory socketFactory = new TLSSocketFactory();
-                X509TrustManager manager = socketFactory.getTrustManager();
-
-                if(manager != null)
-                {
-                    clientBuilder.sslSocketFactory(socketFactory, manager);
-                }
-            }
             client = clientBuilder.build();
             siteHttpsConnection = client.newCall(siteRequestBuilder.build()).execute();
             responseCode = siteHttpsConnection.code();

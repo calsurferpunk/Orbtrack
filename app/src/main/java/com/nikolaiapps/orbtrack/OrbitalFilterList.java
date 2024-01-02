@@ -47,7 +47,7 @@ public class OrbitalFilterList
             {
                 if(!nameOnly && value1.satellite.name.equals(value2.satellite.name))
                 {
-                    return(Globals.intCompare(value1.satellite.noradId, value2.satellite.noradId));
+                    return(Integer.compare(value1.satellite.noradId, value2.satellite.noradId));
                 }
                 else
                 {

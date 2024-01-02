@@ -465,7 +465,7 @@ public abstract class Universe
                 radius = (int)(imageHalfWidth - (imageHalfWidth * (0.5 - phase) * 4));
                 phaseCanvas.clipRect(leftOffset, 0, centerX, imageHeight);
                 ovalPath.addOval(new RectF(centerX - radius, 0, centerX + radius, imageHeight), Path.Direction.CW);
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                if(Build.VERSION.SDK_INT >= 26)
                 {
                     phaseCanvas.clipOutPath(ovalPath);
                 }
@@ -482,7 +482,7 @@ public abstract class Universe
                 radius = (int)(imageHalfWidth - (imageHalfWidth * (phase - 0.5) * 4));
                 phaseCanvas.clipRect(centerX, 0, centerX + imageHalfWidth, imageHeight);
                 ovalPath.addOval(new RectF(centerX - radius, 0, centerX + radius, imageHeight), Path.Direction.CW);
-                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                if(Build.VERSION.SDK_INT >= 26)
                 {
                     phaseCanvas.clipOutPath(ovalPath);
                 }

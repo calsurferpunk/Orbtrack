@@ -201,12 +201,12 @@ public class AddSelectListAdapter extends BaseAdapter
                 switch(position + (Build.VERSION.SDK_INT >= 29 ? 1 : 0))
                 {
                     case FileSourceType.GoogleDrive:
-                        imageId = R.drawable.org_gdrive;
+                        imageId = R.drawable.org_google_drive;
                         useTheme = false;
                         break;
 
                     case FileSourceType.Dropbox:
-                        imageId = R.drawable.org_dbox;
+                        imageId = R.drawable.org_dropbox;
                         useTheme = false;
                         break;
 
@@ -282,11 +282,11 @@ public class AddSelectListAdapter extends BaseAdapter
                     switch(selectionIds[position])
                     {
                         case Globals.AccountType.GoogleDrive:
-                            imageId = R.drawable.org_gdrive;
+                            imageId = R.drawable.org_google_drive;
                             break;
 
                         case Globals.AccountType.Dropbox:
-                            imageId = R.drawable.org_dbox;
+                            imageId = R.drawable.org_dropbox;
                             break;
 
                         default:

@@ -88,11 +88,7 @@ public class PlayBar extends LinearLayout
                 buttonColor = valueArray.getColor(R.styleable.PlayBar_buttonColor, Color.WHITE);
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }

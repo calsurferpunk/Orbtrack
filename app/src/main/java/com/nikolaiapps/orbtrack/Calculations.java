@@ -1,7 +1,6 @@
 package com.nikolaiapps.orbtrack;
 
 
-import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import androidx.annotation.NonNull;
@@ -1209,10 +1208,6 @@ public abstract class Calculations
     {
         String valueExpString = String.format(Locale.US, "%E", value).replace("+", " ");
         int expIndex = valueExpString.indexOf("E");
-        if(Build.VERSION.SDK_INT < 21 && valueExpString.charAt(expIndex + 2) == '0')
-        {
-            valueExpString = valueExpString.substring(0, expIndex + 2) + valueExpString.substring(expIndex + 3);
-        }
         int exp = (expIndex >= 0 && (expIndex + 1) < valueExpString.length() ? Integer.parseInt(valueExpString.substring(expIndex + 1).trim()) : 0);
         int usedExp = (exp >= 0 ? (exp - 4) : (exp + 1));
         int decimalValue = (int)(value * Math.pow(10, -exp + 4));

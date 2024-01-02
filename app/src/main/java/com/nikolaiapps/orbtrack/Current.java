@@ -78,7 +78,7 @@ public abstract class Current
                 @Override
                 public int compare(NoradIndex value1, NoradIndex value2)
                 {
-                    return(Globals.intCompare(value1.noradId, value2.noradId));
+                    return(Integer.compare(value1.noradId, value2.noradId));
                 }
             }
 

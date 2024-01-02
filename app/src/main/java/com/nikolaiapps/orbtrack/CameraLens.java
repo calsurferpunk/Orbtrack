@@ -125,7 +125,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             @Override
             public int compare(IconImage value1, IconImage value2)
             {
-                return(Globals.intCompare(value1.id, value2.id));
+                return(Integer.compare(value1.id, value2.id));
             }
         }
 
@@ -194,7 +194,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             @Override
             public int compare(ParentOrbital value1, ParentOrbital value2)
             {
-                return(Globals.intCompare(value1.id, value2.id));
+                return(Integer.compare(value1.id, value2.id));
             }
         }
 

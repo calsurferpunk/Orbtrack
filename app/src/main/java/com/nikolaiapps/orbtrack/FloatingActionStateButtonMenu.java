@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Color;
-import android.os.Build;
 import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.view.Gravity;
@@ -86,11 +85,7 @@ public class FloatingActionStateButtonMenu extends LinearLayout
                 }
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }
@@ -197,7 +192,7 @@ public class FloatingActionStateButtonMenu extends LinearLayout
     public FloatingActionStateButton addMenuItem(int imageId, int stringId)
     {
         Context context = getContext();
-        float[] dps = Globals.dpsToPixels(context, 7, (Build.VERSION.SDK_INT >= 21 ? 20 : 7));
+        float[] dps = Globals.dpsToPixels(context, 7, 20);
         int padding = (int)dps[0];
         int offset = (int)dps[1];
         LinearLayout.LayoutParams textParams;
@@ -234,7 +229,7 @@ public class FloatingActionStateButtonMenu extends LinearLayout
 
             //setup button
             itemParams = (LayoutParams)menuItem.getLayoutParams();
-            itemParams.setMargins((int)(offset / (Build.VERSION.SDK_INT >= 21 ? 2.5 : 1.4)), -2, 0, -2);
+            itemParams.setMargins((int)(offset / 2.5), -2, 0, -2);
             menuItem.setPadding(0, 0, 0, 0);
             menuItem.setLayoutParams(itemParams);
         }

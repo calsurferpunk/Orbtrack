@@ -601,7 +601,7 @@ public class EditValuesDialog
                                 rotate = 90;
                             }
 
-                            currentItem = (currentId != -1 ? new IconSpinner.Item(currentId, (!isLogin && currentId != R.drawable.org_gdrive && currentId != R.drawable.org_dbox), currentValue, currentValue, rotate) : null);
+                            currentItem = (currentId != -1 ? new IconSpinner.Item(currentId, (!isLogin && currentId != R.drawable.org_google_drive && currentId != R.drawable.org_dropbox), currentValue, currentValue, rotate) : null);
                         }
 
                         items[index] = currentItem;

@@ -272,11 +272,7 @@ public class Graph extends View
                 textSizeSmall = valueArray.getDimension(R.styleable.Graph_dataTextSize, textSizeSmall);
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }

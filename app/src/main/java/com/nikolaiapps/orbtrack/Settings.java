@@ -466,10 +466,10 @@ public abstract class Settings
                     switch(id)
                     {
                         case Globals.AccountType.GoogleDrive:
-                            return(R.drawable.org_gdrive);
+                            return(R.drawable.org_google_drive);
 
                         case Globals.AccountType.Dropbox:
-                            return(R.drawable.org_dbox);
+                            return(R.drawable.org_dropbox);
 
                         case Globals.AccountType.SpaceTrack:
                             return(R.drawable.org_space_track);
@@ -597,7 +597,7 @@ public abstract class Settings
                         AppCompatImageView imageColumn = listColumns.findViewById(R.id.Accounts_Item_Image);
 
                         imageColumn.setVisibility(View.INVISIBLE);
-                        imageColumn.setImageResource(R.drawable.org_gdrive);
+                        imageColumn.setImageResource(R.drawable.org_google_drive);
                         ((TextView)listColumns.findViewById(R.id.Accounts_Item_Name_Text)).setText(R.string.title_account);
                     }
 

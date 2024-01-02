@@ -47,11 +47,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
                 inputType = valueArray.getInt(R.styleable.SelectableAutoCompleteTextView_android_inputType, inputType);
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }

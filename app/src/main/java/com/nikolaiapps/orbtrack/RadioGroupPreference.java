@@ -58,11 +58,7 @@ public class RadioGroupPreference extends ValueTypePreference
                 setValueType(valueArray.getInt(R.styleable.RadioGroupPreference_valueType, ClassType.String));
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }

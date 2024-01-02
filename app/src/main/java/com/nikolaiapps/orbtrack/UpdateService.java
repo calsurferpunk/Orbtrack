@@ -252,7 +252,7 @@ public class UpdateService extends NotifyService
             {
                 if(indexOnly || (!nameOnly && value1.name.equals(value2.name)))
                 {
-                    return(Globals.intCompare(value1.index, value2.index));
+                    return(Integer.compare(value1.index, value2.index));
                 }
                 else
                 {
@@ -287,11 +287,11 @@ public class UpdateService extends NotifyService
             {
                 if(value1.noradId == value2.noradId)
                 {
-                    return(Globals.intCompare(value1.categoryIndex, value2.categoryIndex));
+                    return(Integer.compare(value1.categoryIndex, value2.categoryIndex));
                 }
                 else
                 {
-                    return(Globals.intCompare(value1.noradId, value2.noradId));
+                    return(Integer.compare(value1.noradId, value2.noradId));
                 }
             }
         }

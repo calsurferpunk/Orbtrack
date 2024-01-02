@@ -7,7 +7,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -758,7 +757,7 @@ public interface CoordinatesFragment
     {
         static void setupZoomButton(Context context, final CoordinatesFragment mapView, FloatingActionButton zoomButton, final boolean zoomIn)
         {
-            int marginDp = (int)Globals.dpToPixels(context, -(Build.VERSION.SDK_INT >= 21 ? 20 : 10));
+            int marginDp = (int)Globals.dpToPixels(context, -20);
             LinearLayout.LayoutParams zoomParams = (LinearLayout.LayoutParams)zoomButton.getLayoutParams();
 
             zoomParams.setMargins(0, 0, 0, (zoomIn ? marginDp : 0));

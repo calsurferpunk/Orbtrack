@@ -67,11 +67,7 @@ public class SwitchTextPreference extends ValueTypePreference
                 setValueType(valueArray.getInt(R.styleable.SwitchTextPreference_valueType, ClassType.Integer));
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }

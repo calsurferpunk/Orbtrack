@@ -94,11 +94,7 @@ public class TimeIntervalPreference extends CustomPreference
                 intervalKey = valueArray.getString(R.styleable.TimeIntervalPreference_intervalKey);
                 valueArray.recycle();
             }
-            catch(NoSuchMethodError noMethod)
-            {
-                //do nothing
-            }
-            catch(Exception ex)
+            catch(NoSuchMethodError | Exception noMethod)
             {
                 //do nothing
             }

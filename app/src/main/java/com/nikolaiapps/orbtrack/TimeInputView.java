@@ -143,18 +143,7 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
                 TimePickerDialog timeDialog;
 
                 //show time picker
-                if(Build.VERSION.SDK_INT <= 20)
-                {
-                    timeDialog = new TimePickerDialog(context, this, currentHour, currentMinute, false);
-                    if(timeDialog.getWindow() != null)
-                    {
-                        timeDialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-                    }
-                }
-                else
-                {
-                    timeDialog = new TimePickerDialog(context, themeID, this, currentHour, currentMinute, false);
-                }
+                timeDialog = new TimePickerDialog(context, themeID, this, currentHour, currentMinute, false);
                 timeDialog.show();
             }
         }

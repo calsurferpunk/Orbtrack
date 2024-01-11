@@ -98,6 +98,18 @@ public abstract class Selectable
             id = idNum;
             listIndex = index;
         }
+        public ListItem(String fromString)
+        {
+            if(fromString != null)
+            {
+                String[] values = fromString.split(",");
+                if(values.length == 2)
+                {
+                    id = Integer.parseInt(values[0]);
+                    listIndex = Integer.parseInt(values[1]);
+                }
+            }
+        }
 
         @Override
         public int describeContents()
@@ -110,6 +122,66 @@ public abstract class Selectable
         {
             dest.writeInt(id);
             dest.writeInt(listIndex);
+        }
+
+        @Override
+        public @NonNull String toString()
+        {
+            return(id + "," + listIndex);
+        }
+
+        //Converts an array string to an array
+        public static ListItem[] arrayFromString(String arrayString)
+        {
+            ArrayList<ListItem> list = new ArrayList<>(0);
+
+            //if array string is set
+            if(arrayString != null)
+            {
+                String[] listValues = arrayString.split(":");
+
+                //go through values
+                for(String currentValue : listValues)
+                {
+                    //add value to list
+                    list.add(new ListItem(currentValue));
+                }
+            }
+
+            //invalid list string
+            return(list.size() > 0 ? list.toArray(new ListItem[0]) : null);
+        }
+
+        //Converts an array into an array string
+        public static String stringFromArray(ListItem[] array)
+        {
+            boolean onFirst = true;
+            StringBuilder listString = new StringBuilder();
+
+            //if list is set
+            if(array != null)
+            {
+                //go through each item
+                for(ListItem currentItem : array)
+                {
+                    //if on the first
+                    if(onFirst)
+                    {
+                        //no longer on first
+                        onFirst = false;
+                    }
+                    else
+                    {
+                        //add separator
+                        listString.append(":");
+                    }
+
+                    //add current item
+                    listString.append(currentItem.toString());
+                }
+            }
+
+            return(listString.length() > 0 ? listString.toString() : null);
         }
     }
 

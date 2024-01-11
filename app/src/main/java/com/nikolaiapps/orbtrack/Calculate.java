@@ -4,6 +4,7 @@ package com.nikolaiapps.orbtrack;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -1548,6 +1549,94 @@ public abstract class Calculate
         }
     }
 
+    //Gets read settings
+    private static SharedPreferences getReadSettings(Context context)
+    {
+        return(context.getSharedPreferences("Calculate", Context.MODE_PRIVATE));
+    }
+
+    //Gets write settings
+    private static SharedPreferences.Editor getWriteSettings(Context context)
+    {
+        return(getReadSettings(context).edit());
+    }
+
+    //Converts an array object to an item list
+    private static ArrayList<Selectable.ListItem> getItemList(Object arrayObject)
+    {
+        //if an item array
+        if(arrayObject instanceof Selectable.ListItem[])
+        {
+            Selectable.ListItem[] itemArray = (Selectable.ListItem[])arrayObject;
+
+            //if there are items
+            if(itemArray.length > 0)
+            {
+                //return all items as an item list
+                ArrayList<Selectable.ListItem> itemList = new ArrayList<>(0);
+                itemList.addAll(Arrays.asList(itemArray));
+                return(itemList);
+            }
+        }
+
+        //invalid or empty
+        return(null);
+    }
+
+    //Converts an item list into an array
+    private static Selectable.ListItem[] getItemArray(ArrayList<Selectable.ListItem> itemList)
+    {
+        return(itemList != null && itemList.size() > 0 ? itemList.toArray(new Selectable.ListItem[0]) : null);
+    }
+
+    //Gets page param
+    private static Object getPageParam(Context context, String paramType, int page, Object defaultValue)
+    {
+        String key = paramType + page;
+        SharedPreferences calculateSettings = getReadSettings(context);
+
+        switch(paramType)
+        {
+            case ParamTypes.NoradId:
+            case ParamTypes.NoradId2:
+                return(calculateSettings.getInt(key, (int)defaultValue));
+
+            case ParamTypes.SelectedOrbitals:
+            case ParamTypes.SelectedOrbitals2:
+                return(Selectable.ListItem.arrayFromString(calculateSettings.getString(key, (String)defaultValue)));
+        }
+
+        //invalid param
+        return(defaultValue);
+    }
+
+    //Saves page param
+    private static void savePageParam(Context context, String paramType, int page, Object value)
+    {
+        String key = paramType + page;
+        SharedPreferences.Editor writeSettings = getWriteSettings(context);
+
+        switch(paramType)
+        {
+            case ParamTypes.NoradId:
+            case ParamTypes.NoradId2:
+                writeSettings.putInt(key, (int)value).apply();
+                break;
+
+            case ParamTypes.SelectedOrbitals:
+            case ParamTypes.SelectedOrbitals2:
+                if(value instanceof Selectable.ListItem[])
+                {
+                    writeSettings.putString(key, Selectable.ListItem.stringFromArray((Selectable.ListItem[])value)).apply();
+                }
+                else
+                {
+                    writeSettings.putString(key, null).apply();
+                }
+                break;
+        }
+    }
+
     //Page view
     public static class Page extends Selectable.ListFragment
     {
@@ -1900,7 +1989,7 @@ public abstract class Calculate
         }
 
         //Gets input values
-        public Bundle getInputValues()
+        public Bundle getInputValues(boolean saveSettings)
         {
             int index;
             int noradId = Universe.IDs.Invalid;
@@ -2061,6 +2150,15 @@ public abstract class Calculate
                 pageParams.putParcelableArrayList(ParamTypes.SelectedOrbitals, orbitalsSelected);
                 pageParams.putLong(ParamTypes.StartDateMs, startTime.getTimeInMillis());
                 pageParams.putLong(ParamTypes.EndDateMs, endTime.getTimeInMillis());
+
+                //if saving settings
+                if(saveSettings)
+                {
+                    savePageParam(context, ParamTypes.NoradId, pageNumber, noradId);
+                    savePageParam(context, ParamTypes.NoradId2, pageNumber, noradId2);
+                    savePageParam(context, ParamTypes.SelectedOrbitals, pageNumber, getItemArray(orbitalsSelected));
+                    savePageParam(context, ParamTypes.SelectedOrbitals2, pageNumber, getItemArray(orbitalsSelected2));
+                }
 
                 //return values
                 return(pageParams);
@@ -2225,6 +2323,7 @@ public abstract class Calculate
             Bundle savedParams;
             Calendar dateNow = Calendar.getInstance();
             Calendar dateLater = Calendar.getInstance();
+            Context context = container.getContext();
             Page newPage = (Page)super.instantiateItem(container, position);
 
             //set later date for later
@@ -2261,7 +2360,7 @@ public abstract class Calculate
                         if(subPageNum == Globals.SubPageType.Input)
                         {
                             //save inputs
-                            savedInputs[pageNum] = ((Page)page).getInputValues();
+                            savedInputs[pageNum] = ((Page)page).getInputValues(false);
                         }
                     }
                 }
@@ -2278,10 +2377,10 @@ public abstract class Calculate
                 params = new Bundle();
             }
             params.putInt(Selectable.ParamTypes.PageNumber, position);
-            params.putInt(ParamTypes.NoradId, Integer.MAX_VALUE);
-            params.putInt(ParamTypes.NoradId2, Universe.IDs.Invalid);
-            params.putParcelableArrayList(ParamTypes.SelectedOrbitals, null);
-            params.putParcelableArrayList(ParamTypes.SelectedOrbitals2, null);
+            params.putInt(ParamTypes.NoradId, (int)getPageParam(context, ParamTypes.NoradId, position, Integer.MAX_VALUE));
+            params.putInt(ParamTypes.NoradId2, (int)getPageParam(context, ParamTypes.NoradId2, position, Universe.IDs.Invalid));
+            params.putParcelableArrayList(ParamTypes.SelectedOrbitals, getItemList(getPageParam(context, ParamTypes.SelectedOrbitals, position, null)));
+            params.putParcelableArrayList(ParamTypes.SelectedOrbitals2, getItemList(getPageParam(context, ParamTypes.SelectedOrbitals2, position, null)));
             if(position == PageType.View || position == PageType.Coordinates)
             {
                 params.putIntegerArrayList(ParamTypes.MultiNoradId, (haveSavedParams ? savedParams.getIntegerArrayList(ParamTypes.MultiNoradId) : null));
@@ -3171,7 +3270,7 @@ public abstract class Calculate
             @Override
             public void onClick(View v)
             {
-                Bundle inputParams = page.getInputValues();
+                Bundle inputParams = page.getInputValues(true);
                 int noradId;
                 ArrayList<Integer> multiNoradId;
 

@@ -871,6 +871,7 @@ public class MasterAddListActivity extends BaseInputActivity
         int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
         int listNumber = addIntent.getIntExtra(ParamTypes.ListNumber, 1);
         ArrayList<Selectable.ListItem> selectedOrbitals = addIntent.getParcelableArrayListExtra(ParamTypes.SelectedOrbitals);
+        boolean haveSelectedOrbitals = (selectedOrbitals != null && selectedOrbitals.size() > 0);
         MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
         searchLayout = this.findViewById(R.id.Orbital_Search_Layout);
         searchGroup = this.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
@@ -965,7 +966,7 @@ public class MasterAddListActivity extends BaseInputActivity
                             searchLayout.setVisibility(View.VISIBLE);
                             setupInputs(addAdapter, null, null, false, used.types);
                             addAdapter.showSearchInputs(false);
-                            addButton.setEnabled(isVisibleList);
+                            addButton.setEnabled(isVisibleList || haveSelectedOrbitals);
                         }
                     });
                 }
@@ -977,7 +978,7 @@ public class MasterAddListActivity extends BaseInputActivity
                     super.onChanged();
 
                     //if there are selected orbitals
-                    if(selectedOrbitals != null && selectedOrbitals.size() > 0)
+                    if(haveSelectedOrbitals)
                     {
                         //get first selected position
                         int position = selectedOrbitals.get(0).listIndex;

@@ -537,8 +537,8 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                                 //if there are items and view exists
                                 if(loadedItems.length > 0 && listView != null)
                                 {
-                                    //load adapter again
-                                    listView.loadAdapter();
+                                    //set adapter
+                                    listView.setAdapter(adapter);
                                 }
 
                                 //if listener is set
@@ -932,6 +932,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         public boolean getUsingIcon3Only()
         {
             return(usingIcon3Only);
+        }
+
+        public boolean getIsLoadingItems()
+        {
+            return(loadingItems);
         }
     }
 

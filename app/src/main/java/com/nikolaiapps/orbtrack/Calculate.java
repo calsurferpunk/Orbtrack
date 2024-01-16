@@ -3088,7 +3088,10 @@ public abstract class Calculate
             Activity activity = page.getActivity();
 
             //set adapter, background, and listener
-            orbitalList.setAdapter(orbitalAdapter);
+            if(!orbitalAdapter.getIsLoadingItems())
+            {
+                orbitalList.setAdapter(orbitalAdapter);
+            }
             orbitalList.setBackgroundColor(backgroundColor);
             orbitalList.setDropDownHeight(0);
             orbitalList.setOnClickListener(new View.OnClickListener()

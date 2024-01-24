@@ -1422,9 +1422,9 @@ public abstract class Current
     }
 
     //Creates a search adapter
-    private static IconSpinner.CustomAdapter createSearchAdapter(Context context, IconSpinner searchList, ArrayList<Database.DatabaseSatellite> selectedOrbitalList, int textColor, int textSelectedColor, IconSpinner.CustomAdapter.OnLoadItemsListener listener)
+    private static IconSpinner.CustomAdapter createSearchAdapter(Context context, ArrayList<Database.DatabaseSatellite> selectedOrbitalList, int textColor, int textSelectedColor, IconSpinner.CustomAdapter.OnLoadItemsListener listener)
     {
-        return(new IconSpinner.CustomAdapter(context, searchList, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black), listener));
+        return(new IconSpinner.CustomAdapter(context, null, selectedOrbitalList.toArray(new Database.DatabaseSatellite[0]), false, textColor, textSelectedColor, textColor, textSelectedColor, (Settings.getDarkTheme(context) ? R.color.white : R.color.black), listener));
     }
 
     //Shows/hides search displays
@@ -1471,7 +1471,7 @@ public abstract class Current
         if(usingSearchList)
         {
             //set search list
-            searchList.setAdapter(createSearchAdapter(context, searchList, selectedOrbitalList, textColor, textSelectedColor, null));
+            searchList.setAdapter(createSearchAdapter(context, selectedOrbitalList, textColor, textSelectedColor, null));
             searchList.setBackgroundColor(Globals.resolveColorID(context, R.attr.colorAccentDark));
             searchList.setBackgroundItemColor(Globals.resolveColorID(context, android.R.attr.colorBackground));
             searchList.setBackgroundItemSelectedColor(Globals.resolveColorID(context, R.attr.colorAccentVariant));
@@ -1499,7 +1499,7 @@ public abstract class Current
             if(searchButton != null && searchText != null)
             {
                 //create search view adapter
-                IconSpinner.CustomAdapter searchViewAdapter = createSearchAdapter(context, searchList, selectedOrbitalList, textColor, textSelectedColor, new IconSpinner.CustomAdapter.OnLoadItemsListener()
+                IconSpinner.CustomAdapter searchViewAdapter = createSearchAdapter(context, selectedOrbitalList, textColor, textSelectedColor, new IconSpinner.CustomAdapter.OnLoadItemsListener()
                 {
                     @Override
                     public void onLoaded(IconSpinner.CustomAdapter adapter, IconSpinner.Item[] loadedItems)

@@ -531,14 +531,11 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                             @Override
                             public void run()
                             {
-                                //notify change
-                                CustomAdapter.this.notifyDataSetChanged();
-
                                 //if there are items and view exists
                                 if(loadedItems.length > 0 && listView != null)
                                 {
                                     //set adapter
-                                    listView.setAdapter(adapter);
+                                    listView.setAdapter(CustomAdapter.this);
                                 }
 
                                 //if listener is set
@@ -547,6 +544,9 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
                                     //send event
                                     listener.onLoaded(CustomAdapter.this, loadedItems);
                                 }
+
+                                //notify change
+                                CustomAdapter.this.notifyDataSetChanged();
                             }
                         });
                     }

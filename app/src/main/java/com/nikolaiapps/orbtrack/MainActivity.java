@@ -4123,6 +4123,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean onCurrentLensId;
                 boolean onCurrentLensChildId;
                 boolean havePendingMarkerScale = Current.getHaveMapPendingMarkerScale();
+                boolean havePendingLensStarMagnitude = Current.getHaveLensPendingStarMagnitude();
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 float pendingMarkerScale = Current.getMapPendingMarkerScale();
@@ -4426,6 +4427,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     {
                         //clear pending scale
                         Current.clearMapPendingMarkerScale();
+                    }
+                    if(havePendingLensStarMagnitude)
+                    {
+                        //clear pending magnitude
+                        Current.clearLensPendingStarMagnitude();
                     }
 
                     //if on lens and it exists

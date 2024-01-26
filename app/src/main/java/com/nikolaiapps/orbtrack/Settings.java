@@ -38,6 +38,8 @@ public abstract class Settings
     public static final int SpeedScaleMax = 150;
     public static final int SensitivityScaleMin = 10;
     public static final int SensitivityScaleMax = 150;
+    public static final int StarMagnitudeScaleMin = -2;
+    public static final int StarMagnitudeScaleMax = 7;
 
     //Page types
     public static abstract class PageType
@@ -112,6 +114,7 @@ public abstract class Settings
         static final String LensConstellationAlpha = "LensConstellationAlpha";
         static final String LensHorizonColor = "LensHorizonColor";
         static final String LensUseHorizon = "LensUseHorizon";
+        static final String LensStarMagnitude = "LensStarMagnitude";
         static final String LensUseCamera = "LensUseCamera";
         static final String LensRotate = "LensRotate";
         static final String LensUseAutoWidth = "LensUseAutoWidth";
@@ -2206,6 +2209,9 @@ public abstract class Settings
             case PreferenceName.MapMarkerScale:
                 return(0.65f);
 
+            case PreferenceName.LensStarMagnitude:
+                return(2);
+
             case PreferenceName.MapFootprintAlpha:
                 return(0.35f);
         }
@@ -2621,6 +2627,24 @@ public abstract class Settings
     public static void setLensShowHorizon(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.LensUseHorizon, show);
+    }
+
+    //Returns lens star magnitude
+    public static float getLensStarMagnitude(Context context)
+    {
+        //get magnitude
+        return(getPreferenceFloat(context, PreferenceName.LensStarMagnitude));
+    }
+
+    //Sets lens star magnitude
+    public static void setLensStarMagnitude(Context context, float magnitude)
+    {
+        //if a valid magnitude
+        if(magnitude >= (StarMagnitudeScaleMin / 100.0f) && magnitude <= (StarMagnitudeScaleMax / 100.0f))
+        {
+            //set magnitude
+            setPreferenceFloat(context, PreferenceName.LensStarMagnitude, magnitude);
+        }
     }
 
     //Gets lens using camera

@@ -119,7 +119,7 @@
                             android:summary="@string/desc_show_shadows"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_stars"
+                            android:title="@string/title_visible_stars"
                             android:key="MapShowStars"
                             android:summary="@string/desc_show_stars"/>
 

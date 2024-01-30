@@ -962,6 +962,7 @@ public abstract class Current
             int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
+            boolean showingStars;
             boolean onCurrent = (group == MainActivity.Groups.Current);
             boolean createLens = (subPage == Globals.SubPageType.Lens);
             boolean createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
@@ -981,6 +982,7 @@ public abstract class Current
             //note: current single views use list filter since it came from there
             Globals.applyOrbitalTypeFilter(context, group, (onCurrent && (mapSingleOrbital || lensSingleOrbital) ? Globals.SubPageType.List : subPage), satellites);
             orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
+            showingStars = (orbitalTypeCount[Database.OrbitalType.Star] > 0);
             showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
 
             //set adapter
@@ -1003,7 +1005,7 @@ public abstract class Current
                 setOrbitalViews(usedSatellites);
 
                 //create view
-                newView = onCreateLensView(this, inflater, container, usedSatellites, savedInstanceState, showingConstellations);
+                newView = onCreateLensView(this, inflater, container, usedSatellites, savedInstanceState, showingStars, showingConstellations);
             }
             //else if need to create map view
             else if(createMapView)
@@ -1687,7 +1689,7 @@ public abstract class Current
     }
 
     //Creates lens view
-    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean needConstellations)
+    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean showingStars, boolean needConstellations)
     {
         final Context context = pageFragment.getContext();
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
@@ -1724,7 +1726,7 @@ public abstract class Current
         final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align) : null);
         final FloatingActionStateButton showHorizonButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_remove_black, R.string.title_show_horizon);
         final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
-        final FloatingActionStateButton showStarsButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_show_stars) : null);
+        final FloatingActionStateButton visibleStarsButton = (!useSaved && (showingStars || needConstellations) ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_visible_stars) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
         final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
         final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
@@ -2089,7 +2091,7 @@ public abstract class Current
             }
 
             //setup stars button
-            setupScaleButton(context, showStarsButton, pageFragment.scaleBar, true);
+            setupScaleButton(context, visibleStarsButton, pageFragment.scaleBar, true);
 
             //remove play bar
             cameraView.playBar = null;
@@ -2397,136 +2399,145 @@ public abstract class Current
     //Setup scale button
     private static void setupScaleButton(final Context context, final FloatingActionStateButton scaleButton, final PlayBar scaleBar, boolean forStars)
     {
-        scaleButton.setOnClickListener(new View.OnClickListener()
+        //if button exists
+        if(scaleButton != null)
         {
-            @Override
-            public void onClick(View view)
+            //setup button
+            scaleButton.setOnClickListener(new View.OnClickListener()
             {
-                boolean setScaleVisible = (scaleBar.getVisibility() == View.GONE);
-
-                //if showing scale now
-                if(setScaleVisible)
+                @Override
+                public void onClick(View view)
                 {
-                    //set to current value
-                    if(forStars)
+                    boolean setScaleVisible = (scaleBar.getVisibility() == View.GONE);
+
+                    //if showing scale now
+                    if(setScaleVisible)
                     {
-                        scaleBar.setValue((int)(Settings.getLensStarMagnitude(context) * 10));
+                        //set to current value
+                        if(forStars)
+                        {
+                            scaleBar.setValue((int)(Settings.getLensStarMagnitude(context) * 10));
+                        }
+                        else
+                        {
+                            scaleBar.setValue((int)(Math.floor(Settings.getMapMarkerScale(context) * 100)));
+                        }
                     }
                     else
                     {
-                        scaleBar.setValue((int)(Math.floor(Settings.getMapMarkerScale(context) * 100)));
+                        //undo any changes
+                        if(forStars)
+                        {
+                            lensPendingStarMagnitude = Settings.getLensStarMagnitude(context);
+                        }
+                        else
+                        {
+                            mapPendingMarkerScale = Settings.getMapMarkerScale(context);
+                        }
                     }
-                }
-                else
-                {
-                    //undo any changes
+
+                    //toggle scale bar visibility
+                    scaleBar.setVisibility(setScaleVisible ? View.VISIBLE : View.GONE);
+
+                    //close menu
                     if(forStars)
                     {
+                        CameraLens cameraView = getCameraView();
+
+                        if(cameraView != null)
+                        {
+                            cameraView.settingsMenu.close();
+                        }
+                    }
+                    else
+                    {
+                        mapSettingsMenu.close();
+                    }
+                }
+            });
+        }
+
+        //if bar exists
+        if(scaleBar != null)
+        {
+            //setup bar
+            scaleBar.setButtonsVisible(true);
+            scaleBar.setMin(forStars ? Settings.StarMagnitudeScaleMin : Settings.IconScaleMin);
+            scaleBar.setMax(forStars ? Settings.StarMagnitudeScaleMax : Settings.IconScaleMax);
+            scaleBar.setPlayIndexIncrementUnits(1);
+            if(context != null)
+            {
+                scaleBar.setTitle(context.getString(forStars ? R.string.title_visible_star_magnitude : R.string.title_icon_scale));
+            }
+            scaleBar.setPlayActivity(null);
+            scaleBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
+            {
+                @Override
+                public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
+                {
+                    //if for stars
+                    if(forStars)
+                    {
+                        //update magnitude
+                        lensPendingStarMagnitude = progressValue / 10f;
+
+                        //update text
+                        seekBar.setScaleText(String.format(Locale.US, "%1.1f", lensPendingStarMagnitude));
+                    }
+                    //else if map is ready
+                    else if(getMapViewIfReady() != null)
+                    {
+                        //update scale
+                        mapPendingMarkerScale = progressValue / 100f;
+
+                        //update text
+                        seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));
+                    }
+                }
+            });
+            scaleBar.setButtonListeners(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    //if for stars
+                    if(forStars)
+                    {
+                        //set scale
+                        Settings.setLensStarMagnitude(context, scaleBar.getValue() / 10f);
+                    }
+                    else
+                    {
+                        //set scale
+                        Settings.setMapMarkerScale(context, scaleBar.getValue() / 100f);
+                    }
+
+                    //hide scale
+                    scaleBar.setVisibility(View.GONE);
+                }
+            }, new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View view)
+                {
+                    //if for stars
+                    if(forStars)
+                    {
+                        //undo any changes
                         lensPendingStarMagnitude = Settings.getLensStarMagnitude(context);
                     }
-                    else
+                    //else if map is ready
+                    else if(getMapViewIfReady() != null)
                     {
+                        //undo any changes
                         mapPendingMarkerScale = Settings.getMapMarkerScale(context);
                     }
+
+                    //hide scale
+                    scaleBar.setVisibility(View.GONE);
                 }
-
-                //toggle scale bar visibility
-                scaleBar.setVisibility(setScaleVisible ? View.VISIBLE : View.GONE);
-
-                //close menu
-                if(forStars)
-                {
-                    CameraLens cameraView = getCameraView();
-
-                    if(cameraView != null)
-                    {
-                        cameraView.settingsMenu.close();
-                    }
-                }
-                else
-                {
-                    mapSettingsMenu.close();
-                }
-            }
-        });
-
-        //setup bar
-        scaleBar.setButtonsVisible(true);
-        scaleBar.setMin(forStars ? Settings.StarMagnitudeScaleMin : Settings.IconScaleMin);
-        scaleBar.setMax(forStars ? Settings.StarMagnitudeScaleMax : Settings.IconScaleMax);
-        scaleBar.setPlayIndexIncrementUnits(1);
-        if(context != null)
-        {
-            scaleBar.setTitle(context.getString(forStars ? R.string.title_star_visible_magnitude : R.string.title_icon_scale));
+            });
         }
-        scaleBar.setPlayActivity(null);
-        scaleBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
-        {
-            @Override
-            public void onProgressChanged(PlayBar seekBar, int progressValue, double subProgressPercent, boolean fromUser)
-            {
-                //if for stars
-                if(forStars)
-                {
-                    //update magnitude
-                    lensPendingStarMagnitude = progressValue / 10f;
-
-                    //update text
-                    seekBar.setScaleText(String.format(Locale.US, "%1.1f", lensPendingStarMagnitude));
-                }
-                //else if map is ready
-                else if(getMapViewIfReady() != null)
-                {
-                    //update scale
-                    mapPendingMarkerScale = progressValue / 100f;
-
-                    //update text
-                    seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));
-                }
-            }
-        });
-        scaleBar.setButtonListeners(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                //if for stars
-                if(forStars)
-                {
-                    //set scale
-                    Settings.setLensStarMagnitude(context, scaleBar.getValue() / 10f);
-                }
-                else
-                {
-                    //set scale
-                    Settings.setMapMarkerScale(context, scaleBar.getValue() / 100f);
-                }
-
-                //hide scale
-                scaleBar.setVisibility(View.GONE);
-            }
-        }, new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View view)
-            {
-                //if for stars
-                if(forStars)
-                {
-                    //undo any changes
-                    lensPendingStarMagnitude = Settings.getLensStarMagnitude(context);
-                }
-                //else if map is ready
-                else if(getMapViewIfReady() != null)
-                {
-                    //undo any changes
-                    mapPendingMarkerScale = Settings.getMapMarkerScale(context);
-                }
-
-                //hide scale
-                scaleBar.setVisibility(View.GONE);
-            }
-        });
     }
 
     //Setup play bar

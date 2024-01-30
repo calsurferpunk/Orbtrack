@@ -66,37 +66,11 @@
             android:visibility="gone"/>
 
         <LinearLayout
-            android:id="@+id/Lens_Button_Layout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="30dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/Lens_Select_Button"
-                style="@style/MaterialButton"
-                android:text="@string/title_select"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/Lens_Reset_Button"
-                style="@style/MaterialButton"
-                android:text="@string/title_reset"/>
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/Lens_Cancel_Button"
-                style="@style/MaterialButton"
-                android:text="@string/title_cancel"/>
-        </LinearLayout>
-
-        <LinearLayout
             android:id="@+id/Lens_Floating_Button_Layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|end"
-            android:layout_marginRight="-14dp"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
+            android:orientation="vertical">
             <com.google.android.material.floatingactionbutton.FloatingActionButton
                 android:id="@+id/Lens_Fullscreen_Button"
                 style="@style/FloatingButton"
@@ -107,31 +81,58 @@
                 android:contentDescription="@string/title_unknown"/>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/Lens_Help_Text"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:padding="5dp"
-            android:gravity="center"
-            android:text="@string/title_select"
-            android:textColor="?attr/colorAccentLightest"
-            android:background="?attr/colorAccentVariant"
-            android:visibility="gone"/>
+            android:orientation="vertical"
+            android:layout_gravity="bottom">
+            <com.nikolaiapps.orbtrack.PlayBar
+                android:id="@+id/Lens_Magnitude_Bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="gone"/>
 
-        <com.nikolaiapps.orbtrack.PlayBar
-            android:id="@+id/Lens_Play_Bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom"
-            android:background="?attr/colorAccentDark"
-            android:visibility="gone"/>
+            <com.nikolaiapps.orbtrack.PlayBar
+                android:id="@+id/Lens_Play_Bar"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:background="?attr/colorAccentDark"
+                android:visibility="gone"/>
+
+            <LinearLayout
+                android:id="@+id/Lens_Button_Layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Lens_Select_Button"
+                    style="@style/MaterialButton"
+                    android:text="@string/title_select"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Lens_Reset_Button"
+                    style="@style/MaterialButton"
+                    android:text="@string/title_reset"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Lens_Cancel_Button"
+                    style="@style/MaterialButton"
+                    android:text="@string/title_cancel"/>
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/Lens_Help_Text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="5dp"
+                android:gravity="center"
+                android:text="@string/title_select"
+                android:textColor="?attr/colorAccentLightest"
+                android:background="?attr/colorAccentVariant"
+                android:visibility="gone"/>
+        </LinearLayout>
     </FrameLayout>
-
-    <com.nikolaiapps.orbtrack.PlayBar
-        android:id="@+id/Lens_Magnitude_Bar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="?attr/colorAccentDark"
-        android:visibility="gone"/>
 </LinearLayout>

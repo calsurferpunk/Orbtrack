@@ -587,7 +587,6 @@
     <string name="title_show_selected">Mostrar Seleccionado</string>
     <string name="title_show_selected_footprint">Mostrar Huella Seleccionada</string>
     <string name="title_show_shadows">Mostrar Sombras</string>
-    <string name="title_show_stars">Mostrar Estrellas</string>
     <string name="title_show_sunlight">Mostrar Luz Sol</string>
     <string name="title_show_toolbars">Mostrar Barras Herramientas</string>
     <string name="title_show_zoom">Mostrar Enfocar</string>
@@ -599,7 +598,6 @@
     <string name="title_space">Espacio</string>
     <string name="title_speed">Velocidad</string>
     <string name="title_square">Cuadrado</string>
-    <string name="title_star_visible_magnitude">Magnitud Visible de Estrellas</string>
     <string name="title_stars">Estrellas</string>
     <string name="title_start">Comienzo</string>
     <string name="title_start_color">Color Inicio</string>
@@ -651,6 +649,8 @@
     <string name="title_view">Vista</string>
     <string name="title_views">Vistas</string>
     <string name="title_visible">Visible</string>
+    <string name="title_visible_stars">Estrellas Visibles</string>
+    <string name="title_visible_star_magnitude">Magnitud Estrellas Visibles</string>
     <string name="title_waning_crescent">Creciente Menguante</string>
     <string name="title_waning_gibbous">Menguante Giboso</string>
     <string name="title_waxing_crescent">Creciente</string>

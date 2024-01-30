@@ -4099,6 +4099,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         final Globals.DoubleObject sunLastEl = new Globals.DoubleObject(Double.MAX_VALUE);
         final Globals.LongObject lastSystemElapsedSeconds = new Globals.LongObject(SystemClock.elapsedRealtime() / 1000);
 
+        //clear any pending
+        Current.clearMapPendingMarkerScale();
+        Current.clearLensPendingStarMagnitude();
+
         return(new Runnable()
         {
             private int lastMapNoradId = Universe.IDs.None;

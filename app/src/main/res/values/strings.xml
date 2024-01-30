@@ -587,7 +587,6 @@
     <string name="title_show_selected">Show Selected</string>
     <string name="title_show_selected_footprint">Show Selected Footprint</string>
     <string name="title_show_shadows">Show Shadows</string>
-    <string name="title_show_stars">Show Stars</string>
     <string name="title_show_sunlight">Show Sunlight</string>
     <string name="title_show_toolbars">Show Toolbars</string>
     <string name="title_show_zoom">Show Zoom</string>
@@ -599,7 +598,6 @@
     <string name="title_space">Space</string>
     <string name="title_speed">Speed</string>
     <string name="title_square">Square</string>
-    <string name="title_star_visible_magnitude">Star Visible Magnitude</string>
     <string name="title_stars">Stars</string>
     <string name="title_start">Start</string>
     <string name="title_start_color">Start Color</string>
@@ -651,6 +649,8 @@
     <string name="title_view">View</string>
     <string name="title_views">Views</string>
     <string name="title_visible">Visible</string>
+    <string name="title_visible_stars">Visible Stars</string>
+    <string name="title_visible_star_magnitude">Visible Star Magnitude</string>
     <string name="title_waning_crescent">Waning Crescent</string>
     <string name="title_waning_gibbous">Waning Gibbous</string>
     <string name="title_waxing_crescent">Waxing Crescent</string>

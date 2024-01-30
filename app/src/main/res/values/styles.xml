@@ -392,6 +392,12 @@
         <item name="cornerRadius">18dp</item>
     </style>
 
+    <style name="MaterialButtonPlayBar" parent="MaterialButton">
+        <item name="android:layout_gravity">center</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+
     <!-- Detail Views -->
     <style name="DetailTableMaterial">
         <item name="android:layout_width">match_parent</item>

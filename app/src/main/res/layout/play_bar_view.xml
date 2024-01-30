@@ -85,18 +85,14 @@
             android:gravity="center"
             android:orientation="horizontal"
             android:visibility="gone">
-                <androidx.appcompat.widget.AppCompatButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/Play_Bar_Ok_Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_ok"
-                    android:textSize="12sp"/>
+                    style="@style/MaterialButtonPlayBar"
+                    android:text="@string/title_ok"/>
 
-                <androidx.appcompat.widget.AppCompatButton
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/Play_Bar_Cancel_Button"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/title_cancel"
-                    android:textSize="12sp"/>
+                    style="@style/MaterialButtonPlayBar"
+                    android:text="@string/title_cancel"/>
         </LinearLayout>
 </LinearLayout>

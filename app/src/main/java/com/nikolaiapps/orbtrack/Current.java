@@ -1728,9 +1728,11 @@ public abstract class Current
         final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
         final FloatingActionStateButton visibleStarsButton = (!useSaved && (showingStars || needConstellations) ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_visible_stars) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
+        final LinearLayout floatingButtonLayout = rootView.findViewById(R.id.Lens_Floating_Button_Layout);
         final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
         final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
         final MaterialButton cancelButton = rootView.findViewById(R.id.Lens_Cancel_Button);
+        final FrameLayout.LayoutParams floatingButtonLayoutParams = (FrameLayout.LayoutParams)floatingButtonLayout.getLayoutParams();
 
         //update status
         lensShowToolbars = Settings.getLensShowToolbars(context);
@@ -1758,8 +1760,11 @@ public abstract class Current
             //toggle displays
             showToolbarsButton.performClick();
         }
-        
+
+        //setup bar and floating buttons
         pageFragment.scaleBar = rootView.findViewById(R.id.Lens_Magnitude_Bar);
+        floatingButtonLayoutParams.bottomMargin = (int)(useSaved ? Globals.dpToPixels(context, 24) : 0);
+        floatingButtonLayout.setLayoutParams(floatingButtonLayoutParams);
 
         //setup zoom bar
         cameraView.zoomBar.addOnChangeListener(new Slider.OnChangeListener()

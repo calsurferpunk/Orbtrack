@@ -38,6 +38,7 @@ public class PlayBar extends LinearLayout
     }
 
     private boolean synced;
+    private boolean reverseMinMax;
     private int minValue;
     private int maxValue;
     private int playPeriodMs;
@@ -128,6 +129,7 @@ public class PlayBar extends LinearLayout
         setValueTextVisible(false);
         resetPlayIncrements();
         setSynced(false);
+        setReversed(false);
         playTask = null;
         playPeriodMs = 1000;
         playScaleType = ScaleType.Speed;
@@ -149,7 +151,16 @@ public class PlayBar extends LinearLayout
 
     public int getValue()
     {
-        return(seekSlider != null ? (int)(seekSlider.getValue()) : minValue);
+        int value = (seekSlider != null ? (int)(seekSlider.getValue()) : minValue);
+
+        //if reversing min and max
+        if(reverseMinMax)
+        {
+            //reverse value
+            value = (maxValue - value) + minValue;
+        }
+
+        return(value);
     }
 
     public long getValue2()
@@ -179,6 +190,13 @@ public class PlayBar extends LinearLayout
 
     public void setValue(int value, boolean forceChange)
     {
+        //if reversing min and max
+        if(reverseMinMax)
+        {
+            //reverse value
+            value = maxValue - (value - minValue);
+        }
+
         //if a valid value
         if(value >= minValue && value <= maxValue)
         {
@@ -333,6 +351,11 @@ public class PlayBar extends LinearLayout
         }
     }
 
+    public void setReversed(boolean reverse)
+    {
+        reverseMinMax = reverse;
+    }
+
     public void setSyncButtonListener(OnClickListener listener)
     {
         //set listener
@@ -417,6 +440,12 @@ public class PlayBar extends LinearLayout
                 else if(progressValue > maxValue)
                 {
                     progressValue = maxValue;
+                }
+
+                //if reversing value
+                if(reverseMinMax)
+                {
+                    progressValue = maxValue - (progressValue - minValue);
                 }
 
                 //if user moved

@@ -749,9 +749,9 @@ public class PlayBar extends LinearLayout
                     progressValue = maxValue;
                     clear = true;
                 }
-                else if(!forward && (progressValue + playSubProgressPercent) <= 0)
+                else if(!forward && (progressValue + playSubProgressPercent) <= minValue)
                 {
-                    progressValue = 0;
+                    progressValue = minValue;
                     clear = true;
                 }
                 if(clear)

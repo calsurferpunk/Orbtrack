@@ -2407,8 +2407,15 @@ public abstract class Current
                 //if showing scale now
                 if(setScaleVisible)
                 {
-                    //set scale to current value
-                    scaleBar.setValue((int)(Math.floor(Settings.getMapMarkerScale(context) * 100)));
+                    //set to current value
+                    if(forStars)
+                    {
+                        scaleBar.setValue((int)(Settings.getLensStarMagnitude(context) * 10));
+                    }
+                    else
+                    {
+                        scaleBar.setValue((int)(Math.floor(Settings.getMapMarkerScale(context) * 100)));
+                    }
                 }
                 else
                 {
@@ -2447,7 +2454,7 @@ public abstract class Current
         scaleBar.setButtonsVisible(true);
         scaleBar.setMin(forStars ? Settings.StarMagnitudeScaleMin : Settings.IconScaleMin);
         scaleBar.setMax(forStars ? Settings.StarMagnitudeScaleMax : Settings.IconScaleMax);
-        scaleBar.setPlayIndexIncrementUnits(forStars ? 0.1 : 1);
+        scaleBar.setPlayIndexIncrementUnits(1);
         if(context != null)
         {
             scaleBar.setTitle(context.getString(forStars ? R.string.title_star_visible_magnitude : R.string.title_icon_scale));
@@ -2462,10 +2469,10 @@ public abstract class Current
                 if(forStars)
                 {
                     //update magnitude
-                    lensPendingStarMagnitude = progressValue / 100f;
+                    lensPendingStarMagnitude = progressValue / 10f;
 
                     //update text
-                    seekBar.setScaleText(String.format(Locale.US, "%1.2f", progressValue + subProgressPercent));
+                    seekBar.setScaleText(String.format(Locale.US, "%1.1f", lensPendingStarMagnitude));
                 }
                 //else if map is ready
                 else if(getMapViewIfReady() != null)
@@ -2487,7 +2494,7 @@ public abstract class Current
                 if(forStars)
                 {
                     //set scale
-                    Settings.setLensStarMagnitude(context, scaleBar.getValue() / 100f);
+                    Settings.setLensStarMagnitude(context, scaleBar.getValue() / 10f);
                 }
                 else
                 {

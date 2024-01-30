@@ -4127,6 +4127,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 long travelSeconds;
                 long currentSystemElapsedSeconds = (SystemClock.elapsedRealtime() / 1000);
                 float pendingMarkerScale = Current.getMapPendingMarkerScale();
+                float pendingLensStarMagnitude = Current.getLensPendingStarMagnitude();
                 double julianDate;
                 String coordinateString = null;
                 TextView mapInfoText = Current.getMapInfoText();
@@ -4417,28 +4418,18 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         }
                     }
 
-                    //if update needed
-                    if(updateList)
-                    {
-                        //update list
-                        Current.PageAdapter.notifyItemsChanged();
-                    }
-                    if(havePendingMarkerScale)
-                    {
-                        //clear pending scale
-                        Current.clearMapPendingMarkerScale();
-                    }
-                    if(havePendingLensStarMagnitude)
-                    {
-                        //clear pending magnitude
-                        Current.clearLensPendingStarMagnitude();
-                    }
-
                     //if on lens and it exists
                     if(onLens && cameraView != null)
                     {
                         //update positions
                         cameraView.updatePositions((selectedSatellites != null ? selectedSatellites.toArray(new Database.SatelliteData[0]) : currentSatellites), (selectedLookAngles != null ? selectedLookAngles.toArray(new TopographicDataType[0]) : lookAngles), true);
+
+                        //if have pending magnitude
+                        if(havePendingLensStarMagnitude)
+                        {
+                            //update magnitude
+                            cameraView.setStarMagnitude(pendingLensStarMagnitude);
+                        }
 
                         //set to lens delay
                         timerDelay = lensTimerDelay;
@@ -4469,7 +4460,22 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         setCurrentCoordinateCalculations(true, julianDate);
                     }
 
-                    //if updating elapsed
+                    //if update needed
+                    if(updateList)
+                    {
+                        //update list
+                        Current.PageAdapter.notifyItemsChanged();
+                    }
+                    if(havePendingMarkerScale)
+                    {
+                        //clear pending scale
+                        Current.clearMapPendingMarkerScale();
+                    }
+                    if(havePendingLensStarMagnitude)
+                    {
+                        //clear pending magnitude
+                        Current.clearLensPendingStarMagnitude();
+                    }
                     if(updateElapsed)
                     {
                         //update last time

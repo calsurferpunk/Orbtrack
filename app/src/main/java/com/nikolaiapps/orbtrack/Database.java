@@ -1643,6 +1643,11 @@ public class Database extends SQLiteOpenHelper
             return(database != null ? database.orbitalType : OrbitalType.Satellite);
         }
 
+        public double getMagnitude()
+        {
+            return(database != null ? database.magnitude : Double.MAX_VALUE);
+        }
+
         public int getPathColor()
         {
             return(database != null ? database.pathColor : Color.DKGRAY);

@@ -588,6 +588,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float textPadding;
     private final float starTextSize;
     private final float starTextOffset;
+    private float starMagnitude;
     private float currentTouchDistance;
     private float compassCenterX;
     private float compassCenterY;
@@ -677,6 +678,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         textPadding = (textSize * 0.15f);
         starTextSize = textSize * STAR_TEXT_SCALE;
         starTextOffset = textOffset * STAR_TEXT_SCALE;
+        starMagnitude = Settings.getLensStarMagnitude(context);
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
         iconAlpha = Settings.getLensIndicatorAlpha(context);
@@ -963,13 +965,16 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                  //if current orbital is set, -in filter or parent filter-, look angle is valid, and using orbital
                 if(haveOrbital && (inFilter || inParentFilter) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
                 {
-                    //remember current type, color, look, and travel angles
+                    //remember current color, look, travel angles, and magnitude properties
                     int currentColor = currentOrbital.getPathColor();
+                    double currentMagnitude = currentOrbital.getMagnitude();
+                    boolean withinMagnitude = (isStar && currentMagnitude <= starMagnitude);        //note: lower magnitude = brighter star
+                    boolean showOrbital = (currentSelected || (!isStar && inFilter) || (isStar && withinMagnitude));
                     Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
                     CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
 
-                    //if in filter
-                    if(inFilter)
+                    //if showing orbital
+                    if(showOrbital)
                     {
                         //if current look angle or travel angles are set
                         if(currentLookAngle != null || currentTravel != null)
@@ -1143,8 +1148,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                         }
                     }
 
-                    //if -current look angle is set- and -on selection, a star in parent filter, or in filter-
-                    if(currentLookAngle != null && (currentSelected || (isStar && inParentFilter) || inFilter))
+                    //if -current look angle is set- and -on selection, a star -in parent filter or within magnitude-, or in filter-
+                    if(currentLookAngle != null && (currentSelected || (isStar && (inParentFilter || withinMagnitude)) || inFilter))
                     {
                         //determine relative location and remember current ID and name
                         RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !inParentFilter);
@@ -1171,8 +1176,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                             setParentPoints(currentOrbital, relativeProperties);
                         }
 
-                        //if in filter
-                        if(inFilter)
+                        //if showing orbital
+                        if(showOrbital)
                         {
                             //draw orbital
                             drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
@@ -1845,6 +1850,13 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             //set look angles
             travelLookAngles[index] = currentLookAngles;
         }
+    }
+
+    //Sets star magnitude
+    public void setStarMagnitude(float magnitude)
+    {
+        //set magnitude
+        starMagnitude = magnitude;
     }
 
     //Resets parent states

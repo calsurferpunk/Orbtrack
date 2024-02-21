@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
 import android.os.SystemClock;
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -200,6 +201,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         setSaveFileData(null, "", "", -1, -1);
         backPressTime = Globals.getGMTTime();
         backPressTime.set(Calendar.YEAR, 0);
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
+        {
+            @Override
+            public void handleOnBackPressed()
+            {
+                handleBackPressed();
+            }
+        });
 
         //setup bundles
         calculateBundle = new Bundle();
@@ -1034,8 +1043,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(super.onOptionsItemSelected(item));
     }
 
-    @Override
-    public void onBackPressed()
+    private void handleBackPressed()
     {
         boolean updateDisplay = false;
         boolean exitFullScreen = false;
@@ -1215,7 +1223,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         else if(!closedSettings && !closedSearchText)
         {
             //call super
-            super.onBackPressed();
+            finish();
         }
     }
 

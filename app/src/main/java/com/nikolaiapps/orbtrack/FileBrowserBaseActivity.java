@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import androidx.activity.OnBackPressedCallback;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.DividerItemDecoration;
@@ -522,6 +523,14 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                 FileBrowserBaseActivity.this.finish();
             }
         });
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
+        {
+            @Override
+            public void handleOnBackPressed()
+            {
+                handleBackPressed();
+            }
+        });
 
         //set title
         this.setTitle(selectFolder ? R.string.title_select_folder : R.string.title_select_file_or_files);
@@ -531,14 +540,13 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         browseListView.setAdapter(filesAdapter);
     }
 
-    @Override
-    public void onBackPressed()
+    private void handleBackPressed()
     {
         //if couldn't go back
         if(!filesAdapter.goBack())
         {
             //call super
-            super.onBackPressed();
+            finish();
         }
     }
 

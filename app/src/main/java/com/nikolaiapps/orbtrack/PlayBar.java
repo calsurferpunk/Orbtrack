@@ -173,6 +173,9 @@ public class PlayBar extends LinearLayout
         //if slider exists
         if(seekSlider != null)
         {
+            int fromValue = (int)seekSlider.getValueFrom();
+            int toValue = (int)seekSlider.getValueTo();
+
             //keep value within range
             if(value < minValue)
             {
@@ -181,6 +184,17 @@ public class PlayBar extends LinearLayout
             else if(value > maxValue)
             {
                 value = maxValue;
+            }
+
+            //make sure from/to match min/max values
+            //note: happens from restoring slider display
+            if(fromValue != minValue)
+            {
+                seekSlider.setValueFrom(minValue);
+            }
+            if(toValue != maxValue)
+            {
+                seekSlider.setValueTo(maxValue);
             }
 
             //set value

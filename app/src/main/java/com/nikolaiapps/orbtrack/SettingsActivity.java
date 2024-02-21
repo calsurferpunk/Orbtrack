@@ -24,6 +24,7 @@ import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.activity.OnBackPressedCallback;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
@@ -1663,6 +1664,14 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             }
         };
         preferences.registerOnSharedPreferenceChangeListener(preferenceChangeListener);
+        getOnBackPressedDispatcher().addCallback(new OnBackPressedCallback(true)
+        {
+            @Override
+            public void handleOnBackPressed()
+            {
+                handleBackPressed();
+            }
+        });
 
         //update display
         updateBackButton();
@@ -1677,8 +1686,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         }
     }
 
-    @Override
-    public void onBackPressed()
+    private void handleBackPressed()
     {
         int page;
 
@@ -1698,14 +1706,14 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 else
                 {
                     //call base
-                    super.onBackPressed();
+                    finish();
                 }
             }
         }
         else
         {
             //call base
-            super.onBackPressed();
+            finish();
         }
     }
 

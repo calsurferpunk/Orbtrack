@@ -226,15 +226,15 @@ public class Database extends SQLiteOpenHelper
             int index;
             String name = null;
 
-            //if ID is in list
+            //if ID is in list and valid indexes
             index = noradId.indexOf(id);
-            if(index >= 0)
+            if(index >= 0 && languageIndex < starNames.size() && index < starNames.get(languageIndex).size())
             {
                 //get name for ID and language
                 name = starNames.get(languageIndex).get(index);
 
-                //if unknown and not English
-                if(name.equals("?") && languageIndex != LanguageIndex.English)
+                //if unknown, not English, and can get English name
+                if(name.equals("?") && languageIndex != LanguageIndex.English && LanguageIndex.English < starNames.size() && index < starNames.get(LanguageIndex.English).size())
                 {
                     //default to English
                     name = starNames.get(LanguageIndex.English).get(index);

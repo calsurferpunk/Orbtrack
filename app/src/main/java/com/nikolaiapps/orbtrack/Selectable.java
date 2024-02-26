@@ -1554,14 +1554,20 @@ public abstract class Selectable
 
             //setup list
             selectList = rootView.findViewById(R.id.List_View_List);
-            selectList.setHasFixedSize(true);
+            if(selectList != null)
+            {
+                selectList.setHasFixedSize(true);
+            }
             selectListAdapter = listAdapter;
             if(selectListAdapter != null)
             {
                 setListColumns(context, listColumns, pageNum);
 
                 selectListAdapter.setHeader(header);
-                selectList.setAdapter(selectListAdapter);
+                if(selectList != null)
+                {
+                    selectList.setAdapter(selectListAdapter);
+                }
                 if(adapterSetListener != null)
                 {
                     adapterSetListener.setAdapter(this, group, pageNum, selectListAdapter);
@@ -1814,26 +1820,30 @@ public abstract class Selectable
             {
                 //remember current item and view
                 ListDisplayItem currentItem = selectListAdapter.getItem(position);
-                RecyclerView.LayoutManager selectListManager = selectList.getLayoutManager();
+                RecyclerView.LayoutManager selectListManager = (selectList != null ? selectList.getLayoutManager() : null);
                 View itemView = (selectListManager != null ? selectListManager.findViewByPosition(position) : null);
 
-                //update item
-                currentItem.isSelected = selected;
-                selectListAdapter.setItemBackground(itemView, selected);
-
-                //update selected list
-                itemIndex = selectedItems.indexOf(currentItem);
-                if(selected && itemIndex < 0)
+                //if current item exists
+                if(currentItem != null)
                 {
-                    selectedItems.add(currentItem);
-                }
-                else if(!selected && itemIndex >= 0)
-                {
-                    selectedItems.remove(currentItem);
-                }
+                    //update item
+                    currentItem.isSelected = selected;
+                    selectListAdapter.setItemBackground(itemView, selected);
 
-                //send event
-                onItemSelected(group, pageNum, getSubPageParam(), position, selected);
+                    //update selected list
+                    itemIndex = selectedItems.indexOf(currentItem);
+                    if(selected && itemIndex < 0)
+                    {
+                        selectedItems.add(currentItem);
+                    }
+                    else if(!selected && itemIndex >= 0)
+                    {
+                        selectedItems.remove(currentItem);
+                    }
+
+                    //send event
+                    onItemSelected(group, pageNum, getSubPageParam(), position, selected);
+                }
             }
 
             //if deselecting and no more selected items

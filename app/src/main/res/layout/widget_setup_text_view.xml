@@ -36,32 +36,32 @@
             </LinearLayout>
         </TableRow>
 
-        <TableRow android:id="@+id/Widget_Setup_Orbital_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
+        <TableRow android:id="@+id/Widget_Setup_Name_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
                 style="@style/WidgetSetupStartTitle"
-                android:text="@string/title_orbital"/>
+                android:text="@string/title_name"/>
 
             <LinearLayout
                 style="@style/WidgetSetupTextOptions">
                 <com.nikolaiapps.orbtrack.BorderButton
-                    android:id="@+id/Widget_Setup_Orbital_Text_Color_Button"
+                    android:id="@+id/Widget_Setup_Name_Text_Color_Button"
                     style="@style/ColorButton"/>
 
                 <com.nikolaiapps.orbtrack.IconSpinner
-                    android:id="@+id/Widget_Setup_Orbital_Text_Size_List"
+                    android:id="@+id/Widget_Setup_Name_Text_Size_List"
                     style="@style/WidgetSetupList"/>
 
                 <CheckBox
-                    android:id="@+id/Widget_Setup_Orbital_Text_Bold_CheckBox"
+                    android:id="@+id/Widget_Setup_Name_Text_Bold_CheckBox"
                     style="@style/WidgetSetupBoldCheckBox"/>
 
                 <CheckBox
-                    android:id="@+id/Widget_Setup_Orbital_Text_Italic_CheckBox"
+                    android:id="@+id/Widget_Setup_Name_Text_Italic_CheckBox"
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
 
-        <View android:id="@+id/Widget_Setup_Orbital_Text_Divider" style="@style/Divider" android:visibility="gone"/>
+        <View android:id="@+id/Widget_Setup_Name_Text_Divider" style="@style/Divider" android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Start_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView

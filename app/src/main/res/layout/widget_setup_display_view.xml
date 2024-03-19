@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TableLayout
+        android:id="@+id/Widget_Setup_Display_Table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:id="@+id/Widget_Setup_Display_Top_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_top"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Name_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_name"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Name_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Settings_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_settings"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Settings_Divider" style="@style/Divider"/>
+
+        <TextView
+            android:id="@+id/Widget_Setup_Display_Middle_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_middle"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Orbital_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_orbital"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Orbital_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_Start_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_start"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_Start_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_End_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_end"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_End_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_Dynamic_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_dynamic"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_Dynamic_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_Elevation_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_elevation"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_Elevation_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_Azimuth_Start_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_az_start"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_Azimuth_Start_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_Azimuth_End_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_az_end"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_Azimuth_End_Divider" style="@style/Divider"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Pass_Duration_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_duration"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Pass_Duration_Divider" style="@style/Divider"/>
+
+        <TextView
+            android:id="@+id/Widget_Setup_Display_Bottom_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_bottom"/>
+
+        <androidx.appcompat.widget.SwitchCompat
+            android:id="@+id/Widget_Setup_Display_Location_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_location"/>
+
+        <View android:id="@+id/Widget_Setup_Display_Location_Divider" style="@style/Divider"/>
+    </TableLayout>
+</ScrollView>

@@ -35,7 +35,9 @@ import android.widget.AdapterView;
 import android.widget.AutoCompleteTextView;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import java.util.ArrayList;
@@ -54,6 +56,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private static final String Name = "name";
         private static final String NoradID = "noradId";
         private static final String OrbitalType = "orbitalType";
+        private static final String ShowDisplay = "showDisplay";
         private static final String GlobalText = "globalText";
         private static final String GlobalTextSize = "globalTextSize";
         private static final String GlobalTextColor = "globalTextColor";
@@ -112,10 +115,11 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
     private static abstract class TabPage
     {
         static final int Data = 0;
-        static final int Images = 1;
-        static final int Background = 2;
-        static final int Text = 3;
-        static final int TabCount = 4;
+        static final int Display = 1;
+        static final int Images = 2;
+        static final int Background = 3;
+        static final int Text = 4;
+        static final int TabCount = 5;
     }
 
     private static abstract class FontWeight
@@ -132,10 +136,26 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         static final int Square = 2;
     }
 
+    public static abstract class DisplayType
+    {
+        static final byte Name = 0;
+        static final byte Settings = 1;
+        static final byte Orbital = 2;
+        static final byte PassStart = 3;
+        static final byte PassEnd = 4;
+        static final byte PassDynamic = 5;
+        static final byte PassElMax = 6;
+        static final byte PassAzAStart = 7;
+        static final byte PassAzEnd = 8;
+        static final byte PassDuration = 9;
+        static final byte Location = 10;
+        static final byte DisplayCount = 11;
+    }
+
     private static abstract class TextType
     {
         static final byte Global = 0;
-        static final byte Orbital = 1;
+        static final byte Name = 1;
         static final byte PassStart = 2;
         static final byte PassEnd = 3;
         static final byte PassElevation = 4;
@@ -239,12 +259,15 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         int middleBackgroundColor;
         int bottomBackgroundColor;
         float borderPadding;
+        final boolean[] showDisplay;
         final TextSettings[] text;
         final String[][] textSettingsNames;
         final LocationSettings location;
 
         public WidgetSettings(Context context, Class<?> widgetClass, int widgetId)
         {
+            byte index;
+
             useGlobalText = getGlobalText(context, widgetId);
             useGlobalImage = getGlobalImage(context, widgetId);
             useGlobalBackground = getGlobalBackground(context, widgetId);
@@ -262,9 +285,15 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
             bottomBackgroundColor = getBottomBackgroundColor(context, widgetId);
             borderPadding = getBorderPadding(context, widgetId);
 
+            showDisplay = new boolean[DisplayType.DisplayCount];
+            for(index = 0; index < DisplayType.DisplayCount; index++)
+            {
+                showDisplay[index] = getDisplayShown(context, widgetClass, widgetId, index);
+            }
+
             text = new TextSettings[TextType.TextCount];
             text[TextType.Global] = new TextSettings(getGlobalTextSize(context, widgetClass, widgetId), getGlobalTextColor(context, widgetId), getGlobalTextWeight(context, widgetId));
-            text[TextType.Orbital] = new TextSettings(getOrbitalTextSize(context, widgetClass, widgetId), getOrbitalTextColor(context, widgetId), getOrbitalTextWeight(context, widgetId));
+            text[TextType.Name] = new TextSettings(getOrbitalNameTextSize(context, widgetClass, widgetId), getOrbitalNameTextColor(context, widgetId), getOrbitalNameTextWeight(context, widgetId));
             text[TextType.PassStart] = new TextSettings(getPassStartTextSize(context, widgetClass, widgetId), getPassStartTextColor(context, widgetId), getPassStartTextWeight(context, widgetId));
             text[TextType.PassEnd] = new TextSettings(getPassEndTextSize(context, widgetClass, widgetId), getPassEndTextColor(context, widgetId), getPassEndTextWeight(context, widgetId));
             text[TextType.PassElevation] = new TextSettings(getPassElevationTextSize(context, widgetClass, widgetId), getPassElevationTextColor(context, widgetId), getPassElevationTextWeight(context, widgetId));
@@ -275,7 +304,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
             textSettingsNames = new String[TextType.TextCount][];
             textSettingsNames[TextType.Global] = new String[]{PreferenceName.GlobalTextSize, PreferenceName.GlobalTextColor, PreferenceName.GlobalTextWeight};
-            textSettingsNames[TextType.Orbital] = new String[]{PreferenceName.OrbitalTextSize, PreferenceName.OrbitalTextColor, PreferenceName.OrbitalTextWeight};
+            textSettingsNames[TextType.Name] = new String[]{PreferenceName.OrbitalTextSize, PreferenceName.OrbitalTextColor, PreferenceName.OrbitalTextWeight};
             textSettingsNames[TextType.PassStart] = new String[]{PreferenceName.PassStartTextSize, PreferenceName.PassStartTextColor, PreferenceName.PassStartTextWeight};
             textSettingsNames[TextType.PassEnd] = new String[]{PreferenceName.PassEndTextSize, PreferenceName.PassEndTextColor, PreferenceName.PassEndTextWeight};
             textSettingsNames[TextType.PassElevation] = new String[]{PreferenceName.PassElevationTextSize, PreferenceName.PassElevationTextColor, PreferenceName.PassElevationTextWeight};
@@ -318,6 +347,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private SwitchCompat globalTextSwitch;
         private SwitchCompat globalImageSwitch;
         private SwitchCompat globalBackgroundSwitch;
+        private SwitchCompat[] displaySwitch;
         private SelectListInterface orbitalList;
         private SelectListInterface locationList;
         private SelectListInterface intervalList;
@@ -350,6 +380,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private View middleDivider;
         private View outdatedText;
         private View[] textDivider;
+        private View[] displayDivider;
         private ChooseColorDialog colorDialog;
         private LocationReceiver locationReceiver;
         private OnAllowOkayListener allowOkayListener;
@@ -361,11 +392,14 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
             byte index;
             int page = this.getPageParam();
             final Context context = this.getContext();
+            View bottomTitle;
             ViewGroup rootView = null;
+            TableLayout table;
             final ViewGroup rootViewConst;
             final Resources res = (context != null ? context.getResources() : null);
             final Database.DatabaseLocation[] locations;
             final Database.DatabaseSatellite[] orbitals;
+            final Class<?> widgetClass = this.getWidgetClassParam();
             final Float[] fontSizes = new Float[]{6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f, 13.0f, 14.0f, 15.0f, 16.0f, 17.0f, 18.0f, 19.0f, 20.0f, 21.0f, 22.0f, 23.0f, 24.0f};
             final Float[] paddingSizes = new Float[]{0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f, 9.0f, 10.0f, 11.0f, 12.0f};
             final IconSpinner.Item[] borderStyles = (res != null ? new IconSpinner.Item[]{new IconSpinner.Item(res.getString(R.string.title_round), BorderType.Round), new IconSpinner.Item(res.getString(R.string.title_rectangle), BorderType.Square)} : null);
@@ -611,6 +645,66 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     locationReceiver.startLocationService(context);
                     break;
 
+                case TabPage.Display:
+                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_display_material_view : R.layout.widget_setup_display_view), container, false);
+                    table = rootView.findViewById(R.id.Widget_Setup_Display_Table);
+
+                    displaySwitch = new SwitchCompat[DisplayType.DisplayCount];
+                    displayDivider = new View[DisplayType.DisplayCount];
+
+                    displaySwitch[DisplayType.Name] = rootView.findViewById(R.id.Widget_Setup_Display_Name_Switch);
+                    displaySwitch[DisplayType.Name].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Name));
+                    displayDivider[DisplayType.Name] = rootView.findViewById(R.id.Widget_Setup_Display_Name_Divider);
+
+                    displaySwitch[DisplayType.Settings] = rootView.findViewById(R.id.Widget_Setup_Display_Settings_Switch);
+                    displaySwitch[DisplayType.Settings].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Settings));
+                    displayDivider[DisplayType.Settings] = rootView.findViewById(R.id.Widget_Setup_Display_Settings_Divider);
+
+                    displaySwitch[DisplayType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Display_Orbital_Switch);
+                    displaySwitch[DisplayType.Orbital].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Orbital));
+                    displayDivider[DisplayType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Display_Orbital_Divider);
+
+                    displaySwitch[DisplayType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Start_Switch);
+                    displaySwitch[DisplayType.PassStart].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassStart));
+                    displayDivider[DisplayType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Start_Divider);
+
+                    displaySwitch[DisplayType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_End_Switch);
+                    displaySwitch[DisplayType.PassEnd].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassEnd));
+                    displayDivider[DisplayType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_End_Divider);
+
+                    displaySwitch[DisplayType.PassDynamic] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Dynamic_Switch);
+                    displaySwitch[DisplayType.PassDynamic].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassDynamic));
+                    displayDivider[DisplayType.PassDynamic] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Dynamic_Divider);
+
+                    displaySwitch[DisplayType.PassElMax] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Elevation_Switch);
+                    displaySwitch[DisplayType.PassElMax].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassElMax));
+                    displayDivider[DisplayType.PassElMax] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Elevation_Divider);
+
+                    displaySwitch[DisplayType.PassAzAStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_Start_Switch);
+                    displaySwitch[DisplayType.PassAzAStart].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassAzAStart));
+                    displayDivider[DisplayType.PassAzAStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_Start_Divider);
+
+                    displaySwitch[DisplayType.PassAzEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_End_Switch);
+                    displaySwitch[DisplayType.PassAzEnd].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassAzEnd));
+                    displayDivider[DisplayType.PassAzEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_End_Divider);
+
+                    displaySwitch[DisplayType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Duration_Switch);
+                    displaySwitch[DisplayType.PassDuration].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassDuration));
+                    displayDivider[DisplayType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Duration_Divider);
+
+                    bottomTitle = rootView.findViewById(R.id.Widget_Setup_Display_Bottom_Title);
+                    if(widgetClass != null && widgetClass.equals(WidgetPassTinyProvider.class))
+                    {
+                        //move bottom title to before pass start
+                        table.removeView(bottomTitle);
+                        table.addView(bottomTitle, table.indexOfChild(displaySwitch[DisplayType.PassStart]));
+                    }
+
+                    displaySwitch[DisplayType.Location] = rootView.findViewById(R.id.Widget_Setup_Display_Location_Switch);
+                    displaySwitch[DisplayType.Location].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Location));
+                    displayDivider[DisplayType.Location] = rootView.findViewById(R.id.Widget_Setup_Display_Location_Divider);
+                    break;
+
                 case TabPage.Images:
                     rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_images_material_view : R.layout.widget_setup_images_view), container, false);
 
@@ -754,12 +848,12 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     textItalicCheckBox[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Italic_CheckBox);
                     textColorButton[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Color_Button);
 
-                    textRow[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Row);
-                    textSizeList[TextType.Orbital] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Orbital_Text_Size_Text_List : R.id.Widget_Setup_Orbital_Text_Size_List);
-                    textBoldCheckBox[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Bold_CheckBox);
-                    textItalicCheckBox[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Italic_CheckBox);
-                    textColorButton[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Color_Button);
-                    textDivider[TextType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_Divider);
+                    textRow[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Row);
+                    textSizeList[TextType.Name] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Name_Text_Size_Text_List : R.id.Widget_Setup_Name_Text_Size_List);
+                    textBoldCheckBox[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Bold_CheckBox);
+                    textItalicCheckBox[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Italic_CheckBox);
+                    textColorButton[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Color_Button);
+                    textDivider[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Divider);
 
                     textRow[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Row);
                     passStartText = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text);
@@ -1005,6 +1099,25 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     }
                     break;
 
+                case TabPage.Display:
+                    for(index = 0; index < DisplayType.DisplayCount; index++)
+                    {
+                        visibility = canShowDisplay(widgetClass, index) ? View.VISIBLE : View.GONE;
+
+                        if(displaySwitch[index] != null)
+                        {
+                            displaySwitch[index].setChecked(widgetSettings.showDisplay[index]);
+                            displaySwitch[index].setVisibility(visibility);
+                        }
+                        if(displayDivider[index] != null)
+                        {
+                            displayDivider[index].setVisibility(visibility);
+                        }
+                    }
+
+                    updatePassInputs();
+                    break;
+
                 case TabPage.Images:
                     boolean useGlobalImage = widgetSettings.useGlobalImage;
                     boolean useOrbitalImage = (widgetSettings.noradId > 0);
@@ -1179,7 +1292,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
                             default:
                                 //if using tiny and not any of the used text
-                                if(!useNormal && index != TextType.Orbital && index != TextType.PassStart)
+                                if(!useNormal && index != TextType.Name && index != TextType.PassStart)
                                 {
                                     visibility = View.GONE;
                                 }
@@ -1223,6 +1336,44 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         }
                     }
                     break;
+            }
+        }
+
+        //Updates pass input usability
+        private void updatePassInputs()
+        {
+            boolean enabled;
+            View passStartDivider = displayDivider[DisplayType.PassStart];
+            View passEndDivider = displayDivider[DisplayType.PassEnd];
+            View passDynamicDivider = displayDivider[DisplayType.PassDynamic];
+            SwitchCompat passStartSwitch = displaySwitch[DisplayType.PassStart];
+            SwitchCompat passEndSwitch = displaySwitch[DisplayType.PassEnd];
+            SwitchCompat passDynamicSwitch = displaySwitch[DisplayType.PassDynamic];
+
+            //if switches exist
+            if(passStartSwitch != null && passEndSwitch != null && passDynamicSwitch != null)
+            {
+                //enable start/end when not using dynamic
+                enabled = !passDynamicSwitch.isChecked();
+                passStartSwitch.setEnabled(enabled);
+                if(passStartDivider != null)
+                {
+                    passStartDivider.setEnabled(enabled);
+                }
+                passEndSwitch.setEnabled(enabled);
+                if(passEndDivider != null)
+                {
+                    passEndDivider.setEnabled(enabled);
+                }
+
+                //enable dynamic when start/end switches are checked
+                enabled = (passStartSwitch.isChecked() && passEndSwitch.isChecked());
+                passDynamicSwitch.setEnabled(enabled);
+                if(passDynamicDivider != null)
+                {
+                    //update visibility
+                    passDynamicDivider.setEnabled(enabled);
+                }
             }
         }
 
@@ -1326,6 +1477,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     {
                         setName(context, previewId, orbital.getName());
                     }
+                    break;
+
+                case PreferenceName.ShowDisplay:
+                    setDisplayShown(context, previewId, (byte)value, (boolean)value2);
                     break;
 
                 case PreferenceName.LocationName:
@@ -1524,6 +1679,31 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         {
             return(createOnColorButtonClickListener(row, false));
         }
+
+        //Creates a switch on checked change listener
+        private CompoundButton.OnCheckedChangeListener createOnCheckedChangeListener(Context context, byte displayIndex)
+        {
+            return(new CompoundButton.OnCheckedChangeListener()
+            {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                {
+                    //handle specific cases
+                    switch(displayIndex)
+                    {
+                        case DisplayType.PassStart:
+                        case DisplayType.PassEnd:
+                        case DisplayType.PassDynamic:
+                            updatePassInputs();
+                            break;
+                    }
+
+                    //update if display shown and preview
+                    widgetSettings.showDisplay[displayIndex] = isChecked;
+                    onSettingChanged(context, PreferenceName.ShowDisplay, displayIndex, isChecked);
+                }
+            });
+        }
     }
 
     private static class TabAdapter extends Selectable.ListFragmentAdapter
@@ -1587,7 +1767,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
     //variables
     private byte requestCode;
     private View parentView;
-    private View widgetPreview;
     private MaterialButton okButton;
     private static int dpWidth;
     private static WidgetSettings widgetSettings;
@@ -1609,8 +1788,11 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         int widgetId = AppWidgetManager.INVALID_APPWIDGET_ID;
         Intent intent = this.getIntent();
         Bundle extras;
+        View widgetPreview;
         MaterialButton cancelButton;
+        LinearLayout widgetPreviewLayout;
         ViewGroup.LayoutParams previewParams;
+        ViewGroup.LayoutParams previewLayoutParams;
         float[] dps;
 
         //if intent is not set
@@ -1651,6 +1833,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
         //get views
         parentView = this.findViewById(R.id.Widget_Setup_Layout);
+        widgetPreviewLayout = this.findViewById(R.id.Widget_Preview_Layout);
         widgetPreview = this.findViewById(R.id.Widget_Pass_View);
         okButton = this.findViewById(R.id.Widget_Setup_Ok_Button);
         cancelButton = this.findViewById(R.id.Widget_Setup_Cancel_Button);
@@ -1714,9 +1897,11 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         //setup preview
         updatePreviewSettings(this, widgetId);
         dps = Globals.dpsToPixels(this, 70, 30);
+        previewLayoutParams = widgetPreviewLayout.getLayoutParams();
+        previewLayoutParams.height = (int)(dps[0] * 1.65 - dps[1]);
+        widgetPreviewLayout.setLayoutParams(previewLayoutParams);
         previewParams = widgetPreview.getLayoutParams();
         previewParams.width = (int)(dps[0] * (widgetClass.equals(WidgetPassMediumProvider.class) ? 3.5 : widgetClass.equals(WidgetPassSmallProvider.class) ? 2.5 : 1.5) - dps[1]);
-        previewParams.height = (int)(dps[0] * 1.65 - dps[1]);
         widgetPreview.setLayoutParams(previewParams);
 
         //button events
@@ -1794,7 +1979,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
         //if there is a selected orbital
         selectedOrbitals = data.getParcelableArrayListExtra(MasterAddListActivity.ParamTypes.SelectedOrbitals);
-        if(selectedOrbitals != null && selectedOrbitals.size() > 0 && noradIdChangedListener != null)
+        if(selectedOrbitals != null && !selectedOrbitals.isEmpty() && noradIdChangedListener != null)
         {
             //remember item
             Selectable.ListItem currentItem = selectedOrbitals.get(0);
@@ -1820,6 +2005,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                 boolean useGlobalText;
                 boolean useNormal;
                 boolean useExtended;
+                byte index;
                 byte usedSource = widgetSettings.location.source;
                 int result = RESULT_CANCELED;
                 Context context = v.getContext();
@@ -1932,7 +2118,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                             }
                             else
                             {
-                                setOrbitalTextOptions(context, widgetId, widgetSettings.text[TextType.Orbital].size, widgetSettings.text[TextType.Orbital].color, widgetSettings.text[TextType.Orbital].getWeight());
+                                setOrbitalNameTextOptions(context, widgetId, widgetSettings.text[TextType.Name].size, widgetSettings.text[TextType.Name].color, widgetSettings.text[TextType.Name].getWeight());
                                 setPassStartTextOptions(context, widgetId, widgetSettings.text[TextType.PassStart].size, widgetSettings.text[TextType.PassStart].color, widgetSettings.text[TextType.PassStart].getWeight());
                                 if(useNormal)
                                 {
@@ -1946,6 +2132,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                                     }
                                     setLocationTextOptions(context, widgetId, widgetSettings.text[TextType.Location].size, widgetSettings.text[TextType.Location].color, widgetSettings.text[TextType.Location].getWeight());
                                 }
+                            }
+                            for(index = 0; index < DisplayType.DisplayCount; index++)
+                            {
+                                setDisplayShown(context, widgetId, index, widgetSettings.showDisplay[index]);
                             }
 
                             //cancel any previous alarm and update widget
@@ -2138,6 +2328,45 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         SharedPreferences.Editor writeSettings = getWriteSettings(context);
 
         writeSettings.putInt(PreferenceName.OrbitalType + getIdString(widgetId), orbitalType);
+        writeSettings.apply();
+    }
+
+    //Gets if display can be used by the given widget type
+    private static boolean canShowDisplay(Class<?> widgetClass, byte displayIndex)
+    {
+        boolean haveClass = (widgetClass != null);
+        boolean useNormal = (haveClass && !widgetClass.equals(WidgetPassTinyProvider.class));
+        boolean useExtended = (haveClass && widgetClass.equals(WidgetPassMediumProvider.class));
+
+        switch(displayIndex)
+        {
+            case DisplayType.Settings:
+            case DisplayType.PassElMax:
+            case DisplayType.Location:
+                return(haveClass && useNormal);
+
+            case DisplayType.PassAzAStart:
+            case DisplayType.PassAzEnd:
+            case DisplayType.PassDuration:
+                return(haveClass && useExtended);
+
+            default:
+                return(haveClass);
+        }
+    }
+
+    //Gets if display is shown for the given widget class/ID and display
+    public static boolean getDisplayShown(Context context, Class<?> widgetClass, int widgetId, byte displayIndex)
+    {
+        return(canShowDisplay(widgetClass, displayIndex) && getPreferences(context).getBoolean(PreferenceName.ShowDisplay + getIdString(widgetId) + "_" + displayIndex, (displayIndex != DisplayType.PassDynamic || (widgetClass != null && widgetClass.equals(WidgetPassTinyProvider.class)))));
+    }
+
+    //Sets if display is shown for the given widget ID and display
+    public static void setDisplayShown(Context context, int widgetId, byte displayIndex, boolean shown)
+    {
+        SharedPreferences.Editor writeSettings = getWriteSettings(context);
+
+        writeSettings.putBoolean(PreferenceName.ShowDisplay + getIdString(widgetId) + "_" + displayIndex, shown);
         writeSettings.apply();
     }
 
@@ -2381,22 +2610,22 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         setTextOptions(context, widgetId, size, color, weight, PreferenceName.GlobalTextSize, PreferenceName.GlobalTextColor, PreferenceName.GlobalTextWeight);
     }
 
-    //Gets orbital text options for the given widget ID
-    public static float getOrbitalTextSize(Context context, Class<?> widgetClass, int widgetId)
+    //Gets orbital name text options for the given widget ID
+    public static float getOrbitalNameTextSize(Context context, Class<?> widgetClass, int widgetId)
     {
         return(getSize(context, widgetClass, widgetId, PreferenceName.OrbitalTextSize));
     }
-    public static int getOrbitalTextColor(Context context, int widgetId)
+    public static int getOrbitalNameTextColor(Context context, int widgetId)
     {
         return(getColor(context, widgetId, PreferenceName.OrbitalTextColor));
     }
-    public static int getOrbitalTextWeight(Context context, int widgetId)
+    public static int getOrbitalNameTextWeight(Context context, int widgetId)
     {
         return(getTextWeight(context, widgetId, PreferenceName.OrbitalTextWeight));
     }
 
-    //Sets orbital text options for the given widget ID
-    public static void setOrbitalTextOptions(Context context, int widgetId, float size, int color, int weight)
+    //Sets orbital name text options for the given widget ID
+    public static void setOrbitalNameTextOptions(Context context, int widgetId, float size, int color, int weight)
     {
         setTextOptions(context, widgetId, size, color, weight, PreferenceName.OrbitalTextSize, PreferenceName.OrbitalTextColor, PreferenceName.OrbitalTextWeight);
     }

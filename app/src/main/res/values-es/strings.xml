@@ -501,6 +501,7 @@
     <string name="title_pass_az_end">Pase Final Az</string>
     <string name="title_pass_az_start">Pase Inicio Az</string>
     <string name="title_pass_duration">Duración Pase</string>
+    <string name="title_pass_dynamic">Pase Dinámico</string>
     <string name="title_pass_elevation">Elevación Pase</string>
     <string name="title_pass_end">Final Pase</string>
     <string name="title_pass_progress">Progreso Pase</string>

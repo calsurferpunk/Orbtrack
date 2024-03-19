@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TableLayout
+        android:id="@+id/Widget_Setup_Display_Table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp">
+        <TextView
+            android:id="@+id/Widget_Setup_Display_Top_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_top"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Name_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_name"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Settings_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_settings"/>
+
+        <TextView
+            android:id="@+id/Widget_Setup_Display_Middle_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_middle"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Orbital_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_orbital"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_Start_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_start"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_End_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_end"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_Dynamic_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_dynamic"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_Elevation_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_elevation"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_Azimuth_Start_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_az_start"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_Azimuth_End_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_az_end"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Pass_Duration_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_pass_duration"/>
+
+        <TextView
+            android:id="@+id/Widget_Setup_Display_Bottom_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_bottom"/>
+
+        <com.google.android.material.materialswitch.MaterialSwitch
+            android:id="@+id/Widget_Setup_Display_Location_Switch"
+            style="@style/WidgetSetupGlobalSwitch"
+            android:text="@string/title_location"/>
+    </TableLayout>
+</ScrollView>

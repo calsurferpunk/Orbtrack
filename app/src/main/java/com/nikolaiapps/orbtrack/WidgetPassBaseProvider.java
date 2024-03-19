@@ -97,7 +97,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 {
                     case Intent.ACTION_BOOT_COMPLETED:
                         //if any widgets are using location intervals
-                        if(getWidgetIdList(context, widgetClass, null, FLAG_WIDGET_INTERVAL).size() > 0)
+                        if(!getWidgetIdList(context, widgetClass, null, FLAG_WIDGET_INTERVAL).isEmpty())
                         {
                             //set alarm
                             WidgetPassBaseProvider.updateLocationIntervalAlarm(context, alarmReceiverClass, WidgetBaseSetupActivity.getLocationGlobalInterval(context), true);
@@ -269,14 +269,14 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             excludeIds = Globals.getList(widgetIds);
 
             //if had following but don't anymore
-            if(hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).size() == 0)
+            if(hadFollow && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_FOLLOW).isEmpty())
             {
                 //restart location service with changes
                 LocationService.restart(context, false);
             }
 
             //if had intervals but don't anymore
-            if(hadInterval && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_INTERVAL).size() == 0)
+            if(hadInterval && getWidgetIdList(context, widgetClass, excludeIds, FLAG_WIDGET_INTERVAL).isEmpty())
             {
                 //stop interval updates
                 WidgetPassBaseProvider.updateLocationIntervalAlarm(context, alarmReceiverClass, 0, false);
@@ -531,17 +531,17 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             //handle based on view
             if(viewId == R.id.Widget_Pass_Name_Text)
             {
-                size = WidgetBaseSetupActivity.getOrbitalTextSize(context, widgetClass, widgetId);
-                color = WidgetBaseSetupActivity.getOrbitalTextColor(context, widgetId);
-                weight = WidgetBaseSetupActivity.getOrbitalTextWeight(context, widgetId);
+                size = WidgetBaseSetupActivity.getOrbitalNameTextSize(context, widgetClass, widgetId);
+                color = WidgetBaseSetupActivity.getOrbitalNameTextColor(context, widgetId);
+                weight = WidgetBaseSetupActivity.getOrbitalNameTextWeight(context, widgetId);
             }
-            else if(viewId == R.id.Widget_Pass_Start_Text || viewId == R.id.Widget_Pass_Start_Direction_Text || viewId == R.id.Widget_Pass_Start_Time_Text)
+            else if(viewId == R.id.Widget_Pass_Start_Text || viewId == R.id.Widget_Pass_Tiny_Start_Direction_Text || viewId == R.id.Widget_Pass_Tiny_Start_Text)
             {
                 size = WidgetBaseSetupActivity.getPassStartTextSize(context, widgetClass, widgetId);
                 color = WidgetBaseSetupActivity.getPassStartTextColor(context, widgetId);
                 weight = WidgetBaseSetupActivity.getPassStartTextWeight(context, widgetId);
             }
-            else if(viewId == R.id.Widget_Pass_End_Text)
+            else if(viewId == R.id.Widget_Pass_End_Text || viewId == R.id.Widget_Pass_Tiny_End_Direction_Text || viewId == R.id.Widget_Pass_Tiny_End_Text)
             {
                 size = WidgetBaseSetupActivity.getPassEndTextSize(context, widgetClass, widgetId);
                 color = WidgetBaseSetupActivity.getPassEndTextColor(context, widgetId);
@@ -690,7 +690,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     private static RemoteViews getViews(Context context, Class<?> widgetClass, int widgetId, long midPassTimeMs, View parent)
     {
         int iconId;
-        int itemImageId;
+        int orbitalImageId;
         int noradId = WidgetBaseSetupActivity.getNoradID(context, widgetId);
         int globalImageColor = WidgetBaseSetupActivity.getGlobalImageColor(context, widgetId);
         int orbitalImageColor = WidgetBaseSetupActivity.getOrbitalImageColor(context, widgetId);
@@ -698,27 +698,87 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         int locationImageColor = WidgetBaseSetupActivity.getLocationImageColor(context, widgetId);
         byte orbitalType = WidgetBaseSetupActivity.getOrbitalType(context, widgetId);
         Database.SatelliteData currentSatelliteData = getSatellite(widgetId, context);
+        boolean usingView;
+        boolean usingTopLayout;
+        boolean usingMiddleLayout;
+        boolean usingMiddleNormalLayout;
+        boolean usingMiddleExtendedLayout;
+        boolean usingBottomLayout;
+        boolean usingTinyPassLayout;
         boolean useParent = (parent != null);
-        boolean useGlobalImage = WidgetBaseSetupActivity.getGlobalImage(context, widgetId);
         boolean useNormal = !widgetClass.equals(WidgetPassTinyProvider.class);
         boolean useExtended = widgetClass.equals(WidgetPassMediumProvider.class);
+        boolean useDynamicPass = WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassDynamic);
+        boolean useGlobalImage = WidgetBaseSetupActivity.getGlobalImage(context, widgetId);
         boolean tleIsAccurate = (currentSatelliteData.database == null || currentSatelliteData.database.tleIsAccurate);
         RemoteViews views = (useParent ? null : new RemoteViews(context.getPackageName(), R.layout.widget_pass_view));
         PendingIntent clickIntent = (useParent ? null : getActionSettingsClickIntent(context, widgetClass, widgetId));
 
         //get image ID
-        itemImageId = (useNormal ? R.id.Widget_Pass_Item_Image : R.id.Widget_Pass_Item_Tiny_Image);
+        orbitalImageId = (useNormal ? R.id.Widget_Pass_Orbital_Image : R.id.Widget_Pass_Orbital_Tiny_Image);
 
-        //update visibility
-        setViewVisibility(views, parent, R.id.Widget_Pass_Settings_Button, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Item_Image, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Middle_Layout, !useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Middle_Layout, useNormal);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Normal_Layout, useNormal && tleIsAccurate);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Extended_Layout, useExtended && tleIsAccurate);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Image, useNormal && tleIsAccurate);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Text, useNormal && tleIsAccurate);
-        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Start_Layout, !useNormal && tleIsAccurate);
+        //update top visibility
+        usingView = WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.Name);
+        usingTopLayout = usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Name_Text, usingView);
+        usingView = (useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.Settings));
+        usingTopLayout |= usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Settings_Button, usingView);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Top_Layout, usingTopLayout);
+
+        //update tiny middle visibility
+        usingView = (!useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.Orbital));
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Middle_Layout, usingView);
+
+        //update middle visibility
+        usingView = (useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.Orbital));
+        usingMiddleLayout = usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Orbital_Image, usingView);
+        usingView = (useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassStart));
+        usingMiddleLayout |= usingView;
+        usingMiddleNormalLayout = usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Start_Text, usingView);
+        usingView = (useNormal && !useDynamicPass && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassEnd));
+        usingMiddleLayout |= usingView;
+        usingMiddleNormalLayout |= usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_End_Text, usingView);
+        usingView = (useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassElMax));
+        usingMiddleLayout |= usingView;
+        usingMiddleNormalLayout |= usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_El_Max_Text, usingView);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Normal_Layout, usingMiddleNormalLayout);
+        usingView = (useExtended && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassAzAStart));
+        usingMiddleLayout |= usingView;
+        usingMiddleExtendedLayout = usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Az_Start_Text, usingView);
+        usingView = (useExtended && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassAzEnd));
+        usingMiddleLayout |= usingView;
+        usingMiddleExtendedLayout |= usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Az_End_Text, usingView);
+        usingView = (useExtended && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassDuration));
+        usingMiddleLayout |= usingView;
+        usingMiddleExtendedLayout |= usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Duration_Text, usingView);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Extended_Layout, usingMiddleExtendedLayout && tleIsAccurate);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Middle_Layout, usingMiddleLayout);
+
+        //update bottom visibility
+        usingView = (useNormal && tleIsAccurate && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.Location));
+        usingBottomLayout = usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Image, usingView);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Location_Text, usingView);
+        usingView = (!useNormal && tleIsAccurate && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassStart));
+        usingBottomLayout |= usingView;
+        usingTinyPassLayout = usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Start_Layout, usingView);
+        usingView = (!useNormal && tleIsAccurate && !useDynamicPass && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassEnd));
+        usingBottomLayout |= usingView;
+        usingTinyPassLayout |= usingView;
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_End_Layout, usingView);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Pass_Layout, usingTinyPassLayout);
+        setViewVisibility(views, parent, R.id.Widget_Pass_Bottom_Layout, usingBottomLayout);
+
+        //update outdated visibility
         setViewVisibility(views, parent, R.id.Widget_Pass_Outdated_Text, !tleIsAccurate);
 
         //set border, background, and name
@@ -734,7 +794,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         if(noradId == Universe.IDs.Moon)
         {
             //set moon icon with phase
-            setImageViewBitmap(views, parent, itemImageId, Universe.Moon.getPhaseImage(context, WidgetBaseSetupActivity.getLocation(context, widgetId), midPassTimeMs));
+            setImageViewBitmap(views, parent, orbitalImageId, Universe.Moon.getPhaseImage(context, WidgetBaseSetupActivity.getLocation(context, widgetId), midPassTimeMs));
         }
         else
         {
@@ -745,12 +805,12 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             if((noradId > 0 && Settings.getSatelliteIconImageIsThemeable(context)) || iconId == R.drawable.orbital_rocket || iconId == R.drawable.orbital_debris)
             {
                 //set tinted satellite icon
-                setImageViewBitmap(views, parent, itemImageId, Globals.getBitmap(context, iconId, (useGlobalImage ? globalImageColor : orbitalImageColor)));
+                setImageViewBitmap(views, parent, orbitalImageId, Globals.getBitmap(context, iconId, (useGlobalImage ? globalImageColor : orbitalImageColor)));
             }
             else
             {
                 //set non-tinted icon
-                setImageViewResource(views, parent, itemImageId, iconId);
+                setImageViewResource(views, parent, orbitalImageId, iconId);
             }
         }
 
@@ -766,8 +826,10 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         }
         else
         {
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, null);
-            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Direction_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_End_Direction_Text, null);
+            setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_End_Text, null);
         }
         if(useExtended)
         {
@@ -902,15 +964,14 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
     //Sets pass for given widget
     private static void updatePass(Context context, Class<?> widgetClass, Class<?> alarmReceiverClass, int widgetId, AppWidgetManager manager, RemoteViews views, View parent, CalculateService.PassData currentPass, TimeZone zone)
     {
-        boolean sameDay;
-        boolean useStart;
+        boolean beforePassStart;
         boolean useNormal = !widgetClass.equals(WidgetPassTinyProvider.class);
         boolean useExtended = widgetClass.equals(WidgetPassMediumProvider.class);
         boolean useParent = (parent != null);
-        Calendar displayTime;
-        Calendar displayLocalTime;
-        Calendar currentLocalTime;
+        boolean dynamicPass = WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassDynamic);
+        Calendar usedStartDisplayTime;
         String unknown = Globals.getUnknownString(context);
+        String usedStartDirectionString;
         Resources res = context.getResources();
 
         //if using parent
@@ -937,23 +998,31 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 currentPass.passAzTravel = currentPass.passAzEnd - currentPass.passAzStart;
             }
 
-            //set pass start, end, and max elevation text
+            //remember if before pass start and get used start displays
+            beforePassStart = (currentPass.passTimeStart == null || currentPass.passTimeStart.getTimeInMillis() > System.currentTimeMillis());
+            usedStartDisplayTime = (beforePassStart || !dynamicPass ? currentPass.passTimeStart : currentPass.passTimeEnd);
+            usedStartDirectionString = (beforePassStart || !dynamicPass ? Globals.Symbols.Up : Globals.Symbols.Down);
+
             if(useNormal)
             {
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Text, Globals.Symbols.Up + Globals.getDateString(context, currentPass.passTimeStart, zone, false, true, true));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_End_Text, Globals.Symbols.Down + Globals.getDateString(context, currentPass.passTimeEnd, zone, false, true, true));
+                //set pass start, end, and max elevation text
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Text, usedStartDirectionString + Globals.getDateString(context, usedStartDisplayTime, zone, false, true, true));
+                if(!dynamicPass)
+                {
+                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_End_Text, Globals.Symbols.Down + Globals.getDateString(context, currentPass.passTimeEnd, zone, false, true, true));
+                }
                 setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_El_Max_Text, Globals.Symbols.Elevating + (currentPass.isKnownPassElevationMax() ? Globals.getDegreeString(currentPass.passElMax) : unknown));
             }
             else
             {
-                useStart = (currentPass.passTimeStart == null || currentPass.passTimeStart.getTimeInMillis() > System.currentTimeMillis());
-                displayTime = (useStart ? currentPass.passTimeStart : currentPass.passTimeEnd);
-                displayLocalTime = Globals.getLocalTime(displayTime, zone);
-                currentLocalTime = Globals.getLocalTime(Calendar.getInstance(), zone);
-                sameDay = (displayLocalTime != null && currentLocalTime != null && displayLocalTime.get(Calendar.DAY_OF_YEAR) == currentLocalTime.get(Calendar.DAY_OF_YEAR));
-
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Direction_Text, (useStart ? Globals.Symbols.Up : Globals.Symbols.Down));
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Time_Text, (!sameDay ? (Globals.getLocalDayString(context, displayTime, zone) + " ") : "") + Globals.getTimeString(context, displayTime, zone, true).replace(" ", "&nbsp;"));
+                //set pass start and end
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Direction_Text, usedStartDirectionString);
+                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Text, Globals.getDateString(context, usedStartDisplayTime, zone, false, false, false).replace(", ", " "));
+                if(!dynamicPass)
+                {
+                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_End_Direction_Text, Globals.Symbols.Down);
+                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_End_Text, Globals.getDateString(context, currentPass.passTimeEnd, zone, false, false, false).replace(", ", " "));
+                }
             }
             if(useExtended)
             {
@@ -1088,7 +1157,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                         public void onLocationResolved(String locationString, int resultCode)
                         {
                             String unknown = Globals.getUnknownString(context);
-                            String locationName = (locationString == null || locationString.equals("") ? unknown : locationString);
+                            String locationName = (locationString == null || locationString.isEmpty() ? unknown : locationString);
 
                             //if a known location
                             if(!locationName.equals(unknown))
@@ -1171,7 +1240,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                     for(index = 0; index < widgetClasses.length && !usingFollow; index++)
                     {
                         //check if any widgets of this class are using follow
-                        usingFollow = (getWidgetIdList(context, widgetClasses[index], null, FLAG_WIDGET_FOLLOW).size() > 0);
+                        usingFollow = !getWidgetIdList(context, widgetClasses[index], null, FLAG_WIDGET_FOLLOW).isEmpty();
                     }
 
                     //possibly update starting flags

@@ -38,30 +38,30 @@
             </LinearLayout>
         </TableRow>
 
-        <TableRow android:id="@+id/Widget_Setup_Orbital_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
+        <TableRow android:id="@+id/Widget_Setup_Name_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
                 style="@style/WidgetSetupStartTitle"
-                android:text="@string/title_orbital"/>
+                android:text="@string/title_name"/>
 
             <LinearLayout
                 style="@style/WidgetSetupTextOptions">
                 <com.nikolaiapps.orbtrack.BorderButton
-                    android:id="@+id/Widget_Setup_Orbital_Text_Color_Button"
+                    android:id="@+id/Widget_Setup_Name_Text_Color_Button"
                     style="@style/ColorButton"/>
 
                 <com.google.android.material.textfield.TextInputLayout
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
-                        android:id="@+id/Widget_Setup_Orbital_Text_Size_Text_List"
+                        android:id="@+id/Widget_Setup_Name_Text_Size_Text_List"
                         style="@style/WidgetSetupMaterialList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
-                    android:id="@+id/Widget_Setup_Orbital_Text_Bold_CheckBox"
+                    android:id="@+id/Widget_Setup_Name_Text_Bold_CheckBox"
                     style="@style/WidgetSetupBoldCheckBox"/>
 
                 <CheckBox
-                    android:id="@+id/Widget_Setup_Orbital_Text_Italic_CheckBox"
+                    android:id="@+id/Widget_Setup_Name_Text_Italic_CheckBox"
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>

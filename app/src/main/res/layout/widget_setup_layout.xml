@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/Widget_Setup_Tab_Layout"
         android:layout_width="match_parent"
@@ -13,12 +12,18 @@
         app:tabTextColor="?attr/colorAccentLightest"
         app:tabSelectedTextColor="?attr/colorAccentLight"
         app:tabBackground="?attr/colorAccentVariant"
-        app:tabGravity="fill">
+        app:tabGravity="start">
         <com.google.android.material.tabs.TabItem
             android:id="@+id/Widget_Setup_Source_Tab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/title_source"/>
+
+        <com.google.android.material.tabs.TabItem
+            android:id="@+id/Widget_Setup_Display_Tab"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="@string/title_display"/>
 
         <com.google.android.material.tabs.TabItem
             android:id="@+id/Widget_Setup_Images_Tab"
@@ -45,12 +50,18 @@
         android:layout_height="0dp"
         android:layout_weight="1"/>
 
-    <include layout="@layout/widget_pass_view"
+    <LinearLayout
+        android:id="@+id/Widget_Preview_Layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="8dp"
-        android:layout_gravity="center"/>
+        android:layout_gravity="center">
+        <include layout="@layout/widget_pass_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"/>
+    </LinearLayout>
 
     <LinearLayout style="@style/ResultButtonLayout">
         <com.google.android.material.button.MaterialButton

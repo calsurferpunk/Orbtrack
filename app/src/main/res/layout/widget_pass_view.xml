@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/Widget_Pass_View"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:padding="0dp"
     android:orientation="vertical"
@@ -17,15 +16,16 @@
     <LinearLayout
         android:id="@+id/Widget_Pass_Layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:gravity="center"
         android:layout_margin="3dp"
         android:orientation="vertical">
         <LinearLayout
             android:id="@+id/Widget_Pass_Top_Layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:gravity="center_vertical"
+            android:gravity="center_vertical|end"
             android:orientation="horizontal"
             tools:ignore="UseCompoundDrawables">
             <TextView
@@ -51,7 +51,7 @@
             android:visibility="gone"
             tools:ignore="NestedWeights">
             <ImageView
-                android:id="@+id/Widget_Pass_Item_Tiny_Image"
+                android:id="@+id/Widget_Pass_Orbital_Tiny_Image"
                 style="@style/WidgetImage"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -73,7 +73,7 @@
                 android:orientation="horizontal"
                 tools:ignore="UselessParent">
                 <ImageView
-                    android:id="@+id/Widget_Pass_Item_Image"
+                    android:id="@+id/Widget_Pass_Orbital_Image"
                     style="@style/WidgetImage"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -148,26 +148,56 @@
                 style="@style/WidgetBarText"/>
 
             <LinearLayout
-                android:id="@+id/Widget_Pass_Tiny_Start_Layout"
+                android:id="@+id/Widget_Pass_Tiny_Pass_Layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
+                android:orientation="vertical"
                 android:visibility="gone">
-                <TextView
-                    android:id="@+id/Widget_Pass_Start_Direction_Text"
-                    style="@style/WidgetDetailText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="0"
-                    android:gravity="center"/>
+                <LinearLayout
+                    android:id="@+id/Widget_Pass_Tiny_Start_Layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/Widget_Pass_Tiny_Start_Direction_Text"
+                        style="@style/WidgetDetailText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0"
+                        android:gravity="center"/>
 
-                <TextView
-                    android:id="@+id/Widget_Pass_Start_Time_Text"
-                    style="@style/WidgetDetailText"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1"
-                    android:gravity="center"/>
+                    <TextView
+                        android:id="@+id/Widget_Pass_Tiny_Start_Text"
+                        style="@style/WidgetDetailText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/Widget_Pass_Tiny_End_Layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:visibility="gone">
+                    <TextView
+                        android:id="@+id/Widget_Pass_Tiny_End_Direction_Text"
+                        style="@style/WidgetDetailText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:layout_weight="0"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/Widget_Pass_Tiny_End_Text"
+                        style="@style/WidgetDetailText"
+                        android:layout_width="0dp"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:gravity="center"/>
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
 

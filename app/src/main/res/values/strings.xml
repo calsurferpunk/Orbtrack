@@ -501,6 +501,7 @@
     <string name="title_pass_az_end">Pass Az End</string>
     <string name="title_pass_az_start">Pass Az Start</string>
     <string name="title_pass_duration">Pass Duration</string>
+    <string name="title_pass_dynamic">Pass Dynamic</string>
     <string name="title_pass_elevation">Pass Elevation</string>
     <string name="title_pass_end">Pass End</string>
     <string name="title_pass_progress">Pass Progress</string>

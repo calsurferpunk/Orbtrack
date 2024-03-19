@@ -368,7 +368,7 @@ public abstract class Globals
 
         public boolean gotData()
         {
-            return(pageData != null && !pageData.equals(""));
+            return(pageData != null && !pageData.isEmpty());
         }
     }
 
@@ -390,7 +390,7 @@ public abstract class Globals
             fileSourceType = flSrcType;
 
             //if file does not end with extension
-            if(extension != null && extension.length() > 0 && !name.endsWith(extension))
+            if(extension != null && !extension.isEmpty() && !name.endsWith(extension))
             {
                 //add extension
                 name += extension;
@@ -1543,7 +1543,7 @@ public abstract class Globals
             LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
             List<String> providers = (manager != null ? manager.getProviders(true) : null);
 
-            return(new String[]{providers != null && providers.size() > 0 && providers.contains(LocationManager.GPS_PROVIDER) ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION});
+            return(new String[]{providers != null && !providers.isEmpty() && providers.contains(LocationManager.GPS_PROVIDER) ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION});
         }
     }
 
@@ -2050,35 +2050,51 @@ public abstract class Globals
     }
 
     //Gets formatted local day
-    public static synchronized String getLocalDayString(Context context, Calendar date, TimeZone zone, boolean showDayAbbrev, boolean showYear)
+    public static synchronized String getLocalDayString(Context context, Calendar date, Calendar now, TimeZone zone, boolean showDayAbbrev, boolean showYear)
     {
         int index;
-        long timeMs = (date != null ? date.getTimeInMillis() : 0);
-        Formatter dayFormatter = new Formatter(Locale.getDefault());
-        String valueString =  (context != null && timeMs != 0 ? (DateUtils.formatDateRange(context, dayFormatter, timeMs, timeMs, DateUtils.FORMAT_NUMERIC_DATE | (showYear ? DateUtils.FORMAT_SHOW_YEAR : DateUtils.FORMAT_NO_YEAR) | (showDayAbbrev ? (DateUtils.FORMAT_ABBREV_WEEKDAY | DateUtils.FORMAT_SHOW_WEEKDAY) : 0), zone.getID())).toString() : "");
+        boolean haveDate = (date != null);
+        boolean isToday = (haveDate && now != null && date.get(Calendar.DAY_OF_YEAR) == now.get(Calendar.DAY_OF_YEAR) && date.get(Calendar.YEAR) == now.get(Calendar.YEAR));
+        long timeMs = (haveDate ? date.getTimeInMillis() : 0);
+        Formatter dayFormatter;
+        String valueString = "";
 
-        //if don't want to show year
-        if(!showYear)
+        //if have context
+        if(context != null)
         {
-            //if year was still added (bug on older APIs)
-            index = valueString.lastIndexOf("/");
-            if(index >= 0 && index + 3 < valueString.length())
+            //if today and showing abbreviation
+            if(isToday && showDayAbbrev)
             {
-                //remove it
-                valueString = valueString.substring(0, index);
+                //set today title
+                valueString = context.getString(R.string.title_today);
+            }
+            //else if have time
+            else if(timeMs != 0)
+            {
+                //get date and time
+                dayFormatter = new Formatter(Locale.getDefault());
+                valueString = (DateUtils.formatDateRange(context, dayFormatter, timeMs, timeMs, DateUtils.FORMAT_NUMERIC_DATE | (showYear ? DateUtils.FORMAT_SHOW_YEAR : DateUtils.FORMAT_NO_YEAR) | (showDayAbbrev ? (DateUtils.FORMAT_ABBREV_WEEKDAY | DateUtils.FORMAT_SHOW_WEEKDAY) : 0), zone.getID())).toString();
+
+                //if don't want to show year
+                if(!showYear)
+                {
+                    //if year was still added (bug on older APIs)
+                    index = valueString.lastIndexOf("/");
+                    if(index >= 0 && index + 3 < valueString.length())
+                    {
+                        //remove it
+                        valueString = valueString.substring(0, index);
+                    }
+                }
             }
         }
 
         //return day string
         return(valueString);
     }
-    public static synchronized String getLocalDayString(Context context, Calendar date, TimeZone zone, boolean showDayAbbrev)
-    {
-        return(getLocalDayString(context, date, zone, showDayAbbrev, false));
-    }
     public static synchronized String getLocalDayString(Context context, Calendar date, TimeZone zone)
     {
-        return(getLocalDayString(context, date, zone, false));
+        return(getLocalDayString(context, date, null, zone, false, false));
     }
 
     //Gets formatted date
@@ -2089,9 +2105,12 @@ public abstract class Globals
         boolean showYear = false;
         Calendar currentDate = Calendar.getInstance(zone);
         Calendar localDate = getLocalTime(date, zone);
+        boolean haveContext = (context != null);
+        boolean haveLocalDate = (localDate != null);
+        Resources res = (haveContext ? context.getResources() : null);
         int daysAgo = 0;
-        int localDay = (localDate != null ? localDate.get(Calendar.DAY_OF_YEAR) : -1);
-        int localYear = (localDate != null ? localDate.get(Calendar.YEAR) : -1);
+        int localDay = (haveLocalDate ? localDate.get(Calendar.DAY_OF_YEAR) : -1);
+        int localYear = (haveLocalDate ? localDate.get(Calendar.YEAR) : -1);
         int currentDay = currentDate.get(Calendar.DAY_OF_YEAR);
         int currentYear = currentDate.get(Calendar.YEAR);
         long msUntilDate;
@@ -2126,19 +2145,29 @@ public abstract class Globals
             if(showDay && allowSimpleDay)
             {
                 //get ms
-                msUntilDate = (localDate != null ? localDate.getTimeInMillis() : Long.MAX_VALUE) - currentDate.getTimeInMillis();
+                msUntilDate = (haveLocalDate ? localDate.getTimeInMillis() : Long.MAX_VALUE) - currentDate.getTimeInMillis();
 
                 //if before now
                 if(msUntilDate < 0)
                 {
-                    //show simple day
-                    daysUntilMidnight = 1 - (((currentDate.get(Calendar.HOUR_OF_DAY) * Calculations.SecondsPerHour) + (currentDate.get(Calendar.MINUTE) * 60) + currentDate.get(Calendar.SECOND) + (currentDate.get(Calendar.MILLISECOND) / 1000.0)) / Calculations.SecondsPerDay);
-                    daysAgo = (int)((Math.abs((double)msUntilDate / Calculations.MsPerDay)) + daysUntilMidnight);
-                    if(daysAgo < 1)
+                    //if a different day
+                    if(localDate == null || currentDate.get(Calendar.DAY_OF_YEAR) != localDate.get(Calendar.DAY_OF_YEAR) || currentDate.get(Calendar.YEAR) != localDate.get(Calendar.YEAR))
                     {
-                        daysAgo = 1;
+                        daysUntilMidnight = 1 - (((currentDate.get(Calendar.HOUR_OF_DAY) * Calculations.SecondsPerHour) + (currentDate.get(Calendar.MINUTE) * 60) + currentDate.get(Calendar.SECOND) + (currentDate.get(Calendar.MILLISECOND) / 1000.0)) / Calculations.SecondsPerDay);
+                        daysAgo = (int)((Math.abs((double)msUntilDate / Calculations.MsPerDay)) + daysUntilMidnight);
+                        if(daysAgo < 1)
+                        {
+                            daysAgo = 1;
+                        }
+
+                        //show simple day
+                        showSimpleDay = true;
                     }
-                    showSimpleDay = true;
+                    else
+                    {
+                        //show day abbreviation with today
+                        showDayAbbrev = true;
+                    }
                 }
                 //else if 1 week or less between now and date
                 else if(msUntilDate <= Calculations.MsPerWeek)
@@ -2151,7 +2180,7 @@ public abstract class Globals
             //return for desired zone
             shortTimeFormatter.setTimeZone(zone);
             mediumTimeFormatter.setTimeZone(zone);
-            return(showSimpleDay ? (context != null ? context.getResources().getQuantityString(R.plurals.title_days_ago, daysAgo, daysAgo) : "") : (showDay && context != null ? (getLocalDayString(context, localDate, zone, showDayAbbrev, showYear) + (dayLineBreak ? "\r\n" : ", ")) : "") + (localDate != null ? (showSeconds ? mediumTimeFormatter.format(localDate.getTime()) : shortTimeFormatter.format(localDate.getTime())) : ""));
+            return(showSimpleDay ? (res != null ? res.getQuantityString(R.plurals.title_days_ago, daysAgo, daysAgo) : "") : ((showDay && haveContext ? (getLocalDayString(context, localDate, currentDate, zone, showDayAbbrev, showYear) + (dayLineBreak ? "\r\n" : ", ")) : "") + (haveLocalDate ? (showSeconds ? mediumTimeFormatter.format(localDate.getTime()) : shortTimeFormatter.format(localDate.getTime())) : "")));
         }
     }
     public static String getDateString(Context context, Calendar date, TimeZone zone, boolean showSeconds, boolean alwaysShowDay, boolean allowSimpleDay)
@@ -2307,7 +2336,7 @@ public abstract class Globals
         ArrayList<TimeZone> zones = new ArrayList<>(0);
 
         //if time zone list is already set and has items
-        if(timeZoneList != null && timeZoneList.size() > 0)
+        if(timeZoneList != null && !timeZoneList.isEmpty())
         {
             //return it
             return(timeZoneList);
@@ -2487,7 +2516,7 @@ public abstract class Globals
             //get language
             Configuration config = context.getResources().getConfiguration();
             LocaleList locales = (Build.VERSION.SDK_INT >= 24 ? config.getLocales() : null);
-            Locale currentLocale = (Build.VERSION.SDK_INT >= 24 && locales != null && locales.size() > 0 ? locales.get(0) : Locale.getDefault());
+            Locale currentLocale = (Build.VERSION.SDK_INT >= 24 && locales != null && !locales.isEmpty() ? locales.get(0) : Locale.getDefault());
             return(currentLocale.getLanguage());
         }
         else
@@ -5593,7 +5622,7 @@ public abstract class Globals
     public static WebPageData loginSpaceTrack(String user, String pwd)
     {
         //if no user and/or password
-        if(user == null || pwd == null || user.trim().length() == 0 || pwd.trim().length() == 0)
+        if(user == null || pwd == null || user.trim().isEmpty() || pwd.trim().isEmpty())
         {
             //return invalid
             return(new WebPageData(null, null, 401));

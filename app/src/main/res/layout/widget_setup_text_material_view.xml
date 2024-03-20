@@ -3,6 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
     <TableLayout
+        android:id="@+id/Widget_Setup_Text_Table"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="16dp">
@@ -38,6 +39,12 @@
             </LinearLayout>
         </TableRow>
 
+        <TextView
+            android:id="@+id/Widget_Setup_Text_Top_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_top"
+            android:visibility="gone"/>
+
         <TableRow android:id="@+id/Widget_Setup_Name_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
                 style="@style/WidgetSetupStartTitle"
@@ -65,6 +72,12 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
+
+        <TextView
+            android:id="@+id/Widget_Setup_Text_Middle_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_middle"
+            android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Pass_Start_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView
@@ -234,6 +247,12 @@
                     style="@style/WidgetSetupItalicCheckBox"/>
             </LinearLayout>
         </TableRow>
+
+        <TextView
+            android:id="@+id/Widget_Setup_Text_Bottom_Title"
+            style="@style/WidgetSetupGroupText"
+            android:text="@string/title_bottom"
+            android:visibility="gone"/>
 
         <TableRow android:id="@+id/Widget_Setup_Location_Text_Row" style="@style/WidgetSetupRow" android:visibility="gone">
             <TextView

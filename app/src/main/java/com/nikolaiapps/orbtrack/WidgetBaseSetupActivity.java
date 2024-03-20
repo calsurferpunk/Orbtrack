@@ -343,7 +343,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private TableRow middleRow;
         private TableRow bottomRow;
         private TableRow[] textRow;
-        private TextView passStartText;
         private SwitchCompat globalTextSwitch;
         private SwitchCompat globalImageSwitch;
         private SwitchCompat globalBackgroundSwitch;
@@ -378,6 +377,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private View borderDivider;
         private View topDivider;
         private View middleDivider;
+        private View textTopTitle;
+        private View textMiddleTitle;
+        private View textBottomTitle;
         private View outdatedText;
         private View[] textDivider;
         private View[] displayDivider;
@@ -823,6 +825,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
                 case TabPage.Text:
                     rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_text_material_view : R.layout.widget_setup_text_view), container, false);
+                    table = rootView.findViewById(R.id.Widget_Setup_Text_Table);
 
                     textRow = new TableRow[TextType.TextCount];
                     textSizeList = new SelectListInterface[TextType.TextCount];
@@ -848,6 +851,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     textItalicCheckBox[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Italic_CheckBox);
                     textColorButton[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Color_Button);
 
+                    textTopTitle = rootView.findViewById(R.id.Widget_Setup_Text_Top_Title);
+
                     textRow[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Row);
                     textSizeList[TextType.Name] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Name_Text_Size_Text_List : R.id.Widget_Setup_Name_Text_Size_List);
                     textBoldCheckBox[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Bold_CheckBox);
@@ -855,8 +860,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     textColorButton[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Color_Button);
                     textDivider[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Divider);
 
+                    textMiddleTitle = rootView.findViewById(R.id.Widget_Setup_Text_Middle_Title);
+
                     textRow[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Row);
-                    passStartText = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text);
                     textSizeList[TextType.PassStart] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Start_Text_Size_Text_List : R.id.Widget_Setup_Pass_Start_Text_Size_List);
                     textBoldCheckBox[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Italic_CheckBox);
@@ -897,6 +903,14 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     textItalicCheckBox[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Italic_CheckBox);
                     textColorButton[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Color_Button);
                     textDivider[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Divider);
+
+                    textBottomTitle = rootView.findViewById(R.id.Widget_Setup_Text_Bottom_Title);
+                    if(widgetClass != null && widgetClass.equals(WidgetPassTinyProvider.class))
+                    {
+                        //move bottom title to before pass start
+                        table.removeView(textBottomTitle);
+                        table.addView(textBottomTitle, table.indexOfChild(textRow[TextType.PassStart]));
+                    }
 
                     textRow[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Row);
                     textSizeList[TextType.Location] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Location_Text_Size_Text_List : R.id.Widget_Setup_Location_Text_Size_List);
@@ -1271,9 +1285,17 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         globalTextSwitch.setChecked(useGlobalText);
                     }
 
-                    if(passStartText != null)
+                    if(textTopTitle != null)
                     {
-                        passStartText.setText(this.getResources().getString(useNormal ? R.string.title_pass_start : R.string.title_pass));
+                        textTopTitle.setVisibility(nonGlobalTextVisibility);
+                    }
+                    if(textMiddleTitle != null)
+                    {
+                        textMiddleTitle.setVisibility(useNormal ? nonGlobalTextVisibility : View.GONE);
+                    }
+                    if(textBottomTitle != null)
+                    {
+                        textBottomTitle.setVisibility(nonGlobalTextVisibility);
                     }
 
                     for(index = 0; index < TextType.TextCount; index++)
@@ -1292,7 +1314,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
                             default:
                                 //if using tiny and not any of the used text
-                                if(!useNormal && index != TextType.Name && index != TextType.PassStart)
+                                if(!useNormal && index != TextType.Name && index != TextType.PassStart && index != TextType.PassEnd)
                                 {
                                     visibility = View.GONE;
                                 }
@@ -2120,9 +2142,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                             {
                                 setOrbitalNameTextOptions(context, widgetId, widgetSettings.text[TextType.Name].size, widgetSettings.text[TextType.Name].color, widgetSettings.text[TextType.Name].getWeight());
                                 setPassStartTextOptions(context, widgetId, widgetSettings.text[TextType.PassStart].size, widgetSettings.text[TextType.PassStart].color, widgetSettings.text[TextType.PassStart].getWeight());
+                                setPassEndTextOptions(context, widgetId, widgetSettings.text[TextType.PassEnd].size, widgetSettings.text[TextType.PassEnd].color, widgetSettings.text[TextType.PassEnd].getWeight());
                                 if(useNormal)
                                 {
-                                    setPassEndTextOptions(context, widgetId, widgetSettings.text[TextType.PassEnd].size, widgetSettings.text[TextType.PassEnd].color, widgetSettings.text[TextType.PassEnd].getWeight());
                                     setPassElevationTextOptions(context, widgetId, widgetSettings.text[TextType.PassElevation].size, widgetSettings.text[TextType.PassElevation].color, widgetSettings.text[TextType.PassElevation].getWeight());
                                     if(useExtended)
                                     {

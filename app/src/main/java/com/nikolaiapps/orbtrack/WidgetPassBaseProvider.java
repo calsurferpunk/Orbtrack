@@ -968,10 +968,18 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         boolean useNormal = !widgetClass.equals(WidgetPassTinyProvider.class);
         boolean useExtended = widgetClass.equals(WidgetPassMediumProvider.class);
         boolean useParent = (parent != null);
+        boolean showPassStart = WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassStart);
+        boolean showPassEnd = WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassEnd);
         boolean dynamicPass = WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassDynamic);
-        Calendar usedStartDisplayTime;
+        boolean usePassStart;
+        boolean usePassEnd;
+        int passStartTextId;
+        int passStartLayoutId;
+        int passEndTextId;
+        int passEndLayoutId;
         String unknown = Globals.getUnknownString(context);
-        String usedStartDirectionString;
+        String passStartString = "";
+        String passEndString = "";
         Resources res = context.getResources();
 
         //if using parent
@@ -998,32 +1006,65 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 currentPass.passAzTravel = currentPass.passAzEnd - currentPass.passAzStart;
             }
 
-            //remember if before pass start and get used start displays
+            //remember if before pass start and if using pass start and/or end
             beforePassStart = (currentPass.passTimeStart == null || currentPass.passTimeStart.getTimeInMillis() > System.currentTimeMillis());
-            usedStartDisplayTime = (beforePassStart || !dynamicPass ? currentPass.passTimeStart : currentPass.passTimeEnd);
-            usedStartDirectionString = (beforePassStart || !dynamicPass ? Globals.Symbols.Up : Globals.Symbols.Down);
+            usePassStart = (beforePassStart && dynamicPass) || (showPassStart && !dynamicPass);
+            usePassEnd = (!beforePassStart && dynamicPass) || (showPassEnd && !dynamicPass);
 
+            //get pass start strings and IDs
+            passStartString = (usePassStart ? Globals.getDateString(context, currentPass.passTimeStart, zone, false, useNormal, useNormal) : "");
+            passStartTextId = (useNormal ? R.id.Widget_Pass_Start_Text : R.id.Widget_Pass_Tiny_Start_Text);
+            passStartLayoutId = (useNormal ? passStartTextId : R.id.Widget_Pass_Tiny_Start_Layout);
+
+            //get pass end strings and IDs
+            passEndString = (usePassEnd ? Globals.getDateString(context, currentPass.passTimeEnd, zone, false, useNormal, useNormal) : "");
+            passEndTextId = (useNormal ? R.id.Widget_Pass_End_Text : R.id.Widget_Pass_Tiny_End_Text);
+            passEndLayoutId = (useNormal ? passEndTextId : R.id.Widget_Pass_Tiny_End_Layout);
+
+            //if normal layout
             if(useNormal)
             {
-                //set pass start, end, and max elevation text
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Start_Text, usedStartDirectionString + Globals.getDateString(context, usedStartDisplayTime, zone, false, true, true));
-                if(!dynamicPass)
+                //if using pass start
+                if(usePassStart)
                 {
-                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_End_Text, Globals.Symbols.Down + Globals.getDateString(context, currentPass.passTimeEnd, zone, false, true, true));
+                    //add direction
+                    passStartString = Globals.Symbols.Up + passStartString;
                 }
+
+                //if using pass end
+                if(usePassEnd)
+                {
+                    //add direction
+                    passEndString = Globals.Symbols.Down + passEndString;
+                }
+
+                //set max elevation
                 setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_El_Max_Text, Globals.Symbols.Elevating + (currentPass.isKnownPassElevationMax() ? Globals.getDegreeString(currentPass.passElMax) : unknown));
             }
             else
             {
-                //set pass start and end
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Direction_Text, usedStartDirectionString);
-                setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Text, Globals.getDateString(context, usedStartDisplayTime, zone, false, false, false).replace(", ", " "));
-                if(!dynamicPass)
+                //if using pass start
+                if(usePassStart)
                 {
+                    //replace ","
+                    passStartString = passStartString.replace(", ", " ");
+
+                    //set direction
+                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_Start_Direction_Text, Globals.Symbols.Up);
+                }
+
+                //if using pass end
+                if(usePassEnd)
+                {
+                    //replace ","
+                    passEndString = passEndString.replace(", ", " ");
+
+                    //set direction
                     setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_End_Direction_Text, Globals.Symbols.Down);
-                    setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Tiny_End_Text, Globals.getDateString(context, currentPass.passTimeEnd, zone, false, false, false).replace(", ", " "));
                 }
             }
+
+            //if extended layout
             if(useExtended)
             {
                 //set az start, end, and pass duration text
@@ -1031,10 +1072,26 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Az_End_Text, Globals.Symbols.Down + (currentPass.passTimeEnd != null ? Globals.getAzimuthDirectionString(res, currentPass.passAzEnd) : unknown));
                 setViewText(context, widgetClass, widgetId, views, parent, R.id.Widget_Pass_Duration_Text, Globals.Symbols.Time + currentPass.passDuration);
             }
+
+            //update pass start
+            if(usePassStart)
+            {
+                setViewText(context, widgetClass, widgetId, views, parent, passStartTextId, passStartString);
+            }
+            setViewVisibility(views, parent, passStartLayoutId, usePassStart);
+
+            //update pass end
+            if(usePassEnd)
+            {
+                setViewText(context, widgetClass, widgetId, views, parent, passEndTextId, passEndString);
+            }
+            setViewVisibility(views, parent, passEndLayoutId, usePassEnd);
         }
 
+        //if not for preview
         if(!useParent)
         {
+            //update widget
             updateWidget(context, widgetClass, alarmReceiverClass, widgetId, manager, views, false);
         }
     }

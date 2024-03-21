@@ -12,6 +12,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
@@ -534,6 +535,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public boolean showPaths;
     public boolean showHorizon;
     public boolean showCalibration;
+    public boolean showPathDirections;
     public final boolean showOutsideArea;
     public final boolean showPathTimeNames;
     public final boolean hideDistantPathTimes;
@@ -594,6 +596,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private float compassCenterY;
     private final float indicatorThickness;
     private final float timeCirclePxRadius;
+    private final float pathDirectionShapeLength;
     private float azUserOffset;
     private float azDeclination;
     private final float[] azDegArray;
@@ -612,6 +615,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final double defaultPathJulianDelta;
     private Camera currentCamera;
     private final Paint currentPaint;
+    private final Path timePathShape;
     private Rect selectedArea;
     private final Rect iconArea;
     private final Rect iconScaledArea;
@@ -670,6 +674,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
         hideDistantPathTimes = Settings.getLensHideDistantPathTimes(context);
+        showPathDirections = Settings.getLensShowPathDirection(context);
         showPathTimeNames = Settings.getLensShowPathTimeNames(context);
         hideConstellationStarPaths = Settings.getLensHideConstellationStarPaths(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
@@ -681,6 +686,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         starMagnitude = Settings.getLensStarMagnitude(context);
         indicatorThickness = dpPixels[0];
         timeCirclePxRadius = dpPixels[1];
+        pathDirectionShapeLength = (timeCirclePxRadius * 2);
         iconAlpha = Settings.getLensIndicatorAlpha(context);
         iconLength = (int)dpPixels[4];
         iconHalfLength = (iconLength / 2);
@@ -696,6 +702,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         usingFilledBoxPath = (pathType == Settings.Options.LensView.PathLabelType.FilledBox);
         usingColorTextPath = (pathType == Settings.Options.LensView.PathLabelType.ColorText);
         resetAlignmentStatus();
+        timePathShape = new Path();
         iconArea = new Rect();
         iconScaledArea = new Rect();
         firstArea = new RectF();
@@ -885,7 +892,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         int index2;
         int currentId;
         int travelLength;
+        int lastTimeIndex = -1;
         int lastTravelIndex;
+        int usedTimeIndex;
         int selectedColor = Color.WHITE;
         int width = getWidth();
         int widthHalf = width / 2;
@@ -913,6 +922,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         double pathJulianDelta;
         double pathJulianEndDelta;
         double periodMinutes;
+        double timeAzDelta;
+        double timeElDelta;
         double currentAzDelta;
         double currentElDelta;
         double currentAzPxDelta;
@@ -1022,13 +1033,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                 int usedTextColor = (currentSelected ? baseTextColor : Globals.getColor(75, baseTextColor));
                                 int usedTextBgColor = (currentSelected ? textBgColor : Globals.getColor(30, textBgColor));
                                 int usedCurrentColor = Globals.getColor(currentSelected ? 150 : 20, currentColor);
+                                int timePathShapeColor = Globals.getColorAdded(10, usedCurrentColor);
 
                                 //reset first and previous areas
                                 firstArea.setEmpty();
                                 previousArea.setEmpty();
-
-                                //setup paint
-                                currentPaint.setStyle(Paint.Style.STROKE);
 
                                 //set julian dates
                                 julianDateStart = currentTravel[0].julianDate;
@@ -1061,6 +1070,9 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                     elPx[1] = currentElPx;
                                     currentAzPxDelta = Math.abs(azPx[0] - azPx[1]);
                                     currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
+
+                                    //setup paint
+                                    currentPaint.setStyle(Paint.Style.STROKE);
 
                                     //if not on first and not too long to draw
                                     if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
@@ -1130,6 +1142,50 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                                                 currentPaint.setColor(usedTextColor);
                                                 canvas.drawText(usedTimeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
                                             }
+
+                                            //if showing path directions
+                                            if(showPathDirections)
+                                            {
+                                                //if at least 1 valid previous time
+                                                if(lastTimeIndex >= 0 && lastTimeIndex < travelLength)
+                                                {
+                                                    //if can get time in between current and last
+                                                    usedTimeIndex = lastTimeIndex + ((index2 - lastTimeIndex) / 2);
+                                                    if(usedTimeIndex > 0 && usedTimeIndex < travelLength)
+                                                    {
+                                                        //remember last and between time view
+                                                        CalculateViewsTask.OrbitalView lastTimeView = currentTravel[lastTimeIndex];
+                                                        CalculateViewsTask.OrbitalView betweenTimeView = currentTravel[usedTimeIndex];
+
+                                                        //get direction, position deltas, and screen location
+                                                        angleDirection = Globals.getAngleDirection(currentView.azimuth, currentView.elevation, lastTimeView.azimuth, lastTimeView.elevation);
+                                                        timeAzDelta = Globals.degreeDistance(currentAzDeg, betweenTimeView.azimuth);
+                                                        timeElDelta = Globals.degreeDistance(currentElDeg, betweenTimeView.elevation);
+                                                        centerPx = getCorrectedScreenPoints(timeAzDelta, timeElDelta, betweenTimeView.elevation, width, height, degToPxWidth, degToPxHeight);
+
+                                                        //set relative center, rotation, and color
+                                                        currentPaint.setColor(timePathShapeColor);
+                                                        currentPaint.setStyle(Paint.Style.FILL);
+                                                        canvas.save();
+                                                        canvas.translate(centerPx[0], centerPx[1]);
+                                                        canvas.rotate((float)angleDirection - 90);
+
+                                                        //draw direction shape
+                                                        timePathShape.reset();
+                                                        timePathShape.moveTo(0, -pathDirectionShapeLength);
+                                                        timePathShape.lineTo(pathDirectionShapeLength, pathDirectionShapeLength);
+                                                        timePathShape.lineTo(0, 0);
+                                                        timePathShape.lineTo(-pathDirectionShapeLength, pathDirectionShapeLength);
+                                                        timePathShape.lineTo(0, -pathDirectionShapeLength);
+                                                        timePathShape.close();
+                                                        canvas.drawPath(timePathShape, currentPaint);
+
+                                                        //restore canvas rotation
+                                                        canvas.restore();
+                                                    }
+                                                }
+                                            }
+                                            lastTimeIndex = index2;
 
                                             //remember previous area and starting julian date
                                             previousArea.set(bgArea);

@@ -191,6 +191,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                     case ScreenKey.LensViewPaths:
                         SwitchPreference lensHideConstellationStarPaths = this.findPreference(Settings.PreferenceName.LensHideConstellationStarPaths);
+                        SwitchPreference lensShowPathDirection = this.findPreference(Settings.PreferenceName.LensShowPathDirection);
                         SwitchPreference lensShowPathTimeNames = this.findPreference(Settings.PreferenceName.LensShowPathTimeNames);
                         SwitchPreference lensHideDistantPathTimes = this.findPreference(Settings.PreferenceName.LensHideDistantPathTimes);
                         IconListPreference lensPathLabelTypeList = this.findPreference(Settings.PreferenceName.LensPathLabelType);
@@ -200,6 +201,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(lensHideConstellationStarPaths);
+                        setupSwitch(lensShowPathDirection);
                         setupSwitch(lensShowPathTimeNames);
                         setupSwitch(lensHideDistantPathTimes);
                         setupList(lensPathLabelTypeList, Settings.Options.LensView.pathLabelTypeItems, null, null, null, null);
@@ -1594,6 +1596,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensShowToolbars:
                         case Settings.PreferenceName.LensPathLabelType:
                         case Settings.PreferenceName.LensHideConstellationStarPaths:
+                        case Settings.PreferenceName.LensShowPathDirection:
                         case Settings.PreferenceName.LensShowPathTimeNames:
                         case Settings.PreferenceName.LensHideDistantPathTimes:
                         case Settings.PreferenceName.LensShowOutsideArea:

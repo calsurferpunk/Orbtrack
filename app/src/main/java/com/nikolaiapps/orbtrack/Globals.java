@@ -1871,6 +1871,23 @@ public abstract class Globals
         return(Color.argb(alpha, Color.red(color), Color.green(color), Color.blue(color)));
     }
 
+    //Normalizes the given RGB value (0 - 255)
+    private static int normalizeRGB(int value)
+    {
+        return(value < 0 ? 0 : Math.min(value, 255));
+    }
+
+    //Gets the color added by the given amount
+    public static int getColorAdded(int rgbDelta, int color)
+    {
+        int alpha = Color.alpha(color);
+        int red = normalizeRGB(Color.red(color) + rgbDelta);
+        int green = normalizeRGB(Color.green(color) + rgbDelta);
+        int blue = normalizeRGB(Color.blue(color) + rgbDelta);
+
+        return(Color.argb(alpha, red, green, blue));
+    }
+
     //Sets a text view to be shadowed text
     public static void setShadowedText(TextView view)
     {

@@ -125,6 +125,7 @@ public abstract class Settings
         static final String LensShowToolbars = "LensShowToolbars";
         static final String LensPathLabelType = "LensPathLabelType";
         static final String LensHideConstellationStarPaths = "LensHideConstellationStarPaths";
+        static final String LensShowPathDirection = "LensShowPathDirection";
         static final String LensShowPathTimeNames = "LensShowPathTimeNames";
         static final String LensHideDistantPathTimes = "LensHideDistantPathTimes";
         static final String LensShowOutsideArea = "LensShowOutsideArea";
@@ -1990,6 +1991,7 @@ public abstract class Settings
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
             case PreferenceName.LensHideConstellationStarPaths:
+            case PreferenceName.LensShowPathDirection:
             case PreferenceName.LensShowPathTimeNames:
             case PreferenceName.LensHideDistantPathTimes:
             case PreferenceName.ListShowPassProgress:
@@ -2591,6 +2593,12 @@ public abstract class Settings
     public static boolean getLensHideConstellationStarPaths(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.LensHideConstellationStarPaths));
+    }
+
+    //Returns show path direction
+    public static boolean getLensShowPathDirection(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensShowPathDirection));
     }
 
     //Returns show path time names

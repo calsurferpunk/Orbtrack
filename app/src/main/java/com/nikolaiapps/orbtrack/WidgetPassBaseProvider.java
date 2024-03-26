@@ -737,11 +737,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         usingView = (useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassStart));
         usingMiddleLayout |= usingView;
         usingMiddleNormalLayout = usingView;
-        setViewVisibility(views, parent, R.id.Widget_Pass_Start_Text, usingView);
         usingView = (useNormal && !useDynamicPass && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassEnd));
         usingMiddleLayout |= usingView;
         usingMiddleNormalLayout |= usingView;
-        setViewVisibility(views, parent, R.id.Widget_Pass_End_Text, usingView);
         usingView = (useNormal && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassElMax));
         usingMiddleLayout |= usingView;
         usingMiddleNormalLayout |= usingView;
@@ -770,11 +768,9 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         usingView = (!useNormal && tleIsAccurate && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassStart));
         usingBottomLayout |= usingView;
         usingTinyPassLayout = usingView;
-        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Start_Layout, usingView);
         usingView = (!useNormal && tleIsAccurate && !useDynamicPass && WidgetBaseSetupActivity.getDisplayShown(context, widgetClass, widgetId, WidgetBaseSetupActivity.DisplayType.PassEnd));
         usingBottomLayout |= usingView;
         usingTinyPassLayout |= usingView;
-        setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_End_Layout, usingView);
         setViewVisibility(views, parent, R.id.Widget_Pass_Tiny_Pass_Layout, usingTinyPassLayout);
         setViewVisibility(views, parent, R.id.Widget_Pass_Bottom_Layout, usingBottomLayout);
 

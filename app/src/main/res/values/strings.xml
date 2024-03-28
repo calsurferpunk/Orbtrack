@@ -622,6 +622,7 @@
     <string name="title_time_until">Time Until</string>
     <string name="title_time_zone">Time Zone</string>
     <string name="title_time_zone_locations">Time Zone Locations</string>
+    <string name="title_timeline">Timeline</string>
     <string name="title_tint_color">Tint Color</string>
     <string name="title_tle_age">TLE Age</string>
     <string name="title_today">Today</string>

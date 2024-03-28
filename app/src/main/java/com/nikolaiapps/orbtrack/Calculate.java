@@ -133,10 +133,9 @@ public abstract class Calculate
     public static abstract class ViewAngles
     {
         //Item
-        public static class Item extends Selectable.ListDisplayItem
+        public static class Item extends CalculateService.ViewListItem
         {
             public boolean isLoading;
-            public double julianDate;
             public Calendar time;
             public View progressGroup;
             public TextView timeText;
@@ -147,23 +146,13 @@ public abstract class Calculate
             public TextView illuminationText;
             public ExpandingListView subList;
             public LinearLayout dataGroup;
-            public final CalculateViewsTask.ViewData[] views;
 
-            public Item(int index, int viewCount)
+            public Item(int index, int viewCount, Calculations.SatelliteObjectType satellite)
             {
-                super(Integer.MAX_VALUE, index);
+                super(index, viewCount, satellite);
 
+                this.satellite = satellite;
                 isLoading = (viewCount < 1);
-                if(isLoading)
-                {
-                    viewCount = 1;
-                }
-                views = new CalculateViewsTask.ViewData[viewCount];
-                for(index = 0; index < views.length; index++)
-                {
-                    views[index] = new CalculateViewsTask.ViewData();
-                }
-                julianDate = Double.MAX_VALUE;
                 time = Globals.getCalendar(null, 0);
                 timeText = null;
                 azText = null;
@@ -275,7 +264,7 @@ public abstract class Calculate
                 else
                 {
                     //set as empty
-                    viewItems.set(new Item[]{new Item(0, 0)});
+                    viewItems.set(new Item[]{new Item(0, 0, null)});
                 }
 
                 //remember layout ID
@@ -929,7 +918,7 @@ public abstract class Calculate
                                                 break;
 
                                             case 1:
-                                                text = (!currentItem.passDuration.equals("") ? currentItem.passDuration : unknownString);
+                                                text = (!currentItem.passDuration.isEmpty() ? currentItem.passDuration : unknownString);
                                                 break;
 
                                             case 2:
@@ -1586,7 +1575,7 @@ public abstract class Calculate
     //Converts an item list into an array
     private static Selectable.ListItem[] getItemArray(ArrayList<Selectable.ListItem> itemList)
     {
-        return(itemList != null && itemList.size() > 0 ? itemList.toArray(new Selectable.ListItem[0]) : null);
+        return(itemList != null && !itemList.isEmpty() ? itemList.toArray(new Selectable.ListItem[0]) : null);
     }
 
     //Gets page param
@@ -2888,7 +2877,7 @@ public abstract class Calculate
     }
 
     //Begin calculating view information
-    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] satellites, ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
+    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] satellites, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
         int index;
         CalculateViewsTask task;

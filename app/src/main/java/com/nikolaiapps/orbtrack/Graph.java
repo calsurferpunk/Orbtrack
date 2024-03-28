@@ -519,7 +519,7 @@ public class Graph extends View
             canvas.drawBitmap(backgroundImage, 0, 0, drawBrush);
 
             //if there are items
-            if(items.size() > 0)
+            if(!items.isEmpty())
             {
                 //save canvas and clip area
                 canvas.save();

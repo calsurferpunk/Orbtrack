@@ -622,6 +622,7 @@
     <string name="title_time_until">Tiempo Hasta</string>
     <string name="title_time_zone">Zona Horaria</string>
     <string name="title_time_zone_locations">Ubicaciones Zona Horaria</string>
+    <string name="title_timeline">Línea de Tiempo</string>
     <string name="title_tint_color">Color Tinte</string>
     <string name="title_tle_age">Edad TLE</string>
     <string name="title_today">Hoy</string>

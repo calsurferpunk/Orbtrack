@@ -464,7 +464,7 @@ public abstract class Calculations
 
     //Norad data
     @SuppressWarnings("SpellCheckingInspection")
-    static class NoradDataType
+    public static class NoradDataType
     {
         //All prediction vars
         double m_satInc;	double m_satEcc;	double m_cosio;		double m_theta2; 	double m_x3thm1;

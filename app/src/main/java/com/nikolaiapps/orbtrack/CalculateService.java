@@ -97,7 +97,31 @@ public class CalculateService extends NotifyService
         }
     }
 
-    //Item
+    //View list item
+    public static class ViewListItem extends Selectable.ListDisplayItem
+    {
+        public double julianDate;
+        public Calculations.SatelliteObjectType satellite;
+        public final CalculateViewsTask.ViewData[] views;
+
+        public ViewListItem(int index, int viewCount, Calculations.SatelliteObjectType satellite)
+        {
+            super(satellite != null ? satellite.getSatelliteNum() : Integer.MAX_VALUE, index);
+
+            int viewIndex;
+            int usedViewCount = Math.max(viewCount, 1);
+
+            this.julianDate = Double.MAX_VALUE;
+            this.satellite = satellite;
+            views = new CalculateViewsTask.ViewData[usedViewCount];
+            for(viewIndex = 0; viewIndex < views.length; viewIndex++)
+            {
+                views[viewIndex] = new CalculateViewsTask.ViewData();
+            }
+        }
+    }
+
+    //Pass data
     public static class PassData extends Selectable.ListDisplayItem implements Parcelable
     {
         public int id2;

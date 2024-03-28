@@ -51,6 +51,8 @@ public abstract class Current
     public static abstract class PageType
     {
         static final int Combined = 0;
+        static final int Timeline = 1;
+        static final int PageCount = 2;
     }
 
     public static class Items
@@ -107,7 +109,16 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    PageAdapter.setCombinedItems((Combined.Item[])items);
+                    switch(page)
+                    {
+                        case PageType.Combined:
+                            PageAdapter.setCombinedItems((Combined.Item[])items);
+                            break;
+
+                        case PageType.Timeline:
+                            PageAdapter.setTimelineItems((Timeline.Item[])items);
+                            break;
+                    }
                     break;
 
                 case MainActivity.Groups.Calculate:
@@ -137,7 +148,16 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    PageAdapter.setCombinedItem(index, (Combined.Item)newItem);
+                    switch(page)
+                    {
+                        case PageType.Combined:
+                            PageAdapter.setCombinedItem(index, (Combined.Item)newItem);
+                            break;
+
+                        case PageType.Timeline:
+                            PageAdapter.setTimelineItem(index, (Timeline.Item)newItem);
+                            break;
+                    }
                     break;
 
                 case MainActivity.Groups.Calculate:
@@ -167,7 +187,7 @@ public abstract class Current
         {
             if(group == MainActivity.Groups.Current)
             {
-                PageAdapter.sortItems(Settings.getCurrentSortBy());
+                PageAdapter.sortItems(page, Settings.getCurrentSortBy());
             }
         }
 
@@ -176,7 +196,15 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    return(PageAdapter.getCombinedItem(index));
+                    switch(page)
+                    {
+                        case PageType.Combined:
+                            return(PageAdapter.getCombinedItem(index));
+
+                        case PageType.Timeline:
+                            return(PageAdapter.getTimelineItem(index));
+                    }
+                    break;
 
                 case MainActivity.Groups.Calculate:
                     switch(page)
@@ -203,6 +231,10 @@ public abstract class Current
         {
             return((Combined.Item)get(index));
         }
+        public Timeline.Item getTimelineItem(int index)
+        {
+            return((Timeline.Item)get(index));
+        }
         public Calculate.ViewAngles.Item getViewItem(int index)
         {
             return((Calculate.ViewAngles.Item)get(index));
@@ -221,7 +253,7 @@ public abstract class Current
             switch(group)
             {
                 case MainActivity.Groups.Current:
-                    return(PageAdapter.getItemCount());
+                    return(PageAdapter.getCount(page));
 
                 case MainActivity.Groups.Calculate:
                     return(Calculate.PageAdapter.getCount(page));
@@ -802,7 +834,7 @@ public abstract class Current
                                             break;
 
                                         case 8:
-                                            text = (!currentItem.passDuration.equals("") ? currentItem.passDuration : unknownString);
+                                            text = (!currentItem.passDuration.isEmpty() ? currentItem.passDuration : unknownString);
                                             break;
 
                                         case 9:
@@ -928,6 +960,165 @@ public abstract class Current
         }
     }
 
+    //Timeline
+    public static abstract class Timeline
+    {
+        //Item
+        public static class Item extends CalculateService.ViewListItem
+        {
+            public final boolean tleIsAccurate;
+            public boolean passCalculateFinished;
+            private String name;
+            private Drawable icon;
+            private TextView nameText;
+            private Graph elevationGraph;
+            private CircularProgressIndicator loadingProgress;
+            private AppCompatImageView nameImage;
+
+            public Item(Context context, int index, Database.SatelliteData currentSatellite)
+            {
+                super(index, 1, (currentSatellite != null ? currentSatellite.satellite : null));
+
+                boolean haveSatellite = (currentSatellite != null);
+
+                if(haveSatellite)
+                {
+                    id = currentSatellite.getSatelliteNum();
+                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, currentSatellite.getOrbitalType());
+                    name = currentSatellite.getName();
+                }
+
+                tleIsAccurate = (haveSatellite && currentSatellite.getTLEIsAccurate());
+            }
+
+            public void setLoading(boolean loading)
+            {
+                if(elevationGraph != null)
+                {
+                    elevationGraph.setVisibility(loading ? View.GONE : View.VISIBLE);
+                }
+                if(loadingProgress != null)
+                {
+                    loadingProgress.setVisibility(loading ? View.VISIBLE : View.GONE);
+                }
+            }
+
+            public void updateDisplays()
+            {
+                if(nameImage != null && icon != null)
+                {
+                    nameImage.setBackgroundDrawable(icon);
+                }
+
+                if(nameText != null)
+                {
+                    nameText.setText(name);
+                }
+            }
+        }
+
+        //Item holder
+        public static class ItemHolder extends RecyclerView.ViewHolder
+        {
+            public ItemHolder(@NonNull View itemView)
+            {
+                super(itemView);
+            }
+        }
+
+        //Item list adapter
+        public static class ItemListAdapter extends Selectable.ListBaseAdapter
+        {
+            private final Items timelineItems;
+
+            public ItemListAdapter(Context context, Timeline.Item[] savedItems, Database.SatelliteData[] orbitals)
+            {
+                super(context);
+
+                int index = 0;
+                ArrayList<Item> filteredItems = new ArrayList<>(orbitals.length);
+
+                //remember using material and layout ID
+                //this.itemsRefID = (usingMaterial ? R.layout.current_timeline_material_item : );
+                this.itemsRefID = R.layout.current_timeline_material_item;
+
+                timelineItems = new Current.Items(MainActivity.Groups.Current, PageType.Timeline);
+
+                //if there are saved items
+                if(savedItems != null && savedItems.length > 0)
+                {
+                    //set as saved items
+                    timelineItems.set(savedItems);
+                }
+                else
+                {
+                    //go through each orbital
+                    for(Database.SatelliteData currentOrbital : orbitals)
+                    {
+                        //if type is in filter
+                        if(currentOrbital.getInFilter())
+                        {
+                            //add item
+                            filteredItems.add(new Item(context, index++, currentOrbital));
+                        }
+                    }
+
+                    //setup items with filter
+                    timelineItems.set(new Item[filteredItems.size()]);
+                    for(index = 0; index < filteredItems.size(); index++)
+                    {
+                        timelineItems.set(index, filteredItems.get(index));
+                    }
+                }
+                timelineItems.sort();
+            }
+
+            @Override
+            public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+            {
+                View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
+                ItemHolder itemHolder = new ItemHolder(itemView);
+
+                setViewClickListeners(itemView, itemHolder);
+                return(itemHolder);
+            }
+
+            @Override
+            public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
+            {
+                Item currentItem = timelineItems.getTimelineItem(position);
+                View itemView = holder.itemView;
+
+                currentItem.nameImage = itemView.findViewById(R.id.Timeline_Item_Name_Image);
+                currentItem.nameText = itemView.findViewById(R.id.Timeline_Item_Name_Text);
+                currentItem.elevationGraph = itemView.findViewById(R.id.Timeline_Item_Elevation_Graph);
+                currentItem.loadingProgress = itemView.findViewById(R.id.Timeline_Item_Loading_Progress);
+
+                currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
+                currentItem.updateDisplays();
+            }
+
+            @Override
+            public int getItemCount()
+            {
+                return(timelineItems.getCount());
+            }
+
+            @Override
+            public Item getItem(int position)
+            {
+                return(timelineItems.getTimelineItem(position));
+            }
+
+            @Override
+            public long getItemId(int position)
+            {
+                Item currentItem = timelineItems.getTimelineItem(position);
+                return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
+            }
+        }
+    }
+
     //Page view
     public static class Page extends Selectable.ListFragment
     {
@@ -962,10 +1153,11 @@ public abstract class Current
             int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
-            boolean showingStars;
+            boolean showingStars = false;
             boolean onCurrent = (group == MainActivity.Groups.Current);
-            boolean createLens = (subPage == Globals.SubPageType.Lens);
-            boolean createMapView = (subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
+            boolean onCombined = (page == PageType.Combined);
+            boolean createLens = (onCombined && subPage == Globals.SubPageType.Lens);
+            boolean createMapView = (onCombined && subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
             boolean mapMultiOrbitals = (createMapView && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
             boolean mapSingleOrbital = (createMapView && MainActivity.mapViewNoradID != Integer.MAX_VALUE);
             boolean lensMultiOrbitals = (createLens && MainActivity.viewLensNoradID == Integer.MAX_VALUE);
@@ -974,19 +1166,36 @@ public abstract class Current
             Context context = this.getContext();
             final Selectable.ListBaseAdapter listAdapter;
             int[] orbitalTypeCount;
-            Combined.Item[] savedItems = (Combined.Item[])Current.PageAdapter.getSavedItems();
             Database.SatelliteData[] satellites = MainActivity.getSatellites();
             Database.SatelliteData[] usedSatellites;
 
-            //apply any filter and update status
-            //note: current single views use list filter since it came from there
-            Globals.applyOrbitalTypeFilter(context, group, (onCurrent && (mapSingleOrbital || lensSingleOrbital) ? Globals.SubPageType.List : subPage), satellites);
-            orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
-            showingStars = (orbitalTypeCount[Database.OrbitalType.Star] > 0);
-            showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
+            switch(page)
+            {
+                case PageType.Combined:
+                    Combined.Item[] savedCombinedItems = (Combined.Item[])Current.PageAdapter.getSavedItems(PageType.Combined);
 
-            //set adapter
-            listAdapter = new Combined.ItemListAdapter(context, savedItems, satellites);
+                    //apply any filter and update status
+                    //note: current single views use list filter since it came from there
+                    Globals.applyOrbitalTypeFilter(context, group, (onCurrent && (mapSingleOrbital || lensSingleOrbital) ? Globals.SubPageType.List : subPage), satellites);
+                    orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
+                    showingStars = (orbitalTypeCount[Database.OrbitalType.Star] > 0);
+                    showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
+
+                    //set adapter
+                    listAdapter = new Combined.ItemListAdapter(context, savedCombinedItems, satellites);
+                    break;
+
+                case PageType.Timeline:
+                    Timeline.Item[] savedTimelineItems = (Timeline.Item[])Current.PageAdapter.getSavedItems(PageType.Timeline);
+
+                    //set adapter
+                    listAdapter = new Timeline.ItemListAdapter(context, savedTimelineItems, satellites);
+                    break;
+
+                default:
+                    listAdapter = null;
+                    break;
+            }
 
             //set default
             actionButton = null;
@@ -1022,7 +1231,7 @@ public abstract class Current
             }
 
             //set change listeners
-            setChangeListeners(listAdapter);
+            setChangeListeners(page, listAdapter);
 
             //return view
             return(newView);
@@ -1040,10 +1249,12 @@ public abstract class Current
         public void onPrepareOptionsMenu(@NonNull Menu menu)
         {
             Context context = this.getContext();
+            int page = getPageParam();
             int subPage = getSubPageParam();
             int mapDisplayType = Settings.getMapDisplayType(context);
-            boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
-            boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
+            boolean onCombined = (page == PageType.Combined);
+            boolean usingMapDisplay = (onCombined && mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
+            boolean usingGlobeDisplay = (onCombined && mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
             boolean onSubPageList = (subPage == Globals.SubPageType.List);
             boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
             boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
@@ -1051,12 +1262,13 @@ public abstract class Current
             boolean onCurrentNoSelected = (MainActivity.viewLensNoradID == Integer.MAX_VALUE && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
             boolean showMap = ((usingMapDisplay && onSubPageList) || onSubPageGlobe);
             boolean showGlobe = ((usingGlobeDisplay && onSubPageList) || onSubPageMap);
+            boolean showLens = (onCombined && onSubPageList && SensorUpdate.havePositionSensors(context));
             boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
 
             menu.findItem(R.id.menu_list).setVisible(!onSubPageList);
             menu.findItem(R.id.menu_map).setVisible(showMap);
             menu.findItem(R.id.menu_globe).setVisible(showGlobe);
-            menu.findItem(R.id.menu_lens).setVisible(onSubPageList && SensorUpdate.havePositionSensors(context));
+            menu.findItem(R.id.menu_lens).setVisible(showLens);
             menu.findItem(R.id.menu_sort_by).setVisible(onSubPageList);
             menu.findItem(R.id.menu_filter).setVisible(showSettings);
             menu.findItem(R.id.menu_visible).setVisible(showSettings);
@@ -1107,11 +1319,11 @@ public abstract class Current
             });
         }
 
-        public void setChangeListeners(final Selectable.ListBaseAdapter listAdapter)
+        public void setChangeListeners(int page, final Selectable.ListBaseAdapter listAdapter)
         {
             if(listAdapter != null)
             {
-                PageAdapter.setItemChangedListener(new OnItemsChangedListener()
+                PageAdapter.setItemChangedListener(page, new OnItemsChangedListener()
                 {
                     @Override @SuppressLint("NotifyDataSetChanged")
                     public void itemsChanged()
@@ -1150,20 +1362,21 @@ public abstract class Current
     {
         private static boolean pendingSort;
         private static Combined.Item[] combinedItems;
+        private static Timeline.Item[] timelineItems;
         private static final Items.NoradIndex.Comparer noradIndexComparer = new Items.NoradIndex.Comparer();
         private static ArrayList<Items.NoradIndex> combinedNoradIndex;
-        private static Selectable.ListFragment.OnItemsChangedListener itemsChangedListener = null;
-        private static Object[] savedItems = null;
+        private static final Selectable.ListFragment.OnItemsChangedListener[] itemsChangedListener = new Selectable.ListFragment.OnItemsChangedListener[PageType.PageCount];
+        private static final Object[][] savedItems = new Object[PageType.PageCount][];
 
-        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int subPg)
+        public PageAdapter(FragmentManager fm, View parentView, Selectable.ListFragment.OnItemDetailButtonClickListener detailListener, Selectable.ListFragment.OnAdapterSetListener adapterListener, Selectable.ListFragment.OnPageSetListener setListener, int[] subPg)
         {
-            super(fm, parentView, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, new int[]{subPg});
+            super(fm, parentView, null, null, null, detailListener, adapterListener, setListener, null, MainActivity.Groups.Current, subPg);
         }
 
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, subPage[PageType.Combined], new Page()));
+            return(this.getItem(group, position, subPage[position], new Page()));
         }
 
         @Override
@@ -1178,6 +1391,7 @@ public abstract class Current
             {
                 params = new Bundle();
             }
+            params.putInt(Selectable.ParamTypes.PageNumber, position);
             newPage.setArguments(params);
 
             return(newPage);
@@ -1186,14 +1400,25 @@ public abstract class Current
         @Override
         public int getCount()
         {
-            return(1);
+            return(PageType.PageCount);
         }
 
         @Override
         public CharSequence getPageTitle(int position)
         {
             Resources res = currentContext.getResources();
-            return(res.getString(R.string.title_invalid));
+
+            switch(position)
+            {
+                case PageType.Combined:
+                    return(res.getString(R.string.title_status));
+
+                case PageType.Timeline:
+                    return(res.getString(R.string.title_timeline));
+
+                default:
+                    return(res.getString(R.string.title_invalid));
+            }
         }
 
         //Sets combined item(s)
@@ -1210,34 +1435,60 @@ public abstract class Current
             }
         }
 
+        //Sets timeline item(s)
+        public static void setTimelineItems(Timeline.Item[] items)
+        {
+            timelineItems = items;
+        }
+        public static void setTimelineItem(int index, Timeline.Item newItem)
+        {
+            if(timelineItems != null && index >= 0 && index < timelineItems.length)
+            {
+                timelineItems[index] = newItem;
+            }
+        }
+
         //Sort item(s)
-        public static void sortItems(int sortBy)
+        public static void sortItems(int page, int sortBy)
         {
             int index;
 
-            if(combinedItems != null && combinedNoradIndex != null)
+            if(page == PageType.Combined)
             {
-                Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
-
-                combinedNoradIndex.clear();
-                for(index = 0; index < combinedItems.length; index++)
+                if(combinedItems != null && combinedNoradIndex != null)
                 {
-                    combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                    Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
+
+                    combinedNoradIndex.clear();
+                    for(index = 0; index < combinedItems.length; index++)
+                    {
+                        combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                    }
+                    Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
                 }
-                Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
             }
         }
 
         //Gets count of items in given page
-        public static int getItemCount()
+        public static int getCount(int page)
         {
-            return(combinedItems == null ? 0 : combinedItems.length);
+            switch(page)
+            {
+                case PageType.Combined:
+                    return(combinedItems == null ? 0 : combinedItems.length);
+
+                case PageType.Timeline:
+                    return(timelineItems == null ? 0 : timelineItems.length);
+
+                default:
+                    return(0);
+            }
         }
 
         //Returns true if given page has items
-        public static boolean hasItems()
+        public static boolean hasItems(int page)
         {
-            return(getItemCount() > 0);
+            return(PageAdapter.getCount(page) > 0);
         }
 
         //Gets combined item(s)
@@ -1255,6 +1506,16 @@ public abstract class Current
             return(getCombinedItem(index >= 0 ? combinedNoradIndex.get(index).displayIndex : -1));
         }
 
+        //Gets timeline item(s)
+        public static Timeline.Item[] getTimelineItems()
+        {
+            return(timelineItems);
+        }
+        public static Timeline.Item getTimelineItem(int index)
+        {
+            return(timelineItems != null && index >= 0 && index < timelineItems.length ? timelineItems[index] : null);
+        }
+
         //Set pending
         public static void setPendingSort(boolean pending)
         {
@@ -1268,33 +1529,55 @@ public abstract class Current
         }
 
         //Get saved items
-        public static Object[] getSavedItems()
+        public static Object[] getSavedItems(int page)
         {
-            return(savedItems);
+            //if a valid page
+            if(page >= 0 && page < savedItems.length)
+            {
+                //return saved items
+                return(savedItems[page]);
+            }
+
+            //invalid
+            return(null);
         }
 
         //Set saved items
-        public static void setSavedItems(Object[] saveItems)
+        public static void setSavedItems(int page, Object[] saveItems)
         {
-            //set saved items
-            savedItems = saveItems;
+            //if a valid page
+            if(page >= 0 && page < savedItems.length)
+            {
+                //set saved items
+                savedItems[page] = saveItems;
+            }
         }
 
         //Sets item changed listener
-        public static void setItemChangedListener(Selectable.ListFragment.OnItemsChangedListener listener)
+        public static void setItemChangedListener(int page, Selectable.ListFragment.OnItemsChangedListener listener)
         {
-            //set listener
-            itemsChangedListener = listener;
+            //if a valid page
+            if(page >= 0 && page < itemsChangedListener.length)
+            {
+                //set listener
+                itemsChangedListener[page] = listener;
+            }
         }
 
         //Calls item changed listener
         public static void notifyItemsChanged()
         {
-            //if listener exists
-            if(itemsChangedListener != null)
+            int index;
+
+            //go through each listener
+            for(index = 0; index < itemsChangedListener.length; index++)
             {
-                //call listener
-                itemsChangedListener.itemsChanged();
+                //if listener exists
+                if(itemsChangedListener[index] != null)
+                {
+                    //call listener
+                    itemsChangedListener[index].itemsChanged();
+                }
             }
         }
     }

@@ -148,7 +148,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         needViews = true;
     }
 
-    private ArrayList<OrbitalView> getViews(Context context, Calculations.SatelliteObjectType currentSatellite, int satelliteIndex, Calculate.ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement, boolean limitTravel, boolean adjustTime, boolean hideSlow)
+    private ArrayList<OrbitalView> getViews(Context context, Calculations.SatelliteObjectType currentSatellite, int satelliteIndex, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement, boolean limitTravel, boolean adjustTime, boolean hideSlow)
     {
         int index = 0;
         double phase;
@@ -192,7 +192,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             if(savedViewItems != null && index < savedViewItems.length && satelliteIndex < savedViewItems[index].views.length && viewJulianDate == savedViewItems[index].julianDate)
             {
                 //remember current item
-                Calculate.ViewAngles.Item currentItem = savedViewItems[index];
+                CalculateService.ViewListItem currentItem = savedViewItems[index];
 
                 //set position
                 topographicData = new Calculations.TopographicDataType(currentItem.views[satelliteIndex].azimuth, currentItem.views[satelliteIndex].elevation, currentItem.views[satelliteIndex].rangeKm);
@@ -269,7 +269,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         boolean adjustTime = (Boolean)params[10];
         boolean hideSlow = (Boolean)params[11];
         Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
-        Calculate.ViewAngles.Item[] savedViewItems = (Calculate.ViewAngles.Item[])params[2];
+        CalculateService.ViewListItem[] savedViewItems = (CalculateService.ViewListItem[])params[2];
         Calculations.SatelliteObjectType[] satellites = (Calculations.SatelliteObjectType[])params[1];
         Context context = (Context)params[0];
 

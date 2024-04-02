@@ -876,23 +876,29 @@ public class Graph extends View
 
     private void drawXTitle(Canvas canvas, Paint brush, boolean forScroll)
     {
-        brush.setColor(titleColor);
-        brush.setStrokeWidth(1);
-        brush.setTextSize(textSizeLarge);
-        canvas.drawText(xTitle, (forScroll ? ((screenWidth / 2f) + deltaX) : graphArea.exactCenterX()) - (int)(xTitleWidth / 2f), height, brush);
+        if(xTitle != null)
+        {
+            brush.setColor(titleColor);
+            brush.setStrokeWidth(1);
+            brush.setTextSize(textSizeLarge);
+            canvas.drawText(xTitle, (forScroll ? ((screenWidth / 2f) + deltaX) : graphArea.exactCenterX()) - (int)(xTitleWidth / 2f), height, brush);
+        }
     }
 
     private void drawYTitle(Canvas canvas, Paint brush, boolean forScroll)
     {
-        brush.setColor(titleColor);
-        brush.setStrokeWidth(1);
-        brush.setTextSize(textSizeLarge);
+        if(yTitle != null)
+        {
+            brush.setColor(titleColor);
+            brush.setStrokeWidth(1);
+            brush.setTextSize(textSizeLarge);
 
-        canvas.save();
-        canvas.translate(yTitleHeight / 2f, graphArea.centerY());
-        canvas.rotate(-90);
-        canvas.drawText(yTitle, (int)(yTitleWidth / -2f), (int)(yTitleHeight / 2f) + (forScroll ? deltaX : 0), brush);
-        canvas.restore();
+            canvas.save();
+            canvas.translate(yTitleHeight / 2f, graphArea.centerY());
+            canvas.rotate(-90);
+            canvas.drawText(yTitle, (int)(yTitleWidth / -2f), (int)(yTitleHeight / 2f) + (forScroll ? deltaX : 0), brush);
+            canvas.restore();
+        }
     }
 
     private void drawXDividers(Canvas canvas, Paint brush, boolean forBackground)
@@ -1166,7 +1172,7 @@ public class Graph extends View
         }
 
         //update scaling
-        graphArea.set((yDivisorTitlesVisible ? Math.max(xAxisDivisionImageTitleWidest, ((yTitleHeight > 0 ? (yTitleHeight + titlePadding) : 0) + (haveYAxisValueText ? (yValueWidth + valuePadding) : 0))) : 0) + this.getPaddingLeft(), (yValueHeight / 2) + this.getPaddingTop(), width - (haveXAxisValueText ? (xValueWidth / 2) : 0) - this.getPaddingRight(), height - (yTitleHeight > 0 ? (yTitleHeight + titlePadding) : 0) - (haveXAxisValueText ? xValueHeight : 0) - xAxisDivisionImageHeight[0] - (xAxisDivisionImageHeight[0] > 0 ? (xAxisDivisionImageTopOffset + xAxisDivisionImageBottomOffset) : 0) - xAxisDivisionImageHeight[1] - xAxisDivisionImageHeight[2] - this.getPaddingBottom());
+        graphArea.set((yDivisorTitlesVisible ? Math.max(xAxisDivisionImageTitleWidest, ((yTitleHeight > 0 ? (yTitleHeight + titlePadding) : 0) + (haveYAxisValueText ? (yValueWidth + valuePadding) : (haveXAxisValueText ? (xValueWidth / 2) : 0)))) : 0) + this.getPaddingLeft(), (yValueHeight / 2) + this.getPaddingTop(), width - (haveXAxisValueText ? (xValueWidth / 2) : 0) - this.getPaddingRight(), height - (yTitleHeight > 0 ? (yTitleHeight + titlePadding) : 0) - (haveXAxisValueText ? xValueHeight : 0) - xAxisDivisionImageHeight[0] - (xAxisDivisionImageHeight[0] > 0 ? (xAxisDivisionImageTopOffset + xAxisDivisionImageBottomOffset) : 0) - xAxisDivisionImageHeight[1] - xAxisDivisionImageHeight[2] - this.getPaddingBottom());
         dataScaleX = (graphArea.width() / xSpan);
         dataScaleY = (graphArea.height() / ySpan);
 

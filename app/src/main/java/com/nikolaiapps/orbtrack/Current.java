@@ -967,7 +967,6 @@ public abstract class Current
         public static class Item extends CalculateService.ViewListItem
         {
             public final boolean tleIsAccurate;
-            public boolean passCalculateFinished;
             private String name;
             private Drawable icon;
             private TextView nameText;
@@ -995,7 +994,7 @@ public abstract class Current
             {
                 if(elevationGraph != null)
                 {
-                    elevationGraph.setVisibility(loading ? View.GONE : View.VISIBLE);
+                    elevationGraph.setVisibility(loading ? View.INVISIBLE : View.VISIBLE);
                 }
                 if(loadingProgress != null)
                 {
@@ -1013,6 +1012,41 @@ public abstract class Current
                 if(nameText != null)
                 {
                     nameText.setText(name);
+                }
+
+                if(elevationGraph != null)
+                {
+                    if(views != null && views.length > 1)
+                    {
+                        setViews(views);
+                    }
+                    elevationGraph.refresh();
+                }
+            }
+
+            public void setViews(CalculateViewsTask.ViewData[] views)
+            {
+                this.views = views;
+
+                if(elevationGraph != null)
+                {
+                    ArrayList<Double> timePoints = new ArrayList<>(0);
+                    ArrayList<Double> elevationPoints = new ArrayList<>(0);
+
+                    for(CalculateViewsTask.ViewData currentView : views)
+                    {
+                        timePoints.add(currentView.julianDate);
+                        elevationPoints.add((double)currentView.elevation);
+                    }
+
+                    elevationGraph.setAllowUpdate(false);
+                    elevationGraph.clearItems();
+                    elevationGraph.setDataTitlesVisible(false);
+                    elevationGraph.setTitles(null, null);
+                    elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
+                    elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 6);
+                    elevationGraph.setRangeY(0, 90, 0);
+                    elevationGraph.setAllowUpdate(true);
                 }
             }
         }
@@ -1088,13 +1122,21 @@ public abstract class Current
             {
                 Item currentItem = timelineItems.getTimelineItem(position);
                 View itemView = holder.itemView;
+                Graph elevationGraph;
 
                 currentItem.nameImage = itemView.findViewById(R.id.Timeline_Item_Name_Image);
                 currentItem.nameText = itemView.findViewById(R.id.Timeline_Item_Name_Text);
-                currentItem.elevationGraph = itemView.findViewById(R.id.Timeline_Item_Elevation_Graph);
+                elevationGraph = itemView.findViewById(R.id.Timeline_Item_Elevation_Graph);
+                if(elevationGraph != null)
+                {
+                    elevationGraph.setColors((Settings.getDarkTheme(currentContext) ? Color.WHITE : Color.BLACK), Color.GREEN);
+                    elevationGraph.setUnitTypes(Graph.UnitType.JulianDate, Graph.UnitType.Number);
+
+                }
+                currentItem.elevationGraph = elevationGraph;
                 currentItem.loadingProgress = itemView.findViewById(R.id.Timeline_Item_Loading_Progress);
 
-                currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
+                currentItem.setLoading(!currentItem.viewCalculateFinished && currentItem.tleIsAccurate);
                 currentItem.updateDisplays();
             }
 
@@ -1565,18 +1607,16 @@ public abstract class Current
         }
 
         //Calls item changed listener
-        public static void notifyItemsChanged()
+        public static void notifyItemsChanged(int page)
         {
-            int index;
-
-            //go through each listener
-            for(index = 0; index < itemsChangedListener.length; index++)
+            //if a valid page
+            if(page >= 0 && page < itemsChangedListener.length)
             {
                 //if listener exists
-                if(itemsChangedListener[index] != null)
+                if(itemsChangedListener[page] != null)
                 {
                     //call listener
-                    itemsChangedListener[index].itemsChanged();
+                    itemsChangedListener[page].itemsChanged();
                 }
             }
         }

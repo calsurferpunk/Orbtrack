@@ -2831,7 +2831,7 @@ public abstract class Globals
     //Gets text width
     public static int getTextWidth(Paint textPaint, String text)
     {
-        return((int)textPaint.measureText(text));
+        return(text != null ? (int)textPaint.measureText(text) : 0);
     }
 
     //Gets text height

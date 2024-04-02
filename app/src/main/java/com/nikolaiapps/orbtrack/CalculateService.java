@@ -100,9 +100,10 @@ public class CalculateService extends NotifyService
     //View list item
     public static class ViewListItem extends Selectable.ListDisplayItem
     {
+        public boolean viewCalculateFinished;
         public double julianDate;
         public Calculations.SatelliteObjectType satellite;
-        public final CalculateViewsTask.ViewData[] views;
+        public CalculateViewsTask.ViewData[] views;
 
         public ViewListItem(int index, int viewCount, Calculations.SatelliteObjectType satellite)
         {
@@ -111,6 +112,7 @@ public class CalculateService extends NotifyService
             int viewIndex;
             int usedViewCount = Math.max(viewCount, 1);
 
+            this.viewCalculateFinished = false;
             this.julianDate = Double.MAX_VALUE;
             this.satellite = satellite;
             views = new CalculateViewsTask.ViewData[usedViewCount];
@@ -118,6 +120,37 @@ public class CalculateService extends NotifyService
             {
                 views[viewIndex] = new CalculateViewsTask.ViewData();
             }
+        }
+        public ViewListItem(Database.SatelliteData satelliteData)
+        {
+            this(0, 1, (satelliteData != null ? satelliteData.satellite : null));
+        }
+
+        public static ViewListItem[] getSatellites(Context context, ArrayList<Integer> noraIds)
+        {
+            int index;
+            ViewListItem[] satellites = null;
+
+            if(noraIds != null)
+            {
+                satellites = new ViewListItem[noraIds.size()];
+                for(index = 0; index < noraIds.size(); index++)
+                {
+                    satellites[index] = new ViewListItem(new Database.SatelliteData(context, noraIds.get(index)));
+                }
+            }
+
+            return(satellites);
+        }
+
+        public int getSatelliteNum()
+        {
+            return(satellite != null ? satellite.getSatelliteNum() : Universe.IDs.None);
+        }
+
+        public String getName()
+        {
+            return(satellite != null ? satellite.getName() : null);
         }
     }
 

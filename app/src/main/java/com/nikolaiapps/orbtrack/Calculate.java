@@ -82,12 +82,14 @@ public abstract class Calculate
     {
         public int noradId;
         public double illumination;
+        public double julianDate;
         public String phaseName;
 
         public CalculateDataBase()
         {
             this.noradId = Universe.IDs.Invalid;
             this.illumination = 0;
+            this.julianDate = Double.MAX_VALUE;
             this.phaseName = null;
         }
     }
@@ -2877,22 +2879,15 @@ public abstract class Calculate
     }
 
     //Begin calculating view information
-    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] satellites, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
+    public static CalculateViewsTask calculateViews(Context context, CalculateService.ViewListItem[] viewItems, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
-        int index;
         CalculateViewsTask task;
         Bundle params = PageAdapter.getParams(PageType.View);
         int unitType = (params != null ? getUnitType(params) : IncrementType.Seconds);
-        Calculations.SatelliteObjectType[] satelliteObjects = new Calculations.SatelliteObjectType[satellites != null ? satellites.length : 0];
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        for(index = 0; index < satelliteObjects.length; index++)
-        {
-            //set views
-            satelliteObjects[index] = new Calculations.SatelliteObjectType(satellites[index].satellite);
-        }
-        task.execute(context, satelliteObjects, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
+        task.execute(context, viewItems, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
 
         //return task
         return(task);
@@ -3277,7 +3272,7 @@ public abstract class Calculate
                     multiNoradId = inputParams.getIntegerArrayList(ParamTypes.MultiNoradId);
 
                     //-not using multi or valid ID or valid multi IDs- or -not on intersection or different ID selections-
-                    if((!usingMulti || ((noradId != Universe.IDs.Invalid && noradId != Universe.IDs.Invalid2) || (multiNoradId != null && multiNoradId.size() >= 1))) && (!onIntersection || noradId != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
+                    if((!usingMulti || ((noradId != Universe.IDs.Invalid && noradId != Universe.IDs.Invalid2) || (multiNoradId != null && !multiNoradId.isEmpty()))) && (!onIntersection || noradId != inputParams.getInt(ParamTypes.NoradId2, Universe.IDs.Invalid)))
                     {
                         //start calculation
                         page.startCalculation(inputParams);

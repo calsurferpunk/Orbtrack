@@ -1026,17 +1026,39 @@ public abstract class Current
 
             public void setViews(CalculateViewsTask.ViewData[] views)
             {
+                final int viewsLength = (views != null ? views.length : 0);
+
                 this.views = views;
 
                 if(elevationGraph != null)
                 {
+                    int index;
+                    boolean onLast;
+                    float nextElevation;
+                    float currentElevation;
+                    float previousElevation;
                     ArrayList<Double> timePoints = new ArrayList<>(0);
                     ArrayList<Double> elevationPoints = new ArrayList<>(0);
 
-                    for(CalculateViewsTask.ViewData currentView : views)
+                    //go through each view
+                    for(index = 0; index < viewsLength; index++)
                     {
-                        timePoints.add(currentView.julianDate);
-                        elevationPoints.add((double)currentView.elevation);
+                        //get current view
+                        CalculateViewsTask.ViewData currentView = views[index];
+
+                        //-remember if on last- and -current, next, and last elevation values-
+                        onLast = ((index + 1) >= viewsLength);
+                        currentElevation = currentView.elevation;
+                        nextElevation = (!onLast ? views[index + 1].elevation : -Float.MAX_VALUE);
+                        previousElevation = (index > 0 ? views[index - 1].elevation : -Float.MAX_VALUE);
+
+                        //if -on first or last- or -previous, current, or next elevation is high enough-
+                        if((index == 0) || onLast || (previousElevation >= 0) || (currentElevation >= 0) || (nextElevation >= 0))
+                        {
+                            //add current date and elevation
+                            timePoints.add(currentView.julianDate);
+                            elevationPoints.add((double)currentElevation);
+                        }
                     }
 
                     elevationGraph.setAllowUpdate(false);
@@ -1131,7 +1153,6 @@ public abstract class Current
                 {
                     elevationGraph.setColors((Settings.getDarkTheme(currentContext) ? Color.WHITE : Color.BLACK), Color.GREEN);
                     elevationGraph.setUnitTypes(Graph.UnitType.JulianDate, Graph.UnitType.Number);
-
                 }
                 currentItem.elevationGraph = elevationGraph;
                 currentItem.loadingProgress = itemView.findViewById(R.id.Timeline_Item_Loading_Progress);

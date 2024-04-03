@@ -4983,8 +4983,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 pendingSort = Current.PageAdapter.hasPendingSort();
                             }
 
-                            //if -no pending sort- and --on timeline- or -on calculate but not showing any lens--
-                            if(!pendingSort && (onTimeline || (onCalculate && !onCalculateLens)))
+                            //if -no pending sort- and -on calculate but not showing any lens-
+                            if(!pendingSort && (onCalculate && !onCalculateLens))
                             {
                                 //pause/sleep for 2 seconds
                                 timerTask.sleep(2000);
@@ -4997,7 +4997,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         }
 
                         //wait only as long as needed to match delay
-                        repeatMs = timerDelay - (System.currentTimeMillis() - startTimeMs);
+                        repeatMs = (onTimeline ? 2000 : timerDelay) - (System.currentTimeMillis() - startTimeMs);
                         if(repeatMs < 1)
                         {
                             //make sure task keeps running
@@ -5298,7 +5298,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             timelineItems = Current.PageAdapter.getTimelineItems();
 
             //create and run task
-            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, savedItems, observer, julianDate, julianDate + 1, 30 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
+            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, savedItems, observer, julianDate, julianDate + 1, 5 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, CalculateService.ViewListItem item, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
@@ -5317,6 +5317,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             views[index] = new CalculateViewsTask.ViewData(item.getSatelliteNum(), pathPoints.get(index));
                         }
 
+                        //set views
+                        currentItem.setViews(views);
+
                         activity.runOnUiThread(new Runnable()
                         {
                             @Override
@@ -5324,7 +5327,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             {
                                 //update displays
                                 currentItem.setLoading(false);
-                                currentItem.setViews(views);
                                 currentItem.updateDisplays();
                             }
                         });

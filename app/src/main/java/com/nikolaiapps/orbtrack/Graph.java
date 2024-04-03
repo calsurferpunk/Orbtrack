@@ -28,6 +28,8 @@ import java.util.TimeZone;
 
 public class Graph extends View
 {
+    static final double LongestJulianDate = Calculations.julianDate(1, 1, 10000, 7, 59, 59);        //note: GMT of 12/31/9999 11:59:59 PM
+
     @SuppressWarnings("unused")
     static abstract class UnitType
     {
@@ -1400,6 +1402,7 @@ public class Graph extends View
         int index;
         boolean usingY2 = (y2 != null);
         boolean usingYBottom = (yBottom != null);
+        boolean usingJulianDates = (xUnits == UnitType.JulianDate);
 
         //reset x
         xMin = Float.MAX_VALUE;
@@ -1432,8 +1435,19 @@ public class Graph extends View
                     xMax = value;
                 }
 
-                //possibly update widest and tallest
-                updateWidestTallestX(value);
+                //if not using julian dates
+                if(!usingJulianDates)
+                {
+                    //update widest and tallest
+                    updateWidestTallestX(value);
+                }
+            }
+
+            //if using julian dates
+            if(usingJulianDates)
+            {
+                //update widest and tallest
+                updateWidestTallestX(LongestJulianDate);
             }
 
             yPoints = yTop;
@@ -1906,6 +1920,8 @@ public class Graph extends View
 
     public void setRangeX(double xMinimum, double xMaximum, int divisions)
     {
+        boolean usingJulianDates = (xUnits == UnitType.JulianDate);
+
         //reset
         xValueWidth = Integer.MIN_VALUE;
         xAxisDivisors = null;
@@ -1918,12 +1934,22 @@ public class Graph extends View
 
         if(divisions > 0)
         {
-            xAxisDivisionTextLines = (xUnits == UnitType.JulianDate ? 2 : 1);
+            xAxisDivisionTextLines = (usingJulianDates ? 2 : 1);
 
-            for(double value : new double[]{xMin, xMax})
+            //if using julian dates
+            if(usingJulianDates)
             {
-                //possibly update widest and tallest
-                updateWidestTallestX(value);
+                //update widest and tallest
+                updateWidestTallestX(LongestJulianDate);
+            }
+            else
+            {
+                //go through min and max
+                for(double value : new double[]{xMin, xMax})
+                {
+                    //update widest and tallest
+                    updateWidestTallestX(value);
+                }
             }
         }
         else

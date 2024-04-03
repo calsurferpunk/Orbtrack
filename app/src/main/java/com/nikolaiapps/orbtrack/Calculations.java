@@ -883,33 +883,33 @@ public abstract class Calculations
     }
 
     //Returns the Julian date for the given day of the year, year, and time
-    private static double julianDateDYT(int day_of_year, int year, int hour, int minutes, double seconds)
+    private static double julianDateDYT(int dayOfYear, int year, int hour, int minutes, double seconds)
     {
-        double julian_day;
+        double julianDay;
 
-        julian_day = day_of_year + (hour + (minutes + (seconds / 60.0)) / 60.0) / 24.0;
+        julianDay = dayOfYear + (hour + (minutes + (seconds / 60.0)) / 60.0) / 24.0;
 
-        return(julianDateDY(julian_day, year));
+        return(julianDateDY(julianDay, year));
     }
 
     //Returns the Julian date for the given month, day, year, and time
-    private static double julianDate(int month, int day, int year, int hour, int minutes, double seconds)
+    public static double julianDate(int month, int day, int year, int hour, int minutes, double seconds)
     {
         //calculate the day of the year (1..366)
-        int day_of_year;
+        int dayOfYear;
         int f1 = (int)((275.0 * month) / 9.0);
         int f2 = (int)((month + 9.0) / 12.0);
 
         if(IsLeapYear(year))
         {
-            day_of_year = f1 - f2 + day - 30;
+            dayOfYear = f1 - f2 + day - 30;
         }
         else
         {
-            day_of_year = f1 - (2 * f2) + day - 30;
+            dayOfYear = f1 - (2 * f2) + day - 30;
         }
 
-        return(julianDateDYT(day_of_year, year, hour, minutes, seconds));
+        return(julianDateDYT(dayOfYear, year, hour, minutes, seconds));
     }
 
     //Returns the Julian date for the given calendar

@@ -559,7 +559,7 @@ public abstract class Current
                 int index = 0;
                 boolean usePathProgress = Settings.getListPathProgress(context);
                 boolean usePassQuality = Settings.getListPassQuality(context);
-                ArrayList<Item> filteredItems = new ArrayList<>(orbitals.length);
+                ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
                 this.itemsRefID = (usingMaterial ? R.layout.current_combined_material_item : R.layout.current_combined_item);
@@ -577,19 +577,15 @@ public abstract class Current
                     //go through each orbital
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
-                        //if type is in filter
-                        if(currentOrbital.getInFilter())
-                        {
-                            //add item
-                            filteredItems.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality));
-                        }
+                        //add item
+                        items.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality));
                     }
 
-                    //setup items with filter
-                    combinedItems.set(new Item[filteredItems.size()]);
-                    for(index = 0; index < filteredItems.size(); index++)
+                    //setup items
+                    combinedItems.set(new Item[items.size()]);
+                    for(index = 0; index < items.size(); index++)
                     {
-                        combinedItems.set(index, filteredItems.get(index));
+                        combinedItems.set(index, items.get(index));
                     }
                 }
                 combinedItems.sort();
@@ -971,7 +967,7 @@ public abstract class Current
             private Drawable icon;
             private TextView nameText;
             private Graph elevationGraph;
-            private CircularProgressIndicator loadingProgress;
+            private View loadingProgress;
             private AppCompatImageView nameImage;
 
             public Item(Context context, int index, Database.SatelliteData currentSatellite)
@@ -1066,7 +1062,7 @@ public abstract class Current
                     elevationGraph.setDataTitlesVisible(false);
                     elevationGraph.setTitles(null, null);
                     elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
-                    elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 6);
+                    elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 4);
                     elevationGraph.setRangeY(0, 90, 0);
                     elevationGraph.setAllowUpdate(true);
                 }
@@ -1092,12 +1088,10 @@ public abstract class Current
                 super(context);
 
                 int index = 0;
-                ArrayList<Item> filteredItems = new ArrayList<>(orbitals.length);
+                ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
-                //this.itemsRefID = (usingMaterial ? R.layout.current_timeline_material_item : );
-                this.itemsRefID = R.layout.current_timeline_material_item;
-
+                this.itemsRefID = (usingMaterial ? R.layout.current_timeline_material_item : R.layout.current_timeline_item);
                 timelineItems = new Current.Items(MainActivity.Groups.Current, PageType.Timeline);
 
                 //if there are saved items
@@ -1111,22 +1105,21 @@ public abstract class Current
                     //go through each orbital
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
-                        //if type is in filter
-                        if(currentOrbital.getInFilter())
-                        {
-                            //add item
-                            filteredItems.add(new Item(context, index++, currentOrbital));
-                        }
+                        //add item
+                        items.add(new Item(context, index++, currentOrbital));
                     }
 
-                    //setup items with filter
-                    timelineItems.set(new Item[filteredItems.size()]);
-                    for(index = 0; index < filteredItems.size(); index++)
+                    //setup items
+                    timelineItems.set(new Item[items.size()]);
+                    for(index = 0; index < items.size(); index++)
                     {
-                        timelineItems.set(index, filteredItems.get(index));
+                        timelineItems.set(index, items.get(index));
                     }
                 }
                 timelineItems.sort();
+
+                //ID stays the same
+                this.setHasStableIds(true);
             }
 
             @Override
@@ -1151,7 +1144,7 @@ public abstract class Current
                 elevationGraph = itemView.findViewById(R.id.Timeline_Item_Elevation_Graph);
                 if(elevationGraph != null)
                 {
-                    elevationGraph.setColors((Settings.getDarkTheme(currentContext) ? Color.WHITE : Color.BLACK), Color.GREEN);
+                    elevationGraph.setColors((Settings.getDarkTheme(currentContext) ? Color.WHITE : Color.BLACK), Globals.resolveColorID(currentContext, R.attr.colorAccent));
                     elevationGraph.setUnitTypes(Graph.UnitType.JulianDate, Graph.UnitType.Number);
                 }
                 currentItem.elevationGraph = elevationGraph;
@@ -1216,7 +1209,8 @@ public abstract class Current
             int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
-            boolean showingStars = false;
+            int mainSubPage = this.getMainSubPageParam();
+            boolean showingStars;
             boolean onCurrent = (group == MainActivity.Groups.Current);
             boolean onCombined = (page == PageType.Combined);
             boolean createLens = (onCombined && subPage == Globals.SubPageType.Lens);
@@ -1231,28 +1225,29 @@ public abstract class Current
             int[] orbitalTypeCount;
             Database.SatelliteData[] satellites = MainActivity.getSatellites();
             Database.SatelliteData[] usedSatellites;
+            Database.SatelliteData[] filteredSatellites;
+
+            //apply any filter and update status
+            //note: current single views use list filter since it came from there
+            filteredSatellites = Globals.applyOrbitalTypeFilter(context, group, (onCurrent && (mapSingleOrbital || lensSingleOrbital) ? Globals.SubPageType.List : (onCombined ? subPage : mainSubPage)), satellites);
+            orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
+            showingStars = (orbitalTypeCount[Database.OrbitalType.Star] > 0);
+            showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
 
             switch(page)
             {
                 case PageType.Combined:
                     Combined.Item[] savedCombinedItems = (Combined.Item[])Current.PageAdapter.getSavedItems(PageType.Combined);
 
-                    //apply any filter and update status
-                    //note: current single views use list filter since it came from there
-                    Globals.applyOrbitalTypeFilter(context, group, (onCurrent && (mapSingleOrbital || lensSingleOrbital) ? Globals.SubPageType.List : subPage), satellites);
-                    orbitalTypeCount = Globals.getOrbitalTypeFilterCount(satellites);
-                    showingStars = (orbitalTypeCount[Database.OrbitalType.Star] > 0);
-                    showingConstellations = (orbitalTypeCount[Database.OrbitalType.Constellation] > 0);
-
                     //set adapter
-                    listAdapter = new Combined.ItemListAdapter(context, savedCombinedItems, satellites);
+                    listAdapter = new Combined.ItemListAdapter(context, savedCombinedItems, filteredSatellites);
                     break;
 
                 case PageType.Timeline:
                     Timeline.Item[] savedTimelineItems = (Timeline.Item[])Current.PageAdapter.getSavedItems(PageType.Timeline);
 
                     //set adapter
-                    listAdapter = new Timeline.ItemListAdapter(context, savedTimelineItems, satellites);
+                    listAdapter = new Timeline.ItemListAdapter(context, savedTimelineItems, filteredSatellites);
                     break;
 
                 default:
@@ -1439,7 +1434,7 @@ public abstract class Current
         @Override
         public @NonNull Fragment getItem(int position)
         {
-            return(this.getItem(group, position, subPage[position], new Page()));
+            return(this.getItem(group, position, subPage[position], subPage[PageType.Combined], new Page()));
         }
 
         @Override
@@ -1695,11 +1690,20 @@ public abstract class Current
     //Begin calculating view information
     public static CalculateViewsTask calculateViews(Context context, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
+        int index;
         CalculateViewsTask task;
+        CalculateService.ViewListItem[] viewItems = new CalculateService.ViewListItem[orbitalViews != null ? orbitalViews.length : 0];
+
+        //go through each item
+        for(index = 0; index < viewItems.length; index++)
+        {
+            //set item
+            viewItems[index] = new CalculateService.ViewListItem(0, 1, orbitalViews[index]);
+        }
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, orbitalViews, null, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true);
+        task.execute(context, viewItems, null, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true);
 
         //return task
         return(task);

@@ -1984,23 +1984,24 @@ public abstract class Globals
 
     //Julian date to calendar
     @SuppressWarnings("SpellCheckingInspection")
-    public static Calendar julianDateToCalendar(double julianDate)
+    public static Calendar julianDateToCalendar(double julianDate, boolean roundMs)
     {
-        double tmp;
-        double	j1, j2, j3, j4, j5;			//scratch
         Calendar result = getGMTTime();
 
         if(julianDate != Double.MAX_VALUE)
         {
             //get the date from the Julian day number
-            double intgr   = Math.floor(julianDate);
-            double frac    = julianDate - intgr;
-            double gregjd  = 2299161;
-            if( intgr >= gregjd )
+            boolean addSecond = false;
+            double tmp;
+            double	j1, j2, j3, j4, j5;
+            double intgr = Math.floor(julianDate);
+            double frac = julianDate - intgr;
+            double gregjd = 2299161;
+            if(intgr >= gregjd)
             {
                 //Gregorian calendar correction
-                tmp = Math.floor( ( (intgr - 1867216) - 0.25 ) / 36524.25 );
-                j1 = intgr + 1 + tmp - Math.floor(0.25*tmp);
+                tmp = Math.floor(((intgr - 1867216) - 0.25) / 36524.25);
+                j1 = intgr + 1 + tmp - Math.floor(0.25 * tmp);
             }
             else
             {
@@ -2009,32 +2010,33 @@ public abstract class Globals
 
             //correction for half day offset
             double dayfrac = frac + 0.5;
-            if( dayfrac >= 1.0 )
+            if(dayfrac >= 1.0)
             {
                 dayfrac -= 1.0;
                 ++j1;
             }
 
             j2 = j1 + 1524;
-            j3 = Math.floor( 6680.0 + ( (j2 - 2439870) - 122.1 )/ DaysPerYear);
+            j3 = Math.floor(6680.0 + ((j2 - 2439870) - 122.1 ) / DaysPerYear);
             j4 = Math.floor(j3 * DaysPerYear);
-            j5 = Math.floor( (j2 - j4)/30.6001 );
+            j5 = Math.floor( (j2 - j4) / 30.6001);
 
-            double d = Math.floor(j2 - j4 - Math.floor(j5*30.6001));
+            double d = Math.floor(j2 - j4 - Math.floor(j5 * 30.6001));
             double m = Math.floor(j5 - 1);
-            if( m > 12 ) m -= 12;
+            if(m > 12) m -= 12;
             double y = Math.floor(j3 - 4715);
-            if( m > 2 )   --y;
-            if( y <= 0 )  --y;
+            if(m > 2) --y;
+            if(y <= 0) --y;
 
             //
             // get time of day from day fraction
             //
-            double hr  = Math.floor(dayfrac * 24.0);
-            double mn  = Math.floor((dayfrac*24.0 - hr)*60.0);
-            double sc  = ((dayfrac*24.0 - hr)*60.0 - mn)*60.0;
+            double hrFrac = dayfrac * 24.0;
+            double hr  = Math.floor(hrFrac);
+            double mn  = Math.floor((hrFrac - hr) * 60.0);
+            double sc  = ((hrFrac - hr) * 60.0 - mn) * 60.0;
 
-            if( y < 0 )
+            if(y < 0)
             {
                 y = -y;
             }
@@ -2045,8 +2047,19 @@ public abstract class Globals
                 mn++;
             }
 
+            double ms = (sc - Math.floor(sc)) * 1000;
+            if(roundMs)
+            {
+                addSecond = (ms >= 500);
+                ms = 0.0;
+            }
+
             result.set((int)y, (int)m - 1, (int)d, (int)hr, (int)mn, (int)Math.floor(sc));
-            result.set(Calendar.MILLISECOND, (int)((sc - Math.floor(sc)) * 1000));
+            result.set(Calendar.MILLISECOND, (int)ms);
+            if(addSecond)
+            {
+                result.add(Calendar.SECOND, 1);
+            }
         }
         else
         {
@@ -2054,6 +2067,10 @@ public abstract class Globals
         }
 
         return(result);
+    }
+    public static Calendar julianDateToCalendar(double julianDate)
+    {
+        return(julianDateToCalendar(julianDate, false));
     }
 
     //Julian date with no seconds
@@ -3628,9 +3645,10 @@ public abstract class Globals
     }
 
     //Applies currently used orbital type filter
-    public static void applyOrbitalTypeFilter(Context context, int group, int subPage, Database.SatelliteData[] orbitals)
+    public static Database.SatelliteData[] applyOrbitalTypeFilter(Context context, int group, int subPage, Database.SatelliteData[] orbitals)
     {
         ArrayList<Byte> orbitalTypeFilterList = null;
+        ArrayList<Database.SatelliteData> filteredOrbitals = new ArrayList<>(0);
 
         //get filter
         if(group == MainActivity.Groups.Current)
@@ -3658,7 +3676,17 @@ public abstract class Globals
         {
             //update filter
             currentOrbital.setInFilter(orbitalTypeFilterList);
+
+            //if in filter
+            if(currentOrbital.getInFilter())
+            {
+                //add it to the list
+                filteredOrbitals.add(currentOrbital);
+            }
         }
+
+        //return filtered orbitals
+        return(filteredOrbitals.toArray(new Database.SatelliteData[0]));
     }
 
     //Removes any filter from given orbitals

@@ -1663,6 +1663,15 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         lensTimerDelay = Settings.getLensUpdateDelay(this);
     }
 
+    //Updates current timeline calculations
+    private void updateCurrentTimelineCalculations()
+    {
+        if(currentTimelineAnglesTask != null)
+        {
+            currentTimelineAnglesTask.needViews = true;
+        }
+    }
+
     //Updates current calculations
     private void updateCurrentCalculations()
     {
@@ -1676,10 +1685,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             currentCoordinatesTask.needCoordinates = true;
         }
-        if(currentTimelineAnglesTask != null)
-        {
-            currentTimelineAnglesTask.needViews = true;
-        }
+        updateCurrentTimelineCalculations();
     }
 
     //Updates the observer usage
@@ -2282,10 +2288,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(currentPageAdapter != null)
             {
                 //save items if not viewing list
-                Current.PageAdapter.setSavedItems(Current.PageType.Combined, (saveItems && currentSubPage[Current.PageType.Combined] != Globals.SubPageType.List ? Current.PageAdapter.getCombinedItems() : null));
+                boolean saveCurrentItems = (saveItems && currentSubPage[Current.PageType.Combined] != Globals.SubPageType.List);
 
-                //save items
-                Current.PageAdapter.setSavedItems(Current.PageType.Timeline, (saveItems ? Current.PageAdapter.getTimelineItems() : null));
+                Current.PageAdapter.setSavedItems(Current.PageType.Combined, (saveCurrentItems ? Current.PageAdapter.getCombinedItems() : null));
+                Current.PageAdapter.setSavedItems(Current.PageType.Timeline, null);
             }
         }
         //else if showing calculate
@@ -2294,9 +2300,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //save needed items
             if(calculatePageAdapter != null)
             {
+                boolean onCalculateViewInput = (calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Input);
+                boolean onCalculatePassesInput = (calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Input);
+                boolean onCalculateCoordinatesInput = (calculateSubPage[Calculate.PageType.Coordinates] == Globals.SubPageType.Input);
+                boolean onCalculateIntersectionInput = (calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Input);
+
                 //save items if viewing input
-                Calculate.PageAdapter.setSavedItems(Calculate.PageType.View, (calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Input ? null : Calculate.PageAdapter.getViewAngleItems()));
-                if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Input)
+                Calculate.PageAdapter.setSavedItems(Calculate.PageType.View, (onCalculateViewInput ? null : Calculate.PageAdapter.getViewAngleItems()));
+                if(onCalculateViewInput)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setViewItems(new Calculate.ViewAngles.Item[0]);
@@ -2304,7 +2315,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                 //save inputs
                 calculatePageAdapter.setSavedSubInput(Calculate.PageType.Passes, ParamTypes.PassIndex, passesPassIndex);
-                if(calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Input)
+                if(onCalculatePassesInput)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setSavedItems(Calculate.PageType.Passes, null);
@@ -2312,8 +2323,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
 
                 //save items if viewing input
-                Calculate.PageAdapter.setSavedItems(Calculate.PageType.Coordinates, (calculateSubPage[Calculate.PageType.Coordinates] == Globals.SubPageType.Input ? null : Calculate.PageAdapter.getCoordinatesItems()));
-                if(calculateSubPage[Calculate.PageType.Coordinates] == Globals.SubPageType.Input)
+                Calculate.PageAdapter.setSavedItems(Calculate.PageType.Coordinates, (onCalculateCoordinatesInput ? null : Calculate.PageAdapter.getCoordinatesItems()));
+                if(onCalculateCoordinatesInput)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setCoordinateItems(new Calculate.Coordinates.Item[0]);
@@ -2321,7 +2332,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                 //save inputs
                 calculatePageAdapter.setSavedSubInput(Calculate.PageType.Intersection, ParamTypes.PassIndex, intersectionPassIndex);
-                if(calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Input)
+                if(onCalculateIntersectionInput)
                 {
                     //remove items when starting again
                     Calculate.PageAdapter.setSavedItems(Calculate.PageType.Intersection, null);
@@ -3556,8 +3567,18 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(group)
                 {
                     case Groups.Current:
-                        //get passes
-                        setCurrentPassCalculations(true);
+                        switch(position)
+                        {
+                            case Current.PageType.Combined:
+                                //get passes
+                                setCurrentPassCalculations(true);
+                                break;
+
+                            case Current.PageType.Timeline:
+                                //get timelines
+                                updateCurrentTimelineCalculations();
+                                break;
+                        }
                         break;
 
                     case Groups.Calculate:
@@ -5298,7 +5319,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             timelineItems = Current.PageAdapter.getTimelineItems();
 
             //create and run task
-            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, savedItems, observer, julianDate, julianDate + 1, 5 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
+            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, savedItems, observer, julianDate, julianDate + 1, 2 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, CalculateService.ViewListItem item, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)

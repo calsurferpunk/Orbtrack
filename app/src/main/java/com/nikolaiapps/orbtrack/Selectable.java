@@ -62,6 +62,7 @@ public abstract class Selectable
         static final String Group = "group";
         static final String PageNumber = "page";
         static final String SubPageNumber = "subPage";
+        static final String MainSubPageNumber = "mainSubPage";
     }
 
     //Select list item
@@ -1954,6 +1955,12 @@ public abstract class Selectable
             return(getIntParam(ParamTypes.SubPageNumber));
         }
 
+        //Gets main sub page param
+        protected int getMainSubPageParam()
+        {
+            return(getIntParam(ParamTypes.MainSubPageNumber));
+        }
+
         //Gets adapter
         protected ListBaseAdapter getAdapter()
         {
@@ -2456,7 +2463,7 @@ public abstract class Selectable
         {
             return(new Fragment());
         }
-        protected Fragment getItem(int group, int position, int subPosition, ListFragment newPage)
+        protected Fragment getItem(int group, int position, int subPosition, int mainSubPosition, ListFragment newPage)
         {
             Bundle params = newPage.getArguments();
 
@@ -2467,9 +2474,14 @@ public abstract class Selectable
             params.putInt(ParamTypes.Group, group);
             params.putInt(ParamTypes.PageNumber, (group == MainActivity.Groups.Current ? Current.PageType.Combined : position));
             params.putInt(ParamTypes.SubPageNumber, subPosition);
+            params.putInt(ParamTypes.MainSubPageNumber, mainSubPosition);
 
             newPage.setArguments(params);
             return(setupItem(newPage));
+        }
+        protected Fragment getItem(int group, int position, int subPosition, ListFragment newPage)
+        {
+            return(getItem(group, position, subPosition, -1, newPage));
         }
 
         //Sets up item

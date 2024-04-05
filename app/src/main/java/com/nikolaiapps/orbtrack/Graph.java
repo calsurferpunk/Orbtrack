@@ -1241,7 +1241,7 @@ public class Graph extends View
         switch(units)
         {
             case UnitType.JulianDate:
-                return(Globals.getTimeString(this.getContext(), Globals.julianDateToCalendar(value), zone, false));
+                return(Globals.getTimeString(this.getContext(), Globals.julianDateToCalendar(value, true), zone, false));
 
             case UnitType.Degree:
                 return(Globals.getTemperatureString(value));

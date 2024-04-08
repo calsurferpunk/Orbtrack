@@ -975,6 +975,7 @@ public abstract class Current
         public static class Item extends CalculateService.ViewListItem
         {
             public final boolean tleIsAccurate;
+            private int divisionCount;
             private String name;
             private Drawable icon;
             private TextView nameText;
@@ -982,7 +983,7 @@ public abstract class Current
             private View loadingProgress;
             private AppCompatImageView nameImage;
 
-            public Item(Context context, int index, Database.SatelliteData currentSatellite)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, int divisionCount)
             {
                 super(index, 1, (currentSatellite != null ? currentSatellite.satellite : null));
 
@@ -990,12 +991,13 @@ public abstract class Current
 
                 if(haveSatellite)
                 {
-                    id = currentSatellite.getSatelliteNum();
-                    icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, currentSatellite.getOrbitalType());
-                    name = currentSatellite.getName();
+                    this.id = currentSatellite.getSatelliteNum();
+                    this.icon = Globals.getOrbitalIcon(context, MainActivity.getObserver(), id, currentSatellite.getOrbitalType());
+                    this.name = currentSatellite.getName();
                 }
 
-                tleIsAccurate = (haveSatellite && currentSatellite.getTLEIsAccurate());
+                this.divisionCount = divisionCount;
+                this.tleIsAccurate = (haveSatellite && currentSatellite.getTLEIsAccurate());
             }
 
             public void setLoading(boolean loading)
@@ -1128,7 +1130,7 @@ public abstract class Current
                     elevationGraph.setTitles(null, null);
                     elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
                     elevationGraph.setFillColors(elevationColors);
-                    elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 4);
+                    elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), divisionCount);
                     elevationGraph.setRangeY(0, 90, 0);
                     elevationGraph.setAllowUpdate(true);
                 }
@@ -1148,6 +1150,7 @@ public abstract class Current
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
             private final Items timelineItems;
+            private int divisionCount = 4;
 
             public ItemListAdapter(Context context, Timeline.Item[] savedItems, Database.SatelliteData[] orbitals)
             {
@@ -1172,7 +1175,7 @@ public abstract class Current
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
                         //add item
-                        items.add(new Item(context, index++, currentOrbital));
+                        items.add(new Item(context, index++, currentOrbital, divisionCount));
                     }
 
                     //setup items
@@ -1237,6 +1240,24 @@ public abstract class Current
             {
                 Item currentItem = timelineItems.getTimelineItem(position);
                 return(currentItem != null ? currentItem.id : Integer.MIN_VALUE);
+            }
+
+            public void setDivisionCount(int count)
+            {
+                int index;
+                int itemCount = getItemCount();
+
+                divisionCount = count;
+
+                for(index = 0; index < itemCount; index++)
+                {
+                    Item currentItem = timelineItems.getTimelineItem(index);
+                    if(currentItem != null)
+                    {
+                        currentItem.divisionCount = divisionCount;
+                        currentItem.updateDisplays();
+                    }
+                }
             }
         }
     }
@@ -1435,10 +1456,33 @@ public abstract class Current
                 @Override
                 public void orientationChanged()
                 {
+                    Context context = Page.this.getContext();
+                    Activity activity = (context instanceof Activity ? (Activity)context : null);
                     View rootView = Page.this.getView();
                     View listColumns = (rootView != null && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
 
-                    Page.this.setListColumns(Page.this.getContext(), listColumns, page);
+                    switch(page)
+                    {
+                        case PageType.Combined:
+                            Page.this.setListColumns(context, listColumns, page);
+                            break;
+
+                        case PageType.Timeline:
+                            if(activity != null && listAdapter instanceof Timeline.ItemListAdapter)
+                            {
+                                int columnCount = getListColumns(context, page);
+
+                                activity.runOnUiThread(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        ((Timeline.ItemListAdapter)listAdapter).setDivisionCount(columnCount > 1 ? 8 : 4);
+                                    }
+                                });
+                            }
+                            break;
+                    }
                 }
             });
         }

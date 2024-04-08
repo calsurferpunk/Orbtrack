@@ -392,12 +392,16 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 {
                     //need camera restart if on lens
                     restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
+                }
 
-                    //if adapter exists
-                    if(currentPageAdapter != null)
+                //if adapter exists
+                if(currentPageAdapter != null)
+                {
+                    //send event for all pages
+                    for(index = 0; index < Current.PageType.PageCount; index++)
                     {
                         //send event
-                        currentPageAdapter.notifyOrientationChangedListener(page);
+                        currentPageAdapter.notifyOrientationChangedListener(index);
                     }
                 }
                 break;

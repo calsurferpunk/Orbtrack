@@ -1813,7 +1813,7 @@ public abstract class Current
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, viewItems, null, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true);
+        task.execute(context, viewItems, null, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true, true);
 
         //return task
         return(task);

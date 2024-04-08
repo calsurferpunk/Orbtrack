@@ -2887,7 +2887,7 @@ public abstract class Calculate
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, viewItems, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false);
+        task.execute(context, viewItems, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false, false);
 
         //return task
         return(task);

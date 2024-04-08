@@ -69,7 +69,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             this.julianDate = julianDate;
             this.gmtTime = (gmtTime != null ? gmtTime : Globals.julianDateToCalendar(this.julianDate));
             this.timeZoneId = zoneId;
-            if(timeString != null)
+            if(timeString != null && !timeString.isEmpty())
             {
                 this.timeString = timeString;
             }
@@ -87,9 +87,9 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         {
             this(context, az, el, rangeKm, julianDate, gmtTime, zoneId, illumination, name, phaseName, timeString, false);
         }
-        public OrbitalView(Context context, Calculations.TopographicDataType topographicData, double julianDate, String zoneId, double illumination, String name, String pn)
+        public OrbitalView(Context context, Calculations.TopographicDataType topographicData, double julianDate, String zoneId, double illumination, String name, String pn, boolean getTime)
         {
-            this(context, topographicData.azimuth, topographicData.elevation, topographicData.rangeKm, julianDate, null, zoneId, illumination, name, pn, "", false);
+            this(context, topographicData.azimuth, topographicData.elevation, topographicData.rangeKm, julianDate, null, zoneId, illumination, name, pn, (getTime ? "" : "-"), false);
         }
         public OrbitalView(Context context, Calculations.TopographicDataType topographicData, double julianDate, String zoneId, String name, boolean showSeconds)
         {
@@ -158,7 +158,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         needViews = true;
     }
 
-    private ArrayList<OrbitalView> getViews(Context context, CalculateService.ViewListItem currentItem, int satelliteIndex, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement, boolean limitTravel, boolean adjustTime, boolean hideSlow)
+    private ArrayList<OrbitalView> getViews(Context context, CalculateService.ViewListItem currentItem, int satelliteIndex, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement, boolean limitTravel, boolean adjustTime, boolean hideSlow, boolean getTimeString)
     {
         int index = 0;
         Calculations.TopographicDataType topographicData;
@@ -243,7 +243,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             index++;
 
             //add view to list
-            pathViews.add(new OrbitalView(context, topographicData, viewJulianDate, observer.timeZone.getID(), illumination, currentItem.getName(), phaseName));
+            pathViews.add(new OrbitalView(context, topographicData, viewJulianDate, observer.timeZone.getID(), illumination, currentItem.getName(), phaseName, getTimeString));
 
             //update azimuth travel
             if(lastAz != Double.MAX_VALUE)
@@ -284,6 +284,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         double largeDayIncrement = (Double)params[7];
         boolean adjustTime = (Boolean)params[10];
         boolean hideSlow = (Boolean)params[11];
+        boolean getTimeString = (Boolean)params[12];
         Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
         CalculateService.ViewListItem[] savedViewItems = (CalculateService.ViewListItem[])params[2];
         CalculateService.ViewListItem[] viewItems = (CalculateService.ViewListItem[])params[1];
@@ -305,12 +306,12 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             publishProgress(index, Globals.ProgressType.Started);
 
             //get views
-            pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement, limitTravel, adjustTime, hideSlow);
+            pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement, limitTravel, adjustTime, hideSlow, getTimeString);
             length = pathViews.size();
             if(autoSize && !skipAutoSize && (!hideSlow || length > 1) && length < 100)
             {
                 //get a more accurate path
-                pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement / 5, limitTravel, adjustTime, false);
+                pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement / 5, limitTravel, adjustTime, false, getTimeString);
             }
 
             //update status

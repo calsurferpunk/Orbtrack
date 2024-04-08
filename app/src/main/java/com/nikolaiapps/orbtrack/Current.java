@@ -55,6 +55,18 @@ public abstract class Current
         static final int PageCount = 2;
     }
 
+    public static abstract class QualityColors
+    {
+        static final int BrightBlue = Color.rgb(0x00, 0xA4, 0XFF);
+        static final int Cyan = Color.rgb(0x02, 0xE3, 0xFD);
+        static final int BrightGreen = Color.rgb(0x00, 0xFF, 0xC0);
+        static final int Green = Color.rgb(0x00, 0xFF, 0x00);
+        static final int YellowGreen = Color.rgb(0xD0, 0xFF, 0x00);
+        static final int Yellow = Color.rgb(0xFF, 0xF0, 0x00);
+        static final int Orange = Color.rgb(0xFF, 0xA3, 0x00);
+        static final int Red = Color.rgb(0xFF, 0x00, 0x00);
+    }
+
     public static class Items
     {
         //note: order important for lists
@@ -523,7 +535,7 @@ public abstract class Current
 
                 if(passQualityView != null)
                 {
-                    passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : passElMax >= 70 ? Color.CYAN : passElMax >= 45 ? Color.GREEN : passElMax >= 20 ? Color.YELLOW : Color.RED);
+                    passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : getPathQualityColor(passElMax));
                 }
 
                 if(passProgress != null)
@@ -1028,11 +1040,18 @@ public abstract class Current
 
                 if(elevationGraph != null)
                 {
+                    final int colorsLength;
+                    final int pointsLength;
                     int index;
+                    int passIndex = 0;
                     boolean onLast;
+                    boolean elevationVisible;
                     float nextElevation;
-                    float currentElevation;
                     float previousElevation;
+                    double currentElevation;
+                    double maxElevation = -Double.MAX_VALUE;
+                    ArrayList<Integer> passColors = new ArrayList<>(0);
+                    ArrayList<Integer> elevationColors = new ArrayList<>(0);
                     ArrayList<Double> timePoints = new ArrayList<>(0);
                     ArrayList<Double> elevationPoints = new ArrayList<>(0);
 
@@ -1042,18 +1061,64 @@ public abstract class Current
                         //get current view
                         CalculateViewsTask.ViewData currentView = views[index];
 
-                        //-remember if on last- and -current, next, and last elevation values-
+                        //-remember if on last- and -current, next, last elevation values- and -if elevation visible-
                         onLast = ((index + 1) >= viewsLength);
                         currentElevation = currentView.elevation;
                         nextElevation = (!onLast ? views[index + 1].elevation : -Float.MAX_VALUE);
                         previousElevation = (index > 0 ? views[index - 1].elevation : -Float.MAX_VALUE);
+                        elevationVisible = (currentElevation >= 0);
 
                         //if -on first or last- or -previous, current, or next elevation is high enough-
-                        if((index == 0) || onLast || (previousElevation >= 0) || (currentElevation >= 0) || (nextElevation >= 0))
+                        if((index == 0) || onLast || (previousElevation >= 0) || elevationVisible || (nextElevation >= 0))
                         {
                             //add current date and elevation
                             timePoints.add(currentView.julianDate);
-                            elevationPoints.add((double)currentElevation);
+                            elevationPoints.add(currentElevation);
+
+                            //if elevation is visible
+                            if(elevationVisible)
+                            {
+                                //if the largest elevation in current pass
+                                if(currentElevation > maxElevation)
+                                {
+                                    //remember largest and color
+                                    maxElevation = currentElevation;
+                                }
+                            }
+                            else
+                            {
+                                //if elevation was ever visible
+                                if(maxElevation > -Double.MAX_VALUE)
+                                {
+                                    //add color
+                                    passColors.add(getPathQualityColor(maxElevation));
+                                }
+
+                                //reset
+                                maxElevation = -Double.MAX_VALUE;
+                            }
+                        }
+                    }
+
+                    //remember colors and points length
+                    colorsLength = passColors.size();
+                    pointsLength = elevationPoints.size();
+
+                    //go through each elevation point
+                    for(index = 0; index < pointsLength; index++)
+                    {
+                        //remember current elevation and if visible
+                        currentElevation = elevationPoints.get(index);
+                        elevationVisible = (currentElevation >= 0);
+
+                        //add color
+                        elevationColors.add(elevationVisible && passIndex < colorsLength ? passColors.get(passIndex) : Color.TRANSPARENT);
+
+                        //if elevation visible but next is not
+                        if(elevationVisible && (index + 1 < pointsLength) && elevationPoints.get(index + 1) < 0)
+                        {
+                            //go to next pass index
+                            passIndex++;
                         }
                     }
 
@@ -1062,6 +1127,7 @@ public abstract class Current
                     elevationGraph.setDataTitlesVisible(false);
                     elevationGraph.setTitles(null, null);
                     elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
+                    elevationGraph.setFillColors(elevationColors);
                     elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), 4);
                     elevationGraph.setRangeY(0, 90, 0);
                     elevationGraph.setAllowUpdate(true);
@@ -2580,6 +2646,12 @@ public abstract class Current
 
         //return task
         return(task);
+    }
+
+    //Gets path quality color for given elevation pass max
+    private static  int getPathQualityColor(double passElMax)
+    {
+        return(passElMax >= 80 ? QualityColors.BrightBlue : passElMax >= 70 ? QualityColors.Cyan : passElMax >= 60 ? QualityColors.BrightGreen : passElMax >= 50 ? QualityColors.Green : passElMax >= 40 ? QualityColors.YellowGreen : passElMax >= 30 ? QualityColors.Yellow : passElMax >= 20 ? QualityColors.Orange : QualityColors.Red);
     }
 
     //Gets map information text

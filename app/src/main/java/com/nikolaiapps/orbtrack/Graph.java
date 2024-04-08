@@ -223,6 +223,7 @@ public class Graph extends View
     private Bitmap userSelectedImage2;
     private OnScrollListener scrollListener;
     private OnSetItemsListener setItemsListener;
+    private List<Integer> fillColors;
     private List<Double> xPoints;
     private List<Double> yPoints;
     private List<Double> y2Points;
@@ -297,6 +298,7 @@ public class Graph extends View
         setDataTextScale(textSizeSmallScale);
 
         fillPath = new Path();
+        fillColors = null;
         linePoints = null;
         line2Points = null;
         linePointsBottom = null;
@@ -487,7 +489,10 @@ public class Graph extends View
         height = h;
         screenWidth = Globals.getDevicePixels(this.getContext())[0];
 
-        updateBackgroundImage();
+        if(allowUpdate)
+        {
+            updateBackgroundImage();
+        }
         updateSelectedImage();
     }
 
@@ -1040,14 +1045,19 @@ public class Graph extends View
 
     private void drawLinePoints(Canvas canvas, Paint brush, List<Double> yDrawPoints, float[] lineDrawPoints, List<Double> yDrawPointsBottom, float[] lineDrawPointsBottom)
     {
+        boolean usingFillColors = (fillColors != null);
+        boolean usingYBottom = (yDrawPointsBottom != null);
+        boolean showDataImages = (showDataTitles && linePointsImages != null && yDrawPoints != null && linePointsImages.length == yDrawPoints.size());
         int index;
         int pointOffset;
         int firstX = 0;
+        int currentColor;
+        int startColor = lineColor;
+        int lastColor = (usingFillColors ? Integer.MIN_VALUE : lineColor);
+        int fillColorsLength = (usingFillColors ? fillColors.size() : 0);
         double x = 0;
         double y = 0;
         double yBottom = 0;
-        boolean usingYBottom = (yDrawPointsBottom != null);
-        boolean showDataImages = (showDataTitles && linePointsImages != null && yDrawPoints != null && linePointsImages.length == yDrawPoints.size());
 
         //if there are line points
         if(yDrawPoints != null && lineDrawPoints != null && lineDrawPoints.length > 0)
@@ -1074,13 +1084,14 @@ public class Graph extends View
                     }
                 }
 
-                //get current axis values
+                //get current axis values and color
                 x = getScaledX(xPoints.get(index));
                 y = getScaledY(yDrawPoints.get(index));
                 if(usingYBottom)
                 {
                     yBottom = getScaledY(yDrawPointsBottom.get(index));
                 }
+                currentColor = (index < fillColorsLength ? fillColors.get(index) : lineColor);
 
                 //if on the first point
                 if(index == 0)
@@ -1093,6 +1104,29 @@ public class Graph extends View
                 {
                     //move to next point in path
                     fillPath.lineTo((int)x, (int)y);
+
+                    //if color changed
+                    if(currentColor != lastColor)
+                    {
+                        //update color
+                        setColors(titleColor, lastColor, false);
+
+                        //move back to start of color and close path
+                        fillPath.lineTo((int)x, graphArea.bottom);
+                        fillPath.lineTo(firstX, graphArea.bottom);
+                        fillPath.close();
+
+                        //set color and draw
+                        brush.setColor(fillColor);
+                        canvas.drawPath(fillPath, brush);
+
+                        //reset and move back to current
+                        fillPath.reset();
+                        fillPath.moveTo((int)x, (int)y);
+
+                        //reset start
+                        firstX = (int)x;
+                    }
 
                     //if within bounds
                     if((pointOffset + 3) < lineDrawPoints.length)
@@ -1107,6 +1141,9 @@ public class Graph extends View
                         }
                     }
                 }
+
+                //update last color
+                lastColor = currentColor;
             }
             if(yDrawPointsBottom != null)
             {
@@ -1129,6 +1166,11 @@ public class Graph extends View
             fillPath.close();
             brush.setColor(fillColor);
             canvas.drawPath(fillPath, brush);
+            if(usingFillColors)
+            {
+                //set back to starting color
+                setColors(titleColor, startColor, false);
+            }
             brush.setColor(lineColor);
             brush.setStrokeWidth(3);
             canvas.drawLines(lineDrawPoints, brush);
@@ -1277,15 +1319,22 @@ public class Graph extends View
         return(Globals.getLocalDayString(this.getContext(), Globals.julianDateToCalendar(julianDate), zone));
     }
 
-    public void setColors(int textsColor, int dataColor)
+    public void setColors(int textsColor, int dataColor, boolean updateImage)
     {
         titleColor = textsColor;
         lineColor = dataColor;
         fillColor = Globals.getColor(100, dataColor);
         gridAxisColor = Globals.getColor(200, dataColor);
 
-        updateSelectedImage();
-        this.refresh();
+        if(updateImage)
+        {
+            updateSelectedImage();
+            this.refresh();
+        }
+    }
+    public void setColors(int textsColor, int dataColor)
+    {
+        setColors(textsColor, dataColor, true);
     }
 
     private float getTextSmallSize()
@@ -1512,6 +1561,11 @@ public class Graph extends View
     public void setData(List<Double> x, List<Double> y, TimeZone zone)
     {
         setData(x, y, null, null, zone);
+    }
+
+    public void setFillColors(List<Integer> dataColors)
+    {
+        fillColors = dataColors;
     }
 
     @SuppressWarnings("unused")

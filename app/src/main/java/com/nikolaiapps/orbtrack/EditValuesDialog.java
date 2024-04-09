@@ -171,7 +171,7 @@ public class EditValuesDialog
                         text2Value = (text != null ? text.toString().trim() : "");
 
                         //if -sort by- or -edit colors- or -text exists and -not login or not space-track or text 2 exists--
-                        if(isSortBy || isEditColors || isVisible || ((!textValue.equals("") || (isLogin && !isSpaceTrack)) && (!isLogin || !isSpaceTrack || !text2Value.equals(""))))
+                        if(isSortBy || isEditColors || isVisible || ((!textValue.isEmpty() || (isLogin && !isSpaceTrack)) && (!isLogin || !isSpaceTrack || !text2Value.isEmpty())))
                         {
                             //save changes
                             savedCount++;
@@ -806,10 +806,10 @@ public class EditValuesDialog
         boolean createOnly = (list2Title == null);
         show(EditType.Login, titleText, null, textValueTitle, textValues, textValue2Title, text2Values, textRowValues, textRow2Values, null, null, null, null, null, null, list2Title, (createOnly ? null : Settings.Options.Updates.SatelliteSourceImageIds), (createOnly ? null : Settings.Options.Updates.SatelliteSourceItems), null, (createOnly ? null : new String[]{Settings.Options.Sources.SpaceTrack}), null, null, null, false);
     }
-    public void getSortBy(String titleText)
+    public void getSortBy(String titleText, int page)
     {
         int index;
-        int[] listIds = Current.Items.getSortByIds();
+        int[] listIds = Current.Items.getSortByIds(page);
         int[] imageIds = new int[listIds.length];
         String[] listValues = new String[listIds.length];
         String[] listSubValues = new String[listIds.length];
@@ -823,7 +823,7 @@ public class EditValuesDialog
             listSubValues[index] = String.valueOf(listIds[index]);
         }
 
-        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext)}, null, null, null, false);
+        show(EditType.SortBy, titleText, null, null, null, null, null, null, null, null, null, null, null, null, null, null, imageIds, listValues, listSubValues, new String[]{Settings.getCurrentSortByString(currentContext, page)}, null, null, null, false);
     }
     public void getEditColors(String titleText, int color1, int color2)
     {

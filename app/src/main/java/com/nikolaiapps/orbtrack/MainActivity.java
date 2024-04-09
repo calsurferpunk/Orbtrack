@@ -191,7 +191,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         mainGroup = savedInstanceState.getInt(ParamTypes.MainGroup, Groups.Current);
         inEditMode = pendingLocationUpdate = false;
         observer = null;
-        Settings.setCurrentSortBy(this, Settings.getCurrentSortBy(this));
+        for(index = 0; index < Current.PageType.PageCount; index++)
+        {
+            Settings.setCurrentSortBy(this, index, Settings.getCurrentSortBy(this, index));
+        }
         Settings.setMetricUnits(this, Settings.getMetricUnits(this));
         Settings.setAllowNumberCommas(this, Settings.getAllowNumberCommas(this));
         Settings.setMapMarkerInfoLocation(this, Settings.getMapMarkerInfoLocation(this));
@@ -939,7 +942,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
         else if(id == R.id.menu_sort_by)
         {
-            showSortingDialog();
+            showSortingDialog(page);
         }
         else if(id == R.id.menu_filter)
         {
@@ -2995,7 +2998,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
 
     //Shows a sorting dialog
-    public void showSortingDialog()
+    public void showSortingDialog(int page)
     {
         //show sorting dialog
         new EditValuesDialog(this, new EditValuesDialog.OnSaveListener()
@@ -3004,10 +3007,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             public void onSave(EditValuesDialog dialog, int itemIndex, int id, String textValue, String text2Value, double number1, double number2, double number3, String listValue, String list2Value, long dateValue, int color1, int color2, boolean visible)
             {
                 //update current sort by for page and set pending
-                Settings.setCurrentSortBy(MainActivity.this, list2Value);
-                Current.PageAdapter.setPendingSort(true);
+                Settings.setCurrentSortBy(MainActivity.this, page, list2Value);
+                Current.PageAdapter.setPendingSort(page, true);
             }
-        }).getSortBy(this.getString(R.string.title_sort_by));
+        }).getSortBy(this.getString(R.string.title_sort_by), page);
     }
 
     //Shows a filter type dialog
@@ -4183,6 +4186,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         return(new Runnable()
         {
+            private final boolean[] updateList = new boolean[Current.PageType.PageCount];
             private int lastMapNoradId = Universe.IDs.None;
             private double lastJulianDate = Double.MAX_VALUE;
 
@@ -4201,7 +4205,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean mapSingleOrbital = (onMap && mapViewNoradID != Integer.MAX_VALUE);
                 boolean lensMultiOrbitals = (onLens && viewLensNoradID == Integer.MAX_VALUE);
                 boolean lensSingleOrbital = (onLens && viewLensNoradID != Integer.MAX_VALUE);
-                boolean updateList = false;
                 boolean onCurrentMapId;
                 boolean onCurrentLensId;
                 boolean onCurrentLensChildId;
@@ -4222,6 +4225,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 ArrayList<TopographicDataType> selectedLookAngles = (lensSingleOrbital ? new ArrayList<>(0) : null);
                 ArrayList<Database.SatelliteData> selectedSatellites = (lensSingleOrbital ? new ArrayList<>(0) : null);
+
+                //go through update list status
+                for(index = 0; index < Current.PageType.PageCount; index++)
+                {
+                    //reset
+                    updateList[index] = false;
+                }
 
                 //if not waiting on location update
                 if(!pendingLocationUpdate)
@@ -4367,7 +4377,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             currentItem.altitudeKm = (float)currentOrbital.geo.altitudeKm;
 
                                             //update list later
-                                            updateList = true;
+                                            updateList[Current.PageType.Combined] = true;
                                         }
                                     }
                                 }
@@ -4485,19 +4495,23 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         });
                     }
 
-                    //if there is a pending sort
-                    if(Current.PageAdapter.hasPendingSort())
+                    //go through current pages
+                    for(index = 0; index < Current.PageType.PageCount; index++)
                     {
-                        //try to sort page and notify of change
-                        try
+                        //if there is a pending sort
+                        if(Current.PageAdapter.hasPendingSort(index))
                         {
-                            Current.PageAdapter.sortItems(Current.PageType.Combined, Settings.getCurrentSortBy());
-                            Current.PageAdapter.setPendingSort(false);
-                            updateList = true;
-                        }
-                        catch(Exception ex)
-                        {
-                            //try again later
+                            //try to sort page and notify of change
+                            try
+                            {
+                                Current.PageAdapter.sortItems(index, Settings.getCurrentSortBy(index));
+                                Current.PageAdapter.setPendingSort(index, false);
+                                updateList[index] = true;
+                            }
+                            catch(Exception ex)
+                            {
+                                //try again later
+                            }
                         }
                     }
 
@@ -4551,10 +4565,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     }
 
                     //if update needed
-                    if(updateList)
+                    for(index = 0; index < Current.PageType.PageCount; index++)
                     {
-                        //update list
-                        Current.PageAdapter.notifyItemsChanged(Current.PageType.Combined);
+                        if(updateList[index])
+                        {
+                            //update list
+                            Current.PageAdapter.notifyItemsChanged(index);
+                        }
                     }
                     if(havePendingMarkerScale)
                     {
@@ -4985,6 +5002,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 @Override
                 public void run()
                 {
+                    int index;
                     int page = getMainPage();
                     boolean pendingSort = false;
                     boolean onCurrent = (mainGroup == Groups.Current);
@@ -5004,8 +5022,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             //if on current
                             if(onCurrent)
                             {
-                                //update if pending sort
-                                pendingSort = Current.PageAdapter.hasPendingSort();
+                                //go through each page while no pending sort found
+                                for(index = 0; index < Current.PageType.PageCount && !pendingSort; index++)
+                                {
+                                    //update if pending sort
+                                    pendingSort = Current.PageAdapter.hasPendingSort(index);
+                                }
                             }
 
                             //if -no pending sort- and -on calculate but not showing any lens-
@@ -5176,7 +5198,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     {
                         boolean pendingSort = false;
                         Activity activity = MainActivity.this;
-                        int sortBy = Settings.getCurrentSortBy();
+                        int sortBy = Settings.getCurrentSortBy(Current.PageType.Combined);
                         final Current.Combined.Item currentItem = (pass instanceof Current.Combined.Item ? (Current.Combined.Item)pass : null);
 
                         //if current item and observer are set
@@ -5206,7 +5228,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             if(needSort)
                                             {
                                                 //set pending sort
-                                                Current.PageAdapter.setPendingSort(true);
+                                                Current.PageAdapter.setPendingSort(Current.PageType.Combined, true);
                                             }
                                         }
                                     });
@@ -5328,9 +5350,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, CalculateService.ViewListItem item, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
                 {
+                    //if timeline item is set
                     if(item instanceof Current.Timeline.Item)
                     {
+                        boolean pendingSort = false;
                         int index;
+                        int sortBy = Settings.getCurrentSortBy(Current.PageType.Timeline);
                         Activity activity = MainActivity.this;
                         Current.Timeline.Item currentItem = (Current.Timeline.Item)item;
                         CalculateViewsTask.ViewData[] views = new CalculateViewsTask.ViewData[pathPoints.size()];
@@ -5345,16 +5370,36 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //set views
                         currentItem.setViews(views);
 
-                        activity.runOnUiThread(new Runnable()
+                        //handle any needed sort
+                        switch(sortBy)
                         {
-                            @Override
-                            public void run()
-                            {
-                                //update displays
-                                currentItem.setLoading(false);
-                                currentItem.updateDisplays();
-                            }
-                        });
+                            case Current.Items.SortBy.PassStartTime:
+                            case Current.Items.SortBy.PassDuration:
+                            case Current.Items.SortBy.MaxElevation:
+                                pendingSort = true;
+                                //fall through
+
+                            default:
+                                final boolean needSort = pendingSort;
+                                activity.runOnUiThread(new Runnable()
+                                {
+                                    @Override
+                                    public void run()
+                                    {
+                                        //update displays
+                                        currentItem.setLoading(false);
+                                        currentItem.updateDisplays();
+
+                                        //if need to sort
+                                        if(needSort)
+                                        {
+                                            //set pending sort
+                                            Current.PageAdapter.setPendingSort(Current.PageType.Timeline, true);
+                                        }
+                                    }
+                                });
+                                break;
+                        }
                     }
                 }
             });

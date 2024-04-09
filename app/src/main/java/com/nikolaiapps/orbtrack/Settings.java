@@ -98,6 +98,7 @@ public abstract class Settings
         static final String MapShowToolbars = "MapShowToolbars";
         static final String MapOrbitalTypeFilter = "MapOrbitalTypeFilter";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
+        static final String CurrentTimelineSortBy = "CurrentTimelineSortBy";
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
         static final String ListShowPassQuality = "ListShowPassQuality";
@@ -555,14 +556,14 @@ public abstract class Settings
 
                     //get space-track
                     loginData = getLogin(currentContext, Globals.AccountType.SpaceTrack);
-                    if(loginData[0] != null && loginData[0].trim().length() > 0 && loginData[1] != null && loginData[1].trim().length() > 0)
+                    if(loginData[0] != null && !loginData[0].trim().isEmpty() && loginData[1] != null && !loginData[1].trim().isEmpty())
                     {
                         //add email
                         accountList.add(new Item(Globals.AccountType.SpaceTrack, loginData[0]));
                     }
 
                     //if no accounts
-                    if(accountList.size() == 0)
+                    if(accountList.isEmpty())
                     {
                         //add empty
                         accountList.add(new Item(Globals.AccountType.None, res.getString(R.string.title_none)));
@@ -1477,7 +1478,7 @@ public abstract class Settings
                     }
 
                     //set items and layout ID
-                    if(notifyList.size() == 0)
+                    if(notifyList.isEmpty())
                     {
                         notifyList.add(new Item(Integer.MIN_VALUE, (res != null ? res.getString(R.string.title_none) : ""), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings(), new CalculateService.AlarmNotifySettings()));
                     }
@@ -1954,6 +1955,7 @@ public abstract class Settings
     private static boolean mapSelectedShowFootprint = false;
     private static boolean satelliteUseNextDefaultColor = true;
     private static int currentCombinedSortBy = Current.Items.SortBy.Name;
+    private static int currentTimelineSortBy = Current.Items.SortBy.Name;
 
     //Gets read settings
     public static SharedPreferences getReadSettings(Context context)
@@ -2056,6 +2058,9 @@ public abstract class Settings
 
             case PreferenceName.CurrentCombinedSortBy:
                 return(currentCombinedSortBy);
+
+            case PreferenceName.CurrentTimelineSortBy:
+                return(currentTimelineSortBy);
 
             case PreferenceName.ColorTheme:
                 return(Options.Display.ThemeIndex.Cyan);
@@ -3156,28 +3161,37 @@ public abstract class Settings
     }
 
     //Gets current sort by for given page
-    public static int getCurrentSortBy(Context context)
+    public static int getCurrentSortBy(Context context, int page)
     {
-        return(getPreferenceInt(context, PreferenceName.CurrentCombinedSortBy));
+        return(getPreferenceInt(context, (page == Current.PageType.Timeline ? PreferenceName.CurrentTimelineSortBy : PreferenceName.CurrentCombinedSortBy)));
     }
-    public static int getCurrentSortBy()
+    public static int getCurrentSortBy(int page)
     {
-        return(currentCombinedSortBy);
+        return(page == Current.PageType.Timeline ? currentTimelineSortBy : currentCombinedSortBy);
     }
-    public static String getCurrentSortByString(Context context)
+    public static String getCurrentSortByString(Context context, int page)
     {
-        return(context.getString(getSortByStringId(getCurrentSortBy())));
+        return(context.getString(getSortByStringId(getCurrentSortBy(page))));
     }
 
     //Sets current sort by for given page
-    public static void setCurrentSortBy(Context context, int sortBy)
+    public static void setCurrentSortBy(Context context, int page, int sortBy)
     {
-        setPreferenceInt(context, PreferenceName.CurrentCombinedSortBy, sortBy);
-        currentCombinedSortBy = sortBy;
+        boolean forTimeline = (page == Current.PageType.Timeline);
+
+        setPreferenceInt(context, (forTimeline ? PreferenceName.CurrentTimelineSortBy : PreferenceName.CurrentCombinedSortBy), sortBy);
+        if(forTimeline)
+        {
+            currentTimelineSortBy = sortBy;
+        }
+        else
+        {
+            currentCombinedSortBy = sortBy;
+        }
     }
-    public static void setCurrentSortBy(Context context, String sortByString)
+    public static void setCurrentSortBy(Context context, int page, String sortByString)
     {
-        setCurrentSortBy(context, getSortBy(context, sortByString));
+        setCurrentSortBy(context, page, getSortBy(context, sortByString));
     }
 
     //Gets last location

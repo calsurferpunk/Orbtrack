@@ -107,6 +107,7 @@ public abstract class Current
         }
 
         public static final int[] sortByCombinedIds = new int[]{Settings.getSortByStringId(SortBy.Name), Settings.getSortByStringId(SortBy.Azimuth), Settings.getSortByStringId(SortBy.Elevation), Settings.getSortByStringId(SortBy.Range), Settings.getSortByStringId(SortBy.PassStartTime), Settings.getSortByStringId(SortBy.PassDuration), Settings.getSortByStringId(SortBy.MaxElevation), Settings.getSortByStringId(SortBy.Latitude), Settings.getSortByStringId(SortBy.Longitude), Settings.getSortByStringId(SortBy.Altitude)};
+        public static final int[] sortByTimelineIds = new int[]{Settings.getSortByStringId(SortBy.Name), Settings.getSortByStringId(SortBy.PassStartTime), Settings.getSortByStringId(SortBy.PassDuration), Settings.getSortByStringId(SortBy.MaxElevation)};
         private final int group;
         private final int page;
 
@@ -199,7 +200,7 @@ public abstract class Current
         {
             if(group == MainActivity.Groups.Current)
             {
-                PageAdapter.sortItems(page, Settings.getCurrentSortBy());
+                PageAdapter.sortItems(page, Settings.getCurrentSortBy(page));
             }
         }
 
@@ -303,9 +304,9 @@ public abstract class Current
             }
         }
 
-        public static int[] getSortByIds()
+        public static int[] getSortByIds(int page)
         {
-            return(sortByCombinedIds);
+            return(page == PageType.Timeline ? sortByTimelineIds : sortByCombinedIds);
         }
     }
 
@@ -620,7 +621,7 @@ public abstract class Current
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
             {
-                int sortBy = Settings.getCurrentSortBy();
+                int sortBy = Settings.getCurrentSortBy(position);
                 int visibility;
                 Item currentItem = combinedItems.getCombinedItem(position);
                 View itemView = holder.itemView;
@@ -976,12 +977,54 @@ public abstract class Current
         {
             public final boolean tleIsAccurate;
             private int divisionCount;
+            private double longestPassDays;
+            private double maxPassElevation;
+            private double firstPassJulianDate;
             private String name;
             private Drawable icon;
             private TextView nameText;
             private Graph elevationGraph;
             private View loadingProgress;
             private AppCompatImageView nameImage;
+
+            public static class Comparer implements Comparator<Item>
+            {
+                final int sort;
+
+                public Comparer(int sortBy)
+                {
+                    sort = sortBy;
+                }
+
+                @Override
+                public int compare(Item value1, Item value2)
+                {
+                    double firstDouble;
+                    double secondDouble;
+
+                    switch(sort)
+                    {
+                        case Items.SortBy.PassStartTime:
+                            firstDouble = value1.firstPassJulianDate;
+                            secondDouble = value2.firstPassJulianDate;
+                            break;
+
+                        case Items.SortBy.PassDuration:
+                            firstDouble = value1.longestPassDays;
+                            secondDouble = value2.longestPassDays;
+                            break;
+
+                        case Items.SortBy.MaxElevation:
+                            return(Globals.passMaxElevationCompare(value1.maxPassElevation, value2.maxPassElevation));
+
+                        default:
+                        case Items.SortBy.Name:
+                            return(Globals.stringCompare(value1.name, value2.name));
+                    }
+
+                    return(firstDouble == secondDouble ? Globals.stringCompare(value1.name, value2.name) : Double.compare(firstDouble, secondDouble));
+                }
+            }
 
             public Item(Context context, int index, Database.SatelliteData currentSatellite, int divisionCount)
             {
@@ -997,6 +1040,9 @@ public abstract class Current
                 }
 
                 this.divisionCount = divisionCount;
+                this.longestPassDays = -Double.MAX_VALUE;
+                this.maxPassElevation = -Double.MAX_VALUE;
+                this.firstPassJulianDate = Double.MAX_VALUE;
                 this.tleIsAccurate = (haveSatellite && currentSatellite.getTLEIsAccurate());
             }
 
@@ -1024,12 +1070,13 @@ public abstract class Current
                     nameText.setText(name);
                 }
 
+                if(views != null && views.length > 1)
+                {
+                    setViews(views);
+                }
+
                 if(elevationGraph != null)
                 {
-                    if(views != null && views.length > 1)
-                    {
-                        setViews(views);
-                    }
                     elevationGraph.refresh();
                 }
             }
@@ -1037,71 +1084,123 @@ public abstract class Current
             public void setViews(CalculateViewsTask.ViewData[] views)
             {
                 final int viewsLength = (views != null ? views.length : 0);
+                final int colorsLength;
+                final int pointsLength;
+                int index;
+                int passIndex = 0;
+                boolean onLast;
+                boolean currentElevationVisible;
+                boolean nextElevationVisible;
+                boolean previousElevationVisible;
+                float nextElevation;
+                float previousElevation;
+                double currentElevation;
+                double currentJulianDate;
+                double currentPassDays;
+                double currentPassStart = -Double.MAX_VALUE;
+                double maxElevation = -Double.MAX_VALUE;
+                ArrayList<Integer> passColors = new ArrayList<>(0);
+                ArrayList<Integer> elevationColors = new ArrayList<>(0);
+                ArrayList<Double> timePoints = new ArrayList<>(0);
+                ArrayList<Double> elevationPoints = new ArrayList<>(0);
 
+                //reset status
+                longestPassDays = -Double.MAX_VALUE;
+                maxPassElevation = -Double.MAX_VALUE;
+                firstPassJulianDate = Double.MAX_VALUE;
+
+                //set views
                 this.views = views;
 
-                if(elevationGraph != null)
+                //go through each view
+                for(index = 0; index < viewsLength; index++)
                 {
-                    final int colorsLength;
-                    final int pointsLength;
-                    int index;
-                    int passIndex = 0;
-                    boolean onLast;
-                    boolean elevationVisible;
-                    float nextElevation;
-                    float previousElevation;
-                    double currentElevation;
-                    double maxElevation = -Double.MAX_VALUE;
-                    ArrayList<Integer> passColors = new ArrayList<>(0);
-                    ArrayList<Integer> elevationColors = new ArrayList<>(0);
-                    ArrayList<Double> timePoints = new ArrayList<>(0);
-                    ArrayList<Double> elevationPoints = new ArrayList<>(0);
+                    //get current view
+                    CalculateViewsTask.ViewData currentView = views[index];
 
-                    //go through each view
-                    for(index = 0; index < viewsLength; index++)
+                    //remember if on last, current/next/last elevation values, if current/next/last elevation visible, and date
+                    onLast = ((index + 1) >= viewsLength);
+                    currentElevation = currentView.elevation;
+                    nextElevation = (!onLast ? views[index + 1].elevation : -Float.MAX_VALUE);
+                    previousElevation = (index > 0 ? views[index - 1].elevation : -Float.MAX_VALUE);
+                    currentElevationVisible = (currentElevation >= 0);
+                    nextElevationVisible = (nextElevation >= 0);
+                    previousElevationVisible = (previousElevation >= 0);
+                    currentJulianDate = currentView.julianDate;
+
+                    //if -on first or last- or -previous, current, or next elevation is high enough-
+                    if((index == 0) || onLast || previousElevationVisible || currentElevationVisible || nextElevationVisible)
                     {
-                        //get current view
-                        CalculateViewsTask.ViewData currentView = views[index];
+                        //add current date and elevation
+                        timePoints.add(currentJulianDate);
+                        elevationPoints.add(currentElevation);
 
-                        //-remember if on last- and -current, next, last elevation values- and -if elevation visible-
-                        onLast = ((index + 1) >= viewsLength);
-                        currentElevation = currentView.elevation;
-                        nextElevation = (!onLast ? views[index + 1].elevation : -Float.MAX_VALUE);
-                        previousElevation = (index > 0 ? views[index - 1].elevation : -Float.MAX_VALUE);
-                        elevationVisible = (currentElevation >= 0);
-
-                        //if -on first or last- or -previous, current, or next elevation is high enough-
-                        if((index == 0) || onLast || (previousElevation >= 0) || elevationVisible || (nextElevation >= 0))
+                        //if elevation is visible
+                        if(currentElevationVisible)
                         {
-                            //add current date and elevation
-                            timePoints.add(currentView.julianDate);
-                            elevationPoints.add(currentElevation);
-
-                            //if elevation is visible
-                            if(elevationVisible)
+                            //if the largest elevation in current pass
+                            if(currentElevation > maxElevation)
                             {
-                                //if the largest elevation in current pass
-                                if(currentElevation > maxElevation)
+                                //remember largest and color
+                                maxElevation = currentElevation;
+
+                                //if the largest so far
+                                if(maxElevation > maxPassElevation)
                                 {
-                                    //remember largest and color
-                                    maxElevation = currentElevation;
+                                    //update largest
+                                    maxPassElevation = maxElevation;
                                 }
                             }
-                            else
+
+                            //if pass just started
+                            if(!previousElevationVisible)
                             {
-                                //if elevation was ever visible
-                                if(maxElevation > -Double.MAX_VALUE)
+                                //update pass start
+                                currentPassStart = currentJulianDate;
+                            }
+
+                            //if next is no longer visible and pass start found
+                            if(!nextElevationVisible && currentPassStart > 0)
+                            {
+                                //get pass length
+                                currentPassDays = currentJulianDate - currentPassStart;
+
+                                //if the longest pass so far
+                                if(currentPassDays > longestPassDays)
                                 {
-                                    //add color
-                                    passColors.add(getPathQualityColor(maxElevation));
+                                    //update longest pass
+                                    longestPassDays = currentPassDays;
                                 }
 
                                 //reset
-                                maxElevation = -Double.MAX_VALUE;
+                                currentPassStart = -Double.MAX_VALUE;
+                            }
+
+                            //if first pass date not set yet
+                            if(firstPassJulianDate == Double.MAX_VALUE)
+                            {
+                                //update first pass date
+                                firstPassJulianDate = currentJulianDate;
                             }
                         }
-                    }
+                        else
+                        {
+                            //if elevation was ever visible
+                            if(maxElevation >= 0)
+                            {
+                                //add color
+                                passColors.add(getPathQualityColor(maxElevation));
+                            }
 
+                            //reset
+                            maxElevation = -Double.MAX_VALUE;
+                        }
+                    }
+                }
+
+                //if elevation graph exists
+                if(elevationGraph != null)
+                {
                     //remember colors and points length
                     colorsLength = passColors.size();
                     pointsLength = elevationPoints.size();
@@ -1111,19 +1210,20 @@ public abstract class Current
                     {
                         //remember current elevation and if visible
                         currentElevation = elevationPoints.get(index);
-                        elevationVisible = (currentElevation >= 0);
+                        currentElevationVisible = (currentElevation >= 0);
 
                         //add color
-                        elevationColors.add(elevationVisible && passIndex < colorsLength ? passColors.get(passIndex) : Color.TRANSPARENT);
+                        elevationColors.add(currentElevationVisible && passIndex < colorsLength ? passColors.get(passIndex) : Color.TRANSPARENT);
 
                         //if elevation visible but next is not
-                        if(elevationVisible && (index + 1 < pointsLength) && elevationPoints.get(index + 1) < 0)
+                        if(currentElevationVisible && (index + 1 < pointsLength) && elevationPoints.get(index + 1) < 0)
                         {
                             //go to next pass index
                             passIndex++;
                         }
                     }
 
+                    //update graph
                     elevationGraph.setAllowUpdate(false);
                     elevationGraph.clearItems();
                     elevationGraph.setDataTitlesVisible(false);
@@ -1497,13 +1597,13 @@ public abstract class Current
                     public void itemsChanged()
                     {
                         FragmentActivity activity = Page.this.getActivity();
-                        int sortBy = Settings.getCurrentSortBy();
+                        int sortBy = Settings.getCurrentSortBy(page);
 
                         //if not a constant value for sorting
                         if(sortBy != Items.SortBy.Name && sortBy != Items.SortBy.PassStartTime && sortBy != Items.SortBy.PassDuration && sortBy != Items.SortBy.MaxElevation)
                         {
                             //set pending sort
-                            PageAdapter.setPendingSort(true);
+                            PageAdapter.setPendingSort(page, true);
                         }
 
                         //if able to get activity
@@ -1528,7 +1628,7 @@ public abstract class Current
     //Page adapter
     public static class PageAdapter extends Selectable.ListFragmentAdapter
     {
-        private static boolean pendingSort;
+        private static final boolean[] pendingSort = new boolean[PageType.PageCount];
         private static Combined.Item[] combinedItems;
         private static Timeline.Item[] timelineItems;
         private static final Items.NoradIndex.Comparer noradIndexComparer = new Items.NoradIndex.Comparer();
@@ -1621,19 +1721,28 @@ public abstract class Current
         {
             int index;
 
-            if(page == PageType.Combined)
+            switch(page)
             {
-                if(combinedItems != null && combinedNoradIndex != null)
-                {
-                    Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
-
-                    combinedNoradIndex.clear();
-                    for(index = 0; index < combinedItems.length; index++)
+                case PageType.Timeline:
+                    if(timelineItems != null)
                     {
-                        combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                        Arrays.sort(timelineItems, new Timeline.Item.Comparer(sortBy));
                     }
-                    Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
-                }
+                    break;
+
+                case PageType.Combined:
+                    if(combinedItems != null && combinedNoradIndex != null)
+                    {
+                        Arrays.sort(combinedItems, new Combined.Item.Comparer(sortBy));
+
+                        combinedNoradIndex.clear();
+                        for(index = 0; index < combinedItems.length; index++)
+                        {
+                            combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
+                        }
+                        Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
+                    }
+                    break;
             }
         }
 
@@ -1685,15 +1794,26 @@ public abstract class Current
         }
 
         //Set pending
-        public static void setPendingSort(boolean pending)
+        public static void setPendingSort(int page, boolean pending)
         {
-            pendingSort = pending;
+            //if a valid page
+            if(page >= 0 && page < pendingSort.length)
+            {
+                pendingSort[page] = pending;
+            }
         }
 
         //Returns if pending sort for given page
-        public static boolean hasPendingSort()
+        public static boolean hasPendingSort(int page)
         {
-            return(pendingSort);
+            //if a valid page
+            if(page >= 0 && page < pendingSort.length)
+            {
+                return(pendingSort[page]);
+            }
+
+            //invalid
+            return(false);
         }
 
         //Get saved items

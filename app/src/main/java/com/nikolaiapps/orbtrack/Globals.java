@@ -4760,11 +4760,11 @@ public abstract class Globals
     {
         if(passElMax1 == Double.MAX_VALUE)
         {
-            passElMax1 = Double.MIN_VALUE;
+            passElMax1 = -Double.MAX_VALUE;
         }
         if(passElMax2 == Double.MAX_VALUE)
         {
-            passElMax2 = Double.MIN_VALUE;
+            passElMax2 = -Double.MAX_VALUE;
         }
 
         return(Double.compare(passElMax1, passElMax2));

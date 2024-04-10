@@ -2825,19 +2825,37 @@ public abstract class Globals
     //Gets screen orientation value
     public static int getScreenOrientation(Context context)
     {
-        WindowManager manager = (context != null ? (WindowManager)context.getSystemService(Context.WINDOW_SERVICE) : null);
-
-        //if manager is set
-        if(manager != null)
+        //if context is set
+        if(context != null)
         {
-            try
+            if(Build.VERSION.SDK_INT >= 30)
             {
-                //return orientation
-                return(manager.getDefaultDisplay().getRotation());
+                try
+                {
+                    //return orientation
+                    return(context.getDisplay().getRotation());
+                }
+                catch(Exception ex)
+                {
+                    //do nothing
+                }
             }
-            catch(Exception ex)
+            else
             {
-                //do nothing
+                //if manager is set
+                WindowManager manager = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+                if(manager != null)
+                {
+                    try
+                    {
+                        //return orientation
+                        return(manager.getDefaultDisplay().getRotation());
+                    }
+                    catch(Exception ex)
+                    {
+                        //do nothing
+                    }
+                }
             }
         }
 

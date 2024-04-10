@@ -959,7 +959,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             if(mainGroup == Groups.Current)
             {
-                showSettingsDisplay();
+                showSettingsDisplay(page);
             }
         }
         else if(id == R.id.menu_update)
@@ -3169,26 +3169,35 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         filterTypeBuilder.show();
     }
 
-    //Shows settings display for current sub page
-    public void showSettingsDisplay()
+    //Shows settings display for given page and current sub page
+    public void showSettingsDisplay(int page)
     {
         int subPage = getSubPage();
         Intent startIntent = new Intent(this, SettingsActivity.class);
         String startScreenValue = null;
 
-        switch(subPage)
+        switch(page)
         {
-            case Globals.SubPageType.List:
-                startScreenValue = SettingsActivity.ScreenKey.ListView;
+            case Current.PageType.Combined:
+                switch(subPage)
+                {
+                    case Globals.SubPageType.List:
+                        startScreenValue = SettingsActivity.ScreenKey.ListView;
+                        break;
+
+                    case Globals.SubPageType.Lens:
+                        startScreenValue = SettingsActivity.ScreenKey.LensView;
+                        break;
+
+                    case Globals.SubPageType.Map:
+                    case Globals.SubPageType.Globe:
+                        startScreenValue = SettingsActivity.ScreenKey.GlobeMapView;
+                        break;
+                }
                 break;
 
-            case Globals.SubPageType.Lens:
-                startScreenValue = SettingsActivity.ScreenKey.LensView;
-                break;
-
-            case Globals.SubPageType.Map:
-            case Globals.SubPageType.Globe:
-                startScreenValue = SettingsActivity.ScreenKey.GlobeMapView;
+            case Current.PageType.Timeline:
+                startScreenValue = SettingsActivity.ScreenKey.Timeline;
                 break;
         }
 

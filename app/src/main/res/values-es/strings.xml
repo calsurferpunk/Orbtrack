@@ -182,6 +182,7 @@
     <string name="desc_show_stars">Mostrar estrellas en vista de globo</string>
     <string name="desc_show_sunlight">Mostrar/ocultar la luz diurna actual en la superficie</string>
     <string name="desc_show_toolbars">Mostrar barras herramientas en los bordes de la pantalla</string>
+    <string name="desc_show_view_quality">Mostrar colores de relleno de calidad de visualización</string>
     <string name="desc_show_zoom">Mostrar botones de enfocar</string>
     <string name="desc_stars_constellation_notice">¡Ahora se pueden rastrear estrellas y constelaciones! Si desea verlos, seleccione la configuración de filtro en la parte superior derecha de cada pantalla. De forma predeterminada, se muestran solo en vistas de lentes, pero se pueden agregar al globo terráqueo, listas, etc.</string>
     <string name="desc_time_zone_source">Localización zona horaria detección</string>
@@ -416,6 +417,7 @@
     <string name="title_jupiter">Júpiter</string>
     <string name="title_label_data">Datos Etiqueta</string>
     <string name="title_label_style">Estilo Etiqueta</string>
+    <string name="title_landscape_orientation_graph_divisors">Divisores de Gráficos de Orientación Horizontal</string>
     <string name="title_last_2_digits_of_year">Últimos 2 Dígitos del Año</string>
     <string name="title_last_plural">Últimos</string>
     <string name="title_last_quarter">Último Cuarto</string>
@@ -519,6 +521,7 @@
     <string name="title_pink">Rosado</string>
     <string name="title_planets">Planetas</string>
     <string name="title_pluto">Plutón</string>
+    <string name="title_portrait_orientation_graph_divisors">Divisores de Gráficos de Orientación Vertical</string>
     <string name="title_privacy_policy">Política Privacidad</string>
     <string name="title_purple">Púrpura</string>
     <string name="title_quality">Calidad</string>
@@ -651,6 +654,7 @@
     <string name="title_very_fast">Muy Rápido</string>
     <string name="title_very_slow">Muy Lento</string>
     <string name="title_view">Vista</string>
+    <string name="title_view_quality">Vista Calidad</string>
     <string name="title_views">Vistas</string>
     <string name="title_visible">Visible</string>
     <string name="title_visible_stars">Estrellas Visibles</string>

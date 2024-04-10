@@ -19,6 +19,7 @@ import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -178,6 +179,9 @@ public abstract class Settings
         static final String NotifyFullMoonEndLongitude = "NotifyFullMoonEndLongitude";
         static final String NotifyFullMoonEndAltitude = "NotifyFullMoonEndAltitude";
         static final String NotifyFullMoonEndZoneId = "NotifyFullMoonEndZoneId";
+        static final String TimelineShowViewQuality = "TimelineShowViewQuality";
+        static final String TimelinePortraitDivisions = "TimelinePortraitDivisions";
+        static final String TimelineLandscapeDivisions = "TimelineLandscapeDivisions";
         static final String InformationSource = "InformationSource";
         static final String TranslateInformation = "TranslateInformation";
         static final String ShareTranslations = "ShareTranslations";
@@ -863,6 +867,35 @@ public abstract class Settings
             static final String SpaceTrack = Globals.Strings.SpaceTrack;
             static final String HeavensAbove = Globals.Strings.HeavensAbove;
             static final String NASA = "NASA";
+        }
+
+        //Timeline
+        public static abstract class Timeline
+        {
+            //Divisor items
+            public static String[] DivisorCountPortraitItems;
+            public static final Integer[] DivisorCountPortraitValues = new Integer[]{0, 1, 2, 3, 4, 5, 6};
+            public static String[] DivisorCountLandscapeItems;
+            public static final Integer[] DivisorCountLandscapeValues = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+            //Initializes values
+            public static void initValues(Context context)
+            {
+                Resources res = context.getResources();
+                String noneString = res.getString(R.string.title_none);
+
+                //if values are not set
+                if(DivisorCountPortraitItems == null || DivisorCountPortraitItems.length == 0)
+                {
+                    //init divisor count portrait items
+                    DivisorCountPortraitItems = new String[]{noneString, "2", "3", "4","5", "6", "7"};
+                }
+                if(DivisorCountLandscapeItems == null || DivisorCountLandscapeItems.length == 0)
+                {
+                    //init divisor count landscape items
+                    DivisorCountLandscapeItems = new String[]{noneString, "2", "3", "4","5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"};
+                }
+            }
         }
 
         //Updates
@@ -1998,6 +2031,7 @@ public abstract class Settings
             case PreferenceName.LensHideDistantPathTimes:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
+            case PreferenceName.TimelineShowViewQuality:
             case PreferenceName.MapMarkerShowShadow:
             case PreferenceName.MapMarkerLocationIconUseTint:
             case PreferenceName.MapRotateAllowed:
@@ -2133,6 +2167,12 @@ public abstract class Settings
 
             case PreferenceName.TimeZoneSource:
                 return(LocationService.OnlineSource.Google);
+
+            case PreferenceName.TimelinePortraitDivisions:
+                return(4);
+
+            case PreferenceName.TimelineLandscapeDivisions:
+                return(8);
         }
 
         return(0);
@@ -2772,6 +2812,37 @@ public abstract class Settings
     public static void setListOrbitalTypeFilter(Context context, Byte... orbitalTypes)
     {
         setOrbitalTypeFilter(context, PreferenceName.ListOrbitalTypeFilter, orbitalTypes);
+    }
+
+    //Gets timeline view quality being shown
+    public static boolean getTimelineViewQuality(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.TimelineShowViewQuality));
+    }
+
+    //Gets timeline division preference for current orientation
+    private static String getTimelineUsedPreference(Context context)
+    {
+        int orientation = Globals.getScreenOrientation(context);
+        return(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270 ? PreferenceName.TimelineLandscapeDivisions : PreferenceName.TimelinePortraitDivisions);
+    }
+
+    //Gets timeline used division count
+    public static int getTimelineUsedDivisionCount(Context context)
+    {
+        return(getPreferenceInt(context, getTimelineUsedPreference(context)));
+    }
+
+    //Gets timeline portrait division count
+    public static int getTimelinePortraitDivisionCount(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.TimelinePortraitDivisions));
+    }
+
+    //Gets timeline landscape division count
+    public static int getTimelineLandscapeDivisionCount(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.TimelineLandscapeDivisions));
     }
 
     //Gets map frame rate

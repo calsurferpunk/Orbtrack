@@ -182,6 +182,7 @@
     <string name="desc_show_stars">Show stars in globe view</string>
     <string name="desc_show_sunlight">Show/hide current daylight on surface</string>
     <string name="desc_show_toolbars">Show toolbars on screen edges</string>
+    <string name="desc_show_view_quality">Show view quality fill colors</string>
     <string name="desc_show_zoom">Show zoom buttons</string>
     <string name="desc_stars_constellation_notice">Stars and constellations can now be tracked! If you wish to view them, select filter settings on the top right of each display screen.\n\nThey default to being shown on lens views only, but can be added to the globe, lists, etc.</string>
     <string name="desc_time_zone_source">Location time zone detection</string>
@@ -416,6 +417,7 @@
     <string name="title_jupiter">Jupiter</string>
     <string name="title_label_data">Label Data</string>
     <string name="title_label_style">Label Style</string>
+    <string name="title_landscape_orientation_graph_divisors">Landscape Orientation Graph Divisors</string>
     <string name="title_last_2_digits_of_year">Last 2 Digits of Year</string>
     <string name="title_last_plural">Last</string>
     <string name="title_last_quarter">Last Quarter</string>
@@ -519,6 +521,7 @@
     <string name="title_pink">Pink</string>
     <string name="title_planets">Planets</string>
     <string name="title_pluto">Pluto</string>
+    <string name="title_portrait_orientation_graph_divisors">Portrait Orientation Graph Divisors</string>
     <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_purple">Purple</string>
     <string name="title_quality">Quality</string>
@@ -651,6 +654,7 @@
     <string name="title_very_fast">Very Fast</string>
     <string name="title_very_slow">Very Slow</string>
     <string name="title_view">View</string>
+    <string name="title_view_quality">View Quality</string>
     <string name="title_views">Views</string>
     <string name="title_visible">Visible</string>
     <string name="title_visible_stars">Visible Stars</string>

@@ -976,6 +976,7 @@ public abstract class Current
         public static class Item extends CalculateService.ViewListItem
         {
             public final boolean tleIsAccurate;
+            private final boolean showViewQuality;
             private int divisionCount;
             private double longestPassDays;
             private double maxPassElevation;
@@ -1042,6 +1043,7 @@ public abstract class Current
                     this.name = currentSatellite.getName();
                 }
 
+                this.showViewQuality = Settings.getTimelineViewQuality(context);
                 this.divisionCount = divisionCount;
                 this.longestPassDays = -Double.MAX_VALUE;
                 this.maxPassElevation = -Double.MAX_VALUE;
@@ -1084,7 +1086,10 @@ public abstract class Current
                     elevationGraph.setDataTitlesVisible(false);
                     elevationGraph.setTitles(null, null);
                     elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
-                    elevationGraph.setFillColors(elevationColors);
+                    if(showViewQuality)
+                    {
+                        elevationGraph.setFillColors(elevationColors);
+                    }
                     if(!timePoints.isEmpty())
                     {
                         elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), divisionCount);
@@ -1246,7 +1251,7 @@ public abstract class Current
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
             private final Items timelineItems;
-            private int divisionCount = 4;
+            private int divisionCount;
 
             public ItemListAdapter(Context context, Timeline.Item[] savedItems, Database.SatelliteData[] orbitals)
             {
@@ -1258,6 +1263,9 @@ public abstract class Current
                 //remember using material and layout ID
                 this.itemsRefID = (usingMaterial ? R.layout.current_timeline_material_item : R.layout.current_timeline_item);
                 timelineItems = new Current.Items(MainActivity.Groups.Current, PageType.Timeline);
+
+                //get division count
+                divisionCount = Settings.getTimelineUsedDivisionCount(context);
 
                 //if there are saved items
                 if(savedItems != null && savedItems.length > 0)
@@ -1372,18 +1380,25 @@ public abstract class Current
         @Override
         protected int getListColumns(Context context, int page)
         {
-            Selectable.ListBaseAdapter listAdapter = getAdapter();
-            int widthDp = Globals.getDeviceDp(context, true);
-
-            //if adapter exists
-            if(listAdapter != null)
+            if(page == PageType.Combined)
             {
-                //update status
-                listAdapter.widthDp = widthDp;
-            }
+                Selectable.ListBaseAdapter listAdapter = getAdapter();
+                int widthDp = Globals.getDeviceDp(context, true);
 
-            //return desired column count
-            return((int)Math.ceil(widthDp / EXTENDED_COLUMNS_WIDTH_DP));
+                //if adapter exists
+                if(listAdapter != null)
+                {
+                    //update status
+                    listAdapter.widthDp = widthDp;
+                }
+
+                //return desired column count
+                return((int)Math.ceil(widthDp / EXTENDED_COLUMNS_WIDTH_DP));
+            }
+            else
+            {
+                return(1);
+            }
         }
 
         @Override
@@ -1564,14 +1579,12 @@ public abstract class Current
                         case PageType.Timeline:
                             if(activity != null && listAdapter instanceof Timeline.ItemListAdapter)
                             {
-                                int columnCount = getListColumns(context, page);
-
                                 activity.runOnUiThread(new Runnable()
                                 {
                                     @Override
                                     public void run()
                                     {
-                                        ((Timeline.ItemListAdapter)listAdapter).setDivisionCount(columnCount > 1 ? 8 : 4);
+                                        ((Timeline.ItemListAdapter)listAdapter).setDivisionCount(Settings.getTimelineUsedDivisionCount(context));
                                     }
                                 });
                             }

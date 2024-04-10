@@ -80,6 +80,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         public static final String MapViewFootprint = "mapViewFootprint";
         public static final String MapViewLabelData = "mapViewLabelData";
         public static final String Notifications = "notifications";
+        public static final String Timeline = "timeline";
         public static final String Updates = "updates";
         public static final String Widgets = "widgets";
     }
@@ -337,6 +338,20 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(showInformationBackgroundSwitch);
                         setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
+                        break;
+
+                    case ScreenKey.Timeline:
+                        SwitchPreference timelineViewQualitySwitch = this.findPreference(Settings.PreferenceName.TimelineShowViewQuality);
+                        IconListPreference timelinePortraitDivisorsList = this.findPreference(Settings.PreferenceName.TimelinePortraitDivisions);
+                        IconListPreference timelineLandscapeDivisorsList = this.findPreference(Settings.PreferenceName.TimelineLandscapeDivisions);
+
+                        //initialize values
+                        Settings.Options.Timeline.initValues(context);
+
+                        //setup displays
+                        setupSwitch(timelineViewQualitySwitch);
+                        setupList(timelinePortraitDivisorsList, Settings.Options.Timeline.DivisorCountPortraitItems, Settings.Options.Timeline.DivisorCountPortraitValues, null, null, null);
+                        setupList(timelineLandscapeDivisorsList, Settings.Options.Timeline.DivisorCountLandscapeItems, Settings.Options.Timeline.DivisorCountLandscapeValues, null, null, null);
                         break;
 
                     case ScreenKey.Updates:
@@ -623,6 +638,15 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             valueIndex = Settings.getInformationSource(context);
                             valueIndex = (valueIndex == Database.UpdateSource.NASA ? 0 : valueIndex == Database.UpdateSource.Celestrak ? 1 : 2);
                             break;
+
+                        case Settings.PreferenceName.TimelinePortraitDivisions:
+                            currentValue = Settings.getTimelinePortraitDivisionCount(context);
+                            break;
+
+                        case Settings.PreferenceName.TimelineLandscapeDivisions:
+                            currentValue = Settings.getTimelineLandscapeDivisionCount(context);
+                            break;
+
                     }
 
                     //if value is set
@@ -1433,6 +1457,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 case ScreenKey.GlobeMapView:
                 case ScreenKey.LensView:
                 case ScreenKey.ListView:
+                case ScreenKey.Timeline:
                 case ScreenKey.Updates:
                     startFragment = new SettingsSubFragment();
 
@@ -1564,6 +1589,9 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.OrbitalIcons:
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.ListShowPassQuality:
+                        case Settings.PreferenceName.TimelineShowViewQuality:
+                        case Settings.PreferenceName.TimelinePortraitDivisions:
+                        case Settings.PreferenceName.TimelineLandscapeDivisions:
                         case Settings.PreferenceName.MetricUnits:
                         case Settings.PreferenceName.AllowNumberCommas:
                             //recreate activity
@@ -2661,6 +2689,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     }
 
     //Update list
+    @SuppressLint("DetachAndAttachSameFragment")
     private void updateList()
     {
         Fragment currentFragment = manager.findFragmentByTag(currentPageKey);
@@ -2802,7 +2831,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         }
 
         //if there are unused
-        if(unused.size() > 0)
+        if(!unused.isEmpty())
         {
             //show dialog
             Globals.showSelectDialog(this, res.getString(R.string.title_account_add), AddSelectListAdapter.SelectType.AddAccount, unused.toArray(new Integer[0]), new AddSelectListAdapter.OnItemClickListener()

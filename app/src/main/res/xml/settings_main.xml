@@ -462,6 +462,26 @@
             android:icon="@drawable/ic_notifications_white"
             android:fragment="com.nikolaiapps.orbtrack.Settings$Page"/>
 
+        <PreferenceScreen android:title="@string/title_timeline"
+            android:key="timeline"
+            android:icon="@drawable/ic_timeline_black"
+            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+            <PreferenceCategory android:title="@string/title_timeline">
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_view_quality"
+                    android:key="TimelineShowViewQuality"
+                    android:summary="@string/desc_show_view_quality"/>
+
+                <com.nikolaiapps.orbtrack.IconListPreference
+                    app:titleText="@string/title_portrait_orientation_graph_divisors"
+                    android:key="TimelinePortraitDivisions"/>
+
+                <com.nikolaiapps.orbtrack.IconListPreference
+                    app:titleText="@string/title_landscape_orientation_graph_divisors"
+                    android:key="TimelineLandscapeDivisions"/>
+            </PreferenceCategory>
+        </PreferenceScreen>
+
         <PreferenceScreen android:title="@string/title_updates"
             android:key="updates"
             android:icon="@drawable/ic_sync_white"

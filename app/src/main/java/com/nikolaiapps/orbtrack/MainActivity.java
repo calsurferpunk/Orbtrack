@@ -2298,7 +2298,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean saveCurrentItems = (saveItems && currentSubPage[Current.PageType.Combined] != Globals.SubPageType.List);
 
                 Current.PageAdapter.setSavedItems(Current.PageType.Combined, (saveCurrentItems ? Current.PageAdapter.getCombinedItems() : null));
-                Current.PageAdapter.setSavedItems(Current.PageType.Timeline, null);
             }
         }
         //else if showing calculate
@@ -5333,7 +5332,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         {
             double julianDate;
             Calendar usedDate = Globals.getGMTTime();
-            Current.Timeline.Item[] savedItems = (Current.Timeline.Item[])Current.PageAdapter.getSavedItems(Current.PageType.Timeline);
 
             //start at beginning of current hour
             usedDate.set(Calendar.MINUTE, 0);
@@ -5345,7 +5343,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             timelineItems = Current.PageAdapter.getTimelineItems();
 
             //create and run task
-            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, savedItems, observer, julianDate, julianDate + 1, 2 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
+            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, null, observer, julianDate, julianDate + 1, 2 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, CalculateService.ViewListItem item, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)

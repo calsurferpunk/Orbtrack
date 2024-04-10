@@ -148,10 +148,14 @@ public abstract class Calculate
             public TextView illuminationText;
             public ExpandingListView subList;
             public LinearLayout dataGroup;
+            public CalculateViewsTask.ViewData[] views;
 
             public Item(int index, int viewCount, Calculations.SatelliteObjectType satellite)
             {
-                super(index, viewCount, satellite);
+                super(index, satellite);
+
+                int viewIndex;
+                int usedViewCount = Math.max(viewCount, 1);
 
                 this.satellite = satellite;
                 isLoading = (viewCount < 1);
@@ -164,6 +168,12 @@ public abstract class Calculate
                 illuminationText = null;
                 progressGroup = null;
                 dataGroup = null;
+
+                views = new CalculateViewsTask.ViewData[usedViewCount];
+                for(viewIndex = 0; viewIndex < views.length; viewIndex++)
+                {
+                    views[viewIndex] = new CalculateViewsTask.ViewData();
+                }
             }
 
             public void updateDisplays(Context context, int widthDp, boolean haveSun, boolean haveMoon)

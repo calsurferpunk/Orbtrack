@@ -986,6 +986,9 @@ public abstract class Current
             private Graph elevationGraph;
             private View loadingProgress;
             private AppCompatImageView nameImage;
+            private final ArrayList<Double> timePoints;
+            private final ArrayList<Double> elevationPoints;
+            private final ArrayList<Integer> elevationColors;
 
             public static class Comparer implements Comparator<Item>
             {
@@ -1028,7 +1031,7 @@ public abstract class Current
 
             public Item(Context context, int index, Database.SatelliteData currentSatellite, int divisionCount)
             {
-                super(index, 1, (currentSatellite != null ? currentSatellite.satellite : null));
+                super(index, (currentSatellite != null ? currentSatellite.satellite : null));
 
                 boolean haveSatellite = (currentSatellite != null);
 
@@ -1044,6 +1047,10 @@ public abstract class Current
                 this.maxPassElevation = -Double.MAX_VALUE;
                 this.firstPassJulianDate = Double.MAX_VALUE;
                 this.tleIsAccurate = (haveSatellite && currentSatellite.getTLEIsAccurate());
+
+                this.timePoints = new ArrayList<>(0);
+                this.elevationPoints = new ArrayList<>(0);
+                this.elevationColors = new ArrayList<>(0);
             }
 
             public void setLoading(boolean loading)
@@ -1070,13 +1077,20 @@ public abstract class Current
                     nameText.setText(name);
                 }
 
-                if(views != null && views.length > 1)
-                {
-                    setViews(views);
-                }
-
                 if(elevationGraph != null)
                 {
+                    elevationGraph.setAllowUpdate(false);
+                    elevationGraph.clearItems();
+                    elevationGraph.setDataTitlesVisible(false);
+                    elevationGraph.setTitles(null, null);
+                    elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
+                    elevationGraph.setFillColors(elevationColors);
+                    if(!timePoints.isEmpty())
+                    {
+                        elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), divisionCount);
+                    }
+                    elevationGraph.setRangeY(0, 90, 0);
+                    elevationGraph.setAllowUpdate(true);
                     elevationGraph.refresh();
                 }
             }
@@ -1100,17 +1114,14 @@ public abstract class Current
                 double currentPassStart = -Double.MAX_VALUE;
                 double maxElevation = -Double.MAX_VALUE;
                 ArrayList<Integer> passColors = new ArrayList<>(0);
-                ArrayList<Integer> elevationColors = new ArrayList<>(0);
-                ArrayList<Double> timePoints = new ArrayList<>(0);
-                ArrayList<Double> elevationPoints = new ArrayList<>(0);
 
                 //reset status
                 longestPassDays = -Double.MAX_VALUE;
                 maxPassElevation = -Double.MAX_VALUE;
                 firstPassJulianDate = Double.MAX_VALUE;
-
-                //set views
-                this.views = views;
+                timePoints.clear();
+                elevationPoints.clear();
+                elevationColors.clear();
 
                 //go through each view
                 for(index = 0; index < viewsLength; index++)
@@ -1198,41 +1209,26 @@ public abstract class Current
                     }
                 }
 
-                //if elevation graph exists
-                if(elevationGraph != null)
+                //remember colors and points length
+                colorsLength = passColors.size();
+                pointsLength = elevationPoints.size();
+
+                //go through each elevation point
+                for(index = 0; index < pointsLength; index++)
                 {
-                    //remember colors and points length
-                    colorsLength = passColors.size();
-                    pointsLength = elevationPoints.size();
+                    //remember current elevation and if visible
+                    currentElevation = elevationPoints.get(index);
+                    currentElevationVisible = (currentElevation >= 0);
 
-                    //go through each elevation point
-                    for(index = 0; index < pointsLength; index++)
+                    //add color
+                    elevationColors.add(currentElevationVisible && passIndex < colorsLength ? passColors.get(passIndex) : Color.TRANSPARENT);
+
+                    //if elevation visible but next is not
+                    if(currentElevationVisible && (index + 1 < pointsLength) && elevationPoints.get(index + 1) < 0)
                     {
-                        //remember current elevation and if visible
-                        currentElevation = elevationPoints.get(index);
-                        currentElevationVisible = (currentElevation >= 0);
-
-                        //add color
-                        elevationColors.add(currentElevationVisible && passIndex < colorsLength ? passColors.get(passIndex) : Color.TRANSPARENT);
-
-                        //if elevation visible but next is not
-                        if(currentElevationVisible && (index + 1 < pointsLength) && elevationPoints.get(index + 1) < 0)
-                        {
-                            //go to next pass index
-                            passIndex++;
-                        }
+                        //go to next pass index
+                        passIndex++;
                     }
-
-                    //update graph
-                    elevationGraph.setAllowUpdate(false);
-                    elevationGraph.clearItems();
-                    elevationGraph.setDataTitlesVisible(false);
-                    elevationGraph.setTitles(null, null);
-                    elevationGraph.setData(timePoints, elevationPoints, MainActivity.getTimeZone());
-                    elevationGraph.setFillColors(elevationColors);
-                    elevationGraph.setRangeX(timePoints.get(0), timePoints.get(timePoints.size() - 1), divisionCount);
-                    elevationGraph.setRangeY(0, 90, 0);
-                    elevationGraph.setAllowUpdate(true);
                 }
             }
         }
@@ -1431,10 +1427,8 @@ public abstract class Current
                     break;
 
                 case PageType.Timeline:
-                    Timeline.Item[] savedTimelineItems = (Timeline.Item[])Current.PageAdapter.getSavedItems(PageType.Timeline);
-
                     //set adapter
-                    listAdapter = new Timeline.ItemListAdapter(context, savedTimelineItems, filteredSatellites);
+                    listAdapter = new Timeline.ItemListAdapter(context, null, filteredSatellites);
                     break;
 
                 default:
@@ -1928,7 +1922,7 @@ public abstract class Current
         for(index = 0; index < viewItems.length; index++)
         {
             //set item
-            viewItems[index] = new CalculateService.ViewListItem(0, 1, orbitalViews[index]);
+            viewItems[index] = new CalculateService.ViewListItem(0, orbitalViews[index]);
         }
 
         //start calculating for start and end dates with given increment

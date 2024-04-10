@@ -103,27 +103,18 @@ public class CalculateService extends NotifyService
         public boolean viewCalculateFinished;
         public double julianDate;
         public Calculations.SatelliteObjectType satellite;
-        public CalculateViewsTask.ViewData[] views;
 
-        public ViewListItem(int index, int viewCount, Calculations.SatelliteObjectType satellite)
+        public ViewListItem(int index, Calculations.SatelliteObjectType satellite)
         {
             super(satellite != null ? satellite.getSatelliteNum() : Integer.MAX_VALUE, index);
-
-            int viewIndex;
-            int usedViewCount = Math.max(viewCount, 1);
 
             this.viewCalculateFinished = false;
             this.julianDate = Double.MAX_VALUE;
             this.satellite = satellite;
-            views = new CalculateViewsTask.ViewData[usedViewCount];
-            for(viewIndex = 0; viewIndex < views.length; viewIndex++)
-            {
-                views[viewIndex] = new CalculateViewsTask.ViewData();
-            }
         }
         public ViewListItem(Database.SatelliteData satelliteData)
         {
-            this(0, 1, (satelliteData != null ? satelliteData.satellite : null));
+            this(0, (satelliteData != null ? satelliteData.satellite : null));
         }
 
         public static ViewListItem[] getSatellites(Context context, ArrayList<Integer> noraIds)

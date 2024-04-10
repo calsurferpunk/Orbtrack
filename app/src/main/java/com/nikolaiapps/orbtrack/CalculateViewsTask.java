@@ -158,7 +158,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         needViews = true;
     }
 
-    private ArrayList<OrbitalView> getViews(Context context, CalculateService.ViewListItem currentItem, int satelliteIndex, CalculateService.ViewListItem[] savedViewItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement, boolean limitTravel, boolean adjustTime, boolean hideSlow, boolean getTimeString)
+    private ArrayList<OrbitalView> getViews(Context context, CalculateService.ViewListItem currentItem, int satelliteIndex, Calculate.ViewAngles.Item[] savedViewItems, Calculations.ObserverType observer, double pathJulianDateStart, double pathJulianDateEnd, double dayIncrement, boolean limitTravel, boolean adjustTime, boolean hideSlow, boolean getTimeString)
     {
         int index = 0;
         Calculations.TopographicDataType topographicData;
@@ -202,7 +202,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             if(savedViewItems != null && index < savedViewItems.length && satelliteIndex < savedViewItems[index].views.length && viewJulianDate == savedViewItems[index].julianDate)
             {
                 //remember current item
-                CalculateService.ViewListItem currentSavedItem = savedViewItems[index];
+                Calculate.ViewAngles.Item currentSavedItem = savedViewItems[index];
 
                 //set position
                 topographicData = new Calculations.TopographicDataType(currentSavedItem.views[satelliteIndex].azimuth, currentSavedItem.views[satelliteIndex].elevation, currentSavedItem.views[satelliteIndex].rangeKm);
@@ -286,7 +286,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         boolean hideSlow = (Boolean)params[11];
         boolean getTimeString = (Boolean)params[12];
         Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
-        CalculateService.ViewListItem[] savedViewItems = (CalculateService.ViewListItem[])params[2];
+        Calculate.ViewAngles.Item[] savedViewItems = (Calculate.ViewAngles.Item[])params[2];
         CalculateService.ViewListItem[] viewItems = (CalculateService.ViewListItem[])params[1];
         Context context = (Context)params[0];
 

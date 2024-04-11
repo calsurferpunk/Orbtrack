@@ -137,9 +137,9 @@ public class Database extends SQLiteOpenHelper
 
     private static abstract class TLELines
     {
-        static final String ISSZarya1 = "1 25544U 98067A   24081.87742818  .00020178  00000-0  37064-3 0  9991";
-        static final String ISSZarya2 = "2 25544  51.6420  28.1850 0004385 353.2313  61.3532 15.49212544445004";
-        static final long ISSZaryaDate = 1711062055110L;
+        static final String ISSZarya1 = "1 25544U 98067A   24102.71652931  .00012921  00000-0  23320-3 0  9991";
+        static final String ISSZarya2 = "2 25544  51.6398 284.9797 0004742  58.5359  56.6079 15.50093814448232";
+        static final long ISSZaryaDate = 1712870838020L;
     }
 
     private static final int ISS_ZARYA_NORAD_ID = 25544;
@@ -262,7 +262,7 @@ public class Database extends SQLiteOpenHelper
         //Returns if have data
         public static boolean haveData()
         {
-            return(noradId.size() > 0);
+            return(!noradId.isEmpty());
         }
     }
 
@@ -386,7 +386,7 @@ public class Database extends SQLiteOpenHelper
         //Returns if have data
         public static boolean haveData()
         {
-            return(noradId.size() > 0);
+            return(!noradId.isEmpty());
         }
     }
 
@@ -482,7 +482,7 @@ public class Database extends SQLiteOpenHelper
         //Returns if have data
         public static boolean haveData()
         {
-            return(noradId.size() > 0);
+            return(!noradId.isEmpty());
         }
     }
 
@@ -603,7 +603,7 @@ public class Database extends SQLiteOpenHelper
         //Returns if have data
         public static boolean haveData()
         {
-            return(codeName.size() > 0);
+            return(!codeName.isEmpty());
         }
     }
 
@@ -1389,7 +1389,7 @@ public class Database extends SQLiteOpenHelper
             this.tleLine2 = tleLine2;
             this.gp = gp;
             this.tle = null;
-            if(this.gp != null && !this.gp.equals(""))
+            if(this.gp != null && !this.gp.isEmpty())
             {
                 this.tle = Calculations.loadTLE(this.gp);
             }
@@ -1445,7 +1445,7 @@ public class Database extends SQLiteOpenHelper
 
         public String getName()
         {
-            return(!userName.equals("") ? userName : name);
+            return(!userName.isEmpty() ? userName : name);
         }
 
         public String[] getTLELines()
@@ -1454,7 +1454,7 @@ public class Database extends SQLiteOpenHelper
             String line2;
 
             //if TLE lines exist
-            if(tleLine1 != null && tleLine1.length() > 0 && tleLine2 != null && tleLine2.length() > 0)
+            if(tleLine1 != null && !tleLine1.isEmpty() && tleLine2 != null && !tleLine2.isEmpty())
             {
                 //return lines
                 return(new String[]{tleLine1, tleLine2});
@@ -1816,7 +1816,7 @@ public class Database extends SQLiteOpenHelper
     private static final int MAX_INFO_LENGTH = 5000;
     private static final int MAX_LANGUAGE_LENGTH = 10;
 
-    private static final int DB_VERSION = 35;
+    private static final int DB_VERSION = 36;
     private static final String DB_NAME = "OrbTrack.DB";
     private static UpdateStatusType updateStatus = null;
 
@@ -2355,7 +2355,7 @@ public class Database extends SQLiteOpenHelper
         }
 
         //if any notices to show
-        if(titles.size() > 0)
+        if(!titles.isEmpty())
         {
             //remember any needed indexes
             final int materialWhich = materialIndex;

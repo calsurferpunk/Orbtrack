@@ -473,12 +473,8 @@
                     android:summary="@string/desc_show_view_quality"/>
 
                 <com.nikolaiapps.orbtrack.IconListPreference
-                    app:titleText="@string/title_portrait_orientation_graph_divisors"
-                    android:key="TimelinePortraitDivisions"/>
-
-                <com.nikolaiapps.orbtrack.IconListPreference
-                    app:titleText="@string/title_landscape_orientation_graph_divisors"
-                    android:key="TimelineLandscapeDivisions"/>
+                    app:titleText="@string/title_graph_hour_interval"
+                    android:key="TimelineMinuteInterval"/>
             </PreferenceCategory>
         </PreferenceScreen>
 

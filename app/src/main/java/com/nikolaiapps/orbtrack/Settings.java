@@ -180,8 +180,7 @@ public abstract class Settings
         static final String NotifyFullMoonEndAltitude = "NotifyFullMoonEndAltitude";
         static final String NotifyFullMoonEndZoneId = "NotifyFullMoonEndZoneId";
         static final String TimelineShowViewQuality = "TimelineShowViewQuality";
-        static final String TimelinePortraitDivisions = "TimelinePortraitDivisions";
-        static final String TimelineLandscapeDivisions = "TimelineLandscapeDivisions";
+        static final String TimelineMinuteInterval = "TimelineMinuteInterval";
         static final String InformationSource = "InformationSource";
         static final String TranslateInformation = "TranslateInformation";
         static final String ShareTranslations = "ShareTranslations";
@@ -873,10 +872,8 @@ public abstract class Settings
         public static abstract class Timeline
         {
             //Divisor items
-            public static String[] DivisorCountPortraitItems;
-            public static final Integer[] DivisorCountPortraitValues = new Integer[]{0, 1, 2, 3, 4, 5, 6};
-            public static String[] DivisorCountLandscapeItems;
-            public static final Integer[] DivisorCountLandscapeValues = new Integer[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+            public static String[] MinuteIntervalItems;
+            public static final Integer[] MinuteIntervalValues = new Integer[]{0, 15, 30, 60, 120, 180, 240, 360, 480, 720};
 
             //Initializes values
             public static void initValues(Context context)
@@ -885,15 +882,22 @@ public abstract class Settings
                 String noneString = res.getString(R.string.title_none);
 
                 //if values are not set
-                if(DivisorCountPortraitItems == null || DivisorCountPortraitItems.length == 0)
+                if(MinuteIntervalItems == null || MinuteIntervalItems.length == 0)
                 {
-                    //init divisor count portrait items
-                    DivisorCountPortraitItems = new String[]{noneString, "2", "3", "4","5", "6", "7"};
-                }
-                if(DivisorCountLandscapeItems == null || DivisorCountLandscapeItems.length == 0)
-                {
-                    //init divisor count landscape items
-                    DivisorCountLandscapeItems = new String[]{noneString, "2", "3", "4","5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"};
+                    //init minute interval items
+                    MinuteIntervalItems = new String[]
+                    {
+                        noneString,
+                        res.getQuantityString(R.plurals.text_minutes, 15, 15),
+                        res.getQuantityString(R.plurals.text_minutes, 30, 30),
+                        res.getQuantityString(R.plurals.text_hours, 1, 1),
+                        res.getQuantityString(R.plurals.text_hours, 2, 2),
+                        res.getQuantityString(R.plurals.text_hours, 3, 3),
+                        res.getQuantityString(R.plurals.text_hours, 4, 4),
+                        res.getQuantityString(R.plurals.text_hours, 6, 6),
+                        res.getQuantityString(R.plurals.text_hours, 8, 8),
+                        res.getQuantityString(R.plurals.text_hours, 12, 12)
+                    };
                 }
             }
         }
@@ -2168,11 +2172,8 @@ public abstract class Settings
             case PreferenceName.TimeZoneSource:
                 return(LocationService.OnlineSource.Google);
 
-            case PreferenceName.TimelinePortraitDivisions:
-                return(4);
-
-            case PreferenceName.TimelineLandscapeDivisions:
-                return(8);
+            case PreferenceName.TimelineMinuteInterval:
+                return(120);
         }
 
         return(0);
@@ -2820,29 +2821,26 @@ public abstract class Settings
         return(getPreferenceBoolean(context, PreferenceName.TimelineShowViewQuality));
     }
 
-    //Gets timeline division preference for current orientation
-    private static String getTimelineUsedPreference(Context context)
+    //Gets timeline minute interval
+    public static int getTimelineMinuteInterval(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.TimelineMinuteInterval));
+    }
+
+    //Gets used timeline total minutes
+    public static int getTimelineUsedTotalMinutes(Context context)
     {
         int orientation = Globals.getScreenOrientation(context);
-        return(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270 ? PreferenceName.TimelineLandscapeDivisions : PreferenceName.TimelinePortraitDivisions);
+
+        return(orientation == Surface.ROTATION_90 || orientation == Surface.ROTATION_270 ? 2880 : 1440);
     }
 
-    //Gets timeline used division count
-    public static int getTimelineUsedDivisionCount(Context context)
+    //Gets used timeline graph divisions
+    public static int getTimelineUsedGraphDivisions(Context context)
     {
-        return(getPreferenceInt(context, getTimelineUsedPreference(context)));
-    }
+        int minuteDivisor = getTimelineMinuteInterval(context);
 
-    //Gets timeline portrait division count
-    public static int getTimelinePortraitDivisionCount(Context context)
-    {
-        return(getPreferenceInt(context, PreferenceName.TimelinePortraitDivisions));
-    }
-
-    //Gets timeline landscape division count
-    public static int getTimelineLandscapeDivisionCount(Context context)
-    {
-        return(getPreferenceInt(context, PreferenceName.TimelineLandscapeDivisions));
+        return(minuteDivisor > 0 ? (getTimelineUsedTotalMinutes(context) / minuteDivisor) : 0);
     }
 
     //Gets map frame rate

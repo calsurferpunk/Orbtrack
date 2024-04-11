@@ -1265,7 +1265,7 @@ public abstract class Current
                 timelineItems = new Current.Items(MainActivity.Groups.Current, PageType.Timeline);
 
                 //get division count
-                divisionCount = Settings.getTimelineUsedDivisionCount(context);
+                divisionCount = Settings.getTimelineUsedGraphDivisions(context);
 
                 //if there are saved items
                 if(savedItems != null && savedItems.length > 0)
@@ -1584,7 +1584,7 @@ public abstract class Current
                                     @Override
                                     public void run()
                                     {
-                                        ((Timeline.ItemListAdapter)listAdapter).setDivisionCount(Settings.getTimelineUsedDivisionCount(context));
+                                        ((Timeline.ItemListAdapter)listAdapter).setDivisionCount(Settings.getTimelineUsedGraphDivisions(context));
                                     }
                                 });
                             }
@@ -1720,6 +1720,21 @@ public abstract class Current
             if(timelineItems != null && index >= 0 && index < timelineItems.length)
             {
                 timelineItems[index] = newItem;
+            }
+        }
+
+        //Sets timeline item(s) loading status
+        public static void setTimelineItemsLoading(boolean loading)
+        {
+            if(timelineItems != null)
+            {
+                for(Timeline.Item currentItem : timelineItems)
+                {
+                    if(currentItem != null)
+                    {
+                        currentItem.setLoading(loading);
+                    }
+                }
             }
         }
 

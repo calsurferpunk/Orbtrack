@@ -342,16 +342,14 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                     case ScreenKey.Timeline:
                         SwitchPreference timelineViewQualitySwitch = this.findPreference(Settings.PreferenceName.TimelineShowViewQuality);
-                        IconListPreference timelinePortraitDivisorsList = this.findPreference(Settings.PreferenceName.TimelinePortraitDivisions);
-                        IconListPreference timelineLandscapeDivisorsList = this.findPreference(Settings.PreferenceName.TimelineLandscapeDivisions);
+                        IconListPreference timelineMinuteIntervalList = this.findPreference(Settings.PreferenceName.TimelineMinuteInterval);
 
                         //initialize values
                         Settings.Options.Timeline.initValues(context);
 
                         //setup displays
                         setupSwitch(timelineViewQualitySwitch);
-                        setupList(timelinePortraitDivisorsList, Settings.Options.Timeline.DivisorCountPortraitItems, Settings.Options.Timeline.DivisorCountPortraitValues, null, null, null);
-                        setupList(timelineLandscapeDivisorsList, Settings.Options.Timeline.DivisorCountLandscapeItems, Settings.Options.Timeline.DivisorCountLandscapeValues, null, null, null);
+                        setupList(timelineMinuteIntervalList, Settings.Options.Timeline.MinuteIntervalItems, Settings.Options.Timeline.MinuteIntervalValues, null, null, null);
                         break;
 
                     case ScreenKey.Updates:
@@ -639,12 +637,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             valueIndex = (valueIndex == Database.UpdateSource.NASA ? 0 : valueIndex == Database.UpdateSource.Celestrak ? 1 : 2);
                             break;
 
-                        case Settings.PreferenceName.TimelinePortraitDivisions:
-                            currentValue = Settings.getTimelinePortraitDivisionCount(context);
-                            break;
-
-                        case Settings.PreferenceName.TimelineLandscapeDivisions:
-                            currentValue = Settings.getTimelineLandscapeDivisionCount(context);
+                        case Settings.PreferenceName.TimelineMinuteInterval:
+                            currentValue = Settings.getTimelineMinuteInterval(context);
                             break;
 
                     }
@@ -1590,8 +1584,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.ListShowPassQuality:
                         case Settings.PreferenceName.TimelineShowViewQuality:
-                        case Settings.PreferenceName.TimelinePortraitDivisions:
-                        case Settings.PreferenceName.TimelineLandscapeDivisions:
+                        case Settings.PreferenceName.TimelineMinuteInterval:
                         case Settings.PreferenceName.MetricUnits:
                         case Settings.PreferenceName.AllowNumberCommas:
                             //recreate activity

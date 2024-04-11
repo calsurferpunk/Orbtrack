@@ -17,6 +17,14 @@
         <item quantity="one">%d archivo</item>
         <item quantity="other">%d archivos</item>
     </plurals>
+    <plurals name="text_minutes">
+        <item quantity="one">%d minuto</item>
+        <item quantity="other">%d minutos</item>
+    </plurals>
+    <plurals name="text_hours">
+        <item quantity="one">%d hora</item>
+        <item quantity="other">%d horas</item>
+    </plurals>
     <plurals name="text_weeks">
         <item quantity="one">%d semana</item>
         <item quantity="other">%d semanas</item>
@@ -386,6 +394,7 @@
     <string name="title_globe_slash_map_filter">Filtro Globo/Mapa</string>
     <string name="title_globe_slash_map_view">Vista Globo/Mapa</string>
     <string name="title_golden_hour">Hora Dorada</string>
+    <string name="title_graph_hour_interval">Intervalo de Horas del Gráfico</string>
     <string name="title_green">Verde</string>
     <string name="title_grey">Gris</string>
     <string name="title_grid_color">Color Cuadrícula</string>
@@ -417,7 +426,6 @@
     <string name="title_jupiter">Júpiter</string>
     <string name="title_label_data">Datos Etiqueta</string>
     <string name="title_label_style">Estilo Etiqueta</string>
-    <string name="title_landscape_orientation_graph_divisors">Divisores de Gráficos de Orientación Horizontal</string>
     <string name="title_last_2_digits_of_year">Últimos 2 Dígitos del Año</string>
     <string name="title_last_plural">Últimos</string>
     <string name="title_last_quarter">Último Cuarto</string>
@@ -521,7 +529,6 @@
     <string name="title_pink">Rosado</string>
     <string name="title_planets">Planetas</string>
     <string name="title_pluto">Plutón</string>
-    <string name="title_portrait_orientation_graph_divisors">Divisores de Gráficos de Orientación Vertical</string>
     <string name="title_privacy_policy">Política Privacidad</string>
     <string name="title_purple">Púrpura</string>
     <string name="title_quality">Calidad</string>

@@ -182,6 +182,7 @@ public class Graph extends View
     private boolean allowScroll;
     private boolean allowUpdate;
     private boolean allowParentTouch;
+    private boolean skipRepeatDays;
     private boolean showDataTitles;
     private boolean showGraphBorder;
     private boolean yDivisorTitlesVisible;
@@ -321,7 +322,7 @@ public class Graph extends View
 
         selectType = SelectType.Circle;
         allowScroll = isPreview = showDataTitles = allowParentTouch = false;
-        allowUpdate = yDivisorTitlesVisible = xAxisDivisionLinesVisible = yAxisDivisionLinesVisible = showGraphBorder = updateScrollDisplays = true;
+        allowUpdate = skipRepeatDays = yDivisorTitlesVisible = xAxisDivisionLinesVisible = yAxisDivisionLinesVisible = showGraphBorder = updateScrollDisplays = true;
         this.setClickable(true);
         this.setFocusable(true);
     }
@@ -794,7 +795,7 @@ public class Graph extends View
     {
         drawXText(value, x, graphArea.bottom + (xValueHeight / xAxisDivisionTextLines), canvas, brush);
     }
-    private void drawXText(double value, double x, Canvas canvas, Paint brush)
+    private String drawXText(double value, double x, Canvas canvas, Paint brush, String lastdayString)
     {
         int textY;
         String valueString;
@@ -808,11 +809,17 @@ public class Graph extends View
         if(xUnits == UnitType.JulianDate)
         {
             valueString = getDayString(value, valuesZone);
-            canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2)), textY, brush);
+            if(!skipRepeatDays || !valueString.equals(lastdayString))
+            {
+                canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2)), textY, brush);
+            }
+            lastdayString = valueString;
             textY += (xValueHeight / xAxisDivisionTextLines);
         }
         valueString = getXValueString(value);
         canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2)), textY, brush);
+
+        return(lastdayString);
     }
 
     private int getXImageY(int subImageNum)
@@ -858,13 +865,13 @@ public class Graph extends View
         drawYText(getYValueString(value), y, canvas, brush, forScroll);
     }
 
-    private void drawXDivision(int index, int divisionCount, double x, Canvas canvas, Paint brush)
+    private void drawXDivision(int index, int divisionCount, double x, Canvas canvas, Paint brush, boolean dim)
     {
         //if showing division lines and not on first or last
         if(xAxisDivisionLinesVisible && index > 0 && index < divisionCount)
         {
             //set color
-            brush.setColor(gridAxisColor);
+            brush.setColor(dim ? Globals.getColor(130, gridAxisColor) : gridAxisColor);
 
             //draw vertical line
             canvas.drawLine((int)x, graphArea.top, (int)x, graphArea.bottom, brush);
@@ -914,10 +921,16 @@ public class Graph extends View
     private void drawXDividers(Canvas canvas, Paint brush, boolean forBackground)
     {
         int index;
+        boolean dim;
+        boolean onLast;
         double x;
         double value;
         double gridSpaceX = 0;
+        double lastX = -Double.MAX_VALUE;
+        double overlapX;
+        String lastDayString = null;
 
+        brush.getColor();
         brush.setStrokeWidth(1);
         brush.setStyle(Paint.Style.FILL);
         brush.setTextSize(getTextSmallSize());
@@ -933,12 +946,35 @@ public class Graph extends View
                 value = xMin;
                 for(index = 0; index <= xAxisDivisions; index++)
                 {
-                    //get x
+                    //remember if on last, get x, and reset dimming
+                    onLast = (index + 1 > xAxisDivisions);
                     x = getScaledX(value);
+                    dim = false;
+
+                    //measure any overlap
+                    overlapX = (lastX >= 0 ? ((x - (xValueWidth / 2.0)) - (lastX + (xValueWidth / 2.0))) : 0);
 
                     //draw lines and text
-                    drawXDivision(index, xAxisDivisions, x, canvas, brush);
-                    drawXText(value, x, canvas, brush);
+                    if(onLast)
+                    {
+                        //always allow for last
+                        lastDayString = null;
+                    }
+
+                    //if there is no overlap or on last
+                    if(overlapX >= 0 || onLast)
+                    {
+                        //draw divison text
+                        lastDayString = drawXText(value, x, canvas, brush, lastDayString);
+                        lastX = x;
+                    }
+                    else
+                    {
+                        dim = true;
+                    }
+
+                    //draw division line
+                    drawXDivision(index, xAxisDivisions, x, canvas, brush, dim);
 
                     //go to next
                     value += gridSpaceX;
@@ -959,7 +995,7 @@ public class Graph extends View
                     x = getScaledX(currentDivisor.value);
 
                     //draw division, text, and image
-                    drawXDivision((index == 0 ? 1 : index), xAxisDivisors.length, x, canvas, brush);        //note: still drawing first
+                    drawXDivision((index == 0 ? 1 : index), xAxisDivisors.length, x, canvas, brush, false);        //note: still drawing first
                     drawXText(currentDivisor.text, x, canvas, brush);
                     drawXImage(currentDivisor.image, x, canvas, brush, 0);
                     drawXImage(currentDivisor.subImage1, x, canvas, brush, 1);
@@ -1330,7 +1366,7 @@ public class Graph extends View
         titleColor = textsColor;
         lineColor = dataColor;
         fillColor = Globals.getColor(100, dataColor);
-        gridAxisColor = Globals.getColor(200, dataColor);
+        gridAxisColor = Globals.getColor(220, dataColor);
 
         if(updateImage)
         {
@@ -1623,6 +1659,12 @@ public class Graph extends View
     {
         yDivisorTitlesVisible = show;
         this.refresh();
+    }
+
+    @SuppressWarnings("unused")
+    public void setRepeatDaySkip(boolean skip)
+    {
+        skipRepeatDays = skip;
     }
 
     public void clearItems()

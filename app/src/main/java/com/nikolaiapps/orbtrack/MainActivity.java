@@ -381,8 +381,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         boolean restartCamera = false;
         int index;
-        int page = getMainPage();
+        int usedPageCount = 0;
         CameraLens cameraView = Current.getCameraView();
+        Selectable.ListFragmentAdapter usedAdapter = null;
+        int[] usedSubPage = null;
 
         //update drawer
         mainDrawerToggle.onConfigurationChanged(newConfig);
@@ -391,55 +393,54 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         switch(mainGroup)
         {
             case Groups.Current:
-                if(page == Current.PageType.Combined)
-                {
-                    //need camera restart if on lens
-                    restartCamera = (currentSubPage[page] == Globals.SubPageType.Lens);
-                }
+                //set used items
+                usedAdapter = currentPageAdapter;
+                usedSubPage = currentSubPage;
+                usedPageCount = Current.PageType.PageCount;
 
-                //if adapter exists
-                if(currentPageAdapter != null)
+                //update timeline calculations
+                setCurrentTimelineCalculations(false);
+                this.runOnUiThread(new Runnable()
                 {
-                    //send event for all pages
-                    for(index = 0; index < Current.PageType.PageCount; index++)
+                    @Override
+                    public void run()
                     {
-                        //send event
-                        currentPageAdapter.notifyOrientationChangedListener(index);
+                        Current.PageAdapter.setTimelineItemsLoading(true);
+                        updateCurrentTimelineCalculations();
                     }
-                }
+                });
                 break;
 
             case Groups.Calculate:
-                switch(page)
-                {
-                    case Calculate.PageType.View:
-                    case Calculate.PageType.Passes:
-                    case Calculate.PageType.Intersection:
-                        //need camera restart if on lens
-                        restartCamera = (calculateSubPage[page] == Globals.SubPageType.Lens);
-                        break;
-                }
-
-                //if adapter exists
-                if(calculatePageAdapter != null)
-                {
-                    //go through every page
-                    for(index = 0; index < Calculate.PageType.PageCount; index++)
-                    {
-                        //send event
-                        calculatePageAdapter.notifyOrientationChangedListener(index);
-                    }
-                }
+                //set used items
+                usedAdapter = calculatePageAdapter;
+                usedSubPage = calculateSubPage;
+                usedPageCount = Calculate.PageType.PageCount;
                 break;
 
             case Groups.Orbitals:
-                //if adapter exists
-                if(orbitalPageAdapter != null)
-                {
-                    //send event
-                    orbitalPageAdapter.notifyOrientationChangedListener(page);
-                }
+                //set used items
+                usedAdapter = orbitalPageAdapter;
+                usedPageCount = Orbitals.PageType.PageCount;
                 break;
+        }
+
+        //go through every used page
+        for(index = 0; index < usedPageCount; index++)
+        {
+            //if sub page is set
+            if(usedSubPage != null)
+            {
+                //need camera restart if on lens
+                restartCamera = restartCamera || (usedSubPage[index] == Globals.SubPageType.Lens);
+            }
+
+            //if adapter is set
+            if(usedAdapter != null)
+            {
+                //send event
+                usedAdapter.notifyOrientationChangedListener(index);
+            }
         }
 
         //if need to restart camera and it is set
@@ -5352,13 +5353,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             timelineItems = Current.PageAdapter.getTimelineItems();
 
             //create and run task
-            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, null, observer, julianDate, julianDate + 1, 2 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
+            currentTimelineAnglesTask = Calculate.calculateViews(this, timelineItems, null, observer, julianDate, julianDate + (Settings.getTimelineUsedTotalMinutes(this) / 1440.0), 2 / Calculations.MinutesPerDay, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(int progressType, int satelliteIndex, CalculateService.ViewListItem item, ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
                 {
-                    //if timeline item is set
-                    if(item instanceof Current.Timeline.Item)
+                    //if success and timeline item is set
+                    if(progressType == Globals.ProgressType.Success && item instanceof Current.Timeline.Item)
                     {
                         boolean pendingSort = false;
                         int index;

@@ -1574,7 +1574,7 @@ public class Graph extends View
                 }
             }
 
-            linePoints = new float[(xPoints.size() - 1) * 4];
+            linePoints = new float[!xPoints.isEmpty() ? ((xPoints.size() - 1) * 4) : 0];
             line2Points = (usingY2 ? new float[linePoints.length] : null);
             linePointsBottom = (usingYBottom ? new float[linePoints.length] : null);
             linePointsImages = null;

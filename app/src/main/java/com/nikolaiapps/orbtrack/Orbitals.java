@@ -47,7 +47,7 @@ public abstract class Orbitals
         static final int SolarSystem = 1;
         static final int Constellations = 2;
         static final int Stars = 3;
-        private static final int PageCount = 4;
+        static final int PageCount = 4;
     }
 
     //Page list item
@@ -522,7 +522,7 @@ public abstract class Orbitals
                         ArrayList<Database.DatabaseSatellite> usedParentOrbitals = new ArrayList<>(0);
 
                         //if a star in a constellation
-                        if(orbitalType == Database.OrbitalType.Star && currentProperties != null && currentProperties.size() > 0)
+                        if(orbitalType == Database.OrbitalType.Star && currentProperties != null && !currentProperties.isEmpty())
                         {
                             //go through each parent
                             for(Database.ParentProperties currentProperty : currentProperties)
@@ -538,7 +538,7 @@ public abstract class Orbitals
                         }
 
                         //if trying to disable orbital used by any selected parents
-                        if(currentItem.isVisible && usedParentOrbitals.size() > 0)
+                        if(currentItem.isVisible && !usedParentOrbitals.isEmpty())
                         {
                             //if resources exist
                             if(haveRes)
@@ -1227,7 +1227,7 @@ public abstract class Orbitals
             int[] satelliteIds;
 
             //if no selected items
-            if(selectedItems.size() < 1)
+            if(selectedItems.isEmpty())
             {
                 //running on all items
                 setItemsSelected(true);
@@ -1652,7 +1652,7 @@ public abstract class Orbitals
         final String[] defaultOwnerValues = new String[ids.length];
 
         //if no items
-        if(selectedItems.size() < 1)
+        if(selectedItems.isEmpty())
         {
             //stop
             return;
@@ -1687,7 +1687,7 @@ public abstract class Orbitals
             //get current ID and values
             ids[index] = (orbitals != null ? index : currentItem.id);
             nameValues[index] = currentItem.text;
-            defaultOwnerValues[index] = (currentOwner == null || currentOwner.equals("") ? unknownOwnerName : currentOwner);
+            defaultOwnerValues[index] = (currentOwner == null || currentOwner.isEmpty() ? unknownOwnerName : currentOwner);
             dateValues[index] = currentItem.launchDateMs;
         }
 

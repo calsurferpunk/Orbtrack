@@ -152,7 +152,6 @@ public class Graph extends View
 
     private int width;
     private int height;
-    private int dataCount;
     private int lineColor;
     private int fillColor;
     private int titleColor;
@@ -299,6 +298,10 @@ public class Graph extends View
 
         fillPath = new Path();
         fillColors = null;
+        xPoints = null;
+        yPoints = null;
+        y2Points = null;
+        yPointsBottom = null;
         linePoints = null;
         line2Points = null;
         linePointsBottom = null;
@@ -1045,9 +1048,12 @@ public class Graph extends View
 
     private void drawLinePoints(Canvas canvas, Paint brush, List<Double> yDrawPoints, float[] lineDrawPoints, List<Double> yDrawPointsBottom, float[] lineDrawPointsBottom)
     {
+        int dataCount = (xPoints != null ? xPoints.size() : 0);
+        int lineCount = (lineDrawPoints != null ? lineDrawPoints.length : 0);
+        int yPointCount = (yDrawPoints != null ? yDrawPoints.size() : 0);
         boolean usingFillColors = (fillColors != null);
         boolean usingYBottom = (yDrawPointsBottom != null);
-        boolean showDataImages = (showDataTitles && linePointsImages != null && yDrawPoints != null && linePointsImages.length == yDrawPoints.size());
+        boolean showDataImages = (showDataTitles && linePointsImages != null && linePointsImages.length == yPointCount);
         int index;
         int pointOffset;
         int firstX = 0;
@@ -1059,8 +1065,8 @@ public class Graph extends View
         double y = 0;
         double yBottom = 0;
 
-        //if there are line points
-        if(yDrawPoints != null && lineDrawPoints != null && lineDrawPoints.length > 0)
+        //if there are lines to draw
+        if(dataCount > 0 && yPointCount >= dataCount && lineCount > 0)
         {
             //draw data
             fillPath.reset();
@@ -1180,7 +1186,7 @@ public class Graph extends View
             }
             if(showDataTitles)
             {
-                for(index = 0; index < yDrawPoints.size(); index++)
+                for(index = 0; index < yPointCount; index++)
                 {
                     y = yDrawPoints.get(index);
                     if(y >= showDataTitlesMinYValue)
@@ -1469,9 +1475,8 @@ public class Graph extends View
         if(x != null && yTop != null && x.size() == yTop.size() && (!usingYBottom || yTop.size() == yBottom.size()) && (!usingY2 || y2.size() == yTop.size()) && x.size() >= 2)
         {
             valuesZone = (zone == null ? TimeZone.getDefault() : zone);
-            dataCount = x.size();
-
             xPoints = x;
+
             for(double value : xPoints)
             {
                 //if smallest or largest value, remember it
@@ -1533,7 +1538,7 @@ public class Graph extends View
                 }
             }
 
-            linePoints = new float[(dataCount - 1) * 4];
+            linePoints = new float[(xPoints.size() - 1) * 4];
             line2Points = (usingY2 ? new float[linePoints.length] : null);
             linePointsBottom = (usingYBottom ? new float[linePoints.length] : null);
             linePointsImages = null;
@@ -1542,7 +1547,6 @@ public class Graph extends View
         }
         else
         {
-            dataCount = 0;
             linePoints = new float[0];
             line2Points = null;
             linePointsBottom = null;
@@ -1723,6 +1727,7 @@ public class Graph extends View
     private double[] getClosestY(List<Double> yPoints, double xValue)
     {
         int index;
+        int dataCount = (xPoints != null ? xPoints.size() : 0);
         double yValue;
         double nextX;
         double nextY;

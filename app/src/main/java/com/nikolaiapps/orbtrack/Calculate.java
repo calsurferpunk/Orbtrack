@@ -1710,7 +1710,7 @@ public abstract class Calculate
             savedInstanceState.putLong(ParamTypes.StartDateMs, params.getLong(ParamTypes.StartDateMs));
             savedInstanceState.putLong(ParamTypes.EndDateMs, params.getLong(ParamTypes.EndDateMs));
             savedInstanceState.putDouble(ParamTypes.ElevationMinDegs, params.getDouble(ParamTypes.ElevationMinDegs, 0.0));
-            savedInstanceState.putDouble(ParamTypes.IntersectionDegs, params.getDouble(ParamTypes.IntersectionDegs, 0.2));
+            savedInstanceState.putDouble(ParamTypes.IntersectionDegs, params.getDouble(ParamTypes.IntersectionDegs, 1.0));
 
             switch(page)
             {
@@ -2394,7 +2394,7 @@ public abstract class Calculate
             params.putInt(ParamTypes.IncrementUnit, 5);
             params.putInt(ParamTypes.IncrementType, IncrementType.Minutes);
             params.putDouble(ParamTypes.ElevationMinDegs, 0.0);
-            params.putDouble(ParamTypes.IntersectionDegs, 0.2);
+            params.putDouble(ParamTypes.IntersectionDegs, 1.0);
             if(haveSavedParams && subPageNum == Globals.SubPageType.Input)
             {
                 params.putAll(savedParams);
@@ -2933,7 +2933,7 @@ public abstract class Calculate
         int selectedOrbitalCount;
         int selectedOrbital2Count;
         double elMin = 0.0;
-        double intersectionDegrees = 0.2;
+        double intersectionDegrees = 1.0;
         Calendar dateNow = Calendar.getInstance();
         Calendar dateLater = Calendar.getInstance();
         String[] incrementTypeArray = (context != null ? getIncrementTypes(context) : null);

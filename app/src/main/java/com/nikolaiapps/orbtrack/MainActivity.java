@@ -2576,7 +2576,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 params = Calculate.PageAdapter.getParams(Calculate.PageType.Intersection);
                 if(params != null)
                 {
-                    setCalculateIntersectionCalculations(true, new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId)), new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid)), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), params.getDouble(Calculate.ParamTypes.IntersectionDegs, 0.2), params.getDouble(Calculate.ParamTypes.ElevationMinDegs, 0.0));
+                    setCalculateIntersectionCalculations(true, new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId)), new Database.SatelliteData(this, params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid)), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer), Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer), params.getDouble(Calculate.ParamTypes.IntersectionDegs, 1.0), params.getDouble(Calculate.ParamTypes.ElevationMinDegs, 0.0));
                 }
             }
         }
@@ -3722,7 +3722,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 long startDateMs = params.getLong(Calculate.ParamTypes.StartDateMs);
                 long endDateMs = params.getLong(Calculate.ParamTypes.EndDateMs);
                 double dayIncrement = 1;
-                double intersection = params.getDouble(Calculate.ParamTypes.IntersectionDegs, 0.2);
+                double intersection = params.getDouble(Calculate.ParamTypes.IntersectionDegs, 1.0);
                 double elevationMin = params.getDouble(Calculate.ParamTypes.ElevationMinDegs, 0.0);
                 double julianDateStart = Calculations.julianDateCalendar(startDateMs, observer);
                 double julianDateEnd = Calculations.julianDateCalendar(endDateMs, observer);
@@ -5607,7 +5607,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(params != null && savedPassItems != null)
             {
                 //if IDs, start date, end date, intersection, or minimum elevation changed
-                if(params.getInt(Calculate.ParamTypes.NoradId) != currentItem.id || params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid) != (forIntersections ? currentItem.satellite2.getSatelliteNum() : Universe.IDs.Invalid) || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || params.getDouble(Calculate.ParamTypes.IntersectionDegs, 0.2) != intersection || params.getDouble(Calculate.ParamTypes.ElevationMinDegs) != minEl)
+                if(params.getInt(Calculate.ParamTypes.NoradId) != currentItem.id || params.getInt(Calculate.ParamTypes.NoradId2, Universe.IDs.Invalid) != (forIntersections ? currentItem.satellite2.getSatelliteNum() : Universe.IDs.Invalid) || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.StartDateMs), observer) != julianDateStart || Calculations.julianDateCalendar(params.getLong(Calculate.ParamTypes.EndDateMs), observer) != julianDateEnd || params.getDouble(Calculate.ParamTypes.IntersectionDegs, 1.0) != intersection || params.getDouble(Calculate.ParamTypes.ElevationMinDegs) != minEl)
                 {
                     //ignore saved
                     savedPassItems = null;

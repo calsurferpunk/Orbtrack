@@ -128,7 +128,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
             {
                 parentPath = path.substring(0, index);
             }
-            else if(path != null && path.equals(""))
+            else if(path != null && path.isEmpty())
             {
                 return(null);
             }

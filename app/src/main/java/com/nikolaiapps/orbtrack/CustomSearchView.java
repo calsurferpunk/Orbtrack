@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.Filter;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
 import androidx.appcompat.widget.SearchView;
 
 
@@ -30,7 +31,7 @@ public class CustomSearchView extends SearchView
         super(context, attrs, defStyleAttr);
 
         //get text
-        SearchAutoComplete searchText = this.findViewById(R.id.search_src_text);
+        AppCompatAutoCompleteTextView searchText = this.findViewById(R.id.search_src_text);
 
         //if text exists
         if(searchText != null)

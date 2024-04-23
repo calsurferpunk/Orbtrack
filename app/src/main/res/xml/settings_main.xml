@@ -80,7 +80,7 @@
                             android:key="MapMarkerScale"
                             app:minValue="20"
                             app:maxValue="200"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_orbital_direction"
@@ -164,14 +164,14 @@
                             android:key="MapSensitivityScaleGlobe"
                             app:minValue="10"
                             app:maxValue="150"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_speed"
                             android:key="MapSpeedScaleGlobe"
                             app:minValue="0"
                             app:maxValue="150"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
                     </PreferenceCategory>
 
                     <PreferenceCategory android:title="@string/title_rates">
@@ -206,14 +206,14 @@
                             android:key="MapSensitivityScaleMap"
                             app:minValue="10"
                             app:maxValue="150"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_speed"
                             android:key="MapSpeedScaleMap"
                             app:minValue="0"
                             app:maxValue="150"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
                     </PreferenceCategory>
 
                     <PreferenceCategory android:title="@string/title_rates">
@@ -239,7 +239,7 @@
                             android:key="MapFootprintAlpha"
                             app:minValue="0"
                             app:maxValue="100"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SwitchButtonPreference
                             app:titleText="@string/title_show_selected_footprint"
@@ -297,21 +297,21 @@
                             android:key="LensIndicatorAlpha"
                             app:minValue="0"
                             app:maxValue="100"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_text_opacity"
                             android:key="LensTextAlpha"
                             app:minValue="0"
                             app:maxValue="100"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_constellation_opacity"
                             android:key="LensConstellationAlpha"
                             app:minValue="0"
                             app:maxValue="100"
-                            app:scaleType="Percent"/>
+                            app:scaleUnitType="Percent"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_toolbars"

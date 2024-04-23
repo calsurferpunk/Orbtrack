@@ -45,7 +45,7 @@ public class SliderPreference extends CustomPreference
         {
             try(@SuppressLint({"NewApi", "LocalSuppress"}) TypedArray valueArray = context.getTheme().obtainStyledAttributes(attrs, R.styleable.SliderPreference, 0, 0))
             {
-                scaleType = valueArray.getInt(R.styleable.SliderPreference_scaleType, ScaleType.Integer);
+                scaleType = valueArray.getInt(R.styleable.SliderPreference_scaleUnitType, ScaleType.Integer);
                 minValue = (int)valueArray.getFloat(R.styleable.SliderPreference_minValue, 0);
                 maxValue = (int)valueArray.getFloat(R.styleable.SliderPreference_maxValue, 100);
                 valueArray.recycle();

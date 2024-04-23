@@ -55,11 +55,11 @@
 
         <com.google.android.material.slider.Slider
             android:id="@+id/Lens_Zoom_Bar"
-            android:layout_width="180dp"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="-60dp"
-            android:alpha="0.2"
+            android:layout_marginRight="-100dp"
+            android:alpha="0.3"
             android:rotation="270"
             app:thumbColor="@color/white"
             app:trackColor="@color/gray"
@@ -134,5 +134,16 @@
                 android:background="?attr/colorAccentVariant"
                 android:visibility="gone"/>
         </LinearLayout>
+
+        <TextView
+            android:id="@+id/Lens_Zoom_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:layout_marginBottom="64dp"
+            android:layout_gravity="center|bottom"
+            android:textColor="?attr/colorAccentLightest"
+            android:background="?attr/colorAccentVariant"
+            android:visibility="gone"/>
     </FrameLayout>
 </LinearLayout>

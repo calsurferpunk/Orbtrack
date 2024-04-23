@@ -13,36 +13,56 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.hardware.Camera;
 import android.hardware.GeomagneticField;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
+import android.hardware.camera2.CameraCharacteristics;
+import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.MotionEvent;
+import android.view.ScaleGestureDetector;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.annotation.OptIn;
+import androidx.camera.camera2.interop.Camera2CameraInfo;
+import androidx.camera.camera2.interop.ExperimentalCamera2Interop;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraControl;
+import androidx.camera.core.CameraInfo;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.FocusMeteringAction;
+import androidx.camera.core.Preview;
+import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
+import androidx.camera.core.ZoomState;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleOwner;
 import com.google.android.material.slider.LabelFormatter;
 import com.google.android.material.slider.Slider;
+import com.google.common.util.concurrent.ListenableFuture;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.List;
 
 
-public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, SensorUpdate.OnSensorChangedListener
+public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChangedListener
 {
     public interface OnReadyListener
     {
@@ -70,7 +90,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             while(running)
             {
                 //update display
-                CameraLens.this.postInvalidate();
+                CameraLens.this.updateDisplay();
 
                 //prevent running too quickly
                 try
@@ -541,6 +561,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public final boolean hideDistantPathTimes;
     public final boolean hideConstellationStarPaths;
     public TextView helpText;
+    public TextView zoomText;
     public PlayBar playBar;
     public Slider zoomBar;
     public FloatingActionStateButtonMenu settingsMenu;
@@ -551,7 +572,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private int azIndex;
     private int elIndex;
     private int orientation;
-    private int cameraMaxZoom;
     private final int compassWidth;
     private final int indicator;
     private final int iconAlpha;
@@ -591,7 +611,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float starTextSize;
     private final float starTextOffset;
     private float starMagnitude;
-    private float currentTouchDistance;
     private float compassCenterX;
     private float compassCenterY;
     private final float indicatorThickness;
@@ -604,6 +623,8 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final float[] azPx = new float[2];
     private final float[] elPx = new float[2];
     private final float[] trianglePoints = new float[12];
+    private float cameraZoomMin;
+    private float cameraZoomMax;
     private float cameraDegWidth;
     private float cameraDegHeight;
     private float cameraZoomRatio;
@@ -613,7 +634,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private float cameraHardwareDegHeight;
     private final float indicatorPxRadius;
     private final double defaultPathJulianDelta;
+    private final String xString;
     private Camera currentCamera;
+    private final LensOverlay currentCameraOverlay;
+    private final PreviewView currentCameraView;
+    private ProcessCameraProvider currentCameraProvider;
     private final Paint currentPaint;
     private final Path timePathShape;
     private Rect selectedArea;
@@ -630,12 +655,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private AlignmentAngle alignBottomLeft;
     private AlignmentAngle alignTopRight;
     private final ValueAnimator compassBadAnimator;
-    private final SurfaceHolder currentHolder;
     private SensorUpdate sensorUpdater;
     private UpdateThread updateThread;
     private OnReadyListener readyListener;
     private OnStopCalibrationListener stopCalibrationListener;
-    private List<Integer> cameraZoomRatios;
+    private ScaleGestureDetector scaleDetector;
     private final ArrayList<IconImage> orbitalIcons;
     private final ArrayList<ParentOrbital> parentOrbitals;
     private Rect[] currentOrbitalAreas;
@@ -643,6 +667,515 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     private final Calculations.TopographicDataType[] calibrateAngles;
     private Calculations.TopographicDataType[] currentLookAngles;
     private CalculateViewsTask.OrbitalView[][] travelLookAngles;
+
+    private class LensOverlay extends SurfaceView
+    {
+        public LensOverlay(Context context)
+        {
+            super(context);
+
+            SurfaceHolder holder = this.getHolder();
+
+            this.setWillNotDraw(false);
+            this.setZOrderOnTop(true);
+            this.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+
+            if(holder != null)
+            {
+                holder.setFormat(PixelFormat.TRANSPARENT);
+            }
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas)
+        {
+            int index;
+            int index2;
+            int currentId;
+            int travelLength;
+            int lastTimeIndex = -1;
+            int lastTravelIndex;
+            int usedTimeIndex;
+            int selectedColor = Color.WHITE;
+            int width = getWidth();
+            int widthHalf = width / 2;
+            int widthDouble = width * 2;
+            int height = getHeight();
+            int heightHalf = height / 2;
+            int heightDouble = height * 2;
+            int selectedId = Universe.IDs.Invalid;
+            byte selectedType = Database.OrbitalType.Satellite;
+            boolean selectedCloseArea = false;
+            boolean selectedOutsideArea = false;
+            float elCenterPx;
+            float elDeltaDeg;
+            float alignCenterX;
+            float alignCenterY;
+            float currentAzPx;
+            float currentElPx;
+            float currentAzDeg = getAzDeg();
+            float currentElDeg = getElDeg();
+            float degToPxWidth = getDegreeToPixelWidth(width);
+            float degToPxHeight = getDegreeToPixelHeight(height);
+            double angleDirection;
+            double julianDateStart;
+            double julianDateEnd;
+            double pathJulianDelta;
+            double pathJulianEndDelta;
+            double periodMinutes;
+            double timeAzDelta;
+            double timeElDelta;
+            double currentAzDelta;
+            double currentElDelta;
+            double currentAzPxDelta;
+            double currentElPxDelta;
+            String currentName;
+            String selectedName = "";
+            Context context = getContext();
+            Calculations.TopographicDataType selectedLookAngle = null;
+            float[] centerPx;
+
+            //if camera area has been calculated
+            if(useCameraDegWidth != Float.MAX_VALUE && useCameraDegHeight != Float.MAX_VALUE)
+            {
+                //if using horizon
+                if(showHorizon)
+                {
+                    //draw horizon/ground level
+                    elDeltaDeg = (float)Globals.degreeDistance(currentElDeg, 0);
+                    elCenterPx = heightHalf - (elDeltaDeg * degToPxHeight);
+                    if(elCenterPx < 0)
+                    {
+                        elCenterPx = 0;
+                    }
+                    if(elCenterPx < height)
+                    {
+                        //draw line
+                        currentPaint.setStyle(Paint.Style.FILL);
+                        currentPaint.setColor(horizonLineColor);
+                        canvas.drawRect(0, elCenterPx, width, elCenterPx + 3, currentPaint);
+
+                        //fill below
+                        currentPaint.setColor(horizonColor);
+                        canvas.drawRect(0, elCenterPx, width, height, currentPaint);
+                    }
+                }
+
+                //go through each orbital and look angle
+                for(index = 0; index < currentOrbitals.length; index++)
+                {
+                    //remember current orbital, type, if a star, in filter, selection, and if a star in a shown constellation
+                    Database.SatelliteData currentOrbital = currentOrbitals[index];
+                    boolean haveOrbital = (currentOrbital != null);
+                    byte currentType = (haveOrbital ? currentOrbital.getOrbitalType() : Database.OrbitalType.Satellite);
+                    boolean isStar = (currentType == Database.OrbitalType.Star);
+                    boolean inFilter = (haveOrbital && currentOrbital.getInFilter());
+                    boolean inParentFilter = (haveOrbital && (!currentOrbital.getInParentFilterSet() || currentOrbital.getInParentFilter()));
+                    boolean haveSelected = haveSelectedOrbital();
+                    boolean currentSelected = (selectedOrbitalIndex == index);
+
+                    //if current orbital is set, -in filter or parent filter-, look angle is valid, and using orbital
+                    if(haveOrbital && (inFilter || inParentFilter) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
+                    {
+                        //remember current color, look, travel angles, and magnitude properties
+                        int currentColor = currentOrbital.getPathColor();
+                        double currentMagnitude = currentOrbital.getMagnitude();
+                        boolean withinMagnitude = (isStar && currentMagnitude <= starMagnitude);        //note: lower magnitude = brighter star
+                        boolean showOrbital = (currentSelected || (!isStar && inFilter) || (isStar && withinMagnitude));
+                        Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
+                        CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
+
+                        //if showing orbital
+                        if(showOrbital)
+                        {
+                            //if current look angle or travel angles are set
+                            if(currentLookAngle != null || currentTravel != null)
+                            {
+                                //setup paint
+                                currentPaint.setColor(Globals.getColor((showCalibration && currentSelected ? 70 : 255), currentColor));
+                                currentPaint.setStrokeWidth(indicatorThickness);
+                            }
+
+                            //if current travel is set, showing paths, not calibrating, and -on selection or -none selected and -not a star, not in parent filter, or not hiding constellation star paths---
+                            if(currentTravel != null && showPaths && !showCalibration && (currentSelected || (!haveSelected && (!isStar || !inParentFilter || !hideConstellationStarPaths))))
+                            {
+                                //remember length and last index
+                                travelLength = currentTravel.length;
+                                lastTravelIndex = (travelLength - 1);
+
+                                //if using preset path divisions and at least 2 points
+                                if(pathDivisions != 0 && travelLength > 1)
+                                {
+                                    //get distance between start and end, divided by divisions
+                                    pathJulianDelta = (currentTravel[lastTravelIndex].julianDate - currentTravel[0].julianDate) / pathDivisions;
+                                }
+                                else
+                                {
+                                    //set default path julian delta
+                                    pathJulianDelta = defaultPathJulianDelta;
+
+                                    //remember look angles, and period
+                                    periodMinutes = currentOrbital.satellite.orbit.periodMinutes;
+
+                                    //if less than 1 day for period
+                                    if(periodMinutes > 0 && periodMinutes < Calculations.MinutesPerDay)
+                                    {
+                                        //divide path into 12 parts
+                                        pathJulianDelta = Globals.truncate((periodMinutes / Calculations.MinutesPerDay) / 12, 8);
+                                    }
+                                }
+                                pathJulianEndDelta = pathJulianDelta / 4;
+
+                                //if there are travel views
+                                if(travelLength > 0)
+                                {
+                                    //remember colors
+                                    int baseTextColor = (usingFilledBoxPath ? textColor : currentColor);
+                                    int usedTextColor = (currentSelected ? baseTextColor : Globals.getColor(75, baseTextColor));
+                                    int usedTextBgColor = (currentSelected ? textBgColor : Globals.getColor(30, textBgColor));
+                                    int usedCurrentColor = Globals.getColor(currentSelected ? 150 : 20, currentColor);
+                                    int timePathShapeColor = Globals.getColorAdded(10, usedCurrentColor);
+
+                                    //reset first and previous areas
+                                    firstArea.setEmpty();
+                                    previousArea.setEmpty();
+
+                                    //set julian dates
+                                    julianDateStart = currentTravel[0].julianDate;
+                                    julianDateEnd = currentTravel[lastTravelIndex].julianDate;
+
+                                    //go through each view
+                                    for(index2 = 0; index2 < travelLength; index2++)
+                                    {
+                                        //remember current view and status
+                                        boolean onFirst = (index2 == 0);
+                                        CalculateViewsTask.OrbitalView currentView = currentTravel[index2];
+                                        currentAzDelta = Globals.degreeDistance(currentAzDeg, currentView.azimuth);
+                                        currentElDelta = Globals.degreeDistance(currentElDeg, currentView.elevation);
+                                        centerPx = getCorrectedScreenPoints(currentAzDelta, currentElDelta, currentView.elevation, width, height, degToPxWidth, degToPxHeight);
+                                        currentAzPx = centerPx[0];
+                                        currentElPx = centerPx[1];
+
+                                        //if on first
+                                        if(onFirst)
+                                        {
+                                            //set last point
+                                            azPx[1] = currentAzPx;
+                                            elPx[1] = currentElPx;
+                                        }
+
+                                        //update line points and status
+                                        azPx[0] = azPx[1];
+                                        elPx[0] = elPx[1];
+                                        azPx[1] = currentAzPx;
+                                        elPx[1] = currentElPx;
+                                        currentAzPxDelta = Math.abs(azPx[0] - azPx[1]);
+                                        currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
+
+                                        //setup paint
+                                        currentPaint.setStyle(Paint.Style.STROKE);
+
+                                        //if not on first and not too long to draw
+                                        if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
+                                        {
+                                            //draw line between last and current view
+                                            currentPaint.setColor(usedCurrentColor);
+                                            canvas.drawLine(azPx[0], elPx[0], azPx[1], elPx[1], currentPaint);
+                                        }
+
+                                        //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
+                                        if(onFirst || (index2 == lastTravelIndex) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
+                                        {
+                                            RectF bgArea;
+                                            boolean closeArea = (Math.abs(currentAzDelta) <= (CLOSE_AREA_DEGREES / cameraZoomRatio) && Math.abs(currentElDelta) <= (CLOSE_AREA_DEGREES / cameraZoomRatio));
+                                            boolean showPathTime = (!hideDistantPathTimes || closeArea);
+                                            String usedTimeString = (showPathTimeNames ? currentView.getNameTimeString() : currentView.timeString);
+
+                                            //if showing path time
+                                            if(showPathTime)
+                                            {
+                                                //draw circle
+                                                canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
+                                            }
+
+                                            //get text area
+                                            currentPaint.setTextSize(textSize);
+                                            if(currentView.timeArea.isEmpty())
+                                            {
+                                                currentPaint.getTextBounds(usedTimeString, 0, usedTimeString.length(), currentView.timeArea);
+                                            }
+                                            currentView.timeArea.offsetTo((int) (azPx[1] - (currentView.timeArea.width() / 2f)), (int) (elPx[1] - textSize));
+
+                                            //get background area
+                                            bgArea = new RectF(currentView.timeArea.left - textPadding, currentView.timeArea.top - textOffset - textPadding, currentView.timeArea.right + textPadding, (currentView.timeArea.bottom - textOffset) + textPadding);
+
+                                            //if -first area empty or not intersecting with current- and -previous area is empty or not intersecting with current-
+                                            if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
+                                            {
+                                                //if showing path time
+                                                if(showPathTime)
+                                                {
+                                                    //if using filled boxed
+                                                    if(usingFilledBoxPath)
+                                                    {
+                                                        //draw text background
+                                                        currentPaint.setColor(usedTextBgColor);
+                                                        canvas.drawRect(bgArea, currentPaint);
+
+                                                        //draw text border
+                                                        currentPaint.setColor(usedCurrentColor);
+                                                        currentPaint.setStyle(Paint.Style.STROKE);
+                                                        canvas.drawRect(bgArea, currentPaint);
+                                                    }
+
+                                                    //set text draw style
+                                                    currentPaint.setStyle(Paint.Style.FILL);
+
+                                                    //if using color text
+                                                    if(usingColorTextPath)
+                                                    {
+                                                        //draw shadow
+                                                        currentPaint.setColor(textShadowColor);
+                                                        canvas.drawText(usedTimeString, currentView.timeArea.left + textShadowOffset, currentView.timeArea.top + textShadowOffset, currentPaint);
+                                                    }
+
+                                                    //draw text
+                                                    currentPaint.setColor(usedTextColor);
+                                                    canvas.drawText(usedTimeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
+                                                }
+
+                                                //if showing path directions
+                                                if(showPathDirections)
+                                                {
+                                                    //if at least 1 valid previous time
+                                                    if(lastTimeIndex >= 0 && lastTimeIndex < travelLength)
+                                                    {
+                                                        //if can get time in between current and last
+                                                        usedTimeIndex = lastTimeIndex + ((index2 - lastTimeIndex) / 2);
+                                                        if(usedTimeIndex > 0 && usedTimeIndex < travelLength)
+                                                        {
+                                                            //remember last and between time view
+                                                            CalculateViewsTask.OrbitalView lastTimeView = currentTravel[lastTimeIndex];
+                                                            CalculateViewsTask.OrbitalView betweenTimeView = currentTravel[usedTimeIndex];
+
+                                                            //get direction, position deltas, and screen location
+                                                            angleDirection = Globals.getAngleDirection(currentView.azimuth, currentView.elevation, lastTimeView.azimuth, lastTimeView.elevation);
+                                                            timeAzDelta = Globals.degreeDistance(currentAzDeg, betweenTimeView.azimuth);
+                                                            timeElDelta = Globals.degreeDistance(currentElDeg, betweenTimeView.elevation);
+                                                            centerPx = getCorrectedScreenPoints(timeAzDelta, timeElDelta, betweenTimeView.elevation, width, height, degToPxWidth, degToPxHeight);
+
+                                                            //set relative center, rotation, and color
+                                                            currentPaint.setColor(timePathShapeColor);
+                                                            currentPaint.setStyle(Paint.Style.FILL);
+                                                            canvas.save();
+                                                            canvas.translate(centerPx[0], centerPx[1]);
+                                                            canvas.rotate((float)angleDirection - 90);
+
+                                                            //draw direction shape
+                                                            timePathShape.reset();
+                                                            timePathShape.moveTo(0, -pathDirectionShapeLength);
+                                                            timePathShape.lineTo(pathDirectionShapeLength, pathDirectionShapeLength);
+                                                            timePathShape.lineTo(0, 0);
+                                                            timePathShape.lineTo(-pathDirectionShapeLength, pathDirectionShapeLength);
+                                                            timePathShape.lineTo(0, -pathDirectionShapeLength);
+                                                            timePathShape.close();
+                                                            canvas.drawPath(timePathShape, currentPaint);
+
+                                                            //restore canvas rotation
+                                                            canvas.restore();
+                                                        }
+                                                    }
+                                                }
+                                                lastTimeIndex = index2;
+
+                                                //remember previous area and starting julian date
+                                                previousArea.set(bgArea);
+                                                julianDateStart = currentView.julianDate;
+                                            }
+
+                                            //if were on the first
+                                            if(onFirst)
+                                            {
+                                                //remember first area
+                                                firstArea.set(bgArea);
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        //if -current look angle is set- and -on selection, a star -in parent filter or within magnitude-, or in filter-
+                        if(currentLookAngle != null && (currentSelected || (isStar && (inParentFilter || withinMagnitude)) || inFilter))
+                        {
+                            //determine relative location and remember current ID and name
+                            RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !inParentFilter);
+                            currentId = currentOrbital.getSatelliteNum();
+                            currentName = currentOrbital.getName();
+
+                            //if on selection
+                            if(currentSelected)
+                            {
+                                //update selected properties
+                                selectedId = currentId;
+                                selectedType = currentType;
+                                selectedName = currentName;
+                                selectedColor = currentColor;
+                                selectedCloseArea = relativeProperties.closeArea;
+                                selectedOutsideArea = relativeProperties.outsideArea;
+                                selectedLookAngle = currentLookAngle;
+                            }
+
+                            //if a star in a shown constellation
+                            if(isStar && inParentFilter)
+                            {
+                                //set parent points
+                                setParentPoints(currentOrbital, relativeProperties);
+                            }
+
+                            //if showing orbital
+                            if(showOrbital)
+                            {
+                                //draw orbital
+                                drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
+                            }
+                        }
+                    }
+                }
+
+                //set default paint stroke and width
+                currentPaint.setStyle(Paint.Style.STROKE);
+                currentPaint.setStrokeWidth(indicatorThickness);
+
+                //if calibrating
+                if(showCalibration)
+                {
+                    //if selected nearest orbital
+                    if(haveSelectedNearestOrbital())
+                    {
+                        //if need to align center
+                        if(needAlignmentCenter())
+                        {
+                            alignCenterX = widthHalf;
+                            alignCenterY = heightHalf;
+                            calibrateIndex = 0;
+                        }
+                        //else if need bottom left
+                        else if(needAlignmentBottomLeft())
+                        {
+                            alignCenterX = (0.25f * width);
+                            alignCenterY = (0.75f * height);
+                            calibrateIndex = 1;
+                        }
+                        //else must need bottom right
+                        else //if(needAlignmentTopRight())
+                        {
+                            alignCenterX = (0.75f * width);
+                            alignCenterY = (0.25f * height);
+                            calibrateIndex = 2;
+                        }
+
+                        //show offset orbital position
+                        drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, true, false);
+                    }
+                    else
+                    {
+                        //show center
+                        currentPaint.setColor(Color.WHITE);
+                        canvas.drawLine(widthHalf - indicatorPxRadius, heightHalf, widthHalf + indicatorPxRadius, heightHalf, currentPaint);
+                        canvas.drawLine(widthHalf, heightHalf - indicatorPxRadius, widthHalf, heightHalf + indicatorPxRadius, currentPaint);
+                    }
+                }
+                else
+                {
+                    //go through parent orbitals
+                    for(index = 0; index < parentOrbitals.size(); index++)
+                    {
+                        //remember current parent, orbital, and child properties
+                        ParentOrbital currentParentOrbital = parentOrbitals.get(index);
+                        int orbitalIndex = currentParentOrbital.index;
+                        Database.SatelliteData currentOrbital = (orbitalIndex >= 0 && orbitalIndex < currentOrbitals.length ? currentOrbitals[orbitalIndex] : null);
+                        RelativeLocationProperties[][] currentChildProperties = currentParentOrbital.childProperties;
+
+                        //if able to get orbital, child properties, and in filter
+                        if(currentOrbital != null && currentChildProperties != null && currentOrbital.getInFilter())
+                        {
+                            boolean notSelected = (currentOrbital.getSatelliteNum() != selectedNoradId);
+
+                            //set line color
+                            currentPaint.setColor(currentOrbital.getPathColor());
+
+                            //make transparent
+                            currentPaint.setAlpha(notSelected ? constellationAlpha : constellationSelectedAlpha);
+
+                            //go through child properties
+                            for(RelativeLocationProperties[] currentPoint : currentChildProperties)
+                            {
+                                //remember points and if have both
+                                boolean haveBothPoints = (currentPoint.length == 2);
+                                RelativeLocationProperties startPoint = (haveBothPoints ? currentPoint[0] : null);
+                                RelativeLocationProperties endPoint = (haveBothPoints ? currentPoint[1] : null);
+
+                                //if both points are set and at least 1 is within view
+                                if(startPoint != null && endPoint != null && (!startPoint.outsideArea || !endPoint.outsideArea))
+                                {
+                                    //draw line between points
+                                    canvas.drawLine(startPoint.azCenterPx, startPoint.elCenterPx, endPoint.azCenterPx, endPoint.elCenterPx, currentPaint);
+                                }
+                            }
+
+                            //restore transparency
+                            currentPaint.setAlpha(255);
+                        }
+                    }
+
+                    //draw compass
+                    compassCenterX = ((width - (compassWidth / 2f)) - 5) - compassMargin;
+                    compassCenterY = (5 + (compassHeight / 2f)) + compassMargin;
+                    if(compassBad)
+                    {
+                        //if hasn't been bad yet
+                        if(!compassHadBad)
+                        {
+                            //start animation
+                            compassBadAnimator.start();
+                        }
+
+                        //draw border
+                        currentPaint.setStyle(Paint.Style.FILL);
+                        currentPaint.setColor(Color.RED);
+                        canvas.drawCircle(compassCenterX, compassCenterY, (int)(compassWidth / 2f) + compassBorderWidth, currentPaint);
+
+                        //has been bad
+                        compassHadBad = true;
+                    }
+                    Globals.drawBitmap(canvas, compassDirection, compassCenterX, compassCenterY, currentAzDeg, currentPaint);
+                }
+
+                //if have a selection
+                if(haveSelectedOrbital())
+                {
+                    Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
+                    boolean haveLookAngle = (usedLookAngle != null);
+                    RelativeLocationProperties relativeCalibrateProperties = (showCalibration && haveLookAngle ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, true) : null);
+                    boolean haveProperties = (relativeCalibrateProperties != null);
+                    boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
+                    boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
+
+                    //if not too close and have look angles
+                    if(!closeArea && haveLookAngle)
+                    {
+                        //draw arrow direction
+                        angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
+                        Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / cameraZoomRatio))), (float)(angleDirection + 90), currentPaint);
+                    }
+                }
+
+                //update status
+                pendingOnDraw = false;
+            }
+        }
+    }
 
     public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals, boolean needConstellations)
     {
@@ -678,6 +1211,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         showPathTimeNames = Settings.getLensShowPathTimeNames(context);
         hideConstellationStarPaths = Settings.getLensHideConstellationStarPaths(context);
         showIconIndicatorDirection = Settings.getIndicatorIconShowDirection(context);
+        xString = context.getString(R.string.text_x);
         textSize = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 13, metrics);
         textOffset = textSize / 1.5f;
         textPadding = (textSize * 0.15f);
@@ -695,7 +1229,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         starHalfLength = (starLength / 2);
         cameraHardwareDegWidth = cameraHardwareDegHeight = 45;
         cameraDegWidth = cameraDegHeight = useCameraDegWidth = useCameraDegHeight = Float.MAX_VALUE;
-        cameraZoomRatio = 1;
+        cameraZoomRatio = 1.0f;
         indicator = Settings.getIndicator(context);
         indicatorPxRadius = Globals.dpToPixels(context, 24);
         pathType = Settings.getLensPathLabelType(context);
@@ -709,7 +1243,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         previousArea = new RectF();
         azIndex = elIndex = pathDivisions = 0;
         azUserOffset = Settings.getLensAzimuthUserOffset(context);
-        azDeclination = currentTouchDistance = 0;
+        azDeclination = 0;
         defaultPathJulianDelta = Globals.truncate(1.0 / 24, 8);      //1 hour interval      note: setting to 8 places prevents rounding errors for 1 hour intervals
         azDegArray = new float[averageCount];
         elDegArray = new float[averageCount];
@@ -723,9 +1257,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         currentPaint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         currentPaint.setTextSize(textSize);
 
-        currentHolder = this.getHolder();
-        currentHolder.addCallback(this);
-        this.setWillNotDraw(false);
+        currentCameraView = new PreviewView(context);
+        currentCameraView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        this.addView(currentCameraView);
+
+        currentCameraOverlay = new LensOverlay(context);
+        this.addView(currentCameraOverlay);
 
         starIconImage = null;
         arrowDirectionCentered = Settings.getLensDirectionCentered(context);
@@ -777,11 +1314,10 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         helpText = null;
         readyListener = null;
         stopCalibrationListener = null;
+        scaleDetector = null;
 
         showingConstellations = needConstellations;
 
-        cameraMaxZoom = 0;
-        cameraZoomRatios = null;
         haveZoomValues = false;
         orbitalIcons = new ArrayList<>(0);
         parentOrbitals = new ArrayList<>(0);
@@ -799,8 +1335,12 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     @Override
-    public void surfaceCreated(@NonNull SurfaceHolder holder)
+    protected void onAttachedToWindow()
     {
+        super.onAttachedToWindow();
+
+        startCamera();
+
         //if listener set
         if(readyListener != null)
         {
@@ -810,23 +1350,17 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     }
 
     @Override
-    public void surfaceChanged(@NonNull SurfaceHolder holder, int format, int width, int height)
+    protected void onDetachedFromWindow()
     {
-        //if no surface yet
-        if(currentHolder.getSurface() == null)
-        {
-            //stop
-            return;
-        }
+        super.onDetachedFromWindow();
 
-        //start camera
-        startCamera(currentHolder, false);
+        stopCamera(true);
     }
 
     @Override
-    public void surfaceDestroyed(@NonNull SurfaceHolder holder)
+    public boolean onInterceptHoverEvent(MotionEvent event)
     {
-        stopCamera(true);
+        return(true);
     }
 
     @Override
@@ -838,35 +1372,26 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         float y = event.getY();
         float compassHalfWidth = compassWidth / 2.0f;
         float compassHalfHeight = compassHeight / 2.0f;
-        Camera.Parameters cameraParams = (currentCamera != null ? currentCamera.getParameters() : null);
+        CameraControl cameraControls = (currentCamera != null ? currentCamera.getCameraControl() : null);
 
-        //if multi touch and have zoom values
-        if(pointerCount > 1 && haveZoomValues)
+        //if multi touch, have zoom values, and scale detection is set
+        if(pointerCount > 1 && haveZoomValues && scaleDetector != null)
         {
-            //if 2 points down
-            if((action & MotionEvent.ACTION_POINTER_DOWN) != 0 && (action & MotionEvent.ACTION_POINTER_2_DOWN) != 0)
-            {
-                //update touch distance
-                currentTouchDistance = getTouchDistance(event);
-            }
-            //else if moving and have camera params
-            else if(action == MotionEvent.ACTION_MOVE && cameraParams != null)
-            {
-                //stop focus and handle touch zoom
-                handleFocus(cameraParams, false);
-                handleTouchZoom(event, cameraParams);
-            }
+            //stop focus and handle zoom scaling
+            handleFocus(event, cameraControls, false);
+            scaleDetector.onTouchEvent(event);
         }
         //else if compass reading is bad and within compass image bounds
         else if(compassBad && x >= (compassCenterX - compassHalfWidth) && x <= (compassCenterX + compassHalfWidth) && (y >= compassCenterY - compassHalfHeight) && (y <= compassCenterY + compassHalfHeight))
         {
+            //show compass error dialog
             showCompassErrorDialog();
         }
         //else if released
         else if(action == MotionEvent.ACTION_UP)
         {
             //start focus
-            handleFocus(cameraParams, true);
+            handleFocus(event, cameraControls, true);
         }
         //else normal click
         else
@@ -885,588 +1410,79 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         return(super.performClick());
     }
 
-    @Override
-    protected void onDraw(Canvas canvas)
-    {
-        int index;
-        int index2;
-        int currentId;
-        int travelLength;
-        int lastTimeIndex = -1;
-        int lastTravelIndex;
-        int usedTimeIndex;
-        int selectedColor = Color.WHITE;
-        int width = getWidth();
-        int widthHalf = width / 2;
-        int widthDouble = width * 2;
-        int height = getHeight();
-        int heightHalf = height / 2;
-        int heightDouble = height * 2;
-        int selectedId = Universe.IDs.Invalid;
-        byte selectedType = Database.OrbitalType.Satellite;
-        boolean selectedCloseArea = false;
-        boolean selectedOutsideArea = false;
-        float elCenterPx;
-        float elDeltaDeg;
-        float alignCenterX;
-        float alignCenterY;
-        float currentAzPx;
-        float currentElPx;
-        float currentAzDeg = getAzDeg();
-        float currentElDeg = getElDeg();
-        float degToPxWidth = getDegreeToPixelWidth(width);
-        float degToPxHeight = getDegreeToPixelHeight(height);
-        double angleDirection;
-        double julianDateStart;
-        double julianDateEnd;
-        double pathJulianDelta;
-        double pathJulianEndDelta;
-        double periodMinutes;
-        double timeAzDelta;
-        double timeElDelta;
-        double currentAzDelta;
-        double currentElDelta;
-        double currentAzPxDelta;
-        double currentElPxDelta;
-        String currentName;
-        String selectedName = "";
-        Context context = getContext();
-        Calculations.TopographicDataType selectedLookAngle = null;
-        float[] centerPx;
-
-        //if camera area has been calculated
-        if(useCameraDegWidth != Float.MAX_VALUE && useCameraDegHeight != Float.MAX_VALUE)
-        {
-            //if using horizon
-            if(showHorizon)
-            {
-                //draw horizon/ground level
-                elDeltaDeg = (float)Globals.degreeDistance(currentElDeg, 0);
-                elCenterPx = heightHalf - (elDeltaDeg * degToPxHeight);
-                if(elCenterPx < 0)
-                {
-                    elCenterPx = 0;
-                }
-                if(elCenterPx < height)
-                {
-                    //draw line
-                    currentPaint.setStyle(Paint.Style.FILL);
-                    currentPaint.setColor(horizonLineColor);
-                    canvas.drawRect(0, elCenterPx, width, elCenterPx + 3, currentPaint);
-
-                    //fill below
-                    currentPaint.setColor(horizonColor);
-                    canvas.drawRect(0, elCenterPx, width, height, currentPaint);
-                }
-            }
-
-            //go through each orbital and look angle
-            for(index = 0; index < currentOrbitals.length; index++)
-            {
-                //remember current orbital, type, if a star, in filter, selection, and if a star in a shown constellation
-                Database.SatelliteData currentOrbital = currentOrbitals[index];
-                boolean haveOrbital = (currentOrbital != null);
-                byte currentType = (haveOrbital ? currentOrbital.getOrbitalType() : Database.OrbitalType.Satellite);
-                boolean isStar = (currentType == Database.OrbitalType.Star);
-                boolean inFilter = (haveOrbital && currentOrbital.getInFilter());
-                boolean inParentFilter = (haveOrbital && (!currentOrbital.getInParentFilterSet() || currentOrbital.getInParentFilter()));
-                boolean haveSelected = haveSelectedOrbital();
-                boolean currentSelected = (selectedOrbitalIndex == index);
-
-                 //if current orbital is set, -in filter or parent filter-, look angle is valid, and using orbital
-                if(haveOrbital && (inFilter || inParentFilter) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
-                {
-                    //remember current color, look, travel angles, and magnitude properties
-                    int currentColor = currentOrbital.getPathColor();
-                    double currentMagnitude = currentOrbital.getMagnitude();
-                    boolean withinMagnitude = (isStar && currentMagnitude <= starMagnitude);        //note: lower magnitude = brighter star
-                    boolean showOrbital = (currentSelected || (!isStar && inFilter) || (isStar && withinMagnitude));
-                    Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
-                    CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
-
-                    //if showing orbital
-                    if(showOrbital)
-                    {
-                        //if current look angle or travel angles are set
-                        if(currentLookAngle != null || currentTravel != null)
-                        {
-                            //setup paint
-                            currentPaint.setColor(Globals.getColor((showCalibration && currentSelected ? 70 : 255), currentColor));
-                            currentPaint.setStrokeWidth(indicatorThickness);
-                        }
-
-                        //if current travel is set, showing paths, not calibrating, and -on selection or -none selected and -not a star, not in parent filter, or not hiding constellation star paths---
-                        if(currentTravel != null && showPaths && !showCalibration && (currentSelected || (!haveSelected && (!isStar || !inParentFilter || !hideConstellationStarPaths))))
-                        {
-                            //remember length and last index
-                            travelLength = currentTravel.length;
-                            lastTravelIndex = (travelLength - 1);
-
-                            //if using preset path divisions and at least 2 points
-                            if(pathDivisions != 0 && travelLength > 1)
-                            {
-                                //get distance between start and end, divided by divisions
-                                pathJulianDelta = (currentTravel[lastTravelIndex].julianDate - currentTravel[0].julianDate) / pathDivisions;
-                            }
-                            else
-                            {
-                                //set default path julian delta
-                                pathJulianDelta = defaultPathJulianDelta;
-
-                                //remember look angles, and period
-                                periodMinutes = currentOrbital.satellite.orbit.periodMinutes;
-
-                                //if less than 1 day for period
-                                if(periodMinutes > 0 && periodMinutes < Calculations.MinutesPerDay)
-                                {
-                                    //divide path into 12 parts
-                                    pathJulianDelta = Globals.truncate((periodMinutes / Calculations.MinutesPerDay) / 12, 8);
-                                }
-                            }
-                            pathJulianEndDelta = pathJulianDelta / 4;
-
-                            //if there are travel views
-                            if(travelLength > 0)
-                            {
-                                //remember colors
-                                int baseTextColor = (usingFilledBoxPath ? textColor : currentColor);
-                                int usedTextColor = (currentSelected ? baseTextColor : Globals.getColor(75, baseTextColor));
-                                int usedTextBgColor = (currentSelected ? textBgColor : Globals.getColor(30, textBgColor));
-                                int usedCurrentColor = Globals.getColor(currentSelected ? 150 : 20, currentColor);
-                                int timePathShapeColor = Globals.getColorAdded(10, usedCurrentColor);
-
-                                //reset first and previous areas
-                                firstArea.setEmpty();
-                                previousArea.setEmpty();
-
-                                //set julian dates
-                                julianDateStart = currentTravel[0].julianDate;
-                                julianDateEnd = currentTravel[lastTravelIndex].julianDate;
-
-                                //go through each view
-                                for(index2 = 0; index2 < travelLength; index2++)
-                                {
-                                    //remember current view and status
-                                    boolean onFirst = (index2 == 0);
-                                    CalculateViewsTask.OrbitalView currentView = currentTravel[index2];
-                                    currentAzDelta = Globals.degreeDistance(currentAzDeg, currentView.azimuth);
-                                    currentElDelta = Globals.degreeDistance(currentElDeg, currentView.elevation);
-                                    centerPx = getCorrectedScreenPoints(currentAzDelta, currentElDelta, currentView.elevation, width, height, degToPxWidth, degToPxHeight);
-                                    currentAzPx = centerPx[0];
-                                    currentElPx = centerPx[1];
-
-                                    //if on first
-                                    if(onFirst)
-                                    {
-                                        //set last point
-                                        azPx[1] = currentAzPx;
-                                        elPx[1] = currentElPx;
-                                    }
-
-                                    //update line points and status
-                                    azPx[0] = azPx[1];
-                                    elPx[0] = elPx[1];
-                                    azPx[1] = currentAzPx;
-                                    elPx[1] = currentElPx;
-                                    currentAzPxDelta = Math.abs(azPx[0] - azPx[1]);
-                                    currentElPxDelta = Math.abs(elPx[0] - elPx[1]);
-
-                                    //setup paint
-                                    currentPaint.setStyle(Paint.Style.STROKE);
-
-                                    //if not on first and not too long to draw
-                                    if(!onFirst && currentAzPxDelta < widthDouble && currentElPxDelta < heightDouble)
-                                    {
-                                        //draw line between last and current view
-                                        currentPaint.setColor(usedCurrentColor);
-                                        canvas.drawLine(azPx[0], elPx[0], azPx[1], elPx[1], currentPaint);
-                                    }
-
-                                    //if -on first- or -on last- or --enough pixels between views- and -on last- or --needed time between views- and -more than 1/4 delta before end---
-                                    if(onFirst || (index2 == lastTravelIndex) || ((currentAzPxDelta >= timeCirclePxRadius || currentElPxDelta >= timeCirclePxRadius) && (currentView.julianDate - julianDateStart >= pathJulianDelta) && (currentView.julianDate + pathJulianEndDelta < julianDateEnd)))
-                                    {
-                                        RectF bgArea;
-                                        boolean closeArea = (Math.abs(currentAzDelta) <= (CLOSE_AREA_DEGREES / cameraZoomRatio) && Math.abs(currentElDelta) <= (CLOSE_AREA_DEGREES / cameraZoomRatio));
-                                        boolean showPathTime = (!hideDistantPathTimes || closeArea);
-                                        String usedTimeString = (showPathTimeNames ? currentView.getNameTimeString() : currentView.timeString);
-
-                                        //if showing path time
-                                        if(showPathTime)
-                                        {
-                                            //draw circle
-                                            canvas.drawCircle(azPx[1], elPx[1], timeCirclePxRadius, currentPaint);
-                                        }
-
-                                        //get text area
-                                        currentPaint.setTextSize(textSize);
-                                        if(currentView.timeArea.isEmpty())
-                                        {
-                                            currentPaint.getTextBounds(usedTimeString, 0, usedTimeString.length(), currentView.timeArea);
-                                        }
-                                        currentView.timeArea.offsetTo((int) (azPx[1] - (currentView.timeArea.width() / 2f)), (int) (elPx[1] - textSize));
-
-                                        //get background area
-                                        bgArea = new RectF(currentView.timeArea.left - textPadding, currentView.timeArea.top - textOffset - textPadding, currentView.timeArea.right + textPadding, (currentView.timeArea.bottom - textOffset) + textPadding);
-
-                                        //if -first area empty or not intersecting with current- and -previous area is empty or not intersecting with current-
-                                        if((firstArea.isEmpty() || !firstArea.intersect(bgArea)) && (previousArea.isEmpty() || !previousArea.intersect(bgArea)))
-                                        {
-                                            //if showing path time
-                                            if(showPathTime)
-                                            {
-                                                //if using filled boxed
-                                                if(usingFilledBoxPath)
-                                                {
-                                                    //draw text background
-                                                    currentPaint.setColor(usedTextBgColor);
-                                                    canvas.drawRect(bgArea, currentPaint);
-
-                                                    //draw text border
-                                                    currentPaint.setColor(usedCurrentColor);
-                                                    currentPaint.setStyle(Paint.Style.STROKE);
-                                                    canvas.drawRect(bgArea, currentPaint);
-                                                }
-
-                                                //set text draw style
-                                                currentPaint.setStyle(Paint.Style.FILL);
-
-                                                //if using color text
-                                                if(usingColorTextPath)
-                                                {
-                                                    //draw shadow
-                                                    currentPaint.setColor(textShadowColor);
-                                                    canvas.drawText(usedTimeString, currentView.timeArea.left + textShadowOffset, currentView.timeArea.top + textShadowOffset, currentPaint);
-                                                }
-
-                                                //draw text
-                                                currentPaint.setColor(usedTextColor);
-                                                canvas.drawText(usedTimeString, currentView.timeArea.left, currentView.timeArea.top, currentPaint);
-                                            }
-
-                                            //if showing path directions
-                                            if(showPathDirections)
-                                            {
-                                                //if at least 1 valid previous time
-                                                if(lastTimeIndex >= 0 && lastTimeIndex < travelLength)
-                                                {
-                                                    //if can get time in between current and last
-                                                    usedTimeIndex = lastTimeIndex + ((index2 - lastTimeIndex) / 2);
-                                                    if(usedTimeIndex > 0 && usedTimeIndex < travelLength)
-                                                    {
-                                                        //remember last and between time view
-                                                        CalculateViewsTask.OrbitalView lastTimeView = currentTravel[lastTimeIndex];
-                                                        CalculateViewsTask.OrbitalView betweenTimeView = currentTravel[usedTimeIndex];
-
-                                                        //get direction, position deltas, and screen location
-                                                        angleDirection = Globals.getAngleDirection(currentView.azimuth, currentView.elevation, lastTimeView.azimuth, lastTimeView.elevation);
-                                                        timeAzDelta = Globals.degreeDistance(currentAzDeg, betweenTimeView.azimuth);
-                                                        timeElDelta = Globals.degreeDistance(currentElDeg, betweenTimeView.elevation);
-                                                        centerPx = getCorrectedScreenPoints(timeAzDelta, timeElDelta, betweenTimeView.elevation, width, height, degToPxWidth, degToPxHeight);
-
-                                                        //set relative center, rotation, and color
-                                                        currentPaint.setColor(timePathShapeColor);
-                                                        currentPaint.setStyle(Paint.Style.FILL);
-                                                        canvas.save();
-                                                        canvas.translate(centerPx[0], centerPx[1]);
-                                                        canvas.rotate((float)angleDirection - 90);
-
-                                                        //draw direction shape
-                                                        timePathShape.reset();
-                                                        timePathShape.moveTo(0, -pathDirectionShapeLength);
-                                                        timePathShape.lineTo(pathDirectionShapeLength, pathDirectionShapeLength);
-                                                        timePathShape.lineTo(0, 0);
-                                                        timePathShape.lineTo(-pathDirectionShapeLength, pathDirectionShapeLength);
-                                                        timePathShape.lineTo(0, -pathDirectionShapeLength);
-                                                        timePathShape.close();
-                                                        canvas.drawPath(timePathShape, currentPaint);
-
-                                                        //restore canvas rotation
-                                                        canvas.restore();
-                                                    }
-                                                }
-                                            }
-                                            lastTimeIndex = index2;
-
-                                            //remember previous area and starting julian date
-                                            previousArea.set(bgArea);
-                                            julianDateStart = currentView.julianDate;
-                                        }
-
-                                        //if were on the first
-                                        if(onFirst)
-                                        {
-                                            //remember first area
-                                            firstArea.set(bgArea);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    //if -current look angle is set- and -on selection, a star -in parent filter or within magnitude-, or in filter-
-                    if(currentLookAngle != null && (currentSelected || (isStar && (inParentFilter || withinMagnitude)) || inFilter))
-                    {
-                        //determine relative location and remember current ID and name
-                        RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !inParentFilter);
-                        currentId = currentOrbital.getSatelliteNum();
-                        currentName = currentOrbital.getName();
-
-                        //if on selection
-                        if(currentSelected)
-                        {
-                            //update selected properties
-                            selectedId = currentId;
-                            selectedType = currentType;
-                            selectedName = currentName;
-                            selectedColor = currentColor;
-                            selectedCloseArea = relativeProperties.closeArea;
-                            selectedOutsideArea = relativeProperties.outsideArea;
-                            selectedLookAngle = currentLookAngle;
-                        }
-
-                        //if a star in a shown constellation
-                        if(isStar && inParentFilter)
-                        {
-                            //set parent points
-                            setParentPoints(currentOrbital, relativeProperties);
-                        }
-
-                        //if showing orbital
-                        if(showOrbital)
-                        {
-                            //draw orbital
-                            drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
-                        }
-                    }
-                }
-            }
-
-            //set default paint stroke and width
-            currentPaint.setStyle(Paint.Style.STROKE);
-            currentPaint.setStrokeWidth(indicatorThickness);
-
-            //if calibrating
-            if(showCalibration)
-            {
-                //if selected nearest orbital
-                if(haveSelectedNearestOrbital())
-                {
-                    //if need to align center
-                    if(needAlignmentCenter())
-                    {
-                        alignCenterX = widthHalf;
-                        alignCenterY = heightHalf;
-                        calibrateIndex = 0;
-                    }
-                    //else if need bottom left
-                    else if(needAlignmentBottomLeft())
-                    {
-                        alignCenterX = (0.25f * width);
-                        alignCenterY = (0.75f * height);
-                        calibrateIndex = 1;
-                    }
-                    //else must need bottom right
-                    else //if(needAlignmentTopRight())
-                    {
-                        alignCenterX = (0.75f * width);
-                        alignCenterY = (0.25f * height);
-                        calibrateIndex = 2;
-                    }
-
-                    //show offset orbital position
-                    drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, true, false);
-                }
-                else
-                {
-                    //show center
-                    currentPaint.setColor(Color.WHITE);
-                    canvas.drawLine(widthHalf - indicatorPxRadius, heightHalf, widthHalf + indicatorPxRadius, heightHalf, currentPaint);
-                    canvas.drawLine(widthHalf, heightHalf - indicatorPxRadius, widthHalf, heightHalf + indicatorPxRadius, currentPaint);
-                }
-            }
-            else
-            {
-                //go through parent orbitals
-                for(index = 0; index < parentOrbitals.size(); index++)
-                {
-                    //remember current parent, orbital, and child properties
-                    ParentOrbital currentParentOrbital = parentOrbitals.get(index);
-                    int orbitalIndex = currentParentOrbital.index;
-                    Database.SatelliteData currentOrbital = (orbitalIndex >= 0 && orbitalIndex < currentOrbitals.length ? currentOrbitals[orbitalIndex] : null);
-                    RelativeLocationProperties[][] currentChildProperties = currentParentOrbital.childProperties;
-
-                    //if able to get orbital, child properties, and in filter
-                    if(currentOrbital != null && currentChildProperties != null && currentOrbital.getInFilter())
-                    {
-                        boolean notSelected = (currentOrbital.getSatelliteNum() != selectedNoradId);
-
-                        //set line color
-                        currentPaint.setColor(currentOrbital.getPathColor());
-
-                        //make transparent
-                        currentPaint.setAlpha(notSelected ? constellationAlpha : constellationSelectedAlpha);
-
-                        //go through child properties
-                        for(RelativeLocationProperties[] currentPoint : currentChildProperties)
-                        {
-                            //remember points and if have both
-                            boolean haveBothPoints = (currentPoint.length == 2);
-                            RelativeLocationProperties startPoint = (haveBothPoints ? currentPoint[0] : null);
-                            RelativeLocationProperties endPoint = (haveBothPoints ? currentPoint[1] : null);
-
-                            //if both points are set and at least 1 is within view
-                            if(startPoint != null && endPoint != null && (!startPoint.outsideArea || !endPoint.outsideArea))
-                            {
-                                //draw line between points
-                                canvas.drawLine(startPoint.azCenterPx, startPoint.elCenterPx, endPoint.azCenterPx, endPoint.elCenterPx, currentPaint);
-                            }
-                        }
-
-                        //restore transparency
-                        currentPaint.setAlpha(255);
-                    }
-                }
-
-                //draw compass
-                compassCenterX = ((width - (compassWidth / 2f)) - 5) - compassMargin;
-                compassCenterY = (5 + (compassHeight / 2f)) + compassMargin;
-                if(compassBad)
-                {
-                    //if hasn't been bad yet
-                    if(!compassHadBad)
-                    {
-                        //start animation
-                        compassBadAnimator.start();
-                    }
-
-                    //draw border
-                    currentPaint.setStyle(Paint.Style.FILL);
-                    currentPaint.setColor(Color.RED);
-                    canvas.drawCircle(compassCenterX, compassCenterY, (int)(compassWidth / 2f) + compassBorderWidth, currentPaint);
-
-                    //has been bad
-                    compassHadBad = true;
-                }
-                Globals.drawBitmap(canvas, compassDirection, compassCenterX, compassCenterY, currentAzDeg, currentPaint);
-            }
-
-            //if have a selection
-            if(haveSelectedOrbital())
-            {
-                Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
-                boolean haveLookAngle = (usedLookAngle != null);
-                RelativeLocationProperties relativeCalibrateProperties = (showCalibration && haveLookAngle ? getRelativeLocationProperties(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, true) : null);
-                boolean haveProperties = (relativeCalibrateProperties != null);
-                boolean closeArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.closeArea) : selectedCloseArea);
-                boolean outsideArea = (showCalibration ? (!haveProperties || relativeCalibrateProperties.outsideArea) : selectedOutsideArea);
-
-                //if not too close and have look angles
-                if(!closeArea && haveLookAngle)
-                {
-                    //draw arrow direction
-                    angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
-                    Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / cameraZoomRatio))), (float)(angleDirection + 90), currentPaint);
-                }
-            }
-
-            //update status
-            pendingOnDraw = false;
-        }
-
-        //draw
-        super.onDraw(canvas);
-    }
-
-    //Gets the distance between 2 touch points
-    private float getTouchDistance(MotionEvent event)
-    {
-        float x = event.getX(0) - event.getX(1);
-        float y = event.getY(0) - event.getY(1);
-
-        return((float)Math.sqrt((x * x) + (y * y)));
-    }
-
     //Sets zoom
-    private void setZoom(int zoom, Camera.Parameters params)
+    private void setZoom(float zoom, CameraControl controls, boolean showText)
     {
-        //if camera, params, and zoom values exist
-        if(currentCamera != null && params != null && haveZoomValues)
-        {
-            //update zoom properties
-            cameraZoomRatio = (zoom >= 0 && zoom < cameraZoomRatios.size() ? (cameraZoomRatios.get(zoom) / 100f) : 1);
-            params.setZoom(zoom);
-            currentCamera.setParameters(params);
+        String textValue;
 
-            //if bar exists and is changing
-            if(zoomBar != null && (int)zoomBar.getValue() != zoom)
+        //if controls exist and have zoom values
+        if(controls != null && haveZoomValues)
+        {
+            //keep zoom within range
+            if(zoom > cameraZoomMax)
             {
-                //update bar
+                zoom = cameraZoomMax;
+            }
+            else if(zoom < cameraZoomMin)
+            {
+                zoom = cameraZoomMin;
+            }
+
+            //set zoom
+            cameraZoomRatio = zoom;
+            controls.setZoomRatio(zoom);
+
+            //if zoom bar exists
+            if(zoomBar != null)
+            {
+                //update value
                 zoomBar.setValue(zoom);
             }
+
+            //if zoom text exists and showing it
+            if(zoomText != null & showText)
+            {
+                //update text and then hide shortly after
+                textValue = Globals.getNumberString(zoom, 1) + xString;
+                zoomText.removeCallbacks(null);
+                zoomText.setVisibility(View.VISIBLE);
+                zoomText.setText(textValue);
+                zoomText.postDelayed(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        zoomText.setVisibility(View.GONE);
+                    }
+                }, 3000);
+            }
         }
     }
-    public void setZoom(int zoom)
+    private void setZoom(float zoom, CameraControl controls)
     {
-        setZoom(zoom, (currentCamera != null ? currentCamera.getParameters() : null));
+        setZoom(zoom, controls, true);
     }
-
-    //Handles touch zoom
-    private void handleTouchZoom(MotionEvent event, Camera.Parameters params)
+    public void setZoom(float zoom)
     {
-        //if camera and params exist
-        if(currentCamera != null && params != null)
-        {
-            int currentZoom = params.getZoom();
-            float touchDistance = getTouchDistance(event);
-
-            //if expanding distance and can zoom in more
-            if(touchDistance > currentTouchDistance && currentZoom < cameraMaxZoom)
-            {
-                //zoom in
-                currentZoom++;
-            }
-            //else if shrinking distance and can zoom out more
-            else if(touchDistance < currentTouchDistance && currentZoom > 0)
-            {
-                //zoom out
-                currentZoom--;
-            }
-
-            //update distance and zoom
-            currentTouchDistance = touchDistance;
-            setZoom(currentZoom, params);
-        }
+        setZoom(zoom, (currentCamera != null ? currentCamera.getCameraControl() : null));
     }
 
     //Handles focus
-    private void handleFocus(Camera.Parameters params, boolean use)
+    private void handleFocus(MotionEvent event, CameraControl controls, boolean use)
     {
-        //if camera exists
-        if(currentCamera != null)
+        //if controls exist
+        if(controls != null)
         {
             //if using
             if(use)
             {
-                //if there are focus modes and auto being used
-                List<String> focusModes = (params != null ? params.getSupportedFocusModes() : null);
-                if(focusModes != null && focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO))
-                {
-                    //start focus
-                    currentCamera.autoFocus(new Camera.AutoFocusCallback()
-                    {
-                        @Override
-                        public void onAutoFocus(boolean success, Camera camera)
-                        {
-                            //do nothing
-                        }
-                    });
-                }
+                //start focus on touched point
+                controls.startFocusAndMetering(new FocusMeteringAction.Builder(new SurfaceOrientedMeteringPointFactory(currentCameraOverlay.getWidth(), currentCameraOverlay.getHeight()).createPoint(event.getX(), event.getY()), FocusMeteringAction.FLAG_AF).build());
             }
             else
             {
                 //stop focus
-                currentCamera.cancelAutoFocus();
+                controls.cancelFocusAndMetering();
             }
         }
     }
@@ -1863,7 +1879,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
 
             //if -parents orbitals not set and needed- or -need to be changed-
-            if((parentOrbitals.size() == 0 && showingConstellations) || (checkLength && changed))
+            if((parentOrbitals.isEmpty() && showingConstellations) || (checkLength && changed))
             {
                 //clear parent orbitals
                 parentOrbitals.clear();
@@ -1894,6 +1910,15 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 updateInParentFilter();
                 pendingSetInParentFilter = false;
             }
+        }
+    }
+
+    //Updates the display
+    public void updateDisplay()
+    {
+        if(currentCameraOverlay != null)
+        {
+            currentCameraOverlay.postInvalidate();
         }
     }
 
@@ -2029,7 +2054,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             ArrayList<Database.ParentProperties> parentProperties = currentOrbital.getParentProperties();
 
             //if no parents
-            if(parentProperties == null || parentProperties.size() < 1)
+            if(parentProperties == null || parentProperties.isEmpty())
             {
                 //remember if in filter directly
                 inFilter = currentOrbital.getInFilter();
@@ -2250,7 +2275,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
     public void updateUserAzimuthOffset()
     {
         //add difference to offset
-        azUserOffset += Globals.degreeDistance(alignCenter.az, alignCenter.orbitalAz);
+        azUserOffset += (float)Globals.degreeDistance(alignCenter.az, alignCenter.orbitalAz);
         Settings.setLensAzimuthUserOffset(getContext(), azUserOffset);
     }
 
@@ -2357,15 +2382,11 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             updateThread = null;
         }
 
-        if(currentCamera != null)
+        if(currentCameraProvider != null)
         {
             try
             {
-                currentCamera.stopPreview();
-                if(kill)
-                {
-                    currentCamera.release();
-                }
+                currentCameraProvider.unbindAll();
             }
             catch(Exception ex)
             {
@@ -2373,7 +2394,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             }
             if(kill)
             {
-                currentCamera = null;
+                currentCameraProvider = null;
             }
         }
 
@@ -2401,25 +2422,141 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         stopCalibrationListener = listener;
     }
 
-    //Starts the camera
-    private void startCamera(SurfaceHolder holder, boolean retrying)
+    //Sets up the camera
+    @OptIn(markerClass = ExperimentalCamera2Interop.class)
+    private void setupCamera(Context context, ProcessCameraProvider cameraProvider)
     {
-        int cameraOrientation;
-        boolean inPortrait = inOrientationPortrait();
+        boolean cameraRotate = Settings.getLensRotate(context);
+        boolean useAutoWidth = Settings.getLensAutoWidth(context);
+        boolean useAutoHeight = Settings.getLensAutoHeight(context);
+        float maxFocus;
+        float userDegWidth = Settings.getLensWidth(context);
+        float userDegHeight = Settings.getLensHeight(context);
+        String id;
+        SizeF sensorSize;
+        Preview preview = new Preview.Builder().build();
+        CameraInfo info;
+        CameraControl controls;
+        CameraSelector selector;
+        CameraCharacteristics characteristics;
+        CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
+        ZoomState zoomState;
+        float[] focalLengths;
+
+        //set provider
+        currentCameraProvider = cameraProvider;
+
+        //try to open camera and preview
+        selector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
+        currentCameraView.setImplementationMode(cameraRotate ? PreviewView.ImplementationMode.COMPATIBLE : PreviewView.ImplementationMode.PERFORMANCE);
+        preview.setSurfaceProvider(currentCameraView.getSurfaceProvider());
+        currentCamera = currentCameraProvider.bindToLifecycle((LifecycleOwner)context, selector, preview);
+
+        //get camera properties
+        info = currentCamera.getCameraInfo();
+        controls = currentCamera.getCameraControl();
+        id = Camera2CameraInfo.from(info).getCameraId();
+        try
+        {
+            //get characteristics
+            characteristics = manager.getCameraCharacteristics(id);
+            sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+            focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+            maxFocus = focalLengths[0];
+
+            //get hardware degree width and height
+            cameraHardwareDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
+            cameraHardwareDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
+        }
+        catch(Exception ex)
+        {
+            //do nothing
+        }
+
+        //get desired camera degree view
+        cameraDegWidth = (useAutoWidth ? cameraHardwareDegWidth : userDegWidth);
+        cameraDegHeight = (useAutoHeight ? cameraHardwareDegHeight : userDegHeight);
+        updateUsedWidthHeight();
+
+        //set orientation
+        preview.setTargetRotation(getRotation(cameraRotate ? ((orientation + 180) % 360) : orientation));
+
+        //setup zoom
+        zoomState = info.getZoomState().getValue();
+        if(zoomState != null)
+        {
+            cameraZoomMin = zoomState.getMinZoomRatio();
+            cameraZoomMax = zoomState.getMaxZoomRatio();
+        }
+        else
+        {
+            cameraZoomMin = cameraZoomMax = 1.0f;
+        }
+        haveZoomValues = (cameraZoomMin != cameraZoomMax);
+        if(haveZoomValues)
+        {
+            if(cameraZoomMin < 1.0f)
+            {
+                cameraZoomMin = 1.0f;
+            }
+            if(cameraZoomMax < 1.0f)
+            {
+                cameraZoomMax = 1.0f;
+            }
+        }
+        scaleDetector = (haveZoomValues ? new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener()
+        {
+            @Override
+            public boolean onScale(@NonNull ScaleGestureDetector detector)
+            {
+                ZoomState currentZoomState = info.getZoomState().getValue();
+                float currentRatio = (currentZoomState != null ? currentZoomState.getZoomRatio() : 1.0f);
+
+                //set zoom
+                setZoom(currentRatio * detector.getScaleFactor(), controls);
+
+                //handled
+                return(true);
+            }
+        }) : null);
+        if(zoomBar != null)
+        {
+            if(haveZoomValues)
+            {
+                zoomBar.setValueFrom(cameraZoomMin);
+                zoomBar.setValueTo(cameraZoomMax);
+                zoomBar.setValue(cameraZoomMin);
+                zoomBar.setLabelBehavior(LabelFormatter.LABEL_GONE);
+                zoomBar.addOnChangeListener(new Slider.OnChangeListener()
+                {
+                    @Override
+                    public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
+                    {
+                        //if from the user
+                        if(fromUser)
+                        {
+                            //set zoom
+                            setZoom(Math.round(value / 0.5f) * 0.5f, controls);
+                        }
+                    }
+                });
+            }
+            zoomBar.setVisibility(haveZoomValues ? View.VISIBLE : View.GONE);
+        }
+        setZoom(1.0f, controls, false);
+    }
+
+    //Starts the camera
+    public void startCamera(boolean retrying)
+    {
         Context context = this.getContext();
         boolean startSensors = false;
         boolean havePermission = Globals.haveCameraPermission(context);
         boolean useCamera = Settings.getLensUseCamera(context);
-        boolean useAutoWidth = Settings.getLensAutoWidth(context);
-        boolean useAutoHeight = Settings.getLensAutoHeight(context);
-        boolean cameraRotate = Settings.getLensRotate(context);
         float userDegWidth = Settings.getLensWidth(context);
         float userDegHeight = Settings.getLensHeight(context);
-        Camera.Parameters cameraParams;
         Resources res = context.getResources();
-
-        //get orientation
-        cameraOrientation = (cameraRotate ? ((orientation + 180) % 360) : orientation);
+        ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
         //if using camera and have permission
         if(useCamera && havePermission)
@@ -2430,65 +2567,40 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
             try
             {
                 //try to start camera
-                if(currentCamera == null)
+                if(currentCameraProvider == null)
                 {
-                    //try to open camera
-                    currentCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
-                }
-                cameraParams = currentCamera.getParameters();
-                cameraParams.set("orientation", (inPortrait ? Camera.Parameters.SCENE_MODE_PORTRAIT : Camera.Parameters.SCENE_MODE_LANDSCAPE));
-                cameraParams.set("rotation", cameraOrientation);
-                cameraParams.setRotation(cameraOrientation);
-                if(cameraParams.getSupportedFocusModes().contains(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO))
-                {
-                    //set auto focus
-                    cameraParams.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_VIDEO);
-                }
-                currentCamera.setParameters(cameraParams);
-                currentCamera.setDisplayOrientation(cameraOrientation);
-                currentCamera.setPreviewDisplay(holder);
-                currentCamera.startPreview();
-
-                //get desired camera degree view
-                cameraHardwareDegWidth = cameraParams.getHorizontalViewAngle();
-                cameraHardwareDegHeight = cameraParams.getVerticalViewAngle();
-                cameraDegWidth = (useAutoWidth ? cameraHardwareDegWidth : userDegWidth);
-                cameraDegHeight = (useAutoHeight ? cameraHardwareDegHeight : userDegHeight);
-
-                //setup zom
-                cameraMaxZoom = cameraParams.getMaxZoom();
-                cameraZoomRatios = cameraParams.getZoomRatios();
-                haveZoomValues = (cameraZoomRatios != null && cameraZoomRatios.size() > 1);
-                if(zoomBar != null)
-                {
-                    //if have zoom values
-                    if(haveZoomValues)
+                    //get camera provider instance
+                    cameraProviderFuture = ProcessCameraProvider.getInstance(context);
+                    cameraProviderFuture.addListener(new Runnable()
                     {
-                        //setup bar
-                        zoomBar.setValueFrom(0);
-                        zoomBar.setValueTo(cameraMaxZoom);
-                        zoomBar.setLabelFormatter(new LabelFormatter()
+                        @Override
+                        public void run()
                         {
-                            @NonNull @Override
-                            public String getFormattedValue(float value)
+                            try
                             {
-                                //return zoom value multiplier
-                                return(Globals.getNumberString(cameraZoomRatios.get((int)value) / 100f, 1) + res.getString(R.string.text_x));
+                                //setup camera
+                                setupCamera(context, cameraProviderFuture.get());
                             }
-                        });
-                    }
-
-                    //set visibility
-                    zoomBar.setVisibility(haveZoomValues ? View.VISIBLE : View.GONE);
+                            catch (Exception ex)
+                            {
+                                //throw error
+                                throw(new RuntimeException(ex));
+                            }
+                        }
+                    }, ContextCompat.getMainExecutor(context));
                 }
-                setZoom(0, cameraParams);
+                else
+                {
+                    //setup camera
+                    setupCamera(context, currentCameraProvider);
+                }
 
                 //start sensors
                 startSensors = true;
             }
             catch(Exception ex)
             {
-                currentCamera = null;
+                currentCameraProvider = null;
                 Globals.showSnackBar(this, res.getString(R.string.text_camera_error), ex.getMessage(), true, true);
             }
         }
@@ -2505,7 +2617,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                     if(retrying)
                     {
                         //use without camera
-                        startCamera(holder, true);
+                        startCamera(true);
                     }
                 }
             });
@@ -2542,9 +2654,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         //if starting sensors
         if(startSensors)
         {
-            //update used width and height
-            updateUsedWidthHeight();
-
             //if sensors updater not set yet
             if(sensorUpdater == null)
             {
@@ -2565,13 +2674,6 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
 
         //start/stop update thread
         updateThread.setRunning(startSensors);
-    }
-    public void startCamera(boolean retrying)
-    {
-        if(currentHolder != null)
-        {
-            startCamera(currentHolder, retrying);
-        }
     }
     public void startCamera()
     {
@@ -2642,13 +2744,31 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
         }
     }
 
+    //Converts degrees to rotation
+    private static int getRotation(int degrees)
+    {
+        switch(degrees)
+        {
+            case 90:
+                return(Surface.ROTATION_90);
+
+            case 180:
+                return(Surface.ROTATION_180);
+
+            case 270:
+                return(Surface.ROTATION_270);
+
+            default:
+            case 0:
+                return(Surface.ROTATION_0);
+        }
+    }
+
     //Gets current camera orientation
     private int getCameraOrientation()
     {
         int degrees;
         int rotation = Globals.getScreenOrientation(this.getContext());
-        Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
-        Camera.getCameraInfo(Camera.CameraInfo.CAMERA_FACING_BACK, cameraInfo);
 
         switch(rotation)
         {
@@ -2670,7 +2790,7 @@ public class CameraLens extends SurfaceView implements SurfaceHolder.Callback, S
                 break;
         }
 
-        return((cameraInfo.orientation - degrees + 360) % 360);
+        return(degrees);
     }
 
     //Returns if in portrait orientation

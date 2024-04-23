@@ -82,7 +82,7 @@
     <declare-styleable name="SliderPreference">
         <attr name="minValue"/>
         <attr name="maxValue"/>
-        <attr name="scaleType" format="enum">
+        <attr name="scaleUnitType" format="enum">
             <enum name="Integer" value="0"/>
             <enum name="Percent" value="1"/>
         </attr>

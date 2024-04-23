@@ -2346,6 +2346,7 @@ public abstract class Current
         cameraView.pathDivisions = pathDivisions;
         cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
         cameraView.zoomBar = rootView.findViewById(R.id.Lens_Zoom_Bar);
+        cameraView.zoomText = rootView.findViewById(R.id.Lens_Zoom_Text);
         cameraView.showPaths = (lensShowPaths || useSaved);         //if showing paths or using a saved path
         lensLayout.addView(cameraView, 0);                          //add before menu
 
@@ -2365,21 +2366,6 @@ public abstract class Current
         pageFragment.scaleBar = rootView.findViewById(R.id.Lens_Magnitude_Bar);
         floatingButtonLayoutParams.bottomMargin = (int)(useSaved ? Globals.dpToPixels(context, 24) : 0);
         floatingButtonLayout.setLayoutParams(floatingButtonLayoutParams);
-
-        //setup zoom bar
-        cameraView.zoomBar.addOnChangeListener(new Slider.OnChangeListener()
-        {
-            @Override
-            public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
-            {
-                //if from the user
-                if(fromUser)
-                {
-                    //update zoom
-                    cameraView.setZoom((int)value);
-                }
-            }
-        });
 
         //setup calibration button
         lensShowCalibration = false;
@@ -2421,7 +2407,7 @@ public abstract class Current
                     if(lensShowCalibration)
                     {
                         //reset zoom
-                        cameraView.setZoom(1);
+                        cameraView.setZoom(1.0f);
                     }
                     else
                     {

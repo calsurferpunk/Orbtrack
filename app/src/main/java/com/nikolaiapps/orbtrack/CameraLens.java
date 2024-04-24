@@ -153,8 +153,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         public final int id;
         public Bitmap image;
         public Bitmap lastImage;
-        private double lastAzimuth;
-        private double lastElevation;
+        public double lastAzimuth;
+        public double lastElevation;
         public double angleDirection;
         public double lastAngleDirection;
 
@@ -164,13 +164,13 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             this.image = image;
             this.lastImage = null;
 
-            angleDirection = 0;
+            angleDirection = Double.MAX_VALUE;
             lastAngleDirection = Double.MAX_VALUE;
             lastAzimuth = Double.MAX_VALUE;
             lastElevation = Double.MAX_VALUE;
         }
 
-        public double getAngleDirection(double azimuth, double elevation)
+        public double getAngleDirection(double azimuth, double elevation, double centerX, double centerY, double lastCenterX, double lastCenterY)
         {
             //remember last angle direction
             lastAngleDirection = angleDirection;
@@ -182,10 +182,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 if(lastAzimuth != Double.MAX_VALUE && lastElevation != Double.MAX_VALUE && azimuth != Double.MAX_VALUE && elevation != Double.MAX_VALUE && (lastAzimuth != azimuth || lastElevation != elevation))
                 {
                     //get angle direction
-                    angleDirection = Globals.getAngleDirection(lastAzimuth, azimuth, lastElevation, elevation);
+                    angleDirection = Calculations.getBearing(lastCenterX, lastCenterY, centerX, centerY);
                 }
 
-                //update last angles
+                //update last status
                 lastAzimuth = azimuth;
                 lastElevation = elevation;
             }
@@ -204,6 +204,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             lastAzimuth = copyFrom.lastAzimuth;
             lastElevation = copyFrom.lastElevation;
             angleDirection = copyFrom.angleDirection;
+            lastAngleDirection = copyFrom.lastAngleDirection;
         }
     }
 
@@ -959,7 +960,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                                                             CalculateViewsTask.OrbitalView betweenTimeView = currentTravel[usedTimeIndex];
 
                                                             //get direction, position deltas, and screen location
-                                                            angleDirection = Globals.getAngleDirection(currentView.azimuth, currentView.elevation, lastTimeView.azimuth, lastTimeView.elevation);
+                                                            angleDirection = Globals.getReverseAngleDirection(currentView.azimuth, currentView.elevation, lastTimeView.azimuth, lastTimeView.elevation);
                                                             timeAzDelta = Globals.degreeDistance(currentAzDeg, betweenTimeView.azimuth);
                                                             timeElDelta = Globals.degreeDistance(currentElDeg, betweenTimeView.elevation);
                                                             centerPx = getCorrectedScreenPoints(timeAzDelta, timeElDelta, betweenTimeView.elevation, width, height, degToPxWidth, degToPxHeight);
@@ -1037,7 +1038,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                             if(showOrbital)
                             {
                                 //draw orbital
-                                drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, indicatorPxRadius, width, height, currentSelected, relativeProperties.outsideArea);
+                                drawOrbital(context, canvas, currentId, currentType, currentName, currentColor, currentOrbitalAreas[index], relativeProperties.azCenterPx, relativeProperties.elCenterPx, currentLookAngle.azimuth, currentLookAngle.elevation, currentAzDeg, currentElDeg, indicatorPxRadius, width, height, degToPxWidth, degToPxHeight, currentSelected, relativeProperties.outsideArea);
                             }
                         }
                     }
@@ -1076,7 +1077,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                         }
 
                         //show offset orbital position
-                        drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, true, false);
+                        drawOrbital(context, canvas, selectedId, selectedType, selectedName, selectedColor, selectedArea, alignCenterX, alignCenterY, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, indicatorPxRadius, width, height, degToPxWidth, degToPxHeight, true, false);
                     }
                     else
                     {
@@ -1166,7 +1167,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     if(!closeArea && haveLookAngle)
                     {
                         //draw arrow direction
-                        angleDirection = Globals.getAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
+                        angleDirection = Globals.getReverseAngleDirection(currentAzDeg, currentElDeg, usedLookAngle.azimuth, usedLookAngle.elevation);
                         Globals.drawBitmap(canvas, (outsideArea ? arrowDoubleDirection : arrowDirection), widthHalf, heightHalf, (arrowDirectionCentered ? 0 : ((CLOSE_AREA_DEGREES / 2) * (degToPxHeight / cameraZoomRatio))), (float)(angleDirection + 90), currentPaint);
                     }
                 }
@@ -1488,7 +1489,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     }
 
     //Draws orbital at the given position
-    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float centerX, float centerY, double azimuth, double elevation, float indicatorPxRadius, int canvasWidth, int canvasHeight, boolean isSelected, boolean outsideArea)
+    private void drawOrbital(Context context, Canvas canvas, int noradId, byte currentType, String currentName, int currentColor, Rect currentArea, float orbitalCenterX, float orbitalCenterY, double orbitalAzimuth, double orbitalElevation, double currentAzDeg, double currentElDeg, float indicatorPxRadius, int canvasWidth, int canvasHeight, float degToPxWidth, float degToPxHeight, boolean isSelected, boolean outsideArea)
     {
         boolean isStar = (currentType == Database.OrbitalType.Star);
         boolean isConstellation = (currentType == Database.OrbitalType.Constellation);
@@ -1515,24 +1516,24 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             switch(indicator)
             {
                 case Settings.Options.LensView.IndicatorType.Square:
-                    canvas.drawRect(centerX - drawPxRadius, centerY - drawPxRadius, centerX + drawPxRadius, centerY + drawPxRadius, currentPaint);
+                    canvas.drawRect(orbitalCenterX - drawPxRadius, orbitalCenterY - drawPxRadius, orbitalCenterX + drawPxRadius, orbitalCenterY + drawPxRadius, currentPaint);
                     break;
 
                 case Settings.Options.LensView.IndicatorType.Triangle:
-                    trianglePoints[0] = centerX - drawPxRadius;        //bottom left
-                    trianglePoints[1] = centerY + drawPxRadius;        //bottom left
-                    trianglePoints[2] = centerX + drawPxRadius;        //bottom right
-                    trianglePoints[3] = centerY + drawPxRadius;        //bottom right
+                    trianglePoints[0] = orbitalCenterX - drawPxRadius;        //bottom left
+                    trianglePoints[1] = orbitalCenterY + drawPxRadius;        //bottom left
+                    trianglePoints[2] = orbitalCenterX + drawPxRadius;        //bottom right
+                    trianglePoints[3] = orbitalCenterY + drawPxRadius;        //bottom right
 
-                    trianglePoints[4] = centerX + drawPxRadius;        //bottom right
-                    trianglePoints[5] = centerY + drawPxRadius;        //bottom right
-                    trianglePoints[6] = centerX;                       //top center
-                    trianglePoints[7] = centerY - drawPxRadius;        //top center
+                    trianglePoints[4] = orbitalCenterX + drawPxRadius;        //bottom right
+                    trianglePoints[5] = orbitalCenterY + drawPxRadius;        //bottom right
+                    trianglePoints[6] = orbitalCenterX;                       //top center
+                    trianglePoints[7] = orbitalCenterY - drawPxRadius;        //top center
 
-                    trianglePoints[8] = centerX;                       //top center
-                    trianglePoints[9] = centerY - drawPxRadius;        //top center
-                    trianglePoints[10] = centerX - drawPxRadius;       //bottom left
-                    trianglePoints[11] = centerY + drawPxRadius;       //bottom left
+                    trianglePoints[8] = orbitalCenterX;                       //top center
+                    trianglePoints[9] = orbitalCenterY - drawPxRadius;        //top center
+                    trianglePoints[10] = orbitalCenterX - drawPxRadius;       //bottom left
+                    trianglePoints[11] = orbitalCenterY + drawPxRadius;       //bottom left
                     canvas.drawLines(trianglePoints, currentPaint);
                     break;
 
@@ -1552,7 +1553,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                             }
 
                             //draw image
-                            canvas.drawBitmap(starIconImage, centerX - starHalfLength, centerY - starHalfLength, currentPaint);
+                            canvas.drawBitmap(starIconImage, orbitalCenterX - starHalfLength, orbitalCenterY - starHalfLength, currentPaint);
                         }
                         else
                         {
@@ -1568,13 +1569,19 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                                 double directionDelta = 0;
                                 Bitmap rotatedImage;
                                 IconImage currentOrbitalIcon = orbitalIcons.get(indexes[0]);
+                                RelativeLocationProperties relativeProperties;
 
                                 //use center and image
                                 indicatorIcon.copyData(currentOrbitalIcon);
                                 if(showIconIndicatorDirection && isSatellite)
                                 {
-                                    angleDirection = indicatorIcon.getAngleDirection(azimuth, elevation);
+                                    relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, indicatorIcon.lastAzimuth, indicatorIcon.lastElevation, canvasWidth, canvasHeight, degToPxWidth, degToPxHeight, 1.0f, false);
+                                    angleDirection = indicatorIcon.getAngleDirection(orbitalAzimuth, orbitalElevation, orbitalCenterX, orbitalCenterY, relativeProperties.azCenterPx, relativeProperties.elCenterPx);
                                     directionDelta = indicatorIcon.getAngleDirectionDelta();
+                                }
+                                if(angleDirection == Double.MAX_VALUE)
+                                {
+                                    angleDirection = 135;
                                 }
                                 if(directionDelta == Double.MAX_VALUE || Math.abs(directionDelta) >= 2.0)
                                 {
@@ -1605,7 +1612,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                             }
 
                             //draw image
-                            iconArea.set((int)(centerX - iconHalfLength), (int)(centerY - iconHalfLength), (int)(centerX + iconHalfLength), (int)(centerY + iconHalfLength));
+                            iconArea.set((int)(orbitalCenterX - iconHalfLength), (int)(orbitalCenterY - iconHalfLength), (int)(orbitalCenterX + iconHalfLength), (int)(orbitalCenterY + iconHalfLength));
                             if(outsideArea)
                             {
                                 iconScaledArea.set(iconArea.left + iconScaleOffset, iconArea.top + iconScaleOffset, iconArea.right - iconScaleOffset, iconArea.bottom - iconScaleOffset);
@@ -1622,7 +1629,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
 
                 default:
                 case Settings.Options.LensView.IndicatorType.Circle:
-                    canvas.drawCircle(centerX, centerY, drawPxRadius, currentPaint);
+                    canvas.drawCircle(orbitalCenterX, orbitalCenterY, drawPxRadius, currentPaint);
                     break;
             }
         }
@@ -1637,7 +1644,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 //get area
                 currentPaint.getTextBounds(currentName, 0, currentName.length(), currentArea);
             }
-            currentArea.offsetTo((int)(centerX - (currentArea.width() / 2f)), (int)((centerY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 5.0f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
+            currentArea.offsetTo((int)(orbitalCenterX - (currentArea.width() / 2f)), (int)((orbitalCenterY - (isConstellation ? 0 : indicatorPxRadius) - usedTextSize) + (usedTextOffset * (isStar ? 5.0f : indicator == Settings.Options.LensView.IndicatorType.Icon ? 2 : 1))));
             if(currentArea.left < 20)
             {
                 //keep within left

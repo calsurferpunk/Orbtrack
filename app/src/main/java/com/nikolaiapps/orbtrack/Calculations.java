@@ -2895,7 +2895,15 @@ public abstract class Calculations
         return(EarthRadiusKM * c);
     }
 
-    //Gets the bearing in degrees from 2 geodetic positions
+    //Gets the bearing in degrees from 2 positions
+    public static double getBearing(double startX, double startY, double endX, double endY)
+    {
+        double x = endX - startX;
+        double y = endY - startY;
+        double bearing = Math.atan2(y, x);
+
+        return(Math.toDegrees(bearing));
+    }
     public static double getBearing(GeodeticDataType start, GeodeticDataType end)
     {
         double startLat = Math.toRadians(start.latitude);

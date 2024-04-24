@@ -4951,8 +4951,8 @@ public abstract class Globals
         return(degreeDistance(start, end, 180));
     }
 
-    //Gets angle direction from start to end angles
-    public static double getAngleDirection(double startAzimuth, double startElevation, double endAzimuth, double endElevation)
+    //Gets reversed angle direction from start to end angles
+    public static double getReverseAngleDirection(double startAzimuth, double startElevation, double endAzimuth, double endElevation)
     {
         return(180 - Math.toDegrees(Math.atan2(Globals.degreeDistance(endElevation, startElevation), Globals.degreeDistance(endAzimuth, startAzimuth))));
     }

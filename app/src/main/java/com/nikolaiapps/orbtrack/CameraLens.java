@@ -726,6 +726,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             double periodMinutes;
             double timeAzDelta;
             double timeElDelta;
+            double timeAz2Delta;
+            double timeEl2Delta;
             double currentAzDelta;
             double currentElDelta;
             double currentAzPxDelta;
@@ -735,6 +737,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             Context context = getContext();
             Calculations.TopographicDataType selectedLookAngle = null;
             float[] centerPx;
+            float[] center2Px;
 
             //if camera area has been calculated
             if(useCameraDegWidth != Float.MAX_VALUE && useCameraDegHeight != Float.MAX_VALUE)
@@ -837,9 +840,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                                     int usedCurrentColor = Globals.getColor(currentSelected ? 150 : 20, currentColor);
                                     int timePathShapeColor = Globals.getColorAdded(10, usedCurrentColor);
 
-                                    //reset first and previous areas
+                                    //reset first and previous areas along with status
                                     firstArea.setEmpty();
                                     previousArea.setEmpty();
+                                    lastTimeIndex = -1;
 
                                     //set julian dates
                                     julianDateStart = currentTravel[0].julianDate;
@@ -959,11 +963,18 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                                                             CalculateViewsTask.OrbitalView lastTimeView = currentTravel[lastTimeIndex];
                                                             CalculateViewsTask.OrbitalView betweenTimeView = currentTravel[usedTimeIndex];
 
-                                                            //get direction, position deltas, and screen location
-                                                            angleDirection = Globals.getReverseAngleDirection(currentView.azimuth, currentView.elevation, lastTimeView.azimuth, lastTimeView.elevation);
+                                                            //get middle point deltas and screen location
                                                             timeAzDelta = Globals.degreeDistance(currentAzDeg, betweenTimeView.azimuth);
                                                             timeElDelta = Globals.degreeDistance(currentElDeg, betweenTimeView.elevation);
                                                             centerPx = getCorrectedScreenPoints(timeAzDelta, timeElDelta, betweenTimeView.elevation, width, height, degToPxWidth, degToPxHeight);
+
+                                                            //get last point deltas and screen location
+                                                            timeAz2Delta = Globals.degreeDistance(currentAzDeg, lastTimeView.azimuth);
+                                                            timeEl2Delta = Globals.degreeDistance(currentElDeg, lastTimeView.elevation);
+                                                            center2Px = getCorrectedScreenPoints(timeAz2Delta, timeEl2Delta, lastTimeView.elevation, width, height, degToPxWidth, degToPxHeight);
+
+                                                            //get direction
+                                                            angleDirection = Calculations.getBearing(centerPx[0], centerPx[1], center2Px[0], center2Px[1]);
 
                                                             //set relative center, rotation, and color
                                                             currentPaint.setColor(timePathShapeColor);

@@ -1295,6 +1295,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(currentSatellites);
     }
 
+    //Returns current lens satellites
+    public static Database.SatelliteData[] getLensSatellites(Context context)
+    {
+        return(viewLensNoradID != Integer.MAX_VALUE ? new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)} : currentSatellites);
+    }
+
     //Returns current old satellites
     private static ArrayList<Database.DatabaseSatellite> getOldSatellites()
     {
@@ -5092,6 +5098,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Starts/stops current view calculations
     private void setCurrentViewCalculations(boolean run, double julianDate)
     {
+        //get used lens satellites
+        Database.SatelliteData[] lensSatellites = (run ? getLensSatellites(this) : null);
+
         //if task was running
         if(currentViewAnglesTask != null)
         {
@@ -5100,13 +5109,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //if want to run and have items
-        if(run && Current.orbitalViews != null && Current.orbitalViews.length > 0)
+        if(run && lensSatellites != null && lensSatellites.length > 0)
         {
             //get action button
             final FloatingActionStateButton actionButton = getCurrentActionButton();
 
             //create and run task
-            currentViewAnglesTask = Current.calculateViews(this, observer, julianDate, julianDate + 1, 0.2 / 24, new CalculateViewsTask.OnProgressChangedListener()
+            currentViewAnglesTask = Current.calculateViews(this, lensSatellites, observer, julianDate, julianDate + 1, 0.2 / 24, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(final int progressType, final int satelliteIndex, CalculateService.ViewListItem item, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
@@ -5134,6 +5143,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             break;
 
                         case Globals.ProgressType.Success:
+                        case Globals.ProgressType.Failed:
                             //set runnable
                             progressRunnable = new Runnable()
                             {
@@ -5141,7 +5151,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 public synchronized void run()
                                 {
                                     CameraLens cameraView = Current.getCameraView();
-                                    CalculateViewsTask.OrbitalView[] views = pathPoints.toArray(new CalculateViewsTask.OrbitalView[0]);
+                                    CalculateViewsTask.OrbitalView[] views = (pathPoints != null ? pathPoints.toArray(new CalculateViewsTask.OrbitalView[0]) : null);
 
                                     //if camera view still exists
                                     if(cameraView != null)

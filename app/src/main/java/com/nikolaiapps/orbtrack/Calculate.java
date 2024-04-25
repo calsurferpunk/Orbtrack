@@ -152,7 +152,7 @@ public abstract class Calculate
 
             public Item(int index, int viewCount, Calculations.SatelliteObjectType satellite)
             {
-                super(index, satellite);
+                super(index, satellite, true);
 
                 int viewIndex;
                 int usedViewCount = Math.max(viewCount, 1);

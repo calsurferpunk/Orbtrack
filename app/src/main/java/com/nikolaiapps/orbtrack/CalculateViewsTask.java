@@ -298,24 +298,29 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         {
             //get current item and path
             CalculateService.ViewListItem currentItem = viewItems[index];
+            boolean currentInFilter = currentItem.inFilter;
             double currentDayIncrement = (currentItem.getSatelliteNum() <= Universe.IDs.Polaris ? largeDayIncrement : dayIncrement);
             boolean skipAutoSize = (currentDayIncrement != dayIncrement);
-            ArrayList<OrbitalView> pathViews;
+            ArrayList<OrbitalView> pathViews = null;
 
             //update progress
             publishProgress(index, Globals.ProgressType.Started);
 
-            //get views
-            pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement, limitTravel, adjustTime, hideSlow, getTimeString);
-            length = pathViews.size();
-            if(autoSize && !skipAutoSize && (!hideSlow || length > 1) && length < 100)
+            //if current item in filter
+            if(currentInFilter)
             {
-                //get a more accurate path
-                pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement / 5, limitTravel, adjustTime, false, getTimeString);
+                //get views
+                pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement, limitTravel, adjustTime, hideSlow, getTimeString);
+                length = pathViews.size();
+                if(autoSize && !skipAutoSize && (!hideSlow || length > 1) && length < 100)
+                {
+                    //get a more accurate path
+                    pathViews = getViews(context, currentItem, index, savedViewItems, observer, julianDateStart, julianDateEnd, currentDayIncrement / 5, limitTravel, adjustTime, false, getTimeString);
+                }
             }
 
             //update status
-            currentItem.viewCalculateFinished = !this.isCancelled();
+            currentItem.viewCalculateFinished = (!this.isCancelled() && currentInFilter);
 
             //update progress
             onProgressChanged((currentItem.viewCalculateFinished ? Globals.ProgressType.Success : Globals.ProgressType.Failed), index, currentItem, pathViews);

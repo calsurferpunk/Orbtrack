@@ -1032,7 +1032,7 @@ public abstract class Current
 
             public Item(Context context, int index, Database.SatelliteData currentSatellite, int divisionCount)
             {
-                super(index, (currentSatellite != null ? currentSatellite.satellite : null));
+                super(index, (currentSatellite != null ? currentSatellite.satellite : null), (currentSatellite != null));
 
                 boolean haveSatellite = (currentSatellite != null);
 
@@ -1415,14 +1415,12 @@ public abstract class Current
             boolean createMapView = (onCombined && subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
             boolean mapMultiOrbitals = (createMapView && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
             boolean mapSingleOrbital = (createMapView && MainActivity.mapViewNoradID != Integer.MAX_VALUE);
-            boolean lensMultiOrbitals = (createLens && MainActivity.viewLensNoradID == Integer.MAX_VALUE);
             boolean lensSingleOrbital = (createLens && MainActivity.viewLensNoradID != Integer.MAX_VALUE);
             View newView = null;
             Context context = this.getContext();
             final Selectable.ListBaseAdapter listAdapter;
             int[] orbitalTypeCount;
             Database.SatelliteData[] satellites = MainActivity.getSatellites();
-            Database.SatelliteData[] usedSatellites;
             Database.SatelliteData[] filteredSatellites;
 
             //apply any filter and update status
@@ -1461,14 +1459,8 @@ public abstract class Current
             //if need to create lens
             if(createLens)
             {
-                //get used satellites
-                usedSatellites = (lensMultiOrbitals ? satellites : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)});
-
-                //set orbital views
-                setOrbitalViews(usedSatellites);
-
                 //create view
-                newView = onCreateLensView(this, inflater, container, usedSatellites, savedInstanceState, showingStars, showingConstellations);
+                newView = onCreateLensView(this, inflater, container, MainActivity.getLensSatellites(context), savedInstanceState, showingStars, showingConstellations);
             }
             //else if need to create map view
             else if(createMapView)
@@ -1896,7 +1888,6 @@ public abstract class Current
     public static boolean showingConstellations = false;
     public static long mapMillisecondsPlayBar = 0;
     public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
-    public static Calculations.SatelliteObjectType[] orbitalViews = new Calculations.SatelliteObjectType[0];
 
     private static boolean lensShowHorizon = false;
     private static boolean lensShowToolbars = true;
@@ -1940,17 +1931,20 @@ public abstract class Current
     }
 
     //Begin calculating view information
-    public static CalculateViewsTask calculateViews(Context context, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
+    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] orbitals, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
         int index;
         CalculateViewsTask task;
-        CalculateService.ViewListItem[] viewItems = new CalculateService.ViewListItem[orbitalViews != null ? orbitalViews.length : 0];
+        CalculateService.ViewListItem[] viewItems = new CalculateService.ViewListItem[orbitals != null ? orbitals.length : 0];
 
         //go through each item
         for(index = 0; index < viewItems.length; index++)
         {
+            //remember current orbital
+            Database.SatelliteData currentOrbital = orbitals[index];
+
             //set item
-            viewItems[index] = new CalculateService.ViewListItem(0, orbitalViews[index]);
+            viewItems[index] = new CalculateService.ViewListItem(0, currentOrbital.satellite, currentOrbital.getInFilter());
         }
 
         //start calculating for start and end dates with given increment
@@ -1959,20 +1953,6 @@ public abstract class Current
 
         //return task
         return(task);
-    }
-
-    //Sets all orbital views
-    private static void setOrbitalViews(Database.SatelliteData[] satellites)
-    {
-        int index;
-
-        //get views
-        orbitalViews = new Calculations.SatelliteObjectType[satellites.length];
-        for(index = 0; index < satellites.length; index++)
-        {
-            //set view
-            orbitalViews[index] = new Calculations.SatelliteObjectType(satellites[index].satellite);
-        }
     }
 
     //Select orbital with the given ID

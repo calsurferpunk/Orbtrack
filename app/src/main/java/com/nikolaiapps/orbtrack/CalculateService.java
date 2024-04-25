@@ -100,21 +100,23 @@ public class CalculateService extends NotifyService
     //View list item
     public static class ViewListItem extends Selectable.ListDisplayItem
     {
+        public boolean inFilter;
         public boolean viewCalculateFinished;
         public double julianDate;
         public Calculations.SatelliteObjectType satellite;
 
-        public ViewListItem(int index, Calculations.SatelliteObjectType satellite)
+        public ViewListItem(int index, Calculations.SatelliteObjectType satellite, boolean inFilter)
         {
             super(satellite != null ? satellite.getSatelliteNum() : Integer.MAX_VALUE, index);
 
+            this.inFilter = inFilter;
             this.viewCalculateFinished = false;
             this.julianDate = Double.MAX_VALUE;
             this.satellite = satellite;
         }
         public ViewListItem(Database.SatelliteData satelliteData)
         {
-            this(0, (satelliteData != null ? satelliteData.satellite : null));
+            this(0, (satelliteData != null ? satelliteData.satellite : null), true);
         }
 
         public static ViewListItem[] getSatellites(Context context, ArrayList<Integer> noraIds)

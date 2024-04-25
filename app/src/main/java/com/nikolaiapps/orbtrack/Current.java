@@ -1934,17 +1934,19 @@ public abstract class Current
     public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] orbitals, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
         int index;
+        boolean hideConstellationStarPaths = Settings.getLensHideConstellationStarPaths(context);
         CalculateViewsTask task;
         CalculateService.ViewListItem[] viewItems = new CalculateService.ViewListItem[orbitals != null ? orbitals.length : 0];
 
         //go through each item
         for(index = 0; index < viewItems.length; index++)
         {
-            //remember current orbital
+            //remember current orbital and type
             Database.SatelliteData currentOrbital = orbitals[index];
+            byte orbitalType = currentOrbital.getOrbitalType();
 
             //set item
-            viewItems[index] = new CalculateService.ViewListItem(0, currentOrbital.satellite, currentOrbital.getInFilter());
+            viewItems[index] = new CalculateService.ViewListItem(0, currentOrbital.satellite, (currentOrbital.getInFilter() && (orbitalType != Database.OrbitalType.Star || !showingConstellations || !hideConstellationStarPaths)));
         }
 
         //start calculating for start and end dates with given increment

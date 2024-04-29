@@ -118,6 +118,8 @@ public abstract class Settings
         static final String LensUseHorizon = "LensUseHorizon";
         static final String LensStarMagnitude = "LensStarMagnitude";
         static final String LensUseCamera = "LensUseCamera";
+        static final String LensUseZoom = "LensUseZoom";
+        static final String LensUseExposure = "LensUseExposure";
         static final String LensRotate = "LensRotate";
         static final String LensUseAutoWidth = "LensUseAutoWidth";
         static final String LensUseAutoHeight = "LensUseAutoHeight";
@@ -2027,6 +2029,8 @@ public abstract class Settings
             case PreferenceName.LensFirstRun:
             case PreferenceName.LensFirstCalibrate:
             case PreferenceName.LensUseCamera:
+            case PreferenceName.LensUseZoom:
+            case PreferenceName.LensUseExposure:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
             case PreferenceName.LensHideConstellationStarPaths:
@@ -2705,6 +2709,18 @@ public abstract class Settings
     public static boolean getLensUseCamera(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.LensUseCamera));
+    }
+
+    //Gets lens allowing zoom use
+    public static boolean getLensUseZoom(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensUseZoom));
+    }
+
+    //Gets lens allowing exposure use
+    public static boolean getLensUseExposure(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensUseExposure));
     }
 
     //Gets lens azimuth user offset

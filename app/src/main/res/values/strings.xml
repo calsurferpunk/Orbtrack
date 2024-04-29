@@ -200,7 +200,9 @@
     <string name="desc_update_rate_lens">Rate to update lens display</string>
     <string name="desc_update_rate_list">Rate to update list displays</string>
     <string name="desc_use_camera">Look through camera while viewing</string>
+    <string name="desc_use_exposure">Allow setting exposure for compatible cameras</string>
     <string name="desc_use_icon_tint">Use icon tint</string>
+    <string name="desc_use_zoom">Allow zooming if hardware exists</string>
     <string name="desc_widgets_add">Add widgets to your home screen to edit them here</string>
     <string name="text_address_decoder_error">Address decoder unavailable</string>
     <string name="text_0">0</string>
@@ -654,8 +656,10 @@
     <string name="title_updating">Updating</string>
     <string name="title_uranus">Uranus</string>
     <string name="title_use_camera">Use Camera</string>
+    <string name="title_use_exposure">Use Exposure</string>
     <string name="title_use_legacy_tle_format">Use Legacy TLE Format</string>
     <string name="title_use_tint">Use Tint</string>
+    <string name="title_use_zoom">Use Zoom</string>
     <string name="title_username">Username</string>
     <string name="title_venus">Venus</string>
     <string name="title_very_fast">Very Fast</string>

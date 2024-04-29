@@ -65,6 +65,17 @@
             app:trackColor="@color/gray"
             android:visibility="gone"/>
 
+        <com.google.android.material.slider.Slider
+            android:id="@+id/Lens_Exposure_Bar"
+            android:layout_width="260dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center|bottom"
+            android:layout_marginBottom="26dp"
+            android:alpha="0.3"
+            app:thumbColor="@color/white"
+            app:trackColor="@color/gray"
+            android:visibility="visible"/>
+
         <LinearLayout
             android:id="@+id/Lens_Floating_Button_Layout"
             android:layout_width="wrap_content"
@@ -136,13 +147,17 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/Lens_Zoom_Text"
+            android:id="@+id/Lens_Slider_Text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="5dp"
-            android:layout_marginBottom="64dp"
-            android:layout_gravity="center|bottom"
+            android:drawablePadding="5dp"
+            android:gravity="center"
+            android:alpha="0.7"
+            android:layout_gravity="center"
+            android:textAlignment="center"
             android:textColor="?attr/colorAccentLightest"
+            android:textSize="12sp"
             android:background="?attr/colorAccentVariant"
             android:visibility="gone"/>
     </FrameLayout>

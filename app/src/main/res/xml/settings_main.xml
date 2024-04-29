@@ -394,6 +394,16 @@
                             android:key="LensRotate"
                             android:summary="@string/desc_force_rotate"/>
 
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_use_zoom"
+                            android:key="LensUseZoom"
+                            android:summary="@string/desc_use_zoom"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_use_exposure"
+                            android:key="LensUseExposure"
+                            android:summary="@string/desc_use_exposure"/>
+
                         <com.nikolaiapps.orbtrack.SwitchTextPreference
                             app:titleText="@string/title_auto_width"
                             app:suffixText="@string/title_degs"

@@ -26,6 +26,7 @@ import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.util.DisplayMetrics;
+import android.util.Range;
 import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -46,6 +47,7 @@ import androidx.camera.core.Camera;
 import androidx.camera.core.CameraControl;
 import androidx.camera.core.CameraInfo;
 import androidx.camera.core.CameraSelector;
+import androidx.camera.core.ExposureState;
 import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.Preview;
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
@@ -562,9 +564,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     public final boolean hideDistantPathTimes;
     public final boolean hideConstellationStarPaths;
     public TextView helpText;
-    public TextView zoomText;
+    public TextView sliderText;
     public PlayBar playBar;
     public Slider zoomBar;
+    public Slider exposureBar;
     public FloatingActionStateButtonMenu settingsMenu;
 
     private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
@@ -596,6 +599,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private int calibrateIndex;
     private int selectedNoradId;
     private int selectedOrbitalIndex;
+    private final boolean allowZoom;
+    private final boolean allowExposure;
     private boolean compassBad;
     private boolean compassHadBad;
     private boolean haveZoomValues;
@@ -633,6 +638,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private float useCameraDegHeight;
     private float cameraHardwareDegWidth;
     private float cameraHardwareDegHeight;
+    private float exposureIncrement;
     private final float indicatorPxRadius;
     private final double defaultPathJulianDelta;
     private final String xString;
@@ -651,6 +657,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private final Bitmap arrowDirection;
     private final Bitmap arrowDoubleDirection;
     private final Bitmap compassDirection;
+    private final Drawable zoomImage;
+    private final Drawable exposureImage;
     private Button calibrateOkayButton;
     private AlignmentAngle alignCenter;
     private AlignmentAngle alignBottomLeft;
@@ -661,6 +669,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private OnReadyListener readyListener;
     private OnStopCalibrationListener stopCalibrationListener;
     private ScaleGestureDetector scaleDetector;
+    private Range<Integer> exposureRange;
     private final ArrayList<IconImage> orbitalIcons;
     private final ArrayList<ParentOrbital> parentOrbitals;
     private Rect[] currentOrbitalAreas;
@@ -694,7 +703,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             int index2;
             int currentId;
             int travelLength;
-            int lastTimeIndex = -1;
+            int lastTimeIndex;
             int lastTravelIndex;
             int usedTimeIndex;
             int selectedColor = Color.WHITE;
@@ -1216,6 +1225,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         possibleAlpha = constellationAlpha + 100;
         constellationSelectedAlpha = (possibleAlpha > 200 ? Math.max(200, constellationAlpha) : Math.max(120, possibleAlpha));
         showPaths = showCalibration = compassBad = compassHadBad = false;
+        allowZoom = Settings.getLensUseZoom(context);
+        allowExposure = Settings.getLensUseExposure(context);
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
         hideDistantPathTimes = Settings.getLensHideDistantPathTimes(context);
@@ -1277,6 +1288,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         this.addView(currentCameraOverlay);
 
         starIconImage = null;
+        zoomImage = Globals.getDrawable(context, R.drawable.ic_search_white, R.color.white);
+        exposureImage = Globals.getDrawable(context, R.drawable.ic_sun_white, R.color.white);
         arrowDirectionCentered = Settings.getLensDirectionCentered(context);
         arrowDirection = Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawable(context, R.drawable.ic_arrow_up_black, R.color.white), Globals.getDrawable(context, R.drawable.ic_arrow_up_black, R.color.black)));
         arrowDoubleDirection = Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawable(context, R.drawable.ic_arrow_up_double_black, R.color.white), Globals.getDrawable(context, R.drawable.ic_arrow_up_double_black, R.color.black)));
@@ -1331,6 +1344,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         showingConstellations = needConstellations;
 
         haveZoomValues = false;
+        exposureIncrement = 1.0f;
+        exposureRange = null;
         orbitalIcons = new ArrayList<>(0);
         parentOrbitals = new ArrayList<>(0);
         currentOrbitals = (selectedOrbitals != null ? selectedOrbitals : new Database.SatelliteData[0]);
@@ -1386,8 +1401,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         float compassHalfHeight = compassHeight / 2.0f;
         CameraControl cameraControls = (currentCamera != null ? currentCamera.getCameraControl() : null);
 
-        //if multi touch, have zoom values, and scale detection is set
-        if(pointerCount > 1 && haveZoomValues && scaleDetector != null)
+        //if multi touch, allowing zoom, have zoom values, and scale detection is set
+        if(pointerCount > 1 && allowZoom && haveZoomValues && scaleDetector != null)
         {
             //stop focus and handle zoom scaling
             handleFocus(event, cameraControls, false);
@@ -1422,13 +1437,114 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         return(super.performClick());
     }
 
+    //Shows disappearing slider text
+    private void setSliderText(Drawable imageValue, double previousValue, double currentValue, double nextValue)
+    {
+        StringBuilder text = new StringBuilder();
+
+        //if text exists
+        if(sliderText != null)
+        {
+            //update text and hide shortly afterwards
+            sliderText.setCompoundDrawablesRelativeWithIntrinsicBounds(imageValue, null, null, null);
+            sliderText.removeCallbacks(null);
+            text.append("<small>");
+            if(previousValue != Double.MAX_VALUE)
+            {
+                text.append(Globals.getNumberString(previousValue, 1));
+                text.append(xString);
+            }
+            else
+            {
+                text.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+            }
+            text.append("</small><b><big>&nbsp;&nbsp;|&nbsp;&nbsp;");
+            text.append(Globals.getNumberString(currentValue, 1));
+            text.append(xString);
+            text.append("&nbsp;&nbsp;|&nbsp;&nbsp;</big></b><small>");
+            if(nextValue != Double.MAX_VALUE)
+            {
+                text.append(Globals.getNumberString(nextValue, 1));
+                text.append(xString);
+            }
+            else
+            {
+                text.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
+            }
+            text.append("</small>");
+            sliderText.setText(Globals.stringToHtml(text.toString()));
+            sliderText.setVisibility(View.VISIBLE);
+            sliderText.postDelayed(new Runnable()
+            {
+                @Override
+                public void run()
+                {
+                    sliderText.setVisibility(View.GONE);
+                }
+            }, 3000);
+        }
+    }
+
+    //Sets exposure
+    public void setExposure(int exposureIndex, CameraControl controls, boolean showText)
+    {
+        int nextIndex;
+        int previousIndex;
+        int minExposure;
+        int maxExposure;
+
+        //if allowing exposure, controls exist, and have exposure values
+        if(allowExposure && controls != null && exposureRange != null)
+        {
+            //get min and max values
+            minExposure = exposureRange.getLower();
+            maxExposure = exposureRange.getUpper();
+
+            //keep exposure within range
+            if(exposureIndex < minExposure)
+            {
+                exposureIndex = minExposure;
+            }
+            else if(exposureIndex > maxExposure)
+            {
+                exposureIndex = maxExposure;
+            }
+
+            //remember previous and next indexes
+            previousIndex = exposureIndex - 1;
+            nextIndex = exposureIndex + 1;
+
+            //if using exposure
+            if(exposureRange.contains(exposureIndex))
+            {
+                //set exposure
+                controls.setExposureCompensationIndex(exposureIndex);
+
+                //if exposure bar exists
+                if(exposureBar != null)
+                {
+                    //update value
+                    exposureBar.setValue(exposureIndex);
+                }
+    
+                //if showing text
+                if(showText)
+                {
+                    //set text
+                    setSliderText(exposureImage, (previousIndex < minExposure ? Double.MAX_VALUE : (previousIndex * exposureIncrement)), exposureIndex * exposureIncrement, (nextIndex > maxExposure ? Double.MAX_VALUE : (nextIndex * exposureIncrement)));
+                }
+            }
+        }
+    }
+
     //Sets zoom
     private void setZoom(float zoom, CameraControl controls, boolean showText)
     {
-        String textValue;
+        float nextZoom;
+        float previousZoom;
 
-        //if controls exist and have zoom values
-        if(controls != null && haveZoomValues)
+        //if allowing zoom, controls exist, and have zoom values
+        if(allowZoom && controls != null && haveZoomValues)
         {
             //keep zoom within range
             if(zoom > cameraZoomMax)
@@ -1439,6 +1555,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             {
                 zoom = cameraZoomMin;
             }
+
+            //remember previous and next zooms
+            previousZoom = zoom - 1;
+            nextZoom = zoom + 1;
 
             //set zoom
             cameraZoomRatio = zoom;
@@ -1451,22 +1571,11 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 zoomBar.setValue(zoom);
             }
 
-            //if zoom text exists and showing it
-            if(zoomText != null & showText)
+            //if showing text
+            if(showText)
             {
-                //update text and then hide shortly after
-                textValue = Globals.getNumberString(zoom, 1) + xString;
-                zoomText.removeCallbacks(null);
-                zoomText.setVisibility(View.VISIBLE);
-                zoomText.setText(textValue);
-                zoomText.postDelayed(new Runnable()
-                {
-                    @Override
-                    public void run()
-                    {
-                        zoomText.setVisibility(View.GONE);
-                    }
-                }, 3000);
+                //set text
+                setSliderText(zoomImage, (previousZoom < cameraZoomMin ? Double.MAX_VALUE : previousZoom), zoom, (nextZoom > cameraZoomMax ? Double.MAX_VALUE : nextZoom));
             }
         }
     }
@@ -2235,7 +2344,13 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     //Returns if able to zoom
     public boolean canZoom()
     {
-        return(haveZoomValues);
+        return(allowZoom && haveZoomValues);
+    }
+
+    //Returns if can set exposure
+    public boolean canSetExposure()
+    {
+        return(allowExposure && exposureRange != null);
     }
 
     //Returns if any valid orbital is selected
@@ -2447,6 +2562,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         boolean cameraRotate = Settings.getLensRotate(context);
         boolean useAutoWidth = Settings.getLensAutoWidth(context);
         boolean useAutoHeight = Settings.getLensAutoHeight(context);
+        int exposureIndex = 0;
         float maxFocus;
         float userDegWidth = Settings.getLensWidth(context);
         float userDegHeight = Settings.getLensHeight(context);
@@ -2458,6 +2574,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         CameraSelector selector;
         CameraCharacteristics characteristics;
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
+        ExposureState exposure;
         ZoomState zoomState;
         float[] focalLengths;
 
@@ -2474,6 +2591,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         info = currentCamera.getCameraInfo();
         controls = currentCamera.getCameraControl();
         id = Camera2CameraInfo.from(info).getCameraId();
+        exposure = info.getExposureState();
         try
         {
             //get characteristics
@@ -2499,6 +2617,40 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         //set orientation
         preview.setTargetRotation(getRotation(cameraRotate ? ((orientation + 180) % 360) : orientation));
 
+        //setup exposure
+        exposureRange = null;
+        exposureIncrement = 1.0f;
+        if(exposure.isExposureCompensationSupported())
+        {
+            exposureIndex = exposure.getExposureCompensationIndex();
+            exposureRange = exposure.getExposureCompensationRange();
+            exposureIncrement = exposure.getExposureCompensationStep().floatValue();
+        }
+        if(exposureBar != null)
+        {
+            if(exposureRange != null)
+            {
+                exposureBar.setValueFrom(exposureRange.getLower());
+                exposureBar.setValueTo(exposureRange.getUpper());
+                exposureBar.setValue(exposureIndex);
+                exposureBar.setLabelBehavior(LabelFormatter.LABEL_GONE);
+                exposureBar.addOnChangeListener(new Slider.OnChangeListener()
+                {
+                    @Override
+                    public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
+                    {
+                        //if from the user
+                        if(fromUser)
+                        {
+                            //set exposure
+                            setExposure((int)value, controls, true);
+                        }
+                    }
+                });
+            }
+            exposureBar.setVisibility(allowExposure && exposureRange != null ? View.VISIBLE : View.GONE);
+        }
+
         //setup zoom
         zoomState = info.getZoomState().getValue();
         if(zoomState != null)
@@ -2522,7 +2674,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 cameraZoomMax = 1.0f;
             }
         }
-        scaleDetector = (haveZoomValues ? new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener()
+        scaleDetector = (allowZoom && haveZoomValues ? new ScaleGestureDetector(context, new ScaleGestureDetector.SimpleOnScaleGestureListener()
         {
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector)
@@ -2559,7 +2711,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     }
                 });
             }
-            zoomBar.setVisibility(haveZoomValues ? View.VISIBLE : View.GONE);
+            zoomBar.setVisibility(allowZoom && haveZoomValues ? View.VISIBLE : View.GONE);
         }
         setZoom(1.0f, controls, false);
     }

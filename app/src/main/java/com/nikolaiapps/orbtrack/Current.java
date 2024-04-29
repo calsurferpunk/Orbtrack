@@ -2027,7 +2027,7 @@ public abstract class Current
     }
 
     //Setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, Slider zoomBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, Slider zoomBar, Slider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
     {
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
@@ -2187,9 +2187,16 @@ public abstract class Current
                     {
                         searchListLayout.setVisibility(toolVisibility);
                     }
-                    if(zoomBar != null && cameraView != null && cameraView.canZoom())
+                    if(cameraView != null)
                     {
-                        zoomBar.setVisibility(toolVisibility);
+                        if(zoomBar != null)
+                        {
+                            zoomBar.setVisibility(cameraView.canZoom() ? toolVisibility : View.GONE);
+                        }
+                        if(exposureBar != null)
+                        {
+                            exposureBar.setVisibility(cameraView.canSetExposure() ? toolVisibility : View.GONE);
+                        }
                     }
                     if(pagePlayBar != null)
                     {
@@ -2328,7 +2335,8 @@ public abstract class Current
         cameraView.pathDivisions = pathDivisions;
         cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
         cameraView.zoomBar = rootView.findViewById(R.id.Lens_Zoom_Bar);
-        cameraView.zoomText = rootView.findViewById(R.id.Lens_Zoom_Text);
+        cameraView.exposureBar = rootView.findViewById(R.id.Lens_Exposure_Bar);
+        cameraView.sliderText = rootView.findViewById(R.id.Lens_Slider_Text);
         cameraView.showPaths = (lensShowPaths || useSaved);         //if showing paths or using a saved path
         lensLayout.addView(cameraView, 0);                          //add before menu
 
@@ -2337,7 +2345,7 @@ public abstract class Current
         searchButton = rootView.findViewById(R.id.Lens_Search_Button);
         searchText = rootView.findViewById(R.id.Lens_Search_Text);
         currentSearchTextReference = new WeakReference<>(searchText);
-        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, cameraView.zoomBar, cameraView.playBar, selectedOrbitals, true);
+        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, cameraView.zoomBar, cameraView.exposureBar, cameraView.playBar, selectedOrbitals, true);
         if(showToolbarsButton != null)
         {
             //toggle displays
@@ -3499,7 +3507,7 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, null, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
 
         //if map info text exists and not using background
         if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))

@@ -200,7 +200,9 @@
     <string name="desc_update_rate_lens">Tasa para actualizar la visualización de la lente</string>
     <string name="desc_update_rate_list">Tasa para actualizar la visualización de la lista</string>
     <string name="desc_use_camera">Mire a través de la cámara mientras mira</string>
+    <string name="desc_use_exposure">Permitir configurar la exposición para cámaras compatibles</string>
     <string name="desc_use_icon_tint">Usar tinte de icono</string>
+    <string name="desc_use_zoom">Permitir el zoom si existe hardware</string>
     <string name="desc_widgets_add">Agregar widgets a su pantalla de inicio para editarlos aquí</string>
     <string name="text_address_decoder_error">Decodificador de dirección no disponible</string>
     <string name="text_0">0</string>
@@ -654,8 +656,10 @@
     <string name="title_updating">Actualización</string>
     <string name="title_uranus">Urano</string>
     <string name="title_use_camera">Usa Cámara</string>
+    <string name="title_use_exposure">Usar Exposición</string>
     <string name="title_use_legacy_tle_format">Utilice Formato TLE Heredado</string>
     <string name="title_use_tint">Usar Tinte</string>
+    <string name="title_use_zoom">Usar Zoom</string>
     <string name="title_username">Usuario</string>
     <string name="title_venus">Venus</string>
     <string name="title_very_fast">Muy Rápido</string>

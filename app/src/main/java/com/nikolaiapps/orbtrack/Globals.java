@@ -82,6 +82,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.os.LocaleList;
 import android.provider.OpenableColumns;
 import android.text.Html;
+import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.TextUtils;
 import android.text.format.DateUtils;
@@ -5410,20 +5411,18 @@ public abstract class Globals
         return(list);
     }
 
+    //Converts a text string into an HTML string
+    public static Spanned stringToHtml(String stringValue)
+    {
+        return((Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(stringValue, Html.FROM_HTML_MODE_LEGACY) : Html.fromHtml(stringValue)));
+    }
+
     //Decodes html special characters
     private static String decodeHtml(String htmlString)
     {
         String result;
 
-        if(Build.VERSION.SDK_INT >= 24)
-        {
-            result = Html.fromHtml(Html.fromHtml(htmlString, Html.FROM_HTML_MODE_LEGACY).toString(), Html.FROM_HTML_MODE_LEGACY).toString();
-        }
-        else
-        {
-            result = Html.fromHtml(Html.fromHtml(htmlString).toString()).toString();
-        }
-
+        result = Html.fromHtml(stringToHtml(htmlString).toString()).toString();
         return(result.replace("< ", "<").replace(" >", ">"));
     }
 

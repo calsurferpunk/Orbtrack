@@ -211,6 +211,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case ScreenKey.LensViewLens:
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
+                        SwitchPreference zoomSwitch = this.findPreference(Settings.PreferenceName.LensUseZoom);
+                        SwitchPreference exposureSwitch = this.findPreference(Settings.PreferenceName.LensUseExposure);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
                         SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
                         SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
@@ -218,6 +220,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(useCameraSwitch);
                         setupSwitch(rotateSwitch);
+                        setupSwitch(zoomSwitch);
+                        setupSwitch(exposureSwitch);
                         setupSwitchText(lensWidthSwitch);
                         setupSwitchText(lensHeightSwitch);
                         setupSwitchText(lensAzimuthOffsetSwitch);
@@ -1608,6 +1612,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensHorizonColor:
                         case Settings.PreferenceName.LensUseHorizon:
                         case Settings.PreferenceName.LensUseCamera:
+                        case Settings.PreferenceName.LensUseZoom:
+                        case Settings.PreferenceName.LensUseExposure:
                         case Settings.PreferenceName.LensRotate:
                         case Settings.PreferenceName.LensUseAutoWidth:
                         case Settings.PreferenceName.LensUseAutoHeight:

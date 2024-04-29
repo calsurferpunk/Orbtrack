@@ -126,6 +126,8 @@ public abstract class Settings
         static final String LensAzimuthUserOffset = "LensAzimuthUserOffset";
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
+        static final String LensWidthHardware = "LensWidthHardware";
+        static final String LensHeightHardware = "LensHeightHardware";
         static final String LensShowToolbars = "LensShowToolbars";
         static final String LensPathLabelType = "LensPathLabelType";
         static final String LensHideConstellationStarPaths = "LensHideConstellationStarPaths";
@@ -2250,6 +2252,10 @@ public abstract class Settings
             case PreferenceName.LensHeight:
                 return(65.789f);
 
+            case PreferenceName.LensWidthHardware:
+            case PreferenceName.LensHeightHardware:
+                return(45.0f);
+
             case PreferenceName.MapSpeedScale + SubPreferenceName.Globe:
             case PreferenceName.MapSpeedScale + SubPreferenceName.Map:
                 return(0.5f);
@@ -2763,6 +2769,30 @@ public abstract class Settings
     public static void setLensWidth(Context context, float width)
     {
         setPreferenceFloat(context, PreferenceName.LensWidth, width);
+    }
+
+    //Gets lens hardware width
+    public static float getLensWidthHardware(Context context)
+    {
+        return(getPreferenceFloat(context, PreferenceName.LensWidthHardware));
+    }
+
+    //Sets lens hardware width
+    public static void setLensWidthHardware(Context context, float width)
+    {
+        setPreferenceFloat(context, PreferenceName.LensWidthHardware, width);
+    }
+
+    //Gets lens hardware height
+    public static float getLensHeightHardware(Context context)
+    {
+        return(getPreferenceFloat(context, PreferenceName.LensHeightHardware));
+    }
+
+    //Sets lens hardware height
+    public static void setLensHeightHardware(Context context, float height)
+    {
+        setPreferenceFloat(context, PreferenceName.LensHeightHardware, height);
     }
 
     //Gets lens using auto height

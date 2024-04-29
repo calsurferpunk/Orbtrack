@@ -2603,6 +2603,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             //get hardware degree width and height
             cameraHardwareDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
             cameraHardwareDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
+
+            //save hardware degree width and height
+            Settings.setLensWidthHardware(context, cameraHardwareDegWidth);
+            Settings.setLensHeightHardware(context, cameraHardwareDegHeight);
         }
         catch(Exception ex)
         {

@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.hardware.Camera;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Spanned;
@@ -977,17 +976,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case Settings.PreferenceName.LensHeight:
                         boolean isWidth = preferenceKey.equals(Settings.PreferenceName.LensWidth);
 
-                        //get lens width and height
-                        try
-                        {
-                            Camera.Parameters cameraParams;
-                            cameraParams = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK).getParameters();
-                            enabledValue = (isWidth ? cameraParams.getHorizontalViewAngle() : cameraParams.getVerticalViewAngle());
-                        }
-                        catch(Exception ex)
-                        {
-                            enabledValue = 45;
-                        }
+                        //get saved lens width and height
+                        enabledValue = (isWidth ? Settings.getLensWidthHardware(context) : Settings.getLensHeightHardware(context));
                         disabledValue = (isWidth ? Settings.getLensWidth(context) : Settings.getLensHeight(context));
 
                         //set values

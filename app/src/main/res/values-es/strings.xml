@@ -133,6 +133,7 @@
     <string name="abbrev_west_south_west">OSO</string>
     <string name="desc_allow_rotation">Permitir movimiento sin forzar posición vertical</string>
     <string name="desc_altitude_source">Detección de altitud de ubicación</string>
+    <string name="desc_arrow_size">Tamaño de la flecha que indica la dirección orbital</string>
     <string name="desc_ar_warning">Si no es un adulto, permanezca cerca de un adulto por seguridad, especialmente por la noche.\n\nEsté atento a su entorno y asegúrese de mirar por donde camina.</string>
     <string name="desc_auto_height">Recuperar altura del hardware</string>
     <string name="desc_auto_width">Recuperar ancho del hardware</string>
@@ -283,6 +284,7 @@
     <string name="title_any">Alguna</string>
     <string name="title_apogee">Apogeo</string>
     <string name="title_arg_of_perigee">Argumento de Perigeo</string>
+    <string name="title_arrow_size">Tamaño de la Flecha</string>
     <string name="title_astronomical_twilight">Crepúsculo Astronómico</string>
     <string name="title_auto_height">Altura Auto</string>
     <string name="title_auto_update_catalog">Catálogo Actualización Automática</string>
@@ -401,6 +403,7 @@
     <string name="title_grey">Gris</string>
     <string name="title_grid_color">Color Cuadrícula</string>
     <string name="title_group">Grupo</string>
+    <string name="title_guide">Guía</string>
     <string name="title_hide_constellation_star_paths">Ocultar Caminos Estelares de Constelaciones</string>
     <string name="title_hide_distant_path_times">Ocultar Tiempos de Ruta Distantes</string>
     <string name="title_hide_selected">Ocultar Seleccionado</string>
@@ -428,6 +431,7 @@
     <string name="title_jupiter">Júpiter</string>
     <string name="title_label_data">Datos Etiqueta</string>
     <string name="title_label_style">Estilo Etiqueta</string>
+    <string name="title_large">Grande</string>
     <string name="title_last_2_digits_of_year">Últimos 2 Dígitos del Año</string>
     <string name="title_last_plural">Últimos</string>
     <string name="title_last_quarter">Último Cuarto</string>
@@ -607,6 +611,7 @@
     <string name="title_show_zoom">Mostrar Enfocar</string>
     <string name="title_skip">Omitir</string>
     <string name="title_slow">Lento</string>
+    <string name="title_small">Pequeño</string>
     <string name="title_solar_system">Sistema Solar</string>
     <string name="title_sort_by">Ordenar Por</string>
     <string name="title_source">Fuente</string>
@@ -664,6 +669,7 @@
     <string name="title_venus">Venus</string>
     <string name="title_very_fast">Muy Rápido</string>
     <string name="title_very_slow">Muy Lento</string>
+    <string name="title_very_small">Muy Pequeño</string>
     <string name="title_view">Vista</string>
     <string name="title_view_quality">Vista Calidad</string>
     <string name="title_views">Vistas</string>

@@ -327,6 +327,13 @@
                             android:title="@string/title_show_outside_visible_area"
                             android:key="LensShowOutsideArea"
                             android:summary="@string/desc_show_outside_visible_area"/>
+                    </PreferenceCategory>
+
+                    <PreferenceCategory android:title="@string/title_guide">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_arrow_size"
+                            android:key="LensDirectionSize"
+                            android:summary="@string/desc_arrow_size"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_direction_centered"

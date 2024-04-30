@@ -168,6 +168,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SliderPreference lensTextAlphaSlider = this.findPreference(Settings.PreferenceName.LensTextAlpha);
                         SliderPreference lensConstellationAlphaSlider = this.findPreference(Settings.PreferenceName.LensConstellationAlpha);
                         IconListPreference lensOrbitalIconList = this.findPreference(Settings.PreferenceName.LensIndicator);
+                        IconListPreference lensDirectionSize = this.findPreference(Settings.PreferenceName.LensDirectionSize);
                         IconListPreference lensUpdateRateList = this.findPreference(Settings.PreferenceName.LensUpdateDelay);
                         IconListPreference lensSensorSmoothingList = this.findPreference(Settings.PreferenceName.LensAverageCount);
 
@@ -185,6 +186,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSlider(lensTextAlphaSlider);
                         setupSlider(lensConstellationAlphaSlider);
                         setupList(lensOrbitalIconList, Settings.Options.LensView.indicatorItems, null, null, null, lensShowIconDirection);
+                        setupList(lensDirectionSize, Settings.Options.LensView.directionSizeItems, null, null, null, null);
                         setupList(lensUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         setupList(lensSensorSmoothingList, Settings.Options.LensView.sensorSmoothingItems, null, null, null, null);
                         break;
@@ -512,6 +514,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     return(true);
                                 }
                             };
+                            break;
+
+                        case Settings.PreferenceName.LensDirectionSize:
+                            currentValue = Settings.getLensDirectionSize(context);
                             break;
 
                         case Settings.PreferenceName.LensPathLabelType:
@@ -1594,6 +1600,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             break;
 
                         case Settings.PreferenceName.LensDirectionCentered:
+                        case Settings.PreferenceName.LensDirectionSize:
                         case Settings.PreferenceName.LensIndicator:
                         case Settings.PreferenceName.LensIndicatorIconShowDirection:
                         case Settings.PreferenceName.LensIndicatorAlpha:

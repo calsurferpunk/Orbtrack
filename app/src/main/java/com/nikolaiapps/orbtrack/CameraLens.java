@@ -610,6 +610,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private final boolean usingColorTextPath;
     private final boolean showingConstellations;
     private final boolean arrowDirectionCentered;
+    private final boolean showingArrowDirection;
     private final boolean showIconIndicatorDirection;
     private final float textSize;
     private final float textOffset;
@@ -1173,8 +1174,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     Globals.drawBitmap(canvas, compassDirection, compassCenterX, compassCenterY, currentAzDeg, currentPaint);
                 }
 
-                //if have a selection
-                if(haveSelectedOrbital())
+                //if showing arrow direction and have a selection
+                if(showingArrowDirection && haveSelectedOrbital())
                 {
                     Calculations.TopographicDataType usedLookAngle = (showCalibration && calibrateIndex >= 0 ? (calibrateIndex < calibrateAngles.length ? calibrateAngles[calibrateIndex] : null) : selectedLookAngle);
                     boolean haveLookAngle = (usedLookAngle != null);
@@ -1204,6 +1205,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
 
         int index;
         int pathType;
+        int arrowDp = Settings.getLensDirectionSize(context);
         int averageCount = Settings.getLensAverageCount(context);
         int possibleAlpha;
         boolean darkTheme = Settings.getDarkTheme(context);
@@ -1291,8 +1293,9 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         zoomImage = Globals.getDrawable(context, R.drawable.ic_search_white, R.color.white);
         exposureImage = Globals.getDrawable(context, R.drawable.ic_sun_white, R.color.white);
         arrowDirectionCentered = Settings.getLensDirectionCentered(context);
-        arrowDirection = Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawable(context, R.drawable.ic_arrow_up_black, R.color.white), Globals.getDrawable(context, R.drawable.ic_arrow_up_black, R.color.black)));
-        arrowDoubleDirection = Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawable(context, R.drawable.ic_arrow_up_double_black, R.color.white), Globals.getDrawable(context, R.drawable.ic_arrow_up_double_black, R.color.black)));
+        showingArrowDirection = (arrowDp > 0);
+        arrowDirection = (showingArrowDirection ? Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawableSized(context, R.drawable.ic_arrow_up_black, arrowDp, arrowDp, R.color.white, true), Globals.getDrawableSized(context, R.drawable.ic_arrow_up_black, arrowDp, arrowDp, R.color.black, true))) : null);
+        arrowDoubleDirection = (showingArrowDirection ? Globals.getBitmap(Globals.getDrawableCombined(context, 5, 5, true, Globals.getDrawableSized(context, R.drawable.ic_arrow_up_double_black, arrowDp, arrowDp, R.color.white, true), Globals.getDrawableSized(context, R.drawable.ic_arrow_up_double_black, arrowDp, arrowDp, R.color.black, true))) : null);
         compassDirection = BitmapFactory.decodeResource(currentResources, R.drawable.compass);
         compassWidth = compassDirection.getWidth();
         compassHeight = compassDirection.getHeight();

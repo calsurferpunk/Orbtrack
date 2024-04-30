@@ -134,6 +134,7 @@
     <string name="desc_allow_rotation">Allow movement without forcing upright</string>
     <string name="desc_altitude_source">Location altitude detection</string>
     <string name="desc_ar_warning">If you are not an adult, please stay near an adult for safety, especially at night.\n\nBe aware of your surroundings and be sure to look where you are walking.</string>
+    <string name="desc_arrow_size">Size of arrow indicating orbital direction</string>
     <string name="desc_auto_height">Retrieve height from hardware</string>
     <string name="desc_auto_width">Retrieve width from hardware</string>
     <string name="desc_azimuth_offset">Compass true north adjustment</string>
@@ -283,6 +284,7 @@
     <string name="title_any">Any</string>
     <string name="title_apogee">Apogee</string>
     <string name="title_arg_of_perigee">Argument of Perigee</string>
+    <string name="title_arrow_size">Arrow Size</string>
     <string name="title_astronomical_twilight">Astronomical Twilight</string>
     <string name="title_auto_height">Auto Height</string>
     <string name="title_auto_update_catalog">Auto Update Catalog</string>
@@ -401,6 +403,7 @@
     <string name="title_grey">Grey</string>
     <string name="title_grid_color">Grid Color</string>
     <string name="title_group">Group</string>
+    <string name="title_guide">Guide</string>
     <string name="title_hide_constellation_star_paths">Hide Constellation Star Paths</string>
     <string name="title_hide_distant_path_times">Hide Distant Path Times</string>
     <string name="title_hide_selected">Hide Selected</string>
@@ -428,6 +431,7 @@
     <string name="title_jupiter">Jupiter</string>
     <string name="title_label_data">Label Data</string>
     <string name="title_label_style">Label Style</string>
+    <string name="title_large">Large</string>
     <string name="title_last_2_digits_of_year">Last 2 Digits of Year</string>
     <string name="title_last_plural">Last</string>
     <string name="title_last_quarter">Last Quarter</string>
@@ -607,6 +611,7 @@
     <string name="title_show_zoom">Show Zoom</string>
     <string name="title_skip">Skip</string>
     <string name="title_slow">Slow</string>
+    <string name="title_small">Small</string>
     <string name="title_solar_system">Solar System</string>
     <string name="title_sort_by">Sort By</string>
     <string name="title_source">Source</string>
@@ -664,6 +669,7 @@
     <string name="title_venus">Venus</string>
     <string name="title_very_fast">Very Fast</string>
     <string name="title_very_slow">Very Slow</string>
+    <string name="title_very_small">Very Small</string>
     <string name="title_view">View</string>
     <string name="title_view_quality">View Quality</string>
     <string name="title_views">Views</string>

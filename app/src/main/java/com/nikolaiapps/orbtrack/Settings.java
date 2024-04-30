@@ -109,6 +109,7 @@ public abstract class Settings
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
         static final String LensDirectionCentered = "LensDirectionCentered";
+        static final String LensDirectionSize = "LensDirectionSize";
         static final String LensIndicator = "LensIndicator";
         static final String LensIndicatorIconShowDirection = "LensIndicatorIconShowDirection";
         static final String LensIndicatorAlpha = "LensIndicatorAlpha";
@@ -226,6 +227,9 @@ public abstract class Settings
             //Indicator items
             public static IconSpinner.Item[] indicatorItems;
 
+            //
+            public static IconSpinner.Item[] directionSizeItems;
+
             //Path type items
             public static IconSpinner.Item[] pathLabelTypeItems;
 
@@ -247,6 +251,18 @@ public abstract class Settings
                         new IconSpinner.Item(R.drawable.shape_circle_black, res.getString(R.string.title_circle), IndicatorType.Circle),
                         new IconSpinner.Item(R.drawable.shape_square_black, res.getString(R.string.title_square), IndicatorType.Square),
                         new IconSpinner.Item(R.drawable.shape_triangle_black, res.getString(R.string.title_triangle), IndicatorType.Triangle)
+                    };
+                }
+                if(directionSizeItems == null || directionSizeItems.length == 0)
+                {
+                    //set direction size items
+                    directionSizeItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_none), 0),
+                        new IconSpinner.Item(res.getString(R.string.title_very_small), 32),
+                        new IconSpinner.Item(res.getString(R.string.title_small), 64),
+                        new IconSpinner.Item(res.getString(R.string.title_medium), 128),
+                        new IconSpinner.Item(res.getString(R.string.title_large), 192)
                     };
                 }
                 if(pathLabelTypeItems == null || pathLabelTypeItems.length == 0)
@@ -2127,6 +2143,9 @@ public abstract class Settings
             case PreferenceName.LensIndicator:
                 return(Options.LensView.IndicatorType.Icon);
 
+            case PreferenceName.LensDirectionSize:
+                return(128);
+
             case PreferenceName.LensPathLabelType:
                 return(Options.LensView.PathLabelType.ColorText);
 
@@ -2498,6 +2517,12 @@ public abstract class Settings
     public static boolean getLensDirectionCentered(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.LensDirectionCentered));
+    }
+
+    //Returns lens direction size
+    public static int getLensDirectionSize(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensDirectionSize));
     }
 
     //Gets indicator type

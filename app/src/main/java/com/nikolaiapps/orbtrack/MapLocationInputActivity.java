@@ -414,7 +414,7 @@ public class MapLocationInputActivity extends BaseInputActivity
                 LocationService.GetAltitudeTask altitudeTask;
 
                 //check for invalid values
-                if(name.equals("") || name.equalsIgnoreCase("current"))
+                if(name.isEmpty() || name.equalsIgnoreCase("current"))
                 {
                     currentError = invalidString + " " + res.getString(R.string.title_name);
                     nameText.setError(currentError);
@@ -436,7 +436,7 @@ public class MapLocationInputActivity extends BaseInputActivity
                 }
 
                 //if there is no error
-                if(currentError.equals(""))
+                if(currentError.isEmpty())
                 {
                     //disable inputs
                     nameText.setEnabled(false);

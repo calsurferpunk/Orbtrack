@@ -3294,7 +3294,7 @@ public abstract class Globals
                 if(overHeight)
                 {
                     //limit height and adjust width by fixed ratio
-                    widthPx /= (heightPx / (float)maxHeightPx);
+                    widthPx = (int)(widthPx / (heightPx / (float)maxHeightPx));
                     overWidth = (widthPx > maxWidthPx);
                     heightPx = maxHeightPx;
                 }

@@ -137,7 +137,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             {
                 parentPath = path.substring(0, index);
             }
-            else if(path != null && path.equals(""))
+            else if(path != null && path.isEmpty())
             {
                 return(null);
             }
@@ -173,7 +173,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             String pathId = (String)objects[0];
             String parentPathId = "";
             String displayPath = (String)objects[1];
-            boolean pathIsRoot = pathId.equals("");
+            boolean pathIsRoot = pathId.isEmpty();
             Item[] items = null;
             List<File> fileList;
             List<String> parents;
@@ -197,7 +197,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                     //get parent ID of path
                     pathFolder = driveClient.files().get(pathId).setFields("parents").execute();
                     parents = pathFolder.getParents();
-                    if(parents != null && parents.size() > 0)
+                    if(parents != null && !parents.isEmpty())
                     {
                         parentPathId = parents.get(0);
                     }
@@ -306,7 +306,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             java.io.File tempFile = (java.io.File)objects[2];
 
             //if path is not set or root
-            if(path == null || path.equals(""))
+            if(path == null || path.isEmpty())
             {
                 //set as root
                 path = "root";

@@ -16,6 +16,7 @@ import java.util.TimeZone;
 public abstract class Calculations
 {
     //TLE line 1 indexes
+    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class TLE1Index
     {
         static final byte SatNum = 2;
@@ -1351,7 +1352,7 @@ public abstract class Calculations
         line1ArrayCopy = line1.toCharArray();
         line2ArrayCopy = line2.toCharArray();
 
-        //fill in blank spaces (else sscanf reads past intended area)
+        //fill in blank spaces
         for(index = 2; index < 69; index++)
         {
             switch(index)
@@ -1647,7 +1648,6 @@ public abstract class Calculations
     }
 
     //Loads satellite objects
-    @SuppressWarnings("SpellCheckingInspection")
     public static SatelliteObjectType[] loadSatellites(JSONObject[] data)
     {
         int index;

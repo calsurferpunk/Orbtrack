@@ -148,7 +148,7 @@ public abstract class Calculate
             public TextView illuminationText;
             public ExpandingListView subList;
             public LinearLayout dataGroup;
-            public CalculateViewsTask.ViewData[] views;
+            public final CalculateViewsTask.ViewData[] views;
 
             public Item(int index, int viewCount, Calculations.SatelliteObjectType satellite)
             {

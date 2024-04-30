@@ -540,6 +540,7 @@ public class PlayBar extends LinearLayout
         stopPlayTimer(true);
     }
 
+    /** @noinspection ExtractMethodRecommender*/
     //Starts the play timer
     private void startPlayTimer(boolean startSynced)
     {

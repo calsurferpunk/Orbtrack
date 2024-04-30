@@ -600,7 +600,7 @@ public interface CoordinatesFragment
                 selectOrbital.setInfoVisible(visible);
             }
             //else if none selected and there are markers
-            else if(selectedOrbitalIndex == -1 && markerObjects.size() > 0)
+            else if(selectedOrbitalIndex == -1 && !markerObjects.isEmpty())
             {
                 //if able to get marker
                 selectMarker = getMarker(noradId);
@@ -812,6 +812,7 @@ public interface CoordinatesFragment
     void setOnLocationClickListener(OnLocationClickListener listener);
     void setOnItemSelectionChangedListener(OnItemSelectionChangedListener listener);
 
+    /** @noinspection BooleanMethodIsAlwaysInverted*/
     boolean isMap();
 
     View getView();

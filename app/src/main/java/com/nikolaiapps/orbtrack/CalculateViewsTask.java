@@ -129,9 +129,9 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
 
     public static class ViewData extends Calculate.CalculateDataBase
     {
-        public float azimuth;
-        public float elevation;
-        public float rangeKm;
+        public final float azimuth;
+        public final float elevation;
+        public final float rangeKm;
 
         public ViewData()
         {

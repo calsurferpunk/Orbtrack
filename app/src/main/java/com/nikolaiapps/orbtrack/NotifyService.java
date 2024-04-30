@@ -309,7 +309,7 @@ public abstract class NotifyService extends IntentService
         boolean isFinished = (progressType == Globals.ProgressType.Finished);
         boolean isCanceled = (progressType == Globals.ProgressType.Cancelled);
         boolean showCancel = (cancelID >= 0);
-        boolean haveSection = (section != null && !section.equals(""));
+        boolean haveSection = (section != null && !section.isEmpty());
         boolean haveSubIndex = (subIndex >= 0);
         boolean enoughProgress = (System.currentTimeMillis() - lastNotify.timeMs >= 250);
         long limitMs = 0;

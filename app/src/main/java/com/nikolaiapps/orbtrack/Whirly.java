@@ -758,12 +758,12 @@ class Whirly
             }
 
             //if there are points
-            if(useVectors && setFlatPoints.size() > 0)
+            if(useVectors && !setFlatPoints.isEmpty())
             {
                 //add them
                 flatPath.addLinear(setFlatPoints.toArray(new Point2d[0]));
             }
-            else if(!useVectors && setElevatedPoints.size() > 0)
+            else if(!useVectors && !setElevatedPoints.isEmpty())
             {
                 //add them
                 elevatedPath.setCoords(setElevatedPoints.toArray(new Point3d[0]));

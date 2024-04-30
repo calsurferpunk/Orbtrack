@@ -66,7 +66,7 @@ public abstract class Selectable
     }
 
     //Select list item
-    protected static class ListItem implements Parcelable
+    public static class ListItem implements Parcelable
     {
         public static class Comparer implements Comparator<ListItem>
         {
@@ -150,7 +150,7 @@ public abstract class Selectable
             }
 
             //invalid list string
-            return(list.size() > 0 ? list.toArray(new ListItem[0]) : null);
+            return(!list.isEmpty() ? list.toArray(new ListItem[0]) : null);
         }
 
         //Converts an array into an array string
@@ -187,7 +187,7 @@ public abstract class Selectable
     }
 
     //Select list display item
-    protected static class ListDisplayItem extends ListItem
+    public static class ListDisplayItem extends ListItem
     {
         public final boolean canEdit;
         public boolean isSelected;
@@ -243,7 +243,7 @@ public abstract class Selectable
         {
             void onItemClicked(View view, int position);
         }
-        private interface OnItemLongClickListener
+        public interface OnItemLongClickListener
         {
             void onItemLongClicked(View view, int position);
         }
@@ -950,7 +950,7 @@ public abstract class Selectable
                     LinearLayout itemDetailLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Layout);
                     LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
 
-                    if(this.detailButtons.size() == 0)
+                    if(this.detailButtons.isEmpty())
                     {
                         addDivider(itemDetailLayout, itemDetailLayout.indexOfChild(buttonLayout), false);
                     }
@@ -1448,7 +1448,6 @@ public abstract class Selectable
                 UpdateService.observe(context, updateReceiver);
             }
 
-            //this.setRetainInstance(true);       //keep adapter on orientation changes
             this.setHasOptionsMenu(true);
         }
 
@@ -1848,7 +1847,7 @@ public abstract class Selectable
             }
 
             //if deselecting and no more selected items
-            if(!selected && selectedItems.size() == 0)
+            if(!selected && selectedItems.isEmpty())
             {
                 //cancel editing
                 cancelEditMode();

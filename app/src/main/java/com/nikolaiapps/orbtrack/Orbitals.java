@@ -1211,6 +1211,7 @@ public abstract class Orbitals
             pendingSaveFile = new Globals.PendingFile(outUri, fileName, fileExtension, fileType, fileSourceType);
         }
 
+        /** @noinspection ConstantValue*/
         //Run task on selected items
         public void runTaskSelectedItems(final byte updateType, boolean confirmInternet)
         {
@@ -1338,7 +1339,6 @@ public abstract class Orbitals
                                 else
                                 {
                                     //save file if not already
-                                    //noinspection ConstantConditions
                                     saveReceiver = createLocalUpdateReceiver(saveReceiver, updateType, satellites, listIndexes, showProgress);
                                     if(!UpdateService.savingFile() && activity != null)
                                     {
@@ -1368,7 +1368,6 @@ public abstract class Orbitals
                         else
                         {
                             //update satellites
-                            //noinspection ConstantConditions
                             updateReceiver = createLocalUpdateReceiver(updateReceiver, updateType, satellites, listIndexes, showProgress);
                             if(!UpdateService.updatingSatellites())
                             {

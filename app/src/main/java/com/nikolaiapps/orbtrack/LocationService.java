@@ -90,7 +90,7 @@ public class LocationService extends Service implements LocationListener
         static final byte GeoNames = 4;
     }
 
-    interface OnGotCoordinatesListener
+    public interface OnGotCoordinatesListener
     {
         void gotCoordinates(double latitude, double longitude);
     }
@@ -201,7 +201,7 @@ public class LocationService extends Service implements LocationListener
                                 id = parsedData.getString("timeZoneId");
 
                                 //if valid
-                                if(!id.equals(""))
+                                if(!id.isEmpty())
                                 {
                                     //set timezone
                                     zoneId = id;

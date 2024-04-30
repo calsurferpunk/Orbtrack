@@ -143,7 +143,7 @@ public class SensorUpdate implements SensorEventListener
     {
         boolean isGyro = false;
         boolean invertGyro = false;
-        int azGyroIndex = 0;
+        int azGyroIndex;
         float azDeg;
         float elDeg;
         long currentTime;
@@ -214,6 +214,7 @@ public class SensorUpdate implements SensorEventListener
                     invertGyro = true;
                     //fall through
 
+                default:
                 case Surface.ROTATION_90:
                     //use x axis
                     azGyroIndex = 0;

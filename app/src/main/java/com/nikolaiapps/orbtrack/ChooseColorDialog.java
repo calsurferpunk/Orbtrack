@@ -693,7 +693,7 @@ public class ChooseColorDialog
         String valueString = String.valueOf(index != OPACITY_INDEX ? value : (int)Math.ceil((value / 255.0f) * 100));
 
         //if value is changing
-        if(valueString.length() > 0 && !textDisplays[index].getText().toString().equals(valueString))
+        if(!valueString.isEmpty() && !textDisplays[index].getText().toString().equals(valueString))
         {
             //set text and move cursor to the end
             textDisplays[index].setTag(false);

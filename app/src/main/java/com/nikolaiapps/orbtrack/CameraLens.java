@@ -558,7 +558,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     public boolean showPaths;
     public boolean showHorizon;
     public boolean showCalibration;
-    public boolean showPathDirections;
+    public final boolean showPathDirections;
     public final boolean showOutsideArea;
     public final boolean showPathTimeNames;
     public final boolean hideDistantPathTimes;

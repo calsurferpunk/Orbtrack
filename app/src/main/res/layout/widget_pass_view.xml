@@ -6,7 +6,8 @@
     android:layout_gravity="center"
     android:padding="0dp"
     android:orientation="vertical"
-    android:background="@color/transparent">
+    android:background="@color/transparent"
+    tools:ignore="Overdraw">
     <ImageView
         android:id="@+id/Widget_Pass_Border"
         android:layout_width="match_parent"

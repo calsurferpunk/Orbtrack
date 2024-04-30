@@ -8,6 +8,7 @@ import android.view.ViewTreeObserver;
 import android.widget.AdapterView;
 
 
+/** @noinspection unused*/
 public interface SelectListInterface
 {
     void setOnClickListener(View.OnClickListener listener);

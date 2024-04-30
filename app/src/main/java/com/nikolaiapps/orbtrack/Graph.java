@@ -964,7 +964,7 @@ public class Graph extends View
                     //if there is no overlap or on last
                     if(overlapX >= 0 || onLast)
                     {
-                        //draw divison text
+                        //draw division text
                         lastDayString = drawXText(value, x, canvas, brush, lastDayString);
                         lastX = x;
                     }

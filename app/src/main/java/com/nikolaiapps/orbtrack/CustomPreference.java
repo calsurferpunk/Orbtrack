@@ -81,7 +81,7 @@ public class CustomPreference extends Preference
         sharedName = name;
 
         //if shared name not set
-        if(sharedName == null || sharedName.trim().length() == 0)
+        if(sharedName == null || sharedName.trim().isEmpty())
         {
             //use default
             sharedName = "Settings";

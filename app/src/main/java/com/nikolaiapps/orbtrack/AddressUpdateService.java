@@ -58,7 +58,7 @@ public class AddressUpdateService extends NotifyService
                     locationString = getLocationName(resultData.getString(RESULT_DATA_KEY));
 
                     //if location was received
-                    if(!locationString.equals(""))
+                    if(!locationString.isEmpty())
                     {
                         //send location string
                         locationResolvedListener.onLocationResolved(locationString, resultCode);
@@ -241,7 +241,7 @@ public class AddressUpdateService extends NotifyService
         }
 
         //if no address found
-        if(addresses == null || addresses.size() == 0)
+        if(addresses == null || addresses.isEmpty())
         {
             //if no other message set yet
             if(message != null && message.isEmpty())

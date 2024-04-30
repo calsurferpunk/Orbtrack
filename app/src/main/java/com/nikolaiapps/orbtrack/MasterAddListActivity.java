@@ -679,10 +679,10 @@ public class MasterAddListActivity extends BaseInputActivity
                                 }
 
                                 //if message is not blank
-                                if(message.length() > 0)
+                                if(!message.isEmpty())
                                 {
                                     //if section exists and is not blank
-                                    if(section != null && section.length() > 0)
+                                    if(section != null && !section.isEmpty())
                                     {
                                         //add section to message
                                         message = section + " (" + message + ")";
@@ -823,7 +823,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                         });
                                     }
                                     //else if just didn't finish
-                                    else if(progressType == Globals.ProgressType.Cancelled || masterList.satellites.size() == 0)
+                                    else if(progressType == Globals.ProgressType.Cancelled || masterList.satellites.isEmpty())
                                     {
                                         //send result
                                         sendResult(data, progressType);
@@ -871,7 +871,7 @@ public class MasterAddListActivity extends BaseInputActivity
         int updateSource = addIntent.getIntExtra(Settings.PreferenceName.SatelliteSource, Database.UpdateSource.SpaceTrack);
         int listNumber = addIntent.getIntExtra(ParamTypes.ListNumber, 1);
         ArrayList<Selectable.ListItem> selectedOrbitals = addIntent.getParcelableArrayListExtra(ParamTypes.SelectedOrbitals);
-        boolean haveSelectedOrbitals = (selectedOrbitals != null && selectedOrbitals.size() > 0);
+        boolean haveSelectedOrbitals = (selectedOrbitals != null && !selectedOrbitals.isEmpty());
         MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
         searchLayout = this.findViewById(R.id.Orbital_Search_Layout);
         searchGroup = this.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
@@ -1036,7 +1036,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
 
                         //if not selecting multiple or at least 1 orbital selected
-                        if(!isSelectMultipleList || userSelectedOrbitals.size() > 0)
+                        if(!isSelectMultipleList || !userSelectedOrbitals.isEmpty())
                         {
                             //add data and finish
                             data.putExtra(ParamTypes.ListNumber, listNumber);

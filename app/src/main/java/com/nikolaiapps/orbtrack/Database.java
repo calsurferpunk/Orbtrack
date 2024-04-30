@@ -2328,6 +2328,7 @@ public class Database extends SQLiteOpenHelper
         sendProgress(progressType, null, 0 , 0);
     }
 
+    /** @noinspection UnusedAssignment*/
     //Show notice dialog
     private static void showNoticeDialog(final Context context, int previousVersion)
     {
@@ -3395,7 +3396,6 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Gets category values
-    @SuppressWarnings("SpellCheckingInspection")
     private static ContentValues getCategoryValues(String name, int index)
     {
         ContentValues ownerValues = new ContentValues(0);
@@ -3437,7 +3437,6 @@ public class Database extends SQLiteOpenHelper
     }
 
     //Saves given categories
-    @SuppressWarnings("SpellCheckingInspection")
     public static void saveCategories(Context context, ArrayList<UpdateService.MasterCategory> categories, Globals.OnProgressChangedListener listener)
     {
         int index;

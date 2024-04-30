@@ -23,7 +23,6 @@ import java.util.TimeZone;
 public class CalculateService extends NotifyService
 {
     //Param Types
-    @SuppressWarnings("SpellCheckingInspection")
     public static abstract class ParamTypes extends NotifyService.ParamTypes
     {
         static final String CalculateType = "calculateType";
@@ -100,7 +99,7 @@ public class CalculateService extends NotifyService
     //View list item
     public static class ViewListItem extends Selectable.ListDisplayItem
     {
-        public boolean inFilter;
+        public final boolean inFilter;
         public boolean viewCalculateFinished;
         public double julianDate;
         public Calculations.SatelliteObjectType satellite;

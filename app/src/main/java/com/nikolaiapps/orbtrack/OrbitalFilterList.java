@@ -26,7 +26,7 @@ public class OrbitalFilterList
     }
 
     //Select orbital filter list item
-    protected static class Item extends Selectable.ListDisplayItem
+    public static class Item extends Selectable.ListDisplayItem
     {
         public final long launchDateMs;
         public final UpdateService.MasterSatellite satellite;
@@ -95,7 +95,7 @@ public class OrbitalFilterList
 
         public String getOwnerCode()
         {
-            return(ownerCodes.size() > 0 ? ownerCodes.get(0) : null);
+            return(!ownerCodes.isEmpty() ? ownerCodes.get(0) : null);
         }
 
         public String getOwner(Context context)
@@ -228,7 +228,7 @@ public class OrbitalFilterList
                 OrbitalFilterList.Item item = allItems[index];
 
                 //add to displayed if -category is "ALL" or matches given- and -age is any or within day range- and -search string is "" or contains given-
-                if((ownerCode.equals(listAllString) || item.ownerCodes.contains(ownerCode)) && (categoryName.equals(listAllString) || item.categories.contains(categoryName)) && (ageValue == -1 || ((currentMs - item.launchDateMs) <= (ageValue * Calculations.MsPerDay))) && (typeValue == -1 || item.satellite.orbitalType == typeValue) && (searchStringInsensitive.equals("") || item.satellite.name.toLowerCase().contains(searchStringInsensitive) || String.valueOf(item.satellite.noradId).contains(searchStringInsensitive)))
+                if((ownerCode.equals(listAllString) || item.ownerCodes.contains(ownerCode)) && (categoryName.equals(listAllString) || item.categories.contains(categoryName)) && (ageValue == -1 || ((currentMs - item.launchDateMs) <= (ageValue * Calculations.MsPerDay))) && (typeValue == -1 || item.satellite.orbitalType == typeValue) && (searchStringInsensitive.isEmpty() || item.satellite.name.toLowerCase().contains(searchStringInsensitive) || String.valueOf(item.satellite.noradId).contains(searchStringInsensitive)))
                 {
                     //add to displayed items
                     displayedItems.add(item);
@@ -343,7 +343,7 @@ public class OrbitalFilterList
                 {
                     UpdateService.MasterOwner currentItem = usedOwners.get(index);
                     int[] ownerIconIds = Globals.getOwnerIconIDs(currentItem.code);
-                    owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.equals("") ? unknown : currentItem.name), currentItem.code);
+                    owners[index + 1] = new IconSpinner.Item(ownerIconIds, (currentItem.name == null || currentItem.name.isEmpty() ? unknown : currentItem.name), currentItem.code);
                 }
                 setupListAdapter(ownerList, new IconSpinner.CustomAdapter(currentContext, owners), itemSelectedListener);
             }

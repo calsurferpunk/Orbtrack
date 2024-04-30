@@ -1261,7 +1261,7 @@ public class UpdateService extends NotifyService
                     receivedPage = Globals.getWebPage(urlAltString, true,null);
                 }
                 receivedPageLower = (receivedPage != null ? receivedPage.toLowerCase() : null);
-                if(receivedPageLower != null && !receivedPageLower.equals(""))
+                if(receivedPageLower != null && !receivedPageLower.isEmpty())
                 {
                     switch(updateSource)
                     {
@@ -1325,7 +1325,7 @@ public class UpdateService extends NotifyService
             }
 
             //if no length
-            if(infoString != null && infoString.trim().length() == 0)
+            if(infoString != null && infoString.trim().isEmpty())
             {
                 //null it
                 infoString = null;
@@ -1873,7 +1873,7 @@ public class UpdateService extends NotifyService
         }
 
         //if there are satellites
-        if(masterList.satellites.size() > 0)
+        if(!masterList.satellites.isEmpty())
         {
             //if ran update and it was a success
             if(ranUpdate && !cancelIntent[UpdateType.GetMasterList])
@@ -1938,7 +1938,7 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, UpdateType.GetMasterList, "", 100, (status == Globals.ProgressType.Denied ? Globals.ProgressType.Denied : status == Globals.ProgressType.Finished && masterList.satellites.size() > 0 && !cancelIntent[UpdateType.GetMasterList] ? Globals.ProgressType.Finished : ranUpdate ? Globals.ProgressType.Failed : Globals.ProgressType.Cancelled));
+        sendMessage(MessageTypes.General, UpdateType.GetMasterList, "", 100, (status == Globals.ProgressType.Denied ? Globals.ProgressType.Denied : status == Globals.ProgressType.Finished && !masterList.satellites.isEmpty() && !cancelIntent[UpdateType.GetMasterList] ? Globals.ProgressType.Finished : ranUpdate ? Globals.ProgressType.Failed : Globals.ProgressType.Cancelled));
     }
 
     //Gets master list and returns progress status
@@ -2134,7 +2134,7 @@ public class UpdateService extends NotifyService
                             if(spaceTrackData.owners != null)
                             {
                                 //go through owners
-                                for(index2 = 0; index2 < spaceTrackData.owners.length && currentValue.equals(""); index2++)
+                                for(index2 = 0; index2 < spaceTrackData.owners.length && currentValue.isEmpty(); index2++)
                                 {
                                     MasterOwner currentOwner = spaceTrackData.owners[index2];
 
@@ -2532,7 +2532,7 @@ public class UpdateService extends NotifyService
                                                 Calendar launchDate = Globals.tryParseGMTDate(currentRow.substring(CelestrakCatalog.LaunchDateStart, CelestrakCatalog.LaunchDateEnd).trim());
 
                                                 //if a valid norad ID and got owner code
-                                                if(noradId >= 0 && noradId < Integer.MAX_VALUE && currentCode.length() > 0)
+                                                if(noradId >= 0 && noradId < Integer.MAX_VALUE && !currentCode.isEmpty())
                                                 {
                                                     //add owner and launch date items
                                                     ownerItemList.add(new OwnerItem(noradId, currentCode, launchDate));
@@ -2643,7 +2643,7 @@ public class UpdateService extends NotifyService
                             case Database.UpdateSource.N2YO:
                             case Database.UpdateSource.Celestrak:
                                 //if got owners
-                                if(ownerItemList.size() > 0)
+                                if(!ownerItemList.isEmpty())
                                 {
                                     //create offset and array to hold catalog items, indexed by norad ID
                                     int offset = (firstNoradID != Integer.MAX_VALUE ? firstNoradID : 0);
@@ -3001,7 +3001,7 @@ public class UpdateService extends NotifyService
             {
                 //if data was read for current satellite number
                 tleLines = parseTLEData((index < satelliteLines.size() ? satelliteLines.get(index) : null), satelliteNum);
-                if(!tleLines[0].equals("") && !tleLines[1].equals(""))
+                if(!tleLines[0].isEmpty() && !tleLines[1].isEmpty())
                 {
                     //get current satellite
                     currentSatellite = Calculations.loadSatellite(satelliteName, tleLines[0], tleLines[1]);
@@ -3193,7 +3193,7 @@ public class UpdateService extends NotifyService
             }
 
             //update status
-            downloadError = (downloadError || receivedPage == null || receivedPage.equals("") || cancelIntent[UpdateType.UpdateSatellites]);
+            downloadError = (downloadError || receivedPage == null || receivedPage.isEmpty() || cancelIntent[UpdateType.UpdateSatellites]);
 
             //if page was received
             if(!downloadError)
@@ -3211,7 +3211,7 @@ public class UpdateService extends NotifyService
                     sendMessage(MessageTypes.Download, UpdateType.UpdateSatellites, section, index3, count, Globals.ProgressType.Started);
 
                     //if updated from UpdateSource.N2YO and owner is missing (not on countries page on website), try to find
-                    if(updateSource == Database.UpdateSource.N2YO && (currentSatellite.ownerCode == null || currentSatellite.ownerCode.length() == 0))
+                    if(updateSource == Database.UpdateSource.N2YO && (currentSatellite.ownerCode == null || currentSatellite.ownerCode.isEmpty()))
                     {
                         //if found source line
                         startIndex = receivedPageLower.indexOf("<b>source</b>: ");

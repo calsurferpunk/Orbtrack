@@ -116,7 +116,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                 String invalidString = res.getString(R.string.title_invalid);
 
                 //check for invalid values
-                if(name.equals(""))
+                if(name.isEmpty())
                 {
                     currentError = invalidString + " " + res.getString(R.string.title_name);
                     firstError = updateError(firstError, currentError);
@@ -148,7 +148,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
                 }
 
                 //if there is no error
-                if(firstError.equals(""))
+                if(firstError.isEmpty())
                 {
                     currentSat = Calculations.loadSatellite(name, line1, line2);
                     if(currentSat.getSatelliteNum() != Universe.IDs.None && currentSat.tle.launchYear != Integer.MAX_VALUE)
@@ -509,6 +509,6 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
     //Updates error
     private String updateError(String currentError, String newError)
     {
-        return(currentError.equals("") ? newError : currentError);
+        return(currentError.isEmpty() ? newError : currentError);
     }
 }

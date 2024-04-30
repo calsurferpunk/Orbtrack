@@ -133,7 +133,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         }
     }
 
-    private static class ItemHolder extends RecyclerView.ViewHolder
+    public static class ItemHolder extends RecyclerView.ViewHolder
     {
         public TextView fileText;
         public CheckBox fileCheck;
@@ -558,7 +558,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         }
         if(selectButton != null)
         {
-            selectButton.setEnabled(!isLoading && (selectFolder || (filesAdapter != null && filesAdapter.getSelectedFiles().size() > 0)));
+            selectButton.setEnabled(!isLoading && (selectFolder || (filesAdapter != null && !filesAdapter.getSelectedFiles().isEmpty())));
         }
         if(cancelButton != null)
         {
@@ -590,7 +590,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
             public void onPathChanged(String path)
             {
                 //if empty root
-                if(path.equals(""))
+                if(path.isEmpty())
                 {
                     //display root
                     path = "/";

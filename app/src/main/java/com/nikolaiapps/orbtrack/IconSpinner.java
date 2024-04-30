@@ -909,6 +909,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             textSelectedColor = color;
         }
 
+        @SuppressWarnings("unused")
         public Item getSelectedItem()
         {
             return((items != null) && (selectedIndex >= 0) && (selectedIndex < items.length) ? items[selectedIndex] : null);

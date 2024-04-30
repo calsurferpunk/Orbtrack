@@ -396,6 +396,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         return(Globals.getPendingBroadcastIntent(context, widgetId, intent, PendingIntent.FLAG_UPDATE_CURRENT));
     }
 
+    /** @noinspection SameParameterValue*/
     //Sets border
     private static void setBorder(Context context, int widgetId, RemoteViews views, View parent, int viewId)
     {
@@ -974,8 +975,8 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         int passEndTextId;
         int passEndLayoutId;
         String unknown = Globals.getUnknownString(context);
-        String passStartString = "";
-        String passEndString = "";
+        String passStartString;
+        String passEndString;
         Resources res = context.getResources();
 
         //if using parent

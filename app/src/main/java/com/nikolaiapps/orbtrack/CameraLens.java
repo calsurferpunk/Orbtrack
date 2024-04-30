@@ -1440,6 +1440,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     //Shows disappearing slider text
     private void setSliderText(Drawable imageValue, double previousValue, double currentValue, double nextValue)
     {
+        boolean havePrevious = (previousValue != Double.MAX_VALUE);
+        boolean haveNext = (nextValue != Double.MAX_VALUE);
         StringBuilder text = new StringBuilder();
 
         //if text exists
@@ -1449,7 +1451,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             sliderText.setCompoundDrawablesRelativeWithIntrinsicBounds(imageValue, null, null, null);
             sliderText.removeCallbacks(null);
             text.append("<small>");
-            if(previousValue != Double.MAX_VALUE)
+            if(havePrevious)
             {
                 text.append(Globals.getNumberString(previousValue, 1));
                 text.append(xString);
@@ -1458,11 +1460,21 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             {
                 text.append("&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
             }
-            text.append("</small><b><big>&nbsp;&nbsp;|&nbsp;&nbsp;");
+            text.append("</small><b><big>&nbsp;&nbsp;");
+            if(havePrevious)
+            {
+                text.append("|");
+            }
+            text.append("&nbsp;&nbsp;");
             text.append(Globals.getNumberString(currentValue, 1));
             text.append(xString);
-            text.append("&nbsp;&nbsp;|&nbsp;&nbsp;</big></b><small>");
-            if(nextValue != Double.MAX_VALUE)
+            text.append("&nbsp;&nbsp;");
+            if(haveNext)
+            {
+                text.append("|");
+            }
+            text.append("&nbsp;&nbsp;</big></b><small>");
+            if(haveNext)
             {
                 text.append(Globals.getNumberString(nextValue, 1));
                 text.append(xString);

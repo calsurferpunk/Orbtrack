@@ -72,9 +72,10 @@
             android:layout_gravity="center|bottom"
             android:layout_marginBottom="26dp"
             android:alpha="0.3"
+            android:stepSize="1"
             app:thumbColor="@color/white"
             app:trackColor="@color/gray"
-            android:visibility="visible"/>
+            android:visibility="gone"/>
 
         <LinearLayout
             android:id="@+id/Lens_Floating_Button_Layout"

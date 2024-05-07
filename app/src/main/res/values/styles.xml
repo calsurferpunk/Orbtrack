@@ -41,11 +41,6 @@
         <item name="android:background">?attr/pageHighlightBackground</item>
     </style>
 
-    <!-- Toolbar -->
-    <style name="ToolBarStyle" parent="Widget.Material3.Toolbar">
-        <item name="subtitleTextColor">@color/light_gray</item>
-    </style>
-
     <!-- Action bar-->
     <style name="ActionBarTheme" parent="ThemeOverlay.MaterialComponents.Dark.ActionBar">
         <item name="tint">@color/white</item>
@@ -99,7 +94,6 @@
         <item name="drawerArrowStyle">@style/DrawerToggleStyle</item>
         <item name="preferenceTheme">@style/LightPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
-        <item name="toolbarStyle">@style/ToolBarStyle</item>
         <item name="actionOverflowMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:itemTextAppearance">@style/PopupMenuTextStyle</item>
         <item name="elevationOverlayEnabled">false</item>
@@ -138,7 +132,6 @@
         <item name="drawerArrowStyle">@style/DrawerToggleStyle</item>
         <item name="preferenceTheme">@style/DarkPreferenceOverlay</item>
         <item name="preferenceCategoryStyle">@style/DividerCategory</item>
-        <item name="toolbarStyle">@style/ToolBarStyle</item>
         <item name="actionOverflowMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:itemTextAppearance">@style/PopupMenuTextStyle</item>
         <item name="elevationOverlayEnabled">false</item>

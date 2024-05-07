@@ -1639,36 +1639,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         updateMainPager(reloadOrbitals, true);
     }
 
-    //Updates subtitle
-    private void updateSubtitle()
-    {
-        String subTitle = null;
-        Resources res = this.getResources();
-        ActionBar mainActionBar = this.getSupportActionBar();
-
-        switch(mainGroup)
-        {
-            case Groups.Current:
-                subTitle = res.getString(R.string.title_current);
-                break;
-
-            case Groups.Calculate:
-                subTitle = res.getString(R.string.title_calculate);
-                break;
-
-            case Groups.Orbitals:
-                subTitle = res.getString(R.string.title_orbitals);
-                break;
-        }
-
-        //if action bar exists
-        if(mainActionBar != null)
-        {
-            //set subtitle
-            mainActionBar.setSubtitle(subTitle);
-        }
-    }
-
     //Updates current timer delays
     private void updateTimerDelays()
     {
@@ -2496,7 +2466,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
             //update display
             updateOptionsMenu();
-            updateSubtitle();
         }
     }
     private void setMainGroup(int group, boolean force)

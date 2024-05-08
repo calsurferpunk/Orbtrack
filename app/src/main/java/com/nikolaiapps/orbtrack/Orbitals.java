@@ -644,14 +644,12 @@ public abstract class Orbitals
             super();
             this.simple = simple;
             this.categoryTitle = title;
-            this.setHasOptionsMenu(false);
         }
         public Page()
         {
             super();
             this.simple = false;
             this.categoryTitle = null;
-            this.setHasOptionsMenu(true);
         }
 
         @Override
@@ -751,15 +749,15 @@ public abstract class Orbitals
         }
 
         @Override
-        public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
+        public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
         {
             //create options menu
             inflater.inflate(R.menu.menu_main_layout, menu);
-            super.onCreateOptionsMenu(menu, inflater);
+            super.onCreateMenu(menu, inflater);
         }
 
         @Override
-        public void onPrepareOptionsMenu(@NonNull Menu menu)
+        public void onPrepareMenu(@NonNull Menu menu)
         {
             boolean onOrbitalSatellites = (pageNum == PageType.Satellites);
             int itemCount = (onOrbitalSatellites && listAdapter != null ? listAdapter.getAllItemCount() : getListItemCount());

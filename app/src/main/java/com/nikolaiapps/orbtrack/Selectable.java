@@ -15,11 +15,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.core.view.MenuProvider;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
@@ -36,6 +38,7 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -1269,7 +1272,7 @@ public abstract class Selectable
         }
     }
 
-    public static abstract class ListFragment extends Fragment implements ActionMode.Callback
+    public static abstract class ListFragment extends Fragment implements ActionMode.Callback, MenuProvider
     {
         //On edit mode changed listener
         public interface OnEditModeChangedListener
@@ -1447,8 +1450,6 @@ public abstract class Selectable
             {
                 UpdateService.observe(context, updateReceiver);
             }
-
-            this.setHasOptionsMenu(true);
         }
 
         @Override
@@ -1507,6 +1508,16 @@ public abstract class Selectable
         {
             //create view
             View newView = createView(inflater, container, savedInstanceState);
+
+            //add menu
+            try
+            {
+                requireActivity().addMenuProvider(this, getViewLifecycleOwner(), Lifecycle.State.RESUMED);
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
 
             //if listener is set
             if(pageSetListener != null)
@@ -1587,6 +1598,24 @@ public abstract class Selectable
         protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page)
         {
             return(onCreateView(inflater, container, listAdapter, grp, page, true));
+        }
+
+        @Override
+        public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater menuInflater)
+        {
+            //do nothing
+        }
+
+        @Override
+        public void onPrepareMenu(@NonNull Menu menu)
+        {
+            MenuProvider.super.onPrepareMenu(menu);
+        }
+
+        @Override
+        public boolean onMenuItemSelected(@NonNull MenuItem menuItem)
+        {
+            return(false);
         }
 
         @Override
@@ -1790,7 +1819,7 @@ public abstract class Selectable
             if(optionsMenu != null)
             {
                 //refresh menu
-                onPrepareOptionsMenu(optionsMenu);
+                onPrepareMenu(optionsMenu);
             }
         }
 

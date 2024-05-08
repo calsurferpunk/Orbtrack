@@ -1655,12 +1655,6 @@ public abstract class Calculate
         private ArrayList<Selectable.ListItem> orbitalsSelected;
         private ArrayList<Selectable.ListItem> orbitalsSelected2;
 
-        public Page()
-        {
-            super();
-            this.setHasOptionsMenu(true);
-        }
-
         @Override
         protected int getListColumns(Context context, int page)
         {
@@ -1820,16 +1814,16 @@ public abstract class Calculate
         }
 
         @Override
-        public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
+        public void onCreateMenu(@NonNull Menu menu, @NonNull MenuInflater inflater)
         {
             //create options menu
             inflater.inflate(R.menu.menu_main_layout, menu);
             optionsMenu = menu;
-            super.onCreateOptionsMenu(menu, inflater);
+            super.onCreateMenu(menu, inflater);
         }
 
         @Override
-        public void onPrepareOptionsMenu(@NonNull Menu menu)
+        public void onPrepareMenu(@NonNull Menu menu)
         {
             Context context = this.getContext();
             MainActivity mainActivity = (context instanceof MainActivity ? (MainActivity)context : null);

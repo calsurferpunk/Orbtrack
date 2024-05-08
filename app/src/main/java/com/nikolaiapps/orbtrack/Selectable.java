@@ -1509,6 +1509,10 @@ public abstract class Selectable
             //create view
             View newView = createView(inflater, container, savedInstanceState);
 
+            //remember group and page
+            group = getGroupParam();
+            pageNum = getPageParam();
+
             //add menu
             try
             {
@@ -1529,7 +1533,7 @@ public abstract class Selectable
             //return view
             return(newView);
         }
-        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page, boolean useListColumns)
+        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, boolean useListColumns)
         {
             int viewIndex;
             View header;
@@ -1538,8 +1542,8 @@ public abstract class Selectable
             ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_material_view : R.layout.list_view), container, false);
 
             //remember group and page
-            group = grp;
-            pageNum = page;
+            group = getGroupParam();
+            pageNum = getPageParam();
 
             //setup header
             header = Globals.replaceView(R.id.List_Header, R.layout.header_text_view, inflater, rootView);
@@ -1595,9 +1599,9 @@ public abstract class Selectable
             //return view
             return(rootView);
         }
-        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter, int grp, int page)
+        protected View onCreateView(LayoutInflater inflater, ViewGroup container, ListBaseAdapter listAdapter)
         {
-            return(onCreateView(inflater, container, listAdapter, grp, page, true));
+            return(onCreateView(inflater, container, listAdapter, true));
         }
 
         @Override

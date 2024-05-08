@@ -656,7 +656,6 @@ public abstract class Orbitals
         public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
             Context context = Page.this.getContext();
-            int group = this.getGroupParam();
             int page = this.getPageParam();
             boolean onSatellites = (page == PageType.Satellites);
             View newView;
@@ -686,7 +685,7 @@ public abstract class Orbitals
             });
 
             //create view
-            newView = this.onCreateView(inflater, container, listAdapter, group, page);
+            newView = this.onCreateView(inflater, container, listAdapter);
             searchLayout = newView.findViewById(R.id.Orbital_Search_Layout);
             searchGroup = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
             ownerList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);

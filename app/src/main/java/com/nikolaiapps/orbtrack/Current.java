@@ -1467,7 +1467,7 @@ public abstract class Current
             if(newView == null)
             {
                 //create view
-                newView = this.onCreateView(inflater, container, listAdapter, group, page, false);
+                newView = this.onCreateView(inflater, container, listAdapter, false);
             }
 
             //set change listeners

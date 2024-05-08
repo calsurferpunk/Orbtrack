@@ -1763,7 +1763,6 @@ public abstract class Settings
         @Override
         public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            int group = this.getGroupParam();
             int page = this.getPageParam();
             Selectable.ListBaseAdapter listAdapter = null;
 
@@ -1788,7 +1787,7 @@ public abstract class Settings
             }
 
             //create view
-            return(this.onCreateView(inflater, container, listAdapter, group, page));
+            return(this.onCreateView(inflater, container, listAdapter));
         }
 
         @Override

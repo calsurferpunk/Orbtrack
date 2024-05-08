@@ -1675,7 +1675,6 @@ public abstract class Calculate
         @Override
         public View createView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState)
         {
-            int group = this.getGroupParam();
             int page = this.getPageParam();
             int subPage = this.getSubPageParam();
             View newView = null;
@@ -1725,7 +1724,7 @@ public abstract class Calculate
                                 case Globals.SubPageType.List:
                                     listAdapter = new ViewAngles.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0));
                                     setChangeListeners(listAdapter, page);
-                                    newView = this.onCreateView(inflater, container, listAdapter, group, page);
+                                    newView = this.onCreateView(inflater, container, listAdapter);
                                     break;
 
                                 case Globals.SubPageType.Lens:
@@ -1754,7 +1753,7 @@ public abstract class Calculate
                                 case Globals.SubPageType.List:
                                     listAdapter = new Passes.ItemListAdapter(context, page, savedItems, null);
                                     setChangeListeners(listAdapter, page);
-                                    newView = this.onCreateView(inflater, container, listAdapter, group, page);
+                                    newView = this.onCreateView(inflater, container, listAdapter);
                                     break;
 
                                 case Globals.SubPageType.Lens:
@@ -1788,7 +1787,7 @@ public abstract class Calculate
                                 case Globals.SubPageType.List:
                                     listAdapter = new Coordinates.ItemListAdapter(context, savedItems, (multiNoradId != null ? multiNoradId.size() : 0), MainActivity.getTimeZone());
                                     setChangeListeners(listAdapter, page);
-                                    newView = this.onCreateView(inflater, container, listAdapter, group, page);
+                                    newView = this.onCreateView(inflater, container, listAdapter);
                                     break;
 
                                 case Globals.SubPageType.Map:

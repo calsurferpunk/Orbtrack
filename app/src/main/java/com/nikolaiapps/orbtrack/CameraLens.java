@@ -1810,14 +1810,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             currentPaint.setColor(currentColor);
             currentPaint.setAlpha(isSelected ? 255 : textAlpha);
             canvas.drawText(currentName, currentArea.left, currentArea.top, currentPaint);
-
-            //if not selected
-            if(!isSelected)
-            {
-                //restore transparency
-                currentPaint.setAlpha(255);
-            }
         }
+
+        //restore transparency
+        currentPaint.setAlpha(255);
     }
 
     public void showCompassAlignmentDialog(DialogInterface.OnClickListener positiveListener)

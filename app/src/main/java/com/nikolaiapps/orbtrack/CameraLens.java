@@ -568,7 +568,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     public PlayBar playBar;
     public Slider zoomBar;
     public Slider exposureBar;
-    public FloatingActionStateButtonMenu settingsMenu;
+    public CustomSettingsMenu settingsMenu;
 
     private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
     private static final ParentOrbital parentOrbitalSearch = new ParentOrbital(Universe.IDs.None, -1, 0);

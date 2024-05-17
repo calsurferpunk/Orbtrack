@@ -13,31 +13,21 @@ import android.view.animation.AnimationUtils;
 
 public class FloatingActionStateButton extends FloatingActionButton
 {
+    public interface OnCheckedChangedListener
+    {
+        void onCheckedChanged(FloatingActionStateButton button, boolean isChecked);
+    }
+
     private int normalTintColor;
     private int checkedTintColor;
     private boolean checked;
     private boolean showChecked;
-
-    public FloatingActionStateButton(Context context)
-    {
-        super(context);
-        init(null);
-    }
-
-    public FloatingActionStateButton(Context context, AttributeSet attrs)
-    {
-        super(context, attrs);
-        init(attrs);
-    }
+    private OnCheckedChangedListener checkedChangedListener;
 
     public FloatingActionStateButton(Context context, AttributeSet attrs, int defStyleAttr)
     {
         super(context, attrs, defStyleAttr);
-        init(attrs);
-    }
 
-    private void init(AttributeSet attrs)
-    {
         //if attributes are not set
         if(attrs == null)
         {
@@ -66,6 +56,19 @@ public class FloatingActionStateButton extends FloatingActionButton
         //set alpha
         setAlpha(0.85f);
     }
+    public FloatingActionStateButton(Context context, AttributeSet attrs)
+    {
+        this(context, attrs, R.attr.floatingActionButtonStyle);
+    }
+    public FloatingActionStateButton(Context context)
+    {
+        this(context, null);
+    }
+
+    public void setOnCheckedChangedListener(OnCheckedChangedListener listener)
+    {
+        checkedChangedListener = listener;
+    }
 
     public void setStateColors(int normalColor, int checkedColor)
     {
@@ -80,6 +83,11 @@ public class FloatingActionStateButton extends FloatingActionButton
         {
             checked = isChecked;
             setBackgroundTintList(ColorStateList.valueOf(checked && showChecked ? checkedTintColor : normalTintColor));
+
+            if(checkedChangedListener != null)
+            {
+                checkedChangedListener.onCheckedChanged(this, isChecked);
+            }
 
             if(invalidate)
             {

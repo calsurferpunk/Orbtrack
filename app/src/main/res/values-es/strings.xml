@@ -351,6 +351,7 @@
     <string name="title_deleted">Eliminado</string>
     <string name="title_deny">Negar</string>
     <string name="title_details">Detalles</string>
+    <string name="title_disabled">Desactivado</string>
     <string name="title_dismiss">Despedir</string>
     <string name="title_display">Monitor</string>
     <string name="title_downloads">Descargas</string>
@@ -363,6 +364,7 @@
     <string name="title_element_set">Conjunto Elementos</string>
     <string name="title_elevation">Elevación</string>
     <string name="title_elevation_minimum">Elevación Mínima</string>
+    <string name="title_enabled">Activado</string>
     <string name="title_end">Fin</string>
     <string name="title_end_color">Color Final</string>
     <string name="title_end_date">Fecha Fin</string>
@@ -546,6 +548,7 @@
     <string name="title_red">Rojo</string>
     <string name="title_remove">Retirar</string>
     <string name="title_reset">Reiniciar</string>
+    <string name="title_reset_alignment_question">¿Restablecer Alineación?</string>
     <string name="title_retry">Rever</string>
     <string name="title_rev_number_at_epoch">Número de Revolución en Época</string>
     <string name="title_right_asc_ascd_node">Ascensión Recta de Nodo Ascendente</string>

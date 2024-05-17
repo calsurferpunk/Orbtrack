@@ -1891,7 +1891,7 @@ public abstract class Current
     private static boolean mapShowDividers = false;
     private static float mapPendingMarkerScale = Float.MAX_VALUE;
     private static float lensPendingStarMagnitude = Float.MAX_VALUE;
-    private static FloatingActionStateButtonMenu mapSettingsMenu = null;
+    private static CustomSettingsMenu mapSettingsMenu = null;
     private static CoordinatesFragment.OrbitalBase moonMarker = null;
     private static Calculations.ObserverType currentLocation = new Calculations.ObserverType();
     private static WeakReference<TextView> mapInfoTextReference;
@@ -2304,18 +2304,16 @@ public abstract class Current
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
         final boolean havePassViews = (passViews != null && passViews.length > 0);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
-        final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Lens_Fullscreen_Button);
+        final FloatingActionButton fullscreenButton = cameraView.settingsMenu.addEndItem(R.drawable.ic_fullscreen_white);
         final FloatingActionStateButton showToolbarsButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars);
-        final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align) : null);
         final FloatingActionStateButton showHorizonButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_remove_black, R.string.title_show_horizon);
         final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
         final FloatingActionStateButton visibleStarsButton = (!useSaved && (showingStars || needConstellations) ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_visible_stars) : null);
+        final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
-        final LinearLayout floatingButtonLayout = rootView.findViewById(R.id.Lens_Floating_Button_Layout);
         final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
         final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
         final MaterialButton cancelButton = rootView.findViewById(R.id.Lens_Cancel_Button);
-        final FrameLayout.LayoutParams floatingButtonLayoutParams = (FrameLayout.LayoutParams)floatingButtonLayout.getLayoutParams();
 
         //update status
         lensShowToolbars = Settings.getLensShowToolbars(context);
@@ -2348,8 +2346,6 @@ public abstract class Current
 
         //setup bar and floating buttons
         pageFragment.scaleBar = rootView.findViewById(R.id.Lens_Magnitude_Bar);
-        floatingButtonLayoutParams.bottomMargin = (int)(useSaved ? Globals.dpToPixels(context, 24) : 0);
-        floatingButtonLayout.setLayoutParams(floatingButtonLayoutParams);
 
         //setup calibration button
         lensShowCalibration = false;
@@ -2496,16 +2492,30 @@ public abstract class Current
         resetButton.setOnClickListener(new View.OnClickListener()
         {
             @Override
-            public void onClick(View v)
+            public void onClick(View view)
             {
-                //reset alignment
-                cameraView.resetAlignment();
+                Resources res = (context != null ? context.getResources() : null);
 
-                //if button exists
-                if(showCalibrationButton != null)
+                //if resources exist
+                if(res != null)
                 {
-                    //close, note: only shown when showing calibration, so will always close
-                    showCalibrationButton.performClick();
+                    //confirm alignment measurement resetting
+                    Globals.showConfirmDialog(context, Globals.getDrawable(context, R.drawable.ic_warning_black, true), res.getString(R.string.title_reset_alignment_question), null, res.getString(R.string.title_ok), res.getString(R.string.title_cancel), true, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            //reset alignment
+                            cameraView.resetAlignment();
+
+                            //if button exists
+                            if(showCalibrationButton != null)
+                            {
+                                //close, note: only shown when showing calibration, so will always close
+                                showCalibrationButton.performClick();
+                            }
+                        }
+                    }, null, null);
                 }
             }
         });
@@ -3461,7 +3471,7 @@ public abstract class Current
         final LinearLayout floatingButtonLayout = rootView.findViewById(R.id.Map_Floating_Button_Layout);
         final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
         mapSettingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
-        final FloatingActionButton fullscreenButton = rootView.findViewById(R.id.Map_Fullscreen_Button);
+        final FloatingActionButton fullscreenButton = mapSettingsMenu.addEndItem(R.drawable.ic_fullscreen_white);
         final FloatingActionStateButton showToolbarsButton = (multiSelected ? mapSettingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
         final FloatingActionStateButton showZoomButton = mapSettingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
         final FloatingActionStateButton showLatLonButton = mapSettingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);

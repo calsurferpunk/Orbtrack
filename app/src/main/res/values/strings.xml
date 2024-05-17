@@ -351,6 +351,7 @@
     <string name="title_deleted">Deleted</string>
     <string name="title_deny">Deny</string>
     <string name="title_details">Details</string>
+    <string name="title_disabled">Disabled</string>
     <string name="title_dismiss">Dismiss</string>
     <string name="title_display">Display</string>
     <string name="title_downloads">Downloads</string>
@@ -363,6 +364,7 @@
     <string name="title_element_set">Element Set</string>
     <string name="title_elevation">Elevation</string>
     <string name="title_elevation_minimum">Elevation Minimum</string>
+    <string name="title_enabled">Enabled</string>
     <string name="title_end">End</string>
     <string name="title_end_color">End Color</string>
     <string name="title_end_date">End Date</string>
@@ -546,6 +548,7 @@
     <string name="title_red">Red</string>
     <string name="title_remove">Remove</string>
     <string name="title_reset">Reset</string>
+    <string name="title_reset_alignment_question">Reset Alignment?</string>
     <string name="title_retry">Retry</string>
     <string name="title_rev_number_at_epoch">Revolution Number at Epoch</string>
     <string name="title_right_asc_ascd_node">Right Ascension of Ascending Node</string>

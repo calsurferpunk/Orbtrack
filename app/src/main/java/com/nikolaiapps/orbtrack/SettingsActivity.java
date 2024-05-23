@@ -160,6 +160,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                     case ScreenKey.LensViewDisplay:
                         SwitchPreference lensShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.LensShowToolbars);
+                        SwitchPreference lensShowSlidersSwitch = this.findPreference(Settings.PreferenceName.LensShowSliders);
                         SwitchPreference lensShowOutsideAreaSwitch = this.findPreference(Settings.PreferenceName.LensShowOutsideArea);
                         SwitchPreference lensDirectionCentered = this.findPreference(Settings.PreferenceName.LensDirectionCentered);
                         SwitchPreference lensShowIconDirection = this.findPreference(Settings.PreferenceName.LensIndicatorIconShowDirection);
@@ -178,6 +179,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(lensShowToolbarsSwitch);
+                        setupSwitch(lensShowSlidersSwitch);
                         setupSwitch(lensShowOutsideAreaSwitch);
                         setupSwitch(lensDirectionCentered);
                         setupSwitch(lensShowIconDirection);
@@ -245,7 +247,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case ScreenKey.MapViewDisplay:
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
                         SwitchPreference mapShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
-                        SwitchPreference showZoomSwitch = this.findPreference(Settings.PreferenceName.MapShowZoom);
+                        SwitchPreference mapShowSlidersSwitch = this.findPreference(Settings.PreferenceName.MapShowSliders);
                         SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
                         SwitchPreference showStarsSwitch = this.findPreference(Settings.PreferenceName.MapShowStars);
@@ -261,7 +263,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
                         setupSwitch(mapShowToolbarsSwitch);
-                        setupSwitch(showZoomSwitch);
+                        setupSwitch(mapShowSlidersSwitch);
                         setupSwitch(showLabelsAlwaysSwitch);
                         setupSwitch(showShadowsSwitch);
                         setupSwitch(showStarsSwitch);
@@ -1618,6 +1620,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
                         case Settings.PreferenceName.LensShowToolbars:
+                        case Settings.PreferenceName.LensShowSliders:
                         case Settings.PreferenceName.LensPathLabelType:
                         case Settings.PreferenceName.LensHideConstellationStarPaths:
                         case Settings.PreferenceName.LensShowPathDirection:
@@ -1666,8 +1669,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShow3dPaths:
                         case Settings.PreferenceName.MapRotateAllowed:
                         case Settings.PreferenceName.MapMarkerShowBackground:
+                        case Settings.PreferenceName.MapShowSliders:
                         case Settings.PreferenceName.MapShowToolbars:
-                        case Settings.PreferenceName.MapShowZoom:
                         case Settings.PreferenceName.MapShowLabelsAlways:
                         case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapShowOrbitalDirectionLimit:

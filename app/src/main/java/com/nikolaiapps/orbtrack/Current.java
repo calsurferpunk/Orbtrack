@@ -1883,21 +1883,21 @@ public abstract class Current
     public static long mapMillisecondsPlayBar = 0;
     public static CoordinatesFragment.MarkerBase currentLocationMarker = null;
 
-    private static boolean lensShowHorizon = false;
+    private static boolean lensShowSliders = true;
     private static boolean lensShowToolbars = true;
     private static boolean mapViewReady = false;
+    private static boolean mapShowSliders = true;
     private static boolean mapShowToolbars = true;
-    private static boolean mapShowZoom = true;
     private static boolean mapShowDividers = false;
     private static float mapPendingMarkerScale = Float.MAX_VALUE;
     private static float lensPendingStarMagnitude = Float.MAX_VALUE;
-    private static CustomSettingsMenu mapSettingsMenu = null;
     private static CoordinatesFragment.OrbitalBase moonMarker = null;
     private static Calculations.ObserverType currentLocation = new Calculations.ObserverType();
     private static WeakReference<TextView> mapInfoTextReference;
     private static WeakReference<CameraLens> cameraViewReference;
     private static WeakReference<CustomSearchView> currentSearchTextReference;
     private static WeakReference<CoordinatesFragment> mapViewReference;
+    private static WeakReference<CustomSettingsMenu> mapSettingsMenuReference;
     private static WeakReference<FloatingActionButton> fullscreenButtonReference;
 
     //Gets camera view
@@ -1910,6 +1910,12 @@ public abstract class Current
     private static CoordinatesFragment getMapView()
     {
         return(mapViewReference != null ? mapViewReference.get() : null);
+    }
+
+    //Gets map settings menu
+    private static CustomSettingsMenu getMapSettingsMenu()
+    {
+        return(mapSettingsMenuReference != null ?mapSettingsMenuReference.get() : null);
     }
 
     //Gets fullscreen button
@@ -2021,7 +2027,7 @@ public abstract class Current
     }
 
     //Setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, Slider zoomBar, Slider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final FloatingActionStateButton showSlidersButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, Slider zoomBar, Slider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
     {
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
@@ -2181,17 +2187,6 @@ public abstract class Current
                     {
                         searchListLayout.setVisibility(toolVisibility);
                     }
-                    if(cameraView != null)
-                    {
-                        if(zoomBar != null)
-                        {
-                            zoomBar.setVisibility(cameraView.canZoom() ? toolVisibility : View.GONE);
-                        }
-                        if(exposureBar != null)
-                        {
-                            exposureBar.setVisibility(cameraView.canSetExposure() ? toolVisibility : View.GONE);
-                        }
-                    }
                     if(pagePlayBar != null)
                     {
                         pagePlayBar.setVisibility(toolVisibility);
@@ -2224,6 +2219,59 @@ public abstract class Current
             else
             {
                 mapShowToolbars = !mapShowToolbars;
+            }
+        }
+
+        //if show sliders button exists
+        if(showSlidersButton != null)
+        {
+            //setup sliders button
+            showSlidersButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    CameraLens cameraView = (forLens ? getCameraView() : null);
+                    boolean showSliders;
+                    boolean haveCamera = (cameraView != null);
+
+                    //try to reverse state
+                    if(forLens)
+                    {
+                        lensShowSliders = !lensShowSliders;
+                        showSliders = lensShowSliders;
+                        Settings.setLensShowSliders(context, showSliders);
+                    }
+                    else
+                    {
+                        mapShowSliders = !mapShowSliders;
+                        showSliders = mapShowSliders;
+                        Settings.setMapShowSliders(context, showSliders);
+                    }
+
+                    //update button
+                    showSlidersButton.setChecked(showSliders);
+
+                    //update visibility
+                    if(zoomBar != null)
+                    {
+                        zoomBar.setVisibility(showSliders && (!forLens || (haveCamera && cameraView.canZoom())) ? View.VISIBLE : View.GONE);
+                    }
+                    if(exposureBar != null)
+                    {
+                        exposureBar.setVisibility(showSliders && (!forLens || (haveCamera && cameraView.canSetExposure())) ? View.VISIBLE : View.GONE);
+                    }
+                }
+            });
+
+            //set to opposite for later click called
+            if(forLens)
+            {
+                lensShowSliders = !lensShowSliders;
+            }
+            else
+            {
+                mapShowSliders = !mapShowSliders;
             }
         }
     }
@@ -2305,10 +2353,10 @@ public abstract class Current
         final boolean havePassViews = (passViews != null && passViews.length > 0);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
         final FloatingActionButton fullscreenButton = cameraView.settingsMenu.addEndItem(R.drawable.ic_fullscreen_white);
-        final FloatingActionStateButton showToolbarsButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars);
-        final FloatingActionStateButton showHorizonButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_remove_black, R.string.title_show_horizon);
         final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path) : null);
         final FloatingActionStateButton visibleStarsButton = (!useSaved && (showingStars || needConstellations) ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_visible_stars) : null);
+        final FloatingActionStateButton showToolbarsButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars);
+        final FloatingActionStateButton showSlidersButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_commit_white, R.string.title_show_sliders);
         final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
         final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
@@ -2317,6 +2365,7 @@ public abstract class Current
 
         //update status
         lensShowToolbars = Settings.getLensShowToolbars(context);
+        lensShowSliders = Settings.getLensShowSliders(context);
         lensPendingStarMagnitude = Settings.getLensStarMagnitude(context);
 
         //setup camera
@@ -2337,11 +2386,16 @@ public abstract class Current
         searchButton = rootView.findViewById(R.id.Lens_Search_Button);
         searchText = rootView.findViewById(R.id.Lens_Search_Text);
         currentSearchTextReference = new WeakReference<>(searchText);
-        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, cameraView.zoomBar, cameraView.exposureBar, cameraView.playBar, selectedOrbitals, true);
+        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, cameraView.zoomBar, cameraView.exposureBar, cameraView.playBar, selectedOrbitals, true);
         if(showToolbarsButton != null)
         {
             //toggle displays
             showToolbarsButton.performClick();
+        }
+        if(showSlidersButton != null)
+        {
+            //toggle displays
+            showSlidersButton.performClick();
         }
 
         //setup bar and floating buttons
@@ -2401,7 +2455,8 @@ public abstract class Current
                         }
                         lastSelectedNoradId = Universe.IDs.None;
                     }
-                    cameraView.zoomBar.setVisibility(lensShowCalibration || !lensShowToolbars || !cameraView.canZoom() ? View.GONE : View.VISIBLE);
+                    cameraView.zoomBar.setVisibility(lensShowCalibration || !lensShowSliders || !cameraView.canZoom() ? View.GONE : View.VISIBLE);
+                    cameraView.exposureBar.setVisibility(lensShowCalibration || !lensShowSliders || !cameraView.canSetExposure() ? View.GONE : View.VISIBLE);
                     buttonLayout.setVisibility(lensShowCalibration ? View.VISIBLE : View.GONE);
                     selectButton.setText(R.string.title_select);
                     resetButton.setVisibility(View.VISIBLE);
@@ -2570,27 +2625,6 @@ public abstract class Current
                 }
             }
         });
-
-        //setup horizon button
-        lensShowHorizon = Settings.getLensShowHorizon(context);
-        showHorizonButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                //reverse state
-                lensShowHorizon = !lensShowHorizon;
-                showHorizonButton.setChecked(lensShowHorizon);
-                Settings.setLensShowHorizon(context, lensShowHorizon);
-
-                //update display
-                cameraView.showHorizon = lensShowHorizon;
-            }
-        });
-
-        //set to opposite then perform click to set it correctly
-        lensShowHorizon = !lensShowHorizon;
-        showHorizonButton.performClick();
 
         //if lens first run or calibrate
         if(firstRun || firstCalibrate)
@@ -2868,39 +2902,6 @@ public abstract class Current
         return(lensPendingStarMagnitude != Float.MAX_VALUE);
     }
 
-    //Setup zoom buttons
-    private static void setupZoomButtons(final Context context, final FloatingActionStateButton showZoomButton, FloatingActionButton zoomInButton, FloatingActionButton zoomOutButton)
-    {
-        CoordinatesFragment mapView = getMapView();
-
-        //setup zoom buttons
-        showZoomButton.setOnClickListener(new View.OnClickListener()
-        {
-            @Override
-            public void onClick(View v)
-            {
-                int buttonVisibility;
-
-                //reverse state
-                mapShowZoom = !mapShowZoom;
-                showZoomButton.setChecked(mapShowZoom);
-                Settings.setMapShowZoom(context, mapShowZoom);
-
-                //update visibility
-                buttonVisibility = (mapShowZoom ? View.VISIBLE : View.GONE);
-                zoomInButton.setVisibility(buttonVisibility);
-                zoomOutButton.setVisibility(buttonVisibility);
-            }
-        });
-        CoordinatesFragment.Utils.setupZoomButton(context, mapView, zoomInButton, true);
-        CoordinatesFragment.Utils.setupZoomButton(context, mapView, zoomOutButton, false);
-
-        //set to opposite then perform click to set it correctly
-        mapShowZoom = !Settings.getMapShowZoom(context);
-        showZoomButton.performClick();
-
-    }
-
     //Setup latitude/longitude button
     private static void setupLatLonButton(final Context context, final FloatingActionStateButton showLatLonButton)
     {
@@ -3042,7 +3043,12 @@ public abstract class Current
                     }
                     else
                     {
-                        mapSettingsMenu.close();
+                        CustomSettingsMenu mapSettingsMenu = getMapSettingsMenu();
+
+                        if(mapSettingsMenu != null)
+                        {
+                            mapSettingsMenu.close();
+                        }
                     }
                 }
             });
@@ -3468,21 +3474,19 @@ public abstract class Current
         final Database.SatelliteData currentSatellite = (useSavedPath && haveSelected && !useMultiNoradId ? selectedOrbitals[0] : null);
 
         //get menu and zoom displays
-        final LinearLayout floatingButtonLayout = rootView.findViewById(R.id.Map_Floating_Button_Layout);
+        final Slider mapZoomBar = rootView.findViewById(R.id.Map_Zoom_Bar);
         final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
-        mapSettingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
+        final CustomSettingsMenu mapSettingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
         final FloatingActionButton fullscreenButton = mapSettingsMenu.addEndItem(R.drawable.ic_fullscreen_white);
-        final FloatingActionStateButton showToolbarsButton = (multiSelected ? mapSettingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
-        final FloatingActionStateButton showZoomButton = mapSettingsMenu.addMenuItem(R.drawable.ic_unfold_more_white, R.string.title_show_zoom);
+        final FloatingActionStateButton showPathButton = mapSettingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path);
         final FloatingActionStateButton showLatLonButton = mapSettingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_show_latitude_longitude);
         final FloatingActionStateButton showFootprintButton = mapSettingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_show_footprint);
-        final FloatingActionStateButton showPathButton = mapSettingsMenu.addMenuItem(R.drawable.orbit, R.string.title_show_path);
         final FloatingActionStateButton iconScaleButton = mapSettingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_set_icon_scale);
-        final FloatingActionButton zoomInButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_In_Button);
-        final FloatingActionButton zoomOutButton = floatingButtonLayout.findViewById(R.id.Map_Zoom_Out_Button);
-        mapSettingsMenu.setVisibility(View.GONE);
+        final FloatingActionStateButton showToolbarsButton = (multiSelected ? mapSettingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_show_toolbars) : null);
+        final FloatingActionStateButton showSlidersButton = mapSettingsMenu.addMenuItem(R.drawable.ic_commit_white, R.string.title_show_sliders);
 
         //update status
+        mapShowSliders = Settings.getMapShowSliders(context);
         mapShowToolbars = Settings.getMapShowToolbars(context);
 
         //get displays
@@ -3490,6 +3494,7 @@ public abstract class Current
         final TextView mapInfoText = rootView.findViewById(R.id.Map_Coordinate_Info_Text);
         final CoordinatesFragment mapView = (forGlobe ? new Whirly.GlobeFragment() : new Whirly.MapFragment());
         mapViewReference = new WeakReference<>(mapView);
+        mapSettingsMenuReference = new WeakReference<>(mapSettingsMenu);
         mapInfoTextReference = new WeakReference<>(mapInfoText);
         fullscreenButtonReference = new WeakReference<>(fullscreenButton);
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(context, forGlobe));
@@ -3511,7 +3516,30 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, searchList, searchButton, searchText, searchListLayout, null, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, mapZoomBar, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+
+        //setup menu
+        mapSettingsMenu.setOnExpandedStateChangedListener(new CustomSettingsMenu.OnExpandedStateChangedListener()
+        {
+            @Override
+            public void onExpandedStateChanged(CustomSettingsMenu menu, boolean isExpanded)
+            {
+                LinearLayout.LayoutParams menuLayoutParams = (LinearLayout.LayoutParams)mapSettingsMenu.getLayoutParams();
+
+                //if bar exists
+                if(page.playBar != null)
+                {
+                    //show if showing toolbars and menu is not expanded
+                    page.playBar.setVisibility(mapShowToolbars && !isExpanded ? View.VISIBLE : View.GONE);
+                }
+
+                //update display
+                menuLayoutParams.width = (isExpanded ? LinearLayout.LayoutParams.MATCH_PARENT : LinearLayout.LayoutParams.WRAP_CONTENT);
+                mapSettingsMenu.setLayoutParams(menuLayoutParams);
+
+            }
+        });
+        mapSettingsMenu.setVisibility(View.GONE);
 
         //if map info text exists and not using background
         if(mapInfoText != null && !Settings.getMapMarkerShowBackground(context))
@@ -3589,6 +3617,15 @@ public abstract class Current
                         }
                     }
                 });
+                mapView.setOnHeightChangedListener(new CoordinatesFragment.OnHeightChangedListener()
+                {
+                    @Override
+                    public void heightChanged(double z)
+                    {
+                        //update zoom
+                        mapZoomBar.setValue((float)z);
+                    }
+                });
 
                 //setup markers
                 mapPendingMarkerScale = Settings.getMapMarkerScale(context);
@@ -3617,7 +3654,7 @@ public abstract class Current
                 firstZoom = CoordinatesFragment.DefaultNearZoom;
 
                 //setup buttons
-                setupZoomButtons(context, showZoomButton, zoomInButton, zoomOutButton);
+                CoordinatesFragment.Utils.setupZoomSlider(mapView, mapZoomBar, forGlobe);
                 setupLatLonButton(context, showLatLonButton);
                 setupFootprintButton(context, showFootprintButton);
                 setupScaleButton(context, iconScaleButton, page.scaleBar, false);
@@ -3715,6 +3752,7 @@ public abstract class Current
                     //toggle displays
                     showToolbarsButton.performClick();
                 }
+                showSlidersButton.performClick();
                 mapSettingsMenu.setVisibility(View.VISIBLE);
                 mapViewReady = true;
             }
@@ -3726,6 +3764,7 @@ public abstract class Current
     //Returns if closed map settings menu
     public static boolean closeMapSettingsMenu()
     {
+        CustomSettingsMenu mapSettingsMenu = getMapSettingsMenu();
         return(mapSettingsMenu != null && mapSettingsMenu.close());
     }
 }

@@ -2190,13 +2190,13 @@ class Whirly
             if(forMap)
             {
                 mapControl.setViewExtents(Point2d.FromDegrees(-180 * 100, -90), Point2d.FromDegrees(180 * 100, 90));
-                mapControl.setZoomLimits(0, 5);
+                mapControl.setZoomLimits(MinZoom, MaxMapZoom);
                 mapControl.gestureDelegate = this;
             }
             else
             {
                 globeControl.setClearColor(Color.BLACK);
-                globeControl.setZoomLimits(0, 18);
+                globeControl.setZoomLimits(MinZoom, MaxGlobeZoom);
                 globeControl.gestureDelegate = this;
 
                 //if activity is set
@@ -2214,6 +2214,22 @@ class Whirly
                     });
                 }
             }
+            baseControl.setHeightChangedListener(new BaseController.HeightListener()
+            {
+                public void onHeightChanged(double z)
+                {
+                    //send event
+                    common.heightChanged(z);
+                }
+            });
+            baseControl.setLocationChangedListener(new BaseController.LocationListener()
+            {
+                public void onLocationChanged(double x, double y, double z)
+                {
+                    //send event
+                    common.locationChanged(x, y, z);
+                }
+            });
 
             //set frame rate
             baseControl.setTargetFPS(Settings.getMapFrameRate(activity));
@@ -2293,9 +2309,21 @@ class Whirly
         }
 
         @Override
+        public void setOnHeightChangedListener(OnHeightChangedListener listener)
+        {
+            common.setOnHeightChangedListener(listener);
+        }
+
+        @Override
         public void setOnLocationClickListener(OnLocationClickListener listener)
         {
             common.setOnLocationClickListener(listener);
+        }
+
+        @Override
+        public void setOnLocationChangedListener(OnLocationChangedListener listener)
+        {
+            common.setOnLocationChangedListener(listener);
         }
 
         @Override
@@ -2734,7 +2762,7 @@ class Whirly
 
         private double getHeadingRads()
         {
-            return(getControl() != null ? (isMap() ? mapControl.getHeading() : globeControl.getViewState().heading) : 0);
+            return(getControl() != null ? (isMap() ? mapControl.getHeading() : globeControl.getGlobeView().getHeading()) : 0);
         }
 
         @Override
@@ -2817,9 +2845,9 @@ class Whirly
         }
 
         @Override
-        public void zoom(boolean in)
+        public void setZoom(double zoom)
         {
-            double currentZoom;
+            double maxZoom = 1;
             Point3d currentPosition = null;
 
             if(getControl() != null)
@@ -2828,18 +2856,29 @@ class Whirly
                 if(isMap())
                 {
                     currentPosition = mapControl.getPositionGeo();
+                    maxZoom = MaxMapZoom;
                 }
                 else if(globeControl.getGlobeView() != null)
                 {
                     currentPosition = globeControl.getGlobeView().getLoc();
-
+                    maxZoom = MaxGlobeZoom;
                 }
 
                 //if got current position
                 if(currentPosition != null)
                 {
-                    currentZoom = currentPosition.getZ();
-                    moveCamera(Math.toDegrees(currentPosition.getY()), Math.toDegrees(currentPosition.getX()), currentZoom * (in ? 0.5 : 2));
+                    //keep zoom within range
+                    if(zoom < MinZoom)
+                    {
+                        zoom = MinZoom;
+                    }
+                    else if(zoom > maxZoom)
+                    {
+                        zoom = maxZoom;
+                    }
+
+                    //update zoom
+                    moveCamera(Math.toDegrees(currentPosition.getY()), Math.toDegrees(currentPosition.getX()), zoom);
                 }
             }
         }

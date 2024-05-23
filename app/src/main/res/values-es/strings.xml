@@ -188,11 +188,11 @@
     <string name="desc_show_outside_visible_area">Mostrar orbitales fuera de la vista en los bordes</string>
     <string name="desc_show_selected_footprint">Mostrar el área visible orbital seleccionada en la superficie</string>
     <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo\nNota: Desactivado para algunas GPU Mali y PowerVR</string>
+    <string name="desc_show_sliders">Mostrar deslizantes en la pantalla</string>
     <string name="desc_show_stars">Mostrar estrellas en vista de globo</string>
     <string name="desc_show_sunlight">Mostrar/ocultar la luz diurna actual en la superficie</string>
     <string name="desc_show_toolbars">Mostrar barras herramientas en los bordes de la pantalla</string>
     <string name="desc_show_view_quality">Mostrar colores de relleno de calidad de visualización</string>
-    <string name="desc_show_zoom">Mostrar botones de enfocar</string>
     <string name="desc_stars_constellation_notice">¡Ahora se pueden rastrear estrellas y constelaciones! Si desea verlos, seleccione la configuración de filtro en la parte superior derecha de cada pantalla. De forma predeterminada, se muestran solo en vistas de lentes, pero se pueden agregar al globo terráqueo, listas, etc.</string>
     <string name="desc_time_zone_source">Localización zona horaria detección</string>
     <string name="desc_unit_size_error">Debe ser más grande (demasiados incrementos)</string>
@@ -609,9 +609,9 @@
     <string name="title_show_selected">Mostrar Seleccionado</string>
     <string name="title_show_selected_footprint">Mostrar Huella Seleccionada</string>
     <string name="title_show_shadows">Mostrar Sombras</string>
+    <string name="title_show_sliders">Mostrar Deslizantes</string>
     <string name="title_show_sunlight">Mostrar Luz Sol</string>
     <string name="title_show_toolbars">Mostrar Barras Herramientas</string>
-    <string name="title_show_zoom">Mostrar Enfocar</string>
     <string name="title_skip">Omitir</string>
     <string name="title_slow">Lento</string>
     <string name="title_small">Pequeño</string>

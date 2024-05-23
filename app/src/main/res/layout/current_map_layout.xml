@@ -61,31 +61,15 @@
             tools:ignore="RtlHardcoded"
             android:visibility="gone"/>
 
-        <LinearLayout
-            android:id="@+id/Map_Floating_Button_Layout"
-            android:layout_width="wrap_content"
+        <com.google.android.material.slider.Slider
+            style="@style/SlimTransparentSlider"
+            android:id="@+id/Map_Zoom_Bar"
+            android:layout_width="280dp"
             android:layout_height="wrap_content"
-            android:layout_gravity="bottom|end"
-            android:orientation="vertical"
-            android:paddingBottom="24dp">
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/Map_Zoom_In_Button"
-                style="@style/FloatingButton"
-                android:alpha="0.7"
-                app:srcCompat="@drawable/ic_add_white"
-                app:tint="?attr/titleTextColor"
-                app:fabSize="mini"
-                android:visibility="gone"/>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/Map_Zoom_Out_Button"
-                style="@style/FloatingButton"
-                android:alpha="0.7"
-                app:srcCompat="@drawable/ic_remove_black"
-                app:tint="?attr/titleTextColor"
-                app:fabSize="mini"
-                android:visibility="gone"/>
-        </LinearLayout>
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="-116dp"
+            android:rotation="90"
+            android:visibility="gone"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -113,21 +97,26 @@
                     android:background="?attr/colorAccentVariant"
                     android:visibility="gone"/>
 
-                <com.nikolaiapps.orbtrack.PlayBar
-                    android:id="@+id/Map_Coordinate_Play_Bar"
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/Map_Coordinate_Info_Text"
-                    android:background="?attr/colorAccentDark"
-                    android:visibility="gone"/>
-            </RelativeLayout>
+                    android:orientation="horizontal"
+                    android:layout_below="@id/Map_Coordinate_Info_Text">
+                    <com.nikolaiapps.orbtrack.CustomSettingsMenu
+                        android:id="@+id/Map_Settings_Menu"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:animateLayoutChanges="true"/>
 
-            <com.nikolaiapps.orbtrack.CustomSettingsMenu
-                android:id="@+id/Map_Settings_Menu"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:animateLayoutChanges="true"/>
+                    <com.nikolaiapps.orbtrack.PlayBar
+                        android:id="@+id/Map_Coordinate_Play_Bar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:visibility="gone"/>
+                </LinearLayout>
+            </RelativeLayout>
         </LinearLayout>
     </FrameLayout>
 </LinearLayout>

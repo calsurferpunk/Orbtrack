@@ -22,6 +22,11 @@ import java.util.ArrayList;
 
 public class CustomSettingsMenu extends FrameLayout
 {
+    public interface OnExpandedStateChangedListener
+    {
+        void onExpandedStateChanged(CustomSettingsMenu menu, boolean isExpanded) ;
+    }
+
     private boolean showMessages;
     private int menuOffset;
     private final int buttonSizePx;
@@ -33,6 +38,7 @@ public class CustomSettingsMenu extends FrameLayout
     private final FloatingActionStateButton nextButton;
     private final FloatingActionStateButton previousButton;
     private final ArrayList<FloatingActionStateButton> centerButtons;
+    private OnExpandedStateChangedListener expandedStateChangedListener;
 
     public CustomSettingsMenu(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
@@ -47,6 +53,7 @@ public class CustomSettingsMenu extends FrameLayout
         showMessages = false;
         centerButtonCountMax = (screenWidthDp - (buttonSizeDp * 5)) / buttonSizeDp;     //note: leave room for state, previous, next, buffer space, and end button
         centerButtons = new ArrayList<>(0);
+        expandedStateChangedListener = null;
 
         //create layouts
         centerLayout = createLayout(Gravity.CENTER);
@@ -76,6 +83,13 @@ public class CustomSettingsMenu extends FrameLayout
                 //update layout visibilities
                 centerLayout.setVisibility(layoutVisibility);
                 endLayout.setVisibility(layoutVisibility);
+
+                //if listener exists
+                if(expandedStateChangedListener != null)
+                {
+                    //call it
+                    expandedStateChangedListener.onExpandedStateChanged(CustomSettingsMenu.this, setChecked);
+                }
             }
         });
 
@@ -227,6 +241,12 @@ public class CustomSettingsMenu extends FrameLayout
     public void setMessagesEnabled(boolean show)
     {
         showMessages = show;
+    }
+
+    //Sets on expanded state changed listener
+    public void setOnExpandedStateChangedListener(OnExpandedStateChangedListener listener)
+    {
+        expandedStateChangedListener = listener;
     }
 
     //Updates display

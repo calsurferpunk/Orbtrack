@@ -2573,6 +2573,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         boolean cameraRotate = Settings.getLensRotate(context);
         boolean useAutoWidth = Settings.getLensAutoWidth(context);
         boolean useAutoHeight = Settings.getLensAutoHeight(context);
+        boolean lensShowSliders = Settings.getLensShowSliders(context);
         int exposureIndex = 0;
         float maxFocus;
         float userDegWidth = Settings.getLensWidth(context);
@@ -2663,7 +2664,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     }
                 });
             }
-            exposureBar.setVisibility(allowExposure && exposureRange != null ? View.VISIBLE : View.GONE);
+            exposureBar.setVisibility(lensShowSliders && allowExposure && exposureRange != null ? View.VISIBLE : View.GONE);
         }
 
         //setup zoom
@@ -2726,7 +2727,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     }
                 });
             }
-            zoomBar.setVisibility(allowZoom && haveZoomValues ? View.VISIBLE : View.GONE);
+            zoomBar.setVisibility(lensShowSliders && allowZoom && haveZoomValues ? View.VISIBLE : View.GONE);
         }
         setZoom(1.0f, controls, false);
     }

@@ -104,9 +104,9 @@
                             android:summary="@string/desc_show_toolbars"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_zoom"
-                            android:key="MapShowZoom"
-                            android:summary="@string/desc_show_zoom"/>
+                            android:title="@string/title_show_sliders"
+                            android:key="MapShowSliders"
+                            android:summary="@string/desc_show_sliders"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_labels_always"
@@ -317,6 +317,11 @@
                             android:title="@string/title_show_toolbars"
                             android:key="LensShowToolbars"
                             android:summary="@string/desc_show_toolbars"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_sliders"
+                            android:key="LensShowSliders"
+                            android:summary="@string/desc_show_sliders"/>
 
                         <com.nikolaiapps.orbtrack.SwitchButtonPreference
                             app:titleText="@string/title_show_horizon"

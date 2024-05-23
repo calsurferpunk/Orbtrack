@@ -47,15 +47,13 @@
         android:layout_height="0dp"
         android:layout_weight="1">
         <com.google.android.material.slider.Slider
+            style="@style/SlimTransparentSlider"
             android:id="@+id/Lens_Zoom_Bar"
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
-            android:layout_marginRight="-100dp"
-            android:alpha="0.3"
+            android:layout_marginRight="-116dp"
             android:rotation="270"
-            app:thumbColor="@color/white"
-            app:trackColor="@color/gray"
             android:visibility="gone"/>
 
         <LinearLayout
@@ -64,14 +62,11 @@
             android:orientation="vertical"
             android:layout_gravity="bottom">
             <com.google.android.material.slider.Slider
+                style="@style/SlimTransparentSlider"
                 android:id="@+id/Lens_Exposure_Bar"
                 android:layout_width="260dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center|bottom"
-                android:alpha="0.3"
-                android:stepSize="1"
-                app:thumbColor="@color/white"
-                app:trackColor="@color/gray"
                 android:visibility="gone"/>
 
             <com.nikolaiapps.orbtrack.CustomSettingsMenu

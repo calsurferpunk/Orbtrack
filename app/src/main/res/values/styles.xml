@@ -373,6 +373,19 @@
         <item name="layout">@layout/divider_view</item>
     </style>
 
+    <!--Slider-->
+    <style name="SlimSlider" parent="Widget.Material3.Slider">
+        <item name="thumbWidth">4dp</item>
+        <item name="thumbHeight">24dp</item>
+        <item name="thumbColor">@color/white</item>
+        <item name="trackHeight">5dp</item>
+    </style>
+
+    <style name="SlimTransparentSlider" parent="SlimSlider">
+        <item name="android:alpha">0.3</item>
+        <item name="trackColor">@color/gray</item>
+    </style>
+
     <!-- Material button -->
     <style name="MaterialButton">
         <item name="android:layout_width">wrap_content</item>

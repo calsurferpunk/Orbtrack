@@ -14,27 +14,15 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-        <LinearLayout
-            android:id="@+id/Location_Zoom_Layout"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:gravity="bottom|end">
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/Location_Zoom_In_Button"
-                style="@style/FloatingButton"
-                android:alpha="0.7"
-                app:srcCompat="@drawable/ic_add_white"
-                app:fabSize="mini"/>
-
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/Location_Zoom_Out_Button"
-                style="@style/FloatingButton"
-                android:alpha="0.7"
-                app:srcCompat="@drawable/ic_remove_black"
-                android:tint="@color/white"
-                app:fabSize="mini"/>
-        </LinearLayout>
+        <com.google.android.material.slider.Slider
+            style="@style/SlimTransparentSlider"
+            android:id="@+id/Location_Zoom_Bar"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginRight="-116dp"
+            android:rotation="90"
+            android:visibility="gone"/>
     </FrameLayout>
 
     <TableLayout

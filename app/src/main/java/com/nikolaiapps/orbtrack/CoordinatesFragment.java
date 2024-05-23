@@ -9,8 +9,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.LinearLayout;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.annotation.NonNull;
+import com.google.android.material.slider.LabelFormatter;
+import com.google.android.material.slider.Slider;
 import java.util.ArrayList;
 import java.util.Locale;
 
@@ -158,6 +159,16 @@ public interface CoordinatesFragment
         void click(double latitude, double longitude);
     }
 
+    interface OnHeightChangedListener
+    {
+        void heightChanged(double z);
+    }
+
+    interface OnLocationChangedListener
+    {
+        void locationChanged(double x, double y, double z);
+    }
+
     interface OnItemSelectionChangedListener
     {
         void itemSelected(int noradId);
@@ -177,7 +188,9 @@ public interface CoordinatesFragment
         private OnReadyListener readyListener;
         private OnMovedListener movedListener;
         private OnRotatedListener rotatedListener;
+        private OnHeightChangedListener heightChangedListener;
         private OnLocationClickListener locationClickListener;
+        private OnLocationChangedListener locationChangedListener;
         private OnItemSelectionChangedListener itemSelectionChangedListener;
 
         boolean started;
@@ -261,6 +274,21 @@ public interface CoordinatesFragment
             }
         }
 
+        void setOnHeightChangedListener(OnHeightChangedListener listener)
+        {
+            heightChangedListener = listener;
+        }
+
+        void heightChanged(double z)
+        {
+            //if listener is set
+            if(heightChangedListener != null)
+            {
+                //call it
+                heightChangedListener.heightChanged(z);
+            }
+        }
+
         void setOnLocationClickListener(OnLocationClickListener listener)
         {
             locationClickListener = listener;
@@ -273,6 +301,21 @@ public interface CoordinatesFragment
             {
                 //call it
                 locationClickListener.click(latitude, longitude);
+            }
+        }
+
+        void setOnLocationChangedListener(OnLocationChangedListener listener)
+        {
+            locationChangedListener = listener;
+        }
+
+        void locationChanged(double x, double y, double z)
+        {
+            //if listener is set
+            if(locationChangedListener != null)
+            {
+                //call it
+                locationChangedListener.locationChanged(x, y, z);
             }
         }
 
@@ -755,21 +798,24 @@ public interface CoordinatesFragment
 
     abstract class Utils
     {
-        static void setupZoomButton(Context context, final CoordinatesFragment mapView, FloatingActionButton zoomButton, final boolean zoomIn)
+        static void setupZoomSlider(final CoordinatesFragment mapView, Slider zoomSlider, boolean forGlobe)
         {
-            int marginDp = (int)Globals.dpToPixels(context, -20);
-            LinearLayout.LayoutParams zoomParams = (LinearLayout.LayoutParams)zoomButton.getLayoutParams();
+            boolean haveMapView = (mapView != null);
 
-            zoomParams.setMargins(0, 0, 0, (zoomIn ? marginDp : 0));
-            zoomButton.setLayoutParams(zoomParams);
-            zoomButton.setOnClickListener(new View.OnClickListener()
+            zoomSlider.setValueFrom((float)MinZoom);
+            zoomSlider.setValueTo((float)(forGlobe ? MaxGlobeZoom : MaxMapZoom));
+            zoomSlider.setValue((float)(haveMapView ? mapView.getCameraZoom() : MinZoom));
+            zoomSlider.setLabelBehavior(LabelFormatter.LABEL_GONE);
+            zoomSlider.addOnChangeListener(new Slider.OnChangeListener()
             {
                 @Override
-                public void onClick(View v)
+                public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
                 {
-                    if(mapView != null)
+                    //if from the user and have map view
+                    if(fromUser && haveMapView)
                     {
-                        mapView.zoom(zoomIn);
+                        //set zoom
+                        mapView.setZoom(value);
                     }
                 }
             });
@@ -800,6 +846,9 @@ public interface CoordinatesFragment
     double WhirlyZScale = 0.1;
     double DefaultNearZoom = 1.25;
     double DefaultFarZoom = 4.25;
+    double MaxMapZoom = 5;
+    double MaxGlobeZoom = 9;
+    double MinZoom = 0;
     double MaxDrawDistanceKm = (WhirlyEarthRadiusKm * 16);
     double MinDrawDistanceMeters = 500000;
     double MaxDrawDistanceMeters = (MaxDrawDistanceKm * 200.0);
@@ -810,6 +859,8 @@ public interface CoordinatesFragment
     void setOnMovedListener(OnMovedListener listener);
     void setOnRotatedListener(OnRotatedListener listener);
     void setOnLocationClickListener(OnLocationClickListener listener);
+    void setOnHeightChangedListener(OnHeightChangedListener listener);
+    void setOnLocationChangedListener(OnLocationChangedListener listener);
     void setOnItemSelectionChangedListener(OnItemSelectionChangedListener listener);
 
     /** @noinspection BooleanMethodIsAlwaysInverted*/
@@ -840,7 +891,7 @@ public interface CoordinatesFragment
     void setLatitudeLongitudeGridEnabled(boolean enabled);
     void setHeading(double degrees);
     double getHeading();
-    void zoom(boolean in);
+    void setZoom(double zoom);
 
     MarkerBase addMarker(Context context, int noradId, Calculations.ObserverType markerLocation);
     void removeMarker(MarkerBase object);

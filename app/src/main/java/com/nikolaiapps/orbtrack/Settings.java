@@ -70,7 +70,6 @@ public abstract class Settings
         static final String MapShow3dPaths = "MapShow3dPaths";
         static final String ShowSatelliteClouds = "ShowSatelliteClouds";
         static final String MapDisplayType = "MapDisplayType";
-        static final String MapShowZoom = "MapShowZoom";
         static final String MapShowLabelsAlways = "MapShowLabelsAlways";
         static final String MapShowStars = "MapShowStars";
         static final String MapSpeedScale = "MapSpeedScale";
@@ -96,6 +95,7 @@ public abstract class Settings
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
+        static final String MapShowSliders = "MapShowSliders";
         static final String MapShowToolbars = "MapShowToolbars";
         static final String MapOrbitalTypeFilter = "MapOrbitalTypeFilter";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
@@ -130,6 +130,7 @@ public abstract class Settings
         static final String LensWidthHardware = "LensWidthHardware";
         static final String LensHeightHardware = "LensHeightHardware";
         static final String LensShowToolbars = "LensShowToolbars";
+        static final String LensShowSliders = "LensShowSliders";
         static final String LensPathLabelType = "LensPathLabelType";
         static final String LensHideConstellationStarPaths = "LensHideConstellationStarPaths";
         static final String LensShowPathDirection = "LensShowPathDirection";
@@ -2050,6 +2051,7 @@ public abstract class Settings
             case PreferenceName.LensUseExposure:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
+            case PreferenceName.LensShowSliders:
             case PreferenceName.LensHideConstellationStarPaths:
             case PreferenceName.LensShowPathDirection:
             case PreferenceName.LensShowPathTimeNames:
@@ -2663,6 +2665,18 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensShowToolbars, show);
     }
 
+    //Returns lens showing sliders
+    public static boolean getLensShowSliders(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensShowSliders));
+    }
+
+    //Sets lens showing sliders
+    public static void setLensShowSliders(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.LensShowSliders, show);
+    }
+
     //Gets lens path label type
     public static int getLensPathLabelType(Context context)
     {
@@ -2709,12 +2723,6 @@ public abstract class Settings
     public static boolean getLensShowHorizon(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.LensUseHorizon));
-    }
-
-    //Sets showing lens horizon
-    public static void setLensShowHorizon(Context context, boolean show)
-    {
-        setPreferenceBoolean(context, PreferenceName.LensUseHorizon, show);
     }
 
     //Returns lens star magnitude
@@ -2961,16 +2969,16 @@ public abstract class Settings
         return(getPreferenceInt(context, PreferenceName.MapDisplayType));
     }
 
-    //Returns map showing zoom
-    public static boolean getMapShowZoom(Context context)
+    //Returns map showing sliders
+    public static boolean getMapShowSliders(Context context)
     {
-        return(getPreferenceBoolean(context, PreferenceName.MapShowZoom));
+        return(getPreferenceBoolean(context, PreferenceName.MapShowSliders));
     }
 
-    //Sets map showing zoom
-    public static void setMapShowZoom(Context context, boolean show)
+    //Sets map showing sliders
+    public static void setMapShowSliders(Context context, boolean show)
     {
-        setPreferenceBoolean(context, PreferenceName.MapShowZoom, show);
+        setPreferenceBoolean(context, PreferenceName.MapShowSliders, show);
     }
 
     //Returns map showing stars

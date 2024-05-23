@@ -255,6 +255,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchButtonPreference showGridSwitch = this.findPreference(Settings.PreferenceName.MapShowGrid);
                         SliderPreference iconScaleSlider = this.findPreference(Settings.PreferenceName.MapMarkerScale);
                         IconListPreference mapFrameRateList = this.findPreference(Settings.PreferenceName.MapFrameRate);
+                        IconListPreference mapUpdateRateList = this.findPreference(Settings.PreferenceName.MapUpdateDelay);
 
                         //initialize values
                         Settings.Options.MapView.initValues(context);
@@ -271,6 +272,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitchButton(showGridSwitch);
                         setupSlider(iconScaleSlider);
                         setupList(mapFrameRateList, Settings.Options.Rates.frameRateItems, null, null, null, null);
+                        setupList(mapUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.MapViewGlobe:
@@ -281,11 +283,9 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SliderPreference globeSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Globe);
                         SliderPreference globeSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Globe);
                         IconListPreference globeTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Globe);
-                        IconListPreference globeUpdateRateList = this.findPreference(Settings.PreferenceName.MapUpdateDelay);
 
                         //initialize values
                         Settings.Options.MapView.initValues(context);
-                        Settings.Options.Rates.initValues(context);
 
                         //setup displays
                         setupSwitch(showCloudsGlobeSwitch);
@@ -295,7 +295,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSlider(globeSensitivitySlider);
                         setupSlider(globeSpeedScaleSlider);
                         setupList(globeTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsGlobeSwitch);
-                        setupList(globeUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.MapViewMap:
@@ -304,11 +303,9 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SliderPreference mapSensitivitySlider = this.findPreference(Settings.PreferenceName.MapSensitivityScale + Settings.SubPreferenceName.Map);
                         SliderPreference mapSpeedScaleSlider = this.findPreference(Settings.PreferenceName.MapSpeedScale + Settings.SubPreferenceName.Map);
                         IconListPreference mapTypeList = this.findPreference(Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map);
-                        IconListPreference mapUpdateRateList = this.findPreference(Settings.PreferenceName.MapUpdateDelay);
 
                         //initialize values
                         Settings.Options.MapView.initValues(context);
-                        Settings.Options.Rates.initValues(context);
 
                         //setup displays
                         setupSwitch(showCloudsMapSwitch);
@@ -316,7 +313,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSlider(mapSensitivitySlider);
                         setupSlider(mapSpeedScaleSlider);
                         setupList(mapTypeList, Settings.Options.MapView.mapTypeItems, Settings.Options.MapView.MapTypeValues, null, null, showCloudsMapSwitch);
-                        setupList(mapUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.MapViewFootprint:

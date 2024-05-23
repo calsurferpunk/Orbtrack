@@ -141,13 +141,16 @@
     <string name="desc_compass_align">For highest accuracy in a new location, it may help to align the compass with a visible orbital. The sun and moon are the best to use.</string>
     <string name="desc_compass_error">Calibrate compass by moving your device in a figure 8 pattern, or move away from interference.</string>
     <string name="desc_finished_setup">All done! If you wish to change anything later, look under settings in the main menu.</string>
+    <string name="desc_footprint_type">Footprint display look</string>
     <string name="desc_force_rotate">Force camera rotation if view appears upside down</string>
+    <string name="desc_frame_rate">Rate to update globe/map rendering</string>
     <string name="desc_google_play_services_fail">Sorry. There is an unknown problem with Google Play services.</string>
     <string name="desc_hide_constellation_star_paths">Hide star paths when showing constellations</string>
     <string name="desc_hide_distant_path_times">Hide time labels on path outside nearby view</string>
     <string name="desc_imperial">Imperial (mi/ft)</string>
     <string name="desc_information_source">Descriptions and details of satellites</string>
     <string name="desc_label_style">Label drawing style</string>
+    <string name="desc_layer">Surface images to display</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
     <string name="desc_material_design_notice">Material design is now the default layout. If you wish to view the legacy design, you can revert back by going to Settings > Display > Theme > Material Theme.</string>
@@ -189,7 +192,7 @@
     <string name="desc_show_selected_footprint">Show selected orbital visible area on surface</string>
     <string name="desc_show_shadows">Show orbital shadows in globe view\nNote: Disabled for some Mali and PowerVR GPUs</string>
     <string name="desc_show_sliders">Show sliders on screen</string>
-    <string name="desc_show_stars">Show stars in globe view</string>
+    <string name="desc_show_stars">Show stars in background in globe view</string>
     <string name="desc_show_sunlight">Show/hide current daylight on surface</string>
     <string name="desc_show_toolbars">Show toolbars on screen edges</string>
     <string name="desc_show_view_quality">Show view quality fill colors</string>
@@ -197,7 +200,7 @@
     <string name="desc_time_zone_source">Location time zone detection</string>
     <string name="desc_unit_size_error">Must be larger (too many increments)</string>
     <string name="desc_update_now">Update now</string>
-    <string name="desc_update_globe_map_list">Rate to update globe/map displays</string>
+    <string name="desc_update_globe_map_list">Rate to update globe/map data</string>
     <string name="desc_update_rate_lens">Rate to update lens display</string>
     <string name="desc_update_rate_list">Rate to update list displays</string>
     <string name="desc_use_camera">Look through camera while viewing</string>
@@ -443,6 +446,7 @@
     <string name="title_launch_date">Launch Date</string>
     <string name="title_launch_number">Launch Number</string>
     <string name="title_launch_number_of_year">Launch Number of Year</string>
+    <string name="title_layer">Layer</string>
     <string name="title_length">Length</string>
     <string name="title_lens">Lens</string>
     <string name="title_lens_filter">Lens Filter</string>
@@ -485,6 +489,7 @@
     <string name="title_minutes">Minutes</string>
     <string name="title_months">Months</string>
     <string name="title_moon">Moon</string>
+    <string name="title_movement">Movement</string>
     <string name="title_multiple">Multiple</string>
     <string name="title_name">Name</string>
     <string name="title_name_or_id">Name or ID</string>
@@ -610,6 +615,7 @@
     <string name="title_show_selected_footprint">Show Selected Footprint</string>
     <string name="title_show_shadows">Show Shadows</string>
     <string name="title_show_sliders">Show Sliders</string>
+    <string name="title_show_stars">Show Stars</string>
     <string name="title_show_sunlight">Show Sunlight</string>
     <string name="title_show_toolbars">Show Toolbars</string>
     <string name="title_skip">Skip</string>

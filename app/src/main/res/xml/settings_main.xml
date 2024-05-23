@@ -24,7 +24,7 @@
                     android:key="ColorTheme"/>
             </PreferenceCategory>
 
-            <PreferenceCategory android:title="@string/title_display">
+            <PreferenceCategory android:title="@string/title_data">
                 <com.nikolaiapps.orbtrack.RadioGroupPreference
                     app:titleText="@string/title_units"
                     android:key="MetricUnits"
@@ -70,11 +70,19 @@
                     android:key="mapViewDisplay"
                     app:icon="@drawable/ic_tablet_white"
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-                    <PreferenceCategory android:title="@string/title_display">
+                    <PreferenceCategory android:title="@string/title_rates">
                         <com.nikolaiapps.orbtrack.IconListPreference
                             app:titleText="@string/title_frame_rate"
-                            android:key="MapFrameRate"/>
+                            android:key="MapFrameRate"
+                            android:summary="@string/desc_frame_rate"/>
 
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_update_rate"
+                            android:key="MapUpdateDelay"
+                            android:summary="@string/desc_update_globe_map_list"/>
+                    </PreferenceCategory>
+
+                    <PreferenceCategory android:title="@string/title_icons">
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_icon_scale"
                             android:key="MapMarkerScale"
@@ -99,6 +107,18 @@
                             android:summary="@string/desc_show_orbital_direction_limit"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_labels_always"
+                            android:key="MapShowLabelsAlways"
+                            android:summary="@string/desc_show_labels_always"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_shadows"
+                            android:key="MapMarkerShowShadow"
+                            android:summary="@string/desc_show_shadows"/>
+                    </PreferenceCategory>
+
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_toolbars"
                             android:key="MapShowToolbars"
                             android:summary="@string/desc_show_toolbars"/>
@@ -109,17 +129,7 @@
                             android:summary="@string/desc_show_sliders"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_labels_always"
-                            android:key="MapShowLabelsAlways"
-                            android:summary="@string/desc_show_labels_always"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_shadows"
-                            android:key="MapMarkerShowShadow"
-                            android:summary="@string/desc_show_shadows"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_visible_stars"
+                            android:title="@string/title_show_stars"
                             android:key="MapShowStars"
                             android:summary="@string/desc_show_stars"/>
 
@@ -136,29 +146,17 @@
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
                     <PreferenceCategory android:title="@string/title_globe">
                         <com.nikolaiapps.orbtrack.IconListPreference
-                            app:titleText="@string/title_type"
-                            android:key="MapLayerTypeGlobe"/>
+                            app:titleText="@string/title_layer"
+                            android:key="MapLayerTypeGlobe"
+                            android:summary="@string/desc_layer"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_clouds"
                             android:key="ShowSatelliteCloudsGlobe"
                             android:summary="@string/desc_show_clouds"/>
+                    </PreferenceCategory>
 
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_sunlight"
-                            android:key="MapShowSunlight"
-                            android:summary="@string/desc_show_sunlight"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_3d_paths"
-                            android:key="MapShow3dPaths"
-                            android:summary="@string/desc_show_3d_paths"/>
-
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_allow_rotation"
-                            android:key="MapRotateAllowed"
-                            android:summary="@string/desc_allow_rotation"/>
-
+                    <PreferenceCategory android:title="@string/title_movement">
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_sensitivity"
                             android:key="MapSensitivityScaleGlobe"
@@ -172,13 +170,23 @@
                             app:minValue="0"
                             app:maxValue="150"
                             app:scaleUnitType="Percent"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_allow_rotation"
+                            android:key="MapRotateAllowed"
+                            android:summary="@string/desc_allow_rotation"/>
                     </PreferenceCategory>
 
-                    <PreferenceCategory android:title="@string/title_rates">
-                        <com.nikolaiapps.orbtrack.IconListPreference
-                            app:titleText="@string/title_update_rate"
-                            android:key="MapUpdateDelay"
-                            android:summary="@string/desc_update_globe_map_list"/>
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_sunlight"
+                            android:key="MapShowSunlight"
+                            android:summary="@string/desc_show_sunlight"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_3d_paths"
+                            android:key="MapShow3dPaths"
+                            android:summary="@string/desc_show_3d_paths"/>
                     </PreferenceCategory>
                 </PreferenceScreen>
 
@@ -188,19 +196,17 @@
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
                     <PreferenceCategory android:title="@string/title_map">
                         <com.nikolaiapps.orbtrack.IconListPreference
-                            app:titleText="@string/title_type"
-                            android:key="MapLayerTypeMap"/>
+                            app:titleText="@string/title_layer"
+                            android:key="MapLayerTypeMap"
+                            android:summary="@string/desc_layer"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_clouds"
                             android:key="ShowSatelliteCloudsMap"
                             android:summary="@string/desc_show_clouds"/>
+                    </PreferenceCategory>
 
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_allow_rotation"
-                            android:key="MapRotateAllowed"
-                            android:summary="@string/desc_allow_rotation"/>
-
+                    <PreferenceCategory android:title="@string/title_movement">
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_sensitivity"
                             android:key="MapSensitivityScaleMap"
@@ -214,13 +220,11 @@
                             app:minValue="0"
                             app:maxValue="150"
                             app:scaleUnitType="Percent"/>
-                    </PreferenceCategory>
 
-                    <PreferenceCategory android:title="@string/title_rates">
-                        <com.nikolaiapps.orbtrack.IconListPreference
-                            app:titleText="@string/title_update_rate"
-                            android:key="MapUpdateDelay"
-                            android:summary="@string/desc_update_globe_map_list"/>
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_allow_rotation"
+                            android:key="MapRotateAllowed"
+                            android:summary="@string/desc_allow_rotation"/>
                     </PreferenceCategory>
                 </PreferenceScreen>
 
@@ -229,10 +233,10 @@
                     app:icon="@drawable/ic_contrast_white"
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
                     <PreferenceCategory android:title="@string/title_footprint">
-                        <com.nikolaiapps.orbtrack.SwitchPreference
-                            android:title="@string/title_show_footprint"
-                            android:key="MapShowFootprint"
-                            android:summary="@string/desc_show_footprint"/>
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_footprint_type"
+                            android:key="MapFootprintType"
+                            android:summary="@string/desc_footprint_type"/>
 
                         <com.nikolaiapps.orbtrack.SliderPreference
                             app:titleText="@string/title_opacity"
@@ -240,15 +244,18 @@
                             app:minValue="0"
                             app:maxValue="100"
                             app:scaleUnitType="Percent"/>
+                    </PreferenceCategory>
+
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_footprint"
+                            android:key="MapShowFootprint"
+                            android:summary="@string/desc_show_footprint"/>
 
                         <com.nikolaiapps.orbtrack.SwitchButtonPreference
                             app:titleText="@string/title_show_selected_footprint"
                             android:key="MapShowSelectedFootprint"
                             android:summary="@string/desc_show_selected_footprint"/>
-
-                        <com.nikolaiapps.orbtrack.IconListPreference
-                            app:titleText="@string/title_footprint_type"
-                            android:key="MapFootprintType"/>
                     </PreferenceCategory>
                 </PreferenceScreen>
 
@@ -260,7 +267,9 @@
                         <com.nikolaiapps.orbtrack.IconListPreference
                             app:titleText="@string/title_location"
                             android:key="MapMarkerInfoLocation"/>
+                    </PreferenceCategory>
 
+                    <PreferenceCategory android:title="@string/title_display">
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_background"
                             android:key="MapMarkerShowBackground"

@@ -2887,26 +2887,38 @@ public abstract class Globals
         }
     }
 
-    //Converts dp unit(s) to pixels
-    public static float[] dpsToPixels(Context context, float... dp)
+    //Converts given unit(s) to pixels
+    private static float[] unitsToPixels(Context context, int unitType, float... unitValues)
     {
         int index;
-        float[] pixels = new float[dp.length];
+        float[] pixels = new float[unitValues.length];
         DisplayMetrics metrics = (context != null ? context.getResources().getDisplayMetrics() : null);
 
         if(context != null)
         {
-            for(index = 0; index < dp.length; index++)
+            for(index = 0; index < unitValues.length; index++)
             {
-                pixels[index] = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp[index], metrics);
+                pixels[index] = TypedValue.applyDimension(unitType, unitValues[index], metrics);
             }
         }
 
         return(pixels);
     }
+
+    //Converts dp unit(s) to pixels
+    public static float[] dpsToPixels(Context context, float... dp)
+    {
+        return(unitsToPixels(context, TypedValue.COMPLEX_UNIT_DIP, dp));
+    }
     public static float dpToPixels(Context context, float dp)
     {
         return(dpsToPixels(context, dp)[0]);
+    }
+
+    //Converts sp to pixels
+    public static float spToPixels(Context context, float sp)
+    {
+        return(unitsToPixels(context, TypedValue.COMPLEX_UNIT_SP, sp)[0]);
     }
 
     //Gets pixel size of screen

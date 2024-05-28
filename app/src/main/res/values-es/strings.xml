@@ -186,7 +186,7 @@
     <string name="desc_show_path_progress">Mostrar línea de progreso de ruta</string>
     <string name="desc_show_path_time_names">Mostrar el nombre delante de las horas en la ruta</string>
     <string name="desc_show_pass_quality">Mostrar línea de calidad de pase</string>
-    <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de la trayectoria</string>
+    <string name="desc_show_orbital_direction">Los orbitales apuntan en la dirección de viaje</string>
     <string name="desc_show_orbital_direction_limit">Mostrar dirección si está dentro del conteo orbital visible\nNota: Obligatorio para las GPU Mali y PowerVR</string>
     <string name="desc_show_outside_visible_area">Mostrar orbitales fuera de la vista en los bordes</string>
     <string name="desc_show_selected_footprint">Mostrar el área visible orbital seleccionada en la superficie</string>

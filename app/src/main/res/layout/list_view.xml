@@ -18,7 +18,7 @@
         android:layout_height="wrap_content"
         android:visibility="gone"/>
 
-    <include layout="@layout/divider_view"/>
+    <include layout="@layout/divider_list_view"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/List_View_List"

@@ -406,6 +406,7 @@
     <string name="title_graph_hour_interval">Graph Hour Interval</string>
     <string name="title_green">Green</string>
     <string name="title_grey">Grey</string>
+    <string name="title_grid">Grid</string>
     <string name="title_grid_color">Grid Color</string>
     <string name="title_group">Group</string>
     <string name="title_guide">Guide</string>
@@ -570,6 +571,7 @@
     <string name="title_save_file">Save File</string>
     <string name="title_save_format">Save Format</string>
     <string name="title_saving">Saving</string>
+    <string name="title_scale">Scale</string>
     <string name="title_screen_bottom">Screen Bottom</string>
     <string name="title_sd_card">SD Card</string>
     <string name="title_search">Search</string>
@@ -619,6 +621,7 @@
     <string name="title_show_sunlight">Show Sunlight</string>
     <string name="title_show_toolbars">Show Toolbars</string>
     <string name="title_skip">Skip</string>
+    <string name="title_sliders">Sliders</string>
     <string name="title_slow">Slow</string>
     <string name="title_small">Small</string>
     <string name="title_solar_system">Solar System</string>
@@ -652,6 +655,7 @@
     <string name="title_tint_color">Tint Color</string>
     <string name="title_tle_age">TLE Age</string>
     <string name="title_today">Today</string>
+    <string name="title_toolbars">Toolbars</string>
     <string name="title_top">Top</string>
     <string name="title_transition">Transition</string>
     <string name="title_translate_information">Translate Information</string>

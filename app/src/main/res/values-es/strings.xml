@@ -406,6 +406,7 @@
     <string name="title_graph_hour_interval">Intervalo de Horas del Gráfico</string>
     <string name="title_green">Verde</string>
     <string name="title_grey">Gris</string>
+    <string name="title_grid">Cuadrícula</string>
     <string name="title_grid_color">Color Cuadrícula</string>
     <string name="title_group">Grupo</string>
     <string name="title_guide">Guía</string>
@@ -570,6 +571,7 @@
     <string name="title_save_file">Guardar Archivo</string>
     <string name="title_save_format">Guardar Formato</string>
     <string name="title_saving">Ahorro</string>
+    <string name="title_scale">Escala</string>
     <string name="title_screen_bottom">Pantalla Inferior</string>
     <string name="title_sd_card">Tarjeta SD</string>
     <string name="title_search">Buscar</string>
@@ -619,6 +621,7 @@
     <string name="title_show_sunlight">Mostrar Luz Sol</string>
     <string name="title_show_toolbars">Mostrar Barras Herramientas</string>
     <string name="title_skip">Omitir</string>
+    <string name="title_sliders">Deslizadores</string>
     <string name="title_slow">Lento</string>
     <string name="title_small">Pequeño</string>
     <string name="title_solar_system">Sistema Solar</string>
@@ -652,6 +655,7 @@
     <string name="title_tint_color">Color Tinte</string>
     <string name="title_tle_age">Edad TLE</string>
     <string name="title_today">Hoy</string>
+    <string name="title_toolbars">Barras</string>
     <string name="title_top">Superior</string>
     <string name="title_transition">Transición</string>
     <string name="title_translate_information">Traducir Información</string>

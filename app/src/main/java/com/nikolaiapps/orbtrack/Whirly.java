@@ -38,6 +38,8 @@ import com.mousebird.maply.RemoteTileInfoNew;
 import com.mousebird.maply.ScreenMarker;
 import com.mousebird.maply.ScreenObject;
 import com.mousebird.maply.SelectedObject;
+import com.mousebird.maply.Shape;
+import com.mousebird.maply.ShapeCylinder;
 import com.mousebird.maply.ShapeInfo;
 import com.mousebird.maply.ShapeLinear;
 import com.mousebird.maply.SimpleTileFetcher;
@@ -591,6 +593,98 @@ class Whirly
         }
     }
 
+    private static class ShapeObject
+    {
+        private boolean isVisible;
+        private final boolean tleIsAccurate;
+        private int skipLayoutCount;
+        private final BaseController controller;
+        private final ShapeCylinder shape;
+        private final ShapeInfo shapeInfo;
+        private ComponentObject shapeObject;
+        private final ArrayList<Shape> cylinderList;
+
+        ShapeObject(BaseController shapeController, int color, boolean tleIsAc, boolean visible)
+        {
+            tleIsAccurate = tleIsAc;
+            skipLayoutCount = 0;
+            controller = shapeController;
+            shape = new ShapeCylinder();
+            shapeInfo = new ShapeInfo();
+            shapeObject = null;
+            cylinderList = new ArrayList<>(0);
+
+            shape.setBaseHeight(0.01);
+            shape.setRadius(0.002);
+            shape.setSample(5);
+            shapeInfo.setColor(Globals.getColor(50, Color.rgb(Color.red(color) / 2, Color.green(color) / 2, Color.blue(color) / 2)));
+            shapeInfo.setDrawPriority(DrawPriority.Path);
+            shapeInfo.setZBufferWrite(true);
+            shapeInfo.setZBufferRead(true);
+            cylinderList.add(shape);
+
+            setVisible(visible);
+        }
+
+        public boolean getVisible()
+        {
+            return(isVisible);
+        }
+
+        public void setVisible(boolean visible)
+        {
+            isVisible = visible;
+            shapeInfo.setEnable(visible);
+        }
+
+        public void setSkipLayout(boolean skip)
+        {
+            if(skip)
+            {
+                if(skipLayoutCount == 0)
+                {
+                    remove();
+                }
+                skipLayoutCount++;
+            }
+            else
+            {
+                skipLayoutCount--;
+                if(skipLayoutCount == 0)
+                {
+                    add();
+                }
+            }
+        }
+
+        private void move(double latitude, double longitude, double altitudeKm)
+        {
+            remove();
+
+            shape.setBaseCenter(Point2d.FromDegrees(longitude, latitude));
+            shape.setHeight(getEarthRadiusPercent(altitudeKm));
+
+            add();
+        }
+
+        private void add()
+        {
+            if(skipLayoutCount <= 0 && tleIsAccurate && shapeObject == null)
+            {
+                shapeObject = controller.addShapes(cylinderList, shapeInfo, BaseController.ThreadMode.ThreadAny);
+            }
+        }
+
+        public void remove()
+        {
+            if(skipLayoutCount <= 0 && shapeObject != null)
+            {
+                controller.removeObject(shapeObject, BaseController.ThreadMode.ThreadAny);
+                shapeObject = null;
+            }
+        }
+    }
+
     private static class Path
     {
         private boolean isVisible;
@@ -739,18 +833,8 @@ class Whirly
                 }
                 else
                 {
-                    //get initial z value in scaled earth radius percent
-                    z = (currentAltKm * CoordinatesFragment.WhirlyZScale) / CoordinatesFragment.WhirlyEarthRadiusKm;
-
-                    //keep inside of bounds
-                    if(z < CoordinatesFragment.MinDrawDistanceEarthRadiusPercent)
-                    {
-                        z = CoordinatesFragment.MinDrawDistanceEarthRadiusPercent;
-                    }
-                    else if(z > CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent)
-                    {
-                        z = CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent;
-                    }
+                    //get z value in scaled earth radius percent
+                    z = getEarthRadiusPercent(currentAltKm * CoordinatesFragment.WhirlyZScale);
 
                     //add point
                     setElevatedPoints.add(new Point3d(Point2d.FromDegrees(currentLon, currentLat), z));
@@ -1191,6 +1275,7 @@ class Whirly
         private final boolean forMap;
         private final int noradId;
         private boolean isStar;
+        private boolean showPin;
         private boolean showShadow;
         private boolean showFootprint;
         private boolean showSelectedFootprint;
@@ -1215,10 +1300,11 @@ class Whirly
         private FlatObject orbitalFootprint;
         private FlatObject orbitalSelectedFootprint;
         private MarkerObject orbitalMarker;
+        private ShapeObject orbitalPin;
         private final Path orbitalPath;
         private final BaseController controller;
 
-        OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData orbitalData, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
+        OrbitalObject(Context context, BaseController orbitalController, Database.SatelliteData orbitalData, Calculations.ObserverType observerLocation, float markerScaling, boolean usingBackground, boolean usingDirection, boolean usingPin, boolean usingShadow, boolean startWithTitleShown, int infoLocation)
         {
             int iconId;
             byte orbitalType;
@@ -1233,6 +1319,7 @@ class Whirly
             common = new Shared();
             controller = orbitalController;
             forMap = (controller instanceof MapController);
+            showPin = usingPin;
             showShadow = usingShadow;
             showFootprint = showSelectedFootprint = false;
             showBackground = usingBackground;
@@ -1246,6 +1333,7 @@ class Whirly
             lastInfo = null;
             common.data = orbitalData;
             haveOrbital = (common.data != null);
+            orbitalPin = null;
             orbitalShadow = null;
             orbitalFootprint = null;
             orbitalSelectedFootprint = null;
@@ -1352,7 +1440,8 @@ class Whirly
                     orbitalBoard.setImage(orbitalImage, markerScale);
                 }
 
-                //add/remove shadow
+                //add/remove pin and shadow
+                setShowPin(showPin);
                 setShowShadow(showShadow);
 
                 //set title
@@ -1618,6 +1707,25 @@ class Whirly
         }
 
         @Override
+        void setShowPin(boolean show)
+        {
+            showPin = show;
+
+            if(!forMap && tleIsAccurate)
+            {
+                if(!showPin && orbitalPin != null)
+                {
+                    orbitalPin.remove();
+                    orbitalPin = null;
+                }
+                else if(showPin && orbitalPin == null)
+                {
+                    orbitalPin = new ShapeObject(controller, common.data.getPathColor(), tleIsAccurate, showPin);
+                }
+            }
+        }
+
+        @Override
         void setShowShadow(boolean show)
         {
             int noradId;
@@ -1771,6 +1879,10 @@ class Whirly
             else
             {
                 orbitalBoard.setVisible(visible);
+                if(showPin && orbitalPin != null)
+                {
+                    orbitalPin.setVisible(visible);
+                }
                 if(showShadow && orbitalShadow != null)
                 {
                     orbitalShadow.setVisible(visible);
@@ -1806,6 +1918,10 @@ class Whirly
                 if(orbitalBoard != null)
                 {
                     orbitalBoard.setSkipLayout(skip);
+                }
+                if(orbitalPin != null)
+                {
+                    orbitalPin.setSkipLayout(skip);
                 }
                 if(orbitalShadow != null)
                 {
@@ -1936,6 +2052,13 @@ class Whirly
                 }
                 infoBoard.moveLocation(latitude, longitude, (withinZoom || !showShadow ? altitudeKm : 0.5), withinZoom || !showShadow);
 
+                //if showing pin and it exists
+                if(showPin && orbitalPin != null)
+                {
+                    //move pin
+                    orbitalPin.move(latitude, longitude, altitudeKm);
+                }
+
                 //if showing shadow
                 if(showShadow)
                 {
@@ -2008,6 +2131,10 @@ class Whirly
             else
             {
                 orbitalBoard.remove();
+                if(showPin && orbitalPin != null)
+                {
+                    orbitalPin.remove();
+                }
                 if(showShadow && orbitalShadow != null)
                 {
                     orbitalShadow.remove();
@@ -2815,6 +2942,12 @@ class Whirly
         }
 
         @Override
+        public void setMarkerShowPin(boolean show)
+        {
+            common.setShowPin(show);
+        }
+
+        @Override
         public void setMarkerShowShadow(boolean show)
         {
             common.setShowShadow(show);
@@ -2939,7 +3072,7 @@ class Whirly
             int limitCount = common.getOrbitalDirectionLimitCount();
             boolean useDirection = common.getShowOrbitalDirection();
             boolean overLimit = (useDirection && (limitCount > 0) && (currentCount + 1 > limitCount));
-            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), orbitalData, observerLocation, common.getMarkerScale(), common.getShowBackground(), (useDirection && !overLimit), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
+            OrbitalObject newObject = (getControl() != null ? new OrbitalObject(context, getControl(), orbitalData, observerLocation, common.getMarkerScale(), common.getShowBackground(), (useDirection && !overLimit), common.getShowPin(), common.getShowShadow(), common.getShowTitleAlways(), common.getInfoLocation()) : null);
 
             //if able to create object
             if(newObject != null)
@@ -3062,5 +3195,25 @@ class Whirly
             args.putInt(ParamTypes.MapLayerType, mapLayerType);
             this.setArguments(args);
         }
+    }
+
+    private static double getEarthRadiusPercent(double altitudeKm)
+    {
+        //get initial z value in scaled meters
+        boolean negativeAltitudeKm = (altitudeKm < 0);
+        double z = (negativeAltitudeKm ? 0 : (altitudeKm / CoordinatesFragment.WhirlyEarthRadiusKm));
+
+        //keep inside of bounds
+        if(z < CoordinatesFragment.MinDrawDistanceEarthRadiusPercent)
+        {
+            z = CoordinatesFragment.MinDrawDistanceEarthRadiusPercent;
+        }
+        else if(z > CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent)
+        {
+            z = CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent;
+        }
+
+        //return radius percent
+        return(z);
     }
 }

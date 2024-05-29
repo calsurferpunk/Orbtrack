@@ -122,6 +122,7 @@ public interface CoordinatesFragment
         abstract void setText(String text);
         abstract void setScale(float markerScaling);
         abstract void setShowBackground(boolean show);
+        abstract void setShowPin(boolean show);
         abstract void setShowShadow(boolean show);
         abstract void setShowFootprint(boolean show);
         abstract void setShowSelectedFootprint(boolean show);
@@ -178,6 +179,7 @@ public interface CoordinatesFragment
     {
         private int infoLocation;
         private int orbitalDirectionLimitCount;
+        private boolean showPin;
         private boolean showShadow;
         private boolean showSunlight;
         private boolean showBackground;
@@ -203,7 +205,7 @@ public interface CoordinatesFragment
         Shared()
         {
             infoLocation = MapMarkerInfoLocation.ScreenBottom;
-            showBackground = false;
+            showBackground = showPin = false;
             showShadow = showSunlight = showTitlesAlways = showOrbitalDirection = true;
             lastSelectEventDateMs = orbitalDirectionLimitCount = 0;
             markerScale = 0.75f;
@@ -434,6 +436,18 @@ public interface CoordinatesFragment
             return(showBackground);
         }
 
+        void setShowPin(boolean show)
+        {
+            showPin = show;
+
+            //go through each orbital
+            for(OrbitalBase currentOrbital : orbitalObjects)
+            {
+                //update visibility
+                currentOrbital.setShowPin(showPin);
+            }
+        }
+
         void setShowShadow(boolean show)
         {
             showShadow = show;
@@ -444,6 +458,11 @@ public interface CoordinatesFragment
                 //update visibility
                 currentOrbital.setShowShadow(showShadow);
             }
+        }
+
+        boolean getShowPin()
+        {
+            return(showPin);
         }
 
         boolean getShowShadow()
@@ -879,6 +898,7 @@ public interface CoordinatesFragment
     void setInfoLocation(int location);
     void setMarkerScale(float markerScaling);
     void setMarkerShowBackground(boolean show);
+    void setMarkerShowPin(boolean show);
     void setMarkerShowShadow(boolean show);
     void setShowSunlight(boolean show);
     void setShowOrbitalDirection(boolean show);

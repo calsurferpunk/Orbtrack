@@ -79,6 +79,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         public static final String MapViewFootprint = "mapViewFootprint";
         public static final String MapViewLabelData = "mapViewLabelData";
         public static final String Notifications = "notifications";
+        public static final String QuickSettings = "quickSettings";
         public static final String Timeline = "timeline";
         public static final String Updates = "updates";
         public static final String Widgets = "widgets";
@@ -341,6 +342,15 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(showInformationBackgroundSwitch);
                         setupList(informationLocationList, Settings.Options.MapView.infoLocationItems, Settings.Options.MapView.InfoLocationValues, null, null, null);
+                        break;
+
+                    case ScreenKey.QuickSettings:
+                        SwitchPreference quickSettingsShowMessages = this.findPreference(Settings.PreferenceName.QuickSettingsShowMessages);
+                        SwitchPreference quickSettingsShowTitles = this.findPreference(Settings.PreferenceName.QuickSettingsShowTitles);
+
+                        //setup displays
+                        setupSwitch(quickSettingsShowMessages);
+                        setupSwitch(quickSettingsShowTitles);
                         break;
 
                     case ScreenKey.Timeline:
@@ -1449,6 +1459,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 case ScreenKey.GlobeMapView:
                 case ScreenKey.LensView:
                 case ScreenKey.ListView:
+                case ScreenKey.QuickSettings:
                 case ScreenKey.Timeline:
                 case ScreenKey.Updates:
                     startFragment = new SettingsSubFragment();
@@ -1683,6 +1694,13 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.MapMarkerScale:
                         case Settings.PreferenceName.MapMarkerLocationIcon:
                             //map needs recreate
+                            setMapRecreateNeeded();
+                            break;
+
+                        case Settings.PreferenceName.QuickSettingsShowMessages:
+                        case Settings.PreferenceName.QuickSettingsShowTitles:
+                            //lens and map need recreate
+                            setLensRecreateNeed();
                             setMapRecreateNeeded();
                             break;
                     }

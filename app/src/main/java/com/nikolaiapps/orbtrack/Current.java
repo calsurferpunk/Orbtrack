@@ -2398,6 +2398,10 @@ public abstract class Current
             showSlidersButton.performClick();
         }
 
+        //setup menu
+        cameraView.settingsMenu.setMessagesEnabled(Settings.getQuickSettingsShowMessages(context));
+        cameraView.settingsMenu.setTitlesEnabled(Settings.getQuickSettingsShowTitles(context));
+
         //setup bar and floating buttons
         pageFragment.scaleBar = rootView.findViewById(R.id.Lens_Magnitude_Bar);
 
@@ -3539,6 +3543,8 @@ public abstract class Current
 
             }
         });
+        mapSettingsMenu.setMessagesEnabled(Settings.getQuickSettingsShowMessages(context));
+        mapSettingsMenu.setTitlesEnabled(Settings.getQuickSettingsShowTitles(context));
         mapSettingsMenu.setVisibility(View.GONE);
 
         //if map info text exists and not using background

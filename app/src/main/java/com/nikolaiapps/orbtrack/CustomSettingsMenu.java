@@ -10,6 +10,7 @@ import android.util.AttributeSet;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewParent;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -287,8 +288,11 @@ public class CustomSettingsMenu extends FrameLayout
             //go through current center views
             for(index = 0; index < centerViews.size(); index++)
             {
-                //remember current view
+                //remember current view and parent
                 View currentView = centerViews.get(index);
+                ViewParent parentView = currentView.getParent();
+                ViewGroup parentGroupView = (parentView instanceof ViewGroup ? (ViewGroup)parentView : null);
+                boolean usingParent = (parentGroupView != null);
 
                 //if showing titles
                 if(showTitles)
@@ -296,18 +300,29 @@ public class CustomSettingsMenu extends FrameLayout
                     //if current view is a button
                     if(currentView instanceof FloatingActionButton)
                     {
-                        //remove and add back with title
+                        View titledButton;
+
+                        //remove button and add back with title
+                        if(usingParent)
+                        {
+                            parentGroupView.removeView(currentView);
+                        }
                         centerViews.remove(index);
-                        centerViews.add(index, createTitledButton((FloatingActionButton)currentView));
+                        titledButton = createTitledButton((FloatingActionButton)currentView);       //note: must not be created until button is removed
+                        centerViews.add(index, titledButton);
+                        if(usingParent)
+                        {
+                            parentGroupView.addView(titledButton);
+                        }
                     }
                 }
                 else
                 {
-                    //if current view is a layout
-                    if(currentView instanceof LinearLayout)
+                    //if current view is a view group
+                    if(currentView instanceof ViewGroup)
                     {
                         //remember current layout view
-                        LinearLayout currentLayoutView = (LinearLayout)currentView;
+                        ViewGroup currentLayoutView = (ViewGroup)currentView;
 
                         //if current layout view has children
                         if(currentLayoutView.getChildCount() > 0)
@@ -319,13 +334,25 @@ public class CustomSettingsMenu extends FrameLayout
                             if(currentChildView instanceof FloatingActionButton)
                             {
                                 //remove titled button and add button only
+                                if(usingParent)
+                                {
+                                    parentGroupView.removeView(currentView);
+                                }
+                                currentLayoutView.removeAllViews();
                                 centerViews.remove(index);
                                 centerViews.add(index, currentChildView);
+                                if(usingParent)
+                                {
+                                    parentGroupView.addView(currentChildView);
+                                }
                             }
                         }
                     }
                 }
             }
+
+            //possibly update display
+            updateDisplay();
         }
     }
 
@@ -342,7 +369,7 @@ public class CustomSettingsMenu extends FrameLayout
     }
 
     //Updates display
-    public void updateDisplay()
+    private void updateDisplay()
     {
         int index;
         int buttonOffset;

@@ -193,7 +193,9 @@
     <string name="desc_show_shadows">Show orbital shadows in globe view\nNote: Disabled for some Mali and PowerVR GPUs</string>
     <string name="desc_show_sliders">Show sliders on screen</string>
     <string name="desc_show_stars">Show stars in background in globe view</string>
+    <string name="desc_show_status_messages">Show message with current setting state</string>
     <string name="desc_show_sunlight">Show/hide current daylight on surface</string>
+    <string name="desc_show_titles">Show title descriptions below settings</string>
     <string name="desc_show_toolbars">Show toolbars on screen edges</string>
     <string name="desc_show_view_quality">Show view quality fill colors</string>
     <string name="desc_stars_constellation_notice">Stars and constellations can now be tracked! If you wish to view them, select filter settings on the top right of each display screen.\n\nThey default to being shown on lens views only, but can be added to the globe, lists, etc.</string>
@@ -546,6 +548,7 @@
     <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_purple">Purple</string>
     <string name="title_quality">Quality</string>
+    <string name="title_quick_settings">Quick Settings</string>
     <string name="title_r">R</string>
     <string name="title_range">Range</string>
     <string name="title_rates">Rates</string>
@@ -618,7 +621,9 @@
     <string name="title_show_shadows">Show Shadows</string>
     <string name="title_show_sliders">Show Sliders</string>
     <string name="title_show_stars">Show Stars</string>
+    <string name="title_show_status_messages">Show Status Messages</string>
     <string name="title_show_sunlight">Show Sunlight</string>
+    <string name="title_show_titles">Show Titles</string>
     <string name="title_show_toolbars">Show Toolbars</string>
     <string name="title_skip">Skip</string>
     <string name="title_sliders">Sliders</string>

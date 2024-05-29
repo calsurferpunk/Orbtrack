@@ -499,6 +499,21 @@
             android:icon="@drawable/ic_notifications_white"
             android:fragment="com.nikolaiapps.orbtrack.Settings$Page"/>
 
+        <PreferenceScreen android:title="@string/title_quick_settings"
+            android:key="quickSettings"
+            android:icon="@drawable/ic_expand_less"
+            android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+            <com.nikolaiapps.orbtrack.SwitchPreference
+                android:title="@string/title_show_status_messages"
+                android:key="QuickSettingsShowMessages"
+                android:summary="@string/desc_show_status_messages"/>
+
+            <com.nikolaiapps.orbtrack.SwitchPreference
+                android:title="@string/title_show_titles"
+                android:key="QuickSettingsShowTitles"
+                android:summary="@string/desc_show_titles"/>
+        </PreferenceScreen>
+
         <PreferenceScreen android:title="@string/title_timeline"
             android:key="timeline"
             android:icon="@drawable/ic_timeline_black"

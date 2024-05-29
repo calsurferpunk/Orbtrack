@@ -185,6 +185,8 @@ public abstract class Settings
         static final String NotifyFullMoonEndLongitude = "NotifyFullMoonEndLongitude";
         static final String NotifyFullMoonEndAltitude = "NotifyFullMoonEndAltitude";
         static final String NotifyFullMoonEndZoneId = "NotifyFullMoonEndZoneId";
+        static final String QuickSettingsShowMessages = "QuickSettingsShowMessages";
+        static final String QuickSettingsShowTitles = "QuickSettingsShowTitles";
         static final String TimelineShowViewQuality = "TimelineShowViewQuality";
         static final String TimelineMinuteInterval = "TimelineMinuteInterval";
         static final String InformationSource = "InformationSource";
@@ -2058,6 +2060,7 @@ public abstract class Settings
             case PreferenceName.LensHideDistantPathTimes:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
+            case PreferenceName.QuickSettingsShowTitles:
             case PreferenceName.TimelineShowViewQuality:
             case PreferenceName.MapMarkerShowShadow:
             case PreferenceName.MapMarkerLocationIconUseTint:
@@ -2891,6 +2894,18 @@ public abstract class Settings
     public static void setListOrbitalTypeFilter(Context context, Byte... orbitalTypes)
     {
         setOrbitalTypeFilter(context, PreferenceName.ListOrbitalTypeFilter, orbitalTypes);
+    }
+
+    //Gets quick settings messages being shown
+    public static boolean getQuickSettingsShowMessages(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.QuickSettingsShowMessages));
+    }
+
+    //Gets quick settings titles being shown
+    public static boolean getQuickSettingsShowTitles(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.QuickSettingsShowTitles));
     }
 
     //Gets timeline view quality being shown

@@ -193,7 +193,9 @@
     <string name="desc_show_shadows">Mostrar sombras orbital en vista del globo\nNota: Desactivado para algunas GPU Mali y PowerVR</string>
     <string name="desc_show_sliders">Mostrar deslizantes en la pantalla</string>
     <string name="desc_show_stars">Mostrar estrellas en segundo plano en vista de globo</string>
+    <string name="desc_show_status_messages">Mostrar mensaje con el estado de configuración actual</string>
     <string name="desc_show_sunlight">Mostrar/ocultar la luz diurna actual en la superficie</string>
+    <string name="desc_show_titles">Mostrar descripciones de títulos debajo de la configuración</string>
     <string name="desc_show_toolbars">Mostrar barras herramientas en los bordes de la pantalla</string>
     <string name="desc_show_view_quality">Mostrar colores de relleno de calidad de visualización</string>
     <string name="desc_stars_constellation_notice">¡Ahora se pueden rastrear estrellas y constelaciones! Si desea verlos, seleccione la configuración de filtro en la parte superior derecha de cada pantalla. De forma predeterminada, se muestran solo en vistas de lentes, pero se pueden agregar al globo terráqueo, listas, etc.</string>
@@ -546,6 +548,7 @@
     <string name="title_privacy_policy">Política Privacidad</string>
     <string name="title_purple">Púrpura</string>
     <string name="title_quality">Calidad</string>
+    <string name="title_quick_settings">Ajustes Rápidos</string>
     <string name="title_r">R</string>
     <string name="title_range">Distancia</string>
     <string name="title_rates">Frecuencia</string>
@@ -618,7 +621,9 @@
     <string name="title_show_shadows">Mostrar Sombras</string>
     <string name="title_show_sliders">Mostrar Deslizantes</string>
     <string name="title_show_stars">Mostrar Estrellas</string>
+    <string name="title_show_status_messages">Mostrar Mensajes de Estado</string>
     <string name="title_show_sunlight">Mostrar Luz Sol</string>
+    <string name="title_show_titles">Mostrar Títulos</string>
     <string name="title_show_toolbars">Mostrar Barras Herramientas</string>
     <string name="title_skip">Omitir</string>
     <string name="title_sliders">Deslizadores</string>

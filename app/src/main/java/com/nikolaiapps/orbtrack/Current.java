@@ -2960,6 +2960,38 @@ public abstract class Current
         }
     }
 
+    //Setup pin button
+    private static void setupPinButton(Context context, final FloatingActionStateButton showPinButton)
+    {
+        //if button exists
+        if(showPinButton != null)
+        {
+            showPinButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    CoordinatesFragment mapView = getMapView();
+
+                    //reverse state
+                    boolean showPins = !Settings.getMapShowPins(context);
+                    showPinButton.setChecked(showPins);
+                    Settings.setMapShowPins(context, showPins);
+
+                    //update visibility
+                    if(mapView != null)
+                    {
+                        mapView.setMarkerShowPin(showPins);
+                    }
+                }
+            });
+
+            //set to opposite then perform click to set it correctly
+            Settings.setMapShowPins(context, !Settings.getMapShowPins(context));
+            showPinButton.performClick();
+        }
+    }
+
     //Setup path button
     private static void setupPathButton(final FloatingActionStateButton showPathButton, Database.SatelliteData[] selectedOrbitals)
     {
@@ -3485,6 +3517,7 @@ public abstract class Current
         final FloatingActionStateButton showPathButton = mapSettingsMenu.addMenuItem(R.drawable.orbit, R.string.title_paths, R.string.title_show_path);
         final FloatingActionStateButton showLatLonButton = mapSettingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_grid, R.string.title_show_latitude_longitude);
         final FloatingActionStateButton showFootprintButton = mapSettingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_footprint, R.string.title_show_footprint);
+        final FloatingActionStateButton showPinButton = (forGlobe ? mapSettingsMenu.addMenuItem(R.drawable.ic_push_pin_white, R.string.title_pins, R.string.title_show_pins) : null);
         final FloatingActionStateButton iconScaleButton = mapSettingsMenu.addMenuItem(R.drawable.ic_width_black, R.string.title_scale, R.string.title_set_icon_scale);
         final FloatingActionStateButton showToolbarsButton = (multiSelected ? mapSettingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_toolbars, R.string.title_show_toolbars) : null);
         final FloatingActionStateButton showSlidersButton = mapSettingsMenu.addMenuItem(R.drawable.ic_commit_white, R.string.title_sliders, R.string.title_show_sliders);
@@ -3662,6 +3695,7 @@ public abstract class Current
                 //setup buttons
                 CoordinatesFragment.Utils.setupZoomSlider(mapView, mapZoomBar, forGlobe);
                 setupLatLonButton(context, showLatLonButton);
+                setupPinButton(context, showPinButton);
                 setupFootprintButton(context, showFootprintButton);
                 setupScaleButton(context, iconScaleButton, page.scaleBar, false);
 

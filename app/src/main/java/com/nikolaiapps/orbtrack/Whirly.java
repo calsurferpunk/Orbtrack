@@ -596,7 +596,6 @@ class Whirly
     private static class ShapeObject
     {
         private boolean isVisible;
-        private final boolean tleIsAccurate;
         private int skipLayoutCount;
         private final BaseController controller;
         private final ShapeCylinder shape;
@@ -604,9 +603,8 @@ class Whirly
         private ComponentObject shapeObject;
         private final ArrayList<Shape> cylinderList;
 
-        ShapeObject(BaseController shapeController, int color, boolean tleIsAc, boolean visible)
+        ShapeObject(BaseController shapeController, int sampleCount, float radius, int alpha, int color, boolean visible)
         {
-            tleIsAccurate = tleIsAc;
             skipLayoutCount = 0;
             controller = shapeController;
             shape = new ShapeCylinder();
@@ -614,10 +612,10 @@ class Whirly
             shapeObject = null;
             cylinderList = new ArrayList<>(0);
 
-            shape.setBaseHeight(0.01);
-            shape.setRadius(0.002);
-            shape.setSample(5);
-            shapeInfo.setColor(Globals.getColor(50, Color.rgb(Color.red(color) / 2, Color.green(color) / 2, Color.blue(color) / 2)));
+            shape.setBaseHeight(0.0);
+            shape.setRadius(radius);
+            shape.setSample(sampleCount);
+            shapeInfo.setColor(Globals.getColor(alpha, Color.rgb(Color.red(color) / 2, Color.green(color) / 2, Color.blue(color) / 2)));
             shapeInfo.setDrawPriority(DrawPriority.Path);
             shapeInfo.setZBufferWrite(true);
             shapeInfo.setZBufferRead(true);
@@ -669,7 +667,7 @@ class Whirly
 
         private void add()
         {
-            if(skipLayoutCount <= 0 && tleIsAccurate && shapeObject == null)
+            if(skipLayoutCount <= 0 && shapeObject == null)
             {
                 shapeObject = controller.addShapes(cylinderList, shapeInfo, BaseController.ThreadMode.ThreadAny);
             }
@@ -1720,7 +1718,7 @@ class Whirly
                 }
                 else if(showPin && orbitalPin == null)
                 {
-                    orbitalPin = new ShapeObject(controller, common.data.getPathColor(), tleIsAccurate, showPin);
+                    orbitalPin = new ShapeObject(controller, Settings.getMapPinsSampleType(currentContext), Settings.getMapPinsSize(currentContext), Settings.getMapPinsAlpha(currentContext), common.data.getPathColor(), showPin);
                 }
             }
         }

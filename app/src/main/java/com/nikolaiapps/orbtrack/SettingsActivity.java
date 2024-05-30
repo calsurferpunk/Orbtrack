@@ -77,6 +77,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         public static final String MapViewGlobe = "mapViewGlobe";
         public static final String MapViewMap = "mapViewMap";
         public static final String MapViewFootprint = "mapViewFootprint";
+        public static final String MapViewPins = "mapViewPins";
         public static final String MapViewLabelData = "mapViewLabelData";
         public static final String Notifications = "notifications";
         public static final String QuickSettings = "quickSettings";
@@ -332,6 +333,22 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupList(footprintTypeList, Settings.Options.MapView.footprintTypeItems, Settings.Options.MapView.FootprintTypeValues, null, null, null);
                         break;
 
+                    case ScreenKey.MapViewPins:
+                        SwitchPreference showPins = this.findPreference(Settings.PreferenceName.MapShowPins);
+                        SliderPreference pinsAlphaSlider = this.findPreference(Settings.PreferenceName.MapPinsAlpha);
+                        IconListPreference pinsSampleTypeList = this.findPreference(Settings.PreferenceName.MapPinsSampleType);
+                        IconListPreference pinsSizeList = this.findPreference(Settings.PreferenceName.MapPinsSize);
+
+                        //initialize values
+                        Settings.Options.MapView.initValues(context);
+
+                        //setup displays
+                        setupSwitch(showPins);
+                        setupSlider(pinsAlphaSlider);
+                        setupList(pinsSampleTypeList, Settings.Options.MapView.pinSampleTypeItems, null, null, null, null);
+                        setupList(pinsSizeList, Settings.Options.MapView.pinSizeItems, null, null, null, null);
+                        break;
+
                     case ScreenKey.MapViewLabelData:
                         SwitchPreference showInformationBackgroundSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowBackground);
                         IconListPreference informationLocationList = this.findPreference(Settings.PreferenceName.MapMarkerInfoLocation);
@@ -580,6 +597,14 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.MapFootprintType:
                             currentValue = Settings.getMapFootprintType(context);
+                            break;
+
+                        case Settings.PreferenceName.MapPinsSampleType:
+                            currentValue = Settings.getMapPinsSampleType(context);
+                            break;
+
+                        case Settings.PreferenceName.MapPinsSize:
+                            currentValue = Settings.getMapPinsSize(context);
                             break;
 
                         case Settings.PreferenceName.MapMarkerLocationIcon:
@@ -876,6 +901,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case Settings.PreferenceName.LensTextAlpha:
                     case Settings.PreferenceName.LensConstellationAlpha:
                     case Settings.PreferenceName.MapFootprintAlpha:
+                    case Settings.PreferenceName.MapPinsAlpha:
                         min = 0;
                         max = 100;
                         break;
@@ -1683,6 +1709,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.MapShowOrbitalDirectionLimit:
                         case Settings.PreferenceName.MapFootprintType:
                         case Settings.PreferenceName.MapFootprintAlpha:
+                        case Settings.PreferenceName.MapShowPins:
+                        case Settings.PreferenceName.MapPinsAlpha:
+                        case Settings.PreferenceName.MapPinsSampleType:
+                        case Settings.PreferenceName.MapPinsSize:
                         case Settings.PreferenceName.MapSelectedFootprintColor:
                         case Settings.PreferenceName.MapMarkerShowShadow:
                         case Settings.PreferenceName.MapFrameRate:

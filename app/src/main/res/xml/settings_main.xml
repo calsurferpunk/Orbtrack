@@ -259,6 +259,37 @@
                     </PreferenceCategory>
                 </PreferenceScreen>
 
+                <PreferenceScreen android:title="@string/title_pins"
+                    android:key="mapViewPins"
+                    android:icon="@drawable/ic_push_pin_white"
+                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+                    <PreferenceCategory android:title="@string/title_pins">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_pin_shape"
+                            android:key="MapPinsSampleType"
+                            android:summary="@string/desc_pin_shape"/>
+
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_pin_size"
+                            android:key="MapPinsSize"
+                            android:summary="@string/desc_pin_size"/>
+
+                        <com.nikolaiapps.orbtrack.SliderPreference
+                            app:titleText="@string/title_opacity"
+                            android:key="MapPinsAlpha"
+                            app:minValue="0"
+                            app:maxValue="100"
+                            app:scaleUnitType="Percent"/>
+                    </PreferenceCategory>
+
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_show_pins"
+                            android:key="MapShowPins"
+                            android:summary="@string/desc_show_pins"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
+
                 <PreferenceScreen android:title="@string/title_label_data"
                     android:key="mapViewLabelData"
                     app:icon="@drawable/ic_title_black"

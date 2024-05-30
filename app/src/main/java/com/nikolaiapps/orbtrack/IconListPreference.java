@@ -137,6 +137,10 @@ public class IconListPreference extends CustomPreference
                     {
                         writeSettings.putLong(preferenceName, (long)itemValue);
                     }
+                    else if(itemValue instanceof Float)
+                    {
+                        writeSettings.putFloat(preferenceName, (float)itemValue);
+                    }
                     else if(itemValue instanceof String)
                     {
                         writeSettings.putString(preferenceName, (String)itemValue);

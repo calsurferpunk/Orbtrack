@@ -95,6 +95,10 @@ public abstract class Settings
         static final String MapShowOrbitalDirection = "MapShowOrbitalDirection";
         static final String MapShowOrbitalDirectionLimit = "MapShowOrbitalDirectionLimit";
         static final String MapShowOrbitalDirectionUseLimit = "MapShowOrbitalDirectionUseLimit";
+        static final String MapShowPins = "MapShowPins";
+        static final String MapPinsAlpha = "MapPinsAlpha";
+        static final String MapPinsSampleType = "MapPinsSampleType";
+        static final String MapPinsSize = "MapPinsSize";
         static final String MapShowSliders = "MapShowSliders";
         static final String MapShowToolbars = "MapShowToolbars";
         static final String MapOrbitalTypeFilter = "MapOrbitalTypeFilter";
@@ -230,7 +234,7 @@ public abstract class Settings
             //Indicator items
             public static IconSpinner.Item[] indicatorItems;
 
-            //
+            //Direction size items
             public static IconSpinner.Item[] directionSizeItems;
 
             //Path type items
@@ -826,6 +830,14 @@ public abstract class Settings
                 static final int OutlineFilled = 2;
             }
 
+            //Pin sample types
+            public static abstract class PinSampleType
+            {
+                static final int Circle = 9;
+                static final int Square = 5;
+                static final int Triangle = 4;
+            }
+
             //Map types
             public static String[] mapTypeItems;
             public static final Integer[] MapTypeValues = new Integer[]{CoordinatesFragment.MapLayerType.Normal, CoordinatesFragment.MapLayerType.Satellite, /*CoordinatesFragment.MapLayerType.Terrain,*/ CoordinatesFragment.MapLayerType.Hybrid};
@@ -833,6 +845,12 @@ public abstract class Settings
             //Footprint types
             public static String[] footprintTypeItems;
             public static final Integer[] FootprintTypeValues = new Integer[]{FootprintType.Outline, FootprintType.Filled, FootprintType.OutlineFilled};
+
+            //Pin sample types
+            public static IconSpinner.Item[] pinSampleTypeItems;
+
+            //Pin sizes
+            public static IconSpinner.Item[] pinSizeItems;
 
             //Information location types
             public static String[] infoLocationItems;
@@ -851,7 +869,6 @@ public abstract class Settings
                     {
                         res.getString(R.string.title_normal),
                         res.getQuantityString(R.plurals.title_satellites, 1),
-                        /*res.getString(R.string.title_terrain),*/
                         res.getString(R.string.title_hybrid)
                     };
                 }
@@ -863,6 +880,27 @@ public abstract class Settings
                         res.getString(R.string.title_outline),
                         res.getString(R.string.title_filled),
                         res.getString(R.string.title_both)
+                    };
+                }
+                if(pinSampleTypeItems == null || pinSampleTypeItems.length == 0)
+                {
+                    //init sample type items
+                    pinSampleTypeItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(R.drawable.shape_circle_black, res.getString(R.string.title_circle), PinSampleType.Circle),
+                        new IconSpinner.Item(R.drawable.shape_square_black, res.getString(R.string.title_square), PinSampleType.Square),
+                        new IconSpinner.Item(R.drawable.shape_triangle_black, res.getString(R.string.title_triangle), PinSampleType.Triangle)
+                    };
+                }
+                if(pinSizeItems == null || pinSizeItems.length == 0)
+                {
+                    //set pin size items
+                    pinSizeItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_very_small), 0.00025f),
+                        new IconSpinner.Item(res.getString(R.string.title_small), 0.001f),
+                        new IconSpinner.Item(res.getString(R.string.title_medium), 0.005f),
+                        new IconSpinner.Item(res.getString(R.string.title_large), 0.01f)
                     };
                 }
                 if(infoLocationItems == null || infoLocationItems.length == 0)
@@ -2176,6 +2214,9 @@ public abstract class Settings
             case PreferenceName.MapSelectedFootprintColor:
                 return(Color.argb(102, 200, 200, 220));
 
+            case PreferenceName.MapPinsSampleType:
+                return(Options.MapView.PinSampleType.Square);
+
             case PreferenceName.MapLayerType + SubPreferenceName.Globe:
                 return(CoordinatesFragment.MapLayerType.Hybrid);
 
@@ -2295,6 +2336,12 @@ public abstract class Settings
 
             case PreferenceName.MapFootprintAlpha:
                 return(0.35f);
+
+            case PreferenceName.MapPinsAlpha:
+                return(0.20f);
+
+            case PreferenceName.MapPinsSize:
+                return(0.001f);
         }
 
         if(Globals.startsWith(preferenceName,
@@ -2982,6 +3029,38 @@ public abstract class Settings
     public static int getMapDisplayType(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.MapDisplayType));
+    }
+
+    //Returns map showing pins
+    @SuppressWarnings("BooleanMethodIsAlwaysInverted")
+    public static boolean getMapShowPins(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapShowPins));
+    }
+
+    //Sets map showing pins
+    public static void setMapShowPins(Context context, boolean show)
+    {
+        setPreferenceBoolean(context, PreferenceName.MapShowPins, show);
+    }
+
+    //Returns map pins alpha
+    //note: converts from 0 - 1.0 to alpha 0 - 255
+    public static int getMapPinsAlpha(Context context)
+    {
+        return((int)(getPreferenceFloat(context, PreferenceName.MapPinsAlpha) * 255));
+    }
+
+    //Returns map pin sample type
+    public static int getMapPinsSampleType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.MapPinsSampleType));
+    }
+
+    //Returns map pin size
+    public static float getMapPinsSize(Context context)
+    {
+        return(getPreferenceFloat(context, PreferenceName.MapPinsSize));
     }
 
     //Returns map showing sliders

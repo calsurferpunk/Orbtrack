@@ -2219,7 +2219,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 else if(locationSource == Database.LocationType.Current)
                 {
                     //show status
-                    Globals.showSnackBar(settingsLayout, context.getString(R.string.text_location_success));
+                    Globals.showSnackBarTransparent(settingsLayout, R.drawable.ic_my_location_black, false);
                 }
 
                 //if settings location list adapter exists
@@ -2393,7 +2393,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         if(locationSource == Database.LocationType.Current && !showSetup)
                         {
                             //show status and update location
-                            Globals.showSnackBar(settingsLayout, context.getResources().getString(R.string.title_location_getting));
+                            Globals.showSnackBarTransparent(settingsLayout, R.drawable.ic_location_searching_white, false);
                             LocationService.getCurrentLocation(context, false, LocationService.PowerTypes.HighPowerThenBalanced);
                         }
                     }

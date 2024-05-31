@@ -1133,7 +1133,7 @@ public abstract class Globals
     }
 
     //Shows a snack bar
-    public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView, int positiveTextId, int negativeTextId, DialogInterface.OnClickListener positiveListener, DialogInterface.OnDismissListener dismissListener)
+    public static void showSnackBar(final View parentView, final String message, final String detailMessage, int imageId, boolean isError, final boolean closeOnView, int positiveTextId, int negativeTextId, DialogInterface.OnClickListener positiveListener, DialogInterface.OnDismissListener dismissListener)
     {
         //if parent view is not set
         if(parentView == null)
@@ -1144,21 +1144,31 @@ public abstract class Globals
 
         final Context context = parentView.getContext();
         boolean usingDetail = (detailMessage != null);
+        boolean usingImagesOnly = (imageId != -1 && message == null && detailMessage == null);
         int resId = (isError ? R.drawable.ic_error_black : R.drawable.ic_check_circle_black);
+        int imageColor = resolveAttributeID(context, android.R.attr.textColor);
         int textColor = resolveColorID(context, R.attr.titleTextColor);
         final Drawable icon = getDrawable(context, resId, true);
-        final Drawable smallIcon = getDrawableSized(context, resId, 16, 16, R.color.white, true);
-        final Snackbar snackView = Snackbar.make(parentView, message, usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
+        final Drawable smallIcon = (usingImagesOnly ? null : getDrawableSized(context, resId, 16, 16, R.color.white, true));
+        final Drawable imageIcon = (usingImagesOnly ? getDrawableSized(context, imageId, 16, 16, imageColor, true) : null);
+        final Snackbar snackView = Snackbar.make(parentView, (message == null ? "" : message), usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
         final View snackParentView = snackView.getView();
         final TextView snackText = snackParentView.findViewById(com.google.android.material.R.id.snackbar_text);
         final Resources res = context.getResources();
 
         //setup views
-        snackView.setBackgroundTint(resolveColorID(context, R.attr.colorAccentDark));
+        if(usingImagesOnly)
+        {
+            snackView.getView().setBackgroundColor(Color.TRANSPARENT);
+        }
+        else
+        {
+            snackView.setBackgroundTint(resolveColorID(context, R.attr.colorAccentDark));
+        }
         snackText.setTextColor(textColor);
         snackView.setActionTextColor(textColor);
         snackText.setCompoundDrawablePadding((int)dpToPixels(context, 3));
-        snackText.setCompoundDrawablesWithIntrinsicBounds(smallIcon, null, null, null);
+        snackText.setCompoundDrawablesWithIntrinsicBounds((usingImagesOnly ? imageIcon : smallIcon), null, null, null);
 
         //if using detail message
         if(usingDetail)
@@ -1169,7 +1179,7 @@ public abstract class Globals
                 @Override
                 public void onClick(View view)
                 {
-                    showConfirmDialog(context, icon, message, detailMessage, res.getString(positiveTextId), (negativeTextId != -1 ? res.getString(negativeTextId) : null), true, positiveListener, null, new DialogInterface.OnDismissListener()
+                    showConfirmDialog(context, icon, message, detailMessage, (positiveTextId != - 1 ? res.getString(positiveTextId) : null), (negativeTextId != -1 ? res.getString(negativeTextId) : null), true, positiveListener, null, new DialogInterface.OnDismissListener()
                     {
                         @Override
                         public void onDismiss(DialogInterface dialogInterface)
@@ -1194,7 +1204,7 @@ public abstract class Globals
     }
     public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView)
     {
-        showSnackBar(parentView, message, detailMessage, isError, closeOnView, R.string.title_ok, -1, null, null);
+        showSnackBar(parentView, message, detailMessage, -1, isError, closeOnView, R.string.title_ok, -1, null, null);
     }
     public static void showSnackBar(View parentView, String message, boolean isError)
     {
@@ -1203,6 +1213,12 @@ public abstract class Globals
     public static void showSnackBar(View parentView, String message)
     {
         showSnackBar(parentView, message, null, false, true);
+    }
+
+    //Shows a transparent snack bar with only an image
+    public static void showSnackBarTransparent(View parentView, int imageId, boolean isError)
+    {
+        showSnackBar(parentView, null, null, imageId, isError, true, -1, -1, null, null);
     }
 
     //Checks if permission is granted

@@ -1515,7 +1515,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             //show old satellite count
             ranOldSatelliteUpdate = false;
             pendingOldSatelliteMessage = true;
-            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_outdated, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), true, true, R.string.title_update, R.string.title_dismiss, new DialogInterface.OnClickListener()
+            Globals.showSnackBar(parentView, res.getQuantityString(R.plurals.title_satellites_outdated, oldSatelliteCount, oldSatelliteCount), oldMessage.toString(), -1, true, true, R.string.title_update, R.string.title_dismiss, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
@@ -1728,7 +1728,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 pendingLocationUpdate = true;
                 if(showStatus)
                 {
-                    Globals.showSnackBar(mainDrawerLayout, this.getResources().getString(R.string.title_location_getting));
+                    Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_location_searching_white, false);
                 }
                 LocationService.getCurrentLocation(this, false, LocationService.PowerTypes.HighPowerThenBalanced);
             }
@@ -2685,7 +2685,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 //if showing status
                 if(showStatus)
                 {
-                    Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.text_location_success));
+                    Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_my_location_black, false);
                 }
 
                 //update status

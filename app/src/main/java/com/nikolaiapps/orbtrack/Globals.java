@@ -98,6 +98,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -1150,7 +1151,7 @@ public abstract class Globals
         int textColor = resolveColorID(context, R.attr.titleTextColor);
         final Drawable icon = getDrawable(context, resId, true);
         final Drawable smallIcon = (usingImagesOnly ? null : getDrawableSized(context, resId, 16, 16, R.color.white, true));
-        final Drawable imageIcon = (usingImagesOnly ? getDrawableSized(context, imageId, 16, 16, imageColor, true) : null);
+        final Drawable imageIcon = (usingImagesOnly ? getDrawableSized(context, imageId, 12, 12, imageColor, true) : null);
         final Snackbar snackView = Snackbar.make(parentView, (message == null ? "" : message), usingDetail ? Snackbar.LENGTH_INDEFINITE : Snackbar.LENGTH_LONG);
         final View snackParentView = snackView.getView();
         final TextView snackText = snackParentView.findViewById(com.google.android.material.R.id.snackbar_text);
@@ -1159,7 +1160,12 @@ public abstract class Globals
         //setup views
         if(usingImagesOnly)
         {
-            snackView.getView().setBackgroundColor(Color.TRANSPARENT);
+            FrameLayout.LayoutParams layoutParams = (FrameLayout.LayoutParams)snackParentView.getLayoutParams();
+
+            snackParentView.setBackgroundColor(Color.TRANSPARENT);
+            layoutParams.width = FrameLayout.LayoutParams.WRAP_CONTENT;
+            layoutParams.gravity = Gravity.TOP | Gravity.RIGHT;
+            snackParentView.setLayoutParams(layoutParams);
         }
         else
         {

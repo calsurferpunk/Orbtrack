@@ -22,6 +22,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -860,6 +861,7 @@ public class MasterAddListActivity extends BaseInputActivity
         super.onCreate(savedInstanceState);
 
         setContentView(usingMaterial ? R.layout.master_list_material_layout : R.layout.master_list_layout);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //get intent, source, and displays
         Intent addIntent = this.getIntent();

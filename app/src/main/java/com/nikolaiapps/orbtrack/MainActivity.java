@@ -2623,8 +2623,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Creates a location receiver
     private LocationReceiver createLocationReceiver(LocationReceiver oldReceiver)
     {
-        final Resources res = this.getResources();
-
         //if old receiver is set
         if(oldReceiver != null)
         {
@@ -3787,7 +3785,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             @Override
             public void onPageSet(Selectable.ListFragment page, int pageNum, int subPageNum)
             {
-                final FloatingActionButton fullscreenButton;
+                final FloatingActionStateButton fullscreenButton;
 
                 //if a Current.Page
                 if(page instanceof Current.Page)
@@ -3860,7 +3858,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 mainPager.setSwipeEnabled(allowingPagerSwipe && !setFullscreen);
                                 mainPagerTitles.setVisibility(!setFullscreen ? View.VISIBLE : View.GONE);
                                 mainDrawerLayout.setDrawerLockMode(setFullscreen ? DrawerLayout.LOCK_MODE_LOCKED_CLOSED : DrawerLayout.LOCK_MODE_UNLOCKED);
-                                fullscreenButton.setImageDrawable(Globals.getDrawable(activity, (setFullscreen ? R.drawable.ic_fullscreen_exit_white : R.drawable.ic_fullscreen_white)));
+                                fullscreenButton.setChecked(setFullscreen);
                             }
                         }
                     });

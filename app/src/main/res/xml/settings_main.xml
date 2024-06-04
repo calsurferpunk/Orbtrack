@@ -534,15 +534,26 @@
             android:key="quickSettings"
             android:icon="@drawable/ic_expand_less"
             android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-            <com.nikolaiapps.orbtrack.SwitchPreference
-                android:title="@string/title_show_status_messages"
-                android:key="QuickSettingsShowMessages"
-                android:summary="@string/desc_show_status_messages"/>
+            <PreferenceCategory android:title="@string/title_quick_settings">
+                <com.nikolaiapps.orbtrack.SliderPreference
+                    app:titleText="@string/title_scale"
+                    android:key="QuickSettingsScale"
+                    app:minValue="50"
+                    app:maxValue="150"
+                    app:scaleUnitType="Percent"/>
+            </PreferenceCategory>
 
-            <com.nikolaiapps.orbtrack.SwitchPreference
-                android:title="@string/title_show_titles"
-                android:key="QuickSettingsShowTitles"
-                android:summary="@string/desc_show_titles"/>
+            <PreferenceCategory android:title="@string/title_display">
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_show_status_messages"
+                    android:key="QuickSettingsShowMessages"
+                    android:summary="@string/desc_show_status_messages"/>
+
+                <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_show_titles"
+                    android:key="QuickSettingsShowTitles"
+                    android:summary="@string/desc_show_titles"/>
+            </PreferenceCategory>
         </PreferenceScreen>
 
         <PreferenceScreen android:title="@string/title_timeline"

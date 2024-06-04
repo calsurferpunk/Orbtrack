@@ -364,10 +364,12 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case ScreenKey.QuickSettings:
                         SwitchPreference quickSettingsShowMessages = this.findPreference(Settings.PreferenceName.QuickSettingsShowMessages);
                         SwitchPreference quickSettingsShowTitles = this.findPreference(Settings.PreferenceName.QuickSettingsShowTitles);
+                        SliderPreference quickSettingsScale = this.findPreference(Settings.PreferenceName.QuickSettingsScale);
 
                         //setup displays
                         setupSwitch(quickSettingsShowMessages);
                         setupSwitch(quickSettingsShowTitles);
+                        setupSlider(quickSettingsScale);
                         break;
 
                     case ScreenKey.Timeline:
@@ -904,6 +906,11 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case Settings.PreferenceName.MapPinsAlpha:
                         min = 0;
                         max = 100;
+                        break;
+
+                    case Settings.PreferenceName.QuickSettingsScale:
+                        min = 50;
+                        max = 150;
                         break;
                 }
 
@@ -1729,6 +1736,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.QuickSettingsShowMessages:
                         case Settings.PreferenceName.QuickSettingsShowTitles:
+                        case Settings.PreferenceName.QuickSettingsScale:
                             //lens and map need recreate
                             setLensRecreateNeed();
                             setMapRecreateNeeded();

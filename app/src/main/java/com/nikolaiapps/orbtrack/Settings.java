@@ -191,6 +191,7 @@ public abstract class Settings
         static final String NotifyFullMoonEndZoneId = "NotifyFullMoonEndZoneId";
         static final String QuickSettingsShowMessages = "QuickSettingsShowMessages";
         static final String QuickSettingsShowTitles = "QuickSettingsShowTitles";
+        static final String QuickSettingsScale = "QuickSettingsScale";
         static final String TimelineShowViewQuality = "TimelineShowViewQuality";
         static final String TimelineMinuteInterval = "TimelineMinuteInterval";
         static final String InformationSource = "InformationSource";
@@ -2342,6 +2343,9 @@ public abstract class Settings
 
             case PreferenceName.MapPinsSize:
                 return(0.001f);
+
+            case PreferenceName.QuickSettingsScale:
+                return(1.0f);
         }
 
         if(Globals.startsWith(preferenceName,
@@ -2953,6 +2957,12 @@ public abstract class Settings
     public static boolean getQuickSettingsShowTitles(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.QuickSettingsShowTitles));
+    }
+
+    //Gets quick settings scale
+    public static float getQuickSettingsScale(Context context)
+    {
+        return(getPreferenceFloat(context, PreferenceName.QuickSettingsScale));
     }
 
     //Gets timeline view quality being shown

@@ -12,11 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.shape.CornerFamily;
 import com.google.android.material.shape.ShapeAppearanceModel;
 import java.util.ArrayList;
@@ -31,6 +31,7 @@ public class CustomSettingsMenu extends FrameLayout
     private boolean showTitles;
     private boolean showMessages;
     private int menuOffset;
+    private final int imageSizePx;
     private final int buttonSizePx;
     private final int buttonTitlePx;
     private final int centerButtonCountMax;
@@ -48,14 +49,18 @@ public class CustomSettingsMenu extends FrameLayout
         super(context, attrs, defStyleAttr, defStyleRes);
 
         float[] sizes;
-        int buttonSizeDp = 42;
+        float scalePercent = Settings.getQuickSettingsScale(context);
+        int imageSizeDp = (int)(24 * scalePercent);
+        int buttonSizeDp = (int)(42 * scalePercent);
         int screenWidthDp = Globals.getDeviceDp(context);
+        int usedButtonSizeDp = Math.max(buttonSizeDp, 42);
+        float cornerSizeDp = (28 * scalePercent);
 
         //set defaults
         menuOffset = 0;
         showTitles = true;
         showMessages = false;
-        centerButtonCountMax = (screenWidthDp - (int)(buttonSizeDp * 4.33)) / buttonSizeDp;     //note: leave room for state, previous, next, buffer space, and end button
+        centerButtonCountMax = Math.max((screenWidthDp - (usedButtonSizeDp * 4)) / usedButtonSizeDp, 2);     //note: leave room for state, previous, next, buffer space, and end button
         centerViews = new ArrayList<>(0);
         expandedStateChangedListener = null;
 
@@ -64,13 +69,14 @@ public class CustomSettingsMenu extends FrameLayout
         endLayout = createLayout(this, Gravity.END | Gravity.CENTER_VERTICAL, true);
 
         //get sizes and model
-        sizes = Globals.dpsToPixels(context, buttonSizeDp, 36);
-        buttonSizePx = (int)sizes[0];
+        sizes = Globals.dpsToPixels(context, imageSizeDp, buttonSizeDp, cornerSizeDp);
+        imageSizePx = (int)sizes[0];
+        buttonSizePx = (int)sizes[1];
         buttonTitlePx = (int)Math.max((buttonSizePx / 11.5f), 10);
-        buttonModel = ShapeAppearanceModel.builder().setAllCorners(CornerFamily.ROUNDED, sizes[1]).build();
+        buttonModel = ShapeAppearanceModel.builder().setAllCorners(CornerFamily.ROUNDED, sizes[2]).build();
 
         //create state button
-        stateButton = (FloatingActionStateButton)createButton(this, R.drawable.ic_expand_less, true, -1, -1, false);
+        stateButton = createButton(this, R.drawable.ic_expand_less, R.drawable.ic_expand_more, -1, -1, false);
         stateButton.setLayoutParams(new FrameLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT, Gravity.START | Gravity.CENTER_VERTICAL));
         stateButton.setStateColors(Color.TRANSPARENT, Color.TRANSPARENT);
         stateButton.setOnClickListener(new OnClickListener()
@@ -83,7 +89,6 @@ public class CustomSettingsMenu extends FrameLayout
 
                 //update state button status
                 stateButton.setChecked(setChecked);
-                stateButton.setImageResource(setChecked ? R.drawable.ic_expand_more : R.drawable.ic_expand_less);
 
                 //update layout visibilities
                 centerLayout.setVisibility(layoutVisibility);
@@ -99,7 +104,7 @@ public class CustomSettingsMenu extends FrameLayout
         });
 
         //create next and previous button
-        nextButton = (FloatingActionStateButton)createButton(null, R.drawable.ic_arrow_right_white, true, -1, -1, false);
+        nextButton = createButton(null, R.drawable.ic_arrow_right_white, -1, -1, -1, false);
         nextButton.setOnClickListener(new OnClickListener()
         {
             @Override
@@ -109,7 +114,7 @@ public class CustomSettingsMenu extends FrameLayout
                 updateDisplay();
             }
         });
-        previousButton = (FloatingActionStateButton)createButton(null, R.drawable.ic_arrow_left_white, true, -1, -1, false);
+        previousButton = createButton(null, R.drawable.ic_arrow_left_white, -1, -1, -1, false);
         previousButton.setOnClickListener(new OnClickListener()
         {
             @Override
@@ -159,7 +164,7 @@ public class CustomSettingsMenu extends FrameLayout
     }
 
     //Creates a button with a title
-    private View createTitledButton(FloatingActionButton button)
+    private View createTitledButton(FloatingActionStateButton button)
     {
         Context context = getContext();
         Object buttonTag = button.getTag();
@@ -180,7 +185,7 @@ public class CustomSettingsMenu extends FrameLayout
     }
 
     //Creates a button
-    private FloatingActionButton createButton(ViewGroup parent, int imageId, boolean isState, int titleStringId, int messageStringId, boolean allowListAdd)
+    private FloatingActionStateButton createButton(ViewGroup parent, int normalImageId, int checkedImageId, int titleStringId, int messageStringId, boolean allowListAdd)
     {
         Context context = getContext();
         boolean parentIsCenter = centerLayout.equals(parent);
@@ -188,40 +193,34 @@ public class CustomSettingsMenu extends FrameLayout
         Resources res = context.getResources();
         String titleString = (titleStringId > -1 ? res.getString(titleStringId) : null);
         String messageString = (messageStringId > -1 ? res.getString(messageStringId) : null);
-        FloatingActionButton button = (isState ? new FloatingActionStateButton(context) : new FloatingActionButton(context));
+        FloatingActionStateButton button = new FloatingActionStateButton(context);
 
         //create button
         button.setBackground(null);
-        if(isState)
+        button.setShowChecked(allowListAdd);
+        button.setChecked(false);
+        button.setStateColors(Color.TRANSPARENT, Globals.getColor(127, Color.GRAY));
+        if(messageString != null)
         {
-            FloatingActionStateButton actionStateButton = (FloatingActionStateButton)button;
-
-            actionStateButton.setChecked(false);
-            actionStateButton.setStateColors(Color.TRANSPARENT, Globals.getColor(127, Color.GRAY));
-            if(messageString != null)
+            button.setOnCheckedChangedListener(new FloatingActionStateButton.OnCheckedChangedListener()
             {
-                actionStateButton.setOnCheckedChangedListener(new FloatingActionStateButton.OnCheckedChangedListener()
+                @Override
+                public void onCheckedChanged(FloatingActionStateButton button, boolean isChecked)
                 {
-                    @Override
-                    public void onCheckedChanged(FloatingActionStateButton button, boolean isChecked)
+                    //if showing messages and button is on screen
+                    if(showMessages && button.isShown())
                     {
-                        //if showing messages and button is on screen
-                        if(showMessages && button.isShown())
-                        {
-                            //show enabled status
-                            Toast.makeText(context,  messageString + ": " + res.getString(isChecked ? R.string.title_enabled : R.string.title_disabled), Toast.LENGTH_SHORT).show();
-                        }
+                        //show enabled status
+                        Toast.makeText(context,  messageString + ": " + res.getString(isChecked ? R.string.title_enabled : R.string.title_disabled), Toast.LENGTH_SHORT).show();
                     }
-                });
-            }
-        }
-        else
-        {
-            button.setBackgroundTintList(ColorStateList.valueOf(Color.TRANSPARENT));
+                }
+            });
         }
         button.setCompatElevation(0f);
         button.setCustomSize(buttonSizePx);
-        button.setImageResource(imageId);
+        button.setScaleType(ImageView.ScaleType.CENTER);
+        button.setImageDrawable(Globals.getDrawableSized(context, normalImageId, imageSizePx, imageSizePx, false, false));
+        button.setImageCheckedDrawable(checkedImageId > -1 ? Globals.getDrawableSized(context, checkedImageId, imageSizePx, imageSizePx, false, false) : null);
         button.setSupportImageTintList(ColorStateList.valueOf(Color.WHITE));
         button.setShapeAppearanceModel(buttonModel);
         button.setPadding(0, 0, 0, 0);
@@ -248,8 +247,8 @@ public class CustomSettingsMenu extends FrameLayout
             parent.addView(buttonView);
         }
 
-        //if allow adding, is a state button, and added to center layout
-        if(allowListAdd && isState && parentIsCenter)
+        //if allow adding and added to center layout
+        if(allowListAdd && parentIsCenter)
         {
             //add to center views
             centerViews.add(buttonView);
@@ -265,13 +264,13 @@ public class CustomSettingsMenu extends FrameLayout
     //Add menu item to center
     public FloatingActionStateButton addMenuItem(int imageId, int titleStringId, int messageStringId)
     {
-        return((FloatingActionStateButton)createButton(centerLayout, imageId, true, titleStringId, messageStringId, true));
+        return(createButton(centerLayout, imageId, -1, titleStringId, messageStringId, true));
     }
 
     //Add menu item to end
-    public FloatingActionButton addEndItem(int imageId)
+    public FloatingActionStateButton addEndItem(int normalImageId, int checkedImageId)
     {
-        return(createButton(endLayout, imageId, false, -1, -1, false));
+        return(createButton(endLayout, normalImageId, checkedImageId, -1, -1, false));
     }
 
     //Set showing titles
@@ -298,7 +297,7 @@ public class CustomSettingsMenu extends FrameLayout
                 if(showTitles)
                 {
                     //if current view is a button
-                    if(currentView instanceof FloatingActionButton)
+                    if(currentView instanceof FloatingActionStateButton)
                     {
                         View titledButton;
 
@@ -308,7 +307,7 @@ public class CustomSettingsMenu extends FrameLayout
                             parentGroupView.removeView(currentView);
                         }
                         centerViews.remove(index);
-                        titledButton = createTitledButton((FloatingActionButton)currentView);       //note: must not be created until button is removed
+                        titledButton = createTitledButton((FloatingActionStateButton)currentView);       //note: must not be created until button is removed
                         centerViews.add(index, titledButton);
                         if(usingParent)
                         {
@@ -331,7 +330,7 @@ public class CustomSettingsMenu extends FrameLayout
                             View currentChildView = currentLayoutView.getChildAt(0);
 
                             //if child view is a button
-                            if(currentChildView instanceof FloatingActionButton)
+                            if(currentChildView instanceof FloatingActionStateButton)
                             {
                                 //remove titled button and add button only
                                 if(usingParent)

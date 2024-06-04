@@ -28,7 +28,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.slider.Slider;
@@ -1898,7 +1897,7 @@ public abstract class Current
     private static WeakReference<CustomSearchView> currentSearchTextReference;
     private static WeakReference<CoordinatesFragment> mapViewReference;
     private static WeakReference<CustomSettingsMenu> mapSettingsMenuReference;
-    private static WeakReference<FloatingActionButton> fullscreenButtonReference;
+    private static WeakReference<FloatingActionStateButton> fullscreenButtonReference;
 
     //Gets camera view
     public static CameraLens getCameraView()
@@ -1919,7 +1918,7 @@ public abstract class Current
     }
 
     //Gets fullscreen button
-    public static FloatingActionButton getFullScreenButton()
+    public static FloatingActionStateButton getFullScreenButton()
     {
         return(fullscreenButtonReference != null ? fullscreenButtonReference.get() : null);
     }
@@ -2352,7 +2351,7 @@ public abstract class Current
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
         final boolean havePassViews = (passViews != null && passViews.length > 0);
         final Database.SatelliteData currentSatellite = (useSaved ? new Database.SatelliteData(context, (useSavedViewPath ? savedViewItems[0].id : currentSavedPathItem != null ? currentSavedPathItem.id : Universe.IDs.Invalid)) : null);
-        final FloatingActionButton fullscreenButton = cameraView.settingsMenu.addEndItem(R.drawable.ic_fullscreen_white);
+        final FloatingActionStateButton fullscreenButton = cameraView.settingsMenu.addEndItem(R.drawable.ic_fullscreen_white, R.drawable.ic_fullscreen_exit_white);
         final FloatingActionStateButton showPathButton = (!useSaved && !forceShowPaths ? cameraView.settingsMenu.addMenuItem(R.drawable.orbit, R.string.title_paths, R.string.title_show_path) : null);
         final FloatingActionStateButton visibleStarsButton = (!useSaved && (showingStars || needConstellations) ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_stars, R.string.title_visible_stars) : null);
         final FloatingActionStateButton showToolbarsButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_toolbars, R.string.title_show_toolbars);
@@ -3513,7 +3512,7 @@ public abstract class Current
         final Slider mapZoomBar = rootView.findViewById(R.id.Map_Zoom_Bar);
         final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
         final CustomSettingsMenu mapSettingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
-        final FloatingActionButton fullscreenButton = mapSettingsMenu.addEndItem(R.drawable.ic_fullscreen_white);
+        final FloatingActionStateButton fullscreenButton = mapSettingsMenu.addEndItem(R.drawable.ic_fullscreen_white, R.drawable.ic_fullscreen_exit_white);
         final FloatingActionStateButton showPathButton = mapSettingsMenu.addMenuItem(R.drawable.orbit, R.string.title_paths, R.string.title_show_path);
         final FloatingActionStateButton showLatLonButton = mapSettingsMenu.addMenuItem(R.drawable.ic_language_black, R.string.title_grid, R.string.title_show_latitude_longitude);
         final FloatingActionStateButton showFootprintButton = mapSettingsMenu.addMenuItem(R.drawable.ic_contrast_white, R.string.title_footprint, R.string.title_show_footprint);

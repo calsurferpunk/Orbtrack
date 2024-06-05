@@ -12,11 +12,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.FragmentActivity;
 import androidx.appcompat.widget.AppCompatImageButton;
+import android.text.Editable;
+import android.text.InputFilter;
+import android.text.InputType;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.slider.Slider;
@@ -39,10 +44,13 @@ public class PlayBar extends LinearLayout
 
     private boolean synced;
     private boolean reverseMinMax;
+    private boolean ignoreTextUpdate;
+    private boolean ignoreScaleTextChanged;
     private int minValue;
     private int maxValue;
     private int playPeriodMs;
     private int playScaleType;
+    private float scaleTextFactor;
     private double playScaleFactor;
     private long value2;
     private double playIndexIncrementUnits;
@@ -53,6 +61,7 @@ public class PlayBar extends LinearLayout
     private final Drawable playDrawable;
     private final Drawable liveDrawable;
     private final Drawable syncDrawable;
+    private final Drawable scaleTextBackgroundDrawable;
     private ThreadTask<Void, Void, Void> playTask;
     private FragmentActivity playActivity;
     private final AppCompatButton cancelButton;
@@ -61,7 +70,7 @@ public class PlayBar extends LinearLayout
     private final AppCompatImageButton syncButton;
     private final AppCompatImageButton playButton;
     private final TextView valueText;
-    private final TextView scaleText;
+    private final EditText scaleText;
     private final TextView scaleTitle;
     private final LinearLayout buttonLayout;
     private OnClickListener syncButtonListener;
@@ -114,6 +123,7 @@ public class PlayBar extends LinearLayout
         pauseDrawable = Globals.getDrawable(context, R.drawable.ic_pause_white, buttonColor, false);
         liveDrawable = Globals.getDrawableText(context, context.getString(R.string.title_live), 12, Color.WHITE);
         syncDrawable = Globals.getDrawable(context, R.drawable.ic_sync_white, buttonColor, false);
+        scaleTextBackgroundDrawable = scaleText.getBackground();
 
         //set images
         playButton.setBackgroundDrawable(playDrawable);
@@ -130,19 +140,22 @@ public class PlayBar extends LinearLayout
         resetPlayIncrements();
         setSynced(false);
         setReversed(false);
+        ignoreTextUpdate = ignoreScaleTextChanged = false;
         playTask = null;
         playPeriodMs = 1000;
         playScaleType = ScaleType.Speed;
-        playScaleFactor = 1;
+        playScaleFactor= scaleTextFactor = 1;
         playIndexIncrementUnits = 1;
         value2 = 0;
         setMax((int)seekSlider.getValueTo());
         setMin((int)seekSlider.getValueFrom());
+        setTextInputEnabled(false);
         zone = TimeZone.getDefault();
 
-        //setup seek buttons
+        //setup seek buttons and text
         leftButton.setOnClickListener(createSeekManualOnClickListener(false));
         rightButton.setOnClickListener(createSeekManualOnClickListener(true));
+        scaleText.setOnClickListener(createScaleTextOnClickListener());
     }
     public PlayBar(Context context)
     {
@@ -290,6 +303,25 @@ public class PlayBar extends LinearLayout
         buttonLayout.setVisibility(show ? View.VISIBLE : View.GONE);
     }
 
+    private void updateScaleText(String text)
+    {
+        if(!ignoreTextUpdate)
+        {
+            ignoreScaleTextChanged = true;
+            scaleText.setText(text);
+            ignoreScaleTextChanged = false;
+        }
+    }
+    private void updateScaleText(int resId)
+    {
+        if(!ignoreTextUpdate)
+        {
+            ignoreScaleTextChanged = true;
+            scaleText.setText(resId);
+            ignoreScaleTextChanged = false;
+        }
+    }
+
     public void setScaleText(String text)
     {
         boolean showText = (text != null);
@@ -297,13 +329,53 @@ public class PlayBar extends LinearLayout
 
         if(showText)
         {
-            scaleText.setText(text);
+            updateScaleText(text);
             params = scaleText.getLayoutParams();
             params.width = LayoutParams.WRAP_CONTENT;
             scaleText.setLayoutParams(params);
         }
-        scaleText.setClickable(false);
         scaleText.setVisibility(showText ? View.VISIBLE : View.GONE);
+    }
+
+    public void setTextInputEnabled(boolean enabled)
+    {
+        if(enabled)
+        {
+            scaleText.setBackground(scaleTextBackgroundDrawable);
+        }
+        else
+        {
+            scaleText.setBackgroundColor(Color.TRANSPARENT);
+        }
+        scaleText.setInputType(enabled ? InputType.TYPE_CLASS_NUMBER : InputType.TYPE_NULL);
+        scaleText.setSelectAllOnFocus(enabled);
+
+    }
+
+    public void setTextInputType(int type)
+    {
+        setTextInputEnabled(type != InputType.TYPE_NULL);
+        scaleText.setInputType(type);
+    }
+
+    public void setTextInputMaxLength(int length)
+    {
+        InputFilter[] oldFilters = scaleText.getFilters();
+        InputFilter[] newFilters = new InputFilter[oldFilters.length + 1];
+
+        //update filter
+        System.arraycopy(oldFilters, 0, newFilters, 0, oldFilters.length);
+        newFilters[newFilters.length - 1] = new InputFilter.LengthFilter(length);
+        scaleText.setFilters(newFilters);
+
+        //update display
+        scaleText.setEms(length);
+        scaleText.setMaxEms(length);
+    }
+
+    public void setTextInputScale(float scale)
+    {
+        scaleTextFactor = scale;
     }
 
     private void updatePlayScaleFactor()
@@ -430,8 +502,7 @@ public class PlayBar extends LinearLayout
         playButton.setVisibility(usingActivity ? View.VISIBLE : View.GONE);
         if(usingActivity)
         {
-            scaleText.setText(playScaleType == ScaleType.Time ? R.string.empty : R.string.text_1_x);
-            scaleText.setOnClickListener(createScaleTextOnClickListener());
+            updateScaleText(playScaleType == ScaleType.Time ? R.string.empty : R.string.text_1_x);
         }
         scaleText.setVisibility(usingActivity ? View.VISIBLE : View.GONE);
     }
@@ -475,6 +546,41 @@ public class PlayBar extends LinearLayout
                 {
                     //call it
                     progressChangedListener.onProgressChanged(PlayBar.this, progressValue, playSubProgressPercent, fromUser);
+                }
+            }
+        });
+        scaleText.addTextChangedListener(new TextWatcher()
+        {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
+            @Override
+            public void afterTextChanged(Editable s)
+            {
+                //if not ignoring text changes
+                if(!ignoreScaleTextChanged)
+                {
+                    //try to get value
+                    float progressValue = Globals.tryParseFloat(s.toString());
+
+                    //if valid
+                    if(progressValue != Float.MAX_VALUE)
+                    {
+                        //adjust to scale
+                        progressValue = (int)(progressValue * scaleTextFactor);
+
+                        //if within range
+                        if((progressValue >= minValue && progressValue <= maxValue))
+                        {
+                            //update value
+                            ignoreTextUpdate = true;
+                            seekSlider.setValue(progressValue);
+                            ignoreTextUpdate = false;
+                        }
+                    }
                 }
             }
         });
@@ -786,6 +892,9 @@ public class PlayBar extends LinearLayout
                 playSubProgressPercent = 0;
                 updateValue(progressValue);
                 setSynced(false);
+
+                //remove any text focus
+                scaleText.clearFocus();
             }
         });
     }
@@ -800,64 +909,73 @@ public class PlayBar extends LinearLayout
             @Override
             public void onClick(View view)
             {
-                String text;
                 Calendar date;
+                boolean usingActivity = (playActivity != null);
 
-                switch(playScaleType)
+                //if using playback activity
+                if(usingActivity)
                 {
-                    case ScaleType.Speed:
-                        //update speed
-                        switch((int)playScaleFactor)
-                        {
-                            case 1:
-                                playScaleFactor = 10;
-                                break;
-
-                            case 10:
-                                playScaleFactor = 100;
-                                break;
-
-                            case 100:
-                                playScaleFactor = 1000;
-                                break;
-
-                            default:
-                                playScaleFactor = 1;
-                                break;
-                        }
-
-                        //update display
-                        text = (int)playScaleFactor + res.getString(R.string.text_x);
-                        scaleText.setText(text);
-                        break;
-
-                    case ScaleType.Time:
-                        //set date
-                        date = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(value2), zone));
-
-                        //show calendar dialog
-                        Globals.showDateDialog(getContext(), date, new DatePickerDialog.OnDateSetListener()
-                        {
-                            @Override
-                            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth)
+                    switch(playScaleType)
+                    {
+                        case ScaleType.Speed:
+                            //update speed
+                            switch((int)playScaleFactor)
                             {
-                                //get new date without time
-                                Calendar newDate = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(), zone));
+                                case 1:
+                                    playScaleFactor = 10;
+                                    break;
 
-                                //if new date is set
-                                if(newDate != null)
-                                {
-                                    //set date values
-                                    newDate.set(Calendar.YEAR, year);
-                                    newDate.set(Calendar.MONTH, month);
-                                    newDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+                                case 10:
+                                    playScaleFactor = 100;
+                                    break;
 
-                                    //update values
-                                    setValues(getValue(), newDate.getTimeInMillis());
-                                }
+                                case 100:
+                                    playScaleFactor = 1000;
+                                    break;
+
+                                default:
+                                    playScaleFactor = 1;
+                                    break;
                             }
-                        });
-                        break;
+
+                            //update display
+                            updateScaleText((int)playScaleFactor + res.getString(R.string.text_x));
+                            break;
+
+                        case ScaleType.Time:
+                            //set date
+                            date = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(value2), zone));
+
+                            //show calendar dialog
+                            Globals.showDateDialog(getContext(), date, new DatePickerDialog.OnDateSetListener()
+                            {
+                                @Override
+                                public void onDateSet(DatePicker view, int year, int month, int dayOfMonth)
+                                {
+                                    //get new date without time
+                                    Calendar newDate = Globals.clearCalendarTime(Globals.getLocalTime(Globals.getGMTTime(), zone));
+
+                                    //if new date is set
+                                    if(newDate != null)
+                                    {
+                                        //set date values
+                                        newDate.set(Calendar.YEAR, year);
+                                        newDate.set(Calendar.MONTH, month);
+                                        newDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
+
+                                        //update values
+                                        setValues(getValue(), newDate.getTimeInMillis());
+                                    }
+                                }
+                            });
+                            break;
+                    }
+                }
+                //else if using text for input
+                else if(scaleText.getInputType() != InputType.TYPE_NULL)
+                {
+                    //select all text
+                    scaleText.selectAll();
                 }
             }
         });

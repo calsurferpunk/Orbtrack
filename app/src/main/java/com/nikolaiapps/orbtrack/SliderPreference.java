@@ -91,6 +91,8 @@ public class SliderPreference extends CustomPreference
         sliderView.setMax(maxValue);
         sliderView.setPlayIndexIncrementUnits(1);
         sliderView.setPlayActivity(null);
+        sliderView.setTextInputEnabled(true);
+        sliderView.setTextInputMaxLength(4);
         sliderView.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
         {
             @Override

@@ -16,6 +16,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.recyclerview.widget.RecyclerView;
+import android.text.InputType;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -3102,6 +3103,9 @@ public abstract class Current
                 scaleBar.setTitle(context.getString(forStars ? R.string.title_visible_star_magnitude : R.string.title_icon_scale));
             }
             scaleBar.setPlayActivity(null);
+            scaleBar.setTextInputType(InputType.TYPE_CLASS_NUMBER | (forStars ? InputType.TYPE_NUMBER_FLAG_DECIMAL : InputType.TYPE_NUMBER_VARIATION_NORMAL));
+            scaleBar.setTextInputMaxLength(forStars ? 3 : 4);
+            scaleBar.setTextInputScale(forStars ? 10 : 1);
             scaleBar.setOnSeekChangedListener(new PlayBar.OnPlayBarChangedListener()
             {
                 @Override
@@ -3111,7 +3115,7 @@ public abstract class Current
                     if(forStars)
                     {
                         //update magnitude
-                        lensPendingStarMagnitude = progressValue / 10f;
+                        lensPendingStarMagnitude = progressValue / 10.0f;
 
                         //update text
                         seekBar.setScaleText(String.format(Locale.US, "%1.1f", lensPendingStarMagnitude));
@@ -3120,7 +3124,7 @@ public abstract class Current
                     else if(getMapViewIfReady() != null)
                     {
                         //update scale
-                        mapPendingMarkerScale = progressValue / 100f;
+                        mapPendingMarkerScale = progressValue / 100.0f;
 
                         //update text
                         seekBar.setScaleText(String.format(Locale.US, "%3d%%", progressValue));

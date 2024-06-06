@@ -21,6 +21,7 @@ import com.mousebird.maply.BillboardInfo;
 import com.mousebird.maply.ComponentObject;
 import com.mousebird.maply.GlobeController;
 import com.mousebird.maply.GlobeMapFragment;
+import com.mousebird.maply.GlobeView;
 import com.mousebird.maply.Light;
 import com.mousebird.maply.MapController;
 import com.mousebird.maply.BaseController;
@@ -669,7 +670,7 @@ class Whirly
         {
             if(skipLayoutCount <= 0 && shapeObject == null)
             {
-                shapeObject = controller.addShapes(cylinderList, shapeInfo, BaseController.ThreadMode.ThreadAny);
+                shapeObject = controller.addShapes(cylinderList, shapeInfo, BaseController.ThreadMode.ThreadCurrent);
             }
         }
 
@@ -677,7 +678,7 @@ class Whirly
         {
             if(skipLayoutCount <= 0 && shapeObject != null)
             {
-                controller.removeObject(shapeObject, BaseController.ThreadMode.ThreadAny);
+                controller.removeObject(shapeObject, BaseController.ThreadMode.ThreadCurrent);
                 shapeObject = null;
             }
         }
@@ -923,7 +924,7 @@ class Whirly
         {
             if(skipLayoutCount <= 0 && tleIsAccurate && pathObject == null)
             {
-                pathObject = (useVectors ? controller.addVector(flatPath, flatPathInfo, BaseController.ThreadMode.ThreadAny) : controller.addShapes(Collections.singletonList(elevatedPath), elevatedPathInfo, RenderControllerInterface.ThreadMode.ThreadAny));
+                pathObject = (useVectors ? controller.addVector(flatPath, flatPathInfo, BaseController.ThreadMode.ThreadCurrent) : controller.addShapes(Collections.singletonList(elevatedPath), elevatedPathInfo, RenderControllerInterface.ThreadMode.ThreadCurrent));
             }
         }
 
@@ -931,7 +932,7 @@ class Whirly
         {
             if(skipLayoutCount <= 0 && pathObject != null)
             {
-                controller.removeObject(pathObject, BaseController.ThreadMode.ThreadAny);
+                controller.removeObject(pathObject, BaseController.ThreadMode.ThreadCurrent);
                 pathObject = null;
             }
         }
@@ -1534,27 +1535,29 @@ class Whirly
             return(infoCreator.get());
         }
 
-        private double getCurrentZoom()
+        private Point3d getCurrentPosition()
         {
-            double zoom = 1;
             MapController mapController;
-            GlobeController globeController;
 
             if(controller != null)
             {
                 if(controller instanceof GlobeController)
                 {
-                    globeController = (GlobeController)controller;
-                    zoom = (globeController.getGlobeView() != null ? globeController.getGlobeView().getLoc().getZ() : 1);
+                    GlobeView currentView = ((GlobeController)controller).getGlobeView();
+
+                    if(currentView != null)
+                    {
+                        return(currentView.getLoc());
+                    }
                 }
                 else if(controller instanceof MapController)
                 {
                     mapController = (MapController)controller;
-                    zoom = mapController.getPositionGeo().getZ();
+                    return(mapController.getPositionGeo());
                 }
             }
 
-            return(zoom);
+            return(new Point3d(0, 0, 1));
         }
 
         @Override
@@ -1621,7 +1624,7 @@ class Whirly
             else
             {
                 //get zoom and z distance to orbital
-                currentZoom = getCurrentZoom();
+                currentZoom = getCurrentPosition().getZ();
                 deltaZ = (currentZoom * ZoomToZValue) - orbitalBoard.zValue;
                 withinZoom = (deltaZ > 0);
 
@@ -1979,9 +1982,12 @@ class Whirly
             boolean showingDirectionChanged = (lastShowingDirection != showingDirection);
             boolean canShowSelectedFootprint = (showSelectedFootprint && orbitalSelectedFootprint != null);
             double currentZoom;
+            double currentLatitude;
+            double currentLongitude;
             double bearing;
             double bearingDelta;
             double orbitalRotationDelta;
+            Point3d currentLocation;
             Calculations.GeodeticAreaType selectedFootprint;
 
             //remember last and current location
@@ -2038,9 +2044,12 @@ class Whirly
                     usedBearing = true;
                 }
 
-                //get current zoom and if orbital within zoom
-                currentZoom = getCurrentZoom();
-                withinZoom = (((currentZoom * ZoomToZValue) - orbitalBoard.zValue) > 0);
+                //get current location and if orbital within zoom
+                currentLocation = getCurrentPosition();
+                currentLatitude = Math.toDegrees(currentLocation.getY());
+                currentLongitude = Math.toDegrees(currentLocation.getX());
+                currentZoom = currentLocation.getZ();
+                withinZoom = (((currentZoom * ZoomToZValue) - orbitalBoard.zValue) > 0) || (Math.abs(Globals.degreeDistance(currentLatitude, latitude)) >= 100) || (Math.abs(Globals.degreeDistance(currentLongitude, longitude)) >= 100);
 
                 //if -there is a last zoom- and -showing shadow- and --within zoom changed- or -not within zoom and zoom changed--
                 if(lastMoveZoom != 0 && showShadow && ((withinZoom != lastMoveWithinZoom) || (!withinZoom && currentZoom != lastMoveZoom)))

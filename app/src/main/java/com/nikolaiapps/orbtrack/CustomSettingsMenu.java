@@ -50,11 +50,11 @@ public class CustomSettingsMenu extends FrameLayout
 
         float[] sizes;
         float scalePercent = Settings.getQuickSettingsScale(context);
-        int imageSizeDp = (int)(24 * scalePercent);
-        int buttonSizeDp = (int)(42 * scalePercent);
+        int imageSizeDp = (int)(28 * scalePercent);
+        int buttonSizeDp = (int)(46 * scalePercent);
         int screenWidthDp = Globals.getDeviceDp(context);
         int usedButtonSizeDp = Math.max(buttonSizeDp, 42);
-        float cornerSizeDp = (28 * scalePercent);
+        float cornerSizeDp = (23 * scalePercent);
 
         //set defaults
         menuOffset = 0;

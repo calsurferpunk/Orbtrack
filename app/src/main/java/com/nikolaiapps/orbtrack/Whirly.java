@@ -373,32 +373,24 @@ class Whirly
 
         void moveLocation(double latitude, double longitude, double altitudeKm, boolean limitAltitude)
         {
-            //get initial z value in scaled meters
+            //remember if non negative
             boolean negativeAltitudeKm = (altitudeKm < 0);
-            double z = (negativeAltitudeKm ? 0 : (altitudeKm * 1000 * CoordinatesFragment.WhirlyZScale));
 
+            //remove display
             remove();
 
             //normalize values
             latitude = Globals.normalizeLatitude(latitude);
             longitude = Globals.normalizeLongitude(longitude);
-            if(limitAltitude && !negativeAltitudeKm)
-            {
-                if(z < CoordinatesFragment.MinDrawDistanceMeters)
-                {
-                    z = CoordinatesFragment.MinDrawDistanceMeters;
-                }
-                else if(z > CoordinatesFragment.MaxDrawDistanceMeters)
-                {
-                    z = CoordinatesFragment.MaxDrawDistanceMeters;
-                }
-            }
+            zValue = getScaledZMeters(altitudeKm, limitAltitude);
 
-            zValue = z;
+            //set location
             board.setCenter(new Point3d(Math.toRadians(longitude), Math.toRadians(latitude), zValue));
 
+            //if non negative
             if(!negativeAltitudeKm)
             {
+                //add display
                 add();
             }
         }
@@ -661,7 +653,7 @@ class Whirly
             remove();
 
             shape.setBaseCenter(Point2d.FromDegrees(longitude, latitude));
-            shape.setHeight(getEarthRadiusPercent(altitudeKm));
+            shape.setHeight(getScaledZEarthRadiusPercent(altitudeKm));
 
             add();
         }
@@ -833,7 +825,7 @@ class Whirly
                 else
                 {
                     //get z value in scaled earth radius percent
-                    z = getEarthRadiusPercent(currentAltKm * CoordinatesFragment.WhirlyZScale);
+                    z = getScaledZEarthRadiusPercent(currentAltKm);
 
                     //add point
                     setElevatedPoints.add(new Point3d(Point2d.FromDegrees(currentLon, currentLat), z));
@@ -3204,23 +3196,58 @@ class Whirly
         }
     }
 
-    private static double getEarthRadiusPercent(double altitudeKm)
+    //Gets z value in meters scaled to display
+    private static double getScaledZMeters(double altitudeKm, boolean allowLimit)
     {
-        //get initial z value in scaled meters
         boolean negativeAltitudeKm = (altitudeKm < 0);
-        double z = (negativeAltitudeKm ? 0 : (altitudeKm / CoordinatesFragment.WhirlyEarthRadiusKm));
+        double boundaryPercent;
+        double z = (negativeAltitudeKm ? 0 : (altitudeKm * 1000 * CoordinatesFragment.WhirlyZScale));
 
-        //keep inside of bounds
-        if(z < CoordinatesFragment.MinDrawDistanceEarthRadiusPercent)
+        //if not negative altitude
+        if(!negativeAltitudeKm)
         {
-            z = CoordinatesFragment.MinDrawDistanceEarthRadiusPercent;
-        }
-        else if(z > CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent)
-        {
-            z = CoordinatesFragment.MaxDrawDistanceEarthRadiusPercent;
+            //if within satellite boundary
+            if(z < CoordinatesFragment.SatelliteBoundaryMeters)
+            {
+                boundaryPercent = 1 - ((CoordinatesFragment.SatelliteBoundaryMeters - z) / CoordinatesFragment.SatelliteBoundaryMeters);
+                z = boundaryPercent * CoordinatesFragment.SatelliteBoundaryRangePercent;
+            }
+            //else if within moon boundary
+            else if(z < CoordinatesFragment.MoonSpaceBoundaryMeters)
+            {
+                boundaryPercent = 1 - ((CoordinatesFragment.MoonSpaceBoundaryMeters - z) / CoordinatesFragment.MoonSpaceBoundaryMeters);
+                z = (boundaryPercent * CoordinatesFragment.MoonSpaceBoundaryRangePercent) + CoordinatesFragment.MoonSpaceBoundaryOffsetPercent;
+            }
+            //else deep space
+            else
+            {
+                boundaryPercent = 1 - ((CoordinatesFragment.SolarSystemBoundaryMeters - z) / CoordinatesFragment.SolarSystemBoundaryMeters);
+                z = (boundaryPercent * CoordinatesFragment.SolarSystemBoundaryRangePercent) + CoordinatesFragment.SolarSystemBoundaryOffsetPercent;
+            }
         }
 
-        //return radius percent
+        //if allowing limit
+        if(allowLimit)
+        {
+            //keep within draw range
+            if(z < CoordinatesFragment.MinDrawDistanceMeters)
+            {
+                z = CoordinatesFragment.MinDrawDistanceMeters;
+            }
+            else if(z > CoordinatesFragment.MaxDrawDistanceMeters)
+            {
+                z = CoordinatesFragment.MaxDrawDistanceMeters;
+            }
+        }
+
+        //return scaled z
         return(z);
+    }
+
+    //Gets z value in earth radius percent scaled to display
+    private static double getScaledZEarthRadiusPercent(double altitudeKm)
+    {
+        //return radius percent
+        return(getScaledZMeters(altitudeKm, true) / (CoordinatesFragment.WhirlyEarthRadiusKm * 1000));
     }
 }

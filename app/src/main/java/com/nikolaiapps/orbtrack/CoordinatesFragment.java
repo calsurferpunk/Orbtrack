@@ -868,11 +868,17 @@ public interface CoordinatesFragment
     double MaxMapZoom = 5;
     double MaxGlobeZoom = 9;
     double MinZoom = 0;
-    double MaxDrawDistanceKm = (WhirlyEarthRadiusKm * 16);
+    double MaxDrawDistanceKm = (WhirlyEarthRadiusKm * 5);
     double MinDrawDistanceMeters = 500000;
-    double MaxDrawDistanceMeters = (MaxDrawDistanceKm * 200.0);
-    double MinDrawDistanceEarthRadiusPercent = (MinDrawDistanceMeters / (WhirlyEarthRadiusKm * 1000));
-    double MaxDrawDistanceEarthRadiusPercent = (MaxDrawDistanceMeters / (WhirlyEarthRadiusKm * 1000));
+    double MaxDrawDistanceMeters = (MaxDrawDistanceKm * 1000.0);
+    double SatelliteBoundaryMeters = 1e7;
+    double MoonSpaceBoundaryMeters = 1e8;
+    double SolarSystemBoundaryMeters = 7.5E11;
+    double SatelliteBoundaryRangePercent = MaxDrawDistanceMeters * 0.3;
+    double MoonSpaceBoundaryRangePercent = MaxDrawDistanceMeters * 0.1;
+    double SolarSystemBoundaryRangePercent = MaxDrawDistanceMeters * 0.6;
+    double MoonSpaceBoundaryOffsetPercent = SatelliteBoundaryRangePercent;
+    double SolarSystemBoundaryOffsetPercent = SatelliteBoundaryRangePercent + MoonSpaceBoundaryRangePercent;
 
     void setOnReadyListener(OnReadyListener listener);
     void setOnMovedListener(OnMovedListener listener);

@@ -840,31 +840,15 @@ public interface CoordinatesFragment
             });
         }
 
-        @SuppressWarnings("ManualMinMaxCalculation")
         static double getZoom(double altitudeKm)
         {
-            double z = altitudeKm * 100;
-            double zoom = (z / Whirly.ZoomToZValue) * 3;
-
-            if(Double.isNaN(altitudeKm) || altitudeKm >= MaxDrawDistanceKm)
-            {
-                return(DefaultFarZoom);
-            }
-            else if(zoom < DefaultNearZoom)
-            {
-                return(DefaultNearZoom);
-            }
-            else
-            {
-                return(zoom);
-            }
+            return((Whirly.getScaledZMeters(altitudeKm, true) / Whirly.ZoomToZValue) + 0.75);
         }
     }
 
     double WhirlyEarthRadiusKm = 6371.0;
     double WhirlyZScale = 0.1;
-    double DefaultNearZoom = 1.25;
-    double DefaultFarZoom = 4.25;
+    double DefaultZoom = 1.75;
     double MaxMapZoom = 5;
     double MaxGlobeZoom = 9;
     double MinZoom = 0;

@@ -3197,7 +3197,7 @@ class Whirly
     }
 
     //Gets z value in meters scaled to display
-    private static double getScaledZMeters(double altitudeKm, boolean allowLimit)
+    static double getScaledZMeters(double altitudeKm, boolean allowLimit)
     {
         boolean negativeAltitudeKm = (altitudeKm < 0);
         double boundaryPercent;
@@ -3245,7 +3245,7 @@ class Whirly
     }
 
     //Gets z value in earth radius percent scaled to display
-    private static double getScaledZEarthRadiusPercent(double altitudeKm)
+    static double getScaledZEarthRadiusPercent(double altitudeKm)
     {
         //return radius percent
         return(getScaledZMeters(altitudeKm, true) / (CoordinatesFragment.WhirlyEarthRadiusKm * 1000));

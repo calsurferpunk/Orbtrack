@@ -3693,7 +3693,7 @@ public abstract class Current
                 firstPoint.latitude = (float)currentLocation.geo.latitude;
                 firstPoint.longitude = (float)currentLocation.geo.longitude;
                 firstPoint.altitudeKm = (float)currentLocation.geo.altitudeKm;
-                firstZoom = CoordinatesFragment.DefaultNearZoom;
+                firstZoom = CoordinatesFragment.DefaultZoom;
 
                 //setup buttons
                 CoordinatesFragment.Utils.setupZoomSlider(mapView, mapZoomBar, forGlobe);

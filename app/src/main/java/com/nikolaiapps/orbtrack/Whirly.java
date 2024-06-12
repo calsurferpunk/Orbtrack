@@ -1440,7 +1440,7 @@ class Whirly
                 if(haveOrbital)
                 {
                     titleImage = getInfoCreator().get(context, name, null);
-                    infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage != null ? (orbitalImage.getHeight() / 2f) : 1) * DefaultImageScale * 0.0093, (DefaultTextScale * 0.5), markerScale);
+                    updateInfoBoard(titleImage, orbitalImage, 1);
                 }
             }
 
@@ -1516,6 +1516,11 @@ class Whirly
 
             //return image
             return(footprintImage);
+        }
+
+        private void updateInfoBoard(Bitmap titleImage, Bitmap orbitalImage, double zoomScale)
+        {
+            infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage != null ? (orbitalImage.getHeight() / 2f) : 1) * DefaultImageScale * 0.0093 /* (1 / zoomScale)*/, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * zoomScale);
         }
 
         private InfoImageCreator getInfoCreator()
@@ -1645,7 +1650,7 @@ class Whirly
                     infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? text : null));
                     if(orbitalBoard.boardImage != null)
                     {
-                        infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalBoard.boardImage.getHeight() / 2f) * DefaultImageScale * 0.0093 * (1 / (withinZoom ? useZoom : 1)), (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * useZoom);
+                        updateInfoBoard(infoImage, orbitalBoard.boardImage, useZoom);
                     }
                 }
             }
@@ -1680,7 +1685,7 @@ class Whirly
                 //recreate info
                 infoImage = getInfoCreator().get(currentContext, common.data.getName(), (usingInfo && showingInfo ? lastInfo : null));
                 infoBoard = new Board(controller, infoBoard, markerScale, (showingInfo || alwaysShowTitle));
-                infoBoard.setImage(infoImage, (infoImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage.getHeight() / 2f) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale);
+                updateInfoBoard(infoImage, orbitalImage, 1);
             }
         }
 
@@ -2048,6 +2053,11 @@ class Whirly
                 {
                     //update info size
                     setText(showingInfo ? lastInfo : null);
+                }
+                if(currentZoom != lastMoveZoom)
+                {
+                    updateInfoBoard(infoBoard.boardImage, infoBoard.boardImage, (withinZoom || !showShadow ? 1 : (float)currentZoom));
+                    lastMoveZoom = currentZoom;
                 }
                 infoBoard.moveLocation(latitude, longitude, (withinZoom || !showShadow ? altitudeKm : 0.5), withinZoom || !showShadow);
 

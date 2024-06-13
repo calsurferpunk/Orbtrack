@@ -358,6 +358,7 @@
     <string name="title_delete">Borrar</string>
     <string name="title_deleted">Eliminado</string>
     <string name="title_deny">Negar</string>
+    <string name="title_deselect">Deseleccionar</string>
     <string name="title_details">Detalles</string>
     <string name="title_disabled">Desactivado</string>
     <string name="title_dismiss">Despedir</string>

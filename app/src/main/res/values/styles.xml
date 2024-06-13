@@ -404,6 +404,16 @@
         <item name="android:layout_marginBottom">0dp</item>
     </style>
 
+    <style name="MaterialButtonSelection" parent="Widget.Material3.Button.OutlinedButton">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_margin">5dp</item>
+        <item name="android:alpha">0.65</item>
+        <item name="iconTint">@color/white</item>
+        <item name="strokeColor">@color/white</item>
+        <item name="android:textColor">@color/white</item>
+    </style>
+
     <!-- Detail Views -->
     <style name="DetailTableMaterial">
         <item name="android:layout_width">match_parent</item>

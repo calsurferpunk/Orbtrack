@@ -196,6 +196,7 @@ public interface CoordinatesFragment
         private OnItemSelectionChangedListener itemSelectionChangedListener;
 
         boolean started;
+        boolean followSelected;
         int selectedOrbitalIndex;
         int selectedNoradId;
 
@@ -206,7 +207,7 @@ public interface CoordinatesFragment
         {
             infoLocation = MapMarkerInfoLocation.ScreenBottom;
             showBackground = showPin = false;
-            showShadow = showSunlight = showTitlesAlways = showOrbitalDirection = true;
+            showShadow = showSunlight = showTitlesAlways = showOrbitalDirection = followSelected = true;
             lastSelectEventDateMs = orbitalDirectionLimitCount = 0;
             markerScale = 0.75f;
             readyListener = null;
@@ -706,6 +707,11 @@ public interface CoordinatesFragment
             selectOrbital(Universe.IDs.None);
         }
 
+        public void setFollowSelected(boolean follow)
+        {
+            followSelected = follow;
+        }
+
         public void removeOrbitals()
         {
             for(OrbitalBase currentObject : orbitalObjects)
@@ -916,6 +922,7 @@ public interface CoordinatesFragment
     int getSelectedNoradId();
     void selectOrbital(int noradId);
     void deselectCurrent();
-
+    boolean getFollowSelected();
+    void setFollowSelected(boolean follow);
     void removeOrbitals();
 }

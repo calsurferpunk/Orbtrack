@@ -358,6 +358,7 @@
     <string name="title_delete">Delete</string>
     <string name="title_deleted">Deleted</string>
     <string name="title_deny">Deny</string>
+    <string name="title_deselect">Deselect</string>
     <string name="title_details">Details</string>
     <string name="title_disabled">Disabled</string>
     <string name="title_dismiss">Dismiss</string>

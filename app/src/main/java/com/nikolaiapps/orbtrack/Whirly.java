@@ -3145,6 +3145,19 @@ class Whirly
         }
 
         @Override
+        public boolean getFollowSelected()
+        {
+            return(common.followSelected);
+        }
+
+        @Override
+        public void setFollowSelected(boolean follow)
+        {
+            //update following selected
+            common.setFollowSelected(follow);
+        }
+
+        @Override
         public void removeOrbitals()
         {
             common.removeOrbitals();

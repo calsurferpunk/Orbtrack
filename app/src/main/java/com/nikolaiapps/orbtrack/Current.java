@@ -1958,7 +1958,7 @@ public abstract class Current
     }
 
     //Select orbital with the given ID
-    private static void selectOrbital(int noradId, boolean forLens)
+    private static void selectOrbital(int noradId, View selectionButtonLayout, boolean forLens)
     {
         boolean isNone = (noradId == Universe.IDs.None);
         boolean isLocation = (noradId == Universe.IDs.CurrentLocation);
@@ -2003,6 +2003,16 @@ public abstract class Current
                 //select nothing
                 mapView.deselectCurrent();
             }
+
+            //follow selected orbital
+            mapView.setFollowSelected(true);
+        }
+
+        //if selection button layout exists
+        if(selectionButtonLayout != null)
+        {
+            //hide it
+            selectionButtonLayout.setVisibility(View.GONE);
         }
     }
 
@@ -2027,7 +2037,7 @@ public abstract class Current
     }
 
     //Setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final FloatingActionStateButton showSlidersButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, Slider zoomBar, Slider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final FloatingActionStateButton showSlidersButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, final View selectionButtonLayout, Slider zoomBar, Slider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
     {
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
@@ -2071,7 +2081,7 @@ public abstract class Current
                     if((forLens ? lensShowToolbars : mapShowToolbars))
                     {
                         //update selection
-                        selectOrbital((int)searchList.getSelectedValue(Universe.IDs.None), forLens);
+                        selectOrbital((int)searchList.getSelectedValue(Universe.IDs.None), selectionButtonLayout, forLens);
                     }
                 }
 
@@ -2386,7 +2396,7 @@ public abstract class Current
         searchButton = rootView.findViewById(R.id.Lens_Search_Button);
         searchText = rootView.findViewById(R.id.Lens_Search_Text);
         currentSearchTextReference = new WeakReference<>(searchText);
-        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, cameraView.zoomBar, cameraView.exposureBar, cameraView.playBar, selectedOrbitals, true);
+        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, null, cameraView.zoomBar, cameraView.exposureBar, cameraView.playBar, selectedOrbitals, true);
         if(showToolbarsButton != null)
         {
             //toggle displays
@@ -2624,7 +2634,7 @@ public abstract class Current
                     else
                     {
                         //select ID
-                        selectOrbital(noradId, true);
+                        selectOrbital(noradId, null, true);
                     }
                 }
             }
@@ -3227,8 +3237,9 @@ public abstract class Current
                             Calculate.Coordinates.Item currentItem = playbackItems[currentItemIndex];
                             TextView mapInfoText = getMapInfoText();
                             CoordinatesFragment mapView = getMapViewIfReady();
+                            boolean haveMapView = (mapView != null);
                             Calendar playTime = Globals.getGMTTime(currentItem.time);
-                            int mapSelectedNoradId = (mapView != null ? mapView.getSelectedNoradId() : Universe.IDs.Invalid);
+                            int mapSelectedNoradId = (haveMapView ? mapView.getSelectedNoradId() : Universe.IDs.Invalid);
 
                             //if more points after current
                             if(nextItem != null)
@@ -3293,8 +3304,8 @@ public abstract class Current
                                             mapInfoText.setVisibility(View.VISIBLE);
                                         }
 
-                                        //if map is ready
-                                        if(mapView != null)
+                                        //if map is ready and following selected
+                                        if(haveMapView && mapView.getFollowSelected())
                                         {
                                             //update map view
                                             mapView.moveCamera(latitude, longitude, (selectionChanged && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(altitudeKm) : mapView.getCameraZoom()));
@@ -3503,6 +3514,11 @@ public abstract class Current
         final AppCompatImageButton searchButton;
         final CustomSearchView searchText;
 
+        //get selection layout and buttons
+        final LinearLayout selectionButtonLayout = rootView.findViewById(R.id.Map_Selection_Button_Layout);
+        final MaterialButton recenterButton = selectionButtonLayout.findViewById(R.id.Map_Selection_Recenter_Button);
+        final MaterialButton deselectButton = selectionButtonLayout.findViewById(R.id.Map_Selection_Deselect_Button);
+
         //setup lists and status
         final Calculate.Coordinates.Item[] savedItems = (savedInstanceState != null ? (Calculate.Coordinates.Item[]) Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
         final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
@@ -3556,7 +3572,48 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, mapZoomBar, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, selectionButtonLayout, mapZoomBar, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+
+        //setup selection buttons
+        if(recenterButton != null)
+        {
+            //setup button
+            recenterButton.setOnClickListener(new View.OnClickListener()
+            {
+                @Override
+                public void onClick(View v)
+                {
+                    //select orbital again
+                    selectOrbital(mapView.getSelectedNoradId(), selectionButtonLayout, false);
+                }
+            });
+        }
+        if(deselectButton != null)
+        {
+            //if there are multiple selections and list exists
+            if(multiSelected && searchList != null)
+            {
+                //setup button
+               deselectButton.setOnClickListener(new View.OnClickListener()
+               {
+                   @Override
+                   public void onClick(View v)
+                   {
+                       //deselect current and hide information
+                       mapView.deselectCurrent();
+                       if(mapInfoText != null)
+                       {
+                           mapInfoText.setVisibility(View.GONE);
+                       }
+                   }
+               });
+            }
+            else
+            {
+                //hide button
+                deselectButton.setVisibility(View.GONE);
+            }
+        }
 
         //setup menu
         mapSettingsMenu.setOnExpandedStateChangedListener(new CustomSettingsMenu.OnExpandedStateChangedListener()
@@ -3643,19 +3700,19 @@ public abstract class Current
                         //if user moved
                         if(userMotion)
                         {
+                            //get selected
+                            int selectedNoradId = mapView.getSelectedNoradId();
+
+                            //if there is a selected orbital
+                            if(selectedNoradId != Universe.IDs.None && selectedNoradId != Universe.IDs.CurrentLocation)
+                            {
+                                //show selection buttons and stop following selected
+                                selectionButtonLayout.setVisibility(View.VISIBLE);
+                                mapView.setFollowSelected(false);
+                            }
+
                             //close settings menu
                             mapSettingsMenu.close();
-
-                            //if multiple orbitals
-                            if(multiSelected)
-                            {
-                                //deselect current and hide information
-                                mapView.deselectCurrent();
-                                if(mapInfoText != null)
-                                {
-                                    mapInfoText.setVisibility(View.GONE);
-                                }
-                            }
                         }
                     }
                 });
@@ -3724,7 +3781,7 @@ public abstract class Current
                         //show info and selected footprint
                         playbackMarker.setInfoVisible(true);
                         playbackMarker.setShowSelectedFootprint((firstPoint.noradId > 0) && Settings.usingMapFootprintAndSelected());
-                        selectOrbital(firstPoint.noradId, false);
+                        selectOrbital(firstPoint.noradId, selectionButtonLayout, false);
                     }
                 }
 
@@ -3754,7 +3811,7 @@ public abstract class Current
                                 else
                                 {
                                     //update selection
-                                    selectOrbital(noradId, false);
+                                    selectOrbital(noradId, selectionButtonLayout, false);
                                 }
                             }
                             //else if norad ID changing and exists
@@ -3786,7 +3843,7 @@ public abstract class Current
                 if(!haveSelected || selectedOrbitals.length > 1)
                 {
                     //select current location
-                    selectOrbital(Universe.IDs.CurrentLocation, false);
+                    selectOrbital(Universe.IDs.CurrentLocation, selectionButtonLayout, false);
                 }
 
                 //ready to show displays and use

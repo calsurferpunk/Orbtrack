@@ -76,6 +76,26 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:layout_gravity="bottom">
+            <LinearLayout
+                android:id="@+id/Map_Selection_Button_Layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Map_Selection_Recenter_Button"
+                    style="@style/MaterialButtonSelection"
+                    app:icon="@drawable/ic_filter_center_focus_black"
+                    android:text="@string/title_follow"/>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/Map_Selection_Deselect_Button"
+                    style="@style/MaterialButtonSelection"
+                    app:icon="@drawable/ic_cancel_white"
+                    android:text="@string/title_deselect"/>
+            </LinearLayout>
+
             <com.nikolaiapps.orbtrack.PlayBar
                 android:id="@+id/Map_Coordinate_Scale_Bar"
                 android:layout_width="match_parent"

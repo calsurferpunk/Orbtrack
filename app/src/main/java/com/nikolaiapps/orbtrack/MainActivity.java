@@ -4416,8 +4416,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                             }
 
                                             //if selection or julian date changed
-                                            if(selectionChanged || julianDate != lastJulianDate)
+                                            if((selectionChanged || julianDate != lastJulianDate) && mapView.getFollowSelected())
                                             {
+                                                //update map view
                                                 mapView.moveCamera(currentLatitude, currentLongitude, (selectionChanged && !mapView.isMap() ? CoordinatesFragment.Utils.getZoom(currentAltitudeKm) : mapView.getCameraZoom()));
                                             }
 

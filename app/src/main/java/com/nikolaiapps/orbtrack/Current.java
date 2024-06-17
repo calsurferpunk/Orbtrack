@@ -3514,11 +3514,6 @@ public abstract class Current
         final AppCompatImageButton searchButton;
         final CustomSearchView searchText;
 
-        //get selection layout and buttons
-        final LinearLayout selectionButtonLayout = rootView.findViewById(R.id.Map_Selection_Button_Layout);
-        final MaterialButton recenterButton = selectionButtonLayout.findViewById(R.id.Map_Selection_Recenter_Button);
-        final MaterialButton deselectButton = selectionButtonLayout.findViewById(R.id.Map_Selection_Deselect_Button);
-
         //setup lists and status
         final Calculate.Coordinates.Item[] savedItems = (savedInstanceState != null ? (Calculate.Coordinates.Item[]) Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
         final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
@@ -3526,7 +3521,13 @@ public abstract class Current
         final boolean useSavedPath = (page instanceof Calculate.Page && savedItems != null && savedItems.length > 0);
         final boolean useMultiNoradId = (useSavedPath && savedItems[0].coordinates.length > 1);
         final boolean rotateAllowed = Settings.getMapRotateAllowed(context);
+        final boolean holdSelected = Settings.getMapHoldSelected(context);
         final Database.SatelliteData currentSatellite = (useSavedPath && haveSelected && !useMultiNoradId ? selectedOrbitals[0] : null);
+
+        //get selection layout and buttons
+        final LinearLayout selectionButtonLayout = (holdSelected ? rootView.findViewById(R.id.Map_Selection_Button_Layout) : null);
+        final MaterialButton recenterButton = (holdSelected ? selectionButtonLayout.findViewById(R.id.Map_Selection_Recenter_Button) : null);
+        final MaterialButton deselectButton = (holdSelected ? selectionButtonLayout.findViewById(R.id.Map_Selection_Deselect_Button) : null);
 
         //get menu and zoom displays
         final Slider mapZoomBar = rootView.findViewById(R.id.Map_Zoom_Bar);
@@ -3700,15 +3701,29 @@ public abstract class Current
                         //if user moved
                         if(userMotion)
                         {
-                            //get selected
-                            int selectedNoradId = mapView.getSelectedNoradId();
-
-                            //if there is a selected orbital
-                            if(selectedNoradId != Universe.IDs.None && selectedNoradId != Universe.IDs.CurrentLocation)
+                            //if holding selected
+                            if(holdSelected)
                             {
-                                //show selection buttons and stop following selected
-                                selectionButtonLayout.setVisibility(View.VISIBLE);
-                                mapView.setFollowSelected(false);
+                                //get selected
+                                int selectedNoradId = mapView.getSelectedNoradId();
+
+                                //if there is a selected orbital
+                                if(selectedNoradId != Universe.IDs.None && selectedNoradId != Universe.IDs.CurrentLocation)
+                                {
+                                    //show selection buttons and stop following selected
+                                    selectionButtonLayout.setVisibility(View.VISIBLE);
+                                    mapView.setFollowSelected(false);
+                                }
+                            }
+                            //else if multiple orbitals
+                            else if(multiSelected)
+                            {
+                                //deselect current and hide information
+                                mapView.deselectCurrent();
+                                if(mapInfoText != null)
+                                {
+                                    mapInfoText.setVisibility(View.GONE);
+                                }
                             }
 
                             //close settings menu
@@ -3840,7 +3855,7 @@ public abstract class Current
                 setupPlayBar(page.getActivity(), page.playBar, (useSavedPath ? savedItems : null), playbackMarkers);
 
                 //if no specific orbital selected
-                if(!haveSelected || selectedOrbitals.length > 1)
+                if(!haveSelected || multiSelected)
                 {
                     //select current location
                     selectOrbital(Universe.IDs.CurrentLocation, selectionButtonLayout, false);

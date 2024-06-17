@@ -124,6 +124,11 @@
                             android:summary="@string/desc_show_toolbars"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_hold_selected"
+                            android:key="MapHoldSelected"
+                            android:summary="@string/desc_hold_selected"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_show_sliders"
                             android:key="MapShowSliders"
                             android:summary="@string/desc_show_sliders"/>

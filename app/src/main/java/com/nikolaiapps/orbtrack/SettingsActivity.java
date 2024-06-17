@@ -249,6 +249,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case ScreenKey.MapViewDisplay:
                         SwitchPreference showOrbitalDirection = this.findPreference(Settings.PreferenceName.MapShowOrbitalDirection);
                         SwitchPreference mapShowToolbarsSwitch = this.findPreference(Settings.PreferenceName.MapShowToolbars);
+                        SwitchPreference mapHoldSelected = this.findPreference(Settings.PreferenceName.MapHoldSelected);
                         SwitchPreference mapShowSlidersSwitch = this.findPreference(Settings.PreferenceName.MapShowSliders);
                         SwitchPreference showLabelsAlwaysSwitch = this.findPreference(Settings.PreferenceName.MapShowLabelsAlways);
                         SwitchPreference showShadowsSwitch = this.findPreference(Settings.PreferenceName.MapMarkerShowShadow);
@@ -266,6 +267,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(showOrbitalDirection, showOrbitalDirectionLimit);
                         setupSwitch(mapShowToolbarsSwitch);
+                        setupSwitch(mapHoldSelected);
                         setupSwitch(mapShowSlidersSwitch);
                         setupSwitch(showLabelsAlwaysSwitch);
                         setupSwitch(showShadowsSwitch);
@@ -1711,6 +1713,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.MapMarkerShowBackground:
                         case Settings.PreferenceName.MapShowSliders:
                         case Settings.PreferenceName.MapShowToolbars:
+                        case Settings.PreferenceName.MapHoldSelected:
                         case Settings.PreferenceName.MapShowLabelsAlways:
                         case Settings.PreferenceName.MapShowOrbitalDirection:
                         case Settings.PreferenceName.MapShowOrbitalDirectionLimit:

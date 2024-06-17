@@ -101,6 +101,7 @@ public abstract class Settings
         static final String MapPinsSize = "MapPinsSize";
         static final String MapShowSliders = "MapShowSliders";
         static final String MapShowToolbars = "MapShowToolbars";
+        static final String MapHoldSelected = "MapHoldSelected";
         static final String MapOrbitalTypeFilter = "MapOrbitalTypeFilter";
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
         static final String CurrentTimelineSortBy = "CurrentTimelineSortBy";
@@ -2111,6 +2112,7 @@ public abstract class Settings
             case PreferenceName.MapShowStars:
             case PreferenceName.MapShowSunlight:
             case PreferenceName.MapShowToolbars:
+            case PreferenceName.MapHoldSelected:
             case PreferenceName.MaterialTheme:
             case PreferenceName.MetricUnits:
             case PreferenceName.AllowNumberCommas:
@@ -3197,6 +3199,12 @@ public abstract class Settings
     public static void setMapShowToolbars(Context context, boolean show)
     {
         setPreferenceBoolean(context, PreferenceName.MapShowToolbars, show);
+    }
+
+    //Returns map holding selected
+    public static boolean getMapHoldSelected(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.MapHoldSelected));
     }
 
     //Returns map showing sunlight

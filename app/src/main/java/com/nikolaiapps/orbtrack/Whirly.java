@@ -1520,7 +1520,7 @@ class Whirly
 
         private void updateInfoBoard(Bitmap titleImage, Bitmap orbitalImage, double zoomScale)
         {
-            infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage != null ? (orbitalImage.getHeight() / 2f) : 1) * DefaultImageScale * 0.0093 /* (1 / zoomScale)*/, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * zoomScale);
+            infoBoard.setImage(titleImage, (titleImage.getWidth() / 2f) * DefaultImageScale * -0.0093, (orbitalImage != null ? (orbitalImage.getHeight() / 2f) : 1) * DefaultImageScale * 0.0093, (DefaultTextScale * (usingInfo && showingInfo ? 1.5 : 0.5)), markerScale * zoomScale);
         }
 
         private InfoImageCreator getInfoCreator()
@@ -2056,7 +2056,8 @@ class Whirly
                 }
                 if(currentZoom != lastMoveZoom)
                 {
-                    updateInfoBoard(infoBoard.boardImage, infoBoard.boardImage, (withinZoom || !showShadow ? 1 : (float)currentZoom));
+                    infoBoard = new Board(controller, infoBoard, markerScale, (showingInfo || alwaysShowTitle));
+                    updateInfoBoard(infoBoard.boardImage, orbitalBoard.boardImage, (withinZoom || !showShadow ? 1 : (float)currentZoom));
                     lastMoveZoom = currentZoom;
                 }
                 infoBoard.moveLocation(latitude, longitude, (withinZoom || !showShadow ? altitudeKm : 0.5), withinZoom || !showShadow);

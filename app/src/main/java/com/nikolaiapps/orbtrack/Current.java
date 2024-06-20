@@ -3733,11 +3733,21 @@ public abstract class Current
                 });
                 mapView.setOnHeightChangedListener(new CoordinatesFragment.OnHeightChangedListener()
                 {
+                    final double maxZoom = (forGlobe ? CoordinatesFragment.MaxGlobeZoom : CoordinatesFragment.MaxMapZoom);
+
                     @Override
                     public void heightChanged(double z)
                     {
-                        //update zoom
-                        mapZoomBar.setValue((float)z);
+                        float barValue = (float)Math.pow(10, (z - maxZoom) * CoordinatesFragment.Log2Base10 * -1);
+                        float barMinValue = mapZoomBar.getValueFrom();
+                        float barMaxValue = mapZoomBar.getValueTo();
+
+                        //if bar value is within range
+                        if(barValue >= barMinValue && barValue <= barMaxValue)
+                        {
+                            //update zoom
+                            mapZoomBar.setValue(barValue);
+                        }
                     }
                 });
 

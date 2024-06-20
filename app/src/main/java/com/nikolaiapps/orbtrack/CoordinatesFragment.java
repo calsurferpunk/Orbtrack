@@ -825,10 +825,11 @@ public interface CoordinatesFragment
     {
         static void setupZoomSlider(final CoordinatesFragment mapView, Slider zoomSlider, boolean forGlobe)
         {
-            boolean haveMapView = (mapView != null);
+            final boolean haveMapView = (mapView != null);
+            final double maxZoom = (forGlobe ? MaxGlobeZoom : MaxMapZoom);
 
             zoomSlider.setValueFrom((float)MinZoom);
-            zoomSlider.setValueTo((float)(forGlobe ? MaxGlobeZoom : MaxMapZoom));
+            zoomSlider.setValueTo((float)Math.pow(2, maxZoom));
             zoomSlider.setValue((float)(haveMapView ? mapView.getCameraZoom() : MinZoom));
             zoomSlider.setLabelBehavior(LabelFormatter.LABEL_GONE);
             zoomSlider.addOnChangeListener(new Slider.OnChangeListener()
@@ -840,7 +841,7 @@ public interface CoordinatesFragment
                     if(fromUser && haveMapView)
                     {
                         //set zoom
-                        mapView.setZoom(value);
+                        mapView.setZoom(maxZoom - (Math.log(value) / Log2BaseE));
                     }
                 }
             });
@@ -852,6 +853,8 @@ public interface CoordinatesFragment
         }
     }
 
+    double Log2BaseE = Math.log(2);
+    double Log2Base10 = Math.log10(2);
     double WhirlyEarthRadiusKm = 6371.0;
     double WhirlyZScale = 0.1;
     double DefaultZoom = 1.75;

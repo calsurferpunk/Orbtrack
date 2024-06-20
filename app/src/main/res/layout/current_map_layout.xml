@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="-116dp"
-            android:rotation="90"
+            android:rotation="-90"
             android:visibility="gone"/>
 
         <LinearLayout

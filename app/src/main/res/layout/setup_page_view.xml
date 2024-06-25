@@ -1,35 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/Setup_Page_View"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-    <LinearLayout
-        android:id="@+id/Setup_Text_Layout"
+    <TextView
+        android:id="@+id/Setup_Text_Title"
+        style="@style/TitleText"
+        android:paddingBottom="30dp"
+        android:text="@string/title_welcome"/>
+
+    <TextView
+        android:id="@+id/Setup_Text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        android:drawablePadding="10dp"
+        android:text="@string/desc_quick_setup"
+        android:autoLink="web"
+        app:drawableTopCompat="@drawable/ic_launcher_clear"/>
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/Setup_Show_Privacy_Button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@color/transparent"
+        android:drawableLeft="@drawable/ic_expand_more"
+        app:drawableTint="?android:textColor"
+        android:text="@string/title_show"/>
+
+    <com.nikolaiapps.orbtrack.ScrollTextView
+        android:id="@+id/Setup_Privacy_Text"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:visibility="gone">
-        <TextView
-            android:id="@+id/Setup_Text_Title"
-            style="@style/TitleText"
-            android:paddingBottom="30dp"
-            android:text="@string/title_welcome"/>
-
-        <TextView
-            android:id="@+id/Setup_Text"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            android:drawablePadding="10dp"
-            android:text="@string/desc_quick_setup"
-            app:drawableTopCompat="@drawable/ic_launcher_clear" />
-    </LinearLayout>
-
-    <View
-        android:id="@+id/Setup_Input_View"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:visibility="gone"/>
+        android:padding="12dp"
+        android:autoLink="web"
+        android:scrollbars="vertical"
+        android:background="?attr/pageHighlightBackground"
+        android:text="@string/desc_privacy_policy"
+        android:visibility="invisible"/>
 </LinearLayout>

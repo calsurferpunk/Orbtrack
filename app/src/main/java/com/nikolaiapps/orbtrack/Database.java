@@ -146,7 +146,7 @@ public class Database extends SQLiteOpenHelper
 
     private static final int STARS_FILE_MIN_COLUMNS = 2;
     private static final int STARS_FILE_FULL_COLUMNS = 6;
-    private static final int STARS_FILE_ROWS = 7;
+    private static final int STARS_FILE_ROWS = 684;
     private static final String STARS_FILE_SEPARATOR = "[|]";
 
     public static abstract class LocaleStars
@@ -268,7 +268,7 @@ public class Database extends SQLiteOpenHelper
 
     private static final int CONSTELLATION_FILE_MIN_COLUMNS = 2;
     private static final int CONSTELLATION_FILE_FULL_COLUMNS = 5;
-    private static final int CONSTELLATION_FILE_ROWS = 1;
+    private static final int CONSTELLATION_FILE_ROWS = 88;
     private static final String CONSTELLATION_FILE_SEPARATOR = "[|]";
     private static final String CONSTELLATION_FILE_PAIR_SEPARATOR = ":";
     private static final String CONSTELLATION_FILE_POINT_SEPARATOR = ",";
@@ -391,7 +391,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     private static final int INFO_FILE_COLUMNS = 3;
-    private static final int INFO_FILE_ROWS = 11;
+    private static final int INFO_FILE_ROWS = 780;
     private static final String INFO_FILE_SEPARATOR = "[|]";
 
     private static abstract class LocaleInformation
@@ -487,7 +487,7 @@ public class Database extends SQLiteOpenHelper
     }
 
     private static final int OWNERS_FILE_COLUMNS = 2;
-    private static final int OWNERS_FILE_ROWS = 106;
+    private static final int OWNERS_FILE_ROWS = 133;
     private static final String OWNERS_FILE_SEPARATOR = "[|]";
 
     public static abstract class LocaleOwner
@@ -1859,6 +1859,7 @@ public class Database extends SQLiteOpenHelper
         int pendingRows = 0;
         boolean usingConstant;
         String line;
+        String progressTitle = res.getString(progressTitleId);
         SQLiteStatement sqlStatement = db.compileStatement("REPLACE INTO " + tableName + " " + tableValues);
         String[] columns;
 
@@ -1927,7 +1928,7 @@ public class Database extends SQLiteOpenHelper
                     //update progress
                     if(instance != null)
                     {
-                        instance.sendProgress(Globals.ProgressType.Running, res.getString(progressTitleId), index, rowTotalCount);
+                        instance.sendProgress(Globals.ProgressType.Running, progressTitle, index, rowTotalCount);
                     }
                     index++;
 
@@ -2116,14 +2117,6 @@ public class Database extends SQLiteOpenHelper
             addOrbital(context, Universe.IDs.Pluto, ResourcesCompat.getColor(res, R.color.tan, null), OrbitalType.Planet);
         }
 
-        //if there are no stars
-        if(runQuery(context, QueryId.GetFirstStar).length == 0)
-        {
-            //add stars and constellations
-            addStars(context, this, db);
-            addConstellations(context, this, db);
-        }
-
         //if there are no locations
         if(runQuery(context, QueryId.GetFirstLocation, LocationType.Current).length == 0)
         {
@@ -2131,6 +2124,21 @@ public class Database extends SQLiteOpenHelper
 
             //add current location
             runInsert(context, Tables.Location, getLocationValues("Current", 0, 0, 0, zoneId, LocationType.Current, true, true));
+        }
+
+        //if there are no satellites
+        if(runQuery(context, QueryId.GetFirstOrbitalType, OrbitalType.Satellite).length == 0)
+        {
+            //load default satellites
+            saveSatellite(context, "ISS (ZARYA)", ISS_ZARYA_NORAD_ID, "ISS", 911548800000L, TLELines.ISSZarya1, TLELines.ISSZarya2, TLELines.ISSZaryaDate, null, TLELines.ISSZaryaDate, OrbitalType.Satellite);
+        }
+
+        //if there are no stars
+        if(runQuery(context, QueryId.GetFirstStar).length == 0)
+        {
+            //add stars and constellations
+            addStars(context, this, db);
+            addConstellations(context, this, db);
         }
 
         //if there are no categories
@@ -2155,13 +2163,6 @@ public class Database extends SQLiteOpenHelper
 
             //update locale owners
             LocaleOwner.initData(context);
-        }
-
-        //if there are no satellites
-        if(runQuery(context, QueryId.GetFirstOrbitalType, OrbitalType.Satellite).length == 0)
-        {
-            //load default satellites
-            saveSatellite(context, "ISS (ZARYA)", ISS_ZARYA_NORAD_ID, "ISS", 911548800000L, TLELines.ISSZarya1, TLELines.ISSZarya2, TLELines.ISSZaryaDate, null, TLELines.ISSZaryaDate, OrbitalType.Satellite);
         }
 
         //if there are no time zones

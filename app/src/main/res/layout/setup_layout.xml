@@ -42,6 +42,14 @@
         android:visibility="gone"/>
 
     <CheckBox
+        android:id="@+id/Setup_Privacy_CheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/title_i_accept_the_privacy_policy"
+        android:visibility="gone"/>
+
+    <CheckBox
         android:id="@+id/Setup_Input_CheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

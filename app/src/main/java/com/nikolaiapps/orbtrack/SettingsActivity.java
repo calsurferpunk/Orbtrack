@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Spanned;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -29,6 +30,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
@@ -463,7 +465,9 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         {
             switch(preferenceKey)
             {
+                case Settings.PreferenceName.MaterialTheme:
                 case Settings.PreferenceName.SatelliteSourceUseGP:
+                case Settings.PreferenceName.SatelliteSourceShared:
                 case Settings.PreferenceName.AltitudeSource:
                 case Settings.PreferenceName.TimeZoneSource:
                 case Settings.PreferenceName.InformationSource:
@@ -1109,15 +1113,38 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             int page = this.getPageParam();
             boolean onWelcome = (page == SetupPageType.Welcome);
             ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.setup_page_view, container, false);
+            TextView setupText = rootView.findViewById(R.id.Setup_Text);
+            TextView titleText = rootView.findViewById(R.id.Setup_Text_Title);
+            ScrollTextView privacyText = rootView.findViewById(R.id.Setup_Privacy_Text);
+            AppCompatButton showPrivacyButton = rootView.findViewById(R.id.Setup_Show_Privacy_Button);
 
             //handle display based on page
             switch(page)
             {
                 case SetupPageType.Welcome:
                 case SetupPageType.Finished:
-                    rootView.findViewById(R.id.Setup_Text_Layout).setVisibility(View.VISIBLE);
-                    ((TextView)rootView.findViewById(R.id.Setup_Text_Title)).setText(onWelcome ? R.string.title_welcome : R.string.title_finished);
-                    ((TextView)rootView.findViewById(R.id.Setup_Text)).setText(onWelcome ? R.string.desc_quick_setup : R.string.desc_finished_setup);
+                    //setup text
+                    titleText.setText(onWelcome ? R.string.title_welcome : R.string.title_finished);
+                    setupText.setText(onWelcome ? R.string.desc_quick_setup : R.string.desc_finished_setup);
+
+                    //update visibility
+                    showPrivacyButton.setVisibility((onWelcome ? View.VISIBLE : View.GONE));
+
+                    //if on welcome
+                    if(onWelcome)
+                    {
+                        //setup show privacy button
+                        showPrivacyButton.setOnClickListener(new View.OnClickListener()
+                        {
+                            @Override
+                            public void onClick(View v)
+                            {
+                                //show privacy text and hide button
+                                privacyText.setVisibility(View.VISIBLE);
+                                showPrivacyButton.setVisibility(View.GONE);
+                            }
+                        });
+                    }
                     break;
             }
 
@@ -1241,6 +1268,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     private String currentPageKey;
     private TextView infoText;
     private CheckBox inputCheckBox;
+    private CheckBox privacyCheckBox;
     private ViewGroup settingsLayout;
     private LinearLayout progressLayout;
     private FragmentManager manager;
@@ -1436,6 +1464,26 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //update if updating and allow swiping if not
                         updateNow = isChecked;
                         setupPager.setSwipeEnabled(!updateNow);
+                    }
+                }
+            });
+        }
+        privacyCheckBox = (showSetup ? this.findViewById(R.id.Setup_Privacy_CheckBox) : null);
+        if(privacyCheckBox != null)
+        {
+            privacyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+            {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                {
+                    int page = setupPager.getCurrentItem();
+
+                    //if on welcome
+                    if(page == SetupPageType.Welcome)
+                    {
+                        //update privacy accepted and buttons
+                        Settings.setAcceptedPrivacy(SettingsActivity.this, isChecked);
+                        updateButtons(isChecked, true, false);
                     }
                 }
             });
@@ -2556,6 +2604,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     private void moveSetupPage(boolean forward)
     {
         int page;
+        boolean acceptedPrivacy;
 
         //if adapter exists
         if(setupPager != null)
@@ -2567,16 +2616,43 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             switch(page)
             {
                 case SetupPageType.Welcome:
-                    //if forward
-                    if(forward)
+                    //get if accepted privacy
+                    acceptedPrivacy = Settings.getAcceptedPrivacy(this);
+
+                    //if accepted privacy and not already building database
+                    if(acceptedPrivacy && !UpdateService.buildingDatabase())
                     {
-                        //go forward
-                        setupPager.setCurrentItem(page + 1);
+                        Handler shortDelay = new Handler();
+
+                        //build database
+                        UpdateService.buildDatabase(this);
+
+                        //allow building for 1 second
+                        setLoading(true);
+                        shortDelay.postDelayed(new Runnable()
+                        {
+                            @Override
+                            public void run()
+                            {
+                                //continue
+                                setLoading(false);
+                                setupPager.setCurrentItem(page + 1);
+                            }
+                        }, 1000);
                     }
                     else
                     {
-                        //skip
-                        cancel();
+                        //if forward
+                        if(forward)
+                        {
+                            //go forward
+                            setupPager.setCurrentItem(page + 1);
+                        }
+                        else
+                        {
+                            //skip
+                            cancel();
+                        }
                     }
                     break;
 
@@ -2619,6 +2695,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     private void setLoading(boolean loading)
     {
         int page = (setupPager != null ? setupPager.getCurrentItem() : -1);
+        boolean onWelcome = (page == SetupPageType.Welcome);
         boolean onSatellites = (page == SetupPageType.Satellites);
 
         //update status
@@ -2631,7 +2708,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         }
         if(loadingBar != null)
         {
-            loadingBar.setVisibility(isLoading && onSatellites ? View.VISIBLE : View.GONE);
+            loadingBar.setVisibility(isLoading && (onWelcome || onSatellites) ? View.VISIBLE : View.GONE);
         }
         if(loadingCancelButton != null)
         {
@@ -2701,17 +2778,28 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         }
     }
 
+    //Updates buttons
+    private void updateButtons(boolean acceptedPrivacy, boolean onWelcome, boolean onFinished)
+    {
+        backButton.setText(onWelcome ? (acceptedPrivacy ? R.string.title_skip : R.string.title_cancel) : R.string.title_back);
+        nextButton.setEnabled(acceptedPrivacy);
+        nextButton.setText(onFinished ? R.string.title_finish : R.string.title_next);
+    }
+
     //Updates progress
     private void updateProgress()
     {
         int currentPage;
         int page = setupPager.getCurrentItem();
+        boolean onWelcome = (page == SetupPageType.Welcome);
         boolean onUpdates = (page == SetupPageType.Updates);
         boolean onSatellites = (page == SetupPageType.Satellites);
+        boolean onFinished = (page == SetupPageType.Finished);
+        boolean acceptedPrivacy = Settings.getAcceptedPrivacy(this);
         Resources res = this.getResources();
 
         //update visibility
-        progressLayout.setVisibility(page == SetupPageType.Welcome || page == SetupPageType.Finished ? View.INVISIBLE : View.VISIBLE);
+        progressLayout.setVisibility(onWelcome || onFinished ? View.GONE : View.VISIBLE);
 
         //go through each page
         for(currentPage = 1; currentPage < SetupPageType.PageCount - 1; currentPage++)
@@ -2732,14 +2820,18 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         infoText.setText(onUpdates ? res.getString(R.string.text_spacetrack_create_account) : "");
         infoText.setVisibility(onUpdates ? View.VISIBLE : View.GONE);
 
-        //update checkbox
+        //update checkboxes
         inputCheckBox.setChecked(onSatellites && updateNow);
         inputCheckBox.setText(onSatellites ? res.getString(R.string.desc_update_now) : "");
         inputCheckBox.setVisibility(onSatellites ? View.VISIBLE : View.GONE);
+        if(onWelcome)
+        {
+            privacyCheckBox.setChecked(acceptedPrivacy);
+        }
+        privacyCheckBox.setVisibility(onWelcome ? View.VISIBLE : View.GONE);
 
         //update buttons
-        backButton.setText(page == SetupPageType.Welcome ? R.string.title_skip : R.string.title_back);
-        nextButton.setText(page == SetupPageType.Finished ? R.string.title_finish : R.string.title_next);
+        updateButtons(acceptedPrivacy, onWelcome, onFinished);
     }
 
     //Update list

@@ -233,7 +233,8 @@ public abstract class UpdateReceiver
                         if(messageType == NotifyService.MessageTypes.Load)
                         {
                             //call on load file update
-                            onLoadFileUpdate(progressType, section, (count > 0 ? (int)(((index + 1) / (float)count) * 100) : 0), overall);
+                            countValue = (count > 0 ? (int)(((index + 1) / (float)count) * 100) : 0);
+                            onLoadFileUpdate(progressType, section, (int)countValue, overall);
                         }
                         break;
                 }

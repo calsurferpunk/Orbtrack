@@ -170,13 +170,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         super.onCreate(savedInstanceState);
 
         int index;
-        Resources res = this.getResources();
-        final Bundle stateCopy;
-        final boolean acceptedPrivacy = Settings.getAcceptedPrivacy(this);
 
         usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
         this.setContentView(R.layout.main_layout);
+        BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
 
         //look for web protocol updates
         Globals.updateWebProtocols(this);
@@ -230,10 +228,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //setup displays
-        if(!acceptedPrivacy)
-        {
-            BaseInputActivity.hideActionBar(this.getSupportActionBar());
-        }
         mainDrawerLayout = this.findViewById(R.id.Main_Drawer_Layout);
         mainDrawerToggle = createActionBarDrawerToggle();
         mainDrawerLayout.addDrawerListener(mainDrawerToggle);
@@ -249,37 +243,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         otherOpenLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersOpenItem);
         otherSaveLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersSave);
 
-        //if privacy policy has been accepted
-        stateCopy = savedInstanceState;
-        if(acceptedPrivacy)
-        {
-            //handle any first run
-            handleFirstRun(stateCopy);
-        }
-        else
-        {
-            //ask for acceptance
-            Globals.showNotificationDialog(this, Globals.getDrawable(this, R.drawable.ic_launcher_clear), res.getString(R.string.title_privacy_policy), res.getString(R.string.desc_privacy_policy), R.string.title_accept, R.string.title_deny, false, new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    //set privacy policy as accepted
-                    Settings.setAcceptedPrivacy(MainActivity.this, true);
-
-                    //handle any first run
-                    handleFirstRun(stateCopy);
-                }
-            }, new DialogInterface.OnClickListener()
-            {
-                @Override
-                public void onClick(DialogInterface dialog, int which)
-                {
-                    //denied privacy policy
-                    MainActivity.this.finish();
-                }
-            }, true);
-        }
+        //handle any first run
+        handleFirstRun(savedInstanceState);
     }
 
     @Override
@@ -464,6 +429,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean isOkay = (resultCode == RESULT_OK);
         boolean handle;
         boolean needRecreate;
+        boolean acceptedPrivacy = Settings.getAcceptedPrivacy(this);
         Intent data = result.getData();
         Resources res = this.getResources();
 
@@ -495,8 +461,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 finishedSetup = !Settings.getFirstRun(this);
                 recreateAfterSetup = needRecreate;
 
-                //if finished updating database
-                if(finishedSetup)
+                //if cancelled and didn't accept privacy
+                if(!isOkay && !acceptedPrivacy)
+                {
+                    //close app
+                    MainActivity.this.finish();
+                }
+                //else if finished updating database
+                else if(finishedSetup)
                 {
                     //finish loading
                     loadStartData(savedStateBundle);
@@ -1350,27 +1322,18 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         //if not running user setup and not on the first run
         boolean onFirstRun = Settings.getFirstRun(this);
-        finishedSetup = (!runningUserSetup && !onFirstRun);
+        boolean acceptedPrivacy = Settings.getAcceptedPrivacy(this);
+        finishedSetup = (!runningUserSetup && !onFirstRun && acceptedPrivacy);
         if(finishedSetup)
         {
             //loading starting data
             loadStartData(savedInstanceState);
         }
-        else
+        //else if not already running user setup
+        else if(!runningUserSetup)
         {
-            //if not done with first run and not already building database
-            if(onFirstRun && !UpdateService.buildingDatabase())
-            {
-                //build database
-                UpdateService.buildDatabase(this);
-            }
-
-            //if not already running user setup
-            if(!runningUserSetup)
-            {
-                //show setup
-                showSetupDialog();
-            }
+            //show setup
+            showSetupDialog();
         }
     }
 
@@ -1407,7 +1370,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         editModeChangedListener = createOnEditModeChangedListener();
 
         //setup drawer menu
-        BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
         updateSideMenu();
 
         //setup location retrieving

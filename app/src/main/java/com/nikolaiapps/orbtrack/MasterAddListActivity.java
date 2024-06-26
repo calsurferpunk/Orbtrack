@@ -860,7 +860,7 @@ public class MasterAddListActivity extends BaseInputActivity
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(usingMaterial ? R.layout.master_list_material_layout : R.layout.master_list_layout);
+        setContentView(R.layout.master_list_material_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //get intent, source, and displays
@@ -876,16 +876,16 @@ public class MasterAddListActivity extends BaseInputActivity
         boolean haveSelectedOrbitals = (selectedOrbitals != null && !selectedOrbitals.isEmpty());
         MaterialButton cancelButton = this.findViewById(R.id.Master_Cancel_Button);
         searchLayout = this.findViewById(R.id.Orbital_Search_Layout);
-        searchGroup = this.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
-        ownerList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
-        groupList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
-        ageList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
-        typeList = this.findViewById(usingMaterial ? R.id.Orbital_Search_Type_Text_List : R.id.Orbital_Search_Type_List);
+        searchGroup = this.findViewById(R.id.Orbital_Search_Lists_Layout);
+        ownerList = this.findViewById(R.id.Orbital_Search_Owner_Text_List);
+        groupList = this.findViewById(R.id.Orbital_Search_Group_Text_List);
+        ageList = this.findViewById(R.id.Orbital_Search_Age_Text_List);
+        typeList = this.findViewById(R.id.Orbital_Search_Type_Text_List);
         addList = this.findViewById(R.id.Master_Add_List);
-        ownerLayout = this.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Layout : R.id.Orbital_Search_Owner_Row);
-        groupLayout = this.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Layout : R.id.Orbital_Search_Group_Row);
-        ageLayout = this.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Layout : R.id.Orbital_Search_Age_Row);
-        typeLayout = this.findViewById(usingMaterial ? R.id.Orbital_Search_Type_Layout : R.id.Orbital_Search_Type_Row);
+        ownerLayout = this.findViewById(R.id.Orbital_Search_Owner_Layout);
+        groupLayout = this.findViewById(R.id.Orbital_Search_Group_Layout);
+        ageLayout = this.findViewById(R.id.Orbital_Search_Age_Layout);
+        typeLayout = this.findViewById(R.id.Orbital_Search_Type_Layout);
         showButton = this.findViewById(R.id.Orbital_Search_Show_Button);
         addButton = this.findViewById(R.id.Master_Add_Button);
 

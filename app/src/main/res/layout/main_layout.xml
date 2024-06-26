@@ -44,8 +44,6 @@
             android:divider="@android:color/transparent"
             android:dividerHeight="0dp"/>
 
-        <View android:id="@+id/Side_Action_Divider" style="@style/Divider" android:visibility="gone"/>
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/Side_Action_Menu"
             android:layout_width="match_parent"

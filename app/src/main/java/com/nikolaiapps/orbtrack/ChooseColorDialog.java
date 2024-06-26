@@ -105,7 +105,6 @@ public class ChooseColorDialog
     private boolean showAdvanced;
     private boolean allowOpacity;
     private boolean allowTransparent;
-    private final boolean usingMaterial;
     private int startColor;
     private int currentColor;
     private int lastColor;
@@ -126,7 +125,6 @@ public class ChooseColorDialog
         icon = null;
         currentContext = context;
         closed = reloading = showAdvanced = allowOpacity = allowTransparent = false;
-        usingMaterial = Settings.getMaterialTheme(currentContext);
         setColor(defaultColor);
         colorSelectedListener = null;
         rgbOffset = rgbTextOffset = 0;
@@ -155,7 +153,7 @@ public class ChooseColorDialog
         BorderButton colorBefore2View;
         ViewGroup.LayoutParams colorImageParams;
         ViewGroup.LayoutParams brightBarParams;
-        View colorDialogView = (viewInflater != null ? viewInflater.inflate((usingMaterial ? R.layout.choose_color_material_dialog : R.layout.choose_color_dialog), null, false) : null);
+        View colorDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.choose_color_material_dialog, null, false) : null);
         final Resources res = (haveContext ? currentContext.getResources() : null);
         final CircularProgressIndicator colorProgress = (colorDialogView != null ? colorDialogView.findViewById(R.id.Color_Progress) : null);
         float[] buttonSize = Globals.dpsToPixels(currentContext, 45, 35);
@@ -693,7 +691,7 @@ public class ChooseColorDialog
         String valueString = String.valueOf(index != OPACITY_INDEX ? value : (int)Math.ceil((value / 255.0f) * 100));
 
         //if value is changing
-        if(!valueString.isEmpty() && !textDisplays[index].getText().toString().equals(valueString))
+        if(!textDisplays[index].getText().toString().equals(valueString))
         {
             //set text and move cursor to the end
             textDisplays[index].setTag(false);

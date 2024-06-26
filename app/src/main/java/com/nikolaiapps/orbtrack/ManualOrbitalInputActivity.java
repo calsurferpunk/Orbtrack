@@ -30,7 +30,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(usingMaterial ? R.layout.manual_object_input_material_layout : R.layout.manual_object_input_layout);
+        setContentView(R.layout.manual_object_input_material_layout);
 
         int index;
         final Intent resultIntent = new Intent();
@@ -52,8 +52,8 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         currentCharLbl = this.findViewById(R.id.Manual_Object_Current_Char_Lbl);
         currentTotalLbl = this.findViewById(R.id.Manual_Object_Current_Total_Lbl);
         launchDate = this.findViewById(R.id.Manual_Object_Launch_Date);
-        final SelectListInterface ownerList = this.findViewById(usingMaterial ? R.id.Manual_Object_Owner_Text_List : R.id.Manual_Object_Owner_List);
-        final SelectListInterface groupList = this.findViewById(usingMaterial ? R.id.Manual_Object_Group_Text_List : R.id.Manual_Object_Group_List);
+        final SelectListInterface ownerList = this.findViewById(R.id.Manual_Object_Owner_Text_List);
+        final SelectListInterface groupList = this.findViewById(R.id.Manual_Object_Group_Text_List);
         MaterialButton cancelButton = this.findViewById(R.id.Manual_Object_Cancel_Button);
         MaterialButton addButton = this.findViewById(R.id.Manual_Object_Add_Button);
 

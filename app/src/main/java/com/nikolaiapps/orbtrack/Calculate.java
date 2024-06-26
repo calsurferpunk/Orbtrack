@@ -124,7 +124,7 @@ public abstract class Calculate
             nameImage = (nameImageId > -1 ? (AppCompatImageView)itemView.findViewById(nameImageId) : null);
             nameText = (nameTextId > - 1 ? (TextView)itemView.findViewById(nameTextId) : null);
 
-            if(subList != null && Settings.getMaterialTheme(subList.getContext()))
+            if(subList != null)
             {
                 subList.setGroupIndicator(null);
             }
@@ -260,7 +260,7 @@ public abstract class Calculate
                 haveSun = haveMoon = false;
 
                 //remember strings and layout ID
-                this.itemsRefID = (usingMaterial ? R.layout.calculate_view_material_item : R.layout.calculate_view_item);
+                this.itemsRefID = R.layout.calculate_view_material_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -476,7 +476,7 @@ public abstract class Calculate
 
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
             {
-                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_view_material_item : R.layout.calculate_view_item), R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Item_Divider, widthDp);
+                super(context, julianDate, items, R.layout.calculate_view_material_item, R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, -1, widthDp);
                 this.haveSun = haveSun;
                 this.haveMoon = haveMoon;
             }
@@ -724,7 +724,7 @@ public abstract class Calculate
                 }
 
                 //remember strings and layout ID
-                this.itemsRefID = (usingMaterial ? R.layout.calculate_pass_material_item : R.layout.calculate_pass_item);
+                this.itemsRefID = R.layout.calculate_pass_material_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -1197,7 +1197,7 @@ public abstract class Calculate
             {
                 super(context);
 
-                int itemId = (usingMaterial ? R.layout.calculate_coordinates_material_item : R.layout.calculate_coordinates_item);
+                int itemId = R.layout.calculate_coordinates_material_item;
 
                 hasItems = false;
                 currentZone = zone;
@@ -1354,7 +1354,7 @@ public abstract class Calculate
         {
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp)
             {
-                super(context, julianDate, items, (Settings.getMaterialTheme(context) ? R.layout.calculate_coordinates_material_item : R.layout.calculate_coordinates_item), R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Divider, widthDp);
+                super(context, julianDate, items, R.layout.calculate_coordinates_material_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, -1, widthDp);
             }
 
             @Override
@@ -1390,7 +1390,6 @@ public abstract class Calculate
     public static class SubItemBaseListAdapter extends BaseExpandableListAdapter
     {
         protected final int widthDp;
-        private final boolean usingMaterial;
         private final int layoutId;
         private final int titleId;
         private final int progressId;
@@ -1402,7 +1401,6 @@ public abstract class Calculate
 
         public SubItemBaseListAdapter(Context context, double julianDate, CalculateDataBase[] items, int layoutId, int titleId, int progressId, int dataId, int dividerId, int widthDp)
         {
-            this.usingMaterial = Settings.getMaterialTheme(context);
             this.listInflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             this.layoutId = layoutId;
             this.titleId = titleId;
@@ -1465,17 +1463,17 @@ public abstract class Calculate
 
             if(convertView == null)
             {
-                convertView = listInflater.inflate((usingMaterial ? R.layout.side_menu_list_material_group : R.layout.side_menu_list_group), parent, false);
+                convertView = listInflater.inflate(R.layout.side_menu_list_material_group, parent, false);
             }
             groupTitleImage = convertView.findViewById(R.id.Group_Title_Image);
-            if(usingMaterial && groupTitleImage != null)
+            if(groupTitleImage != null)
             {
                 groupTitleImage.setVisibility(View.GONE);
             }
             groupTitleText = convertView.findViewById(R.id.Group_Title_Text);
             groupTitleText.setText(Globals.getDateString(parent.getContext(), Globals.julianDateToCalendar(dataJulianDate), MainActivity.getTimeZone(), true).replace("\r\n", " "));
             groupIndicatorImage = convertView.findViewById(R.id.Group_Indicator_Image);
-            if(usingMaterial && groupIndicatorImage != null)
+            if(groupIndicatorImage != null)
             {
                 groupIndicatorImage.setImageDrawable(Globals.getDrawable(listInflater.getContext(), (isExpanded ? R.drawable.ic_expand_less : R.drawable.ic_expand_more), true));
             }
@@ -3116,18 +3114,14 @@ public abstract class Calculate
         final int backgroundColor = Globals.resolveColorID(activity, android.R.attr.colorBackground);
         final boolean onIntersection = (pageNumber == PageType.Intersection);
         final boolean usingMulti = (pageNumber == PageType.View || pageNumber == PageType.Coordinates);
-        final boolean usingMaterial = Settings.getMaterialTheme(activity);
         int viewRowVisibility = View.VISIBLE;
         int elevationMinVisibility = View.VISIBLE;
         int intersectionVisibility = (onIntersection ? View.VISIBLE : View.GONE);
         final Database.DatabaseSatellite[] orbitals;
-        ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.calculate_input_material_layout : R.layout.calculate_input_layout), container, false);
+        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.calculate_input_material_layout, container, false);
         View viewRow = rootView.findViewById(R.id.Calculate_View_Row);
-        View intersectionRow = rootView.findViewById(R.id.Calculate_Intersection_Row);
         View intersectionUnitLayout = rootView.findViewById(R.id.Calculate_Intersection_Unit_Layout);
-        View elevationMinRow = rootView.findViewById(R.id.Calculate_Elevation_Min_Row);
         View elevationMinUnitLayout = rootView.findViewById(R.id.Calculate_Elevation_Min_Unit_Layout);
-        TextView orbital2ListTitle = rootView.findViewById(R.id.Calculate_Orbital2_List_Title);
         TextInputLayout endDateLayout = rootView.findViewById(R.id.Calculate_End_Date_Layout);
         TextInputLayout endTimeLayout = rootView.findViewById(R.id.Calculate_End_Time_Layout);
         TextInputLayout startDateLayout = rootView.findViewById(R.id.Calculate_Start_Date_Layout);
@@ -3143,9 +3137,9 @@ public abstract class Calculate
         page.viewUnitText = rootView.findViewById(R.id.Calculate_View_Unit_Text);
         page.intersectionUnitText = rootView.findViewById(R.id.Calculate_Intersection_Unit_Text);
         page.elevationMinUnitText = rootView.findViewById(R.id.Calculate_Elevation_Min_Unit_Text);
-        page.orbitalList = rootView.findViewById(usingMaterial ? R.id.Calculate_Orbital_Text_List : R.id.Calculate_Orbital_List);
-        page.orbital2List = rootView.findViewById(usingMaterial ? R.id.Calculate_Orbital2_Text_List : R.id.Calculate_Orbital2_List);
-        page.viewUnitList = rootView.findViewById(usingMaterial ? R.id.Calculate_View_Unit_Text_List : R.id.Calculate_View_Unit_List);
+        page.orbitalList = rootView.findViewById(R.id.Calculate_Orbital_Text_List);
+        page.orbital2List = rootView.findViewById(R.id.Calculate_Orbital2_Text_List);
+        page.viewUnitList = rootView.findViewById(R.id.Calculate_View_Unit_Text_List);
         page.startDateText = rootView.findViewById(R.id.Calculate_Start_Date_Text);
         page.endDateText = rootView.findViewById(R.id.Calculate_End_Date_Text);
         page.startTimeText = rootView.findViewById(R.id.Calculate_Start_Time_Text);
@@ -3171,10 +3165,6 @@ public abstract class Calculate
         else if(orbital2TextLayout != null)
         {
             orbital2TextLayout.setVisibility(intersectionVisibility);
-        }
-        if(orbital2ListTitle != null)
-        {
-            orbital2ListTitle.setVisibility(intersectionVisibility);
         }
         if(startDateLayout != null)
         {
@@ -3240,17 +3230,9 @@ public abstract class Calculate
                 break;
         }
         viewRow.setVisibility(viewRowVisibility);
-        if(intersectionRow != null)
-        {
-            intersectionRow.setVisibility(intersectionVisibility);
-        }
         if(intersectionUnitLayout != null)
         {
             intersectionUnitLayout.setVisibility(intersectionVisibility);
-        }
-        if(elevationMinRow != null)
-        {
-            elevationMinRow.setVisibility(elevationMinVisibility);
         }
         if(elevationMinUnitLayout != null)
         {

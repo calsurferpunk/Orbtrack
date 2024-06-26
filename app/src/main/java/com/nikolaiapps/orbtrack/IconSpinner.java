@@ -423,7 +423,6 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
         private boolean usingIcon1;
         private boolean usingIcon3;
         private boolean usingIcon3Only;
-        private boolean usingMaterial;
         private boolean allowFilter = false;
         private boolean loadingItems = false;
         private ItemFilter filter;
@@ -432,7 +431,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
 
         private void getDefaultSize(Context context)
         {
-            defaultIconDp = (usingMaterial ? 32 : 24);
+            defaultIconDp = 32;
             defaultIconPx = (int)(context != null ? Globals.dpToPixels(context, defaultIconDp) : 48);
         }
 
@@ -442,8 +441,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             listInflater = (context != null ? (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
             textColor = textSelectedColor = Globals.resolveColorID(context, android.R.attr.textColor);
             backgroundColor = Globals.resolveColorID(context, android.R.attr.colorBackground);
-            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, (usingMaterial ? R.attr.pageHighlightBackground : android.R.attr.colorBackground));
-            usingMaterial = Settings.getMaterialTheme(context);
+            backgroundItemColor = backgroundItemSelectedColor = Globals.resolveColorID(context, R.attr.pageHighlightBackground);
             getDefaultSize(context);
 
             updateUsing();
@@ -705,7 +703,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             //set view
             if(convertView == null)
             {
-                convertView = (listInflater != null ? listInflater.inflate((usingMaterial ? R.layout.icon_spinner_material_item : R.layout.icon_spinner_item), parent, false) : null);
+                convertView = (listInflater != null ? listInflater.inflate((R.layout.icon_spinner_material_item), parent, false) : null);
                 if(convertView == null)
                 {
                     return(new View(parent.getContext()));

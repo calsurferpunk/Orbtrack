@@ -26,7 +26,6 @@ import androidx.lifecycle.Observer;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.view.ActionMode;
-import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -272,13 +271,11 @@ public abstract class Selectable
         public class ItemDetailDialog
         {
             private boolean canShow;
-            private final boolean usingMaterial;
             private int groupCount;
             private final int[] noradIds;
             private final long timerDelay;
             private final Context currentContext;
             private ViewGroup itemDetailsGroup;
-            private TableLayout itemDetailTable;
             private LinearLayout itemDetailCardsLayout;
             private AlertDialog dialog;
             private final Timer updateTimer = new Timer();
@@ -302,14 +299,13 @@ public abstract class Selectable
 
                 canShow = true;
                 groupCount = 0;
-                usingMaterial = Settings.getMaterialTheme(context);
                 currentContext = context;
                 noradIds = ids;
                 timerDelay = Settings.getListUpdateDelay(currentContext);
 
                 try
                 {
-                    itemDetailsGroup = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.item_detail_material_dialog : R.layout.item_detail_dialog), null);
+                    itemDetailsGroup = (ViewGroup)inflater.inflate(R.layout.item_detail_material_dialog, null);
                 }
                 catch(Exception ex)
                 {
@@ -318,13 +314,12 @@ public abstract class Selectable
                 }
 
                 itemDetailCardsLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Cards_Layout);
-                itemDetailTable = itemDetailsGroup.findViewById(R.id.Item_Detail_Table);
                 itemDetail3dFrame = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Frame);
                 itemDetail3dCloseFrame = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Close_Frame);
                 itemDetailButtonLayout = itemDetailsGroup.findViewById(R.id.Item_Detail_Button_Layout);
                 itemDetail3dCloseButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Close_Button);
                 itemDetail3dFullscreenButton = itemDetailsGroup.findViewById(R.id.Item_Detail_3d_Fullscreen_Button);
-                itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeId(currentContext), usingMaterial, false);
+                itemDetailDialog = new CustomAlertDialogBuilder(currentContext, Globals.getDialogThemeId(currentContext), false);
                 manager = Globals.getFragmentManager(currentContext);
                 itemDetailButtonClickListener = listener;
                 dismissListeners = new ArrayList<>(0);
@@ -392,7 +387,7 @@ public abstract class Selectable
                     @Override
                     public void onClick(View v)
                     {
-                        View detailsLayout = (usingMaterial ? itemDetailCardsLayout : itemDetailTable);
+                        View detailsLayout = itemDetailCardsLayout;
                         boolean showingDetails = (detailsLayout.getVisibility() == View.GONE);
                         int detailsVisibility = (showingDetails ? View.VISIBLE : View.GONE);
                         ViewGroup.LayoutParams frameParams = itemDetail3dFrame.getLayoutParams();
@@ -405,7 +400,7 @@ public abstract class Selectable
                         {
                             ///get sizes
                             startFrameHeight = itemDetail3dFrame.getHeight();
-                            expandFrameHeight = (screenSize[1] - (int)(itemDetailButtonLayout.getHeight() * (usingMaterial ? 3.5 : 2))); //note: since unknown how to get title height, button layout used instead in addition (thus 2x)
+                            expandFrameHeight = (screenSize[1] - (int)(itemDetailButtonLayout.getHeight() * 3.5)); //note: since unknown how to get title height, button layout used instead in addition (thus 2x)
                         }
                         frameParams.height = (showingDetails ? startFrameHeight : expandFrameHeight);
                         itemDetail3dFrame.setLayoutParams(frameParams);
@@ -461,54 +456,34 @@ public abstract class Selectable
             {
                 TextView emptyText;
                 TableRow.LayoutParams params;
-                LinearLayout dividerHolder = null;
+                LinearLayout dividerHolder;
                 float dpPixels;
 
-                if(vertical || !usingMaterial)
+                if(vertical)
                 {
-                    emptyText = new TextView(new ContextThemeWrapper(currentContext, (vertical ? (usingMaterial ? R.style.DetailVerticalDividerMaterial : R.style.DetailVerticalDivider) : R.style.Divider)));
-                    if(vertical)
-                    {
-                        dividerHolder = new LinearLayout(currentContext);
-                        params = new TableRow.LayoutParams();
-                        params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
-                        params.height = ViewGroup.LayoutParams.MATCH_PARENT;
-                        params.gravity = Gravity.CENTER;
-                        dividerHolder.setLayoutParams(params);
+                    emptyText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailVerticalDividerMaterial));
 
-                        dpPixels = Globals.dpToPixels(currentContext, 2);
-                        params = new TableRow.LayoutParams();
-                        params.width = (int)dpPixels;
-                        params.gravity = Gravity.CENTER;
-                        emptyText.setLayoutParams(params);
-                    }
-                    else
-                    {
-                        emptyText.setTextSize(1);
-                    }
+                    dividerHolder = new LinearLayout(currentContext);
+                    params = new TableRow.LayoutParams();
+                    params.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    params.height = ViewGroup.LayoutParams.MATCH_PARENT;
+                    params.gravity = Gravity.CENTER;
+                    dividerHolder.setLayoutParams(params);
+
+                    dpPixels = Globals.dpToPixels(currentContext, 2);
+                    params = new TableRow.LayoutParams();
+                    params.width = (int)dpPixels;
+                    params.gravity = Gravity.CENTER;
+                    emptyText.setLayoutParams(params);
                     if(index >= 0)
                     {
-                        if(dividerHolder != null)
-                        {
-                            dividerHolder.addView(emptyText);
-                            view.addView(dividerHolder, index);
-                        }
-                        else
-                        {
-                            view.addView(emptyText, index);
-                        }
+                        dividerHolder.addView(emptyText);
+                        view.addView(dividerHolder, index);
                     }
                     else
                     {
-                        if(dividerHolder != null)
-                        {
-                            dividerHolder.addView(emptyText);
-                            view.addView(dividerHolder);
-                        }
-                        else
-                        {
-                            view.addView(emptyText);
-                        }
+                        dividerHolder.addView(emptyText);
+                        view.addView(dividerHolder);
                     }
                 }
             }
@@ -521,7 +496,7 @@ public abstract class Selectable
             {
                 if(canShow)
                 {
-                    ViewGroup detailGroup = (usingMaterial ? itemDetailCardsLayout.findViewWithTag("group" + groupCount) : itemDetailTable);
+                    ViewGroup detailGroup = itemDetailCardsLayout.findViewWithTag("group" + groupCount);
                     final View passProgressLayout = this.findViewById(R.id.Item_Detail_Progress_Layout);
 
                     if(detailGroup != null)
@@ -550,10 +525,11 @@ public abstract class Selectable
                 //if can show display
                 if(canShow)
                 {
-                    MaterialCardView groupCard = (usingMaterial ? new MaterialCardView(currentContext) : null);
-                    TableLayout currentDetailTable = (usingMaterial ? new TableLayout(new ContextThemeWrapper(currentContext, R.style.DetailTableMaterial)) : itemDetailTable);
+                    MaterialCardView groupCard = new MaterialCardView(currentContext);
+                    TableLayout currentDetailTable = new TableLayout(new ContextThemeWrapper(currentContext, R.style.DetailTableMaterial));
                     TableRow groupRow = new TableRow(new ContextThemeWrapper(currentContext, R.style.DetailTableRow));
-                    TextView groupText = new TextView(new ContextThemeWrapper(currentContext, (usingMaterial ? R.style.DetailTextMaterial : R.style.DetailText)));
+                    TextView groupText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailTextMaterial));
+                    LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     TableRow.LayoutParams detailParams;
                     TableRow.LayoutParams groupParams = new TableRow.LayoutParams();
                     TableRow[] detailRows = new TableRow[(titleCount / 2) + (titleCount % 2)];
@@ -561,26 +537,15 @@ public abstract class Selectable
                     //update group count
                     groupCount++;
 
-                    //if using material
-                    if(usingMaterial)
-                    {
-                        LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    //setup group card
+                    dpPixels = (int)Globals.dpToPixels(currentContext, 6);
+                    cardParams.setMargins(0, 0, 0, dpPixels);
+                    groupCard.setCardBackgroundColor(bgColor);
+                    groupCard.setContentPadding(dpPixels, dpPixels, dpPixels , dpPixels);
+                    groupCard.setRadius(dpPixels);
+                    groupCard.setLayoutParams(cardParams);
+                    groupCard.setPreventCornerOverlap(true);
 
-                        //setup group card
-                        dpPixels = (int)Globals.dpToPixels(currentContext, 6);
-                        cardParams.setMargins(0, 0, 0, dpPixels);
-                        groupCard.setCardBackgroundColor(bgColor);
-                        groupCard.setContentPadding(dpPixels, dpPixels, dpPixels , dpPixels);
-                        groupCard.setRadius(dpPixels);
-                        groupCard.setLayoutParams(cardParams);
-                        groupCard.setPreventCornerOverlap(true);
-                    }
-                    else
-                    {
-                        //add divider and set row color
-                        addDivider(currentDetailTable, false);
-                        groupRow.setBackgroundColor(bgColor);
-                    }
                     currentDetailTable.setStretchAllColumns(true);
                     currentDetailTable.setTag("group" + groupCount);
 
@@ -671,13 +636,9 @@ public abstract class Selectable
                         this.detailTexts.add(currentDetailText);
                     }
 
-                    //if using material
-                    if(usingMaterial)
-                    {
-                        //add group card
-                        groupCard.addView(currentDetailTable);
-                        itemDetailCardsLayout.addView(groupCard);
-                    }
+                    //add group card
+                    groupCard.addView(currentDetailTable);
+                    itemDetailCardsLayout.addView(groupCard);
 
                     //update group title visibility
                     groupRow.setVisibility(addedRow ? View.VISIBLE : View.GONE);
@@ -1007,7 +968,6 @@ public abstract class Selectable
         protected boolean hasItems;
         protected boolean forSubItems;
         protected boolean loadingItems;
-        final protected boolean usingMaterial;
         private boolean enableItemClicks;
         protected int dataID = Integer.MAX_VALUE;
         protected int itemsRefID = -1;
@@ -1032,7 +992,6 @@ public abstract class Selectable
             categoryTitle = null;
             currentContext = context;
             listInflater = (haveContext ? (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE) : null);
-            usingMaterial = Settings.getMaterialTheme(currentContext);
             hasItems = forSubItems = loadingItems = false;
             enableItemClicks = true;
         }
@@ -1410,7 +1369,6 @@ public abstract class Selectable
         private OnPageResumeListener pageResumeListener;
         private Observer<Intent> updateReceiver;
 
-        protected boolean usingMaterial;
         private Menu actionMenu;
         protected Menu optionsMenu;
         private ActionMode actionModeMenu;
@@ -1444,7 +1402,6 @@ public abstract class Selectable
 
             Context context = this.getContext();
 
-            usingMaterial = Settings.getMaterialTheme(context);
             updateReceiver = createLocalBroadcastReceiver();
             if(context != null)
             {
@@ -1539,7 +1496,7 @@ public abstract class Selectable
             View header;
             View listColumns;
             Context context = this.getContext();
-            ViewGroup rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.list_material_view : R.layout.list_view), container, false);
+            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.list_material_view, container, false);
 
             //remember group and page
             group = getGroupParam();
@@ -1643,12 +1600,9 @@ public abstract class Selectable
         protected void setListColumns(Context context, View listColumns, int page)
         {
             int columns;
-            int currentColumns;
             int dividerInsetPx;
             boolean darkTheme;
             Object tagObject;
-            DividerItemDecoration verticalDivider;
-            DividerItemDecoration horizontalDivider;
             MaterialDividerItemDecoration horizontalMaterialDivider;
 
             //if context and list are set
@@ -1662,38 +1616,18 @@ public abstract class Selectable
                 tagObject = selectList.getTag();
                 if(tagObject != null)
                 {
-                    //remove all column decorations
-                    currentColumns = (int)tagObject;
+                    //remove column decoration
                     selectList.removeItemDecorationAt(0);
-                    if(currentColumns > 1 && !usingMaterial)
-                    {
-                        selectList.removeItemDecorationAt(0);
-                    }
                 }
 
                 //add columns and decorations
                 selectList.setLayoutManager(columns > 1 ? (new GridLayoutManager(context, columns)) : (new LinearLayoutManager(context)));
-                if(usingMaterial)
-                {
-                    dividerInsetPx = (int)Globals.dpToPixels(context, 16);
-                    horizontalMaterialDivider = new MaterialDividerItemDecoration(context, MaterialDividerItemDecoration.VERTICAL);
-                    horizontalMaterialDivider.setDividerColorResource(context, darkTheme ? R.color.dark_gray : R.color.light_gray);
-                    horizontalMaterialDivider.setDividerInsetStart(dividerInsetPx);
-                    horizontalMaterialDivider.setDividerInsetEnd(dividerInsetPx);
-                    selectList.addItemDecoration(horizontalMaterialDivider);
-                }
-                else
-                {
-                    horizontalDivider = new DividerItemDecoration(context, LinearLayoutManager.VERTICAL);
-                    horizontalDivider.setDrawable(Globals.getDrawable(context, (darkTheme ? R.drawable.divider_horizontal_dark : R.drawable.divider_horizontal_light)));
-                    selectList.addItemDecoration(horizontalDivider);
-                }
-                if(columns > 1 && !usingMaterial)
-                {
-                    verticalDivider = new DividerItemDecoration(context, LinearLayoutManager.HORIZONTAL);
-                    verticalDivider.setDrawable(Globals.getDrawable(context, (darkTheme ? R.drawable.divider_vertical_dark : R.drawable.divider_vertical_light)));
-                    selectList.addItemDecoration(verticalDivider);
-                }
+                dividerInsetPx = (int)Globals.dpToPixels(context, 16);
+                horizontalMaterialDivider = new MaterialDividerItemDecoration(context, MaterialDividerItemDecoration.VERTICAL);
+                horizontalMaterialDivider.setDividerColorResource(context, darkTheme ? R.color.dark_gray : R.color.light_gray);
+                horizontalMaterialDivider.setDividerInsetStart(dividerInsetPx);
+                horizontalMaterialDivider.setDividerInsetEnd(dividerInsetPx);
+                selectList.addItemDecoration(horizontalMaterialDivider);
 
                 //force list refresh
                 selectList.setAdapter(null);

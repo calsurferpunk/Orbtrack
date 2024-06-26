@@ -66,15 +66,8 @@ public class EditValuesDialog
     private String itemList2Title;
     private String itemDateTitle;
     private final Activity currentContext;
-    private TextView editValueTitle;
-    private TextView editValue2Title;
     private TextView editText;
     private TextView editText2;
-    private TextView editNumberTitle;
-    private TextView editNumber2Title;
-    private TextView editNumber3Title;
-    private TextView editDateTitle;
-    private TextView editValueList2Title;
     private EditText editValueText;
     private EditText editNumberText;
     private EditText editNumber2Text;
@@ -277,10 +270,6 @@ public class EditValuesDialog
         //set titles
         editDialog.setTitle(titleText);
         itemTitle = (itemTextValueTitle != null ? itemTextValueTitle : "");
-        if(editValueTitle != null)
-        {
-            editValueTitle.setText(itemTitle);
-        }
         if(editValueTextLayout != null)
         {
             editValueTextLayout.setHint(itemTitle);
@@ -290,10 +279,6 @@ public class EditValuesDialog
             editValueTextListLayout.setHint(itemTitle);
         }
         itemTitle = (itemTextValue2Title != null ? itemTextValue2Title : "");
-        if(editValue2Title != null)
-        {
-            editValue2Title.setText(itemTitle);
-        }
         if(editValue2TextLayout != null)
         {
             editValue2TextLayout.setHint(itemTitle);
@@ -326,10 +311,6 @@ public class EditValuesDialog
             {
                 numberText = Globals.getNumberString(itemNumberValues[currentIndex], 4);
                 itemTitle = (itemNumberTitles.length > 0 && itemNumberTitles[0] != null ? itemNumberTitles[0] : "");
-                if(editNumberTitle != null)
-                {
-                    editNumberTitle.setText(itemTitle);
-                }
                 if(editNumberLayout != null)
                 {
                     editNumberLayout.setHint(itemTitle);
@@ -340,10 +321,6 @@ public class EditValuesDialog
             {
                 numberText = Globals.getNumberString(itemNumber2Values[currentIndex], 4);
                 itemTitle = (itemNumberTitles.length > 1 && itemNumberTitles[1] != null ? itemNumberTitles[1] : "");
-                if(editNumber2Title != null)
-                {
-                    editNumber2Title.setText(itemTitle);
-                }
                 if(editNumber2Layout != null)
                 {
                     editNumber2Layout.setHint(itemTitle);
@@ -354,10 +331,6 @@ public class EditValuesDialog
             {
                 numberText = Globals.getNumberString(itemNumber3Values[currentIndex], 2);
                 itemTitle = (itemNumberTitles.length > 2 && itemNumberTitles[2] != null ? itemNumberTitles[2] : "");
-                if(editNumber3Title != null)
-                {
-                    editNumber3Title.setText(itemTitle);
-                }
                 if(editNumber3Layout != null)
                 {
                     editNumber3Layout.setHint(itemTitle);
@@ -378,10 +351,6 @@ public class EditValuesDialog
         {
             //set title and list
             itemTitle = (itemList2Title != null ? itemList2Title : "");
-            if(editValueList2Title != null)
-            {
-                editValueList2Title.setText(itemTitle);
-            }
             if(editValueTextList2Layout != null)
             {
                 editValueTextList2Layout.setHint(itemTitle);
@@ -395,10 +364,6 @@ public class EditValuesDialog
             //set date
             date = Globals.getGMTTime(itemDateValues[currentIndex]);
             itemTitle = (itemDateTitle != null ? itemDateTitle : "");
-            if(editDateTitle != null)
-            {
-                editDateTitle.setText(itemTitle);
-            }
             if(editDateLayout != null)
             {
                 editDateLayout.setHint(itemTitle);
@@ -420,7 +385,6 @@ public class EditValuesDialog
         boolean usingList2Icons = (usingList2 && list2IconIds != null);
         boolean usingDate = (dateValues != null);
         boolean darkTheme = Settings.getDarkTheme(currentContext);
-        boolean usingMaterial = Settings.getMaterialTheme(currentContext);
         int index;
         int currentId;
         int showText2 = (usingText2 ? View.VISIBLE : View.GONE);
@@ -441,7 +405,7 @@ public class EditValuesDialog
         TextInputLayout editColorTextListLayout;
         AlertDialog.Builder editDialogBuilder = new AlertDialog.Builder(currentContext, Globals.getDialogThemeId(currentContext));
         LayoutInflater viewInflater = (LayoutInflater)currentContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        final View editDialogView = (viewInflater != null ? viewInflater.inflate(usingMaterial ? R.layout.edit_material_dialog : R.layout.edit_dialog, currentContext.findViewById(android.R.id.content), false) : null);
+        final View editDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.edit_material_dialog, currentContext.findViewById(android.R.id.content), false) : null);
 
         //remember if a specific edit type
         isLogin = (editType == EditType.Login);
@@ -476,24 +440,22 @@ public class EditValuesDialog
         {
             //get and set displays
             editValueTextLayout = editDialogView.findViewById(R.id.Edit_Value_Text_Layout);
-            editValueTitle = editDialogView.findViewById(R.id.Edit_Value_Title);
             editValueText = editDialogView.findViewById(R.id.Edit_Value_Text);
             editValue2TextLayout = editDialogView.findViewById(R.id.Edit_Value2_Text_Layout);
-            editValue2Title = editDialogView.findViewById(R.id.Edit_Value2_Title);
             editValue2Text = editDialogView.findViewById(R.id.Edit_Value2_Text);
-            valueRow = editDialogView.findViewById(usingMaterial ? R.id.Edit_Value_Layout : R.id.Edit_Value_Row);
+            valueRow = editDialogView.findViewById(R.id.Edit_Value_Layout);
             if(!usingText && !usingList)
             {
                 valueRow.setVisibility(View.GONE);
             }
-            value2Row = (usingMaterial ? editValue2TextLayout : editDialogView.findViewById(R.id.Edit_Value2_Row));
+            value2Row = editValue2TextLayout;
             value2Row.setVisibility(showText2);
             editText = editDialogView.findViewById(R.id.Edit_Text);
             editText.setVisibility(showRowText);
             editText2 = editDialogView.findViewById(R.id.Edit_Text2);
             editText2.setVisibility(showRowText2);
             editValueTextListLayout = editDialogView.findViewById(R.id.Edit_Value_Text_List_Layout);
-            editValueList = editDialogView.findViewById(usingMaterial ? R.id.Edit_Value_Text_List : R.id.Edit_Value_List);
+            editValueList = editDialogView.findViewById(R.id.Edit_Value_Text_List);
             if(usingList)
             {
                 //set text align right and add list values
@@ -510,36 +472,23 @@ public class EditValuesDialog
             }
 
             editNumberLayout = editDialogView.findViewById(R.id.Edit_Number_Layout);
-            editNumberTitle = editDialogView.findViewById(R.id.Edit_Number_Title);
             editNumberText = editDialogView.findViewById(R.id.Edit_Number_Text);
-            (usingMaterial ? editNumberLayout : editDialogView.findViewById(R.id.Edit_Number_Row)).setVisibility(showNumber);
+            editNumberLayout.setVisibility(showNumber);
 
             editNumber2Layout = editDialogView.findViewById(R.id.Edit_Number2_Layout);
-            editNumber2Title = editDialogView.findViewById(R.id.Edit_Number2_Title);
             editNumber2Text = editDialogView.findViewById(R.id.Edit_Number2_Text);
-            (usingMaterial ? editNumber2Layout : editDialogView.findViewById(R.id.Edit_Number2_Row)).setVisibility(showNumber2);
+            editNumber2Layout.setVisibility(showNumber2);
 
             editNumber3Layout = editDialogView.findViewById(R.id.Edit_Number3_Layout);
-            editNumber3Title = editDialogView.findViewById(R.id.Edit_Number3_Title);
             editNumber3Text = editDialogView.findViewById(R.id.Edit_Number3_Text);
-            (usingMaterial ? editNumber3Layout : editDialogView.findViewById(R.id.Edit_Number3_Row)).setVisibility(showNumber3);
+            editNumber3Layout.setVisibility(showNumber3);
 
             editDateLayout = editDialogView.findViewById(R.id.Edit_Date_Layout);
-            editDateTitle = editDialogView.findViewById(R.id.Edit_Date_Title);
             editDate = editDialogView.findViewById(R.id.Edit_Date);
-            (usingMaterial ? editDateLayout : editDialogView.findViewById(R.id.Edit_Date_Row)).setVisibility(usingDate ? View.VISIBLE : View.GONE);
+            editDateLayout.setVisibility(usingDate ? View.VISIBLE : View.GONE);
 
             //get list 2
             editValueTextList2Layout = editDialogView.findViewById(R.id.Edit_Value_Text_List2_Layout);
-            editValueList2Title = editDialogView.findViewById(R.id.Edit_List2_Title);
-            if(editValueList2Title != null)
-            {
-                if(isEditFolder && usingList2)
-                {
-                    editValueList2Title.setText(R.string.text_to);
-                }
-                editValueList2Title.setVisibility(usingList2 ? View.VISIBLE : View.GONE);
-            }
             if(editValueTextList2Layout != null)
             {
                 if(isEditFolder && usingList2)
@@ -548,8 +497,8 @@ public class EditValuesDialog
                 }
                 editValueTextList2Layout.setVisibility(usingList2 ? View.VISIBLE : View.GONE);
             }
-            editValueList2 = editDialogView.findViewById(usingMaterial ? R.id.Edit_Value_Text_List2 : R.id.Edit_Value_List2);
-            (usingMaterial ? editValueTextList2Layout : editDialogView.findViewById(R.id.Edit_List2_Row)).setVisibility((isLogin && usingList2) || (!usingText2 && !isEditColors && !isVisible) ? View.VISIBLE : View.GONE);
+            editValueList2 = editDialogView.findViewById(R.id.Edit_Value_Text_List2);
+            editValueTextList2Layout.setVisibility((isLogin && usingList2) || (!usingText2 && !isEditColors && !isVisible) ? View.VISIBLE : View.GONE);
             if(usingList2)
             {
                 //if editing orbitals, have owner codes, and there is a code for every owner
@@ -659,16 +608,16 @@ public class EditValuesDialog
 
             //get colors
             editColorTextListLayout = editDialogView.findViewById(R.id.Edit_Color_Text_List_Layout);
-            editColorList = editDialogView.findViewById(usingMaterial ? R.id.Edit_Color_Text_List : R.id.Edit_Color_List);
+            editColorList = editDialogView.findViewById(R.id.Edit_Color_Text_List);
             editColorList.setVisibility(isEditColors ? View.VISIBLE : View.GONE);
             if(editColorTextListLayout != null)
             {
                 editColorTextListLayout.setVisibility(isEditColors ? View.VISIBLE : View.GONE);
             }
             editColorButton = editDialogView.findViewById(R.id.Edit_Color_Button);
-            colorRow = (usingMaterial ? editColorButton : editDialogView.findViewById(R.id.Edit_Color_Row));
+            colorRow = editColorButton;
             colorRow.setVisibility(View.GONE);
-            colorsRow = editDialogView.findViewById(usingMaterial ? R.id.Edit_Colors_Layout : R.id.Edit_Colors_Row);
+            colorsRow = editDialogView.findViewById(R.id.Edit_Colors_Layout);
             colorsRow.setVisibility(View.GONE);
             editColorsButton1 = editDialogView.findViewById(R.id.Edit_Colors_Button1);
             editColorsButton2 = editDialogView.findViewById(R.id.Edit_Colors_Button2);
@@ -713,7 +662,7 @@ public class EditValuesDialog
 
             //get visible
             visibleButton = editDialogView.findViewById(R.id.Edit_Visible_Button);
-            visibleRow = (usingMaterial ? visibleButton : editDialogView.findViewById(R.id.Edit_Visible_Row));
+            visibleRow = visibleButton;
             visibleRow.setVisibility(isVisible ? View.VISIBLE : View.GONE);
             if(isVisible)
             {

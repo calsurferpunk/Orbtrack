@@ -334,14 +334,11 @@ public abstract class Current
             private TextView rangeText;
             private TextView speedText;
             private TextView startText;
-            private TextView elMaxText;
-            private TextView elMaxTitle;
             private TextView durationText;
             private TextView latitudeText;
             private TextView longitudeText;
             private LinearProgressIndicator passProgress;
             private CircularProgressIndicator passLoadingProgress;
-            private LinearLayout passLayout;
             private LinearLayout passStartLayout;
             private LinearLayout passDurationLayout;
             private AppCompatImageView azImage;
@@ -423,10 +420,6 @@ public abstract class Current
                 if(passLoadingProgress != null)
                 {
                     passLoadingProgress.setVisibility(loading && tleIsAccurate ? View.VISIBLE : View.GONE);
-                }
-                if(passLayout != null)
-                {
-                    passLayout.setVisibility(passVisibility);
                 }
                 if(passStartLayout != null)
                 {
@@ -523,17 +516,6 @@ public abstract class Current
                     durationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
                 }
 
-                if(elMaxTitle != null)
-                {
-                    elMaxTitle.setText(Globals.Symbols.Elevating);
-                    elMaxTitle.setVisibility(isKnownPassElevationMax() ? View.VISIBLE : View.INVISIBLE);
-                }
-
-                if(elMaxText != null)
-                {
-                    elMaxText.setText(isKnownPassElevationMax() ? Globals.getDegreeString(passElMax) : "");
-                }
-
                 if(passQualityView != null)
                 {
                     passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : getPathQualityColor(passElMax));
@@ -575,7 +557,7 @@ public abstract class Current
                 ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
-                this.itemsRefID = (usingMaterial ? R.layout.current_combined_material_item : R.layout.current_combined_item);
+                this.itemsRefID = R.layout.current_combined_material_item;
 
                 combinedItems = new Items(MainActivity.Groups.Current, PageType.Combined);
 
@@ -625,7 +607,6 @@ public abstract class Current
                 int visibility;
                 Item currentItem = combinedItems.getCombinedItem(position);
                 View itemView = holder.itemView;
-                View dataLayout;
                 View outdatedText;
                 LinearLayout azLayout;
                 LinearLayout elLayout;
@@ -634,7 +615,6 @@ public abstract class Current
                 LinearLayout rangeLayout;
                 LinearLayout speedLayout;
 
-                dataLayout = itemView.findViewById(R.id.Combined_Item_Data_Layout);
                 azLayout = itemView.findViewById(R.id.Combined_Item_Az_Layout);
                 elLayout = itemView.findViewById(R.id.Combined_Item_El_Layout);
                 latitudeLayout = itemView.findViewById(R.id.Combined_Item_Latitude_Layout);
@@ -650,59 +630,50 @@ public abstract class Current
                 currentItem.speedText = itemView.findViewById(R.id.Combined_Item_Speed_Text);
                 currentItem.speedImage = itemView.findViewById(R.id.Combined_Item_Speed_Image);
                 currentItem.startText = itemView.findViewById(R.id.Combined_Item_Start_Text);
-                currentItem.elMaxText = itemView.findViewById(R.id.Combined_Item_El_Max_Text);
-                currentItem.elMaxTitle = itemView.findViewById(R.id.Combined_Item_El_Max_Title);
                 currentItem.durationText = itemView.findViewById(R.id.Combined_Item_Duration_Text);
                 currentItem.nameImage = itemView.findViewById(R.id.Combined_Item_Name_Image);
                 currentItem.nameText = itemView.findViewById(R.id.Combined_Item_Name_Text);
                 currentItem.passProgress = itemView.findViewById(R.id.Combined_Item_Pass_Progress);
                 currentItem.passLoadingProgress = itemView.findViewById(R.id.Combined_Item_Pass_Loading_Progress);
-                currentItem.passLayout = itemView.findViewById(R.id.Combined_Item_Pass_Layout);
                 currentItem.passStartLayout = itemView.findViewById(R.id.Combined_Item_Pass_Start_Layout);
                 currentItem.passDurationLayout = itemView.findViewById(R.id.Combined_Item_Pass_Duration_Layout);
                 currentItem.passQualityView = itemView.findViewById(R.id.Combined_Item_Pass_Quality_View);
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);
                 currentItem.longitudeText = itemView.findViewById(R.id.Combined_Item_Longitude_Text);
 
-                if(dataLayout != null)
-                {
-                    dataLayout.setVisibility(currentItem.tleIsAccurate ? View.VISIBLE : View.GONE);
-                }
                 if(outdatedText != null)
                 {
                     outdatedText.setVisibility(currentItem.tleIsAccurate ? View.GONE : View.VISIBLE);
                 }
-                if(usingMaterial)
+
+                visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Name || sortBy == Items.SortBy.Azimuth || sortBy == Items.SortBy.Elevation || sortBy == Items.SortBy.PassStartTime || sortBy == Items.SortBy.PassDuration || sortBy == Items.SortBy.MaxElevation) ? View.VISIBLE : View.INVISIBLE);
+                if(azLayout != null)
                 {
-                    visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Name || sortBy == Items.SortBy.Azimuth || sortBy == Items.SortBy.Elevation || sortBy == Items.SortBy.PassStartTime || sortBy == Items.SortBy.PassDuration || sortBy == Items.SortBy.MaxElevation) ? View.VISIBLE : View.INVISIBLE);
-                    if(azLayout != null)
-                    {
-                        azLayout.setVisibility(visibility);
-                    }
-                    if(elLayout != null)
-                    {
-                        elLayout.setVisibility(visibility);
-                    }
+                    azLayout.setVisibility(visibility);
+                }
+                if(elLayout != null)
+                {
+                    elLayout.setVisibility(visibility);
+                }
 
-                    visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Latitude || sortBy == Items.SortBy.Longitude) ? View.VISIBLE : View.GONE);
-                    if(latitudeLayout != null)
-                    {
-                        latitudeLayout.setVisibility(visibility);
-                    }
-                    if(longitudeLayout != null)
-                    {
-                        longitudeLayout.setVisibility(visibility);
-                    }
+                visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Latitude || sortBy == Items.SortBy.Longitude) ? View.VISIBLE : View.GONE);
+                if(latitudeLayout != null)
+                {
+                    latitudeLayout.setVisibility(visibility);
+                }
+                if(longitudeLayout != null)
+                {
+                    longitudeLayout.setVisibility(visibility);
+                }
 
-                    visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Range || sortBy == Items.SortBy.Altitude) ? View.VISIBLE : View.GONE);
-                    if(rangeLayout != null)
-                    {
-                        rangeLayout.setVisibility(visibility);
-                    }
-                    if(speedLayout != null)
-                    {
-                        speedLayout.setVisibility(visibility);
-                    }
+                visibility = (currentItem.tleIsAccurate && (sortBy == Items.SortBy.Range || sortBy == Items.SortBy.Altitude) ? View.VISIBLE : View.GONE);
+                if(rangeLayout != null)
+                {
+                    rangeLayout.setVisibility(visibility);
+                }
+                if(speedLayout != null)
+                {
+                    speedLayout.setVisibility(visibility);
                 }
 
                 currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
@@ -1261,7 +1232,7 @@ public abstract class Current
                 ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
-                this.itemsRefID = (usingMaterial ? R.layout.current_timeline_material_item : R.layout.current_timeline_item);
+                this.itemsRefID = R.layout.current_timeline_material_item;
                 timelineItems = new Current.Items(MainActivity.Groups.Current, PageType.Timeline);
 
                 //get division count

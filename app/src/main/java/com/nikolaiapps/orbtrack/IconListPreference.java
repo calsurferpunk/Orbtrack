@@ -15,7 +15,6 @@ import androidx.preference.PreferenceViewHolder;
 
 public class IconListPreference extends CustomPreference
 {
-    private final boolean usingMaterial;
     private SelectListInterface iconList;
     private IconSpinner.CustomAdapter adapter;
     private Object pendingSetValue;
@@ -26,9 +25,8 @@ public class IconListPreference extends CustomPreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        usingMaterial = Settings.getMaterialTheme(context);
         this.setPersistent(false);
-        this.setLayoutResource(usingMaterial ? R.layout.icon_list_preference_material_layout : R.layout.icon_list_preference_layout);
+        this.setLayoutResource(R.layout.icon_list_preference_material_layout);
     }
     public IconListPreference(Context context, AttributeSet attrs, int defStyleAttr)
     {
@@ -65,8 +63,8 @@ public class IconListPreference extends CustomPreference
         //get displays
         titleView = rootView.findViewById(R.id.Icon_List_Preference_Title);
         summaryView = rootView.findViewById(R.id.Icon_List_Preference_Summary);
-        listParentView = rootView.findViewById(usingMaterial ? R.id.Icon_List_Preference_Text_Layout : R.id.Icon_List_Preference_List_Parent);
-        iconList = rootView.findViewById(usingMaterial ? R.id.Icon_List_Preference_Text_List : R.id.Icon_List_Preference_List);
+        listParentView = rootView.findViewById(R.id.Icon_List_Preference_Text_Layout);
+        iconList = rootView.findViewById(R.id.Icon_List_Preference_Text_List);
         iconList.setAllowAutoSelect(false);
 
         //set displays
@@ -154,26 +152,11 @@ public class IconListPreference extends CustomPreference
         });
     }
 
-    //Sets adapter background colors
-    private void setAdapterBackgrounds(Context context)
-    {
-        int bgColor;
-
-        if(!usingMaterial && adapter != null)
-        {
-            bgColor = Globals.resolveColorID(context, R.attr.pageHighlightBackground);
-            adapter.setBackgroundColor(bgColor);
-            adapter.setBackgroundItemColor(bgColor);
-            adapter.setBackgroundItemSelectedColor(bgColor);
-        }
-    }
-
     //Sets adapter
     public void setAdapter(Context context, Object[] items, Object[] values, int[] itemImageIds, String[] subTexts)
     {
         adapter = new IconSpinner.CustomAdapter(context, items, values, itemImageIds, subTexts);
         itemValues = adapter.getItemValues();
-        setAdapterBackgrounds(context);
     }
     public void setAdapter(Context context, IconSpinner.Item[] items, boolean refresh)
     {
@@ -188,8 +171,6 @@ public class IconListPreference extends CustomPreference
             iconList.setAdapter(adapter);
             iconList.setSelectedValue(selectedValue);
         }
-
-        setAdapterBackgrounds(context);
     }
     public void setAdapter(Context context, IconSpinner.Item[] items)
     {

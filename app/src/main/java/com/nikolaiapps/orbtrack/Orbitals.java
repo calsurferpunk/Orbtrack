@@ -207,7 +207,7 @@ public abstract class Orbitals
             columnTitleStringId = titleStringId;
             simple = isSimple;
             forSetup = (columnTitleStringId > 0);
-            this.itemsRefID = (usingMaterial ? R.layout.orbitals_material_item : R.layout.orbitals_item);
+            this.itemsRefID = R.layout.orbitals_material_item;
 
             //set load items task
             loadItems = new LoadItemsTask(new OrbitalFilterList.OnLoadItemsListener()
@@ -267,12 +267,13 @@ public abstract class Orbitals
                 int nonNameVisibility = (onSatellites && !forSetup ? View.VISIBLE : View.GONE);
                 String ageString = (usingContext ? currentContext.getString(R.string.title_tle_age) : "");
                 String nameString = (usingContext ? currentContext.getString(columnTitleStringId > 0 ? columnTitleStringId : R.string.title_name) : "");
+                String tleDateString = nameString + "/" + ageString;
                 TextView itemText = listColumns.findViewById(R.id.Object_Item_Text);
                 TextView tleDateText = listColumns.findViewById(R.id.Object_TLE_Age_Text);
                 BorderButton colorButton = listColumns.findViewById(R.id.Object_Color_Button);
                 AppCompatButton visibleButton = listColumns.findViewById(R.id.Object_Visible_Button);
 
-                if(usingMaterial && onSatellites)
+                if(onSatellites)
                 {
                     itemText.setVisibility(View.GONE);
                 }
@@ -281,7 +282,7 @@ public abstract class Orbitals
                     itemText.setText(nameString);
                     itemText.setTypeface(null, Typeface.NORMAL);
                 }
-                tleDateText.setText(usingMaterial ? (nameString + "/" + ageString) : ageString);
+                tleDateText.setText(tleDateString);
                 tleDateText.setVisibility(nonNameVisibility);
                 listColumns.findViewById(R.id.Object_TLE_Age_Under).setVisibility(View.GONE);
                 visibleButton.setVisibility(View.INVISIBLE);
@@ -391,7 +392,7 @@ public abstract class Orbitals
         public PageListItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
         {
             View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
-            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_Item_Text_Age_Layout, R.id.Object_TLE_Age_Layout, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
+            PageListItemHolder itemHolder = new PageListItemHolder(itemView, R.id.Object_Item_Image, R.id.Object_Item_Text, R.id.Object_Item_Text_Age_Layout, -1, R.id.Object_TLE_Age_Text, R.id.Object_TLE_Age_Under, R.id.Object_Color_Button, R.id.Object_Visible_Button, R.id.Object_Progress);
 
             setItemSelector(itemView);
             setViewClickListeners(itemView, itemHolder);
@@ -687,14 +688,14 @@ public abstract class Orbitals
             //create view
             newView = this.onCreateView(inflater, container, listAdapter);
             searchLayout = newView.findViewById(R.id.Orbital_Search_Layout);
-            searchGroup = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Lists_Layout : R.id.Orbital_Search_Table);
-            ownerList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Text_List : R.id.Orbital_Search_Owner_List);
-            groupList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Text_List : R.id.Orbital_Search_Group_List);
-            ageList = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Text_List : R.id.Orbital_Search_Age_List);
-            ownerLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Owner_Layout : R.id.Orbital_Search_Owner_Row);
-            groupLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Group_Layout : R.id.Orbital_Search_Group_Row);
-            ageLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Age_Layout : R.id.Orbital_Search_Age_Row);
-            typeLayout = newView.findViewById(usingMaterial ? R.id.Orbital_Search_Type_Layout : R.id.Orbital_Search_Type_Row);
+            searchGroup = newView.findViewById(R.id.Orbital_Search_Lists_Layout);
+            ownerList = newView.findViewById(R.id.Orbital_Search_Owner_Text_List);
+            groupList = newView.findViewById(R.id.Orbital_Search_Group_Text_List);
+            ageList = newView.findViewById(R.id.Orbital_Search_Age_Text_List);
+            ownerLayout = newView.findViewById(R.id.Orbital_Search_Owner_Layout);
+            groupLayout = newView.findViewById(R.id.Orbital_Search_Group_Layout);
+            ageLayout = newView.findViewById(R.id.Orbital_Search_Age_Layout);
+            typeLayout = newView.findViewById(R.id.Orbital_Search_Type_Layout);
             showButton = newView.findViewById(R.id.Orbital_Search_Show_Button);
 
             //if for satellites

@@ -14,7 +14,6 @@ import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.preference.PreferenceViewHolder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
@@ -25,7 +24,6 @@ public class SwitchTextPreference extends ValueTypePreference
     private boolean switchEnabled;
     private boolean switchChecked;
     private boolean reverseEnabled;
-    private final boolean usingMaterial;
     private float minValue;
     private float maxValue;
     private String switchKey;
@@ -33,16 +31,13 @@ public class SwitchTextPreference extends ValueTypePreference
     private String enabledValueText;
     private String disabledValueText;
     private EditText valueView;
-    private TextView noSwitchTitle;
-    private SwitchCompat switchView;
     private MaterialSwitch switchMaterialView;
 
     public SwitchTextPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes)
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        usingMaterial = Settings.getMaterialTheme(context);
-        this.setLayoutResource(usingMaterial ? R.layout.switch_text_preference_material_layout : R.layout.switch_text_preference_layout);
+        this.setLayoutResource(R.layout.switch_text_preference_material_layout);
 
         //set defaults
         valueType = Integer.class;
@@ -94,6 +89,7 @@ public class SwitchTextPreference extends ValueTypePreference
         final CharSequence summary = this.getSummary();
         final TextView summaryView;
         final TextView valueSuffixView;
+        final TextView noSwitchTitle;
         final ViewGroup rootView;
         final CompoundButton.OnCheckedChangeListener checkedChangeListener;
 
@@ -103,7 +99,6 @@ public class SwitchTextPreference extends ValueTypePreference
         summaryView = rootView.findViewById(R.id.Switch_Text_Preference_Summary);
         valueSuffixView = rootView.findViewById(R.id.Switch_Text_Preference_Value_Suffix);
         noSwitchTitle = rootView.findViewById(R.id.Switch_Text_Preference_No_Switch_Title);
-        switchView = rootView.findViewById(R.id.Switch_Text_Preference_Switch);
         switchMaterialView = rootView.findViewById(R.id.Switch_Text_Preference_Material_Switch);
 
         //set displays
@@ -143,13 +138,6 @@ public class SwitchTextPreference extends ValueTypePreference
 
                 //set/clear error
                 valueView.setError(save ? null : context.getResources().getString(R.string.title_invalid));
-
-                //if using switch, it exists, and not checked
-                if(showSwitch && switchView != null && !switchView.isChecked())
-                {
-                    //remember disabled value
-                    disabledValueText = stringValue;
-                }
             }
         });
         valueSuffixView.setText(suffixText);
@@ -160,10 +148,6 @@ public class SwitchTextPreference extends ValueTypePreference
         }
         if(showSwitch)
         {
-            if(!usingMaterial && switchView != null)
-            {
-                switchView.setText(titleText);
-            }
             setSwitchChecked(switchChecked || Settings.getPreferenceBoolean(context, switchKey));
             checkedChangeListener = new CompoundButton.OnCheckedChangeListener()
             {
@@ -191,11 +175,6 @@ public class SwitchTextPreference extends ValueTypePreference
                     }
                 }
             };
-            if(switchView != null)
-            {
-                switchView.setOnCheckedChangeListener(checkedChangeListener);
-                checkedChangeListener.onCheckedChanged(switchView, switchView.isChecked());
-            }
             if(switchMaterialView != null)
             {
                 switchMaterialView.setOnCheckedChangeListener(checkedChangeListener);
@@ -203,11 +182,10 @@ public class SwitchTextPreference extends ValueTypePreference
             }
             setSwitchEnabled(switchEnabled);
         }
-        if(usingMaterial || !showSwitch)
-        {
-            noSwitchTitle.setText(titleText);
-            updateValueText(false);
-        }
+
+        noSwitchTitle.setText(titleText);
+        updateValueText(false);
+
         setShowSwitch(showSwitch);
     }
 
@@ -235,11 +213,6 @@ public class SwitchTextPreference extends ValueTypePreference
         switchEnabled = enabled;
 
         //if view exists
-        if(switchView != null)
-        {
-            //set enabled state
-            switchView.setEnabled(switchEnabled);
-        }
         if(switchMaterialView != null)
         {
             //set enabled state
@@ -253,11 +226,6 @@ public class SwitchTextPreference extends ValueTypePreference
         switchChecked = checked;
 
         //if view exists
-        if(switchView != null)
-        {
-            //set checked state
-            switchView.setChecked(checked);
-        }
         if(switchMaterialView != null)
         {
             //set checked state
@@ -270,17 +238,7 @@ public class SwitchTextPreference extends ValueTypePreference
     {
         showSwitch = show;
 
-        //if views exist
-        if(noSwitchTitle != null)
-        {
-            //hide if showing switch
-            noSwitchTitle.setVisibility(!usingMaterial && showSwitch ? View.GONE : View.VISIBLE);
-        }
-        if(switchView != null)
-        {
-            //show if showing switch
-            switchView.setVisibility(showSwitch ? View.VISIBLE : View.GONE);
-        }
+        //if view exists
         if(switchMaterialView != null)
         {
             //show if showing switch

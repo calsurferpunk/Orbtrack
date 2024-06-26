@@ -20,18 +20,18 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
 {
     private TextView titleText = null;
 
-    public CustomAlertDialogBuilder(@NonNull Context context, int themeResId, boolean useMaterial, boolean forSelection)
+    public CustomAlertDialogBuilder(@NonNull Context context, int themeResId, boolean forSelection)
     {
         super(context, themeResId);
-        setTitleView(context, useMaterial, forSelection);
+        setTitleView(context, forSelection);
     }
 
     @SuppressLint("InflateParams")
-    private void setTitleView(Context context, boolean useMaterial, boolean forSelection)
+    private void setTitleView(Context context, boolean forSelection)
     {
         int backgroundColor;
         FrameLayout.LayoutParams params;
-        View titleView = LayoutInflater.from(context).inflate((useMaterial ? R.layout.dialog_title_material_view : R.layout.dialog_title_view), null, false);
+        View titleView = LayoutInflater.from(context).inflate(R.layout.dialog_title_material_view, null, false);
         MaterialCardView titleGroup;
 
         if(titleView instanceof TextView)

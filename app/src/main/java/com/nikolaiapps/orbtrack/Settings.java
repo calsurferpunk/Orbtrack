@@ -58,9 +58,7 @@ public abstract class Settings
     {
         static final String FirstRun = "FirstRun";
         static final String AcceptedPrivacy = "AcceptedPrivacy";
-        static final String MaterialDesignNotice = "MaterialDesignNotice";
         static final String DarkTheme = "DarkTheme";
-        static final String MaterialTheme = "MaterialTheme";
         static final String ColorTheme = "ColorTheme";
         static final String MetricUnits = "MetricUnits";
         static final String AllowNumberCommas = "AllowNumberCommas";
@@ -2113,7 +2111,6 @@ public abstract class Settings
             case PreferenceName.MapShowSunlight:
             case PreferenceName.MapShowToolbars:
             case PreferenceName.MapHoldSelected:
-            case PreferenceName.MaterialTheme:
             case PreferenceName.MetricUnits:
             case PreferenceName.AllowNumberCommas:
             case PreferenceName.ShareTranslations:
@@ -2499,18 +2496,6 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.AcceptedPrivacy, accepted);
     }
 
-    //Gets if material design notice shown
-    public static boolean getMaterialDesignShown(Context context)
-    {
-        return(getPreferenceBoolean(context, PreferenceName.MaterialDesignNotice));
-    }
-
-    //Sets if material design notice shown
-    public static void setMaterialDesignShown(Context context, boolean shown)
-    {
-        setPreferenceBoolean(context, PreferenceName.MaterialDesignNotice, shown);
-    }
-
     //Gets satellite icon type
     public static int getSatelliteIconType(Context context)
     {
@@ -2610,12 +2595,6 @@ public abstract class Settings
     public static boolean getDarkTheme(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.DarkTheme));
-    }
-
-    //Gets material theme value
-    public static boolean getMaterialTheme(Context context)
-    {
-        return(getPreferenceBoolean(context, PreferenceName.MaterialTheme));
     }
 
     //Gets color theme value

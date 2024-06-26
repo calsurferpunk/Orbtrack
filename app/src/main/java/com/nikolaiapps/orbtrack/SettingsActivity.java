@@ -90,16 +90,12 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
     public static class SettingsSubFragment extends PreferenceFragmentCompat
     {
-        private boolean usingMaterial;
         private static boolean showSetup;
 
         @Override
         public void onResume()
         {
-            if(usingMaterial)
-            {
-                setDivider(null);
-            }
+            setDivider(null);
 
             super.onResume();
         }
@@ -120,7 +116,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             }
 
             //get if using material, showing setup, and screen key
-            usingMaterial = Settings.getMaterialTheme(context);
             showSetup = args.getBoolean(EXTRA_SHOW_SETUP, false);
             screenKey = args.getString(RootKey);
 
@@ -134,7 +129,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 {
                     case ScreenKey.Display:
                         SwitchPreference darkThemeSwitch = this.findPreference(Settings.PreferenceName.DarkTheme);
-                        SwitchPreference materialThemeSwitch = this.findPreference(Settings.PreferenceName.MaterialTheme);
                         SwitchPreference allowNumberCommasSwitch = this.findPreference(Settings.PreferenceName.AllowNumberCommas);
                         SwitchButtonPreference useLocationTintSwitch = this.findPreference(Settings.PreferenceName.MapMarkerLocationIconUseTint);
                         IconListPreference colorThemeList = this.findPreference(Settings.PreferenceName.ColorTheme);
@@ -152,7 +146,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         //setup displays
                         setupSwitch(darkThemeSwitch);
-                        setupSwitch(materialThemeSwitch);
                         setupSwitch(allowNumberCommasSwitch);
                         setupSwitchButton(useLocationTintSwitch);
                         setupList(colorThemeList, Settings.Options.Display.colorAdvancedItems, null, null, null, null);
@@ -465,7 +458,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         {
             switch(preferenceKey)
             {
-                case Settings.PreferenceName.MaterialTheme:
                 case Settings.PreferenceName.SatelliteSourceUseGP:
                 case Settings.PreferenceName.SatelliteSourceShared:
                 case Settings.PreferenceName.AltitudeSource:
@@ -1667,7 +1659,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     {
                         case Settings.PreferenceName.DarkTheme:
                         case Settings.PreferenceName.ColorTheme:
-                        case Settings.PreferenceName.MaterialTheme:
                             recreateThis = true;
                             //fall through
 

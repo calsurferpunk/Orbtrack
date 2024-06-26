@@ -15,10 +15,6 @@
                     android:title="@string/title_dark"
                     android:key="DarkTheme"/>
 
-                <com.nikolaiapps.orbtrack.SwitchPreference
-                    android:title="@string/title_material"
-                    android:key="MaterialTheme"/>
-
                 <com.nikolaiapps.orbtrack.IconListPreference
                     app:titleText="@string/title_color"
                     android:key="ColorTheme"/>

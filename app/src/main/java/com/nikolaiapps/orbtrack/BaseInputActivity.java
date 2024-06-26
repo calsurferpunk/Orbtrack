@@ -59,14 +59,11 @@ public abstract class BaseInputActivity extends AppCompatActivity
 
     public static final String EXTRA_REQUEST_CODE = "RequestCode";
 
-    protected boolean usingMaterial;
-
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
 
-        usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
         setupActionBar(this, this.getSupportActionBar(), false);
     }

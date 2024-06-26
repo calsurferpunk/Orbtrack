@@ -371,18 +371,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private BorderButton middleColorButton;
         private BorderButton bottomColorButton;
         private BorderButton[] textColorButton;
-        private View globalImagesDivider;
-        private View orbitalImageDivider;
-        private View settingsImageDivider;
-        private View borderDivider;
-        private View topDivider;
-        private View middleDivider;
         private View textTopTitle;
         private View textMiddleTitle;
         private View textBottomTitle;
         private View outdatedText;
-        private View[] textDivider;
-        private View[] displayDivider;
         private ChooseColorDialog colorDialog;
         private LocationReceiver locationReceiver;
         private OnAllowOkayListener allowOkayListener;
@@ -421,14 +413,14 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
             switch(page)
             {
                 case TabPage.Data:
-                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_data_material_view : R.layout.widget_setup_data_view), container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_data_material_view, container, false);
 
                     orbitals = Database.getOrbitals(context);
                     Globals.clearOrbitalFilter(orbitals);
                     locations = Database.getLocations(context, Database.QueryId.GetLocationsType);
 
                     outdatedText = rootView.findViewById(R.id.Widget_Setup_Outdated_Text);
-                    orbitalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Orbital_Text_List : R.id.Widget_Setup_Orbital_List);
+                    orbitalList = rootView.findViewById(R.id.Widget_Setup_Orbital_Text_List);
                     orbitalList.setAdapter(new IconSpinner.CustomAdapter(context, orbitalList, orbitals));
                     orbitalList.setDropDownHeight(0);
                     orbitalList.setOnClickListener(new View.OnClickListener()
@@ -465,7 +457,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         setSelectedOrbital(Universe.IDs.Sun, true);
                     }
 
-                    locationList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Location_Source_Text_List : R.id.Widget_Setup_Location_Source_List);
+                    locationList = rootView.findViewById(R.id.Widget_Setup_Location_Source_Text_List);
                     if(res != null)
                     {
                         locationItems.add(new IconSpinner.Item(R.drawable.ic_my_location_black, res.getString(R.string.title_location_current), Database.LocationType.Current));
@@ -545,7 +537,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     nowRadio = rootView.findViewById(R.id.Widget_Setup_Now_Radio);
 
                     intervalRow = rootView.findViewById(R.id.Widget_Setup_Interval_Row);
-                    intervalList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Interval_Text_List : R.id.Widget_Setup_Interval_List);
+                    intervalList = rootView.findViewById(R.id.Widget_Setup_Interval_Text_List);
                     if(intervalItems != null)
                     {
                         intervalList.setAdapter(new IconSpinner.CustomAdapter(context, intervalItems));
@@ -648,51 +640,40 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Display:
-                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_display_material_view : R.layout.widget_setup_display_view), container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_display_material_view, container, false);
                     table = rootView.findViewById(R.id.Widget_Setup_Display_Table);
 
                     displaySwitch = new SwitchCompat[DisplayType.DisplayCount];
-                    displayDivider = new View[DisplayType.DisplayCount];
 
                     displaySwitch[DisplayType.Name] = rootView.findViewById(R.id.Widget_Setup_Display_Name_Switch);
                     displaySwitch[DisplayType.Name].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Name));
-                    displayDivider[DisplayType.Name] = rootView.findViewById(R.id.Widget_Setup_Display_Name_Divider);
 
                     displaySwitch[DisplayType.Settings] = rootView.findViewById(R.id.Widget_Setup_Display_Settings_Switch);
                     displaySwitch[DisplayType.Settings].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Settings));
-                    displayDivider[DisplayType.Settings] = rootView.findViewById(R.id.Widget_Setup_Display_Settings_Divider);
 
                     displaySwitch[DisplayType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Display_Orbital_Switch);
                     displaySwitch[DisplayType.Orbital].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Orbital));
-                    displayDivider[DisplayType.Orbital] = rootView.findViewById(R.id.Widget_Setup_Display_Orbital_Divider);
 
                     displaySwitch[DisplayType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Start_Switch);
                     displaySwitch[DisplayType.PassStart].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassStart));
-                    displayDivider[DisplayType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Start_Divider);
 
                     displaySwitch[DisplayType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_End_Switch);
                     displaySwitch[DisplayType.PassEnd].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassEnd));
-                    displayDivider[DisplayType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_End_Divider);
 
                     displaySwitch[DisplayType.PassDynamic] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Dynamic_Switch);
                     displaySwitch[DisplayType.PassDynamic].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassDynamic));
-                    displayDivider[DisplayType.PassDynamic] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Dynamic_Divider);
 
                     displaySwitch[DisplayType.PassElMax] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Elevation_Switch);
                     displaySwitch[DisplayType.PassElMax].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassElMax));
-                    displayDivider[DisplayType.PassElMax] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Elevation_Divider);
 
                     displaySwitch[DisplayType.PassAzAStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_Start_Switch);
                     displaySwitch[DisplayType.PassAzAStart].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassAzAStart));
-                    displayDivider[DisplayType.PassAzAStart] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_Start_Divider);
 
                     displaySwitch[DisplayType.PassAzEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_End_Switch);
                     displaySwitch[DisplayType.PassAzEnd].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassAzEnd));
-                    displayDivider[DisplayType.PassAzEnd] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Azimuth_End_Divider);
 
                     displaySwitch[DisplayType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Duration_Switch);
                     displaySwitch[DisplayType.PassDuration].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.PassDuration));
-                    displayDivider[DisplayType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Display_Pass_Duration_Divider);
 
                     bottomTitle = rootView.findViewById(R.id.Widget_Setup_Display_Bottom_Title);
                     if(widgetClass != null && widgetClass.equals(WidgetPassTinyProvider.class))
@@ -704,11 +685,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
 
                     displaySwitch[DisplayType.Location] = rootView.findViewById(R.id.Widget_Setup_Display_Location_Switch);
                     displaySwitch[DisplayType.Location].setOnCheckedChangeListener(createOnCheckedChangeListener(context, DisplayType.Location));
-                    displayDivider[DisplayType.Location] = rootView.findViewById(R.id.Widget_Setup_Display_Location_Divider);
                     break;
 
                 case TabPage.Images:
-                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_images_material_view : R.layout.widget_setup_images_view), container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_images_material_view, container, false);
 
                     unusedImageRow = rootView.findViewById(R.id.Widget_Setup_Unused_Image_Row);
 
@@ -724,7 +704,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                             onSettingChanged(context, PreferenceName.GlobalImage, isChecked);
                         }
                     });
-                    globalImagesDivider = rootView.findViewById(R.id.Widget_Setup_Global_Images_Divider);
 
                     globalImageColorButton = rootView.findViewById(R.id.Widget_Setup_Global_Images_Color_Button);
                     globalImageColorButton.setOnClickListener(createOnColorButtonClickListener(globalImageRow));
@@ -732,12 +711,10 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     orbitalImageRow = rootView.findViewById(R.id.Widget_Setup_Orbital_Image_Row);
                     orbitalImageColorButton = rootView.findViewById(R.id.Widget_Setup_Orbital_Image_Color_Button);
                     orbitalImageColorButton.setOnClickListener(createOnColorButtonClickListener(orbitalImageRow));
-                    orbitalImageDivider = rootView.findViewById(R.id.Widget_Setup_Orbital_Image_Divider);
 
                     settingsImageRow = rootView.findViewById(R.id.Widget_Setup_Settings_Image_Row);
                     settingsImageColorButton = rootView.findViewById(R.id.Widget_Setup_Settings_Image_Color_Button);
                     settingsImageColorButton.setOnClickListener(createOnColorButtonClickListener(settingsImageRow));
-                    settingsImageDivider = rootView.findViewById(R.id.Widget_Setup_Settings_Image_Divider);
 
                     locationImageRow = rootView.findViewById(R.id.Widget_Setup_Location_Image_Row);
                     locationImageColorButton = rootView.findViewById(R.id.Widget_Setup_Location_Image_Color_Button);
@@ -745,7 +722,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Background:
-                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_background_material_view : R.layout.widget_setup_background_view), container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_background_material_view, container, false);
 
                     globalBackgroundRow = rootView.findViewById(R.id.Widget_Setup_Global_Background_Row);
                     globalBackgroundSwitch = rootView.findViewById(R.id.Widget_Setup_Global_Background_Switch);
@@ -761,7 +738,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     });
                     globalBackgroundColorButton = rootView.findViewById(R.id.Widget_Setup_Global_Background_Color_Button);
                     globalBackgroundColorButton.setOnClickListener(createOnColorButtonClickListener(globalBackgroundRow, true));
-                    globalBorderStyleList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Global_Border_Style_Text_List : R.id.Widget_Setup_Global_Border_Style_List);
+                    globalBorderStyleList = rootView.findViewById(R.id.Widget_Setup_Global_Border_Style_Text_List);
                     if(borderStyles != null)
                     {
                         globalBorderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
@@ -785,29 +762,26 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     borderRow = rootView.findViewById(R.id.Widget_Setup_Border_Background_Row);
                     borderColorButton = rootView.findViewById(R.id.Widget_Setup_Border_Color_Button);
                     borderColorButton.setOnClickListener(createOnColorButtonClickListener(borderRow, true));
-                    borderStyleList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Border_Style_Text_List : R.id.Widget_Setup_Border_Style_List);
+                    borderStyleList = rootView.findViewById(R.id.Widget_Setup_Border_Style_Text_List);
                     if(borderStyles != null)
                     {
                         borderStyleList.setAdapter(new IconSpinner.CustomAdapter(context, borderStyles));
                     }
                     borderStyleList.setOnItemSelectedListener(globalBorderStyleList.getOnItemSelectedListener());
-                    borderDivider = rootView.findViewById(R.id.Widget_Setup_Border_Background_Divider);
 
                     topRow = rootView.findViewById(R.id.Widget_Setup_Top_Background_Row);
                     topColorButton = rootView.findViewById(R.id.Widget_Setup_Top_Background_Color_Button);
                     topColorButton.setOnClickListener(createOnColorButtonClickListener(topRow, true));
-                    topDivider = rootView.findViewById(R.id.Widget_Setup_Top_Background_Divider);
 
                     middleRow = rootView.findViewById(R.id.Widget_Setup_Middle_Background_Row);
                     middleColorButton = rootView.findViewById(R.id.Widget_Setup_Middle_Background_Color_Button);
                     middleColorButton.setOnClickListener(createOnColorButtonClickListener(middleRow, true));
-                    middleDivider = rootView.findViewById(R.id.Widget_Setup_Middle_Background_Divider);
 
                     bottomRow = rootView.findViewById(R.id.Widget_Setup_Bottom_Background_Row);
                     bottomColorButton = rootView.findViewById(R.id.Widget_Setup_Bottom_Background_Color_Button);
                     bottomColorButton.setOnClickListener(createOnColorButtonClickListener(bottomRow, true));
 
-                    borderPaddingList = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Border_Padding_Text_List : R.id.Widget_Setup_Border_Padding_List);
+                    borderPaddingList = rootView.findViewById(R.id.Widget_Setup_Border_Padding_Text_List);
                     borderPaddingList.setAdapter(new IconSpinner.CustomAdapter(context, paddingSizes));
                     borderPaddingList.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener()
                     {
@@ -824,7 +798,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Text:
-                    rootView = (ViewGroup)inflater.inflate((usingMaterial ? R.layout.widget_setup_text_material_view : R.layout.widget_setup_text_view), container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_text_material_view, container, false);
                     table = rootView.findViewById(R.id.Widget_Setup_Text_Table);
 
                     textRow = new TableRow[TextType.TextCount];
@@ -832,7 +806,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     textBoldCheckBox = new CheckBox[TextType.TextCount];
                     textItalicCheckBox = new CheckBox[TextType.TextCount];
                     textColorButton = new BorderButton[TextType.TextCount];
-                    textDivider = new View[TextType.TextCount];
 
                     textRow[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Row);
                     globalTextSwitch = rootView.findViewById(R.id.Widget_Setup_Global_Text_Switch);
@@ -846,7 +819,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                             onSettingChanged(context, PreferenceName.GlobalText, isChecked);
                         }
                     });
-                    textSizeList[TextType.Global] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Global_Text_Size_Text_List : R.id.Widget_Setup_Global_Text_Size_List);
+                    textSizeList[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Size_Text_List);
                     textBoldCheckBox[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Italic_CheckBox);
                     textColorButton[TextType.Global] = rootView.findViewById(R.id.Widget_Setup_Global_Text_Color_Button);
@@ -854,55 +827,48 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     textTopTitle = rootView.findViewById(R.id.Widget_Setup_Text_Top_Title);
 
                     textRow[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Row);
-                    textSizeList[TextType.Name] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Name_Text_Size_Text_List : R.id.Widget_Setup_Name_Text_Size_List);
+                    textSizeList[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Size_Text_List);
                     textBoldCheckBox[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Italic_CheckBox);
                     textColorButton[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Color_Button);
-                    textDivider[TextType.Name] = rootView.findViewById(R.id.Widget_Setup_Name_Text_Divider);
 
                     textMiddleTitle = rootView.findViewById(R.id.Widget_Setup_Text_Middle_Title);
 
                     textRow[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Row);
-                    textSizeList[TextType.PassStart] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Start_Text_Size_Text_List : R.id.Widget_Setup_Pass_Start_Text_Size_List);
+                    textSizeList[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Size_Text_List);
                     textBoldCheckBox[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Italic_CheckBox);
                     textColorButton[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Color_Button);
-                    textDivider[TextType.PassStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Start_Text_Divider);
 
                     textRow[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Row);
-                    textSizeList[TextType.PassEnd] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_End_Text_Size_Text_List :  R.id.Widget_Setup_Pass_End_Text_Size_List);
+                    textSizeList[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Size_Text_List);
                     textBoldCheckBox[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Italic_CheckBox);
                     textColorButton[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Color_Button);
-                    textDivider[TextType.PassEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_End_Text_Divider);
 
                     textRow[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Row);
-                    textSizeList[TextType.PassElevation] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Elevation_Text_Size_Text_List : R.id.Widget_Setup_Pass_Elevation_Text_Size_List);
+                    textSizeList[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Size_Text_List);
                     textBoldCheckBox[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Italic_CheckBox);
                     textColorButton[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Color_Button);
-                    textDivider[TextType.PassElevation] = rootView.findViewById(R.id.Widget_Setup_Pass_Elevation_Text_Divider);
 
                     textRow[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Row);
-                    textSizeList[TextType.PassAzimuthStart] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Azimuth_Start_Text_Size_Text_List : R.id.Widget_Setup_Pass_Azimuth_Start_Text_Size_List);
+                    textSizeList[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Size_Text_List);
                     textBoldCheckBox[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Italic_CheckBox);
                     textColorButton[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Color_Button);
-                    textDivider[TextType.PassAzimuthStart] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_Start_Text_Divider);
 
                     textRow[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Row);
-                    textSizeList[TextType.PassAzimuthEnd] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Azimuth_End_Text_Size_Text_List : R.id.Widget_Setup_Pass_Azimuth_End_Text_Size_List);
+                    textSizeList[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Size_Text_List);
                     textBoldCheckBox[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Italic_CheckBox);
                     textColorButton[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Color_Button);
-                    textDivider[TextType.PassAzimuthEnd] = rootView.findViewById(R.id.Widget_Setup_Pass_Azimuth_End_Text_Divider);
 
                     textRow[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Row);
-                    textSizeList[TextType.PassDuration] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Pass_Duration_Text_Size_Text_List : R.id.Widget_Setup_Pass_Duration_Text_Size_List);
+                    textSizeList[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Size_Text_List);
                     textBoldCheckBox[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Italic_CheckBox);
                     textColorButton[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Color_Button);
-                    textDivider[TextType.PassDuration] = rootView.findViewById(R.id.Widget_Setup_Pass_Duration_Text_Divider);
 
                     textBottomTitle = rootView.findViewById(R.id.Widget_Setup_Text_Bottom_Title);
                     if(widgetClass != null && widgetClass.equals(WidgetPassTinyProvider.class))
@@ -913,7 +879,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     }
 
                     textRow[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Row);
-                    textSizeList[TextType.Location] = rootView.findViewById(usingMaterial ? R.id.Widget_Setup_Location_Text_Size_Text_List : R.id.Widget_Setup_Location_Text_Size_List);
+                    textSizeList[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Size_Text_List);
                     textBoldCheckBox[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Bold_CheckBox);
                     textItalicCheckBox[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Italic_CheckBox);
                     textColorButton[TextType.Location] = rootView.findViewById(R.id.Widget_Setup_Location_Text_Color_Button);
@@ -1123,10 +1089,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                             displaySwitch[index].setChecked(widgetSettings.showDisplay[index]);
                             displaySwitch[index].setVisibility(visibility);
                         }
-                        if(displayDivider[index] != null)
-                        {
-                            displayDivider[index].setVisibility(visibility);
-                        }
                     }
 
                     updatePassInputs();
@@ -1157,10 +1119,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     {
                         globalImageColorButton.setBackgroundColor(widgetSettings.globalImageColor);
                     }
-                    if(globalImagesDivider != null)
-                    {
-                        globalImagesDivider.setVisibility(showGlobalImageSwitch ? View.VISIBLE : View.GONE);
-                    }
                     if(orbitalImageRow != null)
                     {
                         orbitalImageRow.setVisibility(orbitalImageVisibility);
@@ -1168,10 +1126,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     if(orbitalImageColorButton != null)
                     {
                         orbitalImageColorButton.setBackgroundColor(widgetSettings.orbitalImageColor);
-                    }
-                    if(orbitalImageDivider != null)
-                    {
-                        orbitalImageDivider.setVisibility(!useNormal ? View.GONE : orbitalImageVisibility);
                     }
 
                     if(settingsImageRow != null)
@@ -1181,10 +1135,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     if(settingsImageColorButton != null)
                     {
                         settingsImageColorButton.setBackgroundColor(widgetSettings.settingsImageColor);
-                    }
-                    if(settingsImageDivider != null)
-                    {
-                        settingsImageDivider.setVisibility(nonOrbitalImageVisibility);
                     }
 
                     if(locationImageRow != null)
@@ -1230,10 +1180,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     {
                         borderStyleList.setSelectedValue(widgetSettings.borderType);
                     }
-                    if(borderDivider != null)
-                    {
-                        borderDivider.setVisibility(nonGlobalBackgroundVisibility);
-                    }
                     if(borderPaddingList != null)
                     {
                         borderPaddingList.setSelectedValue(widgetSettings.borderPadding);
@@ -1247,10 +1193,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     {
                         topColorButton.setBackgroundColor(widgetSettings.topBackgroundColor);
                     }
-                    if(topDivider != null)
-                    {
-                        topDivider.setVisibility(nonGlobalBackgroundVisibility);
-                    }
 
                     if(middleRow != null)
                     {
@@ -1259,10 +1201,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     if(middleColorButton != null)
                     {
                         middleColorButton.setBackgroundColor(widgetSettings.middleBackgroundColor);
-                    }
-                    if(middleDivider != null)
-                    {
-                        middleDivider.setVisibility(nonGlobalBackgroundVisibility);
                     }
 
                     if(bottomRow != null)
@@ -1352,10 +1290,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         {
                             textColorButton[index].setBackgroundColor(widgetSettings.text[index].color);
                         }
-                        if(textDivider[index] != null)
-                        {
-                            textDivider[index].setVisibility(visibility);
-                        }
                     }
                     break;
             }
@@ -1365,9 +1299,6 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         private void updatePassInputs()
         {
             boolean enabled;
-            View passStartDivider = displayDivider[DisplayType.PassStart];
-            View passEndDivider = displayDivider[DisplayType.PassEnd];
-            View passDynamicDivider = displayDivider[DisplayType.PassDynamic];
             SwitchCompat passStartSwitch = displaySwitch[DisplayType.PassStart];
             SwitchCompat passEndSwitch = displaySwitch[DisplayType.PassEnd];
             SwitchCompat passDynamicSwitch = displaySwitch[DisplayType.PassDynamic];
@@ -1378,24 +1309,11 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                 //enable start/end when not using dynamic
                 enabled = !passDynamicSwitch.isChecked();
                 passStartSwitch.setEnabled(enabled);
-                if(passStartDivider != null)
-                {
-                    passStartDivider.setEnabled(enabled);
-                }
                 passEndSwitch.setEnabled(enabled);
-                if(passEndDivider != null)
-                {
-                    passEndDivider.setEnabled(enabled);
-                }
 
                 //enable dynamic when start/end switches are checked
                 enabled = (passStartSwitch.isChecked() && passEndSwitch.isChecked());
                 passDynamicSwitch.setEnabled(enabled);
-                if(passDynamicDivider != null)
-                {
-                    //update visibility
-                    passDynamicDivider.setEnabled(enabled);
-                }
             }
         }
 

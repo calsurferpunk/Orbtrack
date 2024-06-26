@@ -19,7 +19,6 @@ import android.view.View;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -71,7 +70,7 @@ public class MapLocationInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(usingMaterial ? R.layout.map_location_input_material_layout : R.layout.map_location_input_layout);
+        setContentView(R.layout.map_location_input_material_layout);
 
         //get displays and task
         String text;
@@ -87,11 +86,6 @@ public class MapLocationInputActivity extends BaseInputActivity
         final LinearLayout locationLayout = this.findViewById(R.id.Location_Layout);
         final LinearLayout altitudeLayout = this.findViewById(R.id.Location_Altitude_Layout);
         final LinearLayout timeZoneLayout = this.findViewById(R.id.Location_Time_Zone_Layout);
-        final TextView poweredGoogleLbl = this.findViewById(R.id.Location_Powered_Google_Lbl);
-        final TextView latitudeLbl = this.findViewById(R.id.Location_Latitude_Lbl);
-        final TextView longitudeLbl = this.findViewById(R.id.Location_Longitude_Lbl);
-        final TextView altitudeLbl = this.findViewById(R.id.Location_Altitude_Lbl);
-        final TextView timeZoneLbl = this.findViewById(R.id.Location_Time_Zone_Lbl);
         final TextInputLayout altitudeTextLayout = this.findViewById(R.id.Location_Altitude_Text_Layout);
         final Resources res = this.getResources();
         final String invalidString = res.getString(R.string.title_invalid);
@@ -103,7 +97,7 @@ public class MapLocationInputActivity extends BaseInputActivity
         final EditText latitudeText = this.findViewById(R.id.Location_Latitude_Text);
         final EditText longitudeText = this.findViewById(R.id.Location_Longitude_Text);
         final EditText altitudeText = this.findViewById(R.id.Location_Altitude_Text);
-        final SelectListInterface timeZoneList = this.findViewById(usingMaterial ? R.id.Location_Time_Zone_Text_List : R.id.Location_Time_Zone_List);
+        final SelectListInterface timeZoneList = this.findViewById(R.id.Location_Time_Zone_Text_List);
         final AppCompatImageButton altitudeButton = this.findViewById(R.id.Location_Altitude_Button);
         final AppCompatImageButton timeZoneButton = this.findViewById(R.id.Location_Time_Zone_Button);
         final MaterialButton cancelButton = this.findViewById(R.id.Location_Cancel_Button);
@@ -118,28 +112,11 @@ public class MapLocationInputActivity extends BaseInputActivity
         this.getSupportFragmentManager().beginTransaction().replace(R.id.Location_Map_View, (Fragment)mapInputView).commit();
 
         //update available inputs
-        if(poweredGoogleLbl != null)
-        {
-            poweredGoogleLbl.setVisibility(poweredByVisible);
-        }
         poweredGoogleImage.setVisibility(poweredByVisible);
         poweredGoogleImage.setImageResource(Settings.getDarkTheme(this) ? R.drawable.powered_by_google_on_non_white : R.drawable.powered_by_google_on_white);
-        if(latitudeLbl != null)
-        {
-            latitudeLbl.setVisibility(coordinateInputVisible);
-        }
         latitudeText.setVisibility(coordinateInputVisible);
-        if(longitudeLbl != null)
-        {
-            longitudeLbl.setVisibility(coordinateInputVisible);
-        }
         longitudeText.setVisibility(coordinateInputVisible);
         text = altitudeString + " (" + Globals.getMetersLabel(res) + ")";
-        if(altitudeLbl != null)
-        {
-            altitudeLbl.setText(text);
-            altitudeLbl.setVisibility(coordinateInputVisible);
-        }
         if(altitudeTextLayout != null)
         {
             altitudeTextLayout.setHint(text);
@@ -150,10 +127,6 @@ public class MapLocationInputActivity extends BaseInputActivity
         }
         altitudeText.setVisibility(coordinateInputVisible);
         altitudeButton.setVisibility(coordinateInputVisible);
-        if(timeZoneLbl != null)
-        {
-            timeZoneLbl.setVisibility(coordinateInputVisible);
-        }
         timeZoneList.setVisibility(coordinateInputVisible);
         if(timeZoneLayout != null)
         {

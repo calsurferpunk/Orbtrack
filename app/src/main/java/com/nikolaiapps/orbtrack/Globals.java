@@ -949,7 +949,7 @@ public abstract class Globals
         boolean usingIcon = (titleIconId >= 0);
         AddSelectListAdapter listAdapter = (itemIds != null ? new AddSelectListAdapter(context, selectType, itemIds) : new AddSelectListAdapter(context, selectType, extra));
         AlertDialog dialog;
-        CustomAlertDialogBuilder selectDialog = new CustomAlertDialogBuilder(context, getDialogThemeId(context), Settings.getMaterialTheme(context), true);
+        CustomAlertDialogBuilder selectDialog = new CustomAlertDialogBuilder(context, getDialogThemeId(context), true);
 
         if(usingIcon)
         {
@@ -1074,34 +1074,30 @@ public abstract class Globals
             DatePickerDialog legacyDateDialog;
             MaterialDatePicker<Long> dateDialog;
 
-            //if using material
-            if(Settings.getMaterialTheme(context))
+            //get fragment manager
+            manager = getFragmentManager(context);
+            if(manager != null)
             {
-                //get fragment manager
-                manager = getFragmentManager(context);
-                if(manager != null)
+                //show dialog and stop
+                dateDialog = MaterialDatePicker.Builder.datePicker().setSelection(date.getTimeInMillis()).build();
+                dateDialog.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>()
                 {
-                    //show dialog and stop
-                    dateDialog = MaterialDatePicker.Builder.datePicker().setSelection(date.getTimeInMillis()).build();
-                    dateDialog.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>()
+                    @Override
+                    public void onPositiveButtonClick(Long selection)
                     {
-                        @Override
-                        public void onPositiveButtonClick(Long selection)
-                        {
-                            //get result in ms
-                            Calendar result = Globals.getGMTTime(selection);
+                        //get result in ms
+                        Calendar result = Globals.getGMTTime(selection);
 
-                            //if listener is set
-                            if(listener != null)
-                            {
-                                //call listener
-                                listener.onDateSet(null, result.get(Calendar.YEAR), result.get(Calendar.MONTH), result.get(Calendar.DAY_OF_MONTH));
-                            }
+                        //if listener is set
+                        if(listener != null)
+                        {
+                            //call listener
+                            listener.onDateSet(null, result.get(Calendar.YEAR), result.get(Calendar.MONTH), result.get(Calendar.DAY_OF_MONTH));
                         }
-                    });
-                    dateDialog.show(manager, "DateDialog");
-                    return;
-                }
+                    }
+                });
+                dateDialog.show(manager, "DateDialog");
+                return;
             }
 
             //show legacy dialog instead
@@ -3676,7 +3672,7 @@ public abstract class Globals
     //Gets menu item selector
     public static StateListDrawable getMenuItemStateSelector(Context context)
     {
-        return(getItemStateSelector(context, android.R.attr.colorBackground, Settings.getMaterialTheme(context)));
+        return(getItemStateSelector(context, android.R.attr.colorBackground, true));
     }
 
     //Gets list item selector

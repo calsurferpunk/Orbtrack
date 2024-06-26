@@ -154,7 +154,6 @@
     <string name="desc_layer">Surface images to display</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
-    <string name="desc_material_design_notice">Material design is now the default layout. If you wish to view the legacy design, you can revert back by going to Settings > Display > Theme > Material Theme.</string>
     <string name="desc_metric">Metric (km/m)</string>
     <string name="desc_need_updating">The data is too old and inaccurate. Please update to use.</string>
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
@@ -487,7 +486,6 @@
     <string name="title_map">Map</string>
     <string name="title_map_view">Map View</string>
     <string name="title_mars">Mars</string>
-    <string name="title_material">Material</string>
     <string name="title_max">Max</string>
     <string name="title_mean_anomaly">Mean Anomaly</string>
     <string name="title_mean_motion">Mean Motion (Revolutions per Day)</string>

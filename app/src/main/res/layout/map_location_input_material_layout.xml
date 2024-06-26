@@ -84,7 +84,7 @@
                 android:layout_weight="1"
                 android:hint="@string/title_altitude">
                 <EditText
-                    android:id="@id/Location_Altitude_Text"
+                    android:id="@+id/Location_Altitude_Text"
                     style="@style/LocationMaterialEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 

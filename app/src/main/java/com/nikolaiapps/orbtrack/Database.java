@@ -2329,51 +2329,31 @@ public class Database extends SQLiteOpenHelper
         sendProgress(progressType, null, 0 , 0);
     }
 
-    /** @noinspection UnusedAssignment*/
     //Show notice dialog
     private static void showNoticeDialog(final Context context, int previousVersion)
     {
-        int currentIndex = 0;
-        int materialIndex = -1;
         Resources res = context.getResources();
         String updateString = res.getQuantityString(R.plurals.title_updates, 1);
         ArrayList<String> titles = new ArrayList<>(0);
         ArrayList<String> messages = new ArrayList<>(0);
-
-        //if changed to newer version and material design notice not shown
-        if(previousVersion <= 29 && DB_VERSION > 29 && !Settings.getMaterialDesignShown(context))
-        {
-            titles.add(updateString);
-            messages.add(res.getString(R.string.desc_material_design_notice));
-            materialIndex = currentIndex++;
-        }
 
         //if added stars/constellation
         if(previousVersion < 33)
         {
             titles.add(updateString);
             messages.add(res.getString(R.string.desc_stars_constellation_notice));
-            currentIndex++;
         }
 
         //if any notices to show
         if(!titles.isEmpty())
         {
-            //remember any needed indexes
-            final int materialWhich = materialIndex;
-
             //show all notices
             Globals.showNotificationDialog(context, Globals.getDrawable(context, R.drawable.ic_info_black, true), titles.toArray(new String[0]), messages.toArray(new String[0]), R.string.title_ok, -1, false, new DialogInterface.OnClickListener()
             {
                 @Override
                 public void onClick(DialogInterface dialog, int which)
                 {
-                    //if material notice
-                    if(which == materialWhich)
-                    {
-                        //remember shown
-                        Settings.setMaterialDesignShown(context, true);
-                    }
+                    //do nothing
                 }
             }, null, false);
         }

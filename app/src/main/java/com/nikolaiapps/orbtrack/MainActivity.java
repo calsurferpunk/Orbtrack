@@ -96,7 +96,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private static boolean pendingOldSatelliteMessage = false;
     private boolean savedState;
     private boolean finishedSetup;
-    private boolean usingMaterial;
     private boolean allowingPagerSwipe = false;
     private Bundle calculateBundle;
     private Bundle savedStateBundle;
@@ -105,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private static WeakReference<PagerTitleStrip> mainPagerTitlesReference;
     private static WeakReference<SwipeStateViewPager> mainPagerReference;
     private Menu optionsMenu;
-    private View sideActionDivider;
     private RecyclerView sideActionMenu;
     private ExpandableListView sideMenu;
     private SwipeStateViewPager mainPager;
@@ -171,7 +169,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         int index;
 
-        usingMaterial = Settings.getMaterialTheme(this);
         Settings.Options.Display.setTheme(this);
         this.setContentView(R.layout.main_layout);
         BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
@@ -1344,7 +1341,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //get displays
         optionsMenu = null;
-        sideActionDivider = this.findViewById(R.id.Side_Action_Divider);
         sideActionMenu = this.findViewById(R.id.Side_Action_Menu);
         sideMenu = this.findViewById(R.id.Side_Menu);
         mainFloatingButton = this.findViewById(R.id.Main_Floating_Button);
@@ -1559,10 +1555,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             sideMenu.setAdapter(new SideMenuListAdapter(this, groups));
             sideMenu.setOnChildClickListener(createOnSideMenuChildClickListener());
             sideMenu.setOnGroupExpandListener(createOnSideMenuGroupExpandListener());
-            if(usingMaterial)
-            {
-                sideMenu.setGroupIndicator(null);
-            }
+            sideMenu.setGroupIndicator(null);
         }
     }
 
@@ -2348,7 +2341,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             {
                 case Groups.Current:
                 case Groups.Orbitals:
-                    items.add(new Item(res.getString(R.string.title_add) + " " + res.getQuantityString(R.plurals.title_satellites, 1), Globals.getDrawable(this, (usingMaterial ? R.drawable.ic_add_circle_black : R.drawable.ic_add_white), true)));
+                    items.add(new Item(res.getString(R.string.title_add) + " " + res.getQuantityString(R.plurals.title_satellites, 1), Globals.getDrawable(this, R.drawable.ic_add_circle_black, true)));
                     break;
             }
 
@@ -2388,10 +2381,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             }
 
             //update visibility
-            if(sideActionDivider != null)
-            {
-                sideActionDivider.setVisibility(hasItems && !usingMaterial ? View.VISIBLE : View.GONE);
-            }
             sideActionMenu.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         }
 

@@ -48,7 +48,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        this.setContentView(usingMaterial ? R.layout.notify_settings_material_layout : R.layout.notify_settings_layout);
+        this.setContentView(R.layout.notify_settings_material_layout);
 
         byte index;
         Intent intent = this.getIntent();
@@ -60,17 +60,13 @@ public class NotifySettingsActivity extends BaseInputActivity
         final MaterialButton cancelButton = this.findViewById(R.id.Notify_Settings_Cancel_Button);
         final MaterialButton okayButton = this.findViewById(R.id.Notify_Settings_Ok_Button);
 
-        //if using material
-        if(usingMaterial)
-        {
-            //hide action bar
-            hideActionBar();
-        }
+        //hide action bar
+        hideActionBar();
 
         //get displays
         fullMoonStartDivider = this.findViewById(R.id.Notify_Settings_Full_Moon_Start_Divider);
         fullMoonEndDivider = this.findViewById(R.id.Notify_Settings_Full_Moon_End_Divider);
-        orbitalList = this.findViewById(usingMaterial ? R.id.Notify_Settings_Orbital_Text_List : R.id.Notify_Settings_Orbital_List);
+        orbitalList = this.findViewById(R.id.Notify_Settings_Orbital_Text_List);
         notifySwitch = new SwitchCompat[Globals.NotifyType.NotifyCount];
         notifySwitch[Globals.NotifyType.PassStart] = this.findViewById(R.id.Notify_Settings_Pass_Start_Switch);
         notifySwitch[Globals.NotifyType.PassEnd] = this.findViewById(R.id.Notify_Settings_Pass_End_Switch);

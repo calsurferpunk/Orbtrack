@@ -70,30 +70,25 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
         if(event.getAction() == MotionEvent.ACTION_UP)
         {
             Context context = this.getContext();
-            FragmentManager manager;
+            FragmentManager manager = Globals.getFragmentManager(context);
 
             performClick();
 
-            //if using material
-            if(Settings.getMaterialTheme(context))
+            //if manager exists
+            if(manager != null)
             {
-                //get fragment manager
-                manager = Globals.getFragmentManager(context);
-                if(manager != null)
+                //show dialog and stop
+                MaterialTimePicker timeDialog = new MaterialTimePicker.Builder().setHour(currentHour).setMinute(currentMinute).setTimeFormat(TimeFormat.CLOCK_12H).build();
+                timeDialog.addOnPositiveButtonClickListener(new OnClickListener()
                 {
-                    //show dialog and stop
-                    MaterialTimePicker timeDialog = new MaterialTimePicker.Builder().setHour(currentHour).setMinute(currentMinute).setTimeFormat(TimeFormat.CLOCK_12H).build();
-                    timeDialog.addOnPositiveButtonClickListener(new OnClickListener()
+                    @Override
+                    public void onClick(View v)
                     {
-                        @Override
-                        public void onClick(View v)
-                        {
-                            TimeInputView.this.onTimeSet(null, timeDialog.getHour(), timeDialog.getMinute());
-                        }
-                    });
-                    timeDialog.show(manager, "TimeDialog");
-                    return(true);
-                }
+                        TimeInputView.this.onTimeSet(null, timeDialog.getHour(), timeDialog.getMinute());
+                    }
+                });
+                timeDialog.show(manager, "TimeDialog");
+                return(true);
             }
 
             //if possibly a version with time picker dialog problems

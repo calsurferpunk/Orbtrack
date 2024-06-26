@@ -154,7 +154,6 @@
     <string name="desc_layer">Imágenes de superficie para mostrar</string>
     <string name="desc_location_disable">Los servicios de ubicación están deshabilitados. ¿Desea cambiar la configuración?</string>
     <string name="desc_location_icon">Ícono a usar para mostrar la ubicación del mapa</string>
-    <string name="desc_material_design_notice">El diseño de materiales ahora es el diseño predeterminado. Si desea ver el diseño heredado, puede volver atrás yendo a Ajustes > Pantalla > Tema > Tema Material.</string>
     <string name="desc_metric">Métrico (km/m)</string>
     <string name="desc_need_updating">Los datos son demasiado antiguos e inexactos. Actualice para usar.</string>
     <string name="desc_no_connection">Es posible que no tenga una conexión a Internet. ¿Intentar de todos modos?</string>
@@ -487,7 +486,6 @@
     <string name="title_map">Mapa</string>
     <string name="title_map_view">Vista Mapa</string>
     <string name="title_mars">Marte</string>
-    <string name="title_material">Material</string>
     <string name="title_max">Max</string>
     <string name="title_mean_anomaly">Anomalía Media</string>
     <string name="title_mean_motion">Movimiento Medio (Revoluciones por Día)</string>

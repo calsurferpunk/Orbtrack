@@ -30,7 +30,7 @@ public class SwitchButtonPreference extends CustomPreference
         super(context, attrs, defStyleAttr, defStyleRes);
 
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.switch_button_preference_material_layout);
+        this.setLayoutResource(R.layout.switch_button_preference_layout);
     }
 
     public SwitchButtonPreference(Context context, AttributeSet attrs, int defStyleAttr)

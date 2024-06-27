@@ -18,7 +18,7 @@
         app:startIconTint="@null">
         <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
             android:id="@+id/Icon_List_Preference_Text_List"
-            style="@style/TextViewMaterialList"
+            style="@style/TextViewList"
             android:background="@color/transparent"
             android:padding="16dp"/>
     </com.google.android.material.textfield.TextInputLayout>

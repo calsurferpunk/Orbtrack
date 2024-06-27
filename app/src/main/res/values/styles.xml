@@ -415,7 +415,7 @@
     </style>
 
     <!-- Detail Views -->
-    <style name="DetailTableMaterial">
+    <style name="DetailTable">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
     </style>
@@ -424,7 +424,7 @@
         <item name="android:padding">1dp</item>
         <item name="android:gravity">center</item>
     </style>
-    <style name="DetailTableRowMaterial" parent="DetailTableRow">
+    <style name="DetailTableRowTransparent" parent="DetailTableRow">
         <item name="android:background">@color/transparent</item>
     </style>
 
@@ -437,7 +437,7 @@
         <item name="android:maxLines">1</item>
     </style>
 
-    <style name="DetailTextMaterial" parent="DetailText">
+    <style name="DetailTextBold" parent="DetailText">
         <item name="android:textStyle">bold</item>
     </style>
 
@@ -455,15 +455,11 @@
     </style>
 
     <style name="DetailVerticalDivider">
+        <item name="android:background">@color/transparent</item>
         <item name="android:layout_width">2dp</item>
         <item name="android:layout_marginLeft">1dp</item>
         <item name="android:layout_marginRight">1dp</item>
         <item name="android:layout_height">match_parent</item>
-        <item name="android:background">?attr/dividerLineColor</item>
-    </style>
-
-    <style name="DetailVerticalDividerMaterial" parent="DetailVerticalDivider">
-        <item name="android:background">@color/transparent</item>
     </style>
 
     <!--Edit Dialog -->
@@ -475,7 +471,7 @@
     </style>
 
     <style name="EditValueText">
-        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">1</item>
         <item name="android:inputType">numberDecimal</item>
@@ -486,19 +482,15 @@
         <item name="android:hint">@string/empty</item>
     </style>
 
-    <style name="EditValueMaterialText" parent="EditValueText">
-        <item name="android:layout_width">match_parent</item>
-    </style>
-
-    <!--Text View Material-->
-    <style name="TextViewMaterialList">
+    <!--Text View-->
+    <style name="TextViewList">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">none</item>
         <item name="android:textColorHint">@color/transparent</item>
     </style>
 
-    <style name="TextViewMaterialInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+    <style name="TextViewInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:textColorHint">?android:textColor</item>
@@ -507,22 +499,7 @@
     </style>
 
     <!--Location-->
-    <style name="LocationTitle">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">end</item>
-    </style>
-
     <style name="LocationEditText">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:inputType">numberDecimal|numberSigned</item>
-        <item name="android:singleLine">true</item>
-    </style>
-
-    <style name="LocationMaterialEditText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">numberDecimal|numberSigned</item>
@@ -532,7 +509,7 @@
     </style>
 
     <!--Manual-->
-    <style name="ManualEditTextMaterial">
+    <style name="ManualEditText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:hint">@string/empty</item>
@@ -547,29 +524,15 @@
     <style name="CalculateEditRow">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginTop">10dp</item>
-        <item name="android:gravity">center</item>
-        <item name="android:orientation">vertical</item>
-    </style>
-
-    <style name="CalculateEditRowMaterial">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginBottom">8dp</item>
         <item name="android:gravity">center</item>
         <item name="android:orientation">horizontal</item>
     </style>
 
-    <style name="CalculateEditLayout">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center_vertical</item>
-    </style>
-
     <style name="CalculateEditText">
-        <item name="android:layout_width">75dp</item>
+        <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
-        <item name="android:gravity">center</item>
+        <item name="android:gravity">left</item>
         <item name="android:inputType">numberDecimal</item>
         <item name="android:maxLines">1</item>
         <item name="android:maxLength">6</item>
@@ -577,28 +540,11 @@
         <item name="android:selectAllOnFocus">true</item>
     </style>
 
-    <style name="CalculateEditTextMaterial" parent="CalculateEditText">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:gravity">left</item>
-    </style>
-
     <style name="CalculateDateTimeText">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:paddingTop">0dp</item>
         <item name="android:paddingBottom">0dp</item>
-    </style>
-
-    <style name="CalculateEditUnitTitle">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
-
-    <style name="CalculateEditValueTitle">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginBottom">10dp</item>
-        <item name="android:gravity">center</item>
     </style>
 
     <style name="CalculateListInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
@@ -609,7 +555,7 @@
         <item name="startIconTint">@null</item>
     </style>
 
-    <style name="CalculateTextInputLayout" parent="TextViewMaterialInputLayout">
+    <style name="CalculateTextInputLayout" parent="TextViewInputLayout">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_weight">0.5</item>
@@ -626,73 +572,36 @@
         <item name="startIconTint">@null</item>
     </style>
 
-    <style name="OrbitalSearchMaterialList" parent="TextViewMaterialList">
+    <style name="OrbitalSearchList" parent="TextViewList">
         <item name="android:textColor">?titleTextColor</item>
         <item name="android:enabled">false</item>
     </style>
 
-    <style name="OrbitalSearchList">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:enabled">false</item>
-    </style>
-
-    <style name="OrbitalSearchText">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center|end</item>
-        <item name="android:paddingLeft">3dp</item>
-        <item name="android:paddingRight">3dp</item>
-        <item name="android:textColor">?attr/colorAccentLightest</item>
-    </style>
-
     <!--Combined Layout-->
-    <style name="CombinedLayoutMaterial">
+    <style name="CombinedLayout">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:paddingRight">15dp</item>
     </style>
-    <style name="CombinedLayoutStartMaterial" parent="CombinedLayoutMaterial">
+    <style name="CombinedLayoutStart" parent="CombinedLayout">
         <item name="android:minWidth">154dp</item>
     </style>
 
     <!--Combined Image-->
     <style name="CombinedImage">
-        <item name="android:layout_width">20dp</item>
-        <item name="android:layout_height">20dp</item>
+        <item name="android:layout_width">18dp</item>
+        <item name="android:layout_height">18dp</item>
         <item name="android:layout_margin">1dp</item>
         <item name="android:layout_gravity">center_vertical|end</item>
         <item name="android:gravity">center</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="tint">?android:textColor</item>
     </style>
-    <style name="CombinedImageMaterial" parent="CombinedImage">
-        <item name="android:layout_width">18dp</item>
-        <item name="android:layout_height">18dp</item>
-    </style>
-
-    <!--Combined Title Text-->
-    <style name="CombinedTitleText">
-        <item name="android:layout_width">20dp</item>
-        <item name="android:layout_height">20dp</item>
-        <item name="android:layout_margin">1dp</item>
-        <item name="android:layout_gravity">center_vertical</item>
-        <item name="android:gravity">center</item>
-    </style>
 
     <!--Combined Text-->
     <style name="CombinedText">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">0.5</item>
-        <item name="android:padding">2dp</item>
-        <item name="android:layout_gravity">center_vertical</item>
-    </style>
-
-    <style name="CombinedTextMaterial">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginStart">4dp</item>
@@ -747,18 +656,18 @@
     </style>
 
     <!--Choose Color-->
-    <style name="ChooseColorLayout">
+    <style name="ChooseColorBaseLayout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:gravity">center</item>
     </style>
 
-    <style name="ChooseColorMaterialLayout" parent="ChooseColorLayout">
+    <style name="ChooseColorLayout" parent="ChooseColorBaseLayout">
         <item name="android:layout_margin">8dp</item>
     </style>
 
-    <style name="ChooseColorMaterialLandLayout" parent="ChooseColorLayout">
+    <style name="ChooseColorLandLayout" parent="ChooseColorBaseLayout">
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginLeft">8dp</item>
         <item name="android:layout_marginRight">8dp</item>
@@ -795,16 +704,13 @@
     <style name="ChooseColorEditText">
         <item name="android:layout_width">45dp</item>
         <item name="android:layout_height">wrap_content</item>
+        <item name="android:padding">8dp</item>
         <item name="android:maxLength">3</item>
         <item name="android:inputType">number</item>
         <item name="android:autofillHints" tools:targetApi="26">@string/empty</item>
         <item name="android:hint">@string/empty</item>
         <item name="android:selectAllOnFocus">true</item>
         <item name="android:text">@string/text_0</item>
-    </style>
-
-    <style name="ChooseColorMaterialEditText" parent="ChooseColorEditText">
-        <item name="android:padding">8dp</item>
         <item name="android:textColor">?android:textColor</item>
     </style>
 
@@ -862,14 +768,10 @@
     </style>
 
     <!--Notify settings-->
-    <style name="NotifySettingsMaterialLayout">
+    <style name="NotifySettingsLayout">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:orientation">horizontal</item>
-    </style>
-
-    <style name="NotifySettingsLayout" parent="NotifySettingsMaterialLayout">
-        <item name="android:padding">10dp</item>
     </style>
 
     <style name="NotifySettingsText">
@@ -891,17 +793,12 @@
         <item name="android:layout_marginLeft">16dp</item>
     </style>
 
-    <style name="NotifySettingsMaterialRadioGroup">
+    <style name="NotifySettingsRadioGroup">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:gravity">end</item>
         <item name="android:orientation">horizontal</item>
         <item name="android:visibility">gone</item>
-    </style>
-
-    <style name="NotifySettingsRadioGroup" parent="NotifySettingsMaterialRadioGroup">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:padding">5dp</item>
     </style>
 
     <!--Notify item-->
@@ -962,15 +859,6 @@
         <item name="android:minHeight">50dp</item>
     </style>
 
-    <style name="WidgetSetupList">
-        <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_weight">1</item>
-        <item name="android:layout_marginLeft">8dp</item>
-        <item name="android:layout_marginRight">8dp</item>
-        <item name="android:layout_gravity">center_vertical</item>
-    </style>
-
     <style name="WidgetSetupListInputLayout" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">wrap_content</item>
@@ -981,7 +869,7 @@
         <item name="startIconTint">@null</item>
     </style>
 
-    <style name="WidgetSetupMaterialList">
+    <style name="WidgetSetupList">
         <item name="android:layout_width">wrap_content</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:minWidth">80dp</item>
@@ -991,22 +879,18 @@
         <item name="android:textColorHint">@color/transparent</item>
     </style>
 
-    <style name="WidgetSetupMaterialWideList" parent="WidgetSetupMaterialList">
+    <style name="WidgetSetupWideList" parent="WidgetSetupList">
         <item name="android:layout_width">match_parent</item>
         <item name="android:minWidth">148dp</item>
     </style>
 
     <style name="WidgetSetupColorButtonLayout">
         <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">45dp</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_marginLeft">8dp</item>
+        <item name="android:layout_gravity">center_vertical</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:orientation">horizontal</item>
-    </style>
-
-    <style name="WidgetSetupColorButtonMaterialLayout" parent="WidgetSetupColorButtonLayout">
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_gravity">center_vertical</item>
     </style>
 
     <style name="WidgetSetupGlobalSwitch">
@@ -1025,13 +909,6 @@
         <item name="android:paddingTop">10dp</item>
         <item name="android:paddingBottom">10dp</item>
         <item name="android:gravity">center_vertical|end</item>
-    </style>
-
-    <style name="WidgetSetupTitle">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_marginLeft">10dp</item>
-        <item name="android:layout_marginStart">10dp</item>
     </style>
 
     <style name="WidgetSetupTextOptions">

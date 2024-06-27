@@ -3790,7 +3790,7 @@ public class UpdateService extends NotifyService
         }
 
         //if doing a backup
-        if(fileType == Globals.FileType.Backup)
+        if(fileType == Globals.FileType.Backup && tableNodes != null)
         {
             //go through each table
             for(tableIndex = 0; tableIndex < tableNodes.length; tableIndex++)

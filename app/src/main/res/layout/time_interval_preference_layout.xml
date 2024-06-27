@@ -24,7 +24,7 @@
         android:layout_marginRight="16dp">
         <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
             android:id="@+id/Time_Interval_Preference_Text_List"
-            style="@style/TextViewMaterialList"/>
+            style="@style/TextViewList"/>
     </com.google.android.material.textfield.TextInputLayout>
 
     <TextView

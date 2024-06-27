@@ -70,7 +70,7 @@ public class MapLocationInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.map_location_input_material_layout);
+        setContentView(R.layout.map_location_input_layout);
 
         //get displays and task
         String text;

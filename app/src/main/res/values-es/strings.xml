@@ -224,8 +224,6 @@
     <string name="text_12">12</string>
     <string name="text_14">14</string>
     <string name="text_30">30</string>
-    <string name="text_90_plus_minus">+/-90</string>
-    <string name="text_180_plus_minus">+/-180</string>
     <string name="text_and"> y </string>
     <string name="text_at">a</string>
     <string name="text_camera_error">Error al usar la cámara</string>
@@ -242,7 +240,6 @@
     <string name="text_list_is">Lista es</string>
     <string name="text_list_no_data">Sin datos lista</string>
     <string name="text_location_failed">Error al obtener ubicación</string>
-    <string name="text_location_success">Éxito obteniendo ubicación</string>
     <string name="text_location_watching">Ver cambios de ubicación</string>
     <string name="text_login_failed">Error de inicio de sesion</string>
     <string name="text_no_address_found_error">No se encontró dirección para la ubicación</string>
@@ -448,7 +445,6 @@
     <string name="title_last_plural">Últimos</string>
     <string name="title_last_quarter">Último Cuarto</string>
     <string name="title_latitude">Latitud</string>
-    <string name="title_latitude_north_south">Latitud (N+/S-)</string>
     <string name="title_latitude_north_south_range">Latitud (N +180/S -180)</string>
     <string name="title_launch_date">Fecha Lanzamiento</string>
     <string name="title_launch_number">Lanzamiento Número</string>
@@ -479,7 +475,6 @@
     <string name="title_locations">Ubicaciones</string>
     <string name="title_login">Iniciar Sesión</string>
     <string name="title_longitude">Longitud</string>
-    <string name="title_longitude_west_east">Longitud (O+/E-)</string>
     <string name="title_longitude_west_east_range">Longitud (O +180/E -180)</string>
     <string name="title_low">Bajo</string>
     <string name="title_manual">Manual</string>
@@ -551,7 +546,6 @@
     <string name="title_pink">Rosado</string>
     <string name="title_planets">Planetas</string>
     <string name="title_pluto">Plutón</string>
-    <string name="title_privacy_policy">Política Privacidad</string>
     <string name="title_purple">Púrpura</string>
     <string name="title_quality">Calidad</string>
     <string name="title_quick_settings">Ajustes Rápidos</string>
@@ -659,7 +653,6 @@
     <string name="title_theme">Tema</string>
     <string name="title_this_year">Este Año</string>
     <string name="title_time">Tiempo</string>
-    <string name="title_time_interval">Intervalo de Tiempo</string>
     <string name="title_time_since">Tiempo Desde</string>
     <string name="title_time_until">Tiempo Hasta</string>
     <string name="title_time_zone">Zona Horaria</string>

@@ -16,38 +16,38 @@
             android:orientation="vertical">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Manual_Object_Name_Text_Layout"
-                style="@style/TextViewMaterialInputLayout"
+                style="@style/TextViewInputLayout"
                 android:layout_marginBottom="8dp"
                 android:hint="@string/title_name">
                 <com.nikolaiapps.orbtrack.EditTextSelect
                     android:id="@+id/Manual_Object_Name"
-                    style="@style/ManualEditTextMaterial"
+                    style="@style/ManualEditText"
                     android:maxLength="20"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Manual_Object_Line1_Text_Layout"
-                style="@style/TextViewMaterialInputLayout"
+                style="@style/TextViewInputLayout"
                 android:layout_marginBottom="8dp"
                 android:hint="@string/title_line_1"
                 app:startIconDrawable="@drawable/ic_mode_edit_black"
                 app:startIconTint="?android:textColor">
                 <com.nikolaiapps.orbtrack.EditTextSelect
                     android:id="@+id/Manual_Object_Line1_Text"
-                    style="@style/ManualEditTextMaterial"
+                    style="@style/ManualEditText"
                     android:maxLength="69"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Manual_Object_Line2_Text_Layout"
-                style="@style/TextViewMaterialInputLayout"
+                style="@style/TextViewInputLayout"
                 android:layout_marginBottom="8dp"
                 android:hint="@string/title_line_2"
                 app:startIconDrawable="@drawable/ic_mode_edit_black"
                 app:startIconTint="?android:textColor">
                 <com.nikolaiapps.orbtrack.EditTextSelect
                     android:id="@+id/Manual_Object_Line2_Text"
-                    style="@style/ManualEditTextMaterial"
+                    style="@style/ManualEditText"
                     android:maxLength="69"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -99,7 +99,7 @@
                 android:hint="@string/title_owner">
                 <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Manual_Object_Owner_Text_List"
-                    style="@style/TextViewMaterialList"
+                    style="@style/TextViewList"
                     android:hint="@string/title_owner"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -110,13 +110,13 @@
                 android:hint="@string/title_group">
                 <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Manual_Object_Group_Text_List"
-                    style="@style/TextViewMaterialList"
+                    style="@style/TextViewList"
                     android:hint="@string/title_group"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Calculate_Start_Date_Layout"
-                style="@style/TextViewMaterialInputLayout"
+                style="@style/TextViewInputLayout"
                 android:hint="@string/title_launch_date"
                 app:startIconDrawable="@drawable/ic_calendar_month_white"
                 app:startIconTint="?android:textColor">

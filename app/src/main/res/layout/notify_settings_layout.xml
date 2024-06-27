@@ -28,7 +28,7 @@
             android:orientation="vertical">
             <LinearLayout
                 android:id="@+id/Notify_Settings_Orbital_Group"
-                style="@style/NotifySettingsMaterialLayout"
+                style="@style/NotifySettingsLayout"
                 android:visibility="gone">
                 <TextView
                     style="@style/NotifySettingsText"
@@ -41,7 +41,7 @@
                     android:hint="@string/empty">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Notify_Settings_Orbital_Text_List"
-                        style="@style/TextViewMaterialList"
+                        style="@style/TextViewList"
                         android:hint="@string/empty"/>
                 </com.google.android.material.textfield.TextInputLayout>
             </LinearLayout>
@@ -49,14 +49,14 @@
             <View android:id="@+id/Notify_Settings_List_Divider" style="@style/DividerThin" android:visibility="gone"/>
 
             <LinearLayout
-                style="@style/NotifySettingsMaterialLayout">
+                style="@style/NotifySettingsLayout">
                 <TextView
                     style="@style/NotifySettingsText"
                     android:text="@string/title_pass_start"/>
 
                 <RadioGroup
                     android:id="@+id/Notify_Settings_Pass_Start_Group"
-                    style="@style/NotifySettingsMaterialRadioGroup">
+                    style="@style/NotifySettingsRadioGroup">
                     <androidx.appcompat.widget.AppCompatRadioButton
                         android:id="@+id/Notify_Settings_Pass_Start_Next_Radio"
                         style="@style/RadioButton"
@@ -77,14 +77,14 @@
             <View style="@style/DividerThin"/>
 
             <LinearLayout
-                style="@style/NotifySettingsMaterialLayout">
+                style="@style/NotifySettingsLayout">
                 <TextView
                     style="@style/NotifySettingsText"
                     android:text="@string/title_pass_end"/>
 
                 <RadioGroup
                     android:id="@+id/Notify_Settings_Pass_End_Group"
-                    style="@style/NotifySettingsMaterialRadioGroup">
+                    style="@style/NotifySettingsRadioGroup">
                     <androidx.appcompat.widget.AppCompatRadioButton
                         android:id="@+id/Notify_Settings_Pass_End_Next_Radio"
                         style="@style/RadioButton"
@@ -106,7 +106,7 @@
 
             <LinearLayout
                 android:id="@+id/Notify_Settings_Full_Moon_Start_Layout"
-                style="@style/NotifySettingsMaterialLayout"
+                style="@style/NotifySettingsLayout"
                 android:visibility="gone">
                 <TextView
                     style="@style/NotifySettingsText"
@@ -114,7 +114,7 @@
 
                 <RadioGroup
                     android:id="@+id/Notify_Settings_Full_Moon_Start_Group"
-                    style="@style/NotifySettingsMaterialRadioGroup">
+                    style="@style/NotifySettingsRadioGroup">
                     <androidx.appcompat.widget.AppCompatRadioButton
                         android:id="@+id/Notify_Settings_Full_Moon_Start_Next_Radio"
                         style="@style/RadioButton"
@@ -136,7 +136,7 @@
 
             <LinearLayout
                 android:id="@+id/Notify_Settings_Full_Moon_End_Layout"
-                style="@style/NotifySettingsMaterialLayout"
+                style="@style/NotifySettingsLayout"
                 android:visibility="gone">
                 <TextView
                     style="@style/NotifySettingsText"
@@ -144,7 +144,7 @@
 
                 <RadioGroup
                     android:id="@+id/Notify_Settings_Full_Moon_End_Group"
-                    style="@style/NotifySettingsMaterialRadioGroup">
+                    style="@style/NotifySettingsRadioGroup">
                     <androidx.appcompat.widget.AppCompatRadioButton
                         android:id="@+id/Notify_Settings_Full_Moon_End_Next_Radio"
                         style="@style/RadioButton"

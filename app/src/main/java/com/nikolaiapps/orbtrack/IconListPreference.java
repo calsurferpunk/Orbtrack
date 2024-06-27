@@ -26,7 +26,7 @@ public class IconListPreference extends CustomPreference
         super(context, attrs, defStyleAttr, defStyleRes);
 
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.icon_list_preference_material_layout);
+        this.setLayoutResource(R.layout.icon_list_preference_layout);
     }
     public IconListPreference(Context context, AttributeSet attrs, int defStyleAttr)
     {

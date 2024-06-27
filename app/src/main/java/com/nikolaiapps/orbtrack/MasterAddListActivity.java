@@ -860,7 +860,7 @@ public class MasterAddListActivity extends BaseInputActivity
     {
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.master_list_material_layout);
+        setContentView(R.layout.master_list_layout);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
         //get intent, source, and displays

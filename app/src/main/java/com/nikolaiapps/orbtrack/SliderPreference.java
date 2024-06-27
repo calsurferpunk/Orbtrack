@@ -32,7 +32,7 @@ public class SliderPreference extends CustomPreference
         super(context, attrs, defStyleAttr, defStyleRes);
 
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.slider_preference_material_layout);
+        this.setLayoutResource(R.layout.slider_preference_layout);
 
         //set defaults
         scaleType = ScaleType.Integer;

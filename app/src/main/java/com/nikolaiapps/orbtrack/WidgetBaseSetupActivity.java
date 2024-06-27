@@ -413,7 +413,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
             switch(page)
             {
                 case TabPage.Data:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_data_material_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_data_view, container, false);
 
                     orbitals = Database.getOrbitals(context);
                     Globals.clearOrbitalFilter(orbitals);
@@ -640,7 +640,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Display:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_display_material_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_display_view, container, false);
                     table = rootView.findViewById(R.id.Widget_Setup_Display_Table);
 
                     displaySwitch = new SwitchCompat[DisplayType.DisplayCount];
@@ -688,7 +688,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Images:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_images_material_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_images_view, container, false);
 
                     unusedImageRow = rootView.findViewById(R.id.Widget_Setup_Unused_Image_Row);
 
@@ -722,7 +722,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Background:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_background_material_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_background_view, container, false);
 
                     globalBackgroundRow = rootView.findViewById(R.id.Widget_Setup_Global_Background_Row);
                     globalBackgroundSwitch = rootView.findViewById(R.id.Widget_Setup_Global_Background_Switch);
@@ -798,7 +798,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     break;
 
                 case TabPage.Text:
-                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_text_material_view, container, false);
+                    rootView = (ViewGroup)inflater.inflate(R.layout.widget_setup_text_view, container, false);
                     table = rootView.findViewById(R.id.Widget_Setup_Text_Table);
 
                     textRow = new TableRow[TextType.TextCount];

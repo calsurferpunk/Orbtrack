@@ -48,7 +48,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        this.setContentView(R.layout.notify_settings_material_layout);
+        this.setContentView(R.layout.notify_settings_layout);
 
         byte index;
         Intent intent = this.getIntent();

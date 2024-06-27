@@ -703,7 +703,7 @@ public class IconSpinner extends AppCompatSpinner implements SelectListInterface
             //set view
             if(convertView == null)
             {
-                convertView = (listInflater != null ? listInflater.inflate((R.layout.icon_spinner_material_item), parent, false) : null);
+                convertView = (listInflater != null ? listInflater.inflate((R.layout.icon_spinner_item), parent, false) : null);
                 if(convertView == null)
                 {
                     return(new View(parent.getContext()));

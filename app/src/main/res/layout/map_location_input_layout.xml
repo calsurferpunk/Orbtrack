@@ -34,7 +34,7 @@
         android:layout_marginLeft="16dp"
         android:layout_marginRight="16dp">
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/TextViewMaterialInputLayout"
+            style="@style/TextViewInputLayout"
             android:hint="@string/title_name">
             <com.google.android.material.textfield.MaterialAutoCompleteTextView
                 android:id="@+id/Location_Input_Name"
@@ -56,19 +56,19 @@
             app:srcCompat="@drawable/powered_by_google_on_white" />
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/TextViewMaterialInputLayout"
+            style="@style/TextViewInputLayout"
             android:hint="@string/title_latitude_north_south_range">
             <EditText
                 android:id="@+id/Location_Latitude_Text"
-                style="@style/LocationMaterialEditText"/>
+                style="@style/LocationEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/TextViewMaterialInputLayout"
+            style="@style/TextViewInputLayout"
             android:hint="@string/title_longitude_west_east_range">
             <EditText
                 android:id="@+id/Location_Longitude_Text"
-                style="@style/LocationMaterialEditText"/>
+                style="@style/LocationEditText"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <LinearLayout
@@ -79,13 +79,13 @@
             android:orientation="horizontal">
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/Location_Altitude_Text_Layout"
-                style="@style/TextViewMaterialInputLayout"
+                style="@style/TextViewInputLayout"
                 android:layout_width="0dp"
                 android:layout_weight="1"
                 android:hint="@string/title_altitude">
                 <EditText
                     android:id="@+id/Location_Altitude_Text"
-                    style="@style/LocationMaterialEditText"/>
+                    style="@style/LocationEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.appcompat.widget.AppCompatImageButton
@@ -109,7 +109,7 @@
                 android:hint="@string/title_time_zone">
                 <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Location_Time_Zone_Text_List"
-                    style="@style/TextViewMaterialList"/>
+                    style="@style/TextViewList"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.appcompat.widget.AppCompatImageButton

@@ -47,94 +47,94 @@
 
     <LinearLayout
         android:id="@+id/Combined_Item_Az_Layout"
-        style="@style/CombinedLayoutStartMaterial"
+        style="@style/CombinedLayoutStart"
         app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Az_Image"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/compass_black_white"/>
 
         <TextView
             android:id="@+id/Combined_Item_Az_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Combined_Item_El_Layout"
-        style="@style/CombinedLayoutMaterial"
+        style="@style/CombinedLayout"
         app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Elevation_Image"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/ic_arrow_back_white"/>
 
         <TextView
             android:id="@+id/Combined_Item_El_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Latitude_Layout"
-        style="@style/CombinedLayoutStartMaterial"
+        style="@style/CombinedLayoutStart"
         app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Latitude_Image"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/earth_vertical_lines"
             android:rotation="90"/>
 
         <TextView
             android:id="@+id/Combined_Item_Latitude_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Longitude_Layout"
-        style="@style/CombinedLayoutMaterial"
+        style="@style/CombinedLayout"
         app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Longitude_Image"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/earth_vertical_lines"/>
 
         <TextView
             android:id="@+id/Combined_Item_Longitude_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Range_Layout"
-        style="@style/CombinedLayoutStartMaterial"
+        style="@style/CombinedLayoutStart"
         app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Range_Image"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/distance"/>
 
         <TextView
             android:id="@+id/Combined_Item_Range_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Speed_Layout"
-        style="@style/CombinedLayoutMaterial"
+        style="@style/CombinedLayout"
         app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Speed_Image"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/ic_arrow_back_white"
             android:rotation="180"/>
 
         <TextView
             android:id="@+id/Combined_Item_Speed_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <com.google.android.material.progressindicator.CircularProgressIndicator
@@ -147,34 +147,34 @@
 
     <LinearLayout
         android:id="@+id/Combined_Item_Pass_Start_Layout"
-        style="@style/CombinedLayoutStartMaterial"
+        style="@style/CombinedLayoutStart"
         android:paddingBottom="12dp"
         app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Start_Title"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/ic_clock_black"/>
 
         <TextView
             android:id="@+id/Combined_Item_Start_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Pass_Duration_Layout"
-        style="@style/CombinedLayoutMaterial"
+        style="@style/CombinedLayout"
         android:paddingBottom="12dp"
         app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Duration_Title"
-            style="@style/CombinedImageMaterial"
+            style="@style/CombinedImage"
             app:srcCompat="@drawable/ic_timer_black"/>
 
         <TextView
             android:id="@+id/Combined_Item_Duration_Text"
-            style="@style/CombinedTextMaterial"/>
+            style="@style/CombinedText"/>
     </LinearLayout>
 
     <TextView

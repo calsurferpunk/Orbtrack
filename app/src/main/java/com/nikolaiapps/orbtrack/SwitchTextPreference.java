@@ -37,7 +37,7 @@ public class SwitchTextPreference extends ValueTypePreference
     {
         super(context, attrs, defStyleAttr, defStyleRes);
 
-        this.setLayoutResource(R.layout.switch_text_preference_material_layout);
+        this.setLayoutResource(R.layout.switch_text_preference_layout);
 
         //set defaults
         valueType = Integer.class;

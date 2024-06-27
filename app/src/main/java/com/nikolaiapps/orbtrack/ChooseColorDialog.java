@@ -153,7 +153,7 @@ public class ChooseColorDialog
         BorderButton colorBefore2View;
         ViewGroup.LayoutParams colorImageParams;
         ViewGroup.LayoutParams brightBarParams;
-        View colorDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.choose_color_material_dialog, null, false) : null);
+        View colorDialogView = (viewInflater != null ? viewInflater.inflate(R.layout.choose_color_dialog, null, false) : null);
         final Resources res = (haveContext ? currentContext.getResources() : null);
         final CircularProgressIndicator colorProgress = (colorDialogView != null ? colorDialogView.findViewById(R.id.Color_Progress) : null);
         float[] buttonSize = Globals.dpsToPixels(currentContext, 45, 35);

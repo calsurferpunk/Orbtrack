@@ -260,7 +260,7 @@ public abstract class Calculate
                 haveSun = haveMoon = false;
 
                 //remember strings and layout ID
-                this.itemsRefID = R.layout.calculate_view_material_item;
+                this.itemsRefID = R.layout.calculate_view_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -476,7 +476,7 @@ public abstract class Calculate
 
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp, boolean haveSun, boolean haveMoon)
             {
-                super(context, julianDate, items, R.layout.calculate_view_material_item, R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, -1, widthDp);
+                super(context, julianDate, items, R.layout.calculate_view_item, R.id.View_Title_Text, R.id.View_Progress_Group, R.id.View_Data_Group, -1, widthDp);
                 this.haveSun = haveSun;
                 this.haveMoon = haveMoon;
             }
@@ -724,7 +724,7 @@ public abstract class Calculate
                 }
 
                 //remember strings and layout ID
-                this.itemsRefID = R.layout.calculate_pass_material_item;
+                this.itemsRefID = R.layout.calculate_pass_item;
 
                 //ID stays the same
                 this.setHasStableIds(true);
@@ -1197,7 +1197,7 @@ public abstract class Calculate
             {
                 super(context);
 
-                int itemId = R.layout.calculate_coordinates_material_item;
+                int itemId = R.layout.calculate_coordinates_item;
 
                 hasItems = false;
                 currentZone = zone;
@@ -1354,7 +1354,7 @@ public abstract class Calculate
         {
             public SubItemListAdapter(Context context, double julianDate, CalculateDataBase[] items, int widthDp)
             {
-                super(context, julianDate, items, R.layout.calculate_coordinates_material_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, -1, widthDp);
+                super(context, julianDate, items, R.layout.calculate_coordinates_item, R.id.Coordinate_Title_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, -1, widthDp);
             }
 
             @Override
@@ -1463,7 +1463,7 @@ public abstract class Calculate
 
             if(convertView == null)
             {
-                convertView = listInflater.inflate(R.layout.side_menu_list_material_group, parent, false);
+                convertView = listInflater.inflate(R.layout.side_menu_list_group, parent, false);
             }
             groupTitleImage = convertView.findViewById(R.id.Group_Title_Image);
             if(groupTitleImage != null)
@@ -3118,7 +3118,7 @@ public abstract class Calculate
         int elevationMinVisibility = View.VISIBLE;
         int intersectionVisibility = (onIntersection ? View.VISIBLE : View.GONE);
         final Database.DatabaseSatellite[] orbitals;
-        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.calculate_input_material_layout, container, false);
+        ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.calculate_input_layout, container, false);
         View viewRow = rootView.findViewById(R.id.Calculate_View_Row);
         View intersectionUnitLayout = rootView.findViewById(R.id.Calculate_Intersection_Unit_Layout);
         View elevationMinUnitLayout = rootView.findViewById(R.id.Calculate_Elevation_Min_Unit_Layout);

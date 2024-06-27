@@ -224,8 +224,6 @@
     <string name="text_12">12</string>
     <string name="text_14">14</string>
     <string name="text_30">30</string>
-    <string name="text_90_plus_minus">+/-90</string>
-    <string name="text_180_plus_minus">+/-180</string>
     <string name="text_and">and</string>
     <string name="text_at">at</string>
     <string name="text_camera_error">Error using camera</string>
@@ -242,7 +240,6 @@
     <string name="text_list_is">List is</string>
     <string name="text_list_no_data">No list data</string>
     <string name="text_location_failed">Failed to get location</string>
-    <string name="text_location_success">Success getting location</string>
     <string name="text_location_watching">Watching for location changes</string>
     <string name="text_login_failed">Login failed</string>
     <string name="text_no_address_found_error">No address found for location</string>
@@ -448,7 +445,6 @@
     <string name="title_last_plural">Last</string>
     <string name="title_last_quarter">Last Quarter</string>
     <string name="title_latitude">Latitude</string>
-    <string name="title_latitude_north_south">Latitude (N+/S-)</string>
     <string name="title_latitude_north_south_range">Latitude (N +180/S -180)</string>
     <string name="title_launch_date">Launch Date</string>
     <string name="title_launch_number">Launch Number</string>
@@ -479,7 +475,6 @@
     <string name="title_locations">Locations</string>
     <string name="title_login">Login</string>
     <string name="title_longitude">Longitude</string>
-    <string name="title_longitude_west_east">Longitude (W+/E-)</string>
     <string name="title_longitude_west_east_range">Longitude (W +180/E -180)</string>
     <string name="title_low">Low</string>
     <string name="title_manual">Manual</string>
@@ -551,7 +546,6 @@
     <string name="title_pink">Pink</string>
     <string name="title_planets">Planets</string>
     <string name="title_pluto">Pluto</string>
-    <string name="title_privacy_policy">Privacy Policy</string>
     <string name="title_purple">Purple</string>
     <string name="title_quality">Quality</string>
     <string name="title_quick_settings">Quick Settings</string>
@@ -659,7 +653,6 @@
     <string name="title_theme">Theme</string>
     <string name="title_this_year">This Year</string>
     <string name="title_time">Time</string>
-    <string name="title_time_interval">Time Interval</string>
     <string name="title_time_since">Time Since</string>
     <string name="title_time_until">Time Until</string>
     <string name="title_time_zone">Time Zone</string>

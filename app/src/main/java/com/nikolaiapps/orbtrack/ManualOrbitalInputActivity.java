@@ -30,7 +30,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.manual_object_input_material_layout);
+        setContentView(R.layout.manual_object_input_layout);
 
         int index;
         final Intent resultIntent = new Intent();

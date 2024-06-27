@@ -31,7 +31,7 @@ public class CustomAlertDialogBuilder extends AlertDialog.Builder
     {
         int backgroundColor;
         FrameLayout.LayoutParams params;
-        View titleView = LayoutInflater.from(context).inflate(R.layout.dialog_title_material_view, null, false);
+        View titleView = LayoutInflater.from(context).inflate(R.layout.dialog_title_view, null, false);
         MaterialCardView titleGroup;
 
         if(titleView instanceof TextView)

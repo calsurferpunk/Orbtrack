@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:animateLayoutChanges="true">
-    <include layout="@layout/orbital_search_material_layout" android:visibility="gone"/>
+    <include layout="@layout/orbital_search_layout" android:visibility="gone"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/Master_Add_List"

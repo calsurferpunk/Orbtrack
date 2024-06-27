@@ -557,7 +557,7 @@ public abstract class Current
                 ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
-                this.itemsRefID = R.layout.current_combined_material_item;
+                this.itemsRefID = R.layout.current_combined_item;
 
                 combinedItems = new Items(MainActivity.Groups.Current, PageType.Combined);
 
@@ -1232,7 +1232,7 @@ public abstract class Current
                 ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
-                this.itemsRefID = R.layout.current_timeline_material_item;
+                this.itemsRefID = R.layout.current_timeline_item;
                 timelineItems = new Current.Items(MainActivity.Groups.Current, PageType.Timeline);
 
                 //get division count

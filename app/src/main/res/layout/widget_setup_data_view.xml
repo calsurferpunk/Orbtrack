@@ -12,7 +12,7 @@
                 android:hint="@string/title_orbital">
                 <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Widget_Setup_Orbital_Text_List"
-                    style="@style/WidgetSetupMaterialWideList"/>
+                    style="@style/WidgetSetupWideList"/>
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
 
@@ -28,7 +28,7 @@
                 android:hint="@string/title_location">
                 <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Widget_Setup_Location_Source_Text_List"
-                    style="@style/WidgetSetupMaterialWideList"/>
+                    style="@style/WidgetSetupWideList"/>
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
 
@@ -79,7 +79,7 @@
                 android:hint="@string/empty">
                 <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                     android:id="@+id/Widget_Setup_Interval_Text_List"
-                    style="@style/WidgetSetupMaterialWideList"/>
+                    style="@style/WidgetSetupWideList"/>
             </com.google.android.material.textfield.TextInputLayout>
         </TableRow>
     </TableLayout>

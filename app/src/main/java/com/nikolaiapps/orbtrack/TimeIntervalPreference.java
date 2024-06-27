@@ -56,7 +56,7 @@ public class TimeIntervalPreference extends CustomPreference
         super(context, attrs, defStyleAttr, defStyleRes);
 
         this.setPersistent(false);
-        this.setLayoutResource(R.layout.time_interval_preference_material_layout);
+        this.setLayoutResource(R.layout.time_interval_preference_layout);
 
         Resources res = context.getResources();
 

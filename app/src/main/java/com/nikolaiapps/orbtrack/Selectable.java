@@ -305,7 +305,7 @@ public abstract class Selectable
 
                 try
                 {
-                    itemDetailsGroup = (ViewGroup)inflater.inflate(R.layout.item_detail_material_dialog, null);
+                    itemDetailsGroup = (ViewGroup)inflater.inflate(R.layout.item_detail_dialog, null);
                 }
                 catch(Exception ex)
                 {
@@ -461,7 +461,7 @@ public abstract class Selectable
 
                 if(vertical)
                 {
-                    emptyText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailVerticalDividerMaterial));
+                    emptyText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailVerticalDivider));
 
                     dividerHolder = new LinearLayout(currentContext);
                     params = new TableRow.LayoutParams();
@@ -526,9 +526,9 @@ public abstract class Selectable
                 if(canShow)
                 {
                     MaterialCardView groupCard = new MaterialCardView(currentContext);
-                    TableLayout currentDetailTable = new TableLayout(new ContextThemeWrapper(currentContext, R.style.DetailTableMaterial));
+                    TableLayout currentDetailTable = new TableLayout(new ContextThemeWrapper(currentContext, R.style.DetailTable));
                     TableRow groupRow = new TableRow(new ContextThemeWrapper(currentContext, R.style.DetailTableRow));
-                    TextView groupText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailTextMaterial));
+                    TextView groupText = new TextView(new ContextThemeWrapper(currentContext, R.style.DetailTextBold));
                     LinearLayout.LayoutParams cardParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                     TableRow.LayoutParams detailParams;
                     TableRow.LayoutParams groupParams = new TableRow.LayoutParams();
@@ -1496,7 +1496,7 @@ public abstract class Selectable
             View header;
             View listColumns;
             Context context = this.getContext();
-            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.list_material_view, container, false);
+            ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.list_view, container, false);
 
             //remember group and page
             group = getGroupParam();

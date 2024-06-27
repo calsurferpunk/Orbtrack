@@ -207,7 +207,7 @@ public abstract class Orbitals
             columnTitleStringId = titleStringId;
             simple = isSimple;
             forSetup = (columnTitleStringId > 0);
-            this.itemsRefID = R.layout.orbitals_material_item;
+            this.itemsRefID = R.layout.orbitals_item;
 
             //set load items task
             loadItems = new LoadItemsTask(new OrbitalFilterList.OnLoadItemsListener()

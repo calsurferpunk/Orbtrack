@@ -26,7 +26,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Global_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -60,7 +60,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Name_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -95,7 +95,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Pass_Start_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -123,7 +123,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Pass_End_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -151,7 +151,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Pass_Elevation_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -179,7 +179,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Pass_Azimuth_Start_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -207,7 +207,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Pass_Azimuth_End_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -235,7 +235,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Pass_Duration_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox
@@ -269,7 +269,7 @@
                     style="@style/WidgetSetupListInputLayout">
                     <com.nikolaiapps.orbtrack.SelectableAutoCompleteTextView
                         android:id="@+id/Widget_Setup_Location_Text_Size_Text_List"
-                        style="@style/WidgetSetupMaterialList"/>
+                        style="@style/WidgetSetupList"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <CheckBox

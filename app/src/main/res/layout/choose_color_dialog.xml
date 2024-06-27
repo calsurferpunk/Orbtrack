@@ -115,7 +115,7 @@
 
         <LinearLayout
             android:id="@+id/Color_Red_Layout"
-            style="@style/ChooseColorMaterialLayout">
+            style="@style/ChooseColorLayout">
             <TextView
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_r"/>
@@ -128,13 +128,13 @@
                 style="@style/ChooseColorTextInputLayout">
                 <EditText
                     android:id="@+id/Color_Red_Text"
-                    style="@style/ChooseColorMaterialEditText"/>
+                    style="@style/ChooseColorEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/Color_Green_Layout"
-            style="@style/ChooseColorMaterialLayout">
+            style="@style/ChooseColorLayout">
             <TextView
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_g"/>
@@ -147,13 +147,13 @@
                 style="@style/ChooseColorTextInputLayout">
                 <EditText
                     android:id="@+id/Color_Green_Text"
-                    style="@style/ChooseColorMaterialEditText"/>
+                    style="@style/ChooseColorEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/Color_Blue_Layout"
-            style="@style/ChooseColorMaterialLayout">
+            style="@style/ChooseColorLayout">
             <TextView
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_b"/>
@@ -166,13 +166,13 @@
                 style="@style/ChooseColorTextInputLayout">
                 <EditText
                     android:id="@+id/Color_Blue_Text"
-                    style="@style/ChooseColorMaterialEditText"/>
+                    style="@style/ChooseColorEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 
         <LinearLayout
             android:id="@+id/Color_Opacity_Layout"
-            style="@style/ChooseColorMaterialLayout">
+            style="@style/ChooseColorLayout">
             <TextView
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_a"/>
@@ -185,7 +185,7 @@
                 style="@style/ChooseColorTextInputLayout">
                 <EditText
                     android:id="@+id/Color_Opacity_Text"
-                    style="@style/ChooseColorMaterialEditText"/>
+                    style="@style/ChooseColorEditText"/>
             </com.google.android.material.textfield.TextInputLayout>
         </LinearLayout>
 

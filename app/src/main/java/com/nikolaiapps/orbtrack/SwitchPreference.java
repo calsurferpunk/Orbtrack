@@ -23,7 +23,7 @@ public class SwitchPreference extends CustomPreference
         super(context, attrs, defStyleAttr, defStyleRes);
 
         this.persistBoolean(false);
-        this.setLayoutResource(R.layout.switch_preference_material_layout);
+        this.setLayoutResource(R.layout.switch_preference_layout);
 
         //set defaults
         isChecked = false;

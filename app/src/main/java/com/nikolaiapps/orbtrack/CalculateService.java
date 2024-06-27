@@ -33,28 +33,13 @@ public class CalculateService extends NotifyService
         static final String EndJulian = "endJulian";
         static final String ApplyRefraction = "applyRefraction";
         static final String Id = "id";
-        static final String Satellite = "satellite";
-        static final String Illumination = "illum";
-        static final String PhaseName = "pn";
         static final String AzimuthStart = "azStart";
         static final String AzimuthEnd = "azEnd";
-        static final String AzimuthTravel = "azTravel";
         static final String ElevationMax = "elMax";
-        static final String ClosestAzimuth = "closestAz";
-        static final String ClosestElevation = "closestEl";
-        static final String Calculating = "calculating";
-        static final String FoundPass = "foundPass";
-        static final String FinishedCalculating = "finishedCalc";
-        static final String FoundPassStart = "foundPassStart";
-        static final String PassProgress = "passProgress";
-        static final String PassQuality = "passQuality";
         static final String ZoneStart = "zoneStart";
         static final String TimeStart = "timeStart";
         static final String ZoneEnd = "zoneEnd";
         static final String TimeEnd = "timeEnd";
-        static final String Duration = "duration";
-        static final String Views = "views";
-        static final String Views2 = "views2";
         static final String PassData = "passData";
         static final String NotifyType = "notifyType";
         static final String Latitude = "latitude";
@@ -158,6 +143,7 @@ public class CalculateService extends NotifyService
         public boolean passCalculateFinished;
         public final boolean showPathProgress;
         public final boolean showPassQuality;
+        public final boolean hideUnknownPasses;
         public double passAzStart;
         public double passAzEnd;
         public double passAzTravel;
@@ -181,13 +167,7 @@ public class CalculateService extends NotifyService
             @Override
             public PassData createFromParcel(Parcel source)
             {
-                Bundle bundle = source.readBundle(getClass().getClassLoader());
-                if(bundle == null)
-                {
-                    bundle = new Bundle();
-                }
-
-                return(new PassData(bundle.getInt(ParamTypes.Id), bundle.getDouble(ParamTypes.AzimuthStart), bundle.getDouble(ParamTypes.AzimuthEnd), bundle.getDouble(ParamTypes.AzimuthTravel), bundle.getDouble(ParamTypes.ElevationMax), bundle.getDouble(ParamTypes.ClosestAzimuth), bundle.getDouble(ParamTypes.ClosestElevation), bundle.getBoolean(ParamTypes.Calculating), bundle.getBoolean(ParamTypes.FoundPass), bundle.getBoolean(ParamTypes.FinishedCalculating), bundle.getBoolean(ParamTypes.FoundPassStart), bundle.getBoolean(ParamTypes.PassProgress), bundle.getBoolean(ParamTypes.PassQuality), bundle.getString(ParamTypes.ZoneStart), bundle.getLong(ParamTypes.TimeStart), bundle.getString(ParamTypes.ZoneEnd), bundle.getLong(ParamTypes.TimeEnd), bundle.getString(ParamTypes.Duration), bundle.getParcelableArray(ParamTypes.Views), bundle.getParcelableArray(ParamTypes.Views2), bundle.getParcelable(ParamTypes.Satellite), bundle.getDouble(ParamTypes.Illumination), bundle.getString(ParamTypes.PhaseName)));
+                return(new PassData(source.readInt(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readString(), source.readParcelableArray(CalculateViewsTask.OrbitalView.class.getClassLoader()), source.readParcelableArray(CalculateViewsTask.OrbitalView.class.getClassLoader()), source.readParcelable(Calculations.SatelliteObjectType.class.getClassLoader()), source.readDouble(), source.readString()));
             }
 
             @Override
@@ -197,7 +177,7 @@ public class CalculateService extends NotifyService
             }
         };
 
-        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
+        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
         {
             super((sat != null ? sat.getSatelliteNum() : Universe.IDs.None), index);
             this.satellite = (sat != null ? new Calculations.SatelliteObjectType(sat) : null);
@@ -214,6 +194,7 @@ public class CalculateService extends NotifyService
             this.passCalculated = foundPass;
             this.passCalculateFinished = finishedCalculating;
             this.showPathProgress = usePathProgress;
+            this.hideUnknownPasses = hideUnknownPasses;
             this.showPassQuality = usePassQuality;
             this.passTimeStart = startTime;
             this.passTimeEnd = endTime;
@@ -227,17 +208,17 @@ public class CalculateService extends NotifyService
             this.passViews = copyViewArray(views);
             this.passViews2 = copyViewArray(views2);
         }
-        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, usePassQuality, startTime, endTime, duration, views, views2, sat, null, illumination, phaseName);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, null, illumination, phaseName);
         }
-        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean useListPathProgress, boolean useListPassQuality, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean useListPathProgress, boolean useListPassQuality, boolean hideUnknownPasses, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, useListPathProgress, useListPassQuality, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, useListPathProgress, useListPassQuality, hideUnknownPasses, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
         }
         public PassData(int index, Database.SatelliteData currentSatellite)
         {
-            this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, false, false, null, null, "", null, null, null, 0, null);
+            this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, false, false, false, null, null, "", null, null, null, 0, null);
 
             if(currentSatellite != null && currentSatellite.satellite != null)
             {
@@ -262,7 +243,7 @@ public class CalculateService extends NotifyService
         }
         public PassData(PassData copyFrom)
         {
-            this(copyFrom.listIndex, copyFrom.passAzStart, copyFrom.passAzEnd, copyFrom.passAzTravel, copyFrom.passElMax, copyFrom.passClosestAz, copyFrom.passClosestEl, copyFrom.passCalculating, copyFrom.passCalculated, copyFrom.passCalculateFinished, copyFrom.passStartFound, copyFrom.showPathProgress, copyFrom.showPassQuality, copyFrom.passTimeStart, copyFrom.passTimeEnd, copyFrom.passDuration, copyFrom.passViews, copyFrom.passViews2, copyFrom.satellite, copyFrom.satellite2, copyFrom.illumination, copyFrom.phaseName);
+            this(copyFrom.listIndex, copyFrom.passAzStart, copyFrom.passAzEnd, copyFrom.passAzTravel, copyFrom.passElMax, copyFrom.passClosestAz, copyFrom.passClosestEl, copyFrom.passCalculating, copyFrom.passCalculated, copyFrom.passCalculateFinished, copyFrom.passStartFound, copyFrom.showPathProgress, copyFrom.showPassQuality, copyFrom.hideUnknownPasses, copyFrom.passTimeStart, copyFrom.passTimeEnd, copyFrom.passDuration, copyFrom.passViews, copyFrom.passViews2, copyFrom.satellite, copyFrom.satellite2, copyFrom.illumination, copyFrom.phaseName);
             id = copyFrom.id;
             id2 = copyFrom.id2;
             name = copyFrom.name;
@@ -275,34 +256,30 @@ public class CalculateService extends NotifyService
         @Override
         public void writeToParcel(Parcel dest, int flags)
         {
-            Bundle bundle = new Bundle();
-
-            bundle.putInt(ParamTypes.Id, id);
-            bundle.putParcelable(ParamTypes.Satellite, satellite);
-            bundle.putDouble(ParamTypes.AzimuthStart, passAzStart);
-            bundle.putDouble(ParamTypes.AzimuthEnd, passAzEnd);
-            bundle.putDouble(ParamTypes.AzimuthTravel, passAzTravel);
-            bundle.putDouble(ParamTypes.ElevationMax, passElMax);
-            bundle.putDouble(ParamTypes.ClosestAzimuth, passClosestAz);
-            bundle.putDouble(ParamTypes.ClosestElevation, passClosestEl);
-            bundle.putBoolean(ParamTypes.Calculating, passCalculating);
-            bundle.putBoolean(ParamTypes.FoundPass, passCalculated);
-            bundle.putBoolean(ParamTypes.FinishedCalculating, passCalculateFinished);
-            bundle.putBoolean(ParamTypes.FoundPassStart, passStartFound);
-            bundle.putBoolean(ParamTypes.PassProgress, showPathProgress);
-            bundle.putBoolean(ParamTypes.PassQuality, showPassQuality);
-            bundle.putString(ParamTypes.ZoneStart, passTimeStart != null ? passTimeStart.getTimeZone().getID() : "");
-            bundle.putLong(ParamTypes.TimeStart, passTimeStart != null ? passTimeStart.getTimeInMillis() : 0);
-            bundle.putString(ParamTypes.ZoneEnd, passTimeEnd != null ? passTimeEnd.getTimeZone().getID() : "");
-            bundle.putLong(ParamTypes.TimeEnd, passTimeEnd != null ? passTimeEnd.getTimeInMillis() : 0);
-            bundle.putString(ParamTypes.Duration, passDuration);
-            bundle.putDouble(ParamTypes.Illumination, illumination);
-            bundle.putString(ParamTypes.PhaseName, phaseName);
-            bundle.putParcelableArray(ParamTypes.Views, passViews);
-            bundle.putParcelableArray(ParamTypes.Views2, passViews2);
-            bundle.putParcelable(ParamTypes.Satellite, satellite);
-
-            dest.writeBundle(bundle);
+            dest.writeInt(id);
+            dest.writeDouble(passAzStart);
+            dest.writeDouble(passAzEnd);
+            dest.writeDouble(passAzTravel);
+            dest.writeDouble(passElMax);
+            dest.writeDouble(passClosestAz);
+            dest.writeDouble(passClosestEl);
+            dest.writeByte((byte)(passCalculating ? 1 : 0));
+            dest.writeByte((byte)(passCalculated ? 1 : 0));
+            dest.writeByte((byte)(passCalculateFinished ? 1 : 0));
+            dest.writeByte((byte)(passStartFound ? 1 : 0));
+            dest.writeByte((byte)(showPathProgress ? 1 : 0));
+            dest.writeByte((byte)(showPassQuality ? 1 : 0));
+            dest.writeByte((byte)(hideUnknownPasses ? 1 : 0));
+            dest.writeString(passTimeStart != null ? passTimeStart.getTimeZone().getID() : "");
+            dest.writeLong(passTimeStart != null ? passTimeStart.getTimeInMillis() : 0);
+            dest.writeString(passTimeEnd != null ? passTimeEnd.getTimeZone().getID() : "");
+            dest.writeLong(passTimeEnd != null ? passTimeEnd.getTimeInMillis() : 0);
+            dest.writeString(passDuration);
+            dest.writeParcelableArray(passViews, 0);
+            dest.writeParcelableArray(passViews2, 0);
+            dest.writeParcelable(satellite, 0);
+            dest.writeDouble(illumination);
+            dest.writeString(phaseName);
         }
 
         private CalculateViewsTask.OrbitalView[] copyViewArray(CalculateViewsTask.OrbitalView[] copyFrom)

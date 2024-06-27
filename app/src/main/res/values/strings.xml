@@ -147,6 +147,7 @@
     <string name="desc_google_play_services_fail">Sorry. There is an unknown problem with Google Play services.</string>
     <string name="desc_hide_constellation_star_paths">Hide star paths when showing constellations</string>
     <string name="desc_hide_distant_path_times">Hide time labels on path outside nearby view</string>
+    <string name="desc_hide_unknown_passes">Hide pass displays if none are found</string>
     <string name="desc_hold_selected">Keep selected orbital when manually moving away from it</string>
     <string name="desc_imperial">Imperial (mi/ft)</string>
     <string name="desc_information_source">Descriptions and details of satellites</string>
@@ -413,6 +414,7 @@
     <string name="title_guide">Guide</string>
     <string name="title_hide_constellation_star_paths">Hide Constellation Star Paths</string>
     <string name="title_hide_distant_path_times">Hide Distant Path Times</string>
+    <string name="title_hide_unknown_passes">Hide Unknown Passes</string>
     <string name="title_hide_selected">Hide Selected</string>
     <string name="title_high">High</string>
     <string name="title_hold_selected">Hold Selected</string>

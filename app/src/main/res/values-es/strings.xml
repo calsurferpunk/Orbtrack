@@ -147,6 +147,7 @@
     <string name="desc_google_play_services_fail">Lo siento. Hay un problema desconocido con los servicios de Google Play.</string>
     <string name="desc_hide_constellation_star_paths">Ocultar trayectorias de estrellas al mostrar constelaciones</string>
     <string name="desc_hide_distant_path_times">Ocultar etiquetas de tiempo en el camino fuera de la vista cercana</string>
+    <string name="desc_hide_unknown_passes">Ocultar pantallas de pase si no se encuentra ninguna</string>
     <string name="desc_hold_selected">Mantener el orbital seleccionado al alejarse manualmente de él</string>
     <string name="desc_imperial">Imperial (mi/pies)</string>
     <string name="desc_information_source">Descripciones y detalles de satélites.</string>
@@ -413,6 +414,7 @@
     <string name="title_guide">Guía</string>
     <string name="title_hide_constellation_star_paths">Ocultar Caminos Estelares de Constelaciones</string>
     <string name="title_hide_distant_path_times">Ocultar Tiempos de Ruta Distantes</string>
+    <string name="title_hide_unknown_passes">Ocultar Pases Desconocidos</string>
     <string name="title_hide_selected">Ocultar Seleccionado</string>
     <string name="title_high">Alto</string>
     <string name="title_hold_selected">Mantener Seleccionado</string>

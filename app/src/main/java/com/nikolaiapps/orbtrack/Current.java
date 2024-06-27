@@ -394,9 +394,9 @@ public abstract class Current
                 }
             }
 
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathProgress, boolean usePathQuality)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathProgress, boolean usePathQuality, boolean hideUnknownPasses)
             {
-                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePathQuality, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
+                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePathQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
 
                 azimuth = elevation = rangeKm = speedKms = latitude = longitude = altitudeKm = Float.MAX_VALUE;
 
@@ -415,7 +415,7 @@ public abstract class Current
 
             public void setLoading(boolean loading)
             {
-                int passVisibility = (loading || !tleIsAccurate ? View.GONE : View.VISIBLE);
+                int passVisibility = (loading || !tleIsAccurate || (hideUnknownPasses && !passStartFound && !inUnknownPassTimeStartNow()) ? View.GONE : View.VISIBLE);
 
                 if(passLoadingProgress != null)
                 {
@@ -427,7 +427,7 @@ public abstract class Current
                 }
                 if(passDurationLayout != null)
                 {
-                    passDurationLayout.setVisibility(passVisibility);
+                    passDurationLayout.setVisibility(hideUnknownPasses && !passStartFound ? View.GONE : passVisibility);
                 }
             }
 
@@ -554,6 +554,7 @@ public abstract class Current
                 int index = 0;
                 boolean usePathProgress = Settings.getListPathProgress(context);
                 boolean usePassQuality = Settings.getListPassQuality(context);
+                boolean hideUnknownPasses = Settings.getListHideUnknownPasses(context);
                 ArrayList<Item> items = new ArrayList<>(orbitals.length);
 
                 //remember using material and layout ID
@@ -573,7 +574,7 @@ public abstract class Current
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
                         //add item
-                        items.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality));
+                        items.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality, hideUnknownPasses));
                     }
 
                     //setup items
@@ -603,7 +604,7 @@ public abstract class Current
             @Override
             public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position)
             {
-                int sortBy = Settings.getCurrentSortBy(position);
+                int sortBy = Settings.getCurrentSortBy(PageType.Combined);
                 int visibility;
                 Item currentItem = combinedItems.getCombinedItem(position);
                 View itemView = holder.itemView;

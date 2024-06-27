@@ -230,6 +230,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case ScreenKey.ListView:
                         SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
                         SwitchPreference passQualitySwitch = this.findPreference(Settings.PreferenceName.ListShowPassQuality);
+                        SwitchPreference hideUnknownPassesSwitch = this.findPreference(Settings.PreferenceName.ListHideUnknownPasses);
                         IconListPreference listUpdateRateList = this.findPreference(Settings.PreferenceName.ListUpdateDelay);
 
                         //initialize values
@@ -238,6 +239,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(pathProgressSwitch);
                         setupSwitch(passQualitySwitch);
+                        setupSwitch(hideUnknownPassesSwitch);
                         setupList(listUpdateRateList, Settings.Options.Rates.updateRateItems, null, null, null, null);
                         break;
 
@@ -1666,6 +1668,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.OrbitalIcons:
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.ListShowPassQuality:
+                        case Settings.PreferenceName.ListHideUnknownPasses:
                         case Settings.PreferenceName.TimelineShowViewQuality:
                         case Settings.PreferenceName.TimelineMinuteInterval:
                         case Settings.PreferenceName.MetricUnits:

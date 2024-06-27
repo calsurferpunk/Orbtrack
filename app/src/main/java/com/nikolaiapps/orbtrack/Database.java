@@ -926,9 +926,11 @@ public class Database extends SQLiteOpenHelper
         private static int[] typeCount = null;
         private static DatabaseSatellite[] buffer = null;
 
-        //Add parent ID to the orbital with child ID
-        private static void addParentId(Context context, int parentId, int childId, ArrayList<Integer> usedIds)
+        //Add parent ID to the orbital with child ID and return shortest child distance
+        private static double addParentIdGetDistance(Context context, int parentId, int childId, ArrayList<Integer> usedIds)
         {
+            double shortestLightYears = Double.MAX_VALUE;
+
             //if child ID not already used
             if(!usedIds.contains(childId))
             {
@@ -943,11 +945,21 @@ public class Database extends SQLiteOpenHelper
                         currentChild.parentProperties = new ArrayList<>(0);
                     }
                     currentChild.parentProperties.add(new ParentProperties(parentId, -1));
+
+                    //if the shortest distance so far
+                    if(currentChild.distanceLightYears < shortestLightYears)
+                    {
+                        //update shortest
+                        shortestLightYears = currentChild.distanceLightYears;
+                    }
                 }
 
                 //add to used IDs
                 usedIds.add(childId);
             }
+
+            //return shortest child light years distance
+            return(shortestLightYears);
         }
 
         //Load orbitals from database into buffers
@@ -968,15 +980,27 @@ public class Database extends SQLiteOpenHelper
                 //if on a constellation and there are lines
                 if(currentOrbital.orbitalType == OrbitalType.Constellation && currentLines != null)
                 {
+                    double shortestLightYears = Double.MAX_VALUE;
                     ArrayList<Integer> usedIds = new ArrayList<>(0);
 
                     //go through each line
                     for(IdLine currentLine : currentLines)
                     {
-                        //add as parent to IDs
-                        addParentId(context, currentId, currentLine.startId, usedIds);
-                        addParentId(context, currentId, currentLine.endId, usedIds);
+                        //add as parent to IDs and get distances
+                        double startLightYears = addParentIdGetDistance(context, currentId, currentLine.startId, usedIds);
+                        double endLightYears = addParentIdGetDistance(context, currentId, currentLine.endId, usedIds);
+                        double shorterLightYears = Double.min(startLightYears, endLightYears);
+
+                        //if the shortest distance so far
+                        if(shorterLightYears < shortestLightYears)
+                        {
+                            //update shortest light years
+                            shortestLightYears = shorterLightYears;
+                        }
                     }
+
+                    //set shortest light years
+                    currentOrbital.distanceLightYears = shortestLightYears;
                 }
             }
         }
@@ -1354,7 +1378,7 @@ public class Database extends SQLiteOpenHelper
         public final double rightAscensionHours;
         public final double declinationDegs;
         public final double magnitude;
-        public final double distanceLightYears;
+        public double distanceLightYears;
         public final IdLine[] lines;
         public ArrayList<ParentProperties> parentProperties;
         public int pathColor;

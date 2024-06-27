@@ -62,9 +62,10 @@
 
     <LinearLayout
         android:id="@+id/Combined_Item_El_Layout"
-        style="@style/CombinedLayout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+        style="@style/CombinedLayoutStart"
+        android:paddingBottom="12dp"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Elevation_Image"
             style="@style/CombinedImage"
@@ -93,9 +94,10 @@
 
     <LinearLayout
         android:id="@+id/Combined_Item_Longitude_Layout"
-        style="@style/CombinedLayout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+        style="@style/CombinedLayoutStart"
+        android:paddingBottom="12dp"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Longitude_Image"
             style="@style/CombinedImage"
@@ -123,9 +125,10 @@
 
     <LinearLayout
         android:id="@+id/Combined_Item_Speed_Layout"
-        style="@style/CombinedLayout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+        style="@style/CombinedLayoutStart"
+        android:paddingBottom="12dp"
+        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Speed_Image"
             style="@style/CombinedImage"
@@ -140,17 +143,16 @@
     <com.google.android.material.progressindicator.CircularProgressIndicator
         android:id="@+id/Combined_Item_Pass_Loading_Progress"
         style="@style/ProgressCircleSmall"
+        app:layout_constraintStart_toStartOf="@id/Combined_Item_Pass_Start_Layout"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout"
+        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Pass_Start_Layout"
         android:visibility="gone"/>
 
     <LinearLayout
         android:id="@+id/Combined_Item_Pass_Start_Layout"
-        style="@style/CombinedLayoutStart"
-        android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
+        style="@style/CombinedLayout"
+        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
+        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/Combined_Item_Start_Title"
             style="@style/CombinedImage"

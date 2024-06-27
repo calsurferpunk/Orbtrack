@@ -106,6 +106,7 @@ public abstract class Settings
         static final String ListUpdateDelay = "ListUpdateDelay";
         static final String ListShowPassProgress = "ListShowPassProgress";
         static final String ListShowPassQuality = "ListShowPassQuality";
+        static final String ListHideUnknownPasses = "ListHideUnknownPasses";
         static final String ListOrbitalTypeFilter = "ListOrbitalTypeFilter";
         static final String LensFirstRun = "LensFirstRun";
         static final String LensFirstCalibrate = "LensFirstCalibrate";
@@ -2098,6 +2099,7 @@ public abstract class Settings
             case PreferenceName.LensHideDistantPathTimes:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
+            case PreferenceName.ListHideUnknownPasses:
             case PreferenceName.QuickSettingsShowTitles:
             case PreferenceName.TimelineShowViewQuality:
             case PreferenceName.MapMarkerShowShadow:
@@ -2908,6 +2910,12 @@ public abstract class Settings
     public static boolean getListPassQuality(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.ListShowPassQuality));
+    }
+
+    //Gets list unknown passes being hidden
+    public static boolean getListHideUnknownPasses(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.ListHideUnknownPasses));
     }
 
     //Gets list update delay

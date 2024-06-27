@@ -983,7 +983,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         if(useParent)
         {
             //setup example pass
-            currentPass = new CalculateService.PassData(0, 123.456, 234.567, 0, 45.123, 0.75, 1.3, false, true, true, true, true, true, null, null, null, null, null, null, 85.23, context.getString(R.string.title_full));
+            currentPass = new CalculateService.PassData(0, 123.456, 234.567, 0, 45.123, 0.75, 1.3, false, true, true, true, true, true, true, null, null, null, null, null, null, 85.23, context.getString(R.string.title_full));
         }
 
         //if pass is set

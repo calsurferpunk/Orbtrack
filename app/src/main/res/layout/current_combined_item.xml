@@ -153,10 +153,9 @@
         style="@style/CombinedLayout"
         app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
         app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Start_Title"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/ic_clock_black"/>
+        <com.nikolaiapps.orbtrack.AnalogClock
+            android:id="@+id/Combined_Item_Start_Clock"
+            style="@style/CombinedImage"/>
 
         <TextView
             android:id="@+id/Combined_Item_Start_Text"

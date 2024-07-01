@@ -337,6 +337,7 @@ public abstract class Current
             private TextView durationText;
             private TextView latitudeText;
             private TextView longitudeText;
+            private AnalogClock startClock;
             private LinearProgressIndicator passProgress;
             private CircularProgressIndicator passLoadingProgress;
             private LinearLayout passStartLayout;
@@ -413,21 +414,56 @@ public abstract class Current
                 tleIsAccurate = (currentSatellite != null && currentSatellite.getTLEIsAccurate());
             }
 
-            public void setLoading(boolean loading)
+            public void setLoading(Context context, TimeZone zone, boolean loading)
             {
                 int passVisibility = (loading || !tleIsAccurate || (hideUnknownPasses && !passStartFound && !inUnknownPassTimeStartNow()) ? View.GONE : View.VISIBLE);
+                float elapsedPercent;
+
+                if(zone == null)
+                {
+                    zone = TimeZone.getDefault();
+                }
 
                 if(passLoadingProgress != null)
                 {
                     passLoadingProgress.setVisibility(loading && tleIsAccurate ? View.VISIBLE : View.GONE);
                 }
+
                 if(passStartLayout != null)
                 {
                     passStartLayout.setVisibility(passVisibility);
                 }
+                if(startClock != null && passStartFound)
+                {
+                    startClock.setTime(Globals.getLocalTime(passTimeStart, zone));
+                }
+                if(startText != null)
+                {
+                    startText.setText(inUnknownPassTimeStartNow() ? context.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
+                }
+
                 if(passDurationLayout != null)
                 {
                     passDurationLayout.setVisibility(hideUnknownPasses && !passStartFound ? View.GONE : passVisibility);
+                }
+                if(durationText != null)
+                {
+                    durationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
+                }
+
+                if(passQualityView != null)
+                {
+                    passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : getPathQualityColor(passElMax));
+                }
+
+                if(passProgress != null)
+                {
+                    elapsedPercent = (showPathProgress ? getPassProgressPercent(Globals.getGMTTime()) : Float.MAX_VALUE);
+                    passProgress.setVisibility(elapsedPercent != Float.MAX_VALUE ? View.VISIBLE : View.GONE);
+                    if(elapsedPercent != Float.MAX_VALUE)
+                    {
+                        passProgress.setProgress((int)elapsedPercent);
+                    }
                 }
             }
 
@@ -436,18 +472,12 @@ public abstract class Current
                 return((latitude != 0 || longitude != 0 || altitudeKm != 0) && (latitude != Float.MAX_VALUE && longitude != Float.MAX_VALUE && altitudeKm != Float.MAX_VALUE));
             }
 
-            public void updateDisplays(Context context, TimeZone zone)
+            public void updateDisplays(Context context)
             {
                 Resources res = context.getResources();
                 boolean haveGeo = haveGeo();
-                float elapsedPercent;
                 String text;
                 String kmUnit = Globals.getKmLabel(res);
-
-                if(zone == null)
-                {
-                    zone = TimeZone.getDefault();
-                }
 
                 if(nameImage != null && icon != null)
                 {
@@ -504,31 +534,6 @@ public abstract class Current
                 if(longitudeText != null)
                 {
                     longitudeText.setText(haveGeo ? Globals.getLongitudeDirectionString(res, longitude, 2) : "-");
-                }
-
-                if(startText != null)
-                {
-                    startText.setText(inUnknownPassTimeStartNow() ? res.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
-                }
-
-                if(durationText != null)
-                {
-                    durationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
-                }
-
-                if(passQualityView != null)
-                {
-                    passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : getPathQualityColor(passElMax));
-                }
-
-                if(passProgress != null)
-                {
-                    elapsedPercent = (showPathProgress ? getPassProgressPercent(Globals.getGMTTime()) : Float.MAX_VALUE);
-                    passProgress.setVisibility(elapsedPercent != Float.MAX_VALUE ? View.VISIBLE : View.GONE);
-                    if(elapsedPercent != Float.MAX_VALUE)
-                    {
-                        passProgress.setProgress((int)elapsedPercent);
-                    }
                 }
             }
         }
@@ -630,6 +635,7 @@ public abstract class Current
                 currentItem.rangeText = itemView.findViewById(R.id.Combined_Item_Range_Text);
                 currentItem.speedText = itemView.findViewById(R.id.Combined_Item_Speed_Text);
                 currentItem.speedImage = itemView.findViewById(R.id.Combined_Item_Speed_Image);
+                currentItem.startClock = itemView.findViewById(R.id.Combined_Item_Start_Clock);
                 currentItem.startText = itemView.findViewById(R.id.Combined_Item_Start_Text);
                 currentItem.durationText = itemView.findViewById(R.id.Combined_Item_Duration_Text);
                 currentItem.nameImage = itemView.findViewById(R.id.Combined_Item_Name_Image);
@@ -677,8 +683,8 @@ public abstract class Current
                     speedLayout.setVisibility(visibility);
                 }
 
-                currentItem.setLoading(!currentItem.passCalculateFinished && currentItem.tleIsAccurate);
-                currentItem.updateDisplays(currentContext, MainActivity.getTimeZone());
+                currentItem.setLoading(currentContext, MainActivity.getTimeZone(), !currentItem.passCalculateFinished && currentItem.tleIsAccurate);
+                currentItem.updateDisplays(currentContext);
             }
 
             @Override

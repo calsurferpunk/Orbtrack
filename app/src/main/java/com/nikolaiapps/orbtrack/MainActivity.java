@@ -5159,8 +5159,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                         public void run()
                                         {
                                             //update displays
-                                            currentItem.setLoading(false);
-                                            currentItem.updateDisplays(activity, observer.timeZone);
+                                            currentItem.setLoading(activity, observer.timeZone, false);
+                                            currentItem.updateDisplays(activity);
 
                                             //if need to sort
                                             if(needSort)

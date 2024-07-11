@@ -298,12 +298,12 @@ public abstract class Globals
     //Sub page type
     public static abstract class SubPageType
     {
-        //static final int None = 0;
         static final int Input = 0;
         static final int List = 1;
-        static final int Lens = 2;
-        static final int Map = 3;
-        static final int Globe = 4;
+        static final int CameraLens = 2;
+        static final int VirtualLens = 3;
+        static final int Map = 4;
+        static final int Globe = 5;
     }
 
     //Bool object
@@ -3714,7 +3714,8 @@ public abstract class Globals
                     orbitalTypeFilterList = Settings.getMapOrbitalTypeFilter(context);
                     break;
 
-                case Globals.SubPageType.Lens:
+                case Globals.SubPageType.CameraLens:
+                case Globals.SubPageType.VirtualLens:
                     orbitalTypeFilterList = Settings.getLensOrbitalTypeFilter(context);
                     break;
             }

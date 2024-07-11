@@ -35,38 +35,46 @@
         android:visible="false"/>
 
     <item
-        android:id="@+id/menu_lens"
-        android:title="@string/title_lens_view"
+        android:id="@+id/menu_camera_lens"
+        android:title="@string/title_camera_lens"
         android:icon="@drawable/ic_photo_camera_white"
         android:orderInCategory="50"
+        app:showAsAction="always"
+        android:visible="false"/>
+
+    <item
+        android:id="@+id/menu_virtual_lens"
+        android:title="@string/title_virtual_lens"
+        android:icon="@drawable/ic_panorama_photosphere_white"
+        android:orderInCategory="60"
         app:showAsAction="always"
         android:visible="false"/>
 
     <item android:id="@+id/menu_save"
         android:title="@string/title_save"
         android:icon="@drawable/ic_save_white"
-        android:orderInCategory="60"
+        android:orderInCategory="70"
         app:showAsAction="always"
         android:visible="false"/>
 
     <item android:id="@+id/menu_update"
         android:title="@string/title_update"
         android:icon="@drawable/ic_sync_white"
-        android:orderInCategory="70"
+        android:orderInCategory="80"
         app:showAsAction="always"
         android:visible="false"/>
 
     <item android:id="@+id/menu_edit"
           android:title="@string/title_edit"
           android:icon="@drawable/ic_mode_edit_white"
-          android:orderInCategory="80"
+          android:orderInCategory="90"
           app:showAsAction="always"
           android:visible="false"/>
 
     <item android:id="@+id/menu_overflow"
         android:title="@string/title_settings"
         android:icon="@drawable/ic_more_vert_white"
-        android:orderInCategory="90"
+        android:orderInCategory="100"
         app:showAsAction="always"
         android:visible="false">
         <menu>

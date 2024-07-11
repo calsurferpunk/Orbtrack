@@ -110,6 +110,7 @@ public abstract class Settings
         static final String ListOrbitalTypeFilter = "ListOrbitalTypeFilter";
         static final String LensFirstRun = "LensFirstRun";
         static final String LensFirstCalibrate = "LensFirstCalibrate";
+        static final String LensDisplayType = "LensDisplayType";
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
         static final String LensDirectionCentered = "LensDirectionCentered";
@@ -216,6 +217,13 @@ public abstract class Settings
         //Lens view
         public static abstract class LensView
         {
+            //Display Type
+            public static abstract class DisplayType
+            {
+                static final int Camera = 0;
+                static final int Virtual = 1;
+            }
+
             //Indicator types
             public static abstract class IndicatorType
             {
@@ -2184,6 +2192,9 @@ public abstract class Settings
             case PreferenceName.OrbitalIcons:
                 return(Options.Display.OrbitalIcons.Freepik);
 
+            case PreferenceName.LensDisplayType:
+                return(Options.LensView.DisplayType.Camera);
+
             case PreferenceName.LensIndicator:
                 return(Options.LensView.IndicatorType.Icon);
 
@@ -2992,6 +3003,18 @@ public abstract class Settings
     public static int getMapUpdateDelay(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.MapUpdateDelay));
+    }
+
+    //Sets lens display type
+    public static void setLensDisplayType(Context context, int lensDisplayType)
+    {
+        setPreferenceInt(context, PreferenceName.LensDisplayType, lensDisplayType);
+    }
+
+    //Returns lens display type
+    public static int getLensDisplayType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensDisplayType));
     }
 
     //Gets lens update delay

@@ -257,13 +257,14 @@ public abstract class Selectable
         //Detail button type
         public static abstract class DetailButtonType
         {
-            static final int LensView = 0;
-            static final int MapView = 1;
-            static final int GlobeView = 2;
-            static final int Graph = 3;
-            static final int Notify = 4;
-            static final int Preview3d = 5;
-            static final int Info = 6;
+            static final int CameraView = 0;
+            static final int VirtualView = 1;
+            static final int MapView = 2;
+            static final int GlobeView = 3;
+            static final int Graph = 4;
+            static final int Notify = 5;
+            static final int Preview3d = 6;
+            static final int Info = 7;
         }
 
         //Item detail dialog
@@ -670,8 +671,12 @@ public abstract class Selectable
 
                 switch(infoButtonType)
                 {
-                    case DetailButtonType.LensView:
+                    case DetailButtonType.CameraView:
                         imageId = R.drawable.ic_photo_camera_white;
+                        break;
+
+                    case DetailButtonType.VirtualView:
+                        imageId = R.drawable.ic_panorama_photosphere_white;
                         break;
 
                     case DetailButtonType.MapView:

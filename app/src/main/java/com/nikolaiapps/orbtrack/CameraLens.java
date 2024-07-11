@@ -35,6 +35,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -599,6 +600,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private int calibrateIndex;
     private int selectedNoradId;
     private int selectedOrbitalIndex;
+    private final boolean isVirtual;
     private final boolean allowZoom;
     private final boolean allowExposure;
     private boolean compassBad;
@@ -646,6 +648,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private Camera currentCamera;
     private final LensOverlay currentCameraOverlay;
     private final PreviewView currentCameraView;
+    private final SkyboxView currentVirtualView;
     private ProcessCameraProvider currentCameraProvider;
     private final Paint currentPaint;
     private final Path timePathShape;
@@ -1199,7 +1202,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
     }
 
-    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals, boolean needConstellations)
+    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals, boolean needConstellations, boolean usingVirtual)
     {
         super(context);
 
@@ -1211,6 +1214,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         boolean darkTheme = Settings.getDarkTheme(context);
         Resources currentResources = context.getResources();
         DisplayMetrics metrics = currentResources.getDisplayMetrics();
+        ViewGroup.LayoutParams viewParams = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         float[] dpPixels = Globals.dpsToPixels(context, 2, 5, 4, 16, 42, 14);
 
         selectedOrbitalIndex = -1;
@@ -1282,9 +1286,24 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         currentPaint.setTypeface(Typeface.create("Arial", Typeface.BOLD));
         currentPaint.setTextSize(textSize);
 
-        currentCameraView = new PreviewView(context);
-        currentCameraView.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        this.addView(currentCameraView);
+        isVirtual = usingVirtual;
+        if(isVirtual)
+        {
+            currentVirtualView = new SkyboxView(context);
+            currentVirtualView.setLayoutParams(viewParams);
+            currentVirtualView.setImages(R.drawable.lens_virtual_left, R.drawable.lens_virtual_right, R.drawable.lens_virtual_bottom, R.drawable.lens_virtual_top, R.drawable.lens_virtual_front, R.drawable.lens_virtual_back);
+            this.addView(currentVirtualView);
+
+            currentCameraView = null;
+        }
+        else
+        {
+            currentCameraView = new PreviewView(context);
+            currentCameraView.setLayoutParams(viewParams);
+            this.addView(currentCameraView);
+
+            currentVirtualView = null;
+        }
 
         currentCameraOverlay = new LensOverlay(context);
         this.addView(currentCameraOverlay);
@@ -1361,7 +1380,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     }
     public CameraLens(Context context)
     {
-        this(context, null, false);
+        this(context, null, false, true);
     }
 
     @Override
@@ -1559,7 +1578,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         float previousZoom;
 
         //if allowing zoom, controls exist, and have zoom values
-        if(allowZoom && controls != null && haveZoomValues)
+        if(allowZoom && (isVirtual || controls != null) && haveZoomValues)
         {
             //keep zoom within range
             if(zoom > cameraZoomMax)
@@ -1577,7 +1596,14 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
 
             //set zoom
             cameraZoomRatio = zoom;
-            controls.setZoomRatio(zoom);
+            if(isVirtual)
+            {
+                currentVirtualView.setZoom(zoom);
+            }
+            else
+            {
+                controls.setZoomRatio(zoom);
+            }
 
             //if zoom bar exists
             if(zoomBar != null)
@@ -1874,19 +1900,19 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     //Updates azimuth declination for the given observer
     public void updateAzDeclination(Calculations.ObserverType observer)
     {
-        azDeclination = (new GeomagneticField((float)observer.geo.latitude, (float)observer.geo.longitude, (float)observer.geo.altitudeKm * 1000, System.currentTimeMillis())).getDeclination();
+        azDeclination = (isVirtual ? 0 : (new GeomagneticField((float)observer.geo.latitude, (float)observer.geo.longitude, (float)observer.geo.altitudeKm * 1000, System.currentTimeMillis())).getDeclination());
     }
 
     //Get averaged az degree
     private float getAzDeg()
     {
-        return((float)Globals.normalizeAngle(getAverageDegree(azDegArray) + azDeclination + azUserOffset));
+        return((float)Globals.normalizeAngle(isVirtual ? currentVirtualView.getAzimuth() : (getAverageDegree(azDegArray) + azDeclination + azUserOffset)));
     }
 
     //Get averaged el degree
     private float getElDeg()
     {
-        return((float)Globals.normalizeAngle(getAverageDegree(elDegArray)));
+        return((float)Globals.normalizeAngle(isVirtual ? currentVirtualView.getElevation() : getAverageDegree(elDegArray)));
     }
 
     //Gets degree to pixel conversion for given width
@@ -2593,90 +2619,117 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         //set provider
         currentCameraProvider = cameraProvider;
 
-        //try to open camera and preview
-        selector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
-        currentCameraView.setImplementationMode(cameraRotate ? PreviewView.ImplementationMode.COMPATIBLE : PreviewView.ImplementationMode.PERFORMANCE);
-        preview.setSurfaceProvider(currentCameraView.getSurfaceProvider());
-        currentCamera = currentCameraProvider.bindToLifecycle((LifecycleOwner)context, selector, preview);
-
-        //get camera properties
-        info = currentCamera.getCameraInfo();
-        controls = currentCamera.getCameraControl();
-        id = Camera2CameraInfo.from(info).getCameraId();
-        exposure = info.getExposureState();
-        try
+        //if virtual
+        if(isVirtual)
         {
-            //get characteristics
-            characteristics = manager.getCameraCharacteristics(id);
-            sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
-            focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-            maxFocus = focalLengths[0];
+            //no camera
+            currentCamera = null;
+            info = null;
+            controls = null;
 
-            //get hardware degree width and height
-            cameraHardwareDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
-            cameraHardwareDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
-
-            //save hardware degree width and height
-            Settings.setLensWidthHardware(context, cameraHardwareDegWidth);
-            Settings.setLensHeightHardware(context, cameraHardwareDegHeight);
-        }
-        catch(Exception ex)
-        {
-            //do nothing
-        }
-
-        //get desired camera degree view
-        cameraDegWidth = (useAutoWidth ? cameraHardwareDegWidth : userDegWidth);
-        cameraDegHeight = (useAutoHeight ? cameraHardwareDegHeight : userDegHeight);
-        updateUsedWidthHeight();
-
-        //set orientation
-        preview.setTargetRotation(getRotation(cameraRotate ? ((orientation + 180) % 360) : orientation));
-
-        //setup exposure
-        exposureRange = null;
-        exposureIncrement = 1.0f;
-        if(exposure.isExposureCompensationSupported())
-        {
-            exposureIndex = exposure.getExposureCompensationIndex();
-            exposureRange = exposure.getExposureCompensationRange();
-            exposureIncrement = exposure.getExposureCompensationStep().floatValue();
-        }
-        if(exposureBar != null)
-        {
-            if(exposureRange != null)
-            {
-                exposureBar.setValueFrom(exposureRange.getLower());
-                exposureBar.setValueTo(exposureRange.getUpper());
-                exposureBar.setValue(exposureIndex);
-                exposureBar.setLabelBehavior(LabelFormatter.LABEL_GONE);
-                exposureBar.addOnChangeListener(new Slider.OnChangeListener()
-                {
-                    @Override
-                    public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
-                    {
-                        //if from the user
-                        if(fromUser)
-                        {
-                            //set exposure
-                            setExposure((int)value, controls, true);
-                        }
-                    }
-                });
-            }
-            exposureBar.setVisibility(lensShowSliders && allowExposure && exposureRange != null ? View.VISIBLE : View.GONE);
-        }
-
-        //setup zoom
-        zoomState = info.getZoomState().getValue();
-        if(zoomState != null)
-        {
-            cameraZoomMin = zoomState.getMinZoomRatio();
-            cameraZoomMax = zoomState.getMaxZoomRatio();
+            //set degree view
+            cameraDegWidth = (inOrientationPortrait() ? 90f : 45f);
+            cameraDegHeight = (cameraDegWidth == 90f ? 45f : 90f);
+            updateUsedWidthHeight();
         }
         else
         {
-            cameraZoomMin = cameraZoomMax = 1.0f;
+            //try to open camera and preview
+            selector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
+            if(currentCameraView != null)
+            {
+                currentCameraView.setImplementationMode(cameraRotate ? PreviewView.ImplementationMode.COMPATIBLE : PreviewView.ImplementationMode.PERFORMANCE);
+                preview.setSurfaceProvider(currentCameraView.getSurfaceProvider());
+            }
+            currentCamera = currentCameraProvider.bindToLifecycle((LifecycleOwner)context, selector, preview);
+
+            //get camera properties
+            info = currentCamera.getCameraInfo();
+            controls = currentCamera.getCameraControl();
+            id = Camera2CameraInfo.from(info).getCameraId();
+            exposure = info.getExposureState();
+            try
+            {
+                //get characteristics
+                characteristics = manager.getCameraCharacteristics(id);
+                sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+                focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+                maxFocus = focalLengths[0];
+
+                //get hardware degree width and height
+                cameraHardwareDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
+                cameraHardwareDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
+
+                //save hardware degree width and height
+                Settings.setLensWidthHardware(context, cameraHardwareDegWidth);
+                Settings.setLensHeightHardware(context, cameraHardwareDegHeight);
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
+
+            //get desired camera degree view
+            cameraDegWidth = (useAutoWidth ? cameraHardwareDegWidth : userDegWidth);
+            cameraDegHeight = (useAutoHeight ? cameraHardwareDegHeight : userDegHeight);
+            updateUsedWidthHeight();
+
+            //set orientation
+            preview.setTargetRotation(getRotation(cameraRotate ? ((orientation + 180) % 360) : orientation));
+
+            //setup exposure
+            exposureRange = null;
+            exposureIncrement = 1.0f;
+            if(exposure.isExposureCompensationSupported())
+            {
+                exposureIndex = exposure.getExposureCompensationIndex();
+                exposureRange = exposure.getExposureCompensationRange();
+                exposureIncrement = exposure.getExposureCompensationStep().floatValue();
+            }
+            if(exposureBar != null)
+            {
+                if(exposureRange != null)
+                {
+                    exposureBar.setValueFrom(exposureRange.getLower());
+                    exposureBar.setValueTo(exposureRange.getUpper());
+                    exposureBar.setValue(exposureIndex);
+                    exposureBar.setLabelBehavior(LabelFormatter.LABEL_GONE);
+                    exposureBar.addOnChangeListener(new Slider.OnChangeListener()
+                    {
+                        @Override
+                        public void onValueChange(@NonNull Slider slider, float value, boolean fromUser)
+                        {
+                            //if from the user
+                            if(fromUser)
+                            {
+                                //set exposure
+                                setExposure((int)value, controls, true);
+                            }
+                        }
+                    });
+                }
+                exposureBar.setVisibility(lensShowSliders && allowExposure && exposureRange != null ? View.VISIBLE : View.GONE);
+            }
+        }
+
+        //setup zoom
+        if(isVirtual)
+        {
+            cameraZoomMin = 1.0f;
+            cameraZoomMax = 16.0f;
+        }
+        else
+        {
+            zoomState = info.getZoomState().getValue();
+            if(zoomState != null)
+            {
+                cameraZoomMin = zoomState.getMinZoomRatio();
+                cameraZoomMax = zoomState.getMaxZoomRatio();
+            }
+            else
+            {
+                cameraZoomMin = cameraZoomMax = 1.0f;
+            }
         }
         haveZoomValues = (cameraZoomMin != cameraZoomMax);
         if(haveZoomValues)
@@ -2695,8 +2748,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             @Override
             public boolean onScale(@NonNull ScaleGestureDetector detector)
             {
-                ZoomState currentZoomState = info.getZoomState().getValue();
-                float currentRatio = (currentZoomState != null ? currentZoomState.getZoomRatio() : 1.0f);
+                ZoomState currentZoomState = (isVirtual ? null : info.getZoomState().getValue());
+                float currentRatio = ((isVirtual && currentVirtualView != null) ? currentVirtualView.getZoom() : currentZoomState != null ? currentZoomState.getZoomRatio() : 1.0f);
 
                 //set zoom
                 setZoom(currentRatio * detector.getScaleFactor(), controls);
@@ -2705,6 +2758,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 return(true);
             }
         }) : null);
+        if(isVirtual && currentVirtualView != null)
+        {
+            currentVirtualView.setScaleGestureDetector(scaleDetector);
+        }
         if(zoomBar != null)
         {
             if(haveZoomValues)
@@ -2744,97 +2801,106 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         Resources res = context.getResources();
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
 
-        //if using camera and have permission
-        if(useCamera && havePermission)
+        //if virtual
+        if(isVirtual)
         {
-            //stop camera if previously open
-            stopCamera(false);
-
-            try
+            //setup camera
+            setupCamera(context, null);
+        }
+        else
+        {
+            //if using camera and have permission
+            if(useCamera && havePermission)
             {
-                //try to start camera
-                if(currentCameraProvider == null)
+                //stop camera if previously open
+                stopCamera(false);
+
+                try
                 {
-                    //get camera provider instance
-                    cameraProviderFuture = ProcessCameraProvider.getInstance(context);
-                    cameraProviderFuture.addListener(new Runnable()
+                    //try to start camera
+                    if(currentCameraProvider == null)
                     {
-                        @Override
-                        public void run()
+                        //get camera provider instance
+                        cameraProviderFuture = ProcessCameraProvider.getInstance(context);
+                        cameraProviderFuture.addListener(new Runnable()
                         {
-                            try
+                            @Override
+                            public void run()
                             {
-                                //setup camera
-                                setupCamera(context, cameraProviderFuture.get());
+                                try
+                                {
+                                    //setup camera
+                                    setupCamera(context, cameraProviderFuture.get());
+                                }
+                                catch (Exception ex)
+                                {
+                                    //throw error
+                                    throw(new RuntimeException(ex));
+                                }
                             }
-                            catch (Exception ex)
-                            {
-                                //throw error
-                                throw(new RuntimeException(ex));
-                            }
+                        }, ContextCompat.getMainExecutor(context));
+                    }
+                    else
+                    {
+                        //setup camera
+                        setupCamera(context, currentCameraProvider);
+                    }
+
+                    //start sensors
+                    startSensors = true;
+                }
+                catch(Exception ex)
+                {
+                    currentCameraProvider = null;
+                    Globals.showSnackBar(this, res.getString(R.string.text_camera_error), ex.getMessage(), true, true);
+                }
+            }
+            //else if using camera, don't have permission, but can ask
+            else if(useCamera && Globals.canAskCameraPermission)
+            {
+                //ask for permission
+                Globals.askCameraPermission(context, retrying, new Globals.OnDenyListener()
+                {
+                    @Override
+                    public void OnDeny(byte resultCode)
+                    {
+                        //if were retrying
+                        if(retrying)
+                        {
+                            //use without camera
+                            startCamera(true);
                         }
-                    }, ContextCompat.getMainExecutor(context));
+                    }
+                });
+                if(retrying)
+                {
+                    //don't ask again
+                    Globals.canAskCameraPermission = false;
+                }
+            }
+            //else not using camera or can't get permission
+            else
+            {
+                //if using camera but can't get permission
+                if(useCamera)
+                {
+                    //show denied and don't ask again
+                    Globals.showDenied(this, res.getString(R.string.desc_permission_camera_deny));
+                    Globals.canAskCameraPermission = false;
                 }
                 else
                 {
-                    //setup camera
-                    setupCamera(context, currentCameraProvider);
+                    //stop camera if previously open
+                    stopCamera(false);
                 }
+
+                //set desired camera degree view
+                cameraDegWidth = userDegWidth;
+                cameraDegHeight = userDegHeight;
 
                 //start sensors
                 startSensors = true;
             }
-            catch(Exception ex)
-            {
-                currentCameraProvider = null;
-                Globals.showSnackBar(this, res.getString(R.string.text_camera_error), ex.getMessage(), true, true);
-            }
-        }
-        //else if using camera, don't have permission, but can ask
-        else if(useCamera && Globals.canAskCameraPermission)
-        {
-            //ask for permission
-            Globals.askCameraPermission(context, retrying, new Globals.OnDenyListener()
-            {
-                @Override
-                public void OnDeny(byte resultCode)
-                {
-                    //if were retrying
-                    if(retrying)
-                    {
-                        //use without camera
-                        startCamera(true);
-                    }
-                }
-            });
-            if(retrying)
-            {
-                //don't ask again
-                Globals.canAskCameraPermission = false;
-            }
-        }
-        //else not using camera or can't get permission
-        else
-        {
-            //if using camera but can't get permission
-            if(useCamera)
-            {
-                //show denied and don't ask again
-                Globals.showDenied(this, res.getString(R.string.desc_permission_camera_deny));
-                Globals.canAskCameraPermission = false;
-            }
-            else
-            {
-                //stop camera if previously open
-                stopCamera(false);
-            }
-
-            //set desired camera degree view
-            cameraDegWidth = userDegWidth;
-            cameraDegHeight = userDegHeight;
-
-            //start sensors
-            startSensors = true;
         }
 
         //if starting sensors
@@ -2859,7 +2925,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
 
         //start/stop update thread
-        updateThread.setRunning(startSensors);
+        updateThread.setRunning(isVirtual || startSensors);
     }
     public void startCamera()
     {

@@ -836,13 +836,17 @@ public abstract class Calculate
                 {
                     final TimeZone defaultZone = TimeZone.getDefault();
                     final TimeZone currentZone = MainActivity.getTimeZone();
+                    final int lensDisplayType = Settings.getLensDisplayType(currentContext);
                     final long midPassTimeMs = currentItem.getMidPass();
                     final long currentTimeMs = System.currentTimeMillis();
                     final long passDurationMs = (currentItem.passTimeStart != null && currentItem.passTimeEnd != null ? (currentItem.passTimeEnd.getTimeInMillis() - currentItem.passTimeStart.getTimeInMillis()) : 0);
+                    final boolean haveSensors = SensorUpdate.havePositionSensors(currentContext);
                     final boolean haveSatellite2 = (currentItem.satellite2 != null);
                     final boolean isSun = (item.id == Universe.IDs.Sun || (haveSatellite2 && currentItem.satellite2.getSatelliteNum() == Universe.IDs.Sun));
                     final boolean isMoon = (item.id == Universe.IDs.Moon || (haveSatellite2 && currentItem.satellite2.getSatelliteNum() == Universe.IDs.Moon));
                     final boolean useLocalZone = (!defaultZone.equals(currentZone) && defaultZone.getOffset(currentTimeMs) != currentZone.getOffset(currentTimeMs));
+                    final boolean usingCameraLens = (lensDisplayType == Settings.Options.LensView.DisplayType.Camera);
+                    final boolean usingVirtualLens = (lensDisplayType == Settings.Options.LensView.DisplayType.Virtual);
                     final Calculations.ObserverType location = MainActivity.getObserver();
                     final Resources res = currentContext.getResources();
                     final String unknownString = Globals.getUnknownString(currentContext);
@@ -880,7 +884,8 @@ public abstract class Calculate
                     {
                         detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Graph);
                     }
-                    detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.LensView).setVisibility(SensorUpdate.havePositionSensors(currentContext) ? View.VISIBLE : View.GONE);
+                    detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.CameraView).setVisibility(usingCameraLens && haveSensors ? View.VISIBLE : View.GONE);
+                    detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.VirtualView).setVisibility(usingVirtualLens || (usingCameraLens && !haveSensors) ? View.VISIBLE : View.GONE);
                     if(!haveSatellite2)
                     {
                         detailDialog.addButton(pageNum, item.id, currentItem, DetailButtonType.Notify);
@@ -1714,7 +1719,8 @@ public abstract class Calculate
                             break;
 
                         case Globals.SubPageType.List:
-                        case Globals.SubPageType.Lens:
+                        case Globals.SubPageType.CameraLens:
+                        case Globals.SubPageType.VirtualLens:
                             ViewAngles.Item[] savedItems = (ViewAngles.Item[])PageAdapter.getSavedItems(page);
 
                             switch(subPage)
@@ -1725,10 +1731,11 @@ public abstract class Calculate
                                     newView = this.onCreateView(inflater, container, listAdapter);
                                     break;
 
-                                case Globals.SubPageType.Lens:
+                                case Globals.SubPageType.CameraLens:
+                                case Globals.SubPageType.VirtualLens:
                                     selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
                                     usingStarsAndConstellations = getUsingStarsAndConstellations(selectedOrbitals);
-                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, usingStarsAndConstellations[0], usingStarsAndConstellations[1]);
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, usingStarsAndConstellations[0], usingStarsAndConstellations[1], (subPage == Globals.SubPageType.VirtualLens));
                                     break;
                             }
                             break;
@@ -1743,7 +1750,8 @@ public abstract class Calculate
                     switch(subPage)
                     {
                         case Globals.SubPageType.List:
-                        case Globals.SubPageType.Lens:
+                        case Globals.SubPageType.CameraLens:
+                        case Globals.SubPageType.VirtualLens:
                             Passes.Item[] savedItems = (Passes.Item[])PageAdapter.getSavedItems(page);
 
                             switch(subPage)
@@ -1754,13 +1762,14 @@ public abstract class Calculate
                                     newView = this.onCreateView(inflater, container, listAdapter);
                                     break;
 
-                                case Globals.SubPageType.Lens:
+                                case Globals.SubPageType.CameraLens:
+                                case Globals.SubPageType.VirtualLens:
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PathDivisions, 8);
                                     savedInstanceState.putInt(MainActivity.ParamTypes.PassIndex, params.getInt(MainActivity.ParamTypes.PassIndex, 0));
                                     savedInstanceState.putBoolean(MainActivity.ParamTypes.GetPassItems, true);
                                     selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
                                     usingStarsAndConstellations = getUsingStarsAndConstellations(selectedOrbitals);
-                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, usingStarsAndConstellations[0], usingStarsAndConstellations[1]);
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, usingStarsAndConstellations[0], usingStarsAndConstellations[1], (subPage == Globals.SubPageType.VirtualLens));
                                     break;
                             }
                             break;
@@ -1831,10 +1840,15 @@ public abstract class Calculate
             CalculateService.CalculatePathsTask calculateIntersectionsTask = (haveMainActivity ? mainActivity.getCalculateIntersectionsTask() : null);
             int subPage = getSubPageParam();
             int mapDisplayType = Settings.getMapDisplayType(context);
+            int lensDisplayType = Settings.getLensDisplayType(context);
+            boolean haveSensors = SensorUpdate.havePositionSensors(context);
             boolean usingMapDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
             boolean usingGlobeDisplay = (mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
+            boolean usingCameraDisplay = (lensDisplayType == Settings.Options.LensView.DisplayType.Camera);
+            boolean usingVirtualDisplay = (lensDisplayType == Settings.Options.LensView.DisplayType.Virtual);
             boolean onSubPageList = (subPage == Globals.SubPageType.List);
-            boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
+            boolean onSubPageCameraLens = (subPage == Globals.SubPageType.CameraLens);
+            boolean onSubPageVirtualLens = (subPage == Globals.SubPageType.VirtualLens);
             boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
             boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
             boolean onCalculateView = (pageNum == Calculate.PageType.View);
@@ -1842,20 +1856,22 @@ public abstract class Calculate
             boolean onCalculateCoordinates = (pageNum == Calculate.PageType.Coordinates);
             boolean onCalculateIntersection = (pageNum == Calculate.PageType.Intersection);
             boolean onCalculateViewList = (onCalculateView && onSubPageList);
-            boolean onCalculateViewLens = (onCalculateView && onSubPageLens);
+            boolean onCalculateViewCameraLens = (onCalculateView && onSubPageCameraLens);
+            boolean onCalculateViewVirtualLens = (onCalculateView && onSubPageVirtualLens);
             boolean onCalculatePassesList = (onCalculatePasses && onSubPageList);
-            boolean onCalculatePassesLens = (onCalculatePasses && onSubPageLens);
+            boolean onCalculatePassesLens = (onCalculatePasses && (onSubPageCameraLens || onSubPageVirtualLens));
             boolean onCalculateCoordinatesList = (onCalculateCoordinates && onSubPageList);
             boolean onCalculateCoordinatesMap = (onCalculateCoordinates && onSubPageMap);
             boolean onCalculateCoordinatesGlobe = (onCalculateCoordinates && onSubPageGlobe);
             boolean onCalculateIntersectionList = (onCalculateIntersection && onSubPageList);
-            boolean onCalculateIntersectionLens = (onCalculateIntersection && onSubPageLens);
+            boolean onCalculateIntersectionLens = (onCalculateIntersection && (onSubPageCameraLens || onSubPageVirtualLens));
             boolean calculatingViews = (calculateViewAnglesTask != null && calculateViewAnglesTask.isRunning());
             boolean calculatingPasses = (calculatePassesTask != null && calculatePassesTask.isRunning());
             boolean calculatingCoordinates = (calculateCoordinatesTask != null && calculateCoordinatesTask.calculatingCoordinates);
             boolean calculatingIntersection = (calculateIntersectionsTask != null && calculateIntersectionsTask.isRunning());
-            boolean showLens = (onCalculateViewList && !calculatingViews);
-            boolean showList = onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe;
+            boolean showCameraLens = (!calculatingViews && ((onCalculateViewList && usingCameraDisplay) || onCalculateViewVirtualLens));
+            boolean showVirtualLens = (!calculatingViews && ((onCalculateViewList && usingVirtualDisplay) || onCalculateViewCameraLens));
+            boolean showList = (onCalculateViewCameraLens || onCalculateViewVirtualLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateCoordinatesGlobe || onCalculateIntersectionLens);
             boolean showMap = (!calculatingCoordinates && ((onCalculateCoordinatesList && usingMapDisplay) || onCalculateCoordinatesGlobe));
             boolean showGlobe = (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
             boolean showSave = (onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection);
@@ -1863,8 +1879,9 @@ public abstract class Calculate
             menu.findItem(R.id.menu_list).setVisible(showList);
             menu.findItem(R.id.menu_map).setVisible(showMap);
             menu.findItem(R.id.menu_globe).setVisible(showGlobe);
-            menu.findItem(R.id.menu_lens).setVisible(showLens && SensorUpdate.havePositionSensors(context));
-            menu.findItem(R.id.menu_edit).setVisible(showSave || onCalculateViewLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateIntersectionLens || onCalculateCoordinatesGlobe);
+            menu.findItem(R.id.menu_camera_lens).setVisible(showCameraLens && haveSensors);
+            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors));
+            menu.findItem(R.id.menu_edit).setVisible(showSave || onCalculateViewCameraLens || onCalculateViewVirtualLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateCoordinatesGlobe || onCalculateIntersectionLens);
             menu.findItem(R.id.menu_save).setVisible(showSave);
         }
 

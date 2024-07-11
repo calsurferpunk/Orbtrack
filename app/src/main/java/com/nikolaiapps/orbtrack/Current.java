@@ -702,12 +702,16 @@ public abstract class Current
                 final TimeZone defaultZone = TimeZone.getDefault();
                 final TimeZone currentZone = MainActivity.getTimeZone();
                 final int mapDisplayType = Settings.getMapDisplayType(currentContext);
+                final int lensDisplayType = Settings.getLensDisplayType(currentContext);
                 final long currentTimeMs = System.currentTimeMillis();
                 final long passDurationMs = currentItem.getPassDurationMs();
+                final boolean haveSensors = SensorUpdate.havePositionSensors(currentContext);
                 final boolean isSun = (item.id == Universe.IDs.Sun);
                 final boolean isMoon = (item.id == Universe.IDs.Moon);
                 final boolean showPass = currentItem.passCalculated;
                 final boolean useLocalZone = (!defaultZone.equals(currentZone) && defaultZone.getOffset(currentTimeMs) != currentZone.getOffset(currentTimeMs));
+                final boolean usingCameraLens = (lensDisplayType == Settings.Options.LensView.DisplayType.Camera);
+                final boolean usingVirtualLens = (lensDisplayType == Settings.Options.LensView.DisplayType.Virtual);
                 final Resources res = currentContext.getResources();
                 final String unknownString = Globals.getUnknownString(currentContext);
                 final String azAbbrevString = res.getString(R.string.abbrev_azimuth);
@@ -745,7 +749,8 @@ public abstract class Current
                 {
                     detailDialog.addButton(PageType.Combined, item.id, currentItem, DetailButtonType.Graph);
                 }
-                detailDialog.addButton(PageType.Combined, item.id, currentItem, DetailButtonType.LensView).setVisibility(SensorUpdate.havePositionSensors(currentContext) ? View.VISIBLE : View.GONE);
+                detailDialog.addButton(PageType.Combined, item.id, currentItem, DetailButtonType.CameraView).setVisibility(usingCameraLens && haveSensors ? View.VISIBLE : View.GONE);
+                detailDialog.addButton(PageType.Combined, item.id, currentItem, DetailButtonType.VirtualView).setVisibility(usingVirtualLens || (usingCameraLens && !haveSensors) ? View.VISIBLE : View.GONE);
                 detailDialog.addButton(PageType.Combined, item.id, currentItem, DetailButtonType.Notify);
                 if(have3dPreview(item.id))
                 {
@@ -1383,7 +1388,7 @@ public abstract class Current
             boolean showingStars;
             boolean onCurrent = (group == MainActivity.Groups.Current);
             boolean onCombined = (page == PageType.Combined);
-            boolean createLens = (onCombined && subPage == Globals.SubPageType.Lens);
+            boolean createLens = (onCombined && (subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens));
             boolean createMapView = (onCombined && subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
             boolean mapMultiOrbitals = (createMapView && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
             boolean mapSingleOrbital = (createMapView && MainActivity.mapViewNoradID != Integer.MAX_VALUE);
@@ -1432,7 +1437,7 @@ public abstract class Current
             if(createLens)
             {
                 //create view
-                newView = onCreateLensView(this, inflater, container, MainActivity.getLensSatellites(context), savedInstanceState, showingStars, showingConstellations);
+                newView = onCreateLensView(this, inflater, container, MainActivity.getLensSatellites(context), savedInstanceState, showingStars, showingConstellations, (subPage == Globals.SubPageType.VirtualLens));
             }
             //else if need to create map view
             else if(createMapView)
@@ -1470,23 +1475,30 @@ public abstract class Current
             int page = getPageParam();
             int subPage = getSubPageParam();
             int mapDisplayType = Settings.getMapDisplayType(context);
+            int lensDisplayType = Settings.getLensDisplayType(context);
+            boolean haveSensors = SensorUpdate.havePositionSensors(context);
             boolean onCombined = (page == PageType.Combined);
             boolean usingMapDisplay = (onCombined && mapDisplayType == CoordinatesFragment.MapDisplayType.Map);
             boolean usingGlobeDisplay = (onCombined && mapDisplayType == CoordinatesFragment.MapDisplayType.Globe);
+            boolean usingCameraDisplay = (onCombined && lensDisplayType == Settings.Options.LensView.DisplayType.Camera);
+            boolean usingVirtualDisplay = (onCombined && lensDisplayType == Settings.Options.LensView.DisplayType.Virtual);
             boolean onSubPageList = (subPage == Globals.SubPageType.List);
-            boolean onSubPageLens = (subPage == Globals.SubPageType.Lens);
+            boolean onSubPageCameraLens = (subPage == Globals.SubPageType.CameraLens);
+            boolean onSubPageVirtualLens = (subPage == Globals.SubPageType.VirtualLens);
             boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
             boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
             boolean onCurrentNoSelected = (MainActivity.viewLensNoradID == Integer.MAX_VALUE && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
             boolean showMap = ((usingMapDisplay && onSubPageList) || onSubPageGlobe);
             boolean showGlobe = ((usingGlobeDisplay && onSubPageList) || onSubPageMap);
-            boolean showLens = (onCombined && onSubPageList && SensorUpdate.havePositionSensors(context));
-            boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageLens || onSubPageMap || onSubPageGlobe));
+            boolean showCameraLens = ((usingCameraDisplay && onSubPageList) || onSubPageVirtualLens);
+            boolean showVirtualLens = ((usingVirtualDisplay && onSubPageList) || onSubPageCameraLens);
+            boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageCameraLens || onSubPageVirtualLens || onSubPageMap || onSubPageGlobe));
 
             menu.findItem(R.id.menu_list).setVisible(!onSubPageList);
             menu.findItem(R.id.menu_map).setVisible(showMap);
             menu.findItem(R.id.menu_globe).setVisible(showGlobe);
-            menu.findItem(R.id.menu_lens).setVisible(showLens);
+            menu.findItem(R.id.menu_camera_lens).setVisible(showCameraLens & haveSensors);
+            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors));
             menu.findItem(R.id.menu_sort_by).setVisible(onSubPageList);
             menu.findItem(R.id.menu_filter).setVisible(showSettings);
             menu.findItem(R.id.menu_visible).setVisible(showSettings);
@@ -2308,7 +2320,7 @@ public abstract class Current
     }
 
     //Creates lens view
-    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean showingStars, boolean needConstellations)
+    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean showingStars, boolean needConstellations, boolean usingVirtual)
     {
         final Context context = pageFragment.getContext();
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
@@ -2334,7 +2346,7 @@ public abstract class Current
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
-        final CameraLens cameraView = new CameraLens(context, selectedOrbitals, needConstellations);
+        final CameraLens cameraView = new CameraLens(context, selectedOrbitals, needConstellations, usingVirtual);
         cameraView.settingsMenu = rootView.findViewById(R.id.Lens_Settings_Menu);
         final Calculate.Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
@@ -2345,7 +2357,7 @@ public abstract class Current
         final FloatingActionStateButton visibleStarsButton = (!useSaved && (showingStars || needConstellations) ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_stars_white, R.string.title_stars, R.string.title_visible_stars) : null);
         final FloatingActionStateButton showToolbarsButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_search_black, R.string.title_toolbars, R.string.title_show_toolbars);
         final FloatingActionStateButton showSlidersButton = cameraView.settingsMenu.addMenuItem(R.drawable.ic_commit_white, R.string.title_sliders, R.string.title_show_sliders);
-        final FloatingActionStateButton showCalibrationButton = (!useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align, -1) : null);
+        final FloatingActionStateButton showCalibrationButton = (!usingVirtual && !useSaved ? cameraView.settingsMenu.addMenuItem(R.drawable.ic_filter_center_focus_black, R.string.title_align, -1) : null);
         final LinearLayout buttonLayout = rootView.findViewById(R.id.Lens_Button_Layout);
         final MaterialButton selectButton = rootView.findViewById(R.id.Lens_Select_Button);
         final MaterialButton resetButton = rootView.findViewById(R.id.Lens_Reset_Button);
@@ -2364,7 +2376,7 @@ public abstract class Current
         cameraView.pathDivisions = pathDivisions;
         cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
         cameraView.zoomBar = rootView.findViewById(R.id.Lens_Zoom_Bar);
-        cameraView.exposureBar = rootView.findViewById(R.id.Lens_Exposure_Bar);
+        cameraView.exposureBar = (usingVirtual ? null : rootView.findViewById(R.id.Lens_Exposure_Bar));
         cameraView.sliderText = rootView.findViewById(R.id.Lens_Slider_Text);
         cameraView.showPaths = (lensShowPaths || useSaved);         //if showing paths or using a saved path
         lensLayout.addView(cameraView, 0);                          //add before menu

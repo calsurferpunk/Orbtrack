@@ -315,6 +315,7 @@
     <string name="title_calculate">Calcular</string>
     <string name="title_calculating_passes">Cálculo De Pases</string>
     <string name="title_camera">Cámara</string>
+    <string name="title_camera_lens">Lente Cámara</string>
     <string name="title_cancel">Cancelar</string>
     <string name="title_canceled">Cancelada</string>
     <string name="title_cant_disable">No Se Puede Desactivar</string>
@@ -694,6 +695,7 @@
     <string name="title_view">Vista</string>
     <string name="title_view_quality">Vista Calidad</string>
     <string name="title_views">Vistas</string>
+    <string name="title_virtual_lens">Lente Virtual</string>
     <string name="title_visible">Visible</string>
     <string name="title_visible_stars">Estrellas Visibles</string>
     <string name="title_visible_star_magnitude">Magnitud Estrellas Visibles</string>

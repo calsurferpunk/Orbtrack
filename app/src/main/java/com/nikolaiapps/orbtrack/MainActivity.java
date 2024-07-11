@@ -394,7 +394,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             if(usedSubPage != null)
             {
                 //need camera restart if on lens
-                restartCamera = restartCamera || (usedSubPage[index] == Globals.SubPageType.Lens);
+                restartCamera = restartCamera || (usedSubPage[index] == Globals.SubPageType.CameraLens) || (usedSubPage[index] == Globals.SubPageType.VirtualLens);
             }
 
             //if adapter is set
@@ -491,7 +491,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         updateTheme();
                     }
                     //else if -need to recreate lens view and on a lens view- or -need to recreate map and on a map view-
-                    else if((data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_LENS, false) && subPage == Globals.SubPageType.Lens) ||
+                    else if((data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_LENS, false) && (subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens)) ||
                             (data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE_MAP, false) && (subPage == Globals.SubPageType.Globe || subPage == Globals.SubPageType.Map)))
                     {
                         //recreate
@@ -815,6 +815,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         int selectedSubPage;
         int page = getMainPage();
         boolean usingGlobe = (id == R.id.menu_globe);
+        boolean usingCameraLens = (id == R.id.menu_camera_lens);
         boolean setMapDisplay = false;
         boolean setDisplayGroup = false;
         boolean onCalculate = (mainGroup == Groups.Calculate);
@@ -852,7 +853,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     break;
             }
         }
-        else if(id == R.id.menu_map || id == R.id.menu_globe)
+        else if(usingGlobe || id == R.id.menu_map)
         {
             //if not waiting on a location update
             if(!pendingLocationUpdate)
@@ -879,7 +880,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 showLocationGettingDisplay();
             }
         }
-        else if(id == R.id.menu_lens)
+        else if(usingCameraLens || id == R.id.menu_virtual_lens)
         {
             //if not waiting on a location update
             if(!pendingLocationUpdate)
@@ -887,7 +888,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
-                        setSubPage(mainGroup, page, Globals.SubPageType.Lens);
+                        setSubPage(mainGroup, page, (usingCameraLens ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
                         setDisplayGroup = true;
                         break;
 
@@ -897,11 +898,18 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Calculate.PageType.View:
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
-                                setSubPage(mainGroup, page, Globals.SubPageType.Lens);
+                                setSubPage(mainGroup, page, (usingCameraLens ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
                                 setDisplayGroup = true;
                                 break;
                         }
                         break;
+                }
+
+                //if settings display group
+                if(setDisplayGroup)
+                {
+                    //update default display
+                    Settings.setLensDisplayType(this, (usingCameraLens ? Settings.Options.LensView.DisplayType.Camera : Settings.Options.LensView.DisplayType.Virtual));
                 }
             }
             else
@@ -1037,6 +1045,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean cancelCalibration = false;
         boolean closedSettings = false;
         boolean closedSearchText = false;
+        boolean onLens = false;
         int page = getMainPage();
         int desiredSubPage;
         Calendar currentTime = Globals.getGMTTime();
@@ -1089,7 +1098,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //handle based on sub page
                     switch(currentSubPage[page])
                     {
-                        case Globals.SubPageType.Lens:
+                        case Globals.SubPageType.CameraLens:
+                        case Globals.SubPageType.VirtualLens:
+                            //update status
+                            onLens = true;
+
                             //if camera view exists
                             if(cameraView != null)
                             {
@@ -1112,7 +1125,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         case Globals.SubPageType.Map:
                         case Globals.SubPageType.Globe:
                             //if not on lens and able to close settings menu
-                            if(currentSubPage[page] != Globals.SubPageType.Lens && Current.closeMapSettingsMenu())
+                            if(!onLens && Current.closeMapSettingsMenu())
                             {
                                 closedSettings = true;
                             }
@@ -1149,7 +1162,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     //else fall through
 
                                     //go back to list
-                                case Globals.SubPageType.Lens:
+                                case Globals.SubPageType.CameraLens:
+                                case Globals.SubPageType.VirtualLens:
                                     desiredSubPage = Globals.SubPageType.List;
                                     break;
                             }
@@ -1616,7 +1630,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         int subPage = currentSubPage[Current.PageType.Combined];
 
-        if(currentViewAnglesTask != null && subPage == Globals.SubPageType.Lens)
+        if(currentViewAnglesTask != null && (subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens))
         {
             currentViewAnglesTask.needViews = true;
         }
@@ -2214,6 +2228,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     private void updateMainPagerAdapter(int page, boolean groupChanged, boolean saveItems)
     {
         int index;
+        int usedSubPage;
         boolean showCurrent = (mainGroup == Groups.Current);
         boolean showCalculate = (mainGroup == Groups.Calculate);
         PagerAdapter currentAdapter = mainPager.getAdapter();
@@ -2384,8 +2399,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             sideActionMenu.setVisibility(hasItems ? View.VISIBLE : View.GONE);
         }
 
-        //update titles and swiping status to allow if not on current/calculate with map/globe
-        allowingPagerSwipe = !((showCurrent && (currentSubPage[Current.PageType.Combined] == Globals.SubPageType.Map || currentSubPage[Current.PageType.Combined] == Globals.SubPageType.Globe)) || (showCalculate && page == Calculate.PageType.Coordinates && (calculateSubPage[page] == Globals.SubPageType.Map || calculateSubPage[page] == Globals.SubPageType.Globe)));
+        //update titles and swiping status to allow if not on current/calculate with -map/globe or virtual lens-
+        usedSubPage = (showCurrent ? currentSubPage[Current.PageType.Combined] : showCalculate ? calculateSubPage[page] : 0);
+        allowingPagerSwipe = (usedSubPage != Globals.SubPageType.Map && usedSubPage != Globals.SubPageType.Globe && usedSubPage != Globals.SubPageType.VirtualLens);
         mainPager.setSwipeEnabled(allowingPagerSwipe);
         mainPagerTitles.setVisibility(View.VISIBLE);
     }
@@ -2444,16 +2460,19 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Updates running tasks
     private void updateRunningTasks(boolean run)
     {
+        int viewSubPage = calculateSubPage[Calculate.PageType.View];
+        int passesSubPage = calculateSubPage[Calculate.PageType.Passes];
+        int intersectionSubPage = calculateSubPage[Calculate.PageType.Intersection];
         boolean onCurrent = (mainGroup == Groups.Current);
         boolean onCalculate = (mainGroup == Groups.Calculate);
         boolean onCurrentList = (onCurrent && currentSubPage[Current.PageType.Combined] == Globals.SubPageType.List);
-        boolean onCalculateViewNonInput = (onCalculate && calculateSubPage[Calculate.PageType.View] != Globals.SubPageType.Input);
-        boolean onCalculateViewLens = (onCalculate && calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens);
-        boolean onCalculatePassesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Passes] != Globals.SubPageType.Input);
-        boolean onCalculatePassesLens = (onCalculate && calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Lens);
+        boolean onCalculateViewNonInput = (onCalculate && viewSubPage != Globals.SubPageType.Input);
+        boolean onCalculateViewLens = (onCalculate && (viewSubPage == Globals.SubPageType.CameraLens || viewSubPage == Globals.SubPageType.VirtualLens));
+        boolean onCalculatePassesNonInput = (onCalculate && passesSubPage != Globals.SubPageType.Input);
+        boolean onCalculatePassesLens = (onCalculate && (passesSubPage == Globals.SubPageType.CameraLens || passesSubPage == Globals.SubPageType.VirtualLens));
         boolean onCalculateCoordinatesNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Coordinates] != Globals.SubPageType.Input);
-        boolean onCalculateIntersectionNonInput = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] != Globals.SubPageType.Input);
-        boolean onCalculateIntersectionLens = (onCalculate && calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens);
+        boolean onCalculateIntersectionNonInput = (onCalculate && intersectionSubPage != Globals.SubPageType.Input);
+        boolean onCalculateIntersectionLens = (onCalculate && (intersectionSubPage == Globals.SubPageType.CameraLens || intersectionSubPage == Globals.SubPageType.VirtualLens));
         Bundle params;
         ArrayList<Integer> multiNoradId;
 
@@ -2961,7 +2980,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 filterList = Settings.getListOrbitalTypeFilter(this);
                 break;
 
-            case Globals.SubPageType.Lens:
+            case Globals.SubPageType.CameraLens:
+            case Globals.SubPageType.VirtualLens:
                 titleStringId = R.string.title_lens_filter;
                 filterList = Settings.getLensOrbitalTypeFilter(this);
                 break;
@@ -3077,7 +3097,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         updateMainPager(false);
                         break;
 
-                    case Globals.SubPageType.Lens:
+                    case Globals.SubPageType.CameraLens:
+                    case Globals.SubPageType.VirtualLens:
                         Settings.setLensOrbitalTypeFilter(MainActivity.this, selectedArray);
                         recreate(false);
                         break;
@@ -3110,7 +3131,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         startScreenValue = SettingsActivity.ScreenKey.ListView;
                         break;
 
-                    case Globals.SubPageType.Lens:
+                    case Globals.SubPageType.CameraLens:
+                    case Globals.SubPageType.VirtualLens:
                         startScreenValue = SettingsActivity.ScreenKey.LensView;
                         break;
 
@@ -3330,16 +3352,21 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             public void onClick(final int group, final int pageNum, int itemID, Selectable.ListDisplayItem item, int buttonNum)
             {
                 final Activity activity = MainActivity.this;
+                boolean isCameraButton = false;
 
                 //handle based on button
                 switch(buttonNum)
                 {
-                    case Selectable.ListBaseAdapter.DetailButtonType.LensView:
+                    case Selectable.ListBaseAdapter.DetailButtonType.CameraView:
+                        isCameraButton = true;
+                        //fall through
+
+                    case Selectable.ListBaseAdapter.DetailButtonType.VirtualView:
                         switch(group)
                         {
                             case Groups.Current:
                                 //update sub page and norad ID
-                                setSubPage(group, pageNum, Globals.SubPageType.Lens);
+                                setSubPage(group, pageNum, (isCameraButton ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
                                 viewLensNoradID = itemID;
                                 setMainGroup(mainGroup, true);
                                 break;
@@ -3350,7 +3377,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     case Calculate.PageType.Passes:
                                     case Calculate.PageType.Intersection:
                                         //update sub page and norad ID
-                                        setSubPage(group, pageNum, Globals.SubPageType.Lens);
+                                        setSubPage(group, pageNum, (isCameraButton ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
                                         if(pageNum == Calculate.PageType.Intersection)
                                         {
                                             intersectionPassIndex = item.listIndex;
@@ -3832,6 +3859,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             @Override
             public void onPageSelected(int position)
             {
+                int subPage;
+                int lastSubPage;
                 boolean stopCamera = false;
                 boolean startCamera = false;
                 boolean allowSwipe = true;
@@ -3842,27 +3871,29 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
+                        lastSubPage = currentSubPage[lastPosition];
                         if(lastPosition == Current.PageType.Combined)
                         {
-                            //if were using camera
-                            if(currentSubPage[lastPosition] == Globals.SubPageType.Lens)
+                            //if were using lens
+                            if(lastSubPage == Globals.SubPageType.CameraLens || lastSubPage == Globals.SubPageType.VirtualLens)
                             {
                                 //make sure camera stops
                                 stopCamera = true;
                             }
                         }
 
+                        subPage = currentSubPage[position];
                         if(position == Current.PageType.Combined)
                         {
-                            //if now using camera
-                            if(currentSubPage[position] == Globals.SubPageType.Lens)
+                            //if now using lens
+                            if(subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens)
                             {
                                 //start camera
                                 startCamera = true;
                             }
 
-                            //don't allow swiping if on map/globe
-                            allowSwipe = (currentSubPage[position] != Globals.SubPageType.Map && currentSubPage[position] != Globals.SubPageType.Globe);
+                            //don't allow swiping if on map/globe or virtual lens
+                            allowSwipe = (subPage != Globals.SubPageType.Map && subPage != Globals.SubPageType.Globe && subPage != Globals.SubPageType.VirtualLens);
                         }
 
                         //if coming from another group
@@ -3874,13 +3905,14 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         break;
 
                     case Groups.Calculate:
+                        lastSubPage = calculateSubPage[lastPosition];
                         switch(lastPosition)
                         {
                             case Calculate.PageType.View:
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
-                                //if were using camera
-                                if(calculateSubPage[lastPosition] == Globals.SubPageType.Lens)
+                                //if were using lens
+                                if(lastSubPage == Globals.SubPageType.CameraLens || lastSubPage == Globals.SubPageType.VirtualLens)
                                 {
                                     //make sure camera stops
                                     stopCamera = true;
@@ -3897,22 +3929,26 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 break;
                         }
 
+                        subPage = calculateSubPage[position];
                         switch(position)
                         {
                             case Calculate.PageType.View:
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
-                                //if now using camera
-                                if(calculateSubPage[position] == Globals.SubPageType.Lens)
+                                //if now using lens
+                                if(subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens)
                                 {
                                     //start camera
                                     startCamera = true;
                                 }
+
+                                //don't allow swiping if on virtual lens
+                                allowSwipe = (subPage != Globals.SubPageType.VirtualLens);
                                 break;
 
                             case Calculate.PageType.Coordinates:
                                 //don't allow swiping if on map/globe
-                                allowSwipe = (calculateSubPage[position] != Globals.SubPageType.Map && calculateSubPage[position] != Globals.SubPageType.Globe);
+                                allowSwipe = (subPage != Globals.SubPageType.Map && subPage != Globals.SubPageType.Globe);
                                 break;
                         }
                         break;
@@ -4133,7 +4169,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean updateElapsed = false;
                 boolean onMap = (combinedSubPage == Globals.SubPageType.Map || combinedSubPage == Globals.SubPageType.Globe);
                 boolean onList = (combinedSubPage == Globals.SubPageType.List);
-                boolean onLens = (combinedSubPage == Globals.SubPageType.Lens);
+                boolean onLens = (combinedSubPage == Globals.SubPageType.CameraLens || combinedSubPage == Globals.SubPageType.VirtualLens);
                 boolean mapMultiOrbitals = (onMap && mapViewNoradID == Integer.MAX_VALUE);
                 boolean mapSingleOrbital = (onMap && mapViewNoradID != Integer.MAX_VALUE);
                 boolean lensMultiOrbitals = (onLens && viewLensNoradID == Integer.MAX_VALUE);
@@ -4554,6 +4590,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //if first run
                     if(firstRun.value)
                     {
+                        int subPage;
                         int noradId;
                         int multiCount = 0;
                         int orbitalCount;
@@ -4574,7 +4611,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         ArrayList<CalculateViewsTask.OrbitalView[]> currentViewList = new ArrayList<>(0);
 
                         //if using lens and angles list exists
-                        if(calculateSubPage[Calculate.PageType.View] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
+                        subPage = calculateSubPage[Calculate.PageType.View];
+                        if((subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens) && Calculate.PageAdapter.hasItems(Calculate.PageType.View))
                         {
                             CalculateViewsTask.OrbitalView[][] lensViews;
                             Database.DatabaseSatellite[] currentOrbitals;
@@ -4629,7 +4667,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         }
 
                         //if using lens and passes list exists
-                        if(calculateSubPage[Calculate.PageType.Passes] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Passes))
+                        subPage = calculateSubPage[Calculate.PageType.Passes];
+                        if((subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens) && Calculate.PageAdapter.hasItems(Calculate.PageType.Passes))
                         {
                             //get items
                             passesItems = Calculate.PageAdapter.getPassItems();
@@ -4650,7 +4689,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         }
 
                         //if passes list exists
-                        if(calculateSubPage[Calculate.PageType.Intersection] == Globals.SubPageType.Lens && Calculate.PageAdapter.hasItems(Calculate.PageType.Intersection))
+                        subPage = calculateSubPage[Calculate.PageType.Intersection];
+                        if((subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens) && Calculate.PageAdapter.hasItems(Calculate.PageType.Intersection))
                         {
                             //get items
                             passesItems = Calculate.PageAdapter.getIntersectionItems();
@@ -4886,13 +4926,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             }
 
                             //if changing to lens view
-                            if(subPage == Globals.SubPageType.Lens)
+                            if(subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens)
                             {
                                 //go through other pages that use lens
                                 for(int currentOtherPage : new int[]{Calculate.PageType.View, Calculate.PageType.Passes, Calculate.PageType.Intersection})
                                 {
                                     //if not the current page and page is using lens
-                                    if(currentOtherPage != page && calculateSubPage[currentOtherPage] == Globals.SubPageType.Lens)
+                                    if(currentOtherPage != page && (calculateSubPage[currentOtherPage] == Globals.SubPageType.CameraLens || calculateSubPage[currentOtherPage] == Globals.SubPageType.VirtualLens))
                                     {
                                         //set to input
                                         calculateSubPage[currentOtherPage] = Globals.SubPageType.Input;
@@ -4942,7 +4982,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     boolean onCurrent = (mainGroup == Groups.Current);
                     boolean onCalculate = (mainGroup == Groups.Calculate);
                     boolean onTimeline = (onCurrent && page == Current.PageType.Timeline);
-                    boolean onCalculateLens = (onCalculate && page < Calculate.PageType.PageCount && calculateSubPage[page] == Globals.SubPageType.Lens);
+                    boolean onCalculateLens = (onCalculate && page < Calculate.PageType.PageCount && (calculateSubPage[page] == Globals.SubPageType.CameraLens || calculateSubPage[page] == Globals.SubPageType.VirtualLens));
                     long repeatMs;
                     long startTimeMs = System.currentTimeMillis();
 

@@ -70,6 +70,11 @@ import javax.microedition.khronos.opengles.GL10;
 
 public class SkyboxView extends GLSurfaceView
 {
+    public interface OnPerspectiveChangeListener
+    {
+        void onChanged(float xDegrees, float yDegrees, float zoom);
+    }
+
     private static class SkyboxRenderer implements  GLSurfaceView.Renderer
     {
         private static class ShaderProgram
@@ -294,6 +299,7 @@ public class SkyboxView extends GLSurfaceView
         private final Context currentContext;
         private ViewBox skyBox;
         private ShaderProgram skyBoxProgram;
+        private OnPerspectiveChangeListener perspectiveChangeListener;
         private final float[] viewMatrix;
         private final float[] projectionMatrix;
         private final float[] viewProjectionMatrix;
@@ -364,10 +370,23 @@ public class SkyboxView extends GLSurfaceView
             }
         }
 
+        public void setOnPerspectiveChangeListener(OnPerspectiveChangeListener listener)
+        {
+            perspectiveChangeListener = listener;
+        }
+
         private void updatePerspective()
         {
+            float aspect = areaWidth / (float)areaHeight;
+            boolean wide = (aspect > 1.0f);
+
             needUpdate = true;
-            perspectiveM(projectionMatrix, 0, fovBase / zoomScale, areaWidth / (float)areaHeight, 1.0f, 10.0f);
+            perspectiveM(projectionMatrix, 0, fovBase / zoomScale, aspect, 1.0f, 10.0f);
+
+            if(perspectiveChangeListener != null)
+            {
+                perspectiveChangeListener.onChanged(fovBase * (wide ? aspect : 1.0f), fovBase * (wide ? 1.0f : aspect), zoomScale);
+            }
         }
 
         public float getZoom()
@@ -562,6 +581,11 @@ public class SkyboxView extends GLSurfaceView
     public void setScaleGestureDetector(ScaleGestureDetector detector)
     {
         scaleDetector = detector;
+    }
+
+    public void setOnPerspectiveChangeListener(OnPerspectiveChangeListener listener)
+    {
+        renderer.setOnPerspectiveChangeListener(listener);
     }
 
     //Sets renderer images

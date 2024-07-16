@@ -22,6 +22,7 @@ import android.view.ViewTreeObserver;
 import androidx.core.content.ContextCompat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -1322,6 +1323,11 @@ public class Graph extends View
 
     private String getValueString(double value, byte units, TimeZone zone)
     {
+        if(zone == null)
+        {
+            zone = Calendar.getInstance().getTimeZone();
+        }
+
         switch(units)
         {
             case UnitType.JulianDate:

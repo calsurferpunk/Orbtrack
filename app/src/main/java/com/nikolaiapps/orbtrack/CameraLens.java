@@ -1231,7 +1231,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         possibleAlpha = constellationAlpha + 100;
         constellationSelectedAlpha = (possibleAlpha > 200 ? Math.max(200, constellationAlpha) : Math.max(120, possibleAlpha));
         showPaths = showCalibration = compassBad = compassHadBad = false;
-        allowZoom = Settings.getLensUseZoom(context);
+        allowZoom = Settings.getLensUseZoom(context, usingVirtual);
         allowExposure = Settings.getLensUseExposure(context);
         showHorizon = Settings.getLensShowHorizon(context);
         showOutsideArea = Settings.getLensShowOutsideArea(context);
@@ -1292,6 +1292,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             currentVirtualView = new SkyboxView(context);
             currentVirtualView.setLayoutParams(viewParams);
             currentVirtualView.setImages(R.drawable.lens_virtual_left, R.drawable.lens_virtual_right, R.drawable.lens_virtual_bottom, R.drawable.lens_virtual_top, R.drawable.lens_virtual_front, R.drawable.lens_virtual_back);
+            currentVirtualView.setTargetFps(Settings.getLensFrameRate(context));
             currentVirtualView.setOnPerspectiveChangeListener(new SkyboxView.OnPerspectiveChangeListener()
             {
                 @Override

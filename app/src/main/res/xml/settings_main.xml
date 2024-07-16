@@ -70,7 +70,7 @@
                         <com.nikolaiapps.orbtrack.IconListPreference
                             app:titleText="@string/title_frame_rate"
                             android:key="MapFrameRate"
-                            android:summary="@string/desc_frame_rate"/>
+                            android:summary="@string/desc_map_frame_rate"/>
 
                         <com.nikolaiapps.orbtrack.IconListPreference
                             app:titleText="@string/title_update_rate"
@@ -436,11 +436,11 @@
                     </PreferenceCategory>
                 </PreferenceScreen>
 
-                <PreferenceScreen android:title="@string/title_lens"
-                    android:key="lensViewLens"
+                <PreferenceScreen android:title="@string/title_camera_lens"
+                    android:key="lensViewCameraLens"
                     android:icon="@drawable/ic_photo_camera_white"
                     android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
-                    <PreferenceCategory android:title="@string/title_lens">
+                    <PreferenceCategory android:title="@string/title_camera_lens">
                         <com.nikolaiapps.orbtrack.SwitchTextPreference
                             app:titleText="@string/title_auto_width"
                             app:suffixText="@string/title_degs"
@@ -485,13 +485,32 @@
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_use_zoom"
-                            android:key="LensUseZoom"
-                            android:summary="@string/desc_use_zoom"/>
+                            android:key="LensUseCameraZoom"
+                            android:summary="@string/desc_use_camera_zoom"/>
 
                         <com.nikolaiapps.orbtrack.SwitchPreference
                             android:title="@string/title_use_exposure"
                             android:key="LensUseExposure"
                             android:summary="@string/desc_use_exposure"/>
+                    </PreferenceCategory>
+                </PreferenceScreen>
+
+                <PreferenceScreen android:title="@string/title_virtual_lens"
+                    android:key="lensViewVirtualLens"
+                    android:icon="@drawable/ic_panorama_photosphere_white"
+                    android:fragment="com.nikolaiapps.orbtrack.SettingsActivity$SettingsSubFragment">
+                    <PreferenceCategory android:title="@string/title_virtual_lens">
+                        <com.nikolaiapps.orbtrack.IconListPreference
+                            app:titleText="@string/title_frame_rate"
+                            android:key="LensFrameRate"
+                            android:summary="@string/desc_lens_frame_rate"/>
+                    </PreferenceCategory>
+
+                    <PreferenceCategory android:title="@string/title_display">
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_use_zoom"
+                            android:key="LensUseVirtualZoom"
+                            android:summary="@string/desc_use_virtual_zoom"/>
                     </PreferenceCategory>
                 </PreferenceScreen>
             </PreferenceCategory>

@@ -111,6 +111,7 @@ public abstract class Settings
         static final String LensFirstRun = "LensFirstRun";
         static final String LensFirstCalibrate = "LensFirstCalibrate";
         static final String LensDisplayType = "LensDisplayType";
+        static final String LensFrameRate = "LensFrameRate";
         static final String LensUpdateDelay = "LensUpdateDelay";
         static final String LensAverageCount = "LensAverageCount";
         static final String LensDirectionCentered = "LensDirectionCentered";
@@ -124,7 +125,8 @@ public abstract class Settings
         static final String LensUseHorizon = "LensUseHorizon";
         static final String LensStarMagnitude = "LensStarMagnitude";
         static final String LensUseCamera = "LensUseCamera";
-        static final String LensUseZoom = "LensUseZoom";
+        static final String LensUseCameraZoom = "LensUseCameraZoom";
+        static final String LensUseVirtualZoom = "LensUseVirtualZoom";
         static final String LensUseExposure = "LensUseExposure";
         static final String LensRotate = "LensRotate";
         static final String LensUseAutoWidth = "LensUseAutoWidth";
@@ -2096,7 +2098,8 @@ public abstract class Settings
             case PreferenceName.LensFirstRun:
             case PreferenceName.LensFirstCalibrate:
             case PreferenceName.LensUseCamera:
-            case PreferenceName.LensUseZoom:
+            case PreferenceName.LensUseCameraZoom:
+            case PreferenceName.LensUseVirtualZoom:
             case PreferenceName.LensUseExposure:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
@@ -2214,6 +2217,7 @@ public abstract class Settings
             case PreferenceName.LensUpdateDelay:
                 return(1000);
 
+            case PreferenceName.LensFrameRate:
             case PreferenceName.MapFrameRate:
                 return(60);
 
@@ -2798,9 +2802,9 @@ public abstract class Settings
     }
 
     //Gets lens allowing zoom use
-    public static boolean getLensUseZoom(Context context)
+    public static boolean getLensUseZoom(Context context, boolean forVirtual)
     {
-        return(getPreferenceBoolean(context, PreferenceName.LensUseZoom));
+        return(getPreferenceBoolean(context, (forVirtual ? PreferenceName.LensUseVirtualZoom :  PreferenceName.LensUseCameraZoom)));
     }
 
     //Gets lens allowing exposure use
@@ -3015,6 +3019,12 @@ public abstract class Settings
     public static int getLensDisplayType(Context context)
     {
         return(getPreferenceInt(context, PreferenceName.LensDisplayType));
+    }
+
+    //Returns lens frame rate
+    public static int getLensFrameRate(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensFrameRate));
     }
 
     //Gets lens update delay

@@ -143,7 +143,6 @@
     <string name="desc_finished_setup">All done! If you wish to change anything later, look under settings in the main menu.</string>
     <string name="desc_footprint_type">Footprint display look</string>
     <string name="desc_force_rotate">Force camera rotation if view appears upside down</string>
-    <string name="desc_frame_rate">Rate to update globe/map rendering</string>
     <string name="desc_google_play_services_fail">Sorry. There is an unknown problem with Google Play services.</string>
     <string name="desc_hide_constellation_star_paths">Hide star paths when showing constellations</string>
     <string name="desc_hide_distant_path_times">Hide time labels on path outside nearby view</string>
@@ -153,8 +152,10 @@
     <string name="desc_information_source">Descriptions and details of satellites</string>
     <string name="desc_label_style">Label drawing style</string>
     <string name="desc_layer">Surface images to display</string>
+    <string name="desc_lens_frame_rate">Rate to update virtual lens rendering</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
+    <string name="desc_map_frame_rate">Rate to update globe/map rendering</string>
     <string name="desc_metric">Metric (km/m)</string>
     <string name="desc_need_updating">The data is too old and inaccurate. Please update to use.</string>
     <string name="desc_no_connection">You might not have an internet connection.  Try anyhow?</string>
@@ -210,9 +211,10 @@
     <string name="desc_update_rate_lens">Rate to update lens display</string>
     <string name="desc_update_rate_list">Rate to update list displays</string>
     <string name="desc_use_camera">Look through camera while viewing</string>
+    <string name="desc_use_camera_zoom">Allow zooming if hardware exists</string>
     <string name="desc_use_exposure">Allow setting exposure for compatible cameras</string>
     <string name="desc_use_icon_tint">Use icon tint</string>
-    <string name="desc_use_zoom">Allow zooming if hardware exists</string>
+    <string name="desc_use_virtual_zoom">Allow zooming in virtual scene</string>
     <string name="desc_widgets_add">Add widgets to your home screen to edit them here</string>
     <string name="text_address_decoder_error">Address decoder unavailable</string>
     <string name="text_0">0</string>

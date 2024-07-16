@@ -288,10 +288,11 @@ public class SkyboxView extends GLSurfaceView
             }
         }
 
-        private boolean needUpdate;
         private int areaWidth;
         private int areaHeight;
+        private int targetDelayMs;
         private int skyBoxTexture;
+        private long lastTimeMs;
         private float fovBase;
         private float xRotation;
         private float yRotation;
@@ -309,9 +310,9 @@ public class SkyboxView extends GLSurfaceView
         {
             currentContext = context;
 
-            needUpdate = true;
             areaWidth = areaHeight = 1000;
-            skyBoxTexture = 0;
+            setTargetFps(60);
+            lastTimeMs = skyBoxTexture = 0;
             fovBase = 45f;
             xRotation = yRotation = 0.0f;
             zoomScale = 1.0f;
@@ -343,31 +344,32 @@ public class SkyboxView extends GLSurfaceView
         @Override
         public void onDrawFrame(GL10 gl)
         {
-            if(needUpdate)
-            {
-                glClear(GL_COLOR_BUFFER_BIT);
-                setIdentityM(viewMatrix, 0);
-                rotateM(viewMatrix, 0, -yRotation, 1.0f, 0.0f, 0.0f);
-                rotateM(viewMatrix, 0, -xRotation, 0.0f, 1.0f, 0.0f);
-                multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
-                skyBoxProgram.useProgram();
-                skyBoxProgram.setUniforms(viewProjectionMatrix, skyBoxTexture);
-                skyBox.bindData(skyBoxProgram);
-                skyBox.draw();
+            long delayMs = (System.currentTimeMillis() - lastTimeMs);
 
-                needUpdate = false;
-            }
-            else
+            if(delayMs < targetDelayMs)
             {
                 try
                 {
-                    Thread.sleep(50);
+                    Thread.sleep(targetDelayMs - delayMs);
                 }
                 catch(Exception ex)
                 {
                     //do nothing
                 }
             }
+
+            glClear(GL_COLOR_BUFFER_BIT);
+            setIdentityM(viewMatrix, 0);
+            rotateM(viewMatrix, 0, -yRotation, 1.0f, 0.0f, 0.0f);
+            rotateM(viewMatrix, 0, -xRotation, 0.0f, 1.0f, 0.0f);
+            multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+            skyBoxProgram.useProgram();
+            skyBoxProgram.setUniforms(viewProjectionMatrix, skyBoxTexture);
+            skyBox.bindData(skyBoxProgram);
+            skyBox.draw();
+
+
+            lastTimeMs = System.currentTimeMillis();
         }
 
         public void setOnPerspectiveChangeListener(OnPerspectiveChangeListener listener)
@@ -380,13 +382,17 @@ public class SkyboxView extends GLSurfaceView
             float aspect = areaWidth / (float)areaHeight;
             boolean wide = (aspect > 1.0f);
 
-            needUpdate = true;
             perspectiveM(projectionMatrix, 0, fovBase / zoomScale, aspect, 1.0f, 10.0f);
 
             if(perspectiveChangeListener != null)
             {
                 perspectiveChangeListener.onChanged(fovBase * (wide ? aspect : 1.0f), fovBase * (wide ? 1.0f : aspect), zoomScale);
             }
+        }
+
+        public void setTargetFps(int fps)
+        {
+            targetDelayMs = 1000 / fps;
         }
 
         public float getZoom()
@@ -412,7 +418,6 @@ public class SkyboxView extends GLSurfaceView
         public void setTextures(Bitmap leftImage, Bitmap rightImage, Bitmap bottomImage, Bitmap topImage, Bitmap frontImage, Bitmap backImage)
         {
             //update images
-            needUpdate = true;
             textureImages = new Bitmap[]{leftImage, rightImage, bottomImage, topImage, frontImage, backImage};
         }
 
@@ -485,8 +490,6 @@ public class SkyboxView extends GLSurfaceView
             {
                 yRotation = 90;
             }
-
-            needUpdate = true;
         }
 
         public float getAzimuth()
@@ -500,6 +503,7 @@ public class SkyboxView extends GLSurfaceView
         }
     }
 
+    private boolean multiTouchPending;
     private float lastX;
     private float lastY;
     private ScaleGestureDetector scaleDetector;
@@ -509,6 +513,7 @@ public class SkyboxView extends GLSurfaceView
     {
         super(context, attrs);
 
+        multiTouchPending = false;
         lastX = lastY = 0.0f;
         scaleDetector = null;
         renderer = new SkyboxRenderer(context);
@@ -531,6 +536,7 @@ public class SkyboxView extends GLSurfaceView
         {
             if(scaleDetector != null && event.getPointerCount() > 1 && scaleDetector.onTouchEvent(event))
             {
+                multiTouchPending = true;
                 return(true);
             }
 
@@ -539,6 +545,10 @@ public class SkyboxView extends GLSurfaceView
 
             switch(event.getAction())
             {
+                case MotionEvent.ACTION_UP:
+                    multiTouchPending = false;
+                    break;
+
                 case MotionEvent.ACTION_DOWN:
                     lastX = currentX;
                     lastY = currentY;
@@ -551,15 +561,18 @@ public class SkyboxView extends GLSurfaceView
                     lastX = currentX;
                     lastY = currentY;
 
-                    //handle movement
-                    queueEvent(new Runnable()
+                    if(!multiTouchPending)
                     {
-                        @Override
-                        public void run()
+                        //handle movement
+                        queueEvent(new Runnable()
                         {
-                            renderer.handleTouchDrag(deltaX, deltaY);
-                        }
-                    });
+                            @Override
+                            public void run()
+                            {
+                                renderer.handleTouchDrag(deltaX, deltaY);
+                            }
+                        });
+                    }
                     break;
             }
 
@@ -618,6 +631,11 @@ public class SkyboxView extends GLSurfaceView
 
         //set images
         setImages(images);
+    }
+
+    public void setTargetFps(int fps)
+    {
+        renderer.setTargetFps(fps);
     }
 
     public float getZoom()

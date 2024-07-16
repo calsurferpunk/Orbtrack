@@ -71,7 +71,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         public static final String LensView = "lensView";
         public static final String LensViewDisplay = "lensViewDisplay";
         public static final String LensViewPaths = "lensViewPaths";
-        public static final String LensViewLens = "lensViewLens";
+        public static final String LensViewCameraLens = "lensViewCameraLens";
+        public static final String LensViewVirtualLens = "lensViewVirtualLens";
         public static final String ListView = "listView";
         public static final String Locations = "locations";
         public static final String GlobeMapView = "globeMapView";
@@ -208,10 +209,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupList(lensPathLabelTypeList, Settings.Options.LensView.pathLabelTypeItems, null, null, null, null);
                         break;
 
-                    case ScreenKey.LensViewLens:
+                    case ScreenKey.LensViewCameraLens:
                         SwitchPreference useCameraSwitch = this.findPreference(Settings.PreferenceName.LensUseCamera);
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
-                        SwitchPreference zoomSwitch = this.findPreference(Settings.PreferenceName.LensUseZoom);
+                        SwitchPreference cameraZoomSwitch = this.findPreference(Settings.PreferenceName.LensUseCameraZoom);
                         SwitchPreference exposureSwitch = this.findPreference(Settings.PreferenceName.LensUseExposure);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
                         SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
@@ -220,11 +221,23 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         //setup displays
                         setupSwitch(useCameraSwitch);
                         setupSwitch(rotateSwitch);
-                        setupSwitch(zoomSwitch);
+                        setupSwitch(cameraZoomSwitch);
                         setupSwitch(exposureSwitch);
                         setupSwitchText(lensWidthSwitch);
                         setupSwitchText(lensHeightSwitch);
                         setupSwitchText(lensAzimuthOffsetSwitch);
+                        break;
+
+                    case ScreenKey.LensViewVirtualLens:
+                        SwitchPreference virtualZoomSwitch = this.findPreference(Settings.PreferenceName.LensUseVirtualZoom);
+                        IconListPreference lensFrameRateList = this.findPreference(Settings.PreferenceName.LensFrameRate);
+
+                        //initialize values
+                        Settings.Options.Rates.initValues(context);
+
+                        //setup displays
+                        setupSwitch(virtualZoomSwitch);
+                        setupList(lensFrameRateList, Settings.Options.Rates.frameRateItems, null, null, null, null);
                         break;
 
                     case ScreenKey.ListView:
@@ -553,6 +566,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.LensAverageCount:
                             currentValue = Settings.getLensAverageCount(context);
+                            break;
+
+                        case Settings.PreferenceName.LensFrameRate:
+                            currentValue = Settings.getLensFrameRate(context);
                             break;
 
                         case Settings.PreferenceName.LensUpdateDelay:
@@ -1685,6 +1702,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             }
                             break;
 
+                        case Settings.PreferenceName.LensFrameRate:
                         case Settings.PreferenceName.LensDirectionCentered:
                         case Settings.PreferenceName.LensDirectionSize:
                         case Settings.PreferenceName.LensIndicator:
@@ -1695,7 +1713,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensHorizonColor:
                         case Settings.PreferenceName.LensUseHorizon:
                         case Settings.PreferenceName.LensUseCamera:
-                        case Settings.PreferenceName.LensUseZoom:
+                        case Settings.PreferenceName.LensUseCameraZoom:
+                        case Settings.PreferenceName.LensUseVirtualZoom:
                         case Settings.PreferenceName.LensUseExposure:
                         case Settings.PreferenceName.LensRotate:
                         case Settings.PreferenceName.LensUseAutoWidth:

@@ -143,7 +143,6 @@
     <string name="desc_finished_setup">¡Todo listo! Si desea cambiar algo más tarde, busque en la configuración en el menú principal.</string>
     <string name="desc_footprint_type">Aspecto de visualización de huellas</string>
     <string name="desc_force_rotate">Forzar la rotación de la cámara si la vista aparece al revés</string>
-    <string name="desc_frame_rate">Tarifa para actualizar la representación del globo/mapa</string>
     <string name="desc_google_play_services_fail">Lo siento. Hay un problema desconocido con los servicios de Google Play.</string>
     <string name="desc_hide_constellation_star_paths">Ocultar trayectorias de estrellas al mostrar constelaciones</string>
     <string name="desc_hide_distant_path_times">Ocultar etiquetas de tiempo en el camino fuera de la vista cercana</string>
@@ -153,8 +152,10 @@
     <string name="desc_information_source">Descripciones y detalles de satélites.</string>
     <string name="desc_label_style">Estilo de dibujo de etiqueta</string>
     <string name="desc_layer">Imágenes de superficie para mostrar</string>
+    <string name="desc_lens_frame_rate">Frecuencia de actualización el renderizado de lentes virtuales</string>
     <string name="desc_location_disable">Los servicios de ubicación están deshabilitados. ¿Desea cambiar la configuración?</string>
     <string name="desc_location_icon">Ícono a usar para mostrar la ubicación del mapa</string>
+    <string name="desc_map_frame_rate">Frecuencia de actualización la representación del globo/mapa</string>
     <string name="desc_metric">Métrico (km/m)</string>
     <string name="desc_need_updating">Los datos son demasiado antiguos e inexactos. Actualice para usar.</string>
     <string name="desc_no_connection">Es posible que no tenga una conexión a Internet. ¿Intentar de todos modos?</string>
@@ -210,9 +211,10 @@
     <string name="desc_update_rate_lens">Tasa para actualizar la visualización de la lente</string>
     <string name="desc_update_rate_list">Tasa para actualizar la visualización de la lista</string>
     <string name="desc_use_camera">Mire a través de la cámara mientras mira</string>
+    <string name="desc_use_camera_zoom">Permitir el zoom si existe hardware</string>
     <string name="desc_use_exposure">Permitir configurar la exposición para cámaras compatibles</string>
     <string name="desc_use_icon_tint">Usar tinte de icono</string>
-    <string name="desc_use_zoom">Permitir el zoom si existe hardware</string>
+    <string name="desc_use_virtual_zoom">Permitir hacer zoom en la escena virtual</string>
     <string name="desc_widgets_add">Agregar widgets a su pantalla de inicio para editarlos aquí</string>
     <string name="text_address_decoder_error">Decodificador de dirección no disponible</string>
     <string name="text_0">0</string>

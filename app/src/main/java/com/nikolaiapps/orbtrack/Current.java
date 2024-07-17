@@ -1360,7 +1360,7 @@ public abstract class Current
             if(page == PageType.Combined)
             {
                 Selectable.ListBaseAdapter listAdapter = getAdapter();
-                int widthDp = Globals.getDeviceDp(context, true);
+                int widthDp = Globals.getScreenDp(context, true);
 
                 //if adapter exists
                 if(listAdapter != null)

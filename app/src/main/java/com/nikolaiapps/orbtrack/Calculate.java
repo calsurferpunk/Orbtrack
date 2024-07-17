@@ -1662,7 +1662,7 @@ public abstract class Calculate
         protected int getListColumns(Context context, int page)
         {
             Selectable.ListBaseAdapter listAdapter = getAdapter();
-            int widthDp = Globals.getDeviceDp(context, true);
+            int widthDp = Globals.getScreenDp(context, true);
 
             //if adapter exists
             if(listAdapter != null)

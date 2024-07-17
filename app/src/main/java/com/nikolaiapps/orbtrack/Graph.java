@@ -492,7 +492,7 @@ public class Graph extends View
     {
         width = w;
         height = h;
-        screenWidth = Globals.getDevicePixels(this.getContext())[0];
+        screenWidth = Globals.getScreenPixels(this.getContext())[0];
 
         if(allowUpdate)
         {

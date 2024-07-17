@@ -1766,7 +1766,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         }
 
         //get settings
-        dpWidth = Globals.getDeviceDp(this);
+        dpWidth = Globals.getScreenDp(this);
         widgetSettings = new WidgetSettings(this, widgetClass, widgetId);
         noradIdChangedListener = null;
         resultLauncher = Globals.createActivityLauncher(this, this);

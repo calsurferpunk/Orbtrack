@@ -35,7 +35,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
     }
 
-    private static int dpWidth = Globals.getDeviceDp(null);
+    private static int dpWidth = Globals.getScreenDp(null);
     private static final Class<?>[] widgetClasses = new Class[]{WidgetPassTinyProvider.class, WidgetPassSmallProvider.class, WidgetPassMediumProvider.class};
     private static final Class<?>[] alarmReceiverClasses = new Class[]{WidgetPassTinyProvider.AlarmReceiver.class, WidgetPassSmallProvider.AlarmReceiver.class, WidgetPassMediumProvider.AlarmReceiver.class};
 
@@ -167,7 +167,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         Class<?> alarmReceiverClass = getAlarmReceiverClass();
 
         //update display DPI
-        dpWidth = Globals.getDeviceDp(context);
+        dpWidth = Globals.getScreenDp(context);
 
         //if IDs are set
         if(widgetIds != null)

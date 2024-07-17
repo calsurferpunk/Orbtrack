@@ -2940,7 +2940,7 @@ public abstract class Globals
     }
 
     //Gets pixel size of screen
-    public static int[] getDevicePixels(Context context)
+    public static int[] getScreenPixels(Context context)
     {
         WindowManager manager;
         DisplayMetrics metrics = new DisplayMetrics();
@@ -2969,7 +2969,7 @@ public abstract class Globals
     }
 
     //Gets dp of screen
-    public static int getDeviceDp(Context context, boolean forWidth)
+    public static int getScreenDp(Context context, boolean forWidth)
     {
         WindowManager manager;
         DisplayMetrics metrics = new DisplayMetrics();
@@ -2997,10 +2997,10 @@ public abstract class Globals
         //error
         return(Integer.MIN_VALUE);
     }
-    public static int getDeviceDp(Context context)
+    public static int getScreenDp(Context context)
     {
         int rotation = getScreenOrientation(context);
-        return(getDeviceDp(context, (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180)));
+        return(getScreenDp(context, (rotation == Surface.ROTATION_0 || rotation == Surface.ROTATION_180)));
     }
 
     //Gets current dialog theme ID

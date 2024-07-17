@@ -295,7 +295,7 @@ public abstract class Selectable
                 final FloatingActionButton itemDetail3dCloseButton;
                 final FloatingActionButton itemDetail3dFullscreenButton;
                 final FragmentManager manager;
-                final int[] screenSize = Globals.getDevicePixels(context);
+                final int[] screenSize = Globals.getScreenPixels(context);
                 CustomAlertDialogBuilder itemDetailDialog;
 
                 canShow = true;
@@ -978,7 +978,7 @@ public abstract class Selectable
         protected int itemsRefID = -1;
         protected int itemsRefSubId = -1;
         protected int itemsRootViewID = -1;
-        protected int widthDp = Globals.getDeviceDp(null, true);
+        protected int widthDp = Globals.getScreenDp(null, true);
         protected String categoryTitle;
         protected final Context currentContext;
         protected final LayoutInflater listInflater;

@@ -380,13 +380,12 @@ public class SkyboxView extends GLSurfaceView
         private void updatePerspective()
         {
             float aspect = areaWidth / (float)areaHeight;
-            boolean wide = (aspect > 1.0f);
 
             perspectiveM(projectionMatrix, 0, fovBase / zoomScale, aspect, 1.0f, 10.0f);
 
             if(perspectiveChangeListener != null)
             {
-                perspectiveChangeListener.onChanged(fovBase * (wide ? aspect : 1.0f), fovBase * (wide ? 1.0f : aspect), zoomScale);
+                perspectiveChangeListener.onChanged(fovBase * aspect, fovBase, zoomScale);
             }
         }
 
@@ -607,6 +606,7 @@ public class SkyboxView extends GLSurfaceView
         //set textures
         renderer.setTextures(images[0], images[1], images[2], images[3], images[4], images[5]);
     }
+    @SuppressWarnings("unused")
     public void setImages(Bitmap leftImage, Bitmap rightImage, Bitmap bottomImage, Bitmap topImage, Bitmap frontImage, Bitmap backImage)
     {
         setImages(new Bitmap[]{leftImage, rightImage, bottomImage, topImage, frontImage, backImage});

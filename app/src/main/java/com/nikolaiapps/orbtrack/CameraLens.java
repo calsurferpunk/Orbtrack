@@ -27,6 +27,7 @@ import android.hardware.camera2.CameraManager;
 import android.os.Handler;
 import android.util.DisplayMetrics;
 import android.util.Range;
+import android.util.Size;
 import android.util.SizeF;
 import android.util.TypedValue;
 import android.view.MotionEvent;
@@ -51,6 +52,7 @@ import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ExposureState;
 import androidx.camera.core.FocusMeteringAction;
 import androidx.camera.core.Preview;
+import androidx.camera.core.ResolutionInfo;
 import androidx.camera.core.SurfaceOrientedMeteringPointFactory;
 import androidx.camera.core.ZoomState;
 import androidx.camera.lifecycle.ProcessCameraProvider;
@@ -647,6 +649,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private final String xString;
     private Camera currentCamera;
     private final LensOverlay currentCameraOverlay;
+    private Preview currentCameraPreview;
     private final PreviewView currentCameraView;
     private final SkyboxView currentVirtualView;
     private ProcessCameraProvider currentCameraProvider;
@@ -2515,11 +2518,9 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     //Sets used camera width and height
     private void updateUsedWidthHeight()
     {
-        boolean inPortrait = inOrientationPortrait();
-
-        //use width/height according to orientation
-        useCameraDegWidth = (inPortrait ? cameraDegWidth : cameraDegHeight);
-        useCameraDegHeight = (inPortrait ? cameraDegHeight : cameraDegWidth);
+        //update used width and height
+        useCameraDegWidth = cameraDegWidth;
+        useCameraDegHeight = cameraDegHeight;
     }
 
     //Saves camera width and height
@@ -2603,6 +2604,17 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         stopCalibrationListener = listener;
     }
 
+    //Gets corrected camera lens degree width and height
+    private float[] getCorrectedCameraSize(int screenWidth, int screenHeight, float cameraWidth, float cameraHeight)
+    {
+        boolean wideScreen = (screenWidth > screenHeight);
+        float minHeight = Math.min(cameraWidth, cameraHeight);
+        float maxHeight = Math.max(cameraWidth, cameraHeight);
+
+        //return width and height based on screen size
+        return(new float[]{(wideScreen ? maxHeight : minHeight), (wideScreen ? minHeight : maxHeight)});
+    }
+
     //Sets up the camera
     @OptIn(markerClass = ExperimentalCamera2Interop.class)
     private void setupCamera(Context context, ProcessCameraProvider cameraProvider)
@@ -2615,9 +2627,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         float maxFocus;
         float userDegWidth = Settings.getLensWidth(context);
         float userDegHeight = Settings.getLensHeight(context);
+        float calculatedDegWidth;
+        float calculatedDegHeight;
         String id;
         SizeF sensorSize;
-        Preview preview = new Preview.Builder().build();
         CameraInfo info;
         CameraControl controls;
         CameraSelector selector;
@@ -2625,7 +2638,9 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         CameraManager manager = (CameraManager)context.getSystemService(Context.CAMERA_SERVICE);
         ExposureState exposure;
         ZoomState zoomState;
+        int[] screenSize;
         float[] focalLengths;
+        float[] cameraSize;
 
         //set provider
         currentCameraProvider = cameraProvider;
@@ -2634,6 +2649,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         if(isVirtual)
         {
             //no camera
+            currentCameraPreview = null;
             currentCamera = null;
             info = null;
             controls = null;
@@ -2646,13 +2662,14 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         else
         {
             //try to open camera and preview
+            currentCameraPreview = new Preview.Builder().build();
             selector = new CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_BACK).build();
             if(currentCameraView != null)
             {
                 currentCameraView.setImplementationMode(cameraRotate ? PreviewView.ImplementationMode.COMPATIBLE : PreviewView.ImplementationMode.PERFORMANCE);
-                preview.setSurfaceProvider(currentCameraView.getSurfaceProvider());
+                currentCameraPreview.setSurfaceProvider(currentCameraView.getSurfaceProvider());
             }
-            currentCamera = currentCameraProvider.bindToLifecycle((LifecycleOwner)context, selector, preview);
+            currentCamera = currentCameraProvider.bindToLifecycle((LifecycleOwner)context, selector, currentCameraPreview);
 
             //get camera properties
             info = currentCamera.getCameraInfo();
@@ -2667,13 +2684,19 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
                 maxFocus = focalLengths[0];
 
-                //get hardware degree width and height
-                cameraHardwareDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
-                cameraHardwareDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
+                //calculate hardware degree width and height
+                calculatedDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
+                calculatedDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
 
-                //save hardware degree width and height
-                Settings.setLensWidthHardware(context, cameraHardwareDegWidth);
-                Settings.setLensHeightHardware(context, cameraHardwareDegHeight);
+                //save calculated hardware degree width and height
+                Settings.setLensWidthHardware(context, calculatedDegWidth);
+                Settings.setLensHeightHardware(context, calculatedDegHeight);
+
+                //get hardware width and height
+                screenSize = Globals.getScreenPixels(context);
+                cameraSize = getCorrectedCameraSize(screenSize[0], screenSize[1], calculatedDegWidth, calculatedDegHeight);
+                cameraHardwareDegWidth = cameraSize[0];
+                cameraHardwareDegHeight = cameraSize[1];
             }
             catch(Exception ex)
             {
@@ -2686,7 +2709,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             updateUsedWidthHeight();
 
             //set orientation
-            preview.setTargetRotation(getRotation(cameraRotate ? ((orientation + 180) % 360) : orientation));
+            currentCameraPreview.setTargetRotation(getRotation(cameraRotate ? ((orientation + 180) % 360) : orientation));
 
             //setup exposure
             exposureRange = null;
@@ -2941,6 +2964,50 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     public void startCamera()
     {
         startCamera(false);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom)
+    {
+        super.onLayout(changed, left, top, right, bottom);
+
+        Context context = getContext();
+        boolean useAutoWidth = Settings.getLensAutoWidth(context);
+        boolean useAutoHeight = Settings.getLensAutoHeight(context);
+
+        //if -not virtual lens- and -using auto width or height-
+        if(!isVirtual && (useAutoWidth || useAutoHeight))
+        {
+            //get resolution/sizes
+            ResolutionInfo info = (currentCameraPreview != null ? currentCameraPreview.getResolutionInfo() : null);
+            Size cameraResolution = (info != null ? info.getResolution() : null);
+            int[] screenSize = Globals.getScreenPixels(context);
+            int screenWidth = screenSize[0];
+            int screenHeight = screenSize[1];
+            int cameraWidth = (cameraResolution != null ? cameraResolution.getWidth() : 1);
+            int cameraHeight = (cameraResolution != null ? cameraResolution.getHeight() : 1);
+            float[] cameraSize = getCorrectedCameraSize(screenWidth, screenHeight, cameraWidth, cameraHeight);
+            int usedCameraWidth = (int)cameraSize[0];
+            int usedCameraHeight = (int)cameraSize[1];
+            int viewWidth = (currentCameraView != null ? currentCameraView.getWidth() : 1);
+            int viewHeight = (currentCameraView != null ? currentCameraView.getHeight() : 1);
+            double scale = Math.max(viewWidth / (double)usedCameraWidth, viewHeight / (double)usedCameraHeight);
+            double fullWidth = (usedCameraWidth * scale);
+            double fullHeight = (usedCameraHeight * scale);
+            double widthCropPixels = (fullWidth - viewWidth);
+            double heightCropPixels = (fullHeight - viewHeight);
+
+            //narrow view based on pixels clipped from full size
+            if(useAutoWidth)
+            {
+                cameraDegWidth = cameraHardwareDegWidth * (float)(1.0 - (widthCropPixels / fullWidth));
+            }
+            if(useAutoHeight)
+            {
+                cameraDegHeight = cameraHardwareDegHeight * (float)(1.0 - (heightCropPixels / fullHeight));
+            }
+            updateUsedWidthHeight();
+        }
     }
 
     @Override

@@ -519,6 +519,7 @@ public class SkyboxView extends GLSurfaceView
 
         setEGLContextClientVersion(2);
         setRenderer(renderer);
+        setRenderMode(RENDERMODE_WHEN_DIRTY);
     }
     public SkyboxView(Context context)
     {
@@ -569,6 +570,7 @@ public class SkyboxView extends GLSurfaceView
                             public void run()
                             {
                                 renderer.handleTouchDrag(deltaX, deltaY);
+                                requestRender();
                             }
                         });
                     }
@@ -646,6 +648,7 @@ public class SkyboxView extends GLSurfaceView
     public void setZoom(float scale)
     {
         renderer.setZoom(scale);
+        requestRender();
     }
 
     public float getAzimuth()

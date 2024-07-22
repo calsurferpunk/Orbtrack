@@ -1494,7 +1494,7 @@ public class Graph extends View
         updateWidestY(getYValueString(value));
     }
 
-    private void setData(List<Double> x, List<Double> yTop, List<Double> yBottom, List<Double> y2, TimeZone zone)
+    private synchronized void setData(List<Double> x, List<Double> yTop, List<Double> yBottom, List<Double> y2, TimeZone zone)
     {
         int index;
         boolean usingY2 = (y2 != null);

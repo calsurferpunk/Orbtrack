@@ -31,7 +31,6 @@ import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.android.material.slider.Slider;
 import com.nikolaiapps.orbtrack.Calculations.*;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -2027,7 +2026,7 @@ public abstract class Current
     }
 
     //Setup search
-    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final FloatingActionStateButton showSlidersButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, final View selectionButtonLayout, Slider zoomBar, Slider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
+    private static void setupSearch(final Context context, final FloatingActionStateButton showToolbarsButton, final FloatingActionStateButton showSlidersButton, final IconSpinner searchList, final AppCompatImageButton searchButton, final CustomSearchView searchText, final View searchListLayout, final View selectionButtonLayout, CustomSlider zoomBar, CustomSlider exposureBar, final PlayBar pagePlayBar, Database.SatelliteData[] selectedOrbitals, boolean forLens)
     {
         boolean usingSearchList = (searchList != null);
         int textColor = Globals.resolveColorID(context, android.R.attr.textColor);
@@ -3095,8 +3094,7 @@ public abstract class Current
         {
             //setup bar
             scaleBar.setButtonsVisible(true);
-            scaleBar.setMin(forStars ? Settings.StarMagnitudeScaleMin : Settings.IconScaleMin);
-            scaleBar.setMax(forStars ? Settings.StarMagnitudeScaleMax : Settings.IconScaleMax);
+            scaleBar.setRange((forStars ? Settings.StarMagnitudeScaleMin : Settings.IconScaleMin), (forStars ? Settings.StarMagnitudeScaleMax : Settings.IconScaleMax));
             scaleBar.setPlayIndexIncrementUnits(1);
             if(context != null)
             {
@@ -3194,8 +3192,7 @@ public abstract class Current
             mapTimerDelay = Settings.getMapUpdateDelay(playBar.getContext());
 
             //setup play bar
-            playBar.setMin(min);
-            playBar.setMax(max);
+            playBar.setRange(min, max);
             playBar.setPlayPeriod(mapTimerDelay);
             playBar.setPlayScaleType(scaleType);
             playBar.setPlayActivity(activity);
@@ -3520,7 +3517,7 @@ public abstract class Current
         final MaterialButton deselectButton = (holdSelected ? selectionButtonLayout.findViewById(R.id.Map_Selection_Deselect_Button) : null);
 
         //get menu and zoom displays
-        final Slider mapZoomBar = rootView.findViewById(R.id.Map_Zoom_Bar);
+        final CustomSlider mapZoomBar = rootView.findViewById(R.id.Map_Zoom_Bar);
         final ImageView compassImage = rootView.findViewById(R.id.Map_Compass_Image);
         final CustomSettingsMenu mapSettingsMenu = mapFrameLayout.findViewById(R.id.Map_Settings_Menu);
         final FloatingActionStateButton fullscreenButton = mapSettingsMenu.addEndItem(R.drawable.ic_fullscreen_white, R.drawable.ic_fullscreen_exit_white);

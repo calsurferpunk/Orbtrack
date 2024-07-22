@@ -86,8 +86,7 @@ public class SliderPreference extends CustomPreference
         //set displays
         rootView.setClickable(false);
         titleView.setText(titleText);
-        sliderView.setMin(minValue);
-        sliderView.setMax(maxValue);
+        sliderView.setRange(minValue, maxValue);
         sliderView.setPlayIndexIncrementUnits(1);
         sliderView.setPlayActivity(null);
         sliderView.setTextInputEnabled(true);
@@ -141,8 +140,7 @@ public class SliderPreference extends CustomPreference
         //if slider exists
         if(sliderView != null)
         {
-            sliderView.setMin(minValue);
-            sliderView.setMax(maxValue);
+            sliderView.setRange(minValue, maxValue);
         }
     }
 }

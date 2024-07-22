@@ -14,7 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-        <com.google.android.material.slider.Slider
+        <com.nikolaiapps.orbtrack.CustomSlider
             style="@style/SlimTransparentSlider"
             android:id="@+id/Location_Zoom_Bar"
             android:layout_width="280dp"

@@ -569,8 +569,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     public TextView helpText;
     public TextView sliderText;
     public PlayBar playBar;
-    public Slider zoomBar;
-    public Slider exposureBar;
+    public CustomSlider zoomBar;
+    public CustomSlider exposureBar;
     public CustomSettingsMenu settingsMenu;
 
     private static final IconImage.Comparer iconImageComparer = new IconImage.Comparer();
@@ -2724,8 +2724,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             {
                 if(exposureRange != null)
                 {
-                    exposureBar.setValueFrom(exposureRange.getLower());
-                    exposureBar.setValueTo(exposureRange.getUpper());
+                    exposureBar.setRange(exposureRange.getLower(), exposureRange.getUpper());
                     exposureBar.setValue(exposureIndex);
                     exposureBar.setLabelBehavior(LabelFormatter.LABEL_GONE);
                     exposureBar.addOnChangeListener(new Slider.OnChangeListener()
@@ -2800,8 +2799,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         {
             if(haveZoomValues)
             {
-                zoomBar.setValueFrom(cameraZoomMin);
-                zoomBar.setValueTo(cameraZoomMax);
+                zoomBar.setRange(cameraZoomMin, cameraZoomMax);
                 zoomBar.setValue(cameraZoomMin);
                 zoomBar.setLabelBehavior(LabelFormatter.LABEL_GONE);
                 zoomBar.addOnChangeListener(new Slider.OnChangeListener()

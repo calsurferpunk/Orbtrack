@@ -823,13 +823,12 @@ public interface CoordinatesFragment
 
     abstract class Utils
     {
-        static void setupZoomSlider(final CoordinatesFragment mapView, Slider zoomSlider, boolean forGlobe)
+        static void setupZoomSlider(final CoordinatesFragment mapView, CustomSlider zoomSlider, boolean forGlobe)
         {
             final boolean haveMapView = (mapView != null);
             final double maxZoom = (forGlobe ? MaxGlobeZoom : MaxMapZoom);
 
-            zoomSlider.setValueFrom((float)MinZoom);
-            zoomSlider.setValueTo((float)Math.pow(2, maxZoom));
+            zoomSlider.setRange((float)MinZoom, (float)Math.pow(2, maxZoom));
             zoomSlider.setValue((float)(haveMapView ? mapView.getCameraZoom() : MinZoom));
             zoomSlider.setLabelBehavior(LabelFormatter.LABEL_GONE);
             zoomSlider.addOnChangeListener(new Slider.OnChangeListener()

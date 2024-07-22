@@ -23,7 +23,6 @@ import android.widget.Toast;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.slider.Slider;
 import com.google.android.material.textfield.TextInputLayout;
 import java.util.TimeZone;
 
@@ -82,7 +81,7 @@ public class MapLocationInputActivity extends BaseInputActivity
         final int coordinateInputVisible = (forSearch ? View.GONE : View.VISIBLE);
         final MapLocation currentLocation = new MapLocation();
         final CoordinatesFragment mapInputView = new Whirly.MapFragment();
-        final Slider mapZoomBar = this.findViewById(R.id.Location_Zoom_Bar);
+        final CustomSlider mapZoomBar = this.findViewById(R.id.Location_Zoom_Bar);
         final LinearLayout locationLayout = this.findViewById(R.id.Location_Layout);
         final LinearLayout altitudeLayout = this.findViewById(R.id.Location_Altitude_Layout);
         final LinearLayout timeZoneLayout = this.findViewById(R.id.Location_Time_Zone_Layout);

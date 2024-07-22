@@ -120,7 +120,7 @@
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_r"/>
 
-            <com.google.android.material.slider.Slider
+            <com.nikolaiapps.orbtrack.CustomSlider
                 android:id="@+id/Color_Red_Slider"
                 style="@style/ChooseColorSlider"/>
 
@@ -139,7 +139,7 @@
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_g"/>
 
-            <com.google.android.material.slider.Slider
+            <com.nikolaiapps.orbtrack.CustomSlider
                 android:id="@+id/Color_Green_Slider"
                 style="@style/ChooseColorSlider"/>
 
@@ -158,7 +158,7 @@
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_b"/>
 
-            <com.google.android.material.slider.Slider
+            <com.nikolaiapps.orbtrack.CustomSlider
                 android:id="@+id/Color_Blue_Slider"
                 style="@style/ChooseColorSlider"/>
 
@@ -177,7 +177,7 @@
                 style="@style/ChooseColorTitle"
                 android:text="@string/title_a"/>
 
-            <com.google.android.material.slider.Slider
+            <com.nikolaiapps.orbtrack.CustomSlider
                 android:id="@+id/Color_Opacity_Slider"
                 style="@style/ChooseColorSlider"/>
 

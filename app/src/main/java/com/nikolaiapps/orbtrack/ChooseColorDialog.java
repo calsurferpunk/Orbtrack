@@ -89,7 +89,7 @@ public class ChooseColorDialog
     private LinearLayout greenLayout;
     private LinearLayout blueLayout;
     private LinearLayout opacityLayout;
-    private Slider[] sliderDisplays;
+    private CustomSlider[] sliderDisplays;
     private EditText[] textDisplays;
     private static BitmapDrawable colorImageBackground;
     private static final int[] colorIdList = new int[]{R.color.red_100, R.color.red, R.color.red_900, R.color.brown_200,
@@ -177,7 +177,7 @@ public class ChooseColorDialog
             blueLayout = colorDialogView.findViewById(R.id.Color_Blue_Layout);
             opacityLayout = colorDialogView.findViewById(R.id.Color_Opacity_Layout);
             colorTable = colorDialogView.findViewById(R.id.Color_Table);
-            sliderDisplays = new Slider[]{colorDialogView.findViewById(R.id.Color_Red_Slider), colorDialogView.findViewById(R.id.Color_Green_Slider), colorDialogView.findViewById(R.id.Color_Blue_Slider), colorDialogView.findViewById(R.id.Color_Opacity_Slider)};
+            sliderDisplays = new CustomSlider[]{colorDialogView.findViewById(R.id.Color_Red_Slider), colorDialogView.findViewById(R.id.Color_Green_Slider), colorDialogView.findViewById(R.id.Color_Blue_Slider), colorDialogView.findViewById(R.id.Color_Opacity_Slider)};
             textDisplays = new EditText[]{colorDialogView.findViewById(R.id.Color_Red_Text), colorDialogView.findViewById(R.id.Color_Green_Text), colorDialogView.findViewById(R.id.Color_Blue_Text), colorDialogView.findViewById(R.id.Color_Opacity_Text)};
             colorImageParams = colorImage.getLayoutParams();
             brightBarParams = brightnessSlider.getLayoutParams();

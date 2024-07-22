@@ -61,7 +61,7 @@
             tools:ignore="RtlHardcoded"
             android:visibility="gone"/>
 
-        <com.google.android.material.slider.Slider
+        <com.nikolaiapps.orbtrack.CustomSlider
             style="@style/SlimTransparentSlider"
             android:id="@+id/Map_Zoom_Bar"
             android:layout_width="280dp"

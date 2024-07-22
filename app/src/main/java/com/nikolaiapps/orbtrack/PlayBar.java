@@ -66,7 +66,7 @@ public class PlayBar extends LinearLayout
     private FragmentActivity playActivity;
     private final AppCompatButton cancelButton;
     private final AppCompatButton confirmButton;
-    private final Slider seekSlider;
+    private final CustomSlider seekSlider;
     private final AppCompatImageButton syncButton;
     private final AppCompatImageButton playButton;
     private final TextView valueText;
@@ -147,8 +147,7 @@ public class PlayBar extends LinearLayout
         playScaleFactor= scaleTextFactor = 1;
         playIndexIncrementUnits = 1;
         value2 = 0;
-        setMax((int)seekSlider.getValueTo());
-        setMin((int)seekSlider.getValueFrom());
+        setRange((int)seekSlider.getValueFrom(), (int)seekSlider.getValueTo());
         setTextInputEnabled(false);
         zone = TimeZone.getDefault();
 
@@ -189,25 +188,11 @@ public class PlayBar extends LinearLayout
             int fromValue = (int)seekSlider.getValueFrom();
             int toValue = (int)seekSlider.getValueTo();
 
-            //keep value within range
-            if(value < minValue)
-            {
-                value = minValue;
-            }
-            else if(value > maxValue)
-            {
-                value = maxValue;
-            }
-
-            //make sure from/to match min/max values
+            //make sure range matches
             //note: happens from restoring slider display
-            if(fromValue != minValue)
+            if(fromValue != minValue || toValue != maxValue)
             {
-                seekSlider.setValueFrom(minValue);
-            }
-            if(toValue != maxValue)
-            {
-                seekSlider.setValueTo(maxValue);
+                seekSlider.setRange(minValue, maxValue);
             }
 
             //set value
@@ -284,6 +269,13 @@ public class PlayBar extends LinearLayout
     {
         maxValue = max;
         seekSlider.setValueTo(maxValue);
+    }
+
+    public void setRange(int min, int max)
+    {
+        minValue = min;
+        maxValue = max;
+        seekSlider.setRange(minValue, maxValue);
     }
 
     public void setTitle(String title)

@@ -54,7 +54,8 @@
             android:layout_gravity="right|center_vertical"
             android:layout_marginRight="-116dp"
             android:rotation="270"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            android:saveEnabled="false"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -69,12 +70,24 @@
                 android:layout_gravity="center|bottom"
                 android:visibility="gone"/>
 
-            <com.nikolaiapps.orbtrack.CustomSettingsMenu
-                android:id="@+id/Lens_Settings_Menu"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:animateLayoutChanges="true"/>
+                android:orientation="horizontal">
+                <com.nikolaiapps.orbtrack.CustomSettingsMenu
+                    android:id="@+id/Lens_Settings_Menu"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:animateLayoutChanges="true"/>
+
+                <com.nikolaiapps.orbtrack.PlayBar
+                    android:id="@+id/Lens_Play_Bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </LinearLayout>
 
         <LinearLayout
@@ -86,14 +99,6 @@
                 android:id="@+id/Lens_Magnitude_Bar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:visibility="gone"/>
-
-            <com.nikolaiapps.orbtrack.PlayBar
-                android:id="@+id/Lens_Play_Bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:background="?attr/colorAccentDark"
                 android:visibility="gone"/>
 
             <LinearLayout

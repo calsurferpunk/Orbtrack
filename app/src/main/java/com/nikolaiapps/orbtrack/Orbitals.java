@@ -967,7 +967,7 @@ public abstract class Orbitals
         }
 
         @Override
-        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, int page)
+        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, int page, final int subPage)
         {
             if(listAdapter instanceof PageListAdapter)
             {

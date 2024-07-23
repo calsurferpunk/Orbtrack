@@ -1387,11 +1387,13 @@ public abstract class Current
             boolean showingStars;
             boolean onCurrent = (group == MainActivity.Groups.Current);
             boolean onCombined = (page == PageType.Combined);
+            boolean haveSelectedMap = MainActivity.haveSelectedMapSatellite();
+            boolean haveSelectedLens = MainActivity.haveSelectedLensSatellite();
             boolean createLens = (onCombined && (subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens));
             boolean createMapView = (onCombined && subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
-            boolean mapMultiOrbitals = (createMapView && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
-            boolean mapSingleOrbital = (createMapView && MainActivity.mapViewNoradID != Integer.MAX_VALUE);
-            boolean lensSingleOrbital = (createLens && MainActivity.viewLensNoradID != Integer.MAX_VALUE);
+            boolean mapMultiOrbitals = (createMapView && !haveSelectedMap);
+            boolean mapSingleOrbital = (createMapView && haveSelectedMap);
+            boolean lensSingleOrbital = (createLens && haveSelectedLens);
             View newView = null;
             Context context = this.getContext();
             final Selectable.ListBaseAdapter listAdapter;
@@ -1436,7 +1438,7 @@ public abstract class Current
             if(createLens)
             {
                 //create view
-                newView = onCreateLensView(this, inflater, container, MainActivity.getLensSatellites(context), savedInstanceState, showingStars, showingConstellations, (subPage == Globals.SubPageType.VirtualLens));
+                newView = onCreateLensView(this, inflater, container, MainActivity.getLensSatellites(context), savedInstanceState, haveSelectedLens, showingStars, showingConstellations, (subPage == Globals.SubPageType.VirtualLens));
             }
             //else if need to create map view
             else if(createMapView)
@@ -1486,7 +1488,7 @@ public abstract class Current
             boolean onSubPageVirtualLens = (subPage == Globals.SubPageType.VirtualLens);
             boolean onSubPageMap = (subPage == Globals.SubPageType.Map);
             boolean onSubPageGlobe = (subPage == Globals.SubPageType.Globe);
-            boolean onCurrentNoSelected = (MainActivity.viewLensNoradID == Integer.MAX_VALUE && MainActivity.mapViewNoradID == Integer.MAX_VALUE);
+            boolean onCurrentNoSelected = (!MainActivity.haveSelectedLensSatellite() && !MainActivity.haveSelectedMapSatellite());
             boolean showMap = ((usingMapDisplay && onSubPageList) || onSubPageGlobe);
             boolean showGlobe = ((usingGlobeDisplay && onSubPageList) || onSubPageMap);
             boolean showCameraLens = ((usingCameraDisplay && onSubPageList) || onSubPageVirtualLens);
@@ -1497,7 +1499,7 @@ public abstract class Current
             menu.findItem(R.id.menu_map).setVisible(showMap);
             menu.findItem(R.id.menu_globe).setVisible(showGlobe);
             menu.findItem(R.id.menu_camera_lens).setVisible(showCameraLens & haveSensors);
-            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors));
+            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors && !onSubPageVirtualLens));
             menu.findItem(R.id.menu_sort_by).setVisible(onSubPageList);
             menu.findItem(R.id.menu_filter).setVisible(showSettings);
             menu.findItem(R.id.menu_visible).setVisible(showSettings);
@@ -1533,7 +1535,7 @@ public abstract class Current
         protected void onUpdateFinished(boolean success) {}
 
         @Override
-        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, final int page)
+        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, final int page, final int subPage)
         {
             return(new OnOrientationChangedListener()
             {
@@ -1543,7 +1545,9 @@ public abstract class Current
                     Context context = Page.this.getContext();
                     Activity activity = (context instanceof Activity ? (Activity)context : null);
                     View rootView = Page.this.getView();
-                    View listColumns = (rootView != null && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+                    boolean haveView = (rootView != null);
+                    View listColumns = (haveView && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+                    CustomSlider zoomBar = (haveView ? rootView.findViewById(subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens ? R.id.Lens_Zoom_Bar : R.id.Map_Zoom_Bar)  : null);
 
                     switch(page)
                     {
@@ -1565,6 +1569,7 @@ public abstract class Current
                             }
                             break;
                     }
+                    setupZoomBar(context, zoomBar);
                 }
             });
         }
@@ -1920,7 +1925,7 @@ public abstract class Current
     }
 
     //Begin calculating view information
-    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] orbitals, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
+    public static CalculateViewsTask calculateViews(Context context, Database.SatelliteData[] orbitals, boolean usingAllOrbitals, ObserverType observer, double julianStartDate, double julianEndDate, double dayIncrement, CalculateViewsTask.OnProgressChangedListener listener)
     {
         int index;
         boolean hideConstellationStarPaths = Settings.getLensHideConstellationStarPaths(context);
@@ -1940,7 +1945,7 @@ public abstract class Current
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, viewItems, null, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true, true);
+        task.execute(context, viewItems, null, usingAllOrbitals, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement * 2.5, true, true, true, true, true);
 
         //return task
         return(task);
@@ -2273,6 +2278,13 @@ public abstract class Current
                 mapShowSliders = !mapShowSliders;
             }
         }
+
+        //if zoom bar exists
+        if(zoomBar != null)
+        {
+            //setup display
+            setupZoomBar(context, zoomBar);
+        }
     }
 
     //Shows first calibration dialog
@@ -2319,7 +2331,7 @@ public abstract class Current
     }
 
     //Creates lens view
-    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean showingStars, boolean needConstellations, boolean usingVirtual)
+    public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean usingAllSelected, boolean showingStars, boolean needConstellations, boolean usingVirtual)
     {
         final Context context = pageFragment.getContext();
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
@@ -2345,7 +2357,7 @@ public abstract class Current
         boolean useSavedViewPath = (onCalculateView && savedViewItems != null && savedViewItems.length > 0);
         boolean useSavedPassPath = ((onCalculatePasses || onCalculateIntersection) && savedPassItems != null && passIndex < savedPassItems.length && savedPassItems[passIndex].passViews != null && savedPassItems[passIndex].passViews.length > 0);
         final boolean useSaved = (useSavedViewPath || useSavedPassPath);
-        final CameraLens cameraView = new CameraLens(context, selectedOrbitals, needConstellations, usingVirtual);
+        final CameraLens cameraView = new CameraLens(context, selectedOrbitals, usingAllSelected, needConstellations, usingVirtual);
         cameraView.settingsMenu = rootView.findViewById(R.id.Lens_Settings_Menu);
         final Calculate.Passes.Item currentSavedPathItem = (useSavedPassPath ? savedPassItems[passIndex] : null);
         final CalculateViewsTask.OrbitalView[] passViews = (useSavedPassPath && currentSavedPathItem != null ? currentSavedPathItem.passViews : null);
@@ -2377,8 +2389,8 @@ public abstract class Current
         cameraView.zoomBar = rootView.findViewById(R.id.Lens_Zoom_Bar);
         cameraView.exposureBar = (usingVirtual ? null : rootView.findViewById(R.id.Lens_Exposure_Bar));
         cameraView.sliderText = rootView.findViewById(R.id.Lens_Slider_Text);
-        cameraView.showPaths = (lensShowPaths || useSaved);         //if showing paths or using a saved path
-        lensLayout.addView(cameraView, 0);                          //add before menu
+        cameraView.showPaths = (lensShowPaths || useSaved);     //if showing paths or using a saved path
+        lensLayout.addView(cameraView, 0);                //add before menu
 
         //setup search displays
         searchList = rootView.findViewById(R.id.Lens_Search_List);
@@ -2398,6 +2410,25 @@ public abstract class Current
         }
 
         //setup menu
+        cameraView.settingsMenu.setOnExpandedStateChangedListener(new CustomSettingsMenu.OnExpandedStateChangedListener()
+        {
+            @Override
+            public void onExpandedStateChanged(CustomSettingsMenu menu, boolean isExpanded)
+            {
+                LinearLayout.LayoutParams menuLayoutParams = (LinearLayout.LayoutParams)cameraView.settingsMenu.getLayoutParams();
+
+                //if bar exists
+                if(cameraView.playBar != null)
+                {
+                    //show if showing toolbars and menu is not expanded
+                    cameraView.playBar.setVisibility(lensShowToolbars && !isExpanded ? View.VISIBLE : View.GONE);
+                }
+
+                //update display
+                menuLayoutParams.width = (isExpanded ? LinearLayout.LayoutParams.MATCH_PARENT : ViewGroup.LayoutParams.WRAP_CONTENT);
+                cameraView.settingsMenu.setLayoutParams(menuLayoutParams);
+            }
+        });
         cameraView.settingsMenu.setMessagesEnabled(Settings.getQuickSettingsShowMessages(context));
         cameraView.settingsMenu.setTitlesEnabled(Settings.getQuickSettingsShowTitles(context));
 
@@ -2605,7 +2636,8 @@ public abstract class Current
         });
         cameraView.setOnReadyListener(new CameraLens.OnReadyListener()
         {
-            @Override public void ready()
+            @Override
+            public void ready()
             {
                 //if there is 1 selected orbital
                 if(selectedOrbitals != null && selectedOrbitals.length == 1)
@@ -3174,6 +3206,37 @@ public abstract class Current
         }
     }
 
+    //Sets up zoom bar
+    public static void setupZoomBar(Context context, CustomSlider zoomBar)
+    {
+        boolean fullHeight;
+        int screenHeightDp;
+        float[] sizes;
+
+        //if display exists
+        if(zoomBar != null)
+        {
+            //if able to get screen height
+            screenHeightDp = Globals.getScreenDp(context, false);
+            if(screenHeightDp > 0)
+            {
+                //if able to get frame layout params
+                ViewGroup.LayoutParams layoutParams = zoomBar.getLayoutParams();
+                if(layoutParams instanceof FrameLayout.LayoutParams)
+                {
+                    FrameLayout.LayoutParams frameLayoutParams = (FrameLayout.LayoutParams)layoutParams;
+
+                    //set size according to available screen height
+                    fullHeight = (screenHeightDp > 400);
+                    sizes = Globals.dpsToPixels(context, (fullHeight ? 280 : 120), (fullHeight ? 116 : 36));
+                    frameLayoutParams.width = (int)sizes[0];
+                    frameLayoutParams.setMargins(0, 0, (int)-sizes[1], 0);
+                    zoomBar.setLayoutParams(frameLayoutParams);
+                }
+            }
+        }
+    }
+
     //Setup play bar
     private static void setupPlayBar(final FragmentActivity activity, PlayBar playBar, final Calculate.Coordinates.Item[] playbackItems, final CoordinatesFragment.OrbitalBase[] playbackMarkers)
     {
@@ -3484,7 +3547,7 @@ public abstract class Current
     }
 
     //Creates a map view
-    public static View onCreateMapView(final Selectable.ListFragment page, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, boolean forGlobe, final Bundle savedInstanceState)
+    public static View onCreateMapView(final Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, boolean forGlobe, final Bundle savedInstanceState)
     {
         //update status
         mapViewReady = false;
@@ -3493,7 +3556,7 @@ public abstract class Current
         mapMillisecondsPlayBar = 0;
 
         //get context, main views, and lists
-        final Context context = page.getContext();
+        final Context context = pageFragment.getContext();
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_map_layout, container, false);
         final FrameLayout mapFrameLayout = rootView.findViewById(R.id.Map_Frame_Layout);
         final LinearLayout searchListLayout = rootView.findViewById(R.id.Map_Search_List_Layout);
@@ -3505,7 +3568,7 @@ public abstract class Current
         final Calculate.Coordinates.Item[] savedItems = (savedInstanceState != null ? (Calculate.Coordinates.Item[]) Calculate.PageAdapter.getSavedItems(Calculate.PageType.Coordinates) : null);
         final boolean haveSelected = (selectedOrbitals != null && selectedOrbitals.length > 0);
         final boolean multiSelected = (haveSelected && selectedOrbitals.length > 1);
-        final boolean useSavedPath = (page instanceof Calculate.Page && savedItems != null && savedItems.length > 0);
+        final boolean useSavedPath = (pageFragment instanceof Calculate.Page && savedItems != null && savedItems.length > 0);
         final boolean useMultiNoradId = (useSavedPath && savedItems[0].coordinates.length > 1);
         final boolean rotateAllowed = Settings.getMapRotateAllowed(context);
         final boolean holdSelected = Settings.getMapHoldSelected(context);
@@ -3548,9 +3611,9 @@ public abstract class Current
         searchText = (multiSelected ? rootView.findViewById(R.id.Map_Search_Text) : null);
         currentSearchTextReference = new WeakReference<>(searchText);
 
-        page.playBar = rootView.findViewById(R.id.Map_Coordinate_Play_Bar);
-        page.scaleBar = rootView.findViewById(R.id.Map_Coordinate_Scale_Bar);
-        page.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
+        pageFragment.playBar = rootView.findViewById(R.id.Map_Coordinate_Play_Bar);
+        pageFragment.scaleBar = rootView.findViewById(R.id.Map_Coordinate_Scale_Bar);
+        pageFragment.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
 
         //if search list layout exists
         if(searchListLayout != null)
@@ -3560,7 +3623,7 @@ public abstract class Current
         }
 
         //setup search displays
-        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, selectionButtonLayout, mapZoomBar, null, page.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
+        setupSearch(context, showToolbarsButton, showSlidersButton, searchList, searchButton, searchText, searchListLayout, selectionButtonLayout, mapZoomBar, null, pageFragment.playBar, (!useSavedPath || useMultiNoradId ? selectedOrbitals : null), false);
 
         //setup selection buttons
         if(recenterButton != null)
@@ -3612,16 +3675,15 @@ public abstract class Current
                 LinearLayout.LayoutParams menuLayoutParams = (LinearLayout.LayoutParams)mapSettingsMenu.getLayoutParams();
 
                 //if bar exists
-                if(page.playBar != null)
+                if(pageFragment.playBar != null)
                 {
                     //show if showing toolbars and menu is not expanded
-                    page.playBar.setVisibility(mapShowToolbars && !isExpanded ? View.VISIBLE : View.GONE);
+                    pageFragment.playBar.setVisibility(mapShowToolbars && !isExpanded ? View.VISIBLE : View.GONE);
                 }
 
                 //update display
                 menuLayoutParams.width = (isExpanded ? LinearLayout.LayoutParams.MATCH_PARENT : LinearLayout.LayoutParams.WRAP_CONTENT);
                 mapSettingsMenu.setLayoutParams(menuLayoutParams);
-
             }
         });
         mapSettingsMenu.setMessagesEnabled(Settings.getQuickSettingsShowMessages(context));
@@ -3769,7 +3831,7 @@ public abstract class Current
                 setupLatLonButton(context, showLatLonButton);
                 setupPinButton(context, showPinButton);
                 setupFootprintButton(context, showFootprintButton);
-                setupScaleButton(context, iconScaleButton, page.scaleBar, false);
+                setupScaleButton(context, iconScaleButton, pageFragment.scaleBar, false);
 
                 //if not using saved path
                 if(!useSavedPath)
@@ -3837,19 +3899,19 @@ public abstract class Current
 
                 //setup path button after markers have been added
                 setupPathButton(showPathButton, selectedOrbitals);
-                if(page instanceof Current.Page)
+                if(pageFragment instanceof Current.Page)
                 {
-                    ((Current.Page)page).actionButton = showPathButton;
+                    ((Current.Page)pageFragment).actionButton = showPathButton;
                 }
 
                 //set current location
-                setCurrentLocation(page.getActivity(), currentLocation);
+                setCurrentLocation(pageFragment.getActivity(), currentLocation);
 
                 //move to first point
                 mapView.moveCamera(firstPoint.latitude, firstPoint.longitude, firstZoom);
 
                 //setup play bar
-                setupPlayBar(page.getActivity(), page.playBar, (useSavedPath ? savedItems : null), playbackMarkers);
+                setupPlayBar(pageFragment.getActivity(), pageFragment.playBar, (useSavedPath ? savedItems : null), playbackMarkers);
 
                 //if no specific orbital selected
                 if(!haveSelected || multiSelected)

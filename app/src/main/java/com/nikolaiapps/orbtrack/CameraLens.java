@@ -610,6 +610,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private boolean haveZoomValues;
     private boolean pendingOnDraw;
     private boolean pendingSetInParentFilter;
+    private final boolean usingAllOrbitals;
     private final boolean usingFilledBoxPath;
     private final boolean usingColorTextPath;
     private final boolean showingConstellations;
@@ -795,13 +796,13 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     boolean currentSelected = (selectedOrbitalIndex == index);
 
                     //if current orbital is set, -in filter or parent filter-, look angle is valid, and using orbital
-                    if(haveOrbital && (inFilter || inParentFilter) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
+                    if(haveOrbital && (usingAllOrbitals || inFilter || inParentFilter) && (index < currentLookAngles.length) && (!showCalibration || !haveSelected || currentSelected))
                     {
                         //remember current color, look, travel angles, and magnitude properties
                         int currentColor = currentOrbital.getPathColor();
                         double currentMagnitude = currentOrbital.getMagnitude();
                         boolean withinMagnitude = (isStar && currentMagnitude <= starMagnitude);        //note: lower magnitude = brighter star
-                        boolean showOrbital = (currentSelected || (!isStar && inFilter) || (isStar && withinMagnitude));
+                        boolean showOrbital = (usingAllOrbitals || currentSelected || (!isStar && inFilter) || (isStar && withinMagnitude));
                         Calculations.TopographicDataType currentLookAngle = currentLookAngles[index];
                         CalculateViewsTask.OrbitalView[] currentTravel = (index < travelLookAngles.length ? travelLookAngles[index] : null);
 
@@ -816,8 +817,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                                 currentPaint.setStrokeWidth(indicatorThickness);
                             }
 
-                            //if current travel is set, showing paths, not calibrating, and -on selection or -none selected and -not a star, not in parent filter, or not hiding constellation star paths---
-                            if(currentTravel != null && showPaths && !showCalibration && (currentSelected || (!haveSelected && (!isStar || !inParentFilter || !hideConstellationStarPaths))))
+                            //if current travel is set, showing paths, not calibrating, and -using all orbitals- or -on selection or -none selected and -not a star, not in parent filter, or not hiding constellation star paths---
+                            if(currentTravel != null && showPaths && !showCalibration && (usingAllOrbitals || currentSelected || (!haveSelected && (!isStar || !inParentFilter || !hideConstellationStarPaths))))
                             {
                                 //remember length and last index
                                 travelLength = currentTravel.length;
@@ -1033,8 +1034,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                             }
                         }
 
-                        //if -current look angle is set- and -on selection, a star -in parent filter or within magnitude-, or in filter-
-                        if(currentLookAngle != null && (currentSelected || (isStar && (inParentFilter || withinMagnitude)) || inFilter))
+                        //if -current look angle is set- and -using all orbitals, on selection, a star -in parent filter or within magnitude-, or in filter--
+                        if(currentLookAngle != null && (usingAllOrbitals || currentSelected || (isStar && (inParentFilter || withinMagnitude)) || inFilter))
                         {
                             //determine relative location and remember current ID and name
                             RelativeLocationProperties relativeProperties = getRelativeLocationProperties(currentAzDeg, currentElDeg, currentLookAngle.azimuth, currentLookAngle.elevation, width, height, degToPxWidth, degToPxHeight, cameraZoomRatio, !isStar || !inParentFilter);
@@ -1205,7 +1206,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
     }
 
-    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals, boolean needConstellations, boolean usingVirtual)
+    public CameraLens(Context context, Database.SatelliteData[] selectedOrbitals, boolean usingAllSelected, boolean needConstellations, boolean usingVirtual)
     {
         super(context);
 
@@ -1377,6 +1378,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         stopCalibrationListener = null;
         scaleDetector = null;
 
+        usingAllOrbitals = usingAllSelected;
         showingConstellations = needConstellations;
 
         haveZoomValues = false;
@@ -1394,7 +1396,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     }
     public CameraLens(Context context)
     {
-        this(context, null, false, true);
+        this(context, null, false, false, true);
     }
 
     @Override

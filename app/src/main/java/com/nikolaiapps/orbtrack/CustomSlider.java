@@ -52,10 +52,33 @@ public class CustomSlider extends Slider
 
     public void setRange(float minValue, float maxValue)
     {
+        float currentMax;
+        float currentValue;
+
         if(minValue < maxValue)
         {
-            setValueFrom(minValue);
-            setValueTo(maxValue);
+            currentMax = getValueTo();
+
+            if(minValue >= currentMax)
+            {
+                currentValue = getValue();
+                setValueTo(maxValue);
+                setValueFrom(minValue);
+
+                if(currentValue < minValue)
+                {
+                    setValue(minValue);
+                }
+                else if(currentValue > maxValue)
+                {
+                    setValue(maxValue);
+                }
+            }
+            else
+            {
+                setValueFrom(minValue);
+                setValueTo(maxValue);
+            }
         }
     }
 }

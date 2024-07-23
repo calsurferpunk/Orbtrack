@@ -1735,7 +1735,7 @@ public abstract class Calculate
                                 case Globals.SubPageType.VirtualLens:
                                     selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
                                     usingStarsAndConstellations = getUsingStarsAndConstellations(selectedOrbitals);
-                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, usingStarsAndConstellations[0], usingStarsAndConstellations[1], (subPage == Globals.SubPageType.VirtualLens));
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, true, usingStarsAndConstellations[0], usingStarsAndConstellations[1], (subPage == Globals.SubPageType.VirtualLens));
                                     break;
                             }
                             break;
@@ -1769,7 +1769,7 @@ public abstract class Calculate
                                     savedInstanceState.putBoolean(MainActivity.ParamTypes.GetPassItems, true);
                                     selectedOrbitals = getSelectedOrbitals(context, multiNoradId, savedItems);
                                     usingStarsAndConstellations = getUsingStarsAndConstellations(selectedOrbitals);
-                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, usingStarsAndConstellations[0], usingStarsAndConstellations[1], (subPage == Globals.SubPageType.VirtualLens));
+                                    newView = Current.onCreateLensView(this, inflater, container, selectedOrbitals, savedInstanceState, true, usingStarsAndConstellations[0], usingStarsAndConstellations[1], (subPage == Globals.SubPageType.VirtualLens));
                                     break;
                             }
                             break;
@@ -1880,7 +1880,7 @@ public abstract class Calculate
             menu.findItem(R.id.menu_map).setVisible(showMap);
             menu.findItem(R.id.menu_globe).setVisible(showGlobe);
             menu.findItem(R.id.menu_camera_lens).setVisible(showCameraLens && haveSensors);
-            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors));
+            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors && !onSubPageVirtualLens));
             menu.findItem(R.id.menu_edit).setVisible(showSave || onCalculateViewCameraLens || onCalculateViewVirtualLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateCoordinatesGlobe || onCalculateIntersectionLens);
             menu.findItem(R.id.menu_save).setVisible(showSave);
         }
@@ -2196,16 +2196,19 @@ public abstract class Calculate
         }
 
         @Override
-        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, int page)
+        protected OnOrientationChangedListener createOnOrientationChangedListener(RecyclerView list, Selectable.ListBaseAdapter listAdapter, int page, final int subPage)
         {
             return(new OnOrientationChangedListener()
             {
                 @Override
                 public void orientationChanged()
                 {
+                    Context context = Page.this.getContext();
                     View rootView = Page.this.getView();
-                    View listColumns = (rootView != null && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
+                    boolean haveView = (rootView != null);
+                    View listColumns = (haveView && listAdapter != null ? rootView.findViewById(listAdapter.itemsRootViewID) : null);
                     Selectable.ListBaseAdapter adapter;
+                    CustomSlider zoomBar = (haveView ? rootView.findViewById(subPage == Globals.SubPageType.CameraLens || subPage == Globals.SubPageType.VirtualLens ? R.id.Lens_Zoom_Bar : R.id.Map_Zoom_Bar)  : null);
 
                     if(listColumns != null)
                     {
@@ -2221,6 +2224,8 @@ public abstract class Calculate
                     {
                         setOrientationHeaderText(Page.this.listParentView.findViewById(R.id.Header_Text));
                     }
+
+                    Current.setupZoomBar(context, zoomBar);
                 }
             });
         }
@@ -2905,7 +2910,7 @@ public abstract class Calculate
 
         //start calculating for start and end dates with given increment
         task = new CalculateViewsTask(listener);
-        task.execute(context, viewItems, savedViewItems, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false, false);
+        task.execute(context, viewItems, savedViewItems, false, observer, julianStartDate, julianEndDate, dayIncrement, dayIncrement, false, false, (unitType != IncrementType.Seconds), false, false);
 
         //return task
         return(task);

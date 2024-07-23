@@ -2080,7 +2080,7 @@ public abstract class Selectable
         }
 
         //Creates an orientation changed listener
-        protected OnOrientationChangedListener createOnOrientationChangedListener(final RecyclerView list, final ListBaseAdapter listAdapter, final int page)
+        protected OnOrientationChangedListener createOnOrientationChangedListener(final RecyclerView list, final ListBaseAdapter listAdapter, final int page, final int subPage)
         {
             return(null);
         }
@@ -2414,7 +2414,7 @@ public abstract class Selectable
                     RecyclerView pageList = page.getList();
                     ListBaseAdapter pageAdapter = page.getAdapter();
 
-                    ListFragmentAdapter.this.setOrientationChangedListener(pageNum, page.createOnOrientationChangedListener(pageList, pageAdapter, pageNum));
+                    ListFragmentAdapter.this.setOrientationChangedListener(pageNum, page.createOnOrientationChangedListener(pageList, pageAdapter, pageNum, subPageNum));
                     ListFragmentAdapter.this.setGraphChangedListener(pageNum, page.createOnGraphChangedListener(pageAdapter));
                     ListFragmentAdapter.this.setPreview3dChangedListener(pageNum, page.createOnPreview3dChangedListener(pageAdapter));
                     ListFragmentAdapter.this.setInformationChangedListener(pageNum, page.createOnInformationChangedListener(pageAdapter));

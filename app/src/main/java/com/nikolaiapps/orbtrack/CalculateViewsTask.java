@@ -276,16 +276,17 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
     {
         int index;
         int length;
-        boolean limitTravel = (Boolean)params[8];
-        boolean autoSize = (Boolean)params[9];
-        double julianDateStart = (Double)params[4];
-        double julianDateEnd = (Double)params[5];
-        double dayIncrement = (Double)params[6];
-        double largeDayIncrement = (Double)params[7];
-        boolean adjustTime = (Boolean)params[10];
-        boolean hideSlow = (Boolean)params[11];
-        boolean getTimeString = (Boolean)params[12];
-        Calculations.ObserverType observer = (Calculations.ObserverType)params[3];
+        boolean limitTravel = (Boolean)params[9];
+        boolean autoSize = (Boolean)params[10];
+        boolean usingAllItems = (Boolean)params[3];
+        double julianDateStart = (Double)params[5];
+        double julianDateEnd = (Double)params[6];
+        double dayIncrement = (Double)params[7];
+        double largeDayIncrement = (Double)params[8];
+        boolean adjustTime = (Boolean)params[11];
+        boolean hideSlow = (Boolean)params[12];
+        boolean getTimeString = (Boolean)params[13];
+        Calculations.ObserverType observer = (Calculations.ObserverType)params[4];
         Calculate.ViewAngles.Item[] savedViewItems = (Calculate.ViewAngles.Item[])params[2];
         CalculateService.ViewListItem[] viewItems = (CalculateService.ViewListItem[])params[1];
         Context context = (Context)params[0];
@@ -298,7 +299,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         {
             //get current item and path
             CalculateService.ViewListItem currentItem = viewItems[index];
-            boolean currentInFilter = currentItem.inFilter;
+            boolean currentInFilter = (usingAllItems || currentItem.inFilter);
             double currentDayIncrement = (currentItem.getSatelliteNum() <= Universe.IDs.Polaris ? largeDayIncrement : dayIncrement);
             boolean skipAutoSize = (currentDayIncrement != dayIncrement);
             ArrayList<OrbitalView> pathViews = null;

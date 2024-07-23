@@ -1278,10 +1278,22 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(currentSatellites);
     }
 
+    //Returns if have a selected map view satellite
+    public static boolean haveSelectedMapSatellite()
+    {
+        return(mapViewNoradID != Integer.MAX_VALUE);
+    }
+
+    //Returns if have a selected view lens satellite
+    public static boolean haveSelectedLensSatellite()
+    {
+        return(viewLensNoradID != Integer.MAX_VALUE);
+    }
+
     //Returns current lens satellites
     public static Database.SatelliteData[] getLensSatellites(Context context)
     {
-        return(viewLensNoradID != Integer.MAX_VALUE ? new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)} : currentSatellites);
+        return(haveSelectedLensSatellite() ? new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)} : currentSatellites);
     }
 
     //Returns current old satellites
@@ -4170,10 +4182,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 boolean onMap = (combinedSubPage == Globals.SubPageType.Map || combinedSubPage == Globals.SubPageType.Globe);
                 boolean onList = (combinedSubPage == Globals.SubPageType.List);
                 boolean onLens = (combinedSubPage == Globals.SubPageType.CameraLens || combinedSubPage == Globals.SubPageType.VirtualLens);
-                boolean mapMultiOrbitals = (onMap && mapViewNoradID == Integer.MAX_VALUE);
-                boolean mapSingleOrbital = (onMap && mapViewNoradID != Integer.MAX_VALUE);
-                boolean lensMultiOrbitals = (onLens && viewLensNoradID == Integer.MAX_VALUE);
-                boolean lensSingleOrbital = (onLens && viewLensNoradID != Integer.MAX_VALUE);
+                boolean haveMapSelected = haveSelectedMapSatellite();
+                boolean haveLensSelected = haveSelectedLensSatellite();
+                boolean mapMultiOrbitals = (onMap && !haveMapSelected);
+                boolean mapSingleOrbital = (onMap && haveMapSelected);
+                boolean lensMultiOrbitals = (onLens && !haveLensSelected);
+                boolean lensSingleOrbital = (onLens && haveLensSelected);
                 boolean onCurrentMapId;
                 boolean onCurrentLensId;
                 boolean onCurrentLensChildId;
@@ -5074,7 +5088,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             final FloatingActionStateButton actionButton = getCurrentActionButton();
 
             //create and run task
-            currentViewAnglesTask = Current.calculateViews(this, lensSatellites, observer, julianDate, julianDate + 1, 0.2 / 24, new CalculateViewsTask.OnProgressChangedListener()
+            currentViewAnglesTask = Current.calculateViews(this, lensSatellites, haveSelectedLensSatellite(), observer, julianDate, julianDate + 1, 0.2 / 24, new CalculateViewsTask.OnProgressChangedListener()
             {
                 @Override
                 public void onProgressChanged(final int progressType, final int satelliteIndex, CalculateService.ViewListItem item, final ArrayList<CalculateViewsTask.OrbitalView> pathPoints)
@@ -5274,7 +5288,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 {
                                     //update location points
                                     mapView.setPath(index, pathPoints);
-                                    mapView.setPathVisible(index, (mapViewNoradID == Integer.MAX_VALUE || mapViewNoradID == mapView.getOrbitalNoradId(index)));
+                                    mapView.setPathVisible(index, (!haveSelectedMapSatellite() || mapViewNoradID == mapView.getOrbitalNoradId(index)));
                                 }
                             };
                             break;

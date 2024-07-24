@@ -613,6 +613,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private final boolean usingAllOrbitals;
     private final boolean usingFilledBoxPath;
     private final boolean usingColorTextPath;
+    private boolean usingUserOffset;
+    private final boolean usingDeclination;
     private final boolean showingConstellations;
     private final boolean arrowDirectionCentered;
     private final boolean showingArrowDirection;
@@ -1276,6 +1278,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         previousArea = new RectF();
         azIndex = elIndex = pathDivisions = 0;
         azUserOffset = Settings.getLensAzimuthUserOffset(context);
+        usingUserOffset = Settings.getLensUseAzimuthUserOffset(context);
+        usingDeclination = Settings.getLensUseAzimuthDeclination(context);
         azDeclination = 0;
         defaultPathJulianDelta = Globals.truncate(1.0 / 24, 8);      //1 hour interval      note: setting to 8 places prevents rounding errors for 1 hour intervals
         azDegArray = new float[averageCount];
@@ -1922,7 +1926,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     //Get averaged az degree
     private float getAzDeg()
     {
-        return((float)Globals.normalizeAngle(isVirtual ? currentVirtualView.getAzimuth() : (getAverageDegree(azDegArray) + azDeclination + azUserOffset)));
+        return((float)Globals.normalizeAngle(isVirtual ? currentVirtualView.getAzimuth() : (getAverageDegree(azDegArray) + (usingDeclination ? azDeclination : 0) + (usingUserOffset ? azUserOffset : 0))));
     }
 
     //Get averaged el degree
@@ -2460,9 +2464,13 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     //Tries to update user azimuth offset
     public void updateUserAzimuthOffset()
     {
+        Context context = getContext();
+
         //add difference to offset
         azUserOffset += (float)Globals.degreeDistance(alignCenter.az, alignCenter.orbitalAz);
-        Settings.setLensAzimuthUserOffset(getContext(), azUserOffset);
+        usingUserOffset = true;
+        Settings.setLensAzimuthUserOffset(context, azUserOffset);
+        Settings.setLensUseAzimuthUserOffset(context, usingUserOffset);
     }
 
     //Sets calculated alignment

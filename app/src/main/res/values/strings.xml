@@ -137,7 +137,7 @@
     <string name="desc_arrow_size">Size of arrow indicating orbital direction</string>
     <string name="desc_auto_height">Retrieve height from hardware</string>
     <string name="desc_auto_width">Retrieve width from hardware</string>
-    <string name="desc_azimuth_offset">Compass true north adjustment</string>
+    <string name="desc_azimuth_user_offset">Compass true north user adjustment</string>
     <string name="desc_compass_align">For highest accuracy in a new location, it may help to align the compass with a visible orbital. The sun and moon are the best to use.</string>
     <string name="desc_compass_error">Calibrate compass by moving your device in a figure 8 pattern, or move away from interference.</string>
     <string name="desc_finished_setup">All done! If you wish to change anything later, look under settings in the main menu.</string>
@@ -212,6 +212,7 @@
     <string name="desc_update_rate_list">Rate to update list displays</string>
     <string name="desc_use_camera">Look through camera while viewing</string>
     <string name="desc_use_camera_zoom">Allow zooming if hardware exists</string>
+    <string name="desc_use_declination">Adjust magnetic field true north</string>
     <string name="desc_use_exposure">Allow setting exposure for compatible cameras</string>
     <string name="desc_use_icon_tint">Use icon tint</string>
     <string name="desc_use_virtual_zoom">Allow zooming in virtual scene</string>
@@ -299,7 +300,7 @@
     <string name="title_auto_width">Auto Width</string>
     <string name="title_average">Average</string>
     <string name="title_azimuth">Azimuth</string>
-    <string name="title_azimuth_offset">Azimuth Offset</string>
+    <string name="title_azimuth_user_offset">Azimuth User Offset</string>
     <string name="title_b">B</string>
     <string name="title_back">Back</string>
     <string name="title_background">Background</string>
@@ -685,6 +686,7 @@
     <string name="title_updating">Updating</string>
     <string name="title_uranus">Uranus</string>
     <string name="title_use_camera">Use Camera</string>
+    <string name="title_use_declination">Use Declination</string>
     <string name="title_use_exposure">Use Exposure</string>
     <string name="title_use_legacy_tle_format">Use Legacy TLE Format</string>
     <string name="title_use_tint">Use Tint</string>

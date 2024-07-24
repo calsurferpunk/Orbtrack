@@ -462,14 +462,20 @@
                             android:summary="@string/desc_auto_height"/>
 
                         <com.nikolaiapps.orbtrack.SwitchTextPreference
-                            app:titleText="@string/title_azimuth_offset"
+                            app:titleText="@string/title_azimuth_user_offset"
                             app:suffixText="@string/title_degs"
                             android:key="LensAzimuthUserOffset"
-                            app:showSwitch="false"
+                            app:switchKey="LensUseAzimuthUserOffset"
+                            app:reverseEnabled="true"
                             app:minValue="-180"
                             app:maxValue="360"
                             app:valueType="Float"
-                            android:summary="@string/desc_azimuth_offset"/>
+                            android:summary="@string/desc_azimuth_user_offset"/>
+
+                        <com.nikolaiapps.orbtrack.SwitchPreference
+                            android:title="@string/title_use_declination"
+                            android:key="LensUseAzDeclination"
+                            android:summary="@string/desc_use_declination"/>
                     </PreferenceCategory>
 
                     <PreferenceCategory android:title="@string/title_display">

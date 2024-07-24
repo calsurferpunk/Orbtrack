@@ -137,7 +137,7 @@
     <string name="desc_ar_warning">Si no es un adulto, permanezca cerca de un adulto por seguridad, especialmente por la noche.\n\nEsté atento a su entorno y asegúrese de mirar por donde camina.</string>
     <string name="desc_auto_height">Recuperar altura del hardware</string>
     <string name="desc_auto_width">Recuperar ancho del hardware</string>
-    <string name="desc_azimuth_offset">Brújula ajuste norte verdadero</string>
+    <string name="desc_azimuth_user_offset">Ajuste del usuario del norte real de la brújula</string>
     <string name="desc_compass_align">Para una mayor precisión en una nueva ubicación, puede ayudar a alinear la brújula con un orbital visible. El sol y la luna son los mejores para usar.</string>
     <string name="desc_compass_error">Calibre la brújula moviendo su dispositivo en un patrón de figura 8, o aléjese de la interferencia.</string>
     <string name="desc_finished_setup">¡Todo listo! Si desea cambiar algo más tarde, busque en la configuración en el menú principal.</string>
@@ -212,6 +212,7 @@
     <string name="desc_update_rate_list">Tasa para actualizar la visualización de la lista</string>
     <string name="desc_use_camera">Mire a través de la cámara mientras mira</string>
     <string name="desc_use_camera_zoom">Permitir el zoom si existe hardware</string>
+    <string name="desc_use_declination">Ajustar el campo magnético al norte verdadero</string>
     <string name="desc_use_exposure">Permitir configurar la exposición para cámaras compatibles</string>
     <string name="desc_use_icon_tint">Usar tinte de icono</string>
     <string name="desc_use_virtual_zoom">Permitir hacer zoom en la escena virtual</string>
@@ -299,7 +300,7 @@
     <string name="title_auto_width">Ancho Auto</string>
     <string name="title_average">Promedio</string>
     <string name="title_azimuth">Azimut</string>
-    <string name="title_azimuth_offset">Desplazamiento Azimut</string>
+    <string name="title_azimuth_user_offset">Compensación Usuario Azimut</string>
     <string name="title_b">B</string>
     <string name="title_back">Atrás</string>
     <string name="title_background">Fondo</string>
@@ -685,6 +686,7 @@
     <string name="title_updating">Actualización</string>
     <string name="title_uranus">Urano</string>
     <string name="title_use_camera">Usa Cámara</string>
+    <string name="title_use_declination">Usar Declinación</string>
     <string name="title_use_exposure">Usar Exposición</string>
     <string name="title_use_legacy_tle_format">Utilice Formato TLE Heredado</string>
     <string name="title_use_tint">Usar Tinte</string>

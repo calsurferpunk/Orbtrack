@@ -214,6 +214,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference rotateSwitch = this.findPreference(Settings.PreferenceName.LensRotate);
                         SwitchPreference cameraZoomSwitch = this.findPreference(Settings.PreferenceName.LensUseCameraZoom);
                         SwitchPreference exposureSwitch = this.findPreference(Settings.PreferenceName.LensUseExposure);
+                        SwitchPreference useAzDeclinationSwitch = this.findPreference(Settings.PreferenceName.LensUseAzDeclination);
                         SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
                         SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
                         SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
@@ -223,6 +224,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         setupSwitch(rotateSwitch);
                         setupSwitch(cameraZoomSwitch);
                         setupSwitch(exposureSwitch);
+                        setupSwitch(useAzDeclinationSwitch);
                         setupSwitchText(lensWidthSwitch);
                         setupSwitchText(lensHeightSwitch);
                         setupSwitchText(lensAzimuthOffsetSwitch);
@@ -1720,6 +1722,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensUseAutoWidth:
                         case Settings.PreferenceName.LensUseAutoHeight:
                         case Settings.PreferenceName.LensAzimuthUserOffset:
+                        case Settings.PreferenceName.LensUseAzimuthUserOffset:
+                        case Settings.PreferenceName.LensUseAzDeclination:
                         case Settings.PreferenceName.LensWidth:
                         case Settings.PreferenceName.LensHeight:
                         case Settings.PreferenceName.LensShowToolbars:

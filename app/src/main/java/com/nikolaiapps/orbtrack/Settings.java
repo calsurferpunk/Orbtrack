@@ -132,6 +132,8 @@ public abstract class Settings
         static final String LensUseAutoWidth = "LensUseAutoWidth";
         static final String LensUseAutoHeight = "LensUseAutoHeight";
         static final String LensAzimuthUserOffset = "LensAzimuthUserOffset";
+        static final String LensUseAzimuthUserOffset = "LensUseAzimuthUserOffset";
+        static final String LensUseAzDeclination = "LensUseAzDeclination";
         static final String LensWidth = "LensWidth";
         static final String LensHeight = "LensHeight";
         static final String LensWidthHardware = "LensWidthHardware";
@@ -2101,6 +2103,8 @@ public abstract class Settings
             case PreferenceName.LensUseCameraZoom:
             case PreferenceName.LensUseVirtualZoom:
             case PreferenceName.LensUseExposure:
+            case PreferenceName.LensUseAzimuthUserOffset:
+            case PreferenceName.LensUseAzDeclination:
             case PreferenceName.LensIndicatorIconShowDirection:
             case PreferenceName.LensShowToolbars:
             case PreferenceName.LensShowSliders:
@@ -2823,6 +2827,24 @@ public abstract class Settings
     public static void setLensAzimuthUserOffset(Context context, float offset)
     {
         setPreferenceFloat(context, PreferenceName.LensAzimuthUserOffset, offset);
+    }
+
+    //Gets lens using azimuth user offset
+    public static boolean getLensUseAzimuthUserOffset(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensUseAzimuthUserOffset));
+    }
+
+    //Sets lens using azimuth user offset
+    public static void setLensUseAzimuthUserOffset(Context context, boolean use)
+    {
+        setPreferenceBoolean(context, PreferenceName.LensUseAzimuthUserOffset, use);
+    }
+
+    //Gets lens using azimuth declination
+    public static boolean getLensUseAzimuthDeclination(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.LensUseAzDeclination));
     }
 
     //Gets if lens needs rotating

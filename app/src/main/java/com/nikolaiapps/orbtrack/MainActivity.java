@@ -2413,7 +2413,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //update titles and swiping status to allow if not on current/calculate with -map/globe or virtual lens-
         usedSubPage = (showCurrent ? currentSubPage[Current.PageType.Combined] : showCalculate ? calculateSubPage[page] : 0);
-        allowingPagerSwipe = (usedSubPage != Globals.SubPageType.Map && usedSubPage != Globals.SubPageType.Globe && usedSubPage != Globals.SubPageType.VirtualLens);
+        allowingPagerSwipe = (usedSubPage != Globals.SubPageType.Map && usedSubPage != Globals.SubPageType.Globe && usedSubPage != Globals.SubPageType.CameraLens && usedSubPage != Globals.SubPageType.VirtualLens);
         mainPager.setSwipeEnabled(allowingPagerSwipe);
         mainPagerTitles.setVisibility(View.VISIBLE);
     }
@@ -3904,8 +3904,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 startCamera = true;
                             }
 
-                            //don't allow swiping if on map/globe or virtual lens
-                            allowSwipe = (subPage != Globals.SubPageType.Map && subPage != Globals.SubPageType.Globe && subPage != Globals.SubPageType.VirtualLens);
+                            //don't allow swiping if on map/globe or a lens
+                            allowSwipe = (subPage != Globals.SubPageType.Map && subPage != Globals.SubPageType.Globe && !startCamera);
                         }
 
                         //if coming from another group
@@ -3954,8 +3954,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                     startCamera = true;
                                 }
 
-                                //don't allow swiping if on virtual lens
-                                allowSwipe = (subPage != Globals.SubPageType.VirtualLens);
+                                //don't allow swiping if on a lens
+                                allowSwipe = !startCamera;
                                 break;
 
                             case Calculate.PageType.Coordinates:

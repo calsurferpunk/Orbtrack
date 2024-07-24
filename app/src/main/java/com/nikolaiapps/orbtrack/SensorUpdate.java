@@ -28,27 +28,33 @@ public class SensorUpdate implements SensorEventListener
     private boolean needMagnet;
     private boolean needAccel;
     private boolean needGyro;
+    private boolean usingRotation;
     private final SensorManager sensorsManager;
-    private Sensor magnetSensor;
-    private Sensor accelSensor;
     private Sensor gyroSensor;
-    private float[] magnetValues;
-    private float[] accelValues;
-    private float[] gyroValues;
-    private final float[] rotation;
-    private final float[] rotation2;
+    private Sensor accelSensor;
+    private Sensor magnetSensor;
+    private Sensor rotationSensor;
+    private final float[] gyroValues;
+    private final float[] accelValues;
+    private final float[] magnetValues;
+    private final float[] rotationValues;
     private final float[] orientation;
+    private final float[] rotationMatrix;
+    private final float[] rotationAdjustedMatrix;
+    private final float[] rotationLegacyMatrix;
+    private final float[] rotationLegacyAdjustedMatrix;
     private OnSensorChangedListener sensorChangedListener;
 
     public static boolean havePositionSensors(Context context)
     {
         SensorManager manager = (context != null ? (SensorManager)context.getSystemService(Context.SENSOR_SERVICE) : null);
-        return(manager != null && !manager.getSensorList(Sensor.TYPE_ACCELEROMETER).isEmpty() && !manager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD).isEmpty());
+        return(manager != null && !manager.getSensorList(Sensor.TYPE_ACCELEROMETER).isEmpty() && !(manager.getSensorList(Sensor.TYPE_ROTATION_VECTOR).isEmpty() && manager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD).isEmpty()));
     }
 
     @SuppressWarnings("SuspiciousNameCombination")
     public SensorUpdate(Context context, int orientationVal)
     {
+        usingRotation = false;
         gyroCount = 0;
         gyroTime = SystemClock.elapsedRealtime();
         gyroDelaySeconds = 1.0f / 15;
@@ -83,17 +89,23 @@ public class SensorUpdate implements SensorEventListener
         sensorsManager = (SensorManager)context.getSystemService(Context.SENSOR_SERVICE);
         if(sensorsManager != null)
         {
-            magnetSensor = sensorsManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
+            rotationSensor = sensorsManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR);
+            usingRotation = (rotationSensor != null);
+
+            magnetSensor = (usingRotation ? null : sensorsManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD));
             accelSensor = sensorsManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
             gyroSensor = (!sensorsManager.getSensorList(Sensor.TYPE_GYROSCOPE).isEmpty() ? sensorsManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE) : null);
         }
 
-        magnetValues = new float[]{0, 0, 0};
-        accelValues = new float[]{0, 0, 0};
         gyroValues = new float[]{0, 0 ,0};
-        rotation = new float[9];
-        rotation2 = new float[9];
+        accelValues = new float[]{0, 0, 0};
+        magnetValues = new float[]{0, 0, 0};
+        rotationValues = new float[]{0, 0, 0, 0};
         orientation = new float[3];
+        rotationMatrix = new float[16];
+        rotationAdjustedMatrix = new float[16];
+        rotationLegacyMatrix = new float[9];
+        rotationLegacyAdjustedMatrix = new float[9];
 
         needMagnet = needAccel = true;
         needGyro = (gyroSensor != null);
@@ -101,41 +113,56 @@ public class SensorUpdate implements SensorEventListener
 
     public void startUpdates(OnSensorChangedListener listener)
     {
-        sensorsManager.registerListener(this, magnetSensor, SensorManager.SENSOR_DELAY_GAME);
-        sensorsManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME);
+        if(usingRotation)
+        {
+            sensorsManager.registerListener(this, rotationSensor, SensorManager.SENSOR_DELAY_GAME);
+        }
+        if(magnetSensor != null)
+        {
+            sensorsManager.registerListener(this, magnetSensor, SensorManager.SENSOR_DELAY_GAME);
+        }
+        if(accelSensor != null)
+        {
+            sensorsManager.registerListener(this, accelSensor, SensorManager.SENSOR_DELAY_GAME);
+        }
         if(gyroSensor != null)
         {
             sensorsManager.registerListener(this, gyroSensor, SensorManager.SENSOR_DELAY_GAME);
         }
+
         sensorChangedListener = listener;
     }
 
     public void stopUpdates()
     {
-        sensorsManager.unregisterListener(this, magnetSensor);
-        sensorsManager.unregisterListener(this, accelSensor);
+        if(usingRotation)
+        {
+            sensorsManager.unregisterListener(this, rotationSensor);
+        }
+        if(magnetSensor != null)
+        {
+            sensorsManager.unregisterListener(this, magnetSensor);
+        }
+        if(accelSensor != null)
+        {
+            sensorsManager.unregisterListener(this, accelSensor);
+        }
         if(gyroSensor != null)
         {
             sensorsManager.unregisterListener(this, gyroSensor);
         }
+
         sensorChangedListener = null;
     }
 
-    private float[] applyLowPassFilter(float[] input, float[] result)
+    private void applyLowPassFilter(float[] input, float[] result)
     {
         int index;
-
-        if(result == null)
-        {
-            return(input);
-        }
 
         for(index = 0; index < input.length; index++)
         {
             result[index] = result[index] + filterAlpha * (input[index] - result[index]);
         }
-
-        return(result);
     }
 
     @Override
@@ -143,30 +170,40 @@ public class SensorUpdate implements SensorEventListener
     {
         boolean isGyro = false;
         boolean invertGyro = false;
+        boolean haveOrientation = false;
+        boolean aboveHorizon;
         int azGyroIndex;
         float azDeg;
         float elDeg;
+        float roughElDeg;
         long currentTime;
+        Sensor currentSensor = event.sensor;
+        float[] currentValues = event.values;
 
-        //if magnetometer
-        if(event.sensor.equals(magnetSensor))
+        //if rotation
+        if(currentSensor.equals(rotationSensor))
+        {
+            System.arraycopy(currentValues, 0, rotationValues, 0, rotationValues.length);
+        }
+        //else if magnetometer
+        else if(currentSensor.equals(magnetSensor))
         {
             //copy values and update
-            magnetValues = applyLowPassFilter(event.values, magnetValues);
+            applyLowPassFilter(currentValues, magnetValues);
             needMagnet = false;
         }
         //else if accelerometer
-        else if(event.sensor.equals(accelSensor))
+        else if(currentSensor.equals(accelSensor))
         {
             //copy values and update
-            accelValues = applyLowPassFilter(event.values, accelValues);
+            applyLowPassFilter(currentValues, accelValues);
             needAccel = false;
         }
         //else if gyro
-        else if(event.sensor.equals(gyroSensor))
+        else if(currentSensor.equals(gyroSensor))
         {
             //copy values and update
-            gyroValues = event.values;
+            applyLowPassFilter(currentValues, gyroValues);
             needGyro = false;
             isGyro = true;
             gyroCount++;
@@ -184,15 +221,35 @@ public class SensorUpdate implements SensorEventListener
             }
         }
 
-        //if have all values needed
-        if(!needMagnet && !needAccel)
+        //if using rotation
+        if(usingRotation)
         {
             //get values
-            SensorManager.getRotationMatrix(rotation, null, accelValues, magnetValues);
-            SensorManager.remapCoordinateSystem(rotation, axisX, axisY, rotation2);
-            SensorManager.getOrientation(rotation2, orientation);
-            float roughElDeg = Math.round(Math.toDegrees(Math.acos(accelValues[2] / 10.0))) - 90;
-            boolean aboveHorizon = (roughElDeg >= 0);
+            SensorManager.getRotationMatrixFromVector(rotationMatrix, rotationValues);
+            SensorManager.remapCoordinateSystem(rotationMatrix, axisX, axisY, rotationAdjustedMatrix);
+            SensorManager.getOrientation(rotationAdjustedMatrix, orientation);
+
+            //update status
+            haveOrientation = true;
+        }
+        //else if have all needed values
+        else if(!needMagnet && !needAccel)
+        {
+            //get values
+            SensorManager.getRotationMatrix(rotationLegacyMatrix, null, accelValues, magnetValues);
+            SensorManager.remapCoordinateSystem(rotationLegacyMatrix, axisX, axisY, rotationLegacyAdjustedMatrix);
+            SensorManager.getOrientation(rotationLegacyAdjustedMatrix, orientation);
+
+            //update status
+            haveOrientation = true;
+        }
+
+        //if have all needed values
+        if(haveOrientation && !needAccel)
+        {
+            //get rough elevation
+            roughElDeg = Math.round(Math.toDegrees(Math.acos(accelValues[2] / 10.0))) - 90;
+            aboveHorizon = (roughElDeg >= 0);
 
             if(aboveHorizon)
             {
@@ -201,24 +258,6 @@ public class SensorUpdate implements SensorEventListener
                     orientation[1] = (float)(-Math.PI - orientation[1]);
                 }
                 orientation[0] += (float)Math.PI;
-            }
-
-            switch(currentOrientation)
-            {
-                case Surface.ROTATION_0:
-                    //use y axis
-                    azGyroIndex = 1;
-                    break;
-
-                case Surface.ROTATION_270:
-                    invertGyro = true;
-                    //fall through
-
-                default:
-                case Surface.ROTATION_90:
-                    //use x axis
-                    azGyroIndex = 0;
-                    break;
             }
 
             //convert values to degrees
@@ -239,6 +278,25 @@ public class SensorUpdate implements SensorEventListener
                 //if just read gyro
                 if(isGyro)
                 {
+                    //get gyro status
+                    switch(currentOrientation)
+                    {
+                        case Surface.ROTATION_0:
+                            //use y axis
+                            azGyroIndex = 1;
+                            break;
+
+                        case Surface.ROTATION_270:
+                            invertGyro = true;
+                            //fall through
+
+                        default:
+                        case Surface.ROTATION_90:
+                            //use x axis
+                            azGyroIndex = 0;
+                            break;
+                    }
+
                     //get azimuth with gyro
                     azDeg = (float)Globals.normalizePositiveAngle(latchedAzDeg - Math.toDegrees(gyroValues[azGyroIndex] * gyroDelaySeconds * (invertGyro ? -1 : 1)));
                 }
@@ -256,7 +314,7 @@ public class SensorUpdate implements SensorEventListener
             if(sensorChangedListener != null)
             {
                 //send event
-                sensorChangedListener.onSensorChanged(azDeg, elDeg, event.sensor.getType(), event.accuracy);
+                sensorChangedListener.onSensorChanged(azDeg, elDeg, currentSensor.getType(), event.accuracy);
             }
         }
     }

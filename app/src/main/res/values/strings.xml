@@ -153,6 +153,7 @@
     <string name="desc_label_style">Label drawing style</string>
     <string name="desc_layer">Surface images to display</string>
     <string name="desc_lens_frame_rate">Rate to update virtual lens rendering</string>
+    <string name="desc_lens_view_improvements">Lens view accuracy and movement has been greatly improved for supported devices! Default is now using automatic lens field of view, but you can still manually align if it proves inaccurate.\n\nAlso, now all devices have the option of a simulated virtual lens! Just click the photosphere icon to try it.</string>
     <string name="desc_location_disable">Location services are disabled. Do you wish to change settings?</string>
     <string name="desc_location_icon">Icon to use for map location displays</string>
     <string name="desc_map_frame_rate">Rate to update globe/map rendering</string>
@@ -258,7 +259,7 @@
     <string name="text_reading_success">Success reading</string>
     <string name="text_selected">selected</string>
     <string name="text_space_of_space">" of "</string>
-    <string name="text_spacetrack_create_account">Space-Track requires a free account to use.  You can select another, but data may not be as accurate.</string>
+    <string name="text_spacetrack_create_account">Space-Track requires a free account to use.  You may select another, but data may not be quite as up to date.</string>
     <string name="text_to">to</string>
     <string name="text_unknown_address_decoder_error">Unknown address decoder error</string>
     <string name="text_update_cancelled">Update cancelled</string>

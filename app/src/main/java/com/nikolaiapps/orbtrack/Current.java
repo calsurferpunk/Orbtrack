@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.ActivityInfo;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
@@ -2307,7 +2308,7 @@ public abstract class Current
     }
 
     //Shows first run dialog
-    private static void showFirstRunDialog(Context context, CameraLens cameraView, FloatingActionStateButton showCalibrationButton, boolean useSaved, boolean firstCalibrate)
+    private static void showFirstRunDialog(Context context)
     {
         Resources res = (context != null ? context.getResources() : null);
 
@@ -2319,13 +2320,6 @@ public abstract class Current
             {
                 //done with first run
                 Settings.setLensFirstRun(context, false);
-
-                //if not using a saved path and on first calibration
-                if(!useSaved && firstCalibrate)
-                {
-                    //show first calibration dialog
-                    showFirstCalibrateDialog(cameraView, showCalibrationButton);
-                }
             }
         });
     }
@@ -2334,6 +2328,7 @@ public abstract class Current
     public static View onCreateLensView(Selectable.ListFragment pageFragment, LayoutInflater inflater, ViewGroup container, Database.SatelliteData[] selectedOrbitals, Bundle savedInstanceState, boolean usingAllSelected, boolean showingStars, boolean needConstellations, boolean usingVirtual)
     {
         final Context context = pageFragment.getContext();
+        final Activity activity = (context instanceof Activity ? (Activity)context : null);
         Bundle savedState = (savedInstanceState != null ? savedInstanceState : new Bundle());
         final ViewGroup rootView = (ViewGroup)inflater.inflate(R.layout.current_lens_view, container, false);
         final FrameLayout lensLayout = rootView.findViewById(R.id.Lens_Layout);
@@ -2345,8 +2340,7 @@ public abstract class Current
         int group = pageFragment.getGroupParam();
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
         int pathDivisions = savedState.getInt(MainActivity.ParamTypes.PathDivisions, 8);
-        boolean firstRun = Settings.getLensFirstRun(context);
-        boolean firstCalibrate = Settings.getLensFirstCalibrate(context);
+        boolean firstCameraRun = (!usingVirtual && Settings.getLensFirstRun(context));
         boolean onCalculate = (group == MainActivity.Groups.Calculate);
         boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
         boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
@@ -2442,19 +2436,28 @@ public abstract class Current
             showCalibrationButton.setOnClickListener(new View.OnClickListener()
             {
                 private int lastSelectedNoradId = Universe.IDs.None;
+                private int startOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+                private boolean firstCalibrate = Settings.getLensFirstCalibrate(context);
 
                 @Override
                 public void onClick(View v)
                 {
-                    //reverse state
+                    //if first time calibrating and not already doing so
+                    if(!lensShowCalibration && firstCalibrate)
+                    {
+                        //no longer first time
+                        firstCalibrate = false;
+                        Settings.setLensFirstCalibrate(context, false);
+
+                        //show dialog and stop
+                        showFirstCalibrateDialog(cameraView, showCalibrationButton);
+                        return;
+                    }
+
+                    //reverse state and update display
                     lensShowCalibration = !lensShowCalibration;
                     showCalibrationButton.setChecked(lensShowCalibration);
-                    if(lensShowCalibration)
-                    {
-                        //remember selection and hide menu when starting calibration
-                        lastSelectedNoradId = cameraView.getSelectedNoradId();
-                        cameraView.settingsMenu.close();
-                    }
+                    cameraView.showCalibration = lensShowCalibration;
 
                     //if list is set
                     if(searchList != null)
@@ -2470,12 +2473,25 @@ public abstract class Current
                         searchButton.setEnabled(true);
                     }
 
-                    //update display
-                    cameraView.showCalibration = lensShowCalibration;
+                    //if now showing calibration
                     if(lensShowCalibration)
                     {
+                        //remember selection
+                        lastSelectedNoradId = cameraView.getSelectedNoradId();
+
+                        //hide menu
+                        cameraView.settingsMenu.close();
+
                         //reset zoom
                         cameraView.setZoom(1.0f);
+
+                        //if activity exists
+                        if(activity != null)
+                        {
+                            //remember starting orientation and set to device default
+                            startOrientation = activity.getRequestedOrientation();
+                            activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
+                        }
                     }
                     else
                     {
@@ -2488,7 +2504,16 @@ public abstract class Current
                             searchList.setSelectedValue(lastSelectedNoradId);
                         }
                         lastSelectedNoradId = Universe.IDs.None;
+
+                        //if activity exists
+                        if(activity != null)
+                        {
+                            //return to starting orientation
+                            activity.setRequestedOrientation(startOrientation);
+                        }
                     }
+
+                    //update displays
                     cameraView.zoomBar.setVisibility(lensShowCalibration || !lensShowSliders || !cameraView.canZoom() ? View.GONE : View.VISIBLE);
                     cameraView.exposureBar.setVisibility(lensShowCalibration || !lensShowSliders || !cameraView.canSetExposure() ? View.GONE : View.VISIBLE);
                     buttonLayout.setVisibility(lensShowCalibration ? View.VISIBLE : View.GONE);
@@ -2661,22 +2686,11 @@ public abstract class Current
             }
         });
 
-        //if lens first run or calibrate
-        if(firstRun || firstCalibrate)
+        //if camera lens first run
+        if(firstCameraRun)
         {
-            //if first run
-            if(firstRun)
-            {
-                //show first run dialog
-                //note: also shows calibration if needed
-                showFirstRunDialog(context, cameraView, showCalibrationButton, useSaved, firstCalibrate);
-            }
-            //else if not using a saved path
-            else if(!useSaved)
-            {
-                //show first calibrate dialog only
-                showFirstCalibrateDialog(cameraView, showCalibrationButton);
-            }
+            //show first run dialog
+            showFirstRunDialog(context);
         }
 
         //if using a saved path

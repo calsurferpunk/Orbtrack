@@ -134,8 +134,10 @@ public abstract class Settings
         static final String LensAzimuthUserOffset = "LensAzimuthUserOffset";
         static final String LensUseAzimuthUserOffset = "LensUseAzimuthUserOffset";
         static final String LensUseAzDeclination = "LensUseAzDeclination";
-        static final String LensWidth = "LensWidth";
-        static final String LensHeight = "LensHeight";
+        static final String LensWidthUser = "LensWidthUser";
+        static final String LensHeightUser = "LensHeightUser";
+        static final String LensWidthUserViewWidth = "LensWidthUserViewWidth";
+        static final String LensHeightUserViewHeight = "LensHeightUserViewHeight";
         static final String LensWidthHardware = "LensWidthHardware";
         static final String LensHeightHardware = "LensHeightHardware";
         static final String LensShowToolbars = "LensShowToolbars";
@@ -2103,6 +2105,8 @@ public abstract class Settings
             case PreferenceName.LensUseCameraZoom:
             case PreferenceName.LensUseVirtualZoom:
             case PreferenceName.LensUseExposure:
+            case PreferenceName.LensUseAutoWidth:
+            case PreferenceName.LensUseAutoHeight:
             case PreferenceName.LensUseAzimuthUserOffset:
             case PreferenceName.LensUseAzDeclination:
             case PreferenceName.LensIndicatorIconShowDirection:
@@ -2207,6 +2211,10 @@ public abstract class Settings
 
             case PreferenceName.LensDirectionSize:
                 return(128);
+
+            case PreferenceName.LensWidthUserViewWidth:
+            case PreferenceName.LensHeightUserViewHeight:
+                return(1);
 
             case PreferenceName.LensPathLabelType:
                 return(Options.LensView.PathLabelType.ColorText);
@@ -2331,10 +2339,10 @@ public abstract class Settings
             case PreferenceName.LensConstellationAlpha:
                 return(0.10f);
 
-            case PreferenceName.LensWidth:
+            case PreferenceName.LensWidthUser:
                 return(39.279f);
 
-            case PreferenceName.LensHeight:
+            case PreferenceName.LensHeightUser:
                 return(65.789f);
 
             case PreferenceName.LensWidthHardware:
@@ -2865,16 +2873,28 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensUseAutoWidth, auto);
     }
 
-    //Gets lens width
-    public static float getLensWidth(Context context)
+    //Gets lens user width
+    public static float getLensWidthUser(Context context)
     {
-        return(getPreferenceFloat(context, PreferenceName.LensWidth));
+        return(getPreferenceFloat(context, PreferenceName.LensWidthUser));
     }
 
-    //Set lens width
-    public static void setLensWidth(Context context, float width)
+    //Set lens user width
+    public static void setLensWidthUser(Context context, float width)
     {
-        setPreferenceFloat(context, PreferenceName.LensWidth, width);
+        setPreferenceFloat(context, PreferenceName.LensWidthUser, width);
+    }
+
+    //Gets lens user width view width
+    public static int getLensWidthUserViewWidth(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensWidthUserViewWidth));
+    }
+
+    //Sets lens user width view width
+    public static void setLensWidthUserViewWidth(Context context, int width)
+    {
+        setPreferenceInt(context, PreferenceName.LensWidthUserViewWidth, width);
     }
 
     //Gets lens hardware width
@@ -2913,16 +2933,28 @@ public abstract class Settings
         setPreferenceBoolean(context, PreferenceName.LensUseAutoHeight, auto);
     }
 
-    //Gets lens height
-    public static float getLensHeight(Context context)
+    //Gets lens user height
+    public static float getLensHeightUser(Context context)
     {
-        return(getPreferenceFloat(context, PreferenceName.LensHeight));
+        return(getPreferenceFloat(context, PreferenceName.LensHeightUser));
     }
 
-    //Set lens height
-    public static void setLensHeight(Context context, float height)
+    //Set lens user height
+    public static void setLensHeightUser(Context context, float height)
     {
-        setPreferenceFloat(context, PreferenceName.LensHeight, height);
+        setPreferenceFloat(context, PreferenceName.LensHeightUser, height);
+    }
+
+    //Gets lens user height view height
+    public static int getLensHeightUserViewHeight(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensHeightUserViewHeight));
+    }
+
+    //Sets lens user height view height
+    public static void setLensHeightUserViewHeight(Context context, int height)
+    {
+        setPreferenceInt(context, PreferenceName.LensHeightUserViewHeight, height);
     }
 
     //Gets lens orbital type filter

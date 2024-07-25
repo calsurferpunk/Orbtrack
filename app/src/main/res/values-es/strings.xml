@@ -153,6 +153,7 @@
     <string name="desc_label_style">Estilo de dibujo de etiqueta</string>
     <string name="desc_layer">Imágenes de superficie para mostrar</string>
     <string name="desc_lens_frame_rate">Frecuencia de actualización el renderizado de lentes virtuales</string>
+    <string name="desc_lens_view_improvements">¡La precisión de la visión de la lente y el movimiento se han mejorado enormemente para los dispositivos compatibles! El valor predeterminado ahora es usar el campo de visión automático de la lente, pero aún puedes alinear manualmente si resulta inexacto.\n\nAdemás, ¡ahora todos los dispositivos tienen la opción de una lente virtual simulada! Simplemente haz clic en el ícono de la fotosfera para probarlo.</string>
     <string name="desc_location_disable">Los servicios de ubicación están deshabilitados. ¿Desea cambiar la configuración?</string>
     <string name="desc_location_icon">Ícono a usar para mostrar la ubicación del mapa</string>
     <string name="desc_map_frame_rate">Frecuencia de actualización la representación del globo/mapa</string>
@@ -258,7 +259,7 @@
     <string name="text_reading_success">Lectura exitosa</string>
     <string name="text_selected">seleccionado</string>
     <string name="text_space_of_space">" de "</string>
-    <string name="text_spacetrack_create_account">Space-Track requiere una cuenta gratuita para usar. Puede seleccionar otro, pero los datos pueden no ser tan precisos.</string>
+    <string name="text_spacetrack_create_account">Para utilizar Space-Track es necesario tener una cuenta gratuita. Puedes seleccionar otra, pero es posible que los datos no estén tan actualizados.</string>
     <string name="text_to">a</string>
     <string name="text_unknown_address_decoder_error">Error de descodificador de dirección desconocida</string>
     <string name="text_update_cancelled">Actualización cancelada</string>

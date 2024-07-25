@@ -215,8 +215,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         SwitchPreference cameraZoomSwitch = this.findPreference(Settings.PreferenceName.LensUseCameraZoom);
                         SwitchPreference exposureSwitch = this.findPreference(Settings.PreferenceName.LensUseExposure);
                         SwitchPreference useAzDeclinationSwitch = this.findPreference(Settings.PreferenceName.LensUseAzDeclination);
-                        SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidth);
-                        SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeight);
+                        SwitchTextPreference lensWidthSwitch = this.findPreference(Settings.PreferenceName.LensWidthUser);
+                        SwitchTextPreference lensHeightSwitch = this.findPreference(Settings.PreferenceName.LensHeightUser);
                         SwitchTextPreference lensAzimuthOffsetSwitch = this.findPreference(Settings.PreferenceName.LensAzimuthUserOffset);
 
                         //setup displays
@@ -1038,13 +1038,13 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                 switch(preferenceKey)
                 {
-                    case Settings.PreferenceName.LensWidth:
-                    case Settings.PreferenceName.LensHeight:
-                        boolean isWidth = preferenceKey.equals(Settings.PreferenceName.LensWidth);
+                    case Settings.PreferenceName.LensWidthUser:
+                    case Settings.PreferenceName.LensHeightUser:
+                        boolean isWidth = preferenceKey.equals(Settings.PreferenceName.LensWidthUser);
 
                         //get saved lens width and height
                         enabledValue = (isWidth ? Settings.getLensWidthHardware(context) : Settings.getLensHeightHardware(context));
-                        disabledValue = (isWidth ? Settings.getLensWidth(context) : Settings.getLensHeight(context));
+                        disabledValue = (isWidth ? Settings.getLensWidthUser(context) : Settings.getLensHeightUser(context));
 
                         //set values
                         preference.setValueText(Globals.getNumberString(enabledValue, 3), Globals.getNumberString(disabledValue, 3));
@@ -1724,8 +1724,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensAzimuthUserOffset:
                         case Settings.PreferenceName.LensUseAzimuthUserOffset:
                         case Settings.PreferenceName.LensUseAzDeclination:
-                        case Settings.PreferenceName.LensWidth:
-                        case Settings.PreferenceName.LensHeight:
+                        case Settings.PreferenceName.LensWidthUser:
+                        case Settings.PreferenceName.LensHeightUser:
                         case Settings.PreferenceName.LensShowToolbars:
                         case Settings.PreferenceName.LensShowSliders:
                         case Settings.PreferenceName.LensPathLabelType:

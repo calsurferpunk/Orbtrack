@@ -2315,6 +2315,14 @@ public class Database extends SQLiteOpenHelper
                     addInformation(context, null, db);
                 }
 
+                //if before camera lens improvements and adding virtual lens
+                if(updateStatus.previousVersion < 40)
+                {
+                    //use camera lens auto width/height by default
+                    Settings.setLensAutoWidth(context, true);
+                    Settings.setLensAutoHeight(context, true);
+                }
+
                 //if ISS Zarya exists and is older than hard coded TLE
                 issZarya = getOrbital(context, ISS_ZARYA_NORAD_ID);
                 if(issZarya != null && issZarya.updateDateMs < TLELines.ISSZaryaDate)
@@ -2366,6 +2374,13 @@ public class Database extends SQLiteOpenHelper
         {
             titles.add(updateString);
             messages.add(res.getString(R.string.desc_stars_constellation_notice));
+        }
+
+        //if improved camera lens and added virtual lens
+        if(previousVersion < 40)
+        {
+            titles.add(updateString);
+            messages.add(res.getString(R.string.desc_lens_view_improvements));
         }
 
         //if any notices to show

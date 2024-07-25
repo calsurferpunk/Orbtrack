@@ -48,7 +48,7 @@ public class SensorUpdate implements SensorEventListener
     public static boolean havePositionSensors(Context context)
     {
         SensorManager manager = (context != null ? (SensorManager)context.getSystemService(Context.SENSOR_SERVICE) : null);
-        return(manager != null && !manager.getSensorList(Sensor.TYPE_ACCELEROMETER).isEmpty() && !(manager.getSensorList(Sensor.TYPE_ROTATION_VECTOR).isEmpty() && manager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD).isEmpty()));
+        return(manager != null && !manager.getSensorList(Sensor.TYPE_ACCELEROMETER).isEmpty() && !manager.getSensorList(Sensor.TYPE_MAGNETIC_FIELD).isEmpty());
     }
 
     @SuppressWarnings("SuspiciousNameCombination")

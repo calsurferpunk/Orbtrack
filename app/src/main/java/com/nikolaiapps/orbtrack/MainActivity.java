@@ -4168,6 +4168,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         return(new Runnable()
         {
             private final boolean[] updateList = new boolean[Current.PageType.PageCount];
+            private final int lensVirtualLightType = Settings.getLensVirtualLightType(MainActivity.this);
             private int lastMapNoradId = Universe.IDs.None;
             private double lastJulianDate = Double.MAX_VALUE;
 
@@ -4506,6 +4507,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     //if on lens and it exists
                     if(onLens && cameraView != null)
                     {
+                        //if not using auto lens light
+                        if(lensVirtualLightType != Settings.Options.LensView.LightType.Auto)
+                        {
+                            //update used elevation
+                            sunElevationDegs = (lensVirtualLightType == Settings.Options.LensView.LightType.Day ? 90.0 : -90.0);
+                        }
+
                         //update positions
                         cameraView.updatePositions((selectedSatellites != null ? selectedSatellites.toArray(new Database.SatelliteData[0]) : currentSatellites), (selectedLookAngles != null ? selectedLookAngles.toArray(new TopographicDataType[0]) : lookAngles), sunElevationDegs, true);
 
@@ -4592,6 +4600,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         return(new Runnable()
         {
+            final int lensVirtualLightType = Settings.getLensVirtualLightType(MainActivity.this);
             Database.SatelliteData sunOrbital = null;
             Database.SatelliteData[] currentSatellites = null;
             CalculateViewsTask.OrbitalView[][] currentViews = null;
@@ -4629,8 +4638,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         ArrayList<Database.SatelliteData> currentSatelliteList = new ArrayList<>(0);
                         ArrayList<CalculateViewsTask.OrbitalView[]> currentViewList = new ArrayList<>(0);
 
-                        //get sun orbital
-                        sunOrbital = new Database.SatelliteData(context, Universe.IDs.Sun);
+                        //if using auto lens light
+                        if(lensVirtualLightType == Settings.Options.LensView.LightType.Auto)
+                        {
+                            //get sun orbital
+                            sunOrbital = new Database.SatelliteData(context, Universe.IDs.Sun);
+                        }
 
                         //if using lens and angles list exists
                         subPage = calculateSubPage[Calculate.PageType.View];
@@ -4902,7 +4915,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             Calculations.updateOrbitalPosition(sunOrbital.satellite, observer, usedJulianDate, false);
                             sunTopographicData = Calculations.getLookAngles(observer, sunOrbital.satellite, true);
                         }
-                        cameraView.updatePositions(currentSatellites, currentPlayTopographicData, (sunTopographicData != null ? sunTopographicData.elevation : Double.MAX_VALUE), false);
+                        else
+                        {
+                            sunTopographicData = new TopographicDataType(0.0, (lensVirtualLightType == Settings.Options.LensView.LightType.Day ? 90.0 : -90.0), 0.0);
+                        }
+                        cameraView.updatePositions(currentSatellites, currentPlayTopographicData, sunTopographicData.elevation, false);
                         for(index = 0; index < currentViews.length; index++)
                         {
                             cameraView.setTravel(index, currentViews[index]);

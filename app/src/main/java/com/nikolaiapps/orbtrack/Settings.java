@@ -121,6 +121,7 @@ public abstract class Settings
         static final String LensIndicatorAlpha = "LensIndicatorAlpha";
         static final String LensTextAlpha = "LensTextAlpha";
         static final String LensConstellationAlpha = "LensConstellationAlpha";
+        static final String LensVirtualLightType = "LensVirtualLightType";
         static final String LensHorizonColor = "LensHorizonColor";
         static final String LensUseHorizon = "LensUseHorizon";
         static final String LensStarMagnitude = "LensStarMagnitude";
@@ -246,6 +247,14 @@ public abstract class Settings
                 static final int ColorText = 1;
             }
 
+            //Light types
+            public static abstract class LightType
+            {
+                static final int Auto = 0;
+                static final int Day = 1;
+                static final int Night = 2;
+            }
+
             //Indicator items
             public static IconSpinner.Item[] indicatorItems;
 
@@ -254,6 +263,9 @@ public abstract class Settings
 
             //Path type items
             public static IconSpinner.Item[] pathLabelTypeItems;
+
+            //Light type items
+            public static IconSpinner.Item[] lightTypeItems;
 
             //Sensor smoothing items
             public static IconSpinner.Item[] sensorSmoothingItems;
@@ -294,6 +306,16 @@ public abstract class Settings
                     {
                         new IconSpinner.Item(res.getString(R.string.title_filled_box), PathLabelType.FilledBox),
                         new IconSpinner.Item(res.getString(R.string.title_color_text), PathLabelType.ColorText)
+                    };
+                }
+                if(lightTypeItems == null || lightTypeItems.length == 0)
+                {
+                    //init light type items
+                    lightTypeItems = new IconSpinner.Item[]
+                    {
+                        new IconSpinner.Item(res.getString(R.string.title_auto), LightType.Auto),
+                        new IconSpinner.Item(res.getString(R.string.title_day), LightType.Day),
+                        new IconSpinner.Item(res.getString(R.string.title_night), LightType.Night)
                     };
                 }
                 if(sensorSmoothingItems == null || sensorSmoothingItems.length == 0)
@@ -2225,6 +2247,9 @@ public abstract class Settings
             case PreferenceName.LensHorizonColor:
                 return(Color.rgb(150, 150, 150));
 
+            case PreferenceName.LensVirtualLightType:
+                return(Options.LensView.LightType.Auto);
+
             case PreferenceName.ListUpdateDelay:
             case PreferenceName.LensUpdateDelay:
                 return(1000);
@@ -2805,6 +2830,12 @@ public abstract class Settings
             //set magnitude
             setPreferenceFloat(context, PreferenceName.LensStarMagnitude, magnitude);
         }
+    }
+
+    //Returns lens virtual light type
+    public static int getLensVirtualLightType(Context context)
+    {
+        return(getPreferenceInt(context, PreferenceName.LensVirtualLightType));
     }
 
     //Gets lens using camera

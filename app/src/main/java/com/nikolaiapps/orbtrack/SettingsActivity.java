@@ -233,13 +233,16 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case ScreenKey.LensViewVirtualLens:
                         SwitchPreference virtualZoomSwitch = this.findPreference(Settings.PreferenceName.LensUseVirtualZoom);
                         IconListPreference lensFrameRateList = this.findPreference(Settings.PreferenceName.LensFrameRate);
+                        IconListPreference lensVirtualLightTypeList = this.findPreference(Settings.PreferenceName.LensVirtualLightType);
 
                         //initialize values
                         Settings.Options.Rates.initValues(context);
+                        Settings.Options.LensView.initValues(context);
 
                         //setup displays
                         setupSwitch(virtualZoomSwitch);
                         setupList(lensFrameRateList, Settings.Options.Rates.frameRateItems, null, null, null, null);
+                        setupList(lensVirtualLightTypeList, Settings.Options.LensView.lightTypeItems, null, null, null, null);
                         break;
 
                     case ScreenKey.ListView:
@@ -564,6 +567,10 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.LensPathLabelType:
                             currentValue = Settings.getLensPathLabelType(context);
+                            break;
+
+                        case Settings.PreferenceName.LensVirtualLightType:
+                            currentValue = Settings.getLensVirtualLightType(context);
                             break;
 
                         case Settings.PreferenceName.LensAverageCount:
@@ -1718,6 +1725,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.LensUseCameraZoom:
                         case Settings.PreferenceName.LensUseVirtualZoom:
                         case Settings.PreferenceName.LensUseExposure:
+                        case Settings.PreferenceName.LensVirtualLightType:
                         case Settings.PreferenceName.LensRotate:
                         case Settings.PreferenceName.LensUseAutoWidth:
                         case Settings.PreferenceName.LensUseAutoHeight:

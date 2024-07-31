@@ -40,6 +40,7 @@ import static android.opengl.GLES20.glGetUniformLocation;
 import static android.opengl.GLES20.glLinkProgram;
 import static android.opengl.GLES20.glShaderSource;
 import static android.opengl.GLES20.glTexParameteri;
+import static android.opengl.GLES20.glUniform1f;
 import static android.opengl.GLES20.glUniform1i;
 import static android.opengl.GLES20.glUniformMatrix4fv;
 import static android.opengl.GLES20.glUseProgram;
@@ -82,6 +83,7 @@ public class SkyboxView extends GLSurfaceView
             //Uniform constants
             private static final String U_MATRIX = "u_Matrix";
             private static final String U_TEXTURE_UNIT = "u_TextureUnit";
+            private static final String U_SUN_ELEVATION = "u_SunElevation";
 
             //Attribute constants
             static final String A_POSITION = "a_Position";
@@ -89,14 +91,18 @@ public class SkyboxView extends GLSurfaceView
             private final int program;
             private final int uMatrixLocation;
             private final int uTextureUnitLocation;
+            private final int uSunElevation;
             private final int aPositionLocation;
+            private float sunElevationDegs;
 
             public ShaderProgram(Context context)
             {
                 program = buildProgram(readStringFromFile(context, R.raw.shader_skybox_vertex), readStringFromFile(context, R.raw.shader_skybox_fragment));
                 uMatrixLocation = glGetUniformLocation(program, U_MATRIX);
                 uTextureUnitLocation = glGetUniformLocation(program, U_TEXTURE_UNIT);
+                uSunElevation = glGetUniformLocation(program, U_SUN_ELEVATION);
                 aPositionLocation = glGetAttribLocation(program, A_POSITION);
+                sunElevationDegs = 90.0f;
             }
 
             private static String readStringFromFile(Context context, int fileId)
@@ -198,6 +204,7 @@ public class SkyboxView extends GLSurfaceView
             public void setUniforms(float[] matrix, int texture)
             {
                 glUniformMatrix4fv(uMatrixLocation, 1, false, matrix, 0);
+                glUniform1f(uSunElevation, sunElevationDegs);
 
                 if(texture != 0)
                 {
@@ -205,6 +212,11 @@ public class SkyboxView extends GLSurfaceView
                     glBindTexture(GL_TEXTURE_CUBE_MAP, texture);
                     glUniform1i(uTextureUnitLocation, 0);
                 }
+            }
+
+            public void setSunElevation(float elevationDegs)
+            {
+                sunElevationDegs = elevationDegs;
             }
 
             public int getPositionAttributeLocation()
@@ -297,6 +309,7 @@ public class SkyboxView extends GLSurfaceView
         private float xRotation;
         private float yRotation;
         private float zoomScale;
+        private float sunElevationDegs;
         private final Context currentContext;
         private ViewBox skyBox;
         private ShaderProgram skyBoxProgram;
@@ -316,6 +329,7 @@ public class SkyboxView extends GLSurfaceView
             fovBase = 45f;
             xRotation = yRotation = 0.0f;
             zoomScale = 1.0f;
+            sunElevationDegs = 90.0f;
             viewMatrix = new float[16];
             projectionMatrix = new float[16];
             viewProjectionMatrix = new float[16];
@@ -327,7 +341,9 @@ public class SkyboxView extends GLSurfaceView
         {
             skyBoxProgram = new ShaderProgram(currentContext);
             skyBox = new ViewBox();
+
             loadTextures();
+            skyBoxProgram.setSunElevation(sunElevationDegs);
         }
 
         @Override
@@ -386,6 +402,16 @@ public class SkyboxView extends GLSurfaceView
             if(perspectiveChangeListener != null)
             {
                 perspectiveChangeListener.onChanged(fovBase * aspect, fovBase, zoomScale);
+            }
+        }
+
+        public void setSunElevation(float elevationDegs)
+        {
+            sunElevationDegs = elevationDegs;
+
+            if(skyBoxProgram != null)
+            {
+                skyBoxProgram.setSunElevation(sunElevationDegs);
             }
         }
 
@@ -505,6 +531,7 @@ public class SkyboxView extends GLSurfaceView
     private boolean multiTouchPending;
     private float lastX;
     private float lastY;
+    private float lastSunElevationDegs;
     private ScaleGestureDetector scaleDetector;
     private final SkyboxRenderer renderer;
 
@@ -514,6 +541,7 @@ public class SkyboxView extends GLSurfaceView
 
         multiTouchPending = false;
         lastX = lastY = 0.0f;
+        lastSunElevationDegs = 90.0f;
         scaleDetector = null;
         renderer = new SkyboxRenderer(context);
 
@@ -659,5 +687,31 @@ public class SkyboxView extends GLSurfaceView
     public float getElevation()
     {
         return(renderer.getElevation());
+    }
+
+    public void setSunElevation(float elevationDegs)
+    {
+        float delta = lastSunElevationDegs - elevationDegs;
+
+        //keep within range
+        if(delta < -180)
+        {
+            delta += 360;
+        }
+        else if(delta > 180)
+        {
+            delta -= 360;
+        }
+
+        //set elevation
+        renderer.setSunElevation(elevationDegs);
+
+        //if enough elevation change
+        if(Math.abs(delta) >= 0.05f)
+        {
+            //remember last and update display
+            lastSunElevationDegs = elevationDegs;
+            requestRender();
+        }
     }
 }

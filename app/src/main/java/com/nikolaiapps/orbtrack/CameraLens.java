@@ -2016,7 +2016,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     }
 
     //Update orbital positions to display
-    public void updatePositions(Database.SatelliteData[] orbitals, Calculations.TopographicDataType[] lookAngles, boolean checkLength)
+    public void updatePositions(Database.SatelliteData[] orbitals, Calculations.TopographicDataType[] lookAngles, double sunElevationDegs, boolean checkLength)
     {
         int index;
         int orbitalsLength;
@@ -2093,6 +2093,13 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 //update parent in filter status
                 updateInParentFilter();
                 pendingSetInParentFilter = false;
+            }
+
+            //if virtual and view exists
+            if(isVirtual && currentVirtualView != null)
+            {
+                //update sun elevation
+                currentVirtualView.setSunElevation(sunElevationDegs != Double.MAX_VALUE ? (float)sunElevationDegs : 90.0f);
             }
         }
     }

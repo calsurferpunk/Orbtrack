@@ -4175,7 +4175,6 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
             public void run()
             {
                 int index;
-                int currentNoradId;
                 int combinedSubPage = currentSubPage[Current.PageType.Combined];
                 boolean currentIsSatellite;
                 boolean updateElapsed = false;
@@ -4198,6 +4197,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 float pendingMarkerScale = Current.getMapPendingMarkerScale();
                 float pendingLensStarMagnitude = Current.getLensPendingStarMagnitude();
                 double julianDate;
+                double sunElevationDegs = Double.MAX_VALUE;
                 String coordinateString = null;
                 TextView mapInfoText = Current.getMapInfoText();
                 CameraLens cameraView = Current.getCameraView();
@@ -4262,33 +4262,37 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             //get current satellite, ID, and look angle
                             boolean changedEnough = false;
                             SatelliteObjectType currentOrbital = currentOrbitalData.satellite;
-                            currentNoradId = currentOrbital.getSatelliteNum();
+                            int currentNoradId = currentOrbital.getSatelliteNum();
+                            boolean isSun = (currentNoradId == Universe.IDs.Sun);
                             currentIsSatellite = (currentNoradId > 0);
                             onCurrentMapId = (onMap && currentNoradId == mapViewNoradID);
                             onCurrentLensId = (onLens && currentNoradId == viewLensNoradID);
                             onCurrentLensChildId = (onLens && currentLensChildIds != null && currentLensChildIds.contains(currentNoradId));
 
-                            //if -in filter- or -a star being used in a constellation-
-                            if(currentInFilter || isStarForConstellation)
+                            //if -in filter- or -a star being used in a constellation- or -is sun and need for lens-
+                            if(currentInFilter || isStarForConstellation || (isSun && onLens))
                             {
                                 Calculations.updateOrbitalPosition(currentOrbital, observer, julianDate, true);
                                 topographicData = Calculations.getLookAngles(observer, currentOrbital, true);
 
                                 //if the sun
-                                if(currentNoradId == Universe.IDs.Sun)
+                                if(isSun)
                                 {
+                                    //remember sun elevation
+                                    sunElevationDegs = topographicData.elevation;
+
                                     //if have last elevation
                                     if(sunLastEl.value != Double.MAX_VALUE)
                                     {
                                         //if changed enough
-                                        changedEnough = (Math.abs(topographicData.elevation - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
+                                        changedEnough = (Math.abs(sunElevationDegs - sunLastEl.value) >= Universe.Sun.MinElevationPhaseChange);
                                     }
 
                                     //if -had no last elevation- or -changed enough-
                                     if(sunLastEl.value == Double.MAX_VALUE || changedEnough)
                                     {
                                         //update last elevation
-                                        sunLastEl.value = topographicData.elevation;
+                                        sunLastEl.value = sunElevationDegs;
                                     }
                                 }
                             }
@@ -4503,7 +4507,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                     if(onLens && cameraView != null)
                     {
                         //update positions
-                        cameraView.updatePositions((selectedSatellites != null ? selectedSatellites.toArray(new Database.SatelliteData[0]) : currentSatellites), (selectedLookAngles != null ? selectedLookAngles.toArray(new TopographicDataType[0]) : lookAngles), true);
+                        cameraView.updatePositions((selectedSatellites != null ? selectedSatellites.toArray(new Database.SatelliteData[0]) : currentSatellites), (selectedLookAngles != null ? selectedLookAngles.toArray(new TopographicDataType[0]) : lookAngles), sunElevationDegs, true);
 
                         //if have pending magnitude
                         if(havePendingLensStarMagnitude)
@@ -4588,6 +4592,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         return(new Runnable()
         {
+            Database.SatelliteData sunOrbital = null;
             Database.SatelliteData[] currentSatellites = null;
             CalculateViewsTask.OrbitalView[][] currentViews = null;
 
@@ -4623,6 +4628,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         ArrayList<Database.SatelliteData> currentChildList = new ArrayList<>(0);
                         ArrayList<Database.SatelliteData> currentSatelliteList = new ArrayList<>(0);
                         ArrayList<CalculateViewsTask.OrbitalView[]> currentViewList = new ArrayList<>(0);
+
+                        //get sun orbital
+                        sunOrbital = new Database.SatelliteData(context, Universe.IDs.Sun);
 
                         //if using lens and angles list exists
                         subPage = calculateSubPage[Calculate.PageType.View];
@@ -4828,6 +4836,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         //get play index and progress and set topographic data
                         int playIndex = cameraView.playBar.getValue();
                         double subProgressPercent = cameraView.playBar.getSubProgressPercent();
+                        double currentJulianDate;
+                        double nextJulianDate;
+                        double usedJulianDate = Double.MAX_VALUE;
+                        TopographicDataType sunTopographicData = null;
                         TopographicDataType[] currentPlayTopographicData = new TopographicDataType[currentViews.length];
 
                         //go through each view set
@@ -4840,23 +4852,33 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             //if a valid play index
                             if(playIndex < currentSatelliteViews.length)
                             {
-                                //remember current view
+                                //remember current view and date
                                 CalculateViewsTask.OrbitalView currentView = currentSatelliteViews[playIndex];
+                                currentJulianDate = currentView.julianDate;
 
                                 //if more indexes after current
                                 if(playIndex + 1 < currentSatelliteViews.length)
                                 {
-                                    //get add distance index percentage to current view
+                                    //get add distance index percentage to current view and remember next date
                                     CalculateViewsTask.OrbitalView nextView = currentSatelliteViews[playIndex + 1];
                                     currentTopographicData = new TopographicDataType();
                                     currentTopographicData.azimuth = Globals.normalizeAngle(currentView.azimuth + (Globals.degreeDistance(currentView.azimuth, nextView.azimuth) * subProgressPercent));
                                     currentTopographicData.elevation = Globals.normalizeAngle(currentView.elevation + (Globals.degreeDistance(currentView.elevation, nextView.elevation) * subProgressPercent));
                                     currentTopographicData.rangeKm = (currentView.rangeKm + nextView.rangeKm) / 2;
+                                    nextJulianDate = nextView.julianDate;
                                 }
                                 else
                                 {
                                     //set look angles
                                     currentTopographicData = new TopographicDataType(currentView.azimuth, currentView.elevation, currentView.rangeKm);
+                                    nextJulianDate = Double.MAX_VALUE;
+                                }
+
+                                //if used date is not set yet
+                                if(usedJulianDate == Double.MAX_VALUE)
+                                {
+                                    //set used date
+                                    usedJulianDate = currentJulianDate + (nextJulianDate != Double.MAX_VALUE ? ((nextJulianDate - currentJulianDate) * subProgressPercent) : 0);
                                 }
                             }
                             currentPlayTopographicData[index] = currentTopographicData;
@@ -4875,7 +4897,12 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                         //show paths and update positions/travel
                         cameraView.showPaths = true;
-                        cameraView.updatePositions(currentSatellites, currentPlayTopographicData, false);
+                        if(sunOrbital != null && usedJulianDate != Double.MAX_VALUE)
+                        {
+                            Calculations.updateOrbitalPosition(sunOrbital.satellite, observer, usedJulianDate, false);
+                            sunTopographicData = Calculations.getLookAngles(observer, sunOrbital.satellite, true);
+                        }
+                        cameraView.updatePositions(currentSatellites, currentPlayTopographicData, (sunTopographicData != null ? sunTopographicData.elevation : Double.MAX_VALUE), false);
                         for(index = 0; index < currentViews.length; index++)
                         {
                             cameraView.setTravel(index, currentViews[index]);

@@ -4207,8 +4207,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 Database.DatabaseSatellite currentLensOrbital = (lensSingleOrbital ? Database.getOrbital(MainActivity.this, viewLensNoradID) : null);
                 ArrayList<Integer> currentLensChildIds = (currentLensOrbital != null ? currentLensOrbital.getChildIds() : null);
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
-                ArrayList<TopographicDataType> selectedLookAngles = (lensSingleOrbital ? new ArrayList<>(0) : null);
-                ArrayList<Database.SatelliteData> selectedSatellites = (lensSingleOrbital ? new ArrayList<>(0) : null);
+                ArrayList<TopographicDataType> selectedLookAngles = null;
+                ArrayList<Database.SatelliteData> selectedSatellites = null;
 
                 //go through update list status
                 for(index = 0; index < Current.PageType.PageCount; index++)
@@ -4327,6 +4327,18 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                                 //if on current lens orbital or lens child being used
                                 if(onCurrentLensId || onCurrentLensChildId)
                                 {
+                                    //if lists are not created yet
+                                    if(selectedSatellites == null)
+                                    {
+                                        //create satellites
+                                        selectedSatellites = new ArrayList<>(0);
+                                    }
+                                    if(selectedLookAngles == null)
+                                    {
+                                        //create look angles
+                                        selectedLookAngles = new ArrayList<>(0);
+                                    }
+
                                     //if on current lens orbital
                                     if(onCurrentLensId)
                                     {
@@ -4852,7 +4864,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                         double currentJulianDate;
                         double nextJulianDate;
                         double usedJulianDate = Double.MAX_VALUE;
-                        TopographicDataType sunTopographicData = null;
+                        TopographicDataType sunTopographicData;
                         TopographicDataType[] currentPlayTopographicData = new TopographicDataType[currentViews.length];
 
                         //go through each view set

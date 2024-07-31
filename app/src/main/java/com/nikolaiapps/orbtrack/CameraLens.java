@@ -559,7 +559,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
 
     public int pathDivisions;
     public boolean showPaths;
-    public boolean showHorizon;
+    public final boolean showHorizon;
     public boolean showCalibration;
     public final boolean showPathDirections;
     public final boolean showOutsideArea;
@@ -3061,7 +3061,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 }
                 if(!useAutoHeight && usedUserViewSize[1] > 1)
                 {
-                    cameraDegHeight = usedUserSize[1] * (viewHeight / (float)usedUserViewSize[1]);
+                    cameraDegHeight = usedUserSize[1] * (viewHeight / usedUserViewSize[1]);
                 }
             }
 

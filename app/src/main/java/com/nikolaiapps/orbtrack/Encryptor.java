@@ -90,7 +90,6 @@ public abstract class Encryptor
     }
 
     //Initializes keys
-    @SuppressWarnings("SpellCheckingInspection")
     private static void init(Context context, String sourceKey)
     {
         SecureRandom rand;

@@ -69,9 +69,9 @@ import java.util.Comparator;
 
 public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChangedListener
 {
-    public interface OnReadyListener
+    public interface OnLayoutListener
     {
-        void ready();
+        void layout(int viewWidth, int viewHeight, int screenWidth, int screenHeight);
     }
 
     public interface OnStopCalibrationListener
@@ -676,7 +676,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
     private final ValueAnimator compassBadAnimator;
     private SensorUpdate sensorUpdater;
     private UpdateThread updateThread;
-    private OnReadyListener readyListener;
+    private OnLayoutListener layoutListener;
     private OnStopCalibrationListener stopCalibrationListener;
     private ScaleGestureDetector scaleDetector;
     private Range<Integer> exposureRange;
@@ -1378,7 +1378,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         updateThread = null;
         calibrateOkayButton = null;
         helpText = null;
-        readyListener = null;
+        layoutListener = null;
         stopCalibrationListener = null;
         scaleDetector = null;
 
@@ -1409,13 +1409,6 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         super.onAttachedToWindow();
 
         startCamera();
-
-        //if listener set
-        if(readyListener != null)
-        {
-            //call it
-            readyListener.ready();
-        }
     }
 
     @Override
@@ -2618,10 +2611,10 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
     }
 
-    //Sets on ready listener
-    public void setOnReadyListener(OnReadyListener listener)
+    //Sets on layout listener
+    public void setOnLayoutListener(OnLayoutListener listener)
     {
-        readyListener = listener;
+        layoutListener = listener;
     }
 
     //Sets stop calibration listener
@@ -3012,7 +3005,6 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         int screenWidth = screenSize[0];
         int screenHeight = screenSize[1];
 
-
         //if not virtual lens
         if(!isVirtual)
         {
@@ -3067,6 +3059,13 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
 
             //update used camera width and height
             updateUsedWidthHeight();
+        }
+
+        //if listener set
+        if(layoutListener != null)
+        {
+            //call it
+            layoutListener.layout(viewWidth, viewHeight, screenWidth, screenHeight);
         }
     }
 

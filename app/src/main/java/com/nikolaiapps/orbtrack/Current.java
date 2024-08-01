@@ -2659,13 +2659,18 @@ public abstract class Current
                 }
             }
         });
-        cameraView.setOnReadyListener(new CameraLens.OnReadyListener()
+        cameraView.setOnLayoutListener(new CameraLens.OnLayoutListener()
         {
+            private int lastScreenWidth = -1;
+            private int lastScreenHeight = -1;
+
             @Override
-            public void ready()
+            public void layout(int viewWidth, int viewHeight, int screenWidth, int screenHeight)
             {
-                //if there is 1 selected orbital
-                if(selectedOrbitals != null && selectedOrbitals.length == 1)
+                boolean screenSizeChanged = (lastScreenWidth > 0 && lastScreenHeight > 0 && (screenWidth != lastScreenWidth || screenHeight != lastScreenHeight));
+
+                //if not just screen size changed and there is 1 selected orbital
+                if(!screenSizeChanged && selectedOrbitals != null && selectedOrbitals.length == 1)
                 {
                     //get selected orbital and ID
                     Database.SatelliteData selectedOrbital = selectedOrbitals[0];
@@ -2683,6 +2688,10 @@ public abstract class Current
                         selectOrbital(noradId, null, true);
                     }
                 }
+
+                //remember last screen size
+                lastScreenWidth = screenWidth;
+                lastScreenHeight = screenHeight;
             }
         });
 

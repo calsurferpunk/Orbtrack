@@ -1394,6 +1394,7 @@ public abstract class Current
             boolean createMapView = (onCombined && subPage == Globals.SubPageType.Map || subPage == Globals.SubPageType.Globe);
             boolean mapMultiOrbitals = (createMapView && !haveSelectedMap);
             boolean mapSingleOrbital = (createMapView && haveSelectedMap);
+            boolean lensMultiOrbitals = (createLens && !haveSelectedLens);
             boolean lensSingleOrbital = (createLens && haveSelectedLens);
             View newView = null;
             Context context = this.getContext();
@@ -1439,7 +1440,7 @@ public abstract class Current
             if(createLens)
             {
                 //create view
-                newView = onCreateLensView(this, inflater, container, MainActivity.getLensSatellites(context), savedInstanceState, haveSelectedLens, showingStars, showingConstellations, (subPage == Globals.SubPageType.VirtualLens));
+                newView = onCreateLensView(this, inflater, container, (lensMultiOrbitals ? MainActivity.getLensSatellites(context) : new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.lensViewNoradID)}), savedInstanceState, haveSelectedLens, showingStars, showingConstellations, (subPage == Globals.SubPageType.VirtualLens));
             }
             //else if need to create map view
             else if(createMapView)

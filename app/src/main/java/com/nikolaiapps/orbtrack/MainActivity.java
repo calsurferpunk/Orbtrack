@@ -120,7 +120,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //
     //Current
     private int mainGroup;
-    public static int viewLensNoradID = Integer.MAX_VALUE;
+    public static int lensViewNoradID = Integer.MAX_VALUE;
     public static int mapViewNoradID = Integer.MAX_VALUE;
     private static int passesPassIndex = Integer.MAX_VALUE;
     private static int intersectionPassIndex = Integer.MAX_VALUE;
@@ -817,6 +817,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         boolean usingGlobe = (id == R.id.menu_globe);
         boolean usingCameraLens = (id == R.id.menu_camera_lens);
         boolean setMapDisplay = false;
+        boolean setLensDisplay = false;
         boolean setDisplayGroup = false;
         boolean onCalculate = (mainGroup == Groups.Calculate);
 
@@ -888,8 +889,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
-                        setSubPage(mainGroup, page, (usingCameraLens ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
-                        setDisplayGroup = true;
+                        //continue updating
+                        setLensDisplay = true;
                         break;
 
                     case Groups.Calculate:
@@ -898,18 +899,11 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Calculate.PageType.View:
                             case Calculate.PageType.Passes:
                             case Calculate.PageType.Intersection:
-                                setSubPage(mainGroup, page, (usingCameraLens ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
-                                setDisplayGroup = true;
+                                //continue updating
+                                setLensDisplay = true;
                                 break;
                         }
                         break;
-                }
-
-                //if settings display group
-                if(setDisplayGroup)
-                {
-                    //update default display
-                    Settings.setLensDisplayType(this, (usingCameraLens ? Settings.Options.LensView.DisplayType.Camera : Settings.Options.LensView.DisplayType.Virtual));
                 }
             }
             else
@@ -1025,6 +1019,39 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
             //update default display
             Settings.setMapDisplayType(this, (usingGlobe ? CoordinatesFragment.MapDisplayType.Globe : CoordinatesFragment.MapDisplayType.Map));
+            setDisplayGroup = true;
+        }
+
+        //if setting lens display
+        if(setLensDisplay)
+        {
+            //if not on a calculate page
+            if(!onCalculate)
+            {
+                //remember previous ID and sub page
+                previousId = lensViewNoradID;
+                previousSubPage = currentSubPage[page];
+            }
+
+            //update sub page
+            setSubPage(mainGroup, page, (usingCameraLens ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
+
+            //if not on calculate page
+            if(!onCalculate)
+            {
+                //remember selected sub page
+                selectedSubPage = currentSubPage[page];
+
+                //if switching between camera/virtual
+                if((previousSubPage == Globals.SubPageType.CameraLens && selectedSubPage == Globals.SubPageType.VirtualLens) || (previousSubPage == Globals.SubPageType.VirtualLens && selectedSubPage == Globals.SubPageType.CameraLens))
+                {
+                    //restore ID
+                    lensViewNoradID = previousId;
+                }
+            }
+
+            //update default display
+            Settings.setLensDisplayType(this, (usingCameraLens ? Settings.Options.LensView.DisplayType.Camera : Settings.Options.LensView.DisplayType.Virtual));
             setDisplayGroup = true;
         }
 
@@ -1287,13 +1314,13 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Returns if have a selected view lens satellite
     public static boolean haveSelectedLensSatellite()
     {
-        return(viewLensNoradID != Integer.MAX_VALUE);
+        return(lensViewNoradID != Integer.MAX_VALUE);
     }
 
     //Returns current lens satellites
     public static Database.SatelliteData[] getLensSatellites(Context context)
     {
-        return(haveSelectedLensSatellite() ? new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.viewLensNoradID)} : currentSatellites);
+        return(haveSelectedLensSatellite() ? new Database.SatelliteData[]{new Database.SatelliteData(context, MainActivity.lensViewNoradID)} : currentSatellites);
     }
 
     //Returns current old satellites
@@ -3379,7 +3406,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             case Groups.Current:
                                 //update sub page and norad ID
                                 setSubPage(group, pageNum, (isCameraButton ? Globals.SubPageType.CameraLens : Globals.SubPageType.VirtualLens));
-                                viewLensNoradID = itemID;
+                                lensViewNoradID = itemID;
                                 setMainGroup(mainGroup, true);
                                 break;
 
@@ -4204,7 +4231,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 CameraLens cameraView = Current.getCameraView();
                 CoordinatesFragment mapView = Current.getMapViewIfReady();
                 TopographicDataType topographicData;
-                Database.DatabaseSatellite currentLensOrbital = (lensSingleOrbital ? Database.getOrbital(MainActivity.this, viewLensNoradID) : null);
+                Database.DatabaseSatellite currentLensOrbital = (lensSingleOrbital ? Database.getOrbital(MainActivity.this, lensViewNoradID) : null);
                 ArrayList<Integer> currentLensChildIds = (currentLensOrbital != null ? currentLensOrbital.getChildIds() : null);
                 TopographicDataType[] lookAngles = new TopographicDataType[currentSatellites.length];
                 ArrayList<TopographicDataType> selectedLookAngles = null;
@@ -4267,7 +4294,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                             boolean isSun = (currentNoradId == Universe.IDs.Sun);
                             currentIsSatellite = (currentNoradId > 0);
                             onCurrentMapId = (onMap && currentNoradId == mapViewNoradID);
-                            onCurrentLensId = (onLens && currentNoradId == viewLensNoradID);
+                            onCurrentLensId = (onLens && currentNoradId == lensViewNoradID);
                             onCurrentLensChildId = (onLens && currentLensChildIds != null && currentLensChildIds.contains(currentNoradId));
 
                             //if -in filter- or -a star being used in a constellation- or -is sun and need for lens-
@@ -4969,7 +4996,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                     //clear any selected map and lens
                     mapViewNoradID = Integer.MAX_VALUE;
-                    viewLensNoradID = Integer.MAX_VALUE;
+                    lensViewNoradID = Integer.MAX_VALUE;
                 }
                 break;
 

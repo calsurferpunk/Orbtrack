@@ -1778,6 +1778,9 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
         okButton = this.findViewById(R.id.Widget_Setup_Ok_Button);
         cancelButton = this.findViewById(R.id.Widget_Setup_Cancel_Button);
 
+        //setup edges
+        setupViewEdges(parentView, EdgeDistance.TOP_AND_BOTTOM_BAR);
+
         //setup tabs
         setupTabs.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener()
         {

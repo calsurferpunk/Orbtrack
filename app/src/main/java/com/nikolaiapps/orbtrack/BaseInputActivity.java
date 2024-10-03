@@ -9,13 +9,20 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.OnApplyWindowInsetsListener;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
@@ -25,9 +32,17 @@ import java.util.ArrayList;
 
 public abstract class BaseInputActivity extends AppCompatActivity
 {
-    static
+    private static int actionBarHeight = 0;
+    private static Insets systemBarInsets = Insets.NONE;
+
+    //Edge distances
+    public static abstract class EdgeDistance
     {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
+        static final int TOP_BAR = 1;
+        static final int ACTION_BAR = 2;
+        static final int BOTTOM_BAR = 4;
+        static final int TOP_AND_BOTTOM_BAR = TOP_BAR | BOTTOM_BAR;
+        static final int TOP_AND_ACTION_AND_BOTTOM_BAR = TOP_AND_BOTTOM_BAR | ACTION_BAR;
     }
 
     //Activity result codes
@@ -62,9 +77,10 @@ public abstract class BaseInputActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        super.onCreate(savedInstanceState);
-
+        setEdgeToEdge(this);
         Settings.Options.Display.setTheme(this);
+
+        super.onCreate(savedInstanceState);
         setupActionBar(this, this.getSupportActionBar(), false);
     }
 
@@ -72,6 +88,82 @@ public abstract class BaseInputActivity extends AppCompatActivity
     public void onConfigurationChanged(@NonNull Configuration newConfig)
     {
         super.onConfigurationChanged(newConfig);
+    }
+
+    //Sets display to be edge to edge/behind system views
+    public static void setEdgeToEdge(Activity activity)
+    {
+        Window activityWindow = (activity != null ? activity.getWindow() : null);
+
+        //if window exists
+        if(activityWindow != null)
+        {
+            //draw under system window
+            WindowCompat.setDecorFitsSystemWindows(activityWindow, false);
+        }
+    }
+
+    //Sets display edge margins
+    public static void setEdgeMargins(View moveView, int edgeMoveType)
+    {
+        ViewGroup.MarginLayoutParams marginParams;
+
+        //if view exists
+        if(moveView != null)
+        {
+            boolean useTopBar = (edgeMoveType & EdgeDistance.TOP_BAR) != 0;
+            boolean useActionBar = (edgeMoveType & EdgeDistance.ACTION_BAR) != 0;
+            boolean useBottomBar = (edgeMoveType & EdgeDistance.BOTTOM_BAR) != 0;
+
+            //apply margins
+            marginParams = (ViewGroup.MarginLayoutParams)moveView.getLayoutParams();
+            marginParams.leftMargin = systemBarInsets.left;
+            marginParams.rightMargin = systemBarInsets.right;
+            marginParams.topMargin = (useTopBar ? (systemBarInsets.top - (systemBarInsets.top > actionBarHeight ? actionBarHeight : 0)) : 0) + (useActionBar ? actionBarHeight : 0);
+            marginParams.bottomMargin = (useBottomBar ? systemBarInsets.bottom : 0);
+            moveView.setLayoutParams(marginParams);
+        }
+    }
+
+    //Sets display edge margins below top and action bar
+    public static void setEdgeMarginAboveBottom(View moveView)
+    {
+        setEdgeMargins(moveView, EdgeDistance.BOTTOM_BAR);
+    }
+
+    //Sets display to align with edges
+    public static void setupViewEdges(View mainView, int edgeMoveType)
+    {
+        //if view exists
+        if(mainView != null)
+        {
+            Context context = mainView.getContext();
+
+            //if context exists
+            if(context != null)
+            {
+                TypedValue sizeValue = new TypedValue();
+
+                //get action bar height
+                context.getTheme().resolveAttribute(R.attr.actionBarSize, sizeValue, true);
+                actionBarHeight = TypedValue.complexToDimensionPixelSize(sizeValue.data, context.getResources().getDisplayMetrics());
+            }
+
+            //apply insets
+            ViewCompat.setOnApplyWindowInsetsListener(mainView, new OnApplyWindowInsetsListener()
+            {
+                @NonNull @Override
+                public WindowInsetsCompat onApplyWindowInsets(@NonNull View view, @NonNull WindowInsetsCompat insets)
+                {
+                    //remember insets and add margins to view
+                    systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    setEdgeMargins(mainView, edgeMoveType);
+
+                    //continue with other insets
+                    return(ViewCompat.onApplyWindowInsets(view, insets));
+                }
+            });
+        }
     }
 
     //Sets up the given action bar

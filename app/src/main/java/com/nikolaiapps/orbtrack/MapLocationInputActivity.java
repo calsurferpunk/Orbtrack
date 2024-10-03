@@ -106,6 +106,9 @@ public class MapLocationInputActivity extends BaseInputActivity
         resultData = new Intent();
         BaseInputActivity.setRequestCode(resultData, BaseInputActivity.getRequestCode(intent));
 
+        //setup edges
+        setupViewEdges(locationLayout, EdgeDistance.TOP_AND_BOTTOM_BAR);
+
         //replace view
         args.putInt(Whirly.ParamTypes.MapLayerType, Settings.getMapLayerType(this, false));
         this.getSupportFragmentManager().beginTransaction().replace(R.id.Location_Map_View, (Fragment)mapInputView).commit();

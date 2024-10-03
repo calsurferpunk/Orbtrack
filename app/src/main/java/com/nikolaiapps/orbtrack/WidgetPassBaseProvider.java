@@ -16,7 +16,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Location;
-import androidx.appcompat.app.AppCompatDelegate;
 import android.os.Build;
 import android.text.Html;
 import android.view.View;
@@ -30,11 +29,6 @@ import java.util.TimeZone;
 
 public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 {
-    static
-    {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-    }
-
     private static int dpWidth = Globals.getScreenDp(null);
     private static final Class<?>[] widgetClasses = new Class[]{WidgetPassTinyProvider.class, WidgetPassSmallProvider.class, WidgetPassMediumProvider.class};
     private static final Class<?>[] alarmReceiverClasses = new Class[]{WidgetPassTinyProvider.AlarmReceiver.class, WidgetPassSmallProvider.AlarmReceiver.class, WidgetPassMediumProvider.AlarmReceiver.class};

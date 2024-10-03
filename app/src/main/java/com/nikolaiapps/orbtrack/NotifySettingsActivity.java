@@ -54,6 +54,7 @@ public class NotifySettingsActivity extends BaseInputActivity
         Intent intent = this.getIntent();
         String titleString = this.getString(R.string.title_notifications);
         Database.DatabaseSatellite currentOrbital;
+        final LinearLayout notifySettingsLayout = this.findViewById(R.id.Notify_Settings_Layout);
         final View listDivider = this.findViewById(R.id.Notify_Settings_List_Divider);
         final View orbitalGroup = this.findViewById(R.id.Notify_Settings_Orbital_Group);
         final TextView notificationsTitle = this.findViewById(R.id.Notify_Settings_Notifications_Title);
@@ -89,6 +90,9 @@ public class NotifySettingsActivity extends BaseInputActivity
         notifyGroup[Globals.NotifyType.PassEnd] = this.findViewById(R.id.Notify_Settings_Pass_End_Group);
         notifyGroup[Globals.NotifyType.FullMoonStart] = this.findViewById(R.id.Notify_Settings_Full_Moon_Start_Group);
         notifyGroup[Globals.NotifyType.FullMoonEnd] = this.findViewById(R.id.Notify_Settings_Full_Moon_End_Group);
+
+        //setup edges
+        setupViewEdges(notifySettingsLayout, EdgeDistance.TOP_AND_BOTTOM_BAR);
 
         //if intent not set
         if(intent == null)

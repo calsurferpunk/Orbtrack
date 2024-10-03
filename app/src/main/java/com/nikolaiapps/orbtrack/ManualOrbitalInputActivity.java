@@ -41,6 +41,9 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
         ArrayList<UpdateService.MasterCategory> categories = Database.getCategories(this);
         ArrayList<IconSpinner.Item> categoryItems = new ArrayList<>(0);
 
+        //setup edges
+        setupViewEdges(manualLayout, EdgeDistance.TOP_AND_ACTION_AND_BOTTOM_BAR);
+
         //setup result intent
         BaseInputActivity.setRequestCode(resultIntent, BaseInputActivity.getRequestCode(this.getIntent()));
 

@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/List_Title_View_Layout"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:id="@+id/List_Title_Text"
+        android:padding="5dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textColor="?attr/colorAccentLightest"
+        android:background="?attr/colorAccentVariant"/>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/List_View"
+            android:padding="5dp"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:choiceMode="multipleChoice"/>
+
+        <View
+            android:id="@+id/List_Loading_View"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:focusable="true"
+            android:alpha="0.75"
+            android:visibility="gone"/>
+    </FrameLayout>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:id="@+id/List_Layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout style="@style/ResultButtonLayout">
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/List_Cancel_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_cancel"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/List_Select_Button"
+            style="@style/ResultButton"
+            android:text="@string/title_select"
+            android:enabled="false"/>
+    </LinearLayout>
+</LinearLayout>

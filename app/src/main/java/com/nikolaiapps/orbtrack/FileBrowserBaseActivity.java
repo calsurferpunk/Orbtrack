@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
@@ -451,6 +452,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         super.onCreate(savedInstanceState);
 
         final byte requestCode;
+        final LinearLayout listTitleViewLayout;
         Intent intent = this.getIntent();
         RecyclerView browseListView;
 
@@ -468,9 +470,10 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         selectFolder = intent.getBooleanExtra(ParamTypes.SelectFolder, false);
 
         //set layout
-        setContentView(R.layout.list_title_view);
+        setContentView(R.layout.list_title_view_layout);
 
         //get displays
+        listTitleViewLayout = this.findViewById(R.id.List_Title_View_Layout);
         listLayout = this.findViewById(R.id.List_Layout);
         listLoadingView = this.findViewById(R.id.List_Loading_View);
         browseTitleText = this.findViewById(R.id.List_Title_Text);
@@ -479,6 +482,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         selectButton = this.findViewById(R.id.List_Select_Button);
 
         //setup displays
+        setupViewEdges(listTitleViewLayout, EdgeDistance.TOP_AND_ACTION_AND_BOTTOM_BAR);
         browseListView.setHasFixedSize(true);
         browseListView.addItemDecoration(new DividerItemDecoration(this.getBaseContext(), LinearLayoutManager.VERTICAL));
         browseListView.setLayoutManager(new LinearLayoutManager(this.getBaseContext()));

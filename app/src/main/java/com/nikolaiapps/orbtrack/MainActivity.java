@@ -30,7 +30,6 @@ import android.os.Bundle;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.app.AppCompatDelegate;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerTitleStrip;
 import android.text.Spanned;
@@ -55,13 +54,8 @@ import com.nikolaiapps.orbtrack.SideMenuListAdapter.*;
 import com.nikolaiapps.orbtrack.Calculations.*;
 
 
-public class MainActivity extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
+public class MainActivity extends BaseInputActivity implements ActivityResultCallback<ActivityResult>
 {
-    static
-    {
-        AppCompatDelegate.setCompatVectorFromResourcesEnabled(true);
-    }
-
     public static abstract class Groups
     {
         static final int Current = 0;
@@ -169,9 +163,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         int index;
 
-        Settings.Options.Display.setTheme(this);
         this.setContentView(R.layout.main_layout);
-        BaseInputActivity.setupActionBar(this, this.getSupportActionBar(), true);
+        setupActionBar(this, this.getSupportActionBar(), true);
 
         //look for web protocol updates
         Globals.updateWebProtocols(this);
@@ -226,6 +219,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //setup displays
         mainDrawerLayout = this.findViewById(R.id.Main_Drawer_Layout);
+        setupViewEdges(mainDrawerLayout, EdgeDistance.TOP_BAR | EdgeDistance.ACTION_BAR);
         mainDrawerToggle = createActionBarDrawerToggle();
         mainDrawerLayout.addDrawerListener(mainDrawerToggle);
         mainPager = this.findViewById(R.id.Main_Pager);
@@ -237,8 +231,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         startCalculationListener = createOnStartCalculationListener();
         localUpdateReceiver = createUpdateReceiver(localUpdateReceiver);
         resultLauncher = Globals.createActivityLauncher(this, this);
-        otherOpenLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersOpenItem);
-        otherSaveLauncher = Globals.createActivityLauncher(this, this, BaseInputActivity.RequestCode.OthersSave);
+        otherOpenLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersOpenItem);
+        otherSaveLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersSave);
 
         //handle any first run
         handleFirstRun(savedInstanceState);
@@ -438,8 +432,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         }
 
         //get status
-        requestCode = BaseInputActivity.getRequestCode(data);
-        handle = (requestCode == BaseInputActivity.RequestCode.Setup || finishedSetup);
+        requestCode = getRequestCode(data);
+        handle = (requestCode == RequestCode.Setup || finishedSetup);
         needRecreate = data.getBooleanExtra(SettingsActivity.EXTRA_RECREATE, false);
 
         //if not handling
@@ -452,7 +446,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         //handle based on request code
         switch(requestCode)
         {
-            case BaseInputActivity.RequestCode.Setup:
+            case RequestCode.Setup:
                 //update status
                 runningUserSetup = false;
                 finishedSetup = !Settings.getFirstRun(this);
@@ -477,7 +471,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.Settings:
+            case RequestCode.Settings:
                 //if changed settings
                 if(isOkay)
                 {
@@ -509,9 +503,9 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.MasterAddList:
+            case RequestCode.MasterAddList:
                 //if able to get progress type
-                progressType = BaseInputActivity.handleActivityMasterAddListResult(res, mainDrawerLayout, data);
+                progressType = handleActivityMasterAddListResult(res, mainDrawerLayout, data);
                 if(progressType == Globals.ProgressType.Unknown)
                 {
                     //stop
@@ -519,8 +513,8 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 //else fall through
 
-            case BaseInputActivity.RequestCode.OrbitalViewList:
-            case BaseInputActivity.RequestCode.ManualOrbitalInput:
+            case RequestCode.OrbitalViewList:
+            case RequestCode.ManualOrbitalInput:
                 //if set and weren't denied
                 if(isOkay && progressType != Globals.ProgressType.Denied)
                 {
@@ -529,7 +523,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.OrbitalSelectList:
+            case RequestCode.OrbitalSelectList:
                 //if set
                 if(isOkay)
                 {
@@ -552,22 +546,22 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.SDCardOpenItem:
+            case RequestCode.SDCardOpenItem:
                 //if set
                 if(isOkay)
                 {
                     //handle SD card open files request
-                    BaseInputActivity.handleActivitySDCardOpenFilesRequest(this, data);
+                    handleActivitySDCardOpenFilesRequest(this, data);
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.GoogleDriveSignIn:
+            case RequestCode.GoogleDriveSignIn:
                 //handle Google Drive open file browser request
-                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, resultLauncher, mainDrawerLayout, data, isOkay);
+                handleActivityGoogleDriveOpenFileBrowserRequest(this, resultLauncher, mainDrawerLayout, data, isOkay);
                 break;
 
-            case BaseInputActivity.RequestCode.GoogleDriveOpenFolder:
-            case BaseInputActivity.RequestCode.DropboxOpenFolder:
+            case RequestCode.GoogleDriveOpenFolder:
+            case RequestCode.DropboxOpenFolder:
                 //if selected folder
                 if(isOkay)
                 {
@@ -575,19 +569,19 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.GoogleDriveOpenFile:
-            case BaseInputActivity.RequestCode.DropboxOpenFile:
-            case BaseInputActivity.RequestCode.OthersOpenItem:
+            case RequestCode.GoogleDriveOpenFile:
+            case RequestCode.DropboxOpenFile:
+            case RequestCode.OthersOpenItem:
                 //if selected item
                 if(isOkay)
                 {
                     //handle open file request
-                    BaseInputActivity.handleActivityOpenFileRequest(this, data, requestCode);
+                    handleActivityOpenFileRequest(this, data, requestCode);
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.GoogleDriveSave:
-            case BaseInputActivity.RequestCode.DropboxSave:
+            case RequestCode.GoogleDriveSave:
+            case RequestCode.DropboxSave:
                 //if saved
                 if(isOkay)
                 {
@@ -606,7 +600,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
                 }
                 break;
 
-            case BaseInputActivity.RequestCode.OthersSave:
+            case RequestCode.OthersSave:
                 //if selected folder
                 if(isOkay)
                 {
@@ -1260,10 +1254,10 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     {
         switch(requestCode)
         {
-            case BaseInputActivity.RequestCode.OthersOpenItem:
+            case RequestCode.OthersOpenItem:
                 return(otherOpenLauncher);
 
-            case BaseInputActivity.RequestCode.OthersSave:
+            case RequestCode.OthersSave:
                 return(otherSaveLauncher);
 
             default:
@@ -1272,7 +1266,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     }
     public ActivityResultLauncher<Intent> getResultLauncher()
     {
-        return(getResultLauncher(BaseInputActivity.RequestCode.None));
+        return(getResultLauncher(RequestCode.None));
     }
 
     //Returns pager
@@ -2952,7 +2946,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
         runningUserSetup = true;
         finishedSetup = false;
         setupIntent.putExtra(SettingsActivity.EXTRA_SHOW_SETUP, true);
-        Globals.startActivityForResult(resultLauncher, setupIntent, BaseInputActivity.RequestCode.Setup);
+        Globals.startActivityForResult(resultLauncher, setupIntent, RequestCode.Setup);
     }
 
     //Shows/dismisses database progress dialog
@@ -2976,7 +2970,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
     //Shows orbital view list
     private void showOrbitalViewList()
     {
-        MasterAddListActivity.showList(this, resultLauncher, MasterAddListActivity.ListType.VisibleList, BaseInputActivity.RequestCode.OrbitalViewList, null, -1);
+        MasterAddListActivity.showList(this, resultLauncher, MasterAddListActivity.ListType.VisibleList, RequestCode.OrbitalViewList, null, -1);
     }
 
     //Shows a sorting dialog
@@ -3189,7 +3183,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
         //start settings activity
         startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
-        Globals.startActivityForResult(resultLauncher, startIntent, BaseInputActivity.RequestCode.Settings);
+        Globals.startActivityForResult(resultLauncher, startIntent, RequestCode.Settings);
     }
 
     //Shows getting location display
@@ -4123,7 +4117,7 @@ public class MainActivity extends AppCompatActivity implements ActivityResultCal
 
                     //start settings activity
                     startIntent.putExtra(SettingsActivity.EXTRA_START_SCREEN, startScreenValue);
-                    Globals.startActivityForResult(resultLauncher, startIntent, BaseInputActivity.RequestCode.Settings);
+                    Globals.startActivityForResult(resultLauncher, startIntent, RequestCode.Settings);
                 }
                 else
                 {

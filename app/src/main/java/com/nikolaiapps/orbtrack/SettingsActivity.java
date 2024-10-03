@@ -1355,7 +1355,6 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        Settings.Options.Display.setTheme(this);
         super.onCreate(savedInstanceState);
 
         int titleId;
@@ -1392,6 +1391,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         //setup displays
         hideActionBar();
         settingsLayout = this.findViewById(showSetup ? R.id.Setup_Layout : R.id.Settings_Layout);
+        setupViewEdges(settingsLayout, EdgeDistance.TOP_AND_BOTTOM_BAR);
         progressLayout = (showSetup ? this.findViewById(R.id.Setup_Progress_Layout) : null);
         floatingButton = this.findViewById(showSetup ? R.id.Setup_Floating_Button : R.id.Settings_Layout_Floating_Button);
         floatingButton.setOnClickListener(new View.OnClickListener()

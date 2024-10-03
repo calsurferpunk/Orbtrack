@@ -899,6 +899,9 @@ public class MasterAddListActivity extends BaseInputActivity
         //get display
         masterLayout = this.findViewById(R.id.Master_Layout);
 
+        //setup edges
+        setupViewEdges(masterLayout, EdgeDistance.TOP_AND_BOTTOM_BAR);
+
         //setup list
         addList.setHasFixedSize(true);
         addList.addItemDecoration(new DividerItemDecoration(this, LinearLayoutManager.VERTICAL));

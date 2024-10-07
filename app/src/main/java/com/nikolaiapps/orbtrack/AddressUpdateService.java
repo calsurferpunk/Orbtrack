@@ -67,8 +67,8 @@ public class AddressUpdateService extends NotifyService
                     //else fall through
                     resultCode = RESULT_FAIL;
 
-                default:
                 case RESULT_FAIL:
+                default:
                     //send location string
                     locationResolvedListener.onLocationResolved(null, resultCode);
                     break;

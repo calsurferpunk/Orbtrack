@@ -658,7 +658,7 @@ public class ChooseColorDialog
     //converts brightness y to rgb offset
     private int yToBrightnessOffset(float y)
     {
-        return((int)((((brightHeight / 2) - y) / (float)brightHeight) * 255 * 2));
+        return((int)((((brightHeight / 2f) - y) / (float)brightHeight) * 255 * 2));
     }
 
     //updates component bar display
@@ -943,8 +943,8 @@ public class ChooseColorDialog
                 break;
 
             //mostly blue
-            default:
             case 2:
+            default:
                 //if has green, 3, else has red, 4
                 section = (rgb[1] > 0 ? 3 : 4);
                 subIndex = (rgb[1] > 0 ? 1 : 0);

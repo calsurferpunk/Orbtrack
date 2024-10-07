@@ -152,8 +152,8 @@ public abstract class LocationReceiver
                             Database.saveLocation(context, locationString, observerLocation.geo.latitude, observerLocation.geo.longitude, observerLocation.geo.altitudeKm * 1000, TimeZone.getDefault().getID(), Database.LocationType.Saved, true);
                             //fall through
 
-                        default:
                         case AddressUpdateService.RESULT_FAIL:
+                        default:
                             //show any error and send result
                             if(!isSuccess)
                             {

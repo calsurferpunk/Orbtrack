@@ -4109,8 +4109,8 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                             startScreenValue = SettingsActivity.ScreenKey.Updates;
                             break;
 
-                        default:
                         case 4:
+                        default:
                             startScreenValue = "";
                             break;
                     }
@@ -5656,7 +5656,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
             task.cancel(true);
         }
 
-        ///if want to run and have item
+        //if want to run and have item
         if(run && currentItem != null)
         {
             //get any saved items and params

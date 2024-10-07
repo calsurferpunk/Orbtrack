@@ -509,8 +509,8 @@ public abstract class Settings
                         themeID = (darkTheme ? R.style.DarkYellow : R.style.LightYellow);
                         break;
 
-                    default:
                     case ThemeIndex.Cyan:
+                    default:
                         themeID = (darkTheme ? R.style.DarkCyan : R.style.LightCyan);
                         break;
                 }
@@ -552,8 +552,8 @@ public abstract class Settings
                         case Globals.AccountType.SpaceTrack:
                             return(R.drawable.org_space_track);
 
-                        default:
                         case Globals.AccountType.None:
+                        default:
                             return(-1);
                     }
                 }
@@ -3503,8 +3503,8 @@ public abstract class Settings
             case Current.Items.SortBy.Altitude:
                 return(R.string.title_altitude);
 
-            default:
             case Current.Items.SortBy.Name:
+            default:
                 return(R.string.title_name);
         }
     }
@@ -3797,8 +3797,8 @@ public abstract class Settings
                 key = PreferenceName.NotifyPassStartNextOnly;
                 break;
 
-            default:
             case Globals.NotifyType.PassEnd:
+            default:
                 key = PreferenceName.NotifyPassEndNextOnly;
                 break;
 
@@ -3825,8 +3825,8 @@ public abstract class Settings
                 key = PreferenceName.NotifyPassStartNextMs;
                 break;
 
-            default:
             case Globals.NotifyType.PassEnd:
+            default:
                 key = PreferenceName.NotifyPassEndNextMs;
                 break;
 
@@ -3853,8 +3853,8 @@ public abstract class Settings
                 key = PreferenceName.NotifyPassStartLatitude;
                 break;
 
-            default:
             case Globals.NotifyType.PassEnd:
+            default:
                 key = PreferenceName.NotifyPassEndLatitude;
                 break;
 
@@ -3881,8 +3881,8 @@ public abstract class Settings
                 key = PreferenceName.NotifyPassStartLongitude;
                 break;
 
-            default:
             case Globals.NotifyType.PassEnd:
+            default:
                 key = PreferenceName.NotifyPassEndLongitude;
                 break;
 
@@ -3909,8 +3909,8 @@ public abstract class Settings
                 key = PreferenceName.NotifyPassStartAltitude;
                 break;
 
-            default:
             case Globals.NotifyType.PassEnd:
+            default:
                 key = PreferenceName.NotifyPassEndAltitude;
                 break;
 
@@ -3937,8 +3937,8 @@ public abstract class Settings
                 key = PreferenceName.NotifyPassStartZoneId;
                 break;
 
-            default:
             case Globals.NotifyType.PassEnd:
+            default:
                 key = PreferenceName.NotifyPassEndZoneId;
                 break;
 
@@ -4104,8 +4104,8 @@ public abstract class Settings
             case UpdateService.UpdateType.GetMasterList:
                 return(Settings.getPreferenceLong(context, PreferenceName.CatalogAutoUpdateRate));
 
-            default:
             case UpdateService.UpdateType.UpdateSatellites:
+            default:
                 return(Settings.getPreferenceLong(context, PreferenceName.TLEAutoUpdateRate));
         }
     }
@@ -4123,8 +4123,8 @@ public abstract class Settings
                 settings.minute = getPreferenceInt(context, PreferenceName.CatalogAutoUpdateMinute);
                 break;
 
-            default:
             case UpdateService.UpdateType.UpdateSatellites:
+            default:
                 settings.enabled = getPreferenceBoolean(context, PreferenceName.TLEAutoUpdate);
                 settings.hour = getPreferenceInt(context, PreferenceName.TLEAutoUpdateHour);
                 settings.minute = getPreferenceInt(context, PreferenceName.TLEAutoUpdateMinute);

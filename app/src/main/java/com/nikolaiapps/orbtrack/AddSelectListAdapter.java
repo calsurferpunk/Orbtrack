@@ -111,8 +111,8 @@ public class AddSelectListAdapter extends BaseAdapter
                 selections = new String[]{res.getString(R.string.title_color), res.getString(R.string.title_visible), res.getString(R.string.title_details)};
                 break;
 
-            default:
             case SelectType.SatelliteSource:
+            default:
                 updateSource = Settings.getSatelliteCatalogSource(context);
                 selections = new String[]{(updateSource == Database.UpdateSource.N2YO ? Globals.Strings.N2YO : updateSource == Database.UpdateSource.SpaceTrack ? Globals.Strings.SpaceTrack : updateSource == Database.UpdateSource.Celestrak ? Globals.Strings.Celestrak : updateSource == Database.UpdateSource.HeavensAbove ? Globals.Strings.HeavensAbove : res.getString(R.string.title_unknown)), res.getString(R.string.title_file), res.getString(R.string.title_manual)};
                 break;
@@ -148,8 +148,8 @@ public class AddSelectListAdapter extends BaseAdapter
                             selections[index] = Globals.FileLocationType.Dropbox;
                             break;
 
-                        default:
                         case Globals.AccountType.SpaceTrack:
+                        default:
                             selections[index] = Globals.Strings.SpaceTrack;
                             break;
                     }
@@ -212,8 +212,8 @@ public class AddSelectListAdapter extends BaseAdapter
                         imageId = R.drawable.ic_folder_open_black;
                         break;
 
-                    default:
                     case FileSourceType.SDCard:
+                    default:
                         imageId = R.drawable.ic_sd_card_black;
                         break;
 
@@ -231,8 +231,8 @@ public class AddSelectListAdapter extends BaseAdapter
                         imageId = R.drawable.ic_person_pin_circle_black;
                         break;
 
-                    default:
                     case LocationSourceType.Search:
+                    default:
                         imageId = R.drawable.ic_search_black;
                         break;
                 }
@@ -245,8 +245,8 @@ public class AddSelectListAdapter extends BaseAdapter
                         imageId = R.drawable.ic_storage_black;
                         break;
 
-                    default:
                     case Globals.FileType.TLEs:
+                    default:
                         imageId = Settings.getSatelliteIconImageId(context);
                         useTheme = Settings.getSatelliteIconImageIsThemeable(context);
                         break;
@@ -265,8 +265,8 @@ public class AddSelectListAdapter extends BaseAdapter
                         }
                         //else fall through
 
-                    default:
                     case EditAccountType.Remove:
+                    default:
                         imageId = R.drawable.ic_delete_white;
                         break;
                 }
@@ -287,8 +287,8 @@ public class AddSelectListAdapter extends BaseAdapter
                             imageId = R.drawable.org_dropbox;
                             break;
 
-                        default:
                         case Globals.AccountType.SpaceTrack:
+                        default:
                             imageId = R.drawable.org_space_track;
                             break;
                     }
@@ -306,8 +306,8 @@ public class AddSelectListAdapter extends BaseAdapter
                         imageId = R.drawable.ic_remove_red_eye_white;
                         break;
 
-                    default:
                     case EditType.Details:
+                    default:
                         imageId = R.drawable.ic_list_white;
                         break;
                 }
@@ -324,8 +324,8 @@ public class AddSelectListAdapter extends BaseAdapter
                         imageId = R.drawable.ic_insert_drive_file_black;
                         break;
 
-                    default:
                     case SatelliteSourceType.Manual:
+                    default:
                         imageId = R.drawable.ic_mode_edit_black;
                         break;
                 }

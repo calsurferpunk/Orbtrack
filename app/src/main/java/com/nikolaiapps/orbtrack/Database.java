@@ -179,8 +179,8 @@ public class Database extends SQLiteOpenHelper
                         fileId = R.raw.stars_es;
                         break;
 
-                    default:
                     case LanguageIndex.English:
+                    default:
                         fileId = R.raw.stars_en;
                         break;
                 }
@@ -303,8 +303,8 @@ public class Database extends SQLiteOpenHelper
                         fileId = R.raw.constellation_es;
                         break;
 
-                    default:
                     case LanguageIndex.English:
+                    default:
                         fileId = R.raw.constellation_en;
                         break;
                 }
@@ -424,8 +424,8 @@ public class Database extends SQLiteOpenHelper
                         fileId = R.raw.information_es;
                         break;
 
-                    default:
                     case LanguageIndex.English:
+                    default:
                         fileId = R.raw.information_en;
                         break;
                 }
@@ -520,8 +520,8 @@ public class Database extends SQLiteOpenHelper
                         fileId = R.raw.owners_es;
                         break;
 
-                    default:
                     case LanguageIndex.English:
+                    default:
                         fileId = R.raw.owners_en;
                         break;
                 }

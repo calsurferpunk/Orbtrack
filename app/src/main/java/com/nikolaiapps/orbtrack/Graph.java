@@ -700,8 +700,8 @@ public class Graph extends View
                     canvas.drawBitmap(image, x, y, brush);
                     break;
 
-                default:
                 case SelectType.Circle:
+                default:
                     brush.setStrokeWidth(3);
                     brush.setColor(lineColor);
                     brush.setStyle(Paint.Style.FILL);
@@ -748,8 +748,8 @@ public class Graph extends View
                 y = 0;
                 break;
 
-            default:
             case SelectType.Circle:
+            default:
                 x = y = (selectedWidth / 2f) + 2;
                 selectedImage = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
                 selectedImage2 = (y2Points != null ? Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888) : null);
@@ -777,7 +777,7 @@ public class Graph extends View
         for(String line : lines)
         {
             textWidth = Globals.getTextWidth(brush, line);
-            currentX = (int)(x - (textWidth / 2)) + (imageWidth / 2);
+            currentX = (int)(x - (textWidth / 2f)) + (imageWidth / 2);
             canvas.drawText(line, currentX, textY, brush);
             if(index == 0 && imageWidth > 0)
             {
@@ -812,13 +812,13 @@ public class Graph extends View
             valueString = getDayString(value, valuesZone);
             if(!skipRepeatDays || !valueString.equals(lastdayString))
             {
-                canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2)), textY, brush);
+                canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2f)), textY, brush);
             }
             lastdayString = valueString;
             textY += (xValueHeight / xAxisDivisionTextLines);
         }
         valueString = getXValueString(value);
-        canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2)), textY, brush);
+        canvas.drawText(valueString, (int)(x - (Globals.getTextWidth(brush, valueString) / 2f)), textY, brush);
 
         return(lastdayString);
     }
@@ -858,7 +858,7 @@ public class Graph extends View
         brush.setColor(titleColor);
 
         //draw text
-        canvas.drawText(value, (graphArea.left - Globals.getTextWidth(brush, value)) + (forScroll ? deltaX : 0), (int)(y + (yValueHeight / 2)), brush);
+        canvas.drawText(value, (graphArea.left - Globals.getTextWidth(brush, value)) + (forScroll ? deltaX : 0), (int)(y + (yValueHeight / 2f)), brush);
     }
     private void drawYText(double value, double y, Canvas canvas, Paint brush, boolean forScroll)
     {
@@ -1346,8 +1346,8 @@ public class Graph extends View
                 }
                 //else fall through
 
-            default:
             case UnitType.Number:
+            default:
                 return(Globals.getNumberString(value, valueDecimalPlaces));
         }
     }

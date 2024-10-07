@@ -291,8 +291,8 @@ public abstract class NotifyService extends IntentService
                 stringId = R.string.title_cancel;
                 break;
 
-            default:
             case NotifyReceiver.DismissAction:
+            default:
                 stringId = R.string.title_dismiss;
                 break;
         }

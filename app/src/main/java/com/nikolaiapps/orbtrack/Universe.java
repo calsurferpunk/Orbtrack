@@ -1833,9 +1833,9 @@ public abstract class Universe
                 terms = (calcLat ? Neptune.LatTerms : calcLon ? Neptune.LonTerms : Neptune.RadTerms);
                 break;
 
-            default:
             case IDs.Sun:
             case IDs.Earth:
+            default:
                 terms = (calcLat ? Earth.LatTerms : calcLon ? Earth.LonTerms : Earth.RadTerms);
                 break;
         }

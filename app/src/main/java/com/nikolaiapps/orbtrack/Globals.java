@@ -4569,8 +4569,8 @@ public abstract class Globals
             case Settings.Options.Display.LocationIcon.Dish4:
                 return(R.drawable.map_location_dish4);
 
-            default:
             case Settings.Options.Display.LocationIcon.Marker:
+            default:
                 return(R.drawable.map_location_marker_red);
         }
     }
@@ -4586,8 +4586,8 @@ public abstract class Globals
             case Database.LocationType.Online:
                 return(R.drawable.ic_place_black);
 
-            default                                     :
             case Database.LocationType.Saved:
+            default                                     :
                 return(R.drawable.ic_person_pin_circle_black);
         }
     }

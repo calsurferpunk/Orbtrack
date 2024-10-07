@@ -1305,8 +1305,8 @@ public class UpdateService extends NotifyService
                             }
                             break;
 
-                        default:
                         case Database.UpdateSource.NASA:
+                        default:
                             //get start
                             startIndex = receivedPageLower.indexOf("<h2>description</h2>");
                             if(startIndex >= 0)
@@ -2022,8 +2022,8 @@ public class UpdateService extends NotifyService
                         }
                         //else fall through
 
-                    default:
                     case UpdateSubSource.Satellites:
+                    default:
                         urlMasterBase = urlBase;
                         break;
                 }
@@ -2036,8 +2036,8 @@ public class UpdateService extends NotifyService
                 //do nothing here
                 break;
 
-            default:
             case Database.UpdateSource.Celestrak:
+            default:
                 urlBase = "https://www.celestrak.com/";
 
                 switch(updateSubSource)
@@ -2074,8 +2074,8 @@ public class UpdateService extends NotifyService
                         rowEndText = "]";
                         break;
 
-                    default:
                     case UpdateSubSource.Satellites:
+                    default:
                         urlMasterBase = urlBase + "NORAD/elements/?FORMAT=json";
                         rowStartText = "<a title=\"json data\" href=\"gp.php?group=";
                         rowEndText = "</a>";
@@ -2434,8 +2434,8 @@ public class UpdateService extends NotifyService
                                     }
                                     break;
 
-                                default:
                                 case Database.UpdateSource.Celestrak:
+                                default:
                                     //handle based on sub source
                                     switch(updateSubSource)
                                     {
@@ -3673,8 +3673,8 @@ public class UpdateService extends NotifyService
                 tableNodes = new JSONObject[tables.length];
                 break;
 
-            default:
             case Globals.FileType.TLEs:
+            default:
                 tables = new String[]{Database.Tables.Orbital};
                 tableNodes = null;
                 break;
@@ -3743,8 +3743,8 @@ public class UpdateService extends NotifyService
                                 columns = new String[]{"Norad", "Info", "Language", "Source"};
                                 break;
 
-                            default:
                             case Database.Tables.Orbital:
+                            default:
                                 dataRows = Database.getSatelliteData(context, currentSatellite.noradId);
                                 columns = new String[]{"Name", "User_Name", "Norad", "Owner_Code", "Launch_Date", "TLE_Line1", "TLE_Line2", "TLE_Date", "GP", "Update_Date", "Path_Color", "Type", "Selected"};
                                 break;

@@ -2478,8 +2478,8 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
             case FontWeight.Italic:
                 return(Typeface.ITALIC);
 
-            default:
             case FontWeight.Normal:
+            default:
                 return(Typeface.NORMAL);
         }
     }

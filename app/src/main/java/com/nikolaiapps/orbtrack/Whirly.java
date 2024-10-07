@@ -2730,8 +2730,8 @@ class Whirly
                                 maxZoom = 4;
                                 break;
 
-                            default:
                             case MapLayerType.Venus:
+                            default:
                                 name = "venus";
                                 break;
                         }
@@ -2740,8 +2740,8 @@ class Whirly
                         layerSources.add(new RemoteTileInfoNew("https://github.com/calsurferpunk/tiles/raw/main/" + name + "/{z}/{x}/{y}.jpg", 0, maxZoom));
                         break;
 
-                    default:
                     case MapLayerType.Normal:
+                    default:
                         drawPriorities.add(DrawPriority.Layer);
                         cacheDirNames.add("normal_stamen");
                         layerSources.add(new RemoteTileInfoNew("https://tiles.stadiamaps.com/tiles/stamen_terrain_background/{z}/{x}/{y}@2x.png?api_key=" + stamen_key_string, 0, 17));

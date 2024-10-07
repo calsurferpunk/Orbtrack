@@ -1801,8 +1801,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                     }
                     //else fall through
 
-                default:
                 case Settings.Options.LensView.IndicatorType.Circle:
+                default:
                     canvas.drawCircle(orbitalCenterX, orbitalCenterY, drawPxRadius, currentPaint);
                     break;
             }
@@ -3147,8 +3147,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             case 270:
                 return(Surface.ROTATION_270);
 
-            default:
             case 0:
+            default:
                 return(Surface.ROTATION_0);
         }
     }
@@ -3173,8 +3173,8 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 degrees = 270;
                 break;
 
-            default:
             case Surface.ROTATION_0:
+            default:
                 degrees = 0;
                 break;
         }

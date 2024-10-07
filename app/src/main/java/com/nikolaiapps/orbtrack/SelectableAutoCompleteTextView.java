@@ -221,7 +221,7 @@ public class SelectableAutoCompleteTextView extends androidx.appcompat.widget.Ap
             //if first item is using icon 3 only
             if(firstItem instanceof IconSpinner.Item && currentAdapter.getUsingIcon3Only())
             {
-                ///get icon and size
+                //get icon and size
                 Drawable firstIcon = ((IconSpinner.Item)firstItem).getIcon(context);
                 int[] firstIconSize = Globals.getImageWidthHeight(firstIcon);
                 if(firstIcon != null && firstIconSize[0] > 0)

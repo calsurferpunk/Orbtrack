@@ -1238,9 +1238,9 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     params = page.getArguments();
                     break;
 
-                default:
                 case SetupPageType.Welcome:
                 case SetupPageType.Finished:
+                default:
                     page = this.getItem(-1, position, -1, new SetupPage());
                     params = page.getArguments();
                     break;
@@ -1549,8 +1549,8 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             titleId = R.string.title_notifications;
                             break;
 
-                        default:
                         case ScreenKey.Widgets:
+                        default:
                             titleId = R.string.title_widgets;
                             break;
                     }

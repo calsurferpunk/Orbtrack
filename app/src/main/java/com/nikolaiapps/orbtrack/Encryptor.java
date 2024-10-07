@@ -175,8 +175,8 @@ public abstract class Encryptor
                     header = arrayToString64(cipher.getParameters().getParameterSpec(IvParameterSpec.class).getIV()) + ":";
                     break;
 
-                default:
                 case AlgorithmType.DES:
+                default:
                     //no header
                     header = "";
                     break;
@@ -219,8 +219,8 @@ public abstract class Encryptor
                     cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(string64ToArray(sections[0])));
                     break;
 
-                default:
                 case AlgorithmType.DES:
+                default:
                     //decrypt
                     cipher.init(Cipher.DECRYPT_MODE, key);
                     break;

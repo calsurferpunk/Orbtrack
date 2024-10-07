@@ -79,8 +79,8 @@ public class SensorUpdate implements SensorEventListener
                 axisY = SensorManager.AXIS_MINUS_Z;
                 break;
 
-            default:
             case Surface.ROTATION_0:
+            default:
                 axisX = SensorManager.AXIS_X;
                 axisY = SensorManager.AXIS_Y;
                 break;
@@ -290,8 +290,8 @@ public class SensorUpdate implements SensorEventListener
                             invertGyro = true;
                             //fall through
 
-                        default:
                         case Surface.ROTATION_90:
+                        default:
                             //use x axis
                             azGyroIndex = 0;
                             break;

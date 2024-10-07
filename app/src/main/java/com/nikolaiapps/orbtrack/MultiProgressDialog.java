@@ -111,8 +111,8 @@ public class MultiProgressDialog extends AlertDialog
             case BUTTON_NEUTRAL:
                 return(1);
 
-            default:
             case BUTTON_POSITIVE:
+            default:
                 return(2);
         }
     }
@@ -127,8 +127,8 @@ public class MultiProgressDialog extends AlertDialog
             case 1:
                 return(BUTTON_NEUTRAL);
 
-            default:
             case 2:
+            default:
                 return(BUTTON_POSITIVE);
         }
     }

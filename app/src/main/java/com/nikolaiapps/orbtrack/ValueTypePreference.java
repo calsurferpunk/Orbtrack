@@ -58,8 +58,8 @@ public class ValueTypePreference extends CustomPreference
                 valueType = Float.class;
                 break;
 
-            default:
             case ClassType.String:
+            default:
                 valueType = String.class;
                 break;
         }

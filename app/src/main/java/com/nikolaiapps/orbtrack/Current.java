@@ -388,8 +388,8 @@ public abstract class Current
                         case Items.SortBy.Altitude:
                             return(Float.compare(value1.altitudeKm, value2.altitudeKm));
 
-                        default:
                         case Items.SortBy.Name:
+                        default:
                             return(Globals.stringCompare(value1.name, value2.name));
                     }
                 }
@@ -1004,8 +1004,8 @@ public abstract class Current
                         case Items.SortBy.MaxElevation:
                             return(Globals.passMaxElevationCompare(value1.maxPassElevation, value2.maxPassElevation));
 
-                        default:
                         case Items.SortBy.Name:
+                        default:
                             return(Globals.stringCompare(value1.name, value2.name));
                     }
 

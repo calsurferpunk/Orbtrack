@@ -399,7 +399,7 @@ public abstract class Selectable
                         //update size
                         if(startFrameHeight == 0)
                         {
-                            ///get sizes
+                            //get sizes
                             startFrameHeight = itemDetail3dFrame.getHeight();
                             expandFrameHeight = (screenSize[1] - (int)(itemDetailButtonLayout.getHeight() * 3.5)); //note: since unknown how to get title height, button layout used instead in addition (thus 2x)
                         }
@@ -699,8 +699,8 @@ public abstract class Selectable
                         imageId = R.drawable.ic_3d_rotation_black;
                         break;
 
-                    default:
                     case DetailButtonType.Info:
+                    default:
                         imageId = R.drawable.ic_info_black;
                         break;
                 }

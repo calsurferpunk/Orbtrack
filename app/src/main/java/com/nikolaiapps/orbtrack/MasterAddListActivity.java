@@ -900,7 +900,7 @@ public class MasterAddListActivity extends BaseInputActivity
         masterLayout = this.findViewById(R.id.Master_Layout);
 
         //setup edges
-        setupViewEdges(masterLayout, EdgeDistance.TOP_AND_BOTTOM_BAR);
+        setupViewEdges(masterLayout, EdgeDistance.TOP_AND_ACTION_AND_BOTTOM_BAR);
 
         //setup list
         addList.setHasFixedSize(true);

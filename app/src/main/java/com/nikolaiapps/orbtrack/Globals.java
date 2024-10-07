@@ -1195,6 +1195,9 @@ public abstract class Globals
             });
         }
 
+        //add margins to view
+        BaseInputActivity.setEdgeMargins(snackParentView, BaseInputActivity.EdgeDistance.BOTTOM_BAR);
+
         //show view
         snackView.show();
     }

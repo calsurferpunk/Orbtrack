@@ -105,16 +105,16 @@ public abstract class BaseInputActivity extends AppCompatActivity
     }
 
     //Sets display edge margins
-    public static void setEdgeMargins(View moveView, int edgeMoveType)
+    public static void setEdgeMargins(View moveView, int edgeDistanceType)
     {
         ViewGroup.MarginLayoutParams marginParams;
 
         //if view exists
         if(moveView != null)
         {
-            boolean useTopBar = (edgeMoveType & EdgeDistance.TOP_BAR) != 0;
-            boolean useActionBar = (edgeMoveType & EdgeDistance.ACTION_BAR) != 0;
-            boolean useBottomBar = (edgeMoveType & EdgeDistance.BOTTOM_BAR) != 0;
+            boolean useTopBar = (edgeDistanceType & EdgeDistance.TOP_BAR) != 0;
+            boolean useActionBar = (edgeDistanceType & EdgeDistance.ACTION_BAR) != 0;
+            boolean useBottomBar = (edgeDistanceType & EdgeDistance.BOTTOM_BAR) != 0;
 
             //apply margins
             marginParams = (ViewGroup.MarginLayoutParams)moveView.getLayoutParams();

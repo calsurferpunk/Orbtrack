@@ -219,7 +219,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
 
         //setup displays
         mainDrawerLayout = this.findViewById(R.id.Main_Drawer_Layout);
-        setupViewEdges(mainDrawerLayout, EdgeDistance.TOP_BAR | EdgeDistance.ACTION_BAR);
+        setupViewEdges(mainDrawerLayout, EdgeDistance.TOP_AND_ACTION_AND_BOTTOM_BAR);
         mainDrawerToggle = createActionBarDrawerToggle();
         mainDrawerLayout.addDrawerListener(mainDrawerToggle);
         mainPager = this.findViewById(R.id.Main_Pager);

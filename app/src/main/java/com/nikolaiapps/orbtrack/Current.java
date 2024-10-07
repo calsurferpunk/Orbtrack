@@ -2381,8 +2381,6 @@ public abstract class Current
         cameraView.helpText = rootView.findViewById(R.id.Lens_Help_Text);
         cameraView.pathDivisions = pathDivisions;
         cameraView.playBar = (useSaved ? rootView.findViewById(R.id.Lens_Play_Bar) : null);
-        BaseInputActivity.setEdgeMarginAboveBottom(cameraView.settingsMenu);
-        BaseInputActivity.setEdgeMarginAboveBottom(cameraView.playBar);
         cameraView.zoomBar = rootView.findViewById(R.id.Lens_Zoom_Bar);
         cameraView.exposureBar = (usingVirtual ? null : rootView.findViewById(R.id.Lens_Exposure_Bar));
         cameraView.sliderText = rootView.findViewById(R.id.Lens_Slider_Text);
@@ -3638,8 +3636,6 @@ public abstract class Current
         currentSearchTextReference = new WeakReference<>(searchText);
 
         pageFragment.playBar = rootView.findViewById(R.id.Map_Coordinate_Play_Bar);
-        BaseInputActivity.setEdgeMarginAboveBottom(mapSettingsMenu);
-        BaseInputActivity.setEdgeMarginAboveBottom(pageFragment.playBar);
         pageFragment.scaleBar = rootView.findViewById(R.id.Map_Coordinate_Scale_Bar);
         pageFragment.getChildFragmentManager().beginTransaction().replace(R.id.Map_View, (Fragment)mapView).commit();
 

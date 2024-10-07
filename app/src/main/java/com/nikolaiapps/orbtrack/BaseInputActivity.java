@@ -33,6 +33,7 @@ import java.util.ArrayList;
 public abstract class BaseInputActivity extends AppCompatActivity
 {
     private static int actionBarHeight = 0;
+    private static int statusBarHeight = 0;
     private static Insets systemBarInsets = Insets.NONE;
 
     //Edge distances
@@ -120,15 +121,9 @@ public abstract class BaseInputActivity extends AppCompatActivity
             marginParams.leftMargin = systemBarInsets.left;
             marginParams.rightMargin = systemBarInsets.right;
             marginParams.topMargin = (useTopBar ? (systemBarInsets.top - (systemBarInsets.top > actionBarHeight ? actionBarHeight : 0)) : 0) + (useActionBar ? actionBarHeight : 0);
-            marginParams.bottomMargin = (useBottomBar ? systemBarInsets.bottom : 0);
+            marginParams.bottomMargin = (useBottomBar ? statusBarHeight : 0);
             moveView.setLayoutParams(marginParams);
         }
-    }
-
-    //Sets display edge margins below top and action bar
-    public static void setEdgeMarginAboveBottom(View moveView)
-    {
-        setEdgeMargins(moveView, EdgeDistance.BOTTOM_BAR);
     }
 
     //Sets display to align with edges
@@ -157,6 +152,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
                 {
                     //remember insets and add margins to view
                     systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+                    statusBarHeight = (systemBarInsets.bottom == 0 && context != null ? (int)Globals.dpToPixels(context, 48) : systemBarInsets.bottom);
                     setEdgeMargins(mainView, edgeMoveType);
 
                     //continue with other insets

@@ -11,6 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -515,6 +516,11 @@ public abstract class Settings
                 }
 
                 context.setTheme(themeID);
+
+                if(Build.VERSION.SDK_INT < 23 && context instanceof Activity)
+                {
+                    ((Activity)context).getWindow().setStatusBarColor(Globals.resolveColorID(context, R.attr.colorPrimaryDark));
+                }
             }
         }
 

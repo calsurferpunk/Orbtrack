@@ -3904,14 +3904,18 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 switch(mainGroup)
                 {
                     case Groups.Current:
-                        lastSubPage = currentSubPage[lastPosition];
-                        if(lastPosition == Current.PageType.Combined)
+                        //if a valid last position
+                        if(lastPosition < currentSubPage.length)
                         {
-                            //if were using lens
-                            if(lastSubPage == Globals.SubPageType.CameraLens || lastSubPage == Globals.SubPageType.VirtualLens)
+                            lastSubPage = currentSubPage[lastPosition];
+                            if(lastPosition == Current.PageType.Combined)
                             {
-                                //make sure camera stops
-                                stopCamera = true;
+                                //if were using lens
+                                if(lastSubPage == Globals.SubPageType.CameraLens || lastSubPage == Globals.SubPageType.VirtualLens)
+                                {
+                                    //make sure camera stops
+                                    stopCamera = true;
+                                }
                             }
                         }
 
@@ -3938,28 +3942,32 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                         break;
 
                     case Groups.Calculate:
-                        lastSubPage = calculateSubPage[lastPosition];
-                        switch(lastPosition)
+                        //if a valid last position
+                        if(lastPosition < calculateSubPage.length)
                         {
-                            case Calculate.PageType.View:
-                            case Calculate.PageType.Passes:
-                            case Calculate.PageType.Intersection:
-                                //if were using lens
-                                if(lastSubPage == Globals.SubPageType.CameraLens || lastSubPage == Globals.SubPageType.VirtualLens)
-                                {
-                                    //make sure camera stops
-                                    stopCamera = true;
-                                }
-                                break;
+                            lastSubPage = calculateSubPage[lastPosition];
+                            switch(lastPosition)
+                            {
+                                case Calculate.PageType.View:
+                                case Calculate.PageType.Passes:
+                                case Calculate.PageType.Intersection:
+                                    //if were using lens
+                                    if(lastSubPage == Globals.SubPageType.CameraLens || lastSubPage == Globals.SubPageType.VirtualLens)
+                                    {
+                                        //make sure camera stops
+                                        stopCamera = true;
+                                    }
+                                    break;
 
-                            case Calculate.PageType.Coordinates:
-                                //if adapter exists
-                                if(calculatePageAdapter != null)
-                                {
-                                    //stop any running timer
-                                    calculatePageAdapter.stopPlayTimer(mainPager, Calculate.PageType.Coordinates);
-                                }
-                                break;
+                                case Calculate.PageType.Coordinates:
+                                    //if adapter exists
+                                    if(calculatePageAdapter != null)
+                                    {
+                                        //stop any running timer
+                                        calculatePageAdapter.stopPlayTimer(mainPager, Calculate.PageType.Coordinates);
+                                    }
+                                    break;
+                            }
                         }
 
                         subPage = calculateSubPage[position];

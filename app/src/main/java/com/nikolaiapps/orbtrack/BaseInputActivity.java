@@ -78,8 +78,8 @@ public abstract class BaseInputActivity extends AppCompatActivity
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
-        setEdgeToEdge(this);
         Settings.Options.Display.setTheme(this);
+        setEdgeToEdge(this);
 
         super.onCreate(savedInstanceState);
         setupActionBar(this, this.getSupportActionBar(), false);

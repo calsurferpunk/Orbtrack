@@ -761,7 +761,7 @@ public class LocationService extends Service implements LocationListener
         else if(locationClient != null)
         {
             //try to get last location
-            locationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<Location>()
+            locationClient.getLastLocation().addOnSuccessListener(new OnSuccessListener<>()
             {
                 @Override
                 public void onSuccess(Location location)
@@ -970,7 +970,7 @@ public class LocationService extends Service implements LocationListener
                     {
                         //get updates
                         locationClient = LocationServices.getFusedLocationProviderClient(this);
-                        locationClient.requestLocationUpdates(locationRequester, locationListener, Looper.myLooper()).addOnCompleteListener(new OnCompleteListener<Void>()
+                        locationClient.requestLocationUpdates(locationRequester, locationListener, Looper.myLooper()).addOnCompleteListener(new OnCompleteListener<>()
                         {
                             @Override
                             public void onComplete(@NonNull Task<Void> task)
@@ -1178,7 +1178,7 @@ public class LocationService extends Service implements LocationListener
 
                     if(googlePlacesClient != null)
                     {
-                        googlePlacesClient.fetchPlace(FetchPlaceRequest.builder(placeId, placeResult).build()).addOnSuccessListener(new OnSuccessListener<FetchPlaceResponse>()
+                        googlePlacesClient.fetchPlace(FetchPlaceRequest.builder(placeId, placeResult).build()).addOnSuccessListener(new OnSuccessListener<>()
                         {
                             @Override
                             public void onSuccess(FetchPlaceResponse fetchPlaceResponse)

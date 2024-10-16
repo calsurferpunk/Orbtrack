@@ -19,7 +19,6 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.PlacesClient;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -142,7 +141,7 @@ public class AutoPlacesAdapter extends ArrayAdapter<AutoPlacesAdapter.Item> impl
             {
                 //get predictions
                 //noinspection SpellCheckingInspection
-                resultsObject = Globals.getJSONWebPage("https://maps.googleapis.com/maps/api/place/autocomplete/json?key=" + getContext().getResources().getString(R.string.google_places_api_web_key) + "&sessiontoken=" + uuid + "&input=" + URLEncoder.encode(text.toString(), Globals.Encoding.UTF8));
+                resultsObject = Globals.getJSONWebPage("https://maps.googleapis.com/maps/api/place/autocomplete/json?key=" + getContext().getResources().getString(R.string.google_places_api_web_key) + "&sessiontoken=" + uuid + "&input=" + Globals.encodeUrlValue(text.toString()));
                 if(resultsObject != null)
                 {
                     predictions = resultsObject.getJSONArray("predictions");

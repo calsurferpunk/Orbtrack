@@ -79,7 +79,7 @@ public abstract class LocationReceiver
     {
         boolean needObserve = !forever;
 
-        observer = new Observer<Intent>()
+        observer = new Observer<>()
         {
             @Override
             public void onChanged(Intent intent)

@@ -162,7 +162,7 @@ public class CalculateService extends NotifyService
         public byte orbital2Type;
         public CalculateViewsTask.OrbitalView[] passViews;
         public CalculateViewsTask.OrbitalView[] passViews2;
-        public static final Creator<PassData> CREATOR =  new Parcelable.Creator<PassData>()
+        public static final Creator<PassData> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public PassData createFromParcel(Parcel source)

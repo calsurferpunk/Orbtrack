@@ -35,7 +35,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         public final String timeString;
         public final Rect timeArea;
 
-        public static final Creator<OrbitalView> CREATOR =  new Parcelable.Creator<OrbitalView>()
+        public static final Creator<OrbitalView> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public OrbitalView createFromParcel(Parcel source)

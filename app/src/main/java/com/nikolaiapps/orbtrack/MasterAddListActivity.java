@@ -523,7 +523,7 @@ public class MasterAddListActivity extends BaseInputActivity
         }
 
         //create receiver
-        Observer<Intent> updateReceiver = new Observer<Intent>()
+        Observer<Intent> updateReceiver = new Observer<>()
         {
             @Override
             public void onChanged(Intent intent)
@@ -646,7 +646,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                 if(section != null)
                                 {
                                     //update progress
-                                    taskProgress.setMessage((messageType == NotifyService.MessageTypes.Save ? (savingString + " ") : messageType == NotifyService.MessageTypes.Load ? (loadingString + " ") :  !isDownload ? (gettingString + " ") : "") + section);
+                                    taskProgress.setMessage((messageType == NotifyService.MessageTypes.Save ? (savingString + " ") : messageType == NotifyService.MessageTypes.Load ? (loadingString + " ") : !isDownload ? (gettingString + " ") : "") + section);
                                 }
                                 break;
 
@@ -723,7 +723,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                         @Override
                                         public void onProgressChanged(int progressType, String section, final long updateIndex, final long updateCount)
                                         {
-                                            switch (progressType)
+                                            switch(progressType)
                                             {
                                                 case Globals.ProgressType.Running:
                                                     //if on first, last, or enough have passed

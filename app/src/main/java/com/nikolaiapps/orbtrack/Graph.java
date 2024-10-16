@@ -130,6 +130,7 @@ public class Graph extends View
         }
     }
 
+    /** @noinspection ClassCanBeRecord*/
     private static class Divisor
     {
         final double value;

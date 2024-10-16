@@ -160,7 +160,7 @@ public abstract class Calculations
         public double positionY;
         public double positionZ;
         public double julianDate;						//Julian date of last position update
-        public static final Creator<EciDataType> CREATOR = new Parcelable.Creator<EciDataType>()
+        public static final Creator<EciDataType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public EciDataType createFromParcel(Parcel source)
@@ -218,7 +218,7 @@ public abstract class Calculations
         public double altitudeKm;
         public double speedKmS;                         //speed in km/s
         public double radius;
-        public static final Creator<GeodeticDataType> CREATOR = new Parcelable.Creator<GeodeticDataType>()
+        public static final Creator<GeodeticDataType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public GeodeticDataType createFromParcel(Parcel source)
@@ -344,7 +344,7 @@ public abstract class Calculations
         public String internationalCode;            //International code
 
         //creator
-        public static final Creator<TLEDataType> CREATOR = new Parcelable.Creator<TLEDataType>()
+        public static final Creator<TLEDataType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public TLEDataType createFromParcel(Parcel source)
@@ -400,7 +400,7 @@ public abstract class Calculations
         public double apogee;							//apogee in km
         public double periodMinutes;
         public byte predictionModel;                   //SgpModelType
-        public static final Creator<OrbitDataType> CREATOR = new Parcelable.Creator<OrbitDataType>()
+        public static final Creator<OrbitDataType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public OrbitDataType createFromParcel(Parcel source)
@@ -551,7 +551,7 @@ public abstract class Calculations
         final double rightAscDeg;
         final double distanceKm;
 
-        public static final Creator<PlanetDataType> CREATOR = new Parcelable.Creator<PlanetDataType>()
+        public static final Creator<PlanetDataType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public PlanetDataType createFromParcel(Parcel source)
@@ -684,7 +684,7 @@ public abstract class Calculations
         public OrbitDataType orbit;				//orbit information
         public NoradDataType norad;				//norad data
         public PlanetDataType planetData;       //planet data
-        public static final Creator<SatelliteObjectType> CREATOR = new Parcelable.Creator<SatelliteObjectType>()
+        public static final Creator<SatelliteObjectType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public SatelliteObjectType createFromParcel(Parcel source)
@@ -779,7 +779,7 @@ public abstract class Calculations
         public TimeZone timeZone;
         public final GeodeticDataType geo;				//geodetic position
 
-        public static final Creator<ObserverType> CREATOR = new Parcelable.Creator<ObserverType>()
+        public static final Creator<ObserverType> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public ObserverType createFromParcel(Parcel source)

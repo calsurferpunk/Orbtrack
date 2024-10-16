@@ -149,7 +149,7 @@ public class NotifySettingsActivity extends BaseInputActivity
                 @Override
                 public void onNothingSelected(AdapterView<?> parent) {}
             });
-            resultLauncher = Globals.createActivityLauncher(this, new ActivityResultCallback<ActivityResult>()
+            resultLauncher = Globals.createActivityLauncher(this, new ActivityResultCallback<>()
             {
                 @Override
                 public void onActivityResult(ActivityResult result)

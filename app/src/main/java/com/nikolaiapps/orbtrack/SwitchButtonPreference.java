@@ -44,6 +44,7 @@ public class SwitchButtonPreference extends CustomPreference
         this(context, attrs, 0);
     }
 
+    /** @noinspection SizeReplaceableByIsEmpty*/
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder)
     {

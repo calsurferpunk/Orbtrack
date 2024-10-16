@@ -53,6 +53,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
         static final String PassAlarmType = "passAlarmType";
     }
 
+    /** @noinspection ClassCanBeRecord*/
     //Widget data class
     public static class WidgetData
     {

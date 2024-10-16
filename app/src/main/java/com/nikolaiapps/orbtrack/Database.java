@@ -1227,6 +1227,7 @@ public class Database extends SQLiteOpenHelper
     private static final int TIME_ZONE_ROWS = 23427;
     private static final String TIME_ZONE_FILE_SEPARATOR = "\t";
 
+    /** @noinspection ClassCanBeRecord*/
     public static class IdLine
     {
         public final int startId;
@@ -1319,7 +1320,7 @@ public class Database extends SQLiteOpenHelper
     {
         public final int id;
         public int index;
-        public static final Creator<ParentProperties> CREATOR = new Creator<ParentProperties>()
+        public static final Creator<ParentProperties> CREATOR = new Creator<>()
         {
             @Override
             public ParentProperties createFromParcel(Parcel source)
@@ -1387,7 +1388,7 @@ public class Database extends SQLiteOpenHelper
         private boolean inFilter;
         private byte inParentFilterState;
         public boolean isSelected;
-        public static final Creator<DatabaseSatellite> CREATOR =  new Parcelable.Creator<DatabaseSatellite>()
+        public static final Creator<DatabaseSatellite> CREATOR = new Parcelable.Creator<>()
         {
             @Override
             public DatabaseSatellite createFromParcel(Parcel source)

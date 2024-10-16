@@ -77,7 +77,7 @@ public abstract class UpdateReceiver
     //Register receiver
     public void register(Context context)
     {
-        observer = new Observer<Intent>()
+        observer = new Observer<>()
         {
             @Override
             public void onChanged(Intent intent)

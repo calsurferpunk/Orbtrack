@@ -81,7 +81,7 @@ public abstract class Selectable
 
         public int id;
         public int listIndex;
-        public static final Creator<ListItem> CREATOR = new Creator<ListItem>()
+        public static final Creator<ListItem> CREATOR = new Creator<>()
         {
             @Override
             public ListItem createFromParcel(Parcel source)
@@ -155,6 +155,7 @@ public abstract class Selectable
             return(!list.isEmpty() ? list.toArray(new ListItem[0]) : null);
         }
 
+        /** @noinspection SizeReplaceableByIsEmpty*/
         //Converts an array into an array string
         public static String stringFromArray(ListItem[] array)
         {
@@ -2252,7 +2253,7 @@ public abstract class Selectable
         //Creates a local broadcast listener
         private Observer<Intent> createLocalBroadcastReceiver()
         {
-            return(new Observer<Intent>()
+            return(new Observer<>()
             {
                 @Override
                 public void onChanged(Intent intent)

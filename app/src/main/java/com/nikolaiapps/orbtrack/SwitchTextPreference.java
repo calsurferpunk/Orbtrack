@@ -80,6 +80,7 @@ public class SwitchTextPreference extends ValueTypePreference
         this(context, attrs, 0);
     }
 
+    /** @noinspection SizeReplaceableByIsEmpty*/
     @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder)
     {

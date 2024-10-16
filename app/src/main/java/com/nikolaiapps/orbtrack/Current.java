@@ -85,6 +85,7 @@ public abstract class Current
             static final int Count = 10;
         }
 
+        /** @noinspection ClassCanBeRecord*/
         private static class NoradIndex
         {
             private static class Comparer implements Comparator<NoradIndex>

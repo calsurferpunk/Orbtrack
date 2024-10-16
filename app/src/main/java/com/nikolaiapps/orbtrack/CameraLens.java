@@ -537,6 +537,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
     }
 
+    /** @noinspection ClassCanBeRecord*/
     private static class RelativeLocationProperties
     {
         final public boolean closeArea;

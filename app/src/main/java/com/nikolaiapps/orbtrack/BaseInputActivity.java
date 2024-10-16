@@ -13,7 +13,6 @@ import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.appcompat.app.ActionBar;
@@ -23,9 +22,6 @@ import androidx.core.view.OnApplyWindowInsetsListener;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.Task;
 import java.io.File;
 import java.util.ArrayList;
 
@@ -307,38 +303,6 @@ public abstract class BaseInputActivity extends AppCompatActivity
                 //load all files
                 UpdateService.loadFileData(activity, null, null, fileList);
                 break;
-        }
-    }
-
-    //Handles activity Google Drive file browser request
-    public static void handleActivityGoogleDriveOpenFileBrowserRequest(Activity activity, ActivityResultLauncher<Intent> launcher, View parentView, Intent data, boolean isOkay)
-    {
-        boolean isError = true;
-
-        //if signed in
-        if(isOkay)
-        {
-            //try to get account
-            Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
-
-            //if got account
-            if(getAccountTask.isSuccessful())
-            {
-                //note: don't confirm internet since would have done already to get past sign in
-
-                //show google drive file browser
-                Orbitals.showGoogleDriveFileBrowser(activity, launcher, false);
-
-                //no error
-                isError = false;
-            }
-        }
-
-        //if there was an error
-        if(isError)
-        {
-            //show error message
-            Globals.showSnackBar(parentView, activity.getString(R.string.text_login_failed), true);
         }
     }
 

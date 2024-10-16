@@ -2000,14 +2000,16 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                 //if adapter is set
                 if(accountsListAdapter != null)
                 {
-                    //reload items
-                    accountsListAdapter.reload();
+                    this.runOnUiThread(new Runnable()
+                    {
+                        @Override
+                        public void run()
+                        {
+                            //reload items
+                            accountsListAdapter.reload();
+                        }
+                    });
                 }
-                break;
-
-            case BaseInputActivity.RequestCode.GoogleDriveSignIn:
-                //handle Google Drive open file browser request
-                BaseInputActivity.handleActivityGoogleDriveOpenFileBrowserRequest(this, resultLauncher, settingsLayout, data, isOkay);
                 break;
 
             case BaseInputActivity.RequestCode.GoogleDriveOpenFile:
@@ -3014,7 +3016,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     switch(which)
                     {
                         case Globals.AccountType.GoogleDrive:
-                            Globals.askGoogleDriveAccount(SettingsActivity.this, resultLauncher, BaseInputActivity.RequestCode.GoogleDriveAddAccount);
+                            GoogleDriveAccess.start(SettingsActivity.this, resultLauncher, true);
                             break;
 
                         case Globals.AccountType.Dropbox:

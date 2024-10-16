@@ -53,6 +53,7 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import com.google.android.gms.common.ConnectionResult;
@@ -103,12 +104,6 @@ import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.common.api.Scope;
-import com.google.api.services.drive.DriveScopes;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import java.io.BufferedInputStream;
@@ -123,6 +118,7 @@ import java.io.InputStreamReader;
 import java.io.PushbackInputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -1074,7 +1070,7 @@ public abstract class Globals
             {
                 //show dialog and stop
                 dateDialog = MaterialDatePicker.Builder.datePicker().setSelection(date.getTimeInMillis()).build();
-                dateDialog.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>()
+                dateDialog.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<>()
                 {
                     @Override
                     public void onPositiveButtonClick(Long selection)
@@ -1491,29 +1487,6 @@ public abstract class Globals
         return(getUseGooglePlayServices(context, false));
     }
 
-    //Get google drive sign in client
-    public static GoogleSignInClient getGoogleDriveSignInClient(Activity context)
-    {
-        GoogleSignInClient signInClient;
-        GoogleSignInOptions signInOptions;
-
-        signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().requestScopes(new Scope(DriveScopes.DRIVE_READONLY), new Scope(DriveScopes.DRIVE_FILE)).build();
-        signInClient = GoogleSignIn.getClient(context, signInOptions);
-
-        return(signInClient);
-    }
-
-    //Ask for google drive account
-    public static void askGoogleDriveAccount(Activity activity, ActivityResultLauncher<Intent> launcher, byte requestCode)
-    {
-        //if activity is set
-        if(activity != null)
-        {
-            //ask for user account
-            startActivityForResult(launcher, getGoogleDriveSignInClient(activity).getSignInIntent(), requestCode);
-        }
-    }
-
     //Check if have camera permission
     public static boolean haveCameraPermission(Context context)
     {
@@ -1623,57 +1596,66 @@ public abstract class Globals
         return(context != null && !haveInternetConnection(context) && Settings.getAskInternet(context));
     }
 
-    //Get google drive account if valid
-    public static GoogleSignInAccount getGoogleDriveAccount(Context context)
-    {
-        GoogleSignInAccount signInAccount = GoogleSignIn.getLastSignedInAccount(context);
-        List<Scope> requiredScopes = Arrays.asList(new Scope(DriveScopes.DRIVE_READONLY), new Scope(DriveScopes.DRIVE_FILE));
-
-        //have access if account is set and have permissions
-        return((signInAccount != null && signInAccount.getGrantedScopes().containsAll(requiredScopes)) ? signInAccount : null);
-    }
-
     //Show permission denied
     public static void showDenied(View parentView, String denyMessage)
     {
         showSnackBar(parentView, denyMessage, true);
     }
 
+    //Handles adding request code to callback data
+    private static void handleCallbackWithCode(ActivityResult result, ActivityResultCallback<ActivityResult> callback, byte requestCode)
+    {
+        Intent data;
+
+        //if callback is set
+        if(callback != null)
+        {
+            //get data
+            data = result.getData();
+
+            //if no data yet
+            if(data == null)
+            {
+                //create it
+                data = new Intent();
+            }
+
+            //add request code
+            data.putExtra(BaseInputActivity.EXTRA_REQUEST_CODE, requestCode);
+
+            //call callback
+            callback.onActivityResult(result);
+        }
+    }
+
     //Creates an activity launcher
     public static ActivityResultLauncher<Intent> createActivityLauncher(ComponentActivity activity, ActivityResultCallback<ActivityResult> callback, byte requestCode)
     {
-        return(activity != null ? activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (requestCode != BaseInputActivity.RequestCode.None ? new ActivityResultCallback<ActivityResult>()
+        return(activity != null ? activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), (requestCode != BaseInputActivity.RequestCode.None ? new ActivityResultCallback<>()
         {
             @Override
             public void onActivityResult(ActivityResult result)
             {
-                Intent data;
-
-                //if callback is set
-                if(callback != null)
-                {
-                    //get data
-                    data = result.getData();
-
-                    //if no data yet
-                    if(data == null)
-                    {
-                        //create it
-                        data = new Intent();
-                    }
-
-                    //add request code
-                    data.putExtra(BaseInputActivity.EXTRA_REQUEST_CODE, requestCode);
-
-                    //call callback
-                    callback.onActivityResult(result);
-                }
+                handleCallbackWithCode(result, callback, requestCode);
             }
         } : callback)) : null);
     }
     public static ActivityResultLauncher<Intent> createActivityLauncher(ComponentActivity activity, ActivityResultCallback<ActivityResult> callback)
     {
         return(createActivityLauncher(activity, callback, BaseInputActivity.RequestCode.None));
+    }
+
+    //Create an activity request launcher
+    public static ActivityResultLauncher<IntentSenderRequest> createActivityRequestLauncher(ComponentActivity activity, ActivityResultCallback<ActivityResult> callback, byte requestCode)
+    {
+        return(activity != null ? activity.registerForActivityResult(new ActivityResultContracts.StartIntentSenderForResult(), (requestCode != BaseInputActivity.RequestCode.None ?  new ActivityResultCallback<>()
+        {
+            @Override
+            public void onActivityResult(ActivityResult result)
+            {
+                handleCallbackWithCode(result, callback, requestCode);
+            }
+        } : callback)) : null);
     }
 
     //Starts an activity with the given launcher
@@ -2401,7 +2383,7 @@ public abstract class Globals
         }
 
         //sort list
-        Collections.sort(zones, new Comparator<TimeZone>()
+        Collections.sort(zones, new Comparator<>()
         {
             @Override
             public int compare(TimeZone o1, TimeZone o2)
@@ -5437,6 +5419,20 @@ public abstract class Globals
             list.add(currentValue);
         }
         return(list);
+    }
+
+    /** @noinspection CharsetObjectCanBeUsed*/
+    //Encodes a url string value
+    public static String encodeUrlValue(String urlValue)
+    {
+        try
+        {
+            return(URLEncoder.encode(urlValue, Encoding.UTF8));
+        }
+        catch(Exception ex)
+        {
+            return(urlValue);
+        }
     }
 
     //Converts a text string into an HTML string

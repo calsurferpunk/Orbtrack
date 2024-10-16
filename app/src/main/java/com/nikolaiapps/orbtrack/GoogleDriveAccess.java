@@ -1,36 +1,52 @@
 package com.nikolaiapps.orbtrack;
 
 
-import android.accounts.Account;
 import android.app.Activity;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
+import android.os.CancellationSignal;
 import android.widget.TextView;
 import androidx.activity.result.ActivityResult;
 import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.IntentSenderRequest;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.google.android.gms.tasks.Task;
+import androidx.core.content.ContextCompat;
+import androidx.credentials.ClearCredentialStateRequest;
+import androidx.credentials.CredentialManager;
+import androidx.credentials.CredentialManagerCallback;
+import androidx.credentials.exceptions.ClearCredentialException;
+import com.google.android.gms.auth.api.identity.AuthorizationRequest;
+import com.google.android.gms.auth.api.identity.AuthorizationResult;
+import com.google.android.gms.auth.api.identity.Identity;
+import com.google.android.gms.common.api.Scope;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.googleapis.media.MediaHttpDownloader;
 import com.google.api.client.googleapis.media.MediaHttpDownloaderProgressListener;
 import com.google.api.client.googleapis.media.MediaHttpUploader;
 import com.google.api.client.googleapis.media.MediaHttpUploaderProgressListener;
 import com.google.api.client.http.FileContent;
+import com.google.api.client.http.HttpRequestInitializer;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.api.services.drive.model.FileList;
+import com.google.auth.http.HttpCredentialsAdapter;
+import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.auth.oauth2.ServiceAccountCredentials;
+import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,6 +56,19 @@ import java.util.List;
 
 public class GoogleDriveAccess extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
 {
+    private static final String GOOGLE_DRIVE_SETTINGS = "googleDriveSettings";
+    private static final List<String> GOOGLE_DRIVE_SCOPE_STRINGS = Arrays.asList(DriveScopes.DRIVE_READONLY, DriveScopes.DRIVE_FILE, "https://www.googleapis.com/auth/userinfo.email");
+
+    public interface OnRemoveAccountListener
+    {
+        void onFinished(ClearCredentialException ex);
+    }
+
+    private static abstract class PreferenceName
+    {
+        static final String UserEmail = "userEmail";
+    }
+
     private static abstract class MimeTypes
     {
         static final String Folder = "application/vnd.google-apps.folder";
@@ -202,7 +231,6 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                         parentPathId = parents.get(0);
                     }
                 }
-
 
                 taskResult = FileBrowserBaseActivity.ResultCode.Success;
             }
@@ -450,16 +478,16 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
         }
     }
 
-    private static class GetPermissionTask extends ThreadTask<Object, Integer, Void>
+    private static class GetClientTask extends ThreadTask<Object, Integer, Void>
     {
         public interface OnResultListener
         {
-            void onResult(Drive drive, int resultCode);
+            void onResult(Drive drive, int resultCode, String message);
         }
 
         private final OnResultListener resultListener;
 
-        public GetPermissionTask(OnResultListener listener)
+        public GetClientTask(OnResultListener listener)
         {
             resultListener = listener;
         }
@@ -468,31 +496,27 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
         protected Void doInBackground(Object... objects)
         {
             int taskResult = FileBrowserBaseActivity.ResultCode.LoginFailed;
-            Drive driveClient = null;
-            Context currentContext = (Context)objects[0];
+            Context context = (Context)objects[0];
+            String message = null;
+            String accessToken = (String)objects[1];
+            GoogleCredentials accountCredential = (accessToken != null ? ServiceAccountCredentials.create(new AccessToken(accessToken, null)).createScoped(GOOGLE_DRIVE_SCOPE_STRINGS) : null);
+            HttpRequestInitializer credential = (accountCredential != null ? new HttpCredentialsAdapter(accountCredential) : null);
+            Drive driveClient = (credential != null ? new Drive.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), credential).setApplicationName(context.getPackageName()).build() : null);
 
-            //get account and credential
-            GoogleSignInAccount driveAccount = Globals.getGoogleDriveAccount(currentContext);
-            Account googleAccount = (driveAccount != null ? driveAccount.getAccount() : null);
-            GoogleAccountCredential credential = GoogleAccountCredential.usingOAuth2(currentContext, Arrays.asList(DriveScopes.DRIVE_READONLY, DriveScopes.DRIVE_FILE));
-
-            //if account is set
-            if(googleAccount != null)
+            //if client was set
+            if(driveClient != null)
             {
-                //setup service
-                credential.setSelectedAccount(googleAccount);
-                driveClient = new Drive.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), credential).setApplicationName("com.nikolaiapps.orbtrack").build();
-
                 try
                 {
                     //test connection
                     driveClient.files().get("root").setFields("id").execute();
                     taskResult = FileBrowserBaseActivity.ResultCode.Success;
                 }
-                catch(UserRecoverableAuthIOException authEx)
+                catch(UserRecoverableAuthIOException | IllegalStateException userOrStateEx)
                 {
-                    //retry login later
+                    //retry later
                     driveClient = null;
+                    message = (userOrStateEx instanceof IllegalStateException ? context.getString(R.string.desc_google_account_denied) : userOrStateEx.getMessage());
                 }
                 catch(Exception ex)
                 {
@@ -506,6 +530,34 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                     {
                         //retry later
                         driveClient = null;
+                        message = subEx.getMessage();
+                    }
+                }
+            }
+
+            //if success getting client
+            if(driveClient != null)
+            {
+                //try to get user email
+                Globals.WebPageData userData = Globals.getWebPage("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + Globals.encodeUrlValue(accessToken));
+                if(userData.gotData() && userData.isOkay())
+                {
+                    try
+                    {
+                        //try to parse email
+                        JSONObject userInfo = new JSONObject(userData.pageData);
+                        String userEmail = userInfo.getString("email");
+
+                        //if got email
+                        if(!userEmail.isEmpty())
+                        {
+                            //save it for display
+                            setUserEmail(context, userEmail);
+                        }
+                    }
+                    catch(Exception ex)
+                    {
+                        //do nothing
                     }
                 }
             }
@@ -514,7 +566,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             if(resultListener != null)
             {
                 //send event
-                resultListener.onResult(driveClient, taskResult);
+                resultListener.onResult(driveClient, taskResult, message);
             }
 
             //end task
@@ -525,10 +577,12 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
     private static Drive client = null;
 
     private boolean selectFolder;
+    private boolean loginOnly;
     private int itemCount;
     private byte requestCode;
     private java.io.File saveFile;
     private ActivityResultLauncher<Intent> resultLauncher;
+    private ActivityResultLauncher<IntentSenderRequest> accountRequestLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -548,10 +602,12 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
         selectFolder = intent.getBooleanExtra(FileBrowserBaseActivity.ParamTypes.SelectFolder, false);
         saveFile = (java.io.File)intent.getSerializableExtra(FileBrowserBaseActivity.ParamTypes.FileName);
         itemCount = intent.getIntExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, 0);
+        loginOnly = intent.getBooleanExtra(FileBrowserBaseActivity.ParamTypes.LoginOnly, false);
         requestCode = BaseInputActivity.getRequestCode(intent);
 
-        //create receiver
+        //create launchers
         resultLauncher = Globals.createActivityLauncher(this, this);
+        accountRequestLauncher = Globals.createActivityRequestLauncher(GoogleDriveAccess.this, GoogleDriveAccess.this, BaseInputActivity.RequestCode.GoogleDriveSignIn);
 
         //get permission
         getPermission();
@@ -565,6 +621,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
         boolean isOkay = (resultCode == RESULT_OK);
         boolean finished = false;
         String folderName;
+        String accessToken;
         ArrayList<String> fileIds;
         ArrayList<String> fileNames;
         Intent data = result.getData();
@@ -585,20 +642,74 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
 
         switch(localRequestCode)
         {
-            case BaseInputActivity.RequestCode.None:
             case BaseInputActivity.RequestCode.GoogleDriveSignIn:
-                //if set
                 if(isOkay)
                 {
-                    //try to get account
-                    Task<GoogleSignInAccount> getAccountTask = GoogleSignIn.getSignedInAccountFromIntent(data);
-
-                    //if got account
-                    if(getAccountTask.isSuccessful())
+                    //try to get access token
+                    accessToken = data.getStringExtra(FileBrowserBaseActivity.ParamTypes.AccessToken);
+                    if(accessToken == null)
                     {
-                        //retry setting up permission
-                        getPermission();
+                        try
+                        {
+                            //get result
+                            AuthorizationResult authorizationResult = Identity.getAuthorizationClient(this).getAuthorizationResultFromIntent(data);
+
+                            //get access token and set default email
+                            accessToken = authorizationResult.getAccessToken();
+                            setUserEmail(this.getResources().getString(R.string.title_unknown));
+                        }
+                        catch(Exception ex)
+                        {
+                            //do nothing
+                        }
                     }
+
+                    //try to get client
+                    new GetClientTask(new GetClientTask.OnResultListener()
+                    {
+                        @Override
+                        public void onResult(Drive drive, int resultCode, String message)
+                        {
+                            switch(resultCode)
+                            {
+                                case FileBrowserBaseActivity.ResultCode.Success:
+                                    Intent intent = null;
+
+                                    //if not logging in only
+                                    if(!loginOnly)
+                                    {
+                                        //set params
+                                        intent = new Intent(GoogleDriveAccess.this, BrowserActivity.class);
+                                        intent.putExtra(BrowserActivity.ParamTypes.RootFolder, "");
+                                        intent.putExtra(BrowserActivity.ParamTypes.SelectFolder, selectFolder);
+                                    }
+
+                                    //remember client
+                                    client = drive;
+
+                                    //if logging in only
+                                    if(loginOnly)
+                                    {
+                                        //pass information back to caller
+                                        setResult(RESULT_OK, resultData);
+                                        GoogleDriveAccess.this.finish();
+                                    }
+                                    else
+                                    {
+                                        //show selection activity
+                                        Globals.startActivityForResult(resultLauncher, intent, (selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
+                                    }
+                                    break;
+
+                                case FileBrowserBaseActivity.ResultCode.LoginFailed:
+                                    //pass any message back to caller
+                                    resultData.putExtra(FileBrowserBaseActivity.ParamTypes.Message, message);
+                                    setResult(RESULT_CANCELED, resultData);
+                                    GoogleDriveAccess.this.finish();
+                                    break;
+                            }
+                        }
+                    }).execute(this, accessToken);
                 }
                 else
                 {
@@ -684,6 +795,10 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                     finished = true;
                 }
                 break;
+
+            case BaseInputActivity.RequestCode.None:
+                finished = true;
+                break;
         }
 
         //if finished
@@ -704,28 +819,115 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
     //Gets permission
     private void getPermission()
     {
-        new GetPermissionTask(new GetPermissionTask.OnResultListener()
+        AuthorizationRequest signInRequest;
+        ArrayList<Scope> requiredScopes = new ArrayList<>();
+
+        //get required scopes and build request
+        for(String currentScopeString : GOOGLE_DRIVE_SCOPE_STRINGS)
+        {
+            //add scope
+            requiredScopes.add(new Scope(currentScopeString));
+        }
+        signInRequest = AuthorizationRequest.builder().setRequestedScopes(requiredScopes).build();
+
+        //request permission
+        Identity.getAuthorizationClient(this).authorize(signInRequest).addOnSuccessListener(new OnSuccessListener<>()
         {
             @Override
-            public void onResult(Drive drive, int resultCode)
+            public void onSuccess(AuthorizationResult authorizationResult)
             {
-                switch(resultCode)
+                //if need to ask for account still
+                if(authorizationResult.hasResolution())
                 {
-                    case FileBrowserBaseActivity.ResultCode.Success:
-                        Intent intent = new Intent(GoogleDriveAccess.this, BrowserActivity.class);
-                        intent.putExtra(BrowserActivity.ParamTypes.RootFolder, "");
-                        intent.putExtra(BrowserActivity.ParamTypes.SelectFolder, selectFolder);
+                    //create request
+                    PendingIntent pendingRequestIntent = authorizationResult.getPendingIntent();
+                    IntentSenderRequest request = (pendingRequestIntent != null ? new IntentSenderRequest.Builder(pendingRequestIntent).build() : null);
 
-                        client = drive;
-                        Globals.startActivityForResult(resultLauncher, intent, (selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
-                        break;
+                    //send request
+                    accountRequestLauncher.launch(request);
+                }
+                else
+                {
+                    Intent data = new Intent();
 
-                    case FileBrowserBaseActivity.ResultCode.LoginFailed:
-                        Globals.askGoogleDriveAccount(GoogleDriveAccess.this, resultLauncher, BaseInputActivity.RequestCode.GoogleDriveSignIn);
-                        break;
+                    //handle as if request was just sent and approved, then add access token manually
+                    data.putExtra(BaseInputActivity.EXTRA_REQUEST_CODE, BaseInputActivity.RequestCode.GoogleDriveSignIn);
+                    data.putExtra(FileBrowserBaseActivity.ParamTypes.AccessToken, authorizationResult.getAccessToken());
+                    onActivityResult(new ActivityResult(RESULT_OK, data));
                 }
             }
-        }).execute(this);
+        }).addOnFailureListener(new OnFailureListener()
+        {
+            @Override
+            public void onFailure(@NonNull Exception e)
+            {
+                //denied or no request client
+            }
+        });
+    }
+
+    //Gets settings preferences
+    private static SharedPreferences getPreferences(Context context)
+    {
+        return(context.getSharedPreferences(GOOGLE_DRIVE_SETTINGS, MODE_PRIVATE));
+    }
+
+    //Gets write settings
+    private static SharedPreferences.Editor getWriteSettings(Context context)
+    {
+        return(getPreferences(context).edit());
+    }
+
+    //Gets user email
+    public static String getUserEmail(Context context)
+    {
+        return(getPreferences(context).getString(PreferenceName.UserEmail, null));
+    }
+
+    //Sets user email
+    private static void setUserEmail(Context context, String email)
+    {
+        SharedPreferences.Editor writeSettings = getWriteSettings(context);
+        writeSettings.putString(PreferenceName.UserEmail, email);
+        writeSettings.apply();
+    }
+    private void setUserEmail(String email)
+    {
+        setUserEmail(this, email);
+    }
+
+    //Remove current account
+    public static void removeAccount(Context context, OnRemoveAccountListener listener)
+    {
+        CredentialManager manager = CredentialManager.create(context);
+        ClearCredentialStateRequest request = new ClearCredentialStateRequest();
+        manager.clearCredentialStateAsync(request, new CancellationSignal(), ContextCompat.getMainExecutor(context), new CredentialManagerCallback<>()
+        {
+            @Override
+            public void onResult(Void unused)
+            {
+                //remove email
+                setUserEmail(context, null);
+
+                //if listener exists
+                if(listener != null)
+                {
+                    //call with no error
+                    listener.onFinished(null);
+                }
+            }
+
+            @Override
+            public void onError(@NonNull ClearCredentialException ex)
+            {
+                //if listener exists
+                if(listener != null)
+                {
+                    //call with error
+                    listener.onFinished(ex);
+                }
+            }
+        });
     }
 
     //Gets the given files
@@ -752,7 +954,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
     }
 
     //Starts an instance
-    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, java.io.File fileName, int count, boolean selectFolder)
+    private static void start(Activity activity, ActivityResultLauncher<Intent> launcher, java.io.File fileName, int count, boolean selectFolder, boolean loginOnly)
     {
         boolean useFile = (fileName != null);
         Intent intent = new Intent(activity, GoogleDriveAccess.class);
@@ -767,11 +969,19 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                 intent.putExtra(FileBrowserBaseActivity.ParamTypes.FileName, fileName);
             }
             intent.putExtra(FileBrowserBaseActivity.ParamTypes.ItemCount, count);
-            Globals.startActivityForResult(launcher, intent, (useFile ? BaseInputActivity.RequestCode.GoogleDriveSave : selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
+            if(loginOnly)
+            {
+                intent.putExtra(FileBrowserBaseActivity.ParamTypes.LoginOnly, true);
+            }
+            Globals.startActivityForResult(launcher, intent, (loginOnly ? BaseInputActivity.RequestCode.GoogleDriveAddAccount : useFile ? BaseInputActivity.RequestCode.GoogleDriveSave : selectFolder ? BaseInputActivity.RequestCode.GoogleDriveOpenFolder : BaseInputActivity.RequestCode.GoogleDriveOpenFile));
         }
     }
-    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, boolean selectFolder)
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, java.io.File fileName, int count, boolean selectFolder)
     {
-        start(activity, launcher, null, 1, selectFolder);
+        start(activity, launcher, fileName, count, selectFolder, false);
+    }
+    public static void start(Activity activity, ActivityResultLauncher<Intent> launcher, boolean loginOnly)
+    {
+        start(activity, launcher, null, 0, false, loginOnly);
     }
 }

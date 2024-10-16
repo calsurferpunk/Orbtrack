@@ -63,6 +63,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
 
     public static abstract class ParamTypes
     {
+        static final String AccessToken = "accessToken";
         static final String SelectFolder = "selectFolder";
         static final String FileIds = "fileIds";
         static final String FileName = "fileName";
@@ -72,6 +73,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
         static final String FolderName = "folderName";
         static final String ItemCount = "itemCount";
         static final String LoginOnly = "loginOnly";
+        static final String Message = "message";
     }
 
     public static abstract class ItemBase

@@ -143,6 +143,7 @@
     <string name="desc_finished_setup">¡Todo listo! Si desea cambiar algo más tarde, busque en la configuración en el menú principal.</string>
     <string name="desc_footprint_type">Aspecto de visualización de huellas</string>
     <string name="desc_force_rotate">Forzar la rotación de la cámara si la vista aparece al revés</string>
+    <string name="desc_google_account_denied">Lo sentimos, Google no permite el acceso. Intente eliminar o agregar la cuenta en la configuración o espere un momento.</string>
     <string name="desc_google_play_services_fail">Lo siento. Hay un problema desconocido con los servicios de Google Play.</string>
     <string name="desc_hide_constellation_star_paths">Ocultar trayectorias de estrellas al mostrar constelaciones</string>
     <string name="desc_hide_distant_path_times">Ocultar etiquetas de tiempo en el camino fuera de la vista cercana</string>
@@ -383,6 +384,7 @@
     <string name="title_end_time">Hora Fin</string>
     <string name="title_epoch_day">Epoch Día</string>
     <string name="title_epoch_year">Epoch Año</string>
+    <string name="title_error">Error</string>
     <string name="title_every">Cada</string>
     <string name="title_failed">Fracasado</string>
     <string name="title_fast">Rápido</string>

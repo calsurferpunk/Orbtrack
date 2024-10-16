@@ -421,6 +421,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         boolean handle;
         boolean needRecreate;
         boolean acceptedPrivacy = Settings.getAcceptedPrivacy(this);
+        String message;
         Intent data = result.getData();
         Resources res = this.getResources();
 
@@ -555,11 +556,6 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 }
                 break;
 
-            case RequestCode.GoogleDriveSignIn:
-                //handle Google Drive open file browser request
-                handleActivityGoogleDriveOpenFileBrowserRequest(this, resultLauncher, mainDrawerLayout, data, isOkay);
-                break;
-
             case RequestCode.GoogleDriveOpenFolder:
             case RequestCode.DropboxOpenFolder:
                 //if selected folder
@@ -617,6 +613,18 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                     }
                 }
                 break;
+        }
+
+        //if not okay
+        if(!isOkay)
+        {
+            //if there is a message
+            message = data.getStringExtra(FileBrowserBaseActivity.ParamTypes.Message);
+            if(message != null)
+            {
+                //show it
+                Globals.showSnackBar(mainDrawerLayout, res.getString(R.string.title_error), message, true, true);
+            }
         }
     }
 

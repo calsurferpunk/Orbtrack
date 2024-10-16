@@ -14,6 +14,7 @@ import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
+import androidx.credentials.exceptions.ClearCredentialException;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.appcompat.widget.AppCompatImageView;
@@ -27,8 +28,6 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TimeZone;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 
 public abstract class Settings
@@ -603,20 +602,15 @@ public abstract class Settings
                 {
                     String accountName;
                     Resources res = currentContext.getResources();
-                    GoogleSignInAccount googleDriveAccount = GoogleSignIn.getLastSignedInAccount(currentContext);
                     ArrayList<Item> accountList = new ArrayList<>(0);
                     String[] loginData;
 
-                    //get google drive
-                    if(googleDriveAccount != null)
+                    //if can get email
+                    accountName = GoogleDriveAccess.getUserEmail(currentContext);
+                    if(accountName != null)
                     {
-                        //if can get email
-                        accountName = googleDriveAccount.getDisplayName();
-                        if(accountName != null)
-                        {
-                            //add email
-                            accountList.add(new Item(Globals.AccountType.GoogleDrive, accountName));
-                        }
+                        //add email
+                        accountList.add(new Item(Globals.AccountType.GoogleDrive, accountName));
                     }
 
                     //get dropbox
@@ -768,7 +762,7 @@ public abstract class Settings
                 @Override
                 public Item getItem(int position)
                 {
-                    return(items[position]);
+                    return(position < items.length ? items[position] : null);
                 }
 
                 //Edits given account
@@ -840,11 +834,40 @@ public abstract class Settings
                 //Removes given account
                 public void removeAccount(int accountType)
                 {
+                    boolean needReload = true;
+
                     //handle based on account
                     switch(accountType)
                     {
                         case Globals.AccountType.GoogleDrive:
-                            Globals.getGoogleDriveSignInClient(activity).signOut();
+                            GoogleDriveAccess.removeAccount(activity, new GoogleDriveAccess.OnRemoveAccountListener()
+                            {
+                                @Override
+                                public void onFinished(ClearCredentialException ex)
+                                {
+                                    activity.runOnUiThread(new Runnable()
+                                    {
+                                        @Override
+                                        public void run()
+                                        {
+                                            //if there was an error
+                                            if(ex != null)
+                                            {
+                                                //show error
+                                                Globals.showSnackBar(null, ex.getMessage(), true);
+                                            }
+                                            else
+                                            {
+                                                //reload items
+                                                reload();
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+
+                            //don't reload until finished
+                            needReload = false;
                             break;
 
                         case Globals.AccountType.Dropbox:
@@ -856,8 +879,12 @@ public abstract class Settings
                             break;
                     }
 
-                    //reload items
-                    reload();
+                    //if need to reload
+                    if(needReload)
+                    {
+                        //reload items
+                        reload();
+                    }
                 }
             }
         }

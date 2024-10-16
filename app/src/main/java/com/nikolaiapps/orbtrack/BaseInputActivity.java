@@ -38,6 +38,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
         static final int TOP_BAR = 1;
         static final int ACTION_BAR = 2;
         static final int BOTTOM_BAR = 4;
+        static final int TOP_AND_ACTION_BAR = TOP_BAR | ACTION_BAR;
         static final int TOP_AND_BOTTOM_BAR = TOP_BAR | BOTTOM_BAR;
         static final int TOP_AND_ACTION_AND_BOTTOM_BAR = TOP_AND_BOTTOM_BAR | ACTION_BAR;
     }

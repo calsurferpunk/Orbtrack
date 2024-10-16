@@ -1738,7 +1738,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 pendingLocationUpdate = true;
                 if(showStatus)
                 {
-                    Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_location_searching_white, false);
+                    Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_location_searching_white, false, EdgeDistance. TOP_AND_ACTION_BAR);
                 }
                 LocationService.getCurrentLocation(this, false, LocationService.PowerTypes.HighPowerThenBalanced);
             }
@@ -2694,7 +2694,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 //if showing status
                 if(showStatus)
                 {
-                    Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_my_location_black, false);
+                    Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_my_location_black, false, EdgeDistance. TOP_AND_ACTION_BAR);
                 }
 
                 //update status

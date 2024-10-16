@@ -1120,7 +1120,7 @@ public abstract class Globals
     }
 
     //Shows a snack bar
-    public static void showSnackBar(final View parentView, final String message, final String detailMessage, int imageId, boolean isError, final boolean closeOnView, int positiveTextId, int negativeTextId, DialogInterface.OnClickListener positiveListener, DialogInterface.OnDismissListener dismissListener)
+    public static void showSnackBar(final View parentView, final String message, final String detailMessage, int imageId, boolean isError, final boolean closeOnView, int positiveTextId, int negativeTextId, int edgeDistanceType, DialogInterface.OnClickListener positiveListener, DialogInterface.OnDismissListener dismissListener)
     {
         //if parent view is not set
         if(parentView == null)
@@ -1192,10 +1192,14 @@ public abstract class Globals
         }
 
         //add margins to view
-        BaseInputActivity.setEdgeMargins(snackParentView, BaseInputActivity.EdgeDistance.BOTTOM_BAR);
+        BaseInputActivity.setEdgeMargins(snackParentView, edgeDistanceType);
 
         //show view
         snackView.show();
+    }
+    public static void showSnackBar(final View parentView, final String message, final String detailMessage, int imageId, boolean isError, final boolean closeOnView, int positiveTextId, int negativeTextId, DialogInterface.OnClickListener positiveListener, DialogInterface.OnDismissListener dismissListener)
+    {
+        showSnackBar(parentView, message, detailMessage, imageId, isError, closeOnView, positiveTextId, negativeTextId, BaseInputActivity.EdgeDistance.BOTTOM_BAR, positiveListener, dismissListener);
     }
     public static void showSnackBar(final View parentView, final String message, final String detailMessage, boolean isError, final boolean closeOnView)
     {
@@ -1211,9 +1215,9 @@ public abstract class Globals
     }
 
     //Shows a transparent snack bar with only an image
-    public static void showSnackBarTransparent(View parentView, int imageId, boolean isError)
+    public static void showSnackBarTransparent(View parentView, int imageId, boolean isError, int edgeDistanceType)
     {
-        showSnackBar(parentView, null, null, imageId, isError, true, -1, -1, null, null);
+        showSnackBar(parentView, null, null, imageId, isError, true, -1, -1, edgeDistanceType, null, null);
     }
 
     //Checks if permission is granted

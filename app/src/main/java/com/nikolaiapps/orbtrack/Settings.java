@@ -610,7 +610,7 @@ public abstract class Settings
                     if(accountName != null)
                     {
                         //add email
-                        accountList.add(new Item(Globals.AccountType.GoogleDrive, accountName));
+                        accountList.add(new Item(Globals.AccountType.GoogleDrive, (accountName.isEmpty() ? res.getString(R.string.title_unknown) : accountName)));
                     }
 
                     //get dropbox

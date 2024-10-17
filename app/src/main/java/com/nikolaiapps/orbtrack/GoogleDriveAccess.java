@@ -499,6 +499,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
             Context context = (Context)objects[0];
             String message = null;
             String accessToken = (String)objects[1];
+            String currentEmail = getUserEmail(context);
             GoogleCredentials accountCredential = (accessToken != null ? ServiceAccountCredentials.create(new AccessToken(accessToken, null)).createScoped(GOOGLE_DRIVE_SCOPE_STRINGS) : null);
             HttpRequestInitializer credential = (accountCredential != null ? new HttpCredentialsAdapter(accountCredential) : null);
             Drive driveClient = (credential != null ? new Drive.Builder(new NetHttpTransport(), GsonFactory.getDefaultInstance(), credential).setApplicationName(context.getPackageName()).build() : null);
@@ -535,8 +536,8 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
                 }
             }
 
-            //if success getting client
-            if(driveClient != null)
+            //if success getting client and email is unknown
+            if(driveClient != null && (currentEmail == null || currentEmail.isEmpty()))
             {
                 //try to get user email
                 Globals.WebPageData userData = Globals.getWebPage("https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + Globals.encodeUrlValue(accessToken));
@@ -656,7 +657,7 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
 
                             //get access token and set default email
                             accessToken = authorizationResult.getAccessToken();
-                            setUserEmail(this.getResources().getString(R.string.title_unknown));
+                            setUserEmail(this, "");
                         }
                         catch(Exception ex)
                         {
@@ -890,10 +891,6 @@ public class GoogleDriveAccess extends AppCompatActivity implements ActivityResu
         SharedPreferences.Editor writeSettings = getWriteSettings(context);
         writeSettings.putString(PreferenceName.UserEmail, email);
         writeSettings.apply();
-    }
-    private void setUserEmail(String email)
-    {
-        setUserEmail(this, email);
     }
 
     //Remove current account

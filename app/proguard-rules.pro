@@ -24,3 +24,8 @@
 -dontwarn org.apache.http.**
 -dontwarn io.grpc.internal.DnsNameResolverProvider
 -dontwarn io.grpc.internal.PickFirstLoadBalancerProvider
+
+-if class androidx.credentials.CredentialManager
+-keep class androidx.credentials.playservices.** {
+  *;
+}

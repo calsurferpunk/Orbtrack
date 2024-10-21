@@ -15,8 +15,16 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keepattributes Signature,RuntimeVisibleAnnotations,AnnotationDefault
+
 -keep class com.mousebird.** { *; }
 -keep class com.mousebirdconsulting.** { *; }
+-keep class * extends com.google.api.client.json.GenericJson { *; }
+-keep class com.google.api.services.drive.** { *; }
+
+-keepclassmembers class * {
+    @com.google.api.client.util.Key <fields>;
+}
 -keepclassmembers enum * {
     public static **[] values();
     public static ** valueOf(java.lang.String);

@@ -57,7 +57,7 @@ import java.util.List;
 public class GoogleDriveAccess extends AppCompatActivity implements ActivityResultCallback<ActivityResult>
 {
     private static final String GOOGLE_DRIVE_SETTINGS = "googleDriveSettings";
-    private static final List<String> GOOGLE_DRIVE_SCOPE_STRINGS = Arrays.asList(DriveScopes.DRIVE_READONLY, DriveScopes.DRIVE_FILE, "https://www.googleapis.com/auth/userinfo.email");
+    private static final List<String> GOOGLE_DRIVE_SCOPE_STRINGS = Arrays.asList(DriveScopes.DRIVE_FILE, "https://www.googleapis.com/auth/userinfo.email");
 
     public interface OnRemoveAccountListener
     {

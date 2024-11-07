@@ -2109,6 +2109,10 @@ public abstract class Globals
             {
                 //get date and time
                 dayFormatter = new Formatter(Locale.getDefault());
+                if(zone == null)
+                {
+                    zone = TimeZone.getDefault();
+                }
                 valueString = (DateUtils.formatDateRange(context, dayFormatter, timeMs, timeMs, DateUtils.FORMAT_NUMERIC_DATE | (showYear ? DateUtils.FORMAT_SHOW_YEAR : DateUtils.FORMAT_NO_YEAR) | (showDayAbbrev ? (DateUtils.FORMAT_ABBREV_WEEKDAY | DateUtils.FORMAT_SHOW_WEEKDAY) : 0), zone.getID())).toString();
 
                 //if don't want to show year

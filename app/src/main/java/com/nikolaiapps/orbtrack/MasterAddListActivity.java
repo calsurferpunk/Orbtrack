@@ -378,56 +378,58 @@ public class MasterAddListActivity extends BaseInputActivity
             //if not loading items
             if(!loadingItems)
             {
-                //get current item
-                currentItem = displayedItems.get(position);
-
-                //set displays and update checked state
-                itemHolder.orbitalImage.setBackgroundDrawable(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType));
-                itemHolder.orbitalImage.setVisibility(View.VISIBLE);
-                itemHolder.ownerImage.setBackgroundDrawable(Globals.getDrawableCombined(currentContext, Globals.getOwnerIconIDs(currentItem.satellite.ownerCode)));
-                itemHolder.itemText.setText(currentItem.satellite.name);
-                if(isSingleSelect)
+                //if able to get current item
+                currentItem = (displayedItems != null && position < displayedItems.size() ? displayedItems.get(position) : null);
+                if(currentItem != null)
                 {
-                    //setup item click
-                    itemHolder.itemView.setOnClickListener(new View.OnClickListener()
+                    //set displays and update checked state
+                    itemHolder.orbitalImage.setBackgroundDrawable(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType));
+                    itemHolder.orbitalImage.setVisibility(View.VISIBLE);
+                    itemHolder.ownerImage.setBackgroundDrawable(Globals.getDrawableCombined(currentContext, Globals.getOwnerIconIDs(currentItem.satellite.ownerCode)));
+                    itemHolder.itemText.setText(currentItem.satellite.name);
+                    if(isSingleSelect)
                     {
-                        @Override
-                        public void onClick(View v)
+                        //setup item click
+                        itemHolder.itemView.setOnClickListener(new View.OnClickListener()
                         {
-                            Intent data = new Intent();
-                            MasterAddListActivity activity = (MasterAddListActivity)currentContext;
-                            ArrayList<Selectable.ListItem> selectedOrbital = new ArrayList<>(1);
-
-                            //add data and finish
-                            selectedOrbital.add(currentItem);
-                            data.putExtra(ParamTypes.ListNumber, listNumber);
-                            data.putParcelableArrayListExtra(ParamTypes.SelectedOrbitals, selectedOrbital);
-                            activity.sendResult(data, Globals.ProgressType.Finished);
-                            activity.finish();
-                        }
-                    });
-                }
-                else
-                {
-                    //setup checkbox
-                    itemHolder.checkBoxView.setOnCheckedChangeListener(null);
-                    itemHolder.checkBoxView.setChecked(currentItem.isChecked);
-                    itemHolder.checkBoxView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
-                    {
-                        @Override
-                        public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
-                        {
-                            //update checked state
-                            currentItem.isChecked = checked;
-
-                            //if listener is set
-                            if(itemCheckChangedListener != null)
+                            @Override
+                            public void onClick(View v)
                             {
-                                //call it
-                                itemCheckChangedListener.onCheckChanged(currentItem);
+                                Intent data = new Intent();
+                                MasterAddListActivity activity = (MasterAddListActivity)currentContext;
+                                ArrayList<Selectable.ListItem> selectedOrbital = new ArrayList<>(1);
+
+                                //add data and finish
+                                selectedOrbital.add(currentItem);
+                                data.putExtra(ParamTypes.ListNumber, listNumber);
+                                data.putParcelableArrayListExtra(ParamTypes.SelectedOrbitals, selectedOrbital);
+                                activity.sendResult(data, Globals.ProgressType.Finished);
+                                activity.finish();
                             }
-                        }
-                    });
+                        });
+                    }
+                    else
+                    {
+                        //setup checkbox
+                        itemHolder.checkBoxView.setOnCheckedChangeListener(null);
+                        itemHolder.checkBoxView.setChecked(currentItem.isChecked);
+                        itemHolder.checkBoxView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+                        {
+                            @Override
+                            public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
+                            {
+                                //update checked state
+                                currentItem.isChecked = checked;
+
+                                //if listener is set
+                                if(itemCheckChangedListener != null)
+                                {
+                                    //call it
+                                    itemCheckChangedListener.onCheckChanged(currentItem);
+                                }
+                            }
+                        });
+                    }
                 }
             }
         }

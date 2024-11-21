@@ -2310,7 +2310,7 @@ public abstract class Current
     }
 
     //Shows first run dialog
-    private static void showFirstRunDialog(Context context)
+    private static void showFirstRunDialog(Context context, CameraLens cameraView, FloatingActionStateButton showCalibrationButton, boolean useSaved)
     {
         Resources res = (context != null ? context.getResources() : null);
 
@@ -2322,6 +2322,13 @@ public abstract class Current
             {
                 //done with first run
                 Settings.setLensFirstRun(context, false);
+
+                //if not using a saved path and on first calibration
+                if(!useSaved && Settings.getLensFirstCalibrate(context))
+                {
+                    //show first calibration dialog
+                    showFirstCalibrateDialog(cameraView, showCalibrationButton);
+                }
             }
         });
     }
@@ -2343,6 +2350,7 @@ public abstract class Current
         int passIndex = savedState.getInt(MainActivity.ParamTypes.PassIndex, 0);
         int pathDivisions = savedState.getInt(MainActivity.ParamTypes.PathDivisions, 8);
         boolean firstCameraRun = (!usingVirtual && Settings.getLensFirstRun(context));
+        boolean firstCameraLensCalibrate = (!usingVirtual && Settings.getLensFirstCalibrate(context));
         boolean onCalculate = (group == MainActivity.Groups.Calculate);
         boolean onCalculateView = (onCalculate && page == Calculate.PageType.View);
         boolean onCalculatePasses = (onCalculate && page == Calculate.PageType.Passes);
@@ -2439,16 +2447,14 @@ public abstract class Current
             {
                 private int lastSelectedNoradId = Universe.IDs.None;
                 private int startOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR;
-                private boolean firstCalibrate = Settings.getLensFirstCalibrate(context);
 
                 @Override
                 public void onClick(View v)
                 {
                     //if first time calibrating and not already doing so
-                    if(!lensShowCalibration && firstCalibrate)
+                    if(Settings.getLensFirstCalibrate(context) && !lensShowCalibration)
                     {
                         //no longer first time
-                        firstCalibrate = false;
                         Settings.setLensFirstCalibrate(context, false);
 
                         //show dialog and stop
@@ -2701,7 +2707,13 @@ public abstract class Current
         if(firstCameraRun)
         {
             //show first run dialog
-            showFirstRunDialog(context);
+            showFirstRunDialog(context, cameraView, showCalibrationButton, useSaved);
+        }
+        //else if need to calibrate and not using a saved path
+        else if(firstCameraLensCalibrate && !useSaved)
+        {
+            //show first calibration dialog
+            showFirstCalibrateDialog(cameraView, showCalibrationButton);
         }
 
         //if using a saved path

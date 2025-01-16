@@ -3929,6 +3929,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_argn;
                     break;
 
+                case "arm":
+                    ids[0] = R.drawable.owner_arm;
+                    break;
+
                 case "asra":
                     ids[0] = R.drawable.owner_asra;
                     break;
@@ -3989,6 +3993,12 @@ public abstract class Globals
                     ids[1] = R.drawable.owner_braz;
                     break;
 
+                case "chtu":
+                    ids = new int[2];
+                    ids[0] = R.drawable.owner_prc;
+                    ids[1] = R.drawable.owner_turk;
+                    break;
+
                 case "cis":
                     ids[0] = R.drawable.owner_cis;
                     break;
@@ -4011,6 +4021,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_den;
                     break;
 
+                case "dji":
+                    ids[0] = R.drawable.owner_dji;
+                    break;
+
                 case "ecu":
                     ids[0] = R.drawable.owner_ecu;
                     break;
@@ -4029,6 +4043,10 @@ public abstract class Globals
 
                 case "est":
                     ids[0] = R.drawable.owner_est;
+                    break;
+
+                case "eth":
+                    ids[0] = R.drawable.owner_eth;
                     break;
 
                 case "eume":
@@ -4085,6 +4103,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_guat;
                     break;
 
+                case "hrv":
+                    ids[0] = R.drawable.owner_hrv;
+                    break;
+
                 case "hun":
                     ids[0] = R.drawable.owner_hun;
                     break;
@@ -4112,6 +4134,10 @@ public abstract class Globals
 
                 case "irid":
                     ids[0] = R.drawable.owner_irid;
+                    break;
+
+                case "irl":
+                    ids[0] = R.drawable.owner_irl;
                     break;
 
                 case "isra":
@@ -4322,6 +4348,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_sdn;
                     break;
 
+                case "sen":
+                    ids[0] = R.drawable.owner_sen;
+                    break;
+
                 case "sgjp":
                     ids = new int[2];
                     ids[0] = R.drawable.owner_sing;
@@ -4421,6 +4451,10 @@ public abstract class Globals
 
                 case "vtnm":
                     ids[0] = R.drawable.owner_vtnm;
+                    break;
+
+                case "zwe":
+                    ids[0] = R.drawable.owner_zwe;
                     break;
             }
         }

@@ -355,7 +355,7 @@ public abstract class Selectable
                         }
 
                         //set icon to combination of all previous
-                        itemDetailDialog.setIcon(Globals.getDrawableCombined(context, resultIcons.toArray(new Drawable[0])));
+                        itemDetailDialog.setIcon(Globals.getDrawableCombined(context, false, true, resultIcons.toArray(new Drawable[0])));
                     }
 
                     //set title

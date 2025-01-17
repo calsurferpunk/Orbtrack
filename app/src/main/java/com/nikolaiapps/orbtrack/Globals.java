@@ -3333,10 +3333,14 @@ public abstract class Globals
     }
 
     //Gets combined drawables
-    public static Drawable getDrawableCombined(Context context, int xStackOffsets, int yStackOffsets, boolean stacked, Drawable ...images)
+    private static Drawable getDrawableCombined(Context context, int xStackOffsets, int yStackOffsets, boolean centerHorizontal, boolean centerVertical, Drawable ...images)
     {
         int x = 0;
         int index;
+        int top;
+        int left;
+        int right;
+        int bottom;
         int xOffset;
         int yOffset;
         int height = 0;
@@ -3345,6 +3349,7 @@ public abstract class Globals
         int deltaHeight;
         int totalImages = 0;
         int lastImageIndex = 0;
+        boolean stacked = (centerHorizontal && centerVertical);
         Bitmap imageBitmap;
         Canvas imageCanvas;
         int[][] sizes;
@@ -3365,7 +3370,7 @@ public abstract class Globals
         //set sizes
         sizes = new int[images.length][2];
 
-        //go through each image
+        //go through each image, reverse order if stacked
         for(index = (stacked ? (images.length - 1) : 0); (stacked ? (index >= 0) : (index < images.length)); index += (stacked ? - 1 : 1))
         {
             //if image is set
@@ -3380,7 +3385,7 @@ public abstract class Globals
                 }
 
                 //update width
-                if(stacked)
+                if(centerHorizontal)
                 {
                     //get offset
                     xOffset = (index * xStackOffsets);
@@ -3431,21 +3436,24 @@ public abstract class Globals
                 //if image is set
                 if(images[index] != null)
                 {
-                    //draw image to canvas
-                    if(stacked)
-                    {
-                        xOffset = (index * xStackOffsets);
-                        yOffset = (index * yStackOffsets);
-                        deltaWidth = totalWidth - sizes[index][0];
-                        deltaHeight = height - sizes[index][1];
-                        images[index].setBounds((deltaWidth / 2) + xOffset, (deltaHeight / 2) + yOffset, (totalWidth - (deltaWidth / 2)) + xOffset, (height - (deltaHeight / 2)) + yOffset);
-                    }
-                    else
-                    {
-                        images[index].setBounds(x, 0, x + sizes[index][0], sizes[index][1]);
-                    }
-                    images[index].draw(imageCanvas);
+                    //calculate bounds
+                    deltaWidth = totalWidth - sizes[index][0];
+                    deltaHeight = height - sizes[index][1];
+                    xOffset = (stacked ? (index * xStackOffsets) : 0);
+                    yOffset = (stacked ? (index * yStackOffsets) : 0);
+                    left = (centerHorizontal ? (deltaWidth / 2) + xOffset: x);
+                    top = (centerVertical ? ((deltaHeight / 2) + yOffset) : 0);
+                    right = (centerHorizontal ? ((totalWidth - (deltaWidth / 2)) + xOffset) : (x + sizes[index][0]));
+                    bottom = (centerVertical ? ((height - (deltaHeight / 2)) + yOffset) : sizes[index][1]);
+
+                    //set bounds
+                    images[index].setBounds(left, top, right, bottom);
+
+                    //update x for non center horizontal
                     x += sizes[index][0];
+
+                    //draw image to canvas
+                    images[index].draw(imageCanvas);
                 }
             }
 
@@ -3458,9 +3466,21 @@ public abstract class Globals
             return(null);
         }
     }
+    public static Drawable getDrawableCombined(Context context, boolean centerHorizontal, boolean centerVertical, Drawable ...images)
+    {
+        return(getDrawableCombined(context, 0, 0, centerHorizontal, centerVertical, images));
+    }
+    public static Drawable getDrawableCombined(Context context, int xStackOffsets, int yStackOffsets, boolean stacked, Drawable ...images)
+    {
+        return(getDrawableCombined(context, xStackOffsets, yStackOffsets, stacked, stacked, images));
+    }
+    public static Drawable getDrawableCombined(Context context, boolean stacked, Drawable ...images)
+    {
+        return(getDrawableCombined(context, 0, 0, stacked, images));
+    }
     public static Drawable getDrawableCombined(Context context, Drawable ...images)
     {
-        return(getDrawableCombined(context, 0, 0, false, images));
+        return(getDrawableCombined(context, false, images));
     }
     public static Drawable getDrawableCombined(Context context, int[] imageIds)
     {
@@ -3483,7 +3503,7 @@ public abstract class Globals
         }
 
         //return combined image
-        return(getDrawableCombined(context, 0, 0, false, images));
+        return(getDrawableCombined(context, images));
     }
 
     //Gets a drawable color
@@ -3556,7 +3576,7 @@ public abstract class Globals
         Drawable image = getDrawableSized(context, resId, sizeDp, sizeDp, useThemeTint, true);
         Drawable noImage = (isYes ? null : getDrawableSized(context, R.drawable.ic_no, sizeDp, sizeDp, useThemeTint, true));
 
-        return(getDrawableCombined(context, 0, 0, true, image, noImage));
+        return(getDrawableCombined(context, true, image, noImage));
     }
 
     //Copies a bitmap

@@ -9,7 +9,7 @@ android {
     }
 
     compileSdk 35
-    buildToolsVersion = '35.0.0'
+    buildToolsVersion = '35.0.1'
     defaultConfig {
         applicationId "com.nikolaiapps.orbtrack"
         minSdkVersion 21
@@ -80,7 +80,7 @@ dependencies {
     implementation 'com.google.android.gms:play-services-location:21.3.0'
     implementation 'com.google.android.gms:play-services-auth:21.3.0'
     implementation 'com.dropbox.core:dropbox-core-sdk:7.0.0'
-    implementation 'com.dropbox.core:dropbox-android-sdk:6.1.0'
+    implementation 'com.dropbox.core:dropbox-android-sdk:7.0.0'
     implementation 'com.google.api-client:google-api-client:2.4.0'
     implementation 'com.google.api-client:google-api-client-android:2.4.0'
     implementation 'com.google.apis:google-api-services-drive:v3-rev20230822-2.0.0'

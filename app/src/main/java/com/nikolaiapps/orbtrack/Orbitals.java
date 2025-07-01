@@ -570,7 +570,7 @@ public abstract class Orbitals
                                 }
 
                                 //show error dialog
-                                Globals.showConfirmDialog(currentContext, res.getString(R.string.title_cant_disable), res.getQuantityString(R.plurals.desc_used_by_constellation, usedParentOrbitals.size(), currentOrbital.getName(), parentsMessage.toString()), res.getString(R.string.title_ok), null, true, null, null, null);
+                                Globals.showConfirmDialog(currentContext, res.getString(R.string.title_cant_disable), res.getQuantityString(R.plurals.desc_used_by_constellation, usedParentOrbitals.size(), (haveOrbital ? currentOrbital.getName() : Globals.getUnknownString(currentContext)), parentsMessage.toString()), res.getString(R.string.title_ok), null, true, null, null, null);
                             }
                         }
                         else

@@ -417,6 +417,7 @@ public abstract class Current
 
             public void setLoading(Context context, TimeZone zone, boolean loading)
             {
+                boolean inUnknownPassStartNow = inUnknownPassTimeStartNow();
                 int passVisibility = (loading || !tleIsAccurate || (hideUnknownPasses && !passStartFound && !inUnknownPassTimeStartNow()) ? View.GONE : View.VISIBLE);
                 float elapsedPercent;
 
@@ -434,13 +435,13 @@ public abstract class Current
                 {
                     passStartLayout.setVisibility(passVisibility);
                 }
-                if(startClock != null && passStartFound)
+                if(startClock != null && (inUnknownPassStartNow || passStartFound))
                 {
-                    startClock.setTime(Globals.getLocalTime(passTimeStart, zone));
+                    startClock.setTime(Globals.getLocalTime((passStartFound ? passTimeStart : Globals.getGMTTime()), zone));
                 }
                 if(startText != null)
                 {
-                    startText.setText(inUnknownPassTimeStartNow() ? context.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
+                    startText.setText(inUnknownPassStartNow ? context.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
                 }
 
                 if(passDurationLayout != null)

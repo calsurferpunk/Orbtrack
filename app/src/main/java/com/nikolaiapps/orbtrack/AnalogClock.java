@@ -84,8 +84,8 @@ public class AnalogClock extends View
         handThickness = minSize * 0.25f;
         frameThickness = minSize * 0.2f;
         radius = minSize - (frameThickness / 2) - (minSize * 0.175f);
-        hourHandLength = (radius * 0.6f);
-        minuteHandLength = (radius * 0.75f);
+        hourHandLength = (radius * 0.75f);
+        minuteHandLength = (radius * 0.9f);
 
         super.onSizeChanged(width, height, oldWidth, oldHeight);
     }

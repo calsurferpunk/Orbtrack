@@ -540,6 +540,11 @@
 
             <PreferenceCategory android:title="@string/title_display">
                 <com.nikolaiapps.orbtrack.SwitchPreference
+                    android:title="@string/title_pass_end"
+                    android:key="ListShowPassEnd"
+                    android:summary="@string/desc_show_path_end"/>
+
+                <com.nikolaiapps.orbtrack.SwitchPreference
                     android:title="@string/title_pass_progress"
                     android:key="ListShowPassProgress"
                     android:summary="@string/desc_show_path_progress"/>

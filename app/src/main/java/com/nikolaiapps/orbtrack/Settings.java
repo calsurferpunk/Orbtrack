@@ -104,6 +104,7 @@ public abstract class Settings
         static final String CurrentCombinedSortBy = "CurrentCombinedSortBy";
         static final String CurrentTimelineSortBy = "CurrentTimelineSortBy";
         static final String ListUpdateDelay = "ListUpdateDelay";
+        static final String ListShowPassEnd = "ListShowPassEnd";
         static final String ListShowPassProgress = "ListShowPassProgress";
         static final String ListShowPassQuality = "ListShowPassQuality";
         static final String ListHideUnknownPasses = "ListHideUnknownPasses";
@@ -2171,6 +2172,7 @@ public abstract class Settings
             case PreferenceName.LensShowPathDirection:
             case PreferenceName.LensShowPathTimeNames:
             case PreferenceName.LensHideDistantPathTimes:
+            case PreferenceName.ListShowPassEnd:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
             case PreferenceName.ListHideUnknownPasses:
@@ -3031,6 +3033,12 @@ public abstract class Settings
     public static void setLensOrbitalTypeFilter(Context context, Byte... orbitalTypes)
     {
         setOrbitalTypeFilter(context, PreferenceName.LensOrbitalTypeFilter, orbitalTypes);
+    }
+
+    //Gets list pass end being shown
+    public static boolean getListShowPassEnd(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.ListShowPassEnd));
     }
 
     //Gets list path progress being shown

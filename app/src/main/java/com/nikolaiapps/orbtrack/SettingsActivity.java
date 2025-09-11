@@ -246,6 +246,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         break;
 
                     case ScreenKey.ListView:
+                        SwitchPreference passEndSwitch = this.findPreference(Settings.PreferenceName.ListShowPassEnd);
                         SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
                         SwitchPreference passQualitySwitch = this.findPreference(Settings.PreferenceName.ListShowPassQuality);
                         SwitchPreference hideUnknownPassesSwitch = this.findPreference(Settings.PreferenceName.ListHideUnknownPasses);
@@ -255,6 +256,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         Settings.Options.Rates.initValues(context);
 
                         //setup displays
+                        setupSwitch(passEndSwitch);
                         setupSwitch(pathProgressSwitch);
                         setupSwitch(passQualitySwitch);
                         setupSwitch(hideUnknownPassesSwitch);
@@ -1692,6 +1694,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.SatelliteIcon:
                         case Settings.PreferenceName.OrbitalIcons:
+                        case Settings.PreferenceName.ListShowPassEnd:
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.ListShowPassQuality:
                         case Settings.PreferenceName.ListHideUnknownPasses:

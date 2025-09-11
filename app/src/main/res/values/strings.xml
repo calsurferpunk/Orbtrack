@@ -190,6 +190,7 @@
     <string name="desc_show_grid">Show latitude/longitude grid</string>
     <string name="desc_show_horizon">Show horizon level on display</string>
     <string name="desc_show_path_direction">Show orbital travel direction on path lines</string>
+    <string name="desc_show_path_end">Show pass end time instead of duration</string>
     <string name="desc_show_path_progress">Show path progress line</string>
     <string name="desc_show_path_time_names">Show name in front of times in path</string>
     <string name="desc_show_pass_quality">Show pass quality line</string>

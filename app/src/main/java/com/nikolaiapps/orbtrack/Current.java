@@ -335,13 +335,16 @@ public abstract class Current
             private TextView rangeText;
             private TextView speedText;
             private TextView startText;
+            private TextView endText;
             private TextView durationText;
             private TextView latitudeText;
             private TextView longitudeText;
             private AnalogClock startClock;
+            private AnalogClock endClock;
             private LinearProgressIndicator passProgress;
             private CircularProgressIndicator passLoadingProgress;
             private LinearLayout passStartLayout;
+            private LinearLayout passEndLayout;
             private LinearLayout passDurationLayout;
             private AppCompatImageView azImage;
             private AppCompatImageView elImage;
@@ -396,9 +399,9 @@ public abstract class Current
                 }
             }
 
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathProgress, boolean usePathQuality, boolean hideUnknownPasses)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean showPassEnd, boolean usePathProgress, boolean usePathQuality, boolean hideUnknownPasses)
             {
-                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePathQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
+                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, showPassEnd, usePathProgress, usePathQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
 
                 azimuth = elevation = rangeKm = speedKms = latitude = longitude = altitudeKm = Float.MAX_VALUE;
 
@@ -417,9 +420,11 @@ public abstract class Current
 
             public void setLoading(Context context, TimeZone zone, boolean loading)
             {
+                boolean passEndFound = (passTimeEnd != null);
                 boolean inUnknownPassStartNow = inUnknownPassTimeStartNow();
                 int passVisibility = (loading || !tleIsAccurate || (hideUnknownPasses && !passStartFound && !inUnknownPassTimeStartNow()) ? View.GONE : View.VISIBLE);
                 float elapsedPercent;
+                Calendar timeNow = Globals.getGMTTime();
 
                 if(zone == null)
                 {
@@ -437,18 +442,34 @@ public abstract class Current
                 }
                 if(startClock != null && (inUnknownPassStartNow || passStartFound))
                 {
-                    startClock.setTime(Globals.getLocalTime((passStartFound ? passTimeStart : Globals.getGMTTime()), zone));
+                    startClock.setTime(Globals.getLocalTime((passStartFound ? passTimeStart : timeNow), zone));
                 }
                 if(startText != null)
                 {
                     startText.setText(inUnknownPassStartNow ? context.getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
                 }
 
+                if(passEndLayout != null)
+                {
+                    passEndLayout.setVisibility(!showPassEnd || (hideUnknownPasses && !passEndFound) ? View.GONE : passVisibility);
+                }
+                if(showPassEnd)
+                {
+                    if(endClock != null)
+                    {
+                        endClock.setTime(Globals.getLocalTime((passEndFound ? passTimeEnd : timeNow), zone));
+                    }
+                    if(endText != null)
+                    {
+                        endText.setText(!passEndFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeEnd, zone, true, false));
+                    }
+                }
+
                 if(passDurationLayout != null)
                 {
-                    passDurationLayout.setVisibility(hideUnknownPasses && !passStartFound ? View.GONE : passVisibility);
+                    passDurationLayout.setVisibility(showPassEnd || (hideUnknownPasses && !passStartFound) ? View.GONE : passVisibility);
                 }
-                if(durationText != null)
+                if(!showPassEnd && durationText != null)
                 {
                     durationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
                 }
@@ -460,7 +481,7 @@ public abstract class Current
 
                 if(passProgress != null)
                 {
-                    elapsedPercent = (showPathProgress ? getPassProgressPercent(Globals.getGMTTime()) : Float.MAX_VALUE);
+                    elapsedPercent = (showPathProgress ? getPassProgressPercent(timeNow) : Float.MAX_VALUE);
                     passProgress.setVisibility(elapsedPercent != Float.MAX_VALUE ? View.VISIBLE : View.GONE);
                     if(elapsedPercent != Float.MAX_VALUE)
                     {
@@ -559,6 +580,7 @@ public abstract class Current
                 super(context);
 
                 int index = 0;
+                boolean showPassEnd = Settings.getListShowPassEnd(context);
                 boolean usePathProgress = Settings.getListPathProgress(context);
                 boolean usePassQuality = Settings.getListPassQuality(context);
                 boolean hideUnknownPasses = Settings.getListHideUnknownPasses(context);
@@ -581,7 +603,7 @@ public abstract class Current
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
                         //add item
-                        items.add(new Item(context, index++, currentOrbital, usePathProgress, usePassQuality, hideUnknownPasses));
+                        items.add(new Item(context, index++, currentOrbital, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses));
                     }
 
                     //setup items
@@ -639,12 +661,15 @@ public abstract class Current
                 currentItem.speedImage = itemView.findViewById(R.id.Combined_Item_Speed_Image);
                 currentItem.startClock = itemView.findViewById(R.id.Combined_Item_Start_Clock);
                 currentItem.startText = itemView.findViewById(R.id.Combined_Item_Start_Text);
+                currentItem.endClock = itemView.findViewById(R.id.Combined_Item_End_Clock);
+                currentItem.endText = itemView.findViewById(R.id.Combined_Item_End_Text);
                 currentItem.durationText = itemView.findViewById(R.id.Combined_Item_Duration_Text);
                 currentItem.nameImage = itemView.findViewById(R.id.Combined_Item_Name_Image);
                 currentItem.nameText = itemView.findViewById(R.id.Combined_Item_Name_Text);
                 currentItem.passProgress = itemView.findViewById(R.id.Combined_Item_Pass_Progress);
                 currentItem.passLoadingProgress = itemView.findViewById(R.id.Combined_Item_Pass_Loading_Progress);
                 currentItem.passStartLayout = itemView.findViewById(R.id.Combined_Item_Pass_Start_Layout);
+                currentItem.passEndLayout = itemView.findViewById(R.id.Combined_Item_Pass_End_Layout);
                 currentItem.passDurationLayout = itemView.findViewById(R.id.Combined_Item_Pass_Duration_Layout);
                 currentItem.passQualityView = itemView.findViewById(R.id.Combined_Item_Pass_Quality_View);
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);

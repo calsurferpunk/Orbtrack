@@ -190,6 +190,7 @@
     <string name="desc_show_grid">Mostrar cuadrícula de latitud/longitud</string>
     <string name="desc_show_horizon">Mostrar el horizonte en la pantalla</string>
     <string name="desc_show_path_direction">Mostrar la dirección del viaje orbital en las líneas de trayectoria</string>
+    <string name="desc_show_path_end">Mostrar la hora de finalización del pase en lugar de la duración</string>
     <string name="desc_show_path_progress">Mostrar línea de progreso de ruta</string>
     <string name="desc_show_path_time_names">Mostrar el nombre delante de las horas en la ruta</string>
     <string name="desc_show_pass_quality">Mostrar línea de calidad de pase</string>

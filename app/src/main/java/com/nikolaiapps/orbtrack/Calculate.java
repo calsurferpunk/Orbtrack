@@ -542,9 +542,9 @@ public abstract class Calculate
             public LinearProgressIndicator progressStatusBar;
             public LinearLayout dataGroup;
 
-            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
+            private Item(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closetEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName, boolean tleAccurate)
             {
-                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
+                super(index, azStart, azEnd, azTravel, elMax, closestAz, closetEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
                 this.isLoading = false;
                 this.icon = null;
                 this.nameImage = null;
@@ -562,7 +562,7 @@ public abstract class Calculate
             }
             public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, boolean loading)
             {
-                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, usePathProgress, usePassQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null, false);
+                this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, true, usePathProgress, usePassQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), null, 0, null, false);
                 isLoading = loading;
 
                 if(currentSatellite != null)
@@ -591,7 +591,7 @@ public abstract class Calculate
             }
             public Item(CalculateService.PassData passData)
             {
-                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPathProgress, passData.showPassQuality, passData.hideUnknownPasses, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
+                this(passData.listIndex, passData.passAzStart, passData.passAzEnd, passData.passAzTravel, passData.passElMax, passData.passClosestAz, passData.passClosestEl, passData.passCalculating, passData.passCalculated, passData.passCalculateFinished, passData.passStartFound, passData.showPassEnd, passData.showPathProgress, passData.showPassQuality, passData.hideUnknownPasses, passData.passTimeStart, passData.passTimeEnd, passData.passDuration, passData.passViews, passData.passViews2, passData.satellite, passData.satellite2, passData.illumination, passData.phaseName, true);
                 name = passData.name;
                 ownerCode = passData.ownerCode;
                 owner2Code = passData.owner2Code;

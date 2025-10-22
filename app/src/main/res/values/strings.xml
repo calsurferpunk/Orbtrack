@@ -131,6 +131,7 @@
     <string name="abbrev_west">W</string>
     <string name="abbrev_west_north_west">WNW</string>
     <string name="abbrev_west_south_west">WSW</string>
+    <string name="desc_age_check_failed">Age check failed.  Needed to continue.</string>
     <string name="desc_allow_rotation">Allow movement without forcing upright</string>
     <string name="desc_altitude_source">Location altitude detection</string>
     <string name="desc_ar_warning">If you are not an adult, please stay near an adult for safety, especially at night.\n\nBe aware of your surroundings and be sure to look where you are walking.</string>

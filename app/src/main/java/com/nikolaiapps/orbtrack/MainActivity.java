@@ -50,6 +50,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import com.google.android.play.agesignals.AgeSignalsResult;
 import com.nikolaiapps.orbtrack.SideMenuListAdapter.*;
 import com.nikolaiapps.orbtrack.Calculations.*;
 
@@ -145,6 +146,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
     private static ObserverType observer;
     //
     //Listeners
+    private Globals.OnAgeCheckListener ageCheckListener;
     private static Calculate.OnStartCalculationListener startCalculationListener;
     private static Selectable.ListFragment.OnEditModeChangedListener editModeChangedListener;
     //
@@ -162,6 +164,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         super.onCreate(savedInstanceState);
 
         int index;
+        final Context applicationContext = this.getApplicationContext();
 
         this.setContentView(R.layout.main_layout);
         setupActionBar(this, this.getSupportActionBar(), true);
@@ -234,8 +237,9 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         otherOpenLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersOpenItem);
         otherSaveLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersSave);
 
-        //handle any first run
-        handleFirstRun(savedInstanceState);
+        //check age
+        ageCheckListener = createAgeCheckListener(savedInstanceState);
+        Globals.handleAgeCheck(applicationContext, ageCheckListener);
     }
 
     @Override
@@ -2944,6 +2948,46 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         //register and return receiver
         receiver.register(this);
         return(receiver);
+    }
+
+    //Creates
+    private Globals.OnAgeCheckListener createAgeCheckListener(Bundle savedInstanceState)
+    {
+        final Context applicationContext = this;
+        final Resources res = applicationContext.getResources();
+
+        return(new Globals.OnAgeCheckListener()
+        {
+            @Override
+            public void onResult(AgeSignalsResult result, boolean approved)
+            {
+                if(approved)
+                {
+                    //handle any first run
+                    handleFirstRun(savedInstanceState);
+                }
+                else
+                {
+                    Globals.showNotificationDialog(applicationContext, Globals.getDrawable(applicationContext, R.drawable.ic_warning_black, true), res.getString(R.string.title_error), res.getString(R.string.desc_age_check_failed), R.string.title_retry, R.string.title_cancel, false, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            //retry
+                            Globals.handleAgeCheck(applicationContext, ageCheckListener);
+                        }
+                    }, new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            //exit
+                            finish();
+                        }
+                    }, false);
+                }
+            }
+        });
     }
 
     //Shows setup dialog

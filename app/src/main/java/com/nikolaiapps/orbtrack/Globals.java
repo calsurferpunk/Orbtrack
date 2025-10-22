@@ -59,12 +59,20 @@ import androidx.annotation.NonNull;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.security.ProviderInstaller;
+import com.google.android.gms.tasks.OnCanceledListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.agesignals.AgeSignalsManager;
+import com.google.android.play.agesignals.AgeSignalsManagerFactory;
+import com.google.android.play.agesignals.AgeSignalsRequest;
+import com.google.android.play.agesignals.AgeSignalsResult;
+import com.google.android.play.agesignals.model.AgeSignalsVerificationStatus;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -406,6 +414,12 @@ public abstract class Globals
     public interface WebPageListener
     {
         void onResult(WebPageData pageData, boolean success);
+    }
+
+    //Age check listener
+    public interface OnAgeCheckListener
+    {
+        void onResult(AgeSignalsResult result, boolean approved);
     }
 
     //Login task
@@ -1427,6 +1441,50 @@ public abstract class Globals
             Resources res = context.getResources();
             askPermission(context, Manifest.permission.POST_NOTIFICATIONS, res.getString(R.string.title_show_notifications), res.getString(R.string.desc_permission_post_notifications), (retrying ? PermissionType.PostNotificationsRetry : PermissionType.PostNotifications), null);
         }
+    }
+
+    //Handles age check
+    public static void handleAgeCheck(Context context, OnAgeCheckListener listener)
+    {
+        AgeSignalsManager ageCheckManager = AgeSignalsManagerFactory.create(context);
+
+        //check age
+        ageCheckManager.checkAgeSignals(AgeSignalsRequest.builder().build()).addOnSuccessListener(new OnSuccessListener<>()
+        {
+            @Override
+            public void onSuccess(AgeSignalsResult ageSignalsResult)
+            {
+                Integer status = ageSignalsResult.userStatus();
+
+                //if no status or denied
+                if(status == null || status.equals(AgeSignalsVerificationStatus.SUPERVISED_APPROVAL_DENIED))
+                {
+                    //try again
+                    handleAgeCheck(context, listener);
+                }
+                else
+                {
+                    //send result
+                    listener.onResult(ageSignalsResult, true);
+                }
+            }
+        }).addOnCanceledListener(new OnCanceledListener()
+        {
+            @Override
+            public void onCanceled()
+            {
+                //send cancelled result
+                listener.onResult(null, false);
+            }
+        }).addOnFailureListener(new OnFailureListener()
+        {
+            @Override
+            public void onFailure(@NonNull Exception e)
+            {
+                //unable to check, but send result
+                listener.onResult(null, true);
+            }
+        });
     }
 
     //Gets if google play services are available

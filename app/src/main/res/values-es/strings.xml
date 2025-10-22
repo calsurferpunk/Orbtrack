@@ -131,6 +131,7 @@
     <string name="abbrev_west">O</string>
     <string name="abbrev_west_north_west">ONO</string>
     <string name="abbrev_west_south_west">OSO</string>
+    <string name="desc_age_check_failed">Error en la comprobación de edad. Es necesario continuar.</string>
     <string name="desc_allow_rotation">Permitir movimiento sin forzar posición vertical</string>
     <string name="desc_altitude_source">Detección de altitud de ubicación</string>
     <string name="desc_arrow_size">Tamaño de la flecha que indica la dirección orbital</string>

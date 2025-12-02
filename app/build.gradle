@@ -15,10 +15,10 @@ android {
         applicationId "com.nikolaiapps.orbtrack"
         minSdkVersion 23
         targetSdkVersion 36
-        versionName '3.5.6'
+        versionName '3.5.7'
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        versionCode 71
+        versionCode 72
     }
     buildTypes {
         debug {

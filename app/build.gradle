@@ -18,7 +18,7 @@ android {
         versionName '3.5.8'
         vectorDrawables.useSupportLibrary = true
         multiDexEnabled true
-        versionCode 72
+        versionCode 73
     }
     buildTypes {
         debug {

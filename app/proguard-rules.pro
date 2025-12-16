@@ -21,6 +21,7 @@
 -keep class com.mousebirdconsulting.** { *; }
 -keep class * extends com.google.api.client.json.GenericJson { *; }
 -keep class com.google.api.services.drive.** { *; }
+-keep class com.google.android.play.agesignals.** { *; }
 
 -keepclassmembers class * {
     @com.google.api.client.util.Key <fields>;

@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Environment;
@@ -237,9 +238,24 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         otherOpenLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersOpenItem);
         otherSaveLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersSave);
 
-        //check age
-        ageCheckListener = createAgeCheckListener(savedInstanceState);
-        Globals.handleAgeCheck(applicationContext, ageCheckListener);
+        //if have Google Play services
+        if(Globals.getUseGooglePlayServices(this))
+        {
+            //check age
+            ageCheckListener = createAgeCheckListener(savedInstanceState);
+            Globals.handleAgeCheck(applicationContext, ageCheckListener);
+        }
+        //else if able to check age with Amazon
+        else if(getAmazonAgeCheck())
+        {
+            //handle any first run
+            handleFirstRun(savedInstanceState);
+        }
+        else
+        {
+            //exit
+            finish();
+        }
     }
 
     @Override
@@ -2950,7 +2966,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         return(receiver);
     }
 
-    //Creates
+    //Creates age check listener
     private Globals.OnAgeCheckListener createAgeCheckListener(Bundle savedInstanceState)
     {
         final Context applicationContext = this;
@@ -2988,6 +3004,77 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 }
             }
         });
+    }
+
+    //Handles age check for Amazon
+    private boolean getAmazonAgeCheck()
+    {
+        int retryCount = 0;
+        int valueCount;
+        int userStatusIndex;
+        int responseStatusIndex;
+        String userStatusValue = null;
+        String responseStatusValue = null;
+
+        do
+        {
+            //try to get age approval
+            try(Cursor cursor = getContentResolver().query(Uri.parse("content://amzn_appstore/getUserAgeData"), null, null, null, null, null))
+            {
+                //if unable to use
+                if(cursor == null)
+                {
+                    //can't check
+                    return(true);
+                }
+
+                //remember value count
+                valueCount = cursor.getCount();
+
+                //try to get user status
+                userStatusIndex = cursor.getColumnIndex("userStatus");
+                if(userStatusIndex >= 0 && userStatusIndex < valueCount)
+                {
+                    userStatusValue = cursor.getString(userStatusIndex);
+                }
+
+                //try to get response status
+                responseStatusIndex = cursor.getColumnIndex("responseStatus");
+                if(responseStatusIndex >= 0 && responseStatusIndex < valueCount)
+                {
+                    responseStatusValue = cursor.getString(responseStatusIndex);
+                }
+
+                //if no response, installed from somewhere else, or not implemented
+                if(responseStatusValue == null || responseStatusValue.equals("APP_NOT_OWNED") || responseStatusValue.equals("FEATURE_NOT_SUPPORTED"))
+                {
+                    //success
+                    return(true);
+                }
+                //else if a valid response was received
+                else if(responseStatusValue.equals("SUCCESS"))
+                {
+                    //if not applicable, unable to check, or allowed
+                    if(userStatusValue == null || userStatusValue.isEmpty() || userStatusValue.equals("UNKNOWN") || userStatusValue.equals("VERIFIED") || userStatusValue.equals("SUPERVISED"))
+                    {
+                        //success
+                        return(true);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                //do nothing
+            }
+
+            //update retries
+            retryCount++;
+
+        //while under 2 retries
+        } while(retryCount < 2);
+
+        //failed
+        return(false);
     }
 
     //Shows setup dialog

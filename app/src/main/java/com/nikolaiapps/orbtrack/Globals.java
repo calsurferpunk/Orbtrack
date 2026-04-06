@@ -3075,7 +3075,20 @@ public abstract class Globals
     //Resolves a color attribute
     public static int resolveColorID(Context context, int colorAttr)
     {
-        return(context != null ? ContextCompat.getColor(context, resolveAttributeID(context, colorAttr)) : Color.BLACK);
+        int color = Color.BLACK;
+
+        if(context != null)
+        {
+            try
+            {
+                color = ContextCompat.getColor(context, resolveAttributeID(context, colorAttr));
+            }
+            catch(Exception ex)
+            {
+                //do nothing
+            }
+        }
+        return(color);
     }
 
     //Creates a new progress dialog

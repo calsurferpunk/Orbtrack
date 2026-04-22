@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
@@ -416,15 +415,10 @@ public abstract class Universe
             Canvas phaseCanvas;
             Bitmap phaseImage = Globals.getBitmap(context, moonIconId, 0);
             boolean isMoozarov = (moonIconId == R.drawable.orbital_moon_moozarov);
-            boolean havePhaseImage = (phaseImage != null);
             Calculations.GeodeticDataType geoLocation = (location != null && location.geo != null ? location.geo : new Calculations.GeodeticDataType());
             Paint brush = new Paint(Paint.ANTI_ALIAS_FLAG);
             Path ovalPath;
 
-            if(!havePhaseImage)
-            {
-                phaseImage = Bitmap.createBitmap(128, 128, Bitmap.Config.ARGB_8888);
-            }
             phaseCanvas = new Canvas(phaseImage);
             imageWidth = phaseCanvas.getWidth();
             imageHeight = phaseCanvas.getHeight();
@@ -436,11 +430,6 @@ public abstract class Universe
             imageHalfWidth = imageWidth / 2;
             centerX = imageHalfWidth + leftOffset;
             centerY = (imageHeight / 2) + 1;
-            if(!havePhaseImage)
-            {
-                brush.setColor(Color.GRAY);
-                phaseCanvas.drawCircle(centerX, centerY, imageHalfWidth, brush);
-            }
             brush.setColor(0x5F000000);
             if(geoLocation.latitude < 0)
             {

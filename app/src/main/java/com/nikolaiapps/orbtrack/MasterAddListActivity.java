@@ -28,6 +28,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -416,7 +419,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         itemHolder.checkBoxView.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                         {
                             @Override
-                            public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
+                            public void onCheckedChanged(@NotNull CompoundButton compoundButton, boolean checked)
                             {
                                 //update checked state
                                 currentItem.isChecked = checked;
@@ -609,7 +612,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                         @Override
                                         public void onResult(Globals.WebPageData pageData, boolean success)
                                         {
-                                            //if success or attempted to login
+                                            //if success or attempted to log in
                                             if(success || pageData != null)
                                             {
                                                 //try again
@@ -622,7 +625,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                     }
                                                 });
                                             }
-                                            //else cancelled
+                                            //else canceled
                                             else
                                             {
                                                 //finished
@@ -803,7 +806,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                             @Override
                                             public void onResult(Globals.WebPageData pageData, boolean success)
                                             {
-                                                //if success or attempted to login
+                                                //if success or attempted to log in
                                                 if(success || pageData != null)
                                                 {
                                                     //try again
@@ -816,7 +819,7 @@ public class MasterAddListActivity extends BaseInputActivity
                                                         }
                                                     });
                                                 }
-                                                //else cancelled
+                                                //else canceled
                                                 else
                                                 {
                                                     //finished

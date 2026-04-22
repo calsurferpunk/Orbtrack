@@ -97,7 +97,7 @@ public class LocationService extends Service implements LocationListener
 
     private static class GetPlaceIdCoordinatesTask extends ThreadTask<Object, Void, Void>
     {
-        @Override @SuppressWarnings("SpellCheckingInspection")
+        @Override
         protected Void doInBackground(Object... objects)
         {
             Context context = (Context)objects[0];

@@ -228,7 +228,7 @@ public abstract class BaseInputActivity extends AppCompatActivity
                     break;
 
                 case Globals.ProgressType.Cancelled:
-                    //show cancelled
+                    //show canceled
                     message = res.getString(R.string.text_update_cancelled);
                     break;
 

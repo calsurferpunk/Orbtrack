@@ -62,6 +62,9 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.android.material.slider.LabelFormatter;
 import com.google.android.material.slider.Slider;
 import com.google.common.util.concurrent.ListenableFuture;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -290,7 +293,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
             animX.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
             {
                 @Override
-                public void onAnimationUpdate(ValueAnimator animation)
+                public void onAnimationUpdate(@NotNull ValueAnimator animation)
                 {
                     currentX = (int)animation.getAnimatedValue();
 
@@ -316,7 +319,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
 
         @Override
-        protected void onDraw(Canvas canvas)
+        protected void onDraw(@NotNull Canvas canvas)
         {
             super.onDraw(canvas);
 
@@ -409,7 +412,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 private boolean reachedMiddle = false;
 
                 @Override
-                public void onAnimationUpdate(ValueAnimator animation)
+                public void onAnimationUpdate(@NotNull ValueAnimator animation)
                 {
                     float currentXFraction = animX.getAnimatedFraction();
 
@@ -464,7 +467,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
 
         @Override
-        protected void onDraw(Canvas canvas)
+        protected void onDraw(@NotNull Canvas canvas)
         {
             super.onDraw(canvas);
 
@@ -708,7 +711,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         }
 
         @Override
-        protected void onDraw(Canvas canvas)
+        protected void onDraw(@NotNull Canvas canvas)
         {
             int index;
             int index2;
@@ -1347,7 +1350,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         compassBadAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener()
         {
             @Override
-            public void onAnimationUpdate(ValueAnimator animation)
+            public void onAnimationUpdate(@NotNull ValueAnimator animation)
             {
                 compassBorderWidth = (int)animation.getAnimatedValue();
             }
@@ -1355,7 +1358,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         compassBadAnimator.addListener(new AnimatorListenerAdapter()
         {
             @Override
-            public void onAnimationEnd(Animator animation, boolean isReverse)
+            public void onAnimationEnd(@NotNull Animator animation, boolean isReverse)
             {
                 Handler delayRestart;
 
@@ -1483,7 +1486,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
         //if text exists
         if(sliderText != null)
         {
-            //update text and hide shortly afterwards
+            //update text and hide shortly afterward
             sliderText.setCompoundDrawablesRelativeWithIntrinsicBounds(imageValue, null, null, null);
             sliderText.removeCallbacks(null);
             text.append("<small>");
@@ -2709,11 +2712,11 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 characteristics = manager.getCameraCharacteristics(id);
                 sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
                 focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
-                maxFocus = focalLengths[0];
+                maxFocus = (focalLengths != null && focalLengths.length > 0 ? focalLengths[0] : 1);
 
                 //calculate hardware degree width and height
-                calculatedDegWidth = (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2)));
-                calculatedDegHeight = (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2)));
+                calculatedDegWidth = (sensorSize != null ? (float)Math.toDegrees(Math.atan(sensorSize.getWidth() / (maxFocus * 2))) : 1);
+                calculatedDegHeight = (sensorSize != null ? (float)Math.toDegrees(Math.atan(sensorSize.getHeight() / (maxFocus * 2))) : 1);
 
                 //save calculated hardware degree width and height
                 Settings.setLensWidthHardware(context, calculatedDegWidth);

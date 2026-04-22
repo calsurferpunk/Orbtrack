@@ -92,21 +92,13 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
             }
 
             //if possibly a version with time picker dialog problems
-            if(Build.VERSION.SDK_INT >= 22 && Build.VERSION.SDK_INT <= 23)
+            if(Build.VERSION.SDK_INT <= 23)
             {
                 TimePicker timeView = new TimePicker(new ContextThemeWrapper(context, themeID));
 
                 //set defaults
-                if(Build.VERSION.SDK_INT > 22)
-                {
-                    timeView.setHour(currentHour);
-                    timeView.setMinute(currentMinute);
-                }
-                else
-                {
-                    timeView.setCurrentHour(currentHour);
-                    timeView.setCurrentMinute(currentMinute);
-                }
+                timeView.setHour(currentHour);
+                timeView.setMinute(currentMinute);
                 timeView.setIs24HourView(false);
 
                 //show time picker
@@ -115,14 +107,7 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i)
                     {
-                        if(Build.VERSION.SDK_INT > 22)
-                        {
-                            TimeInputView.this.onTimeSet(timeView, timeView.getHour(), timeView.getMinute());
-                        }
-                        else
-                        {
-                            TimeInputView.this.onTimeSet(timeView, timeView.getCurrentHour(), timeView.getCurrentMinute());
-                        }
+                        TimeInputView.this.onTimeSet(timeView, timeView.getHour(), timeView.getMinute());
                     }
                 }).setNegativeButton(R.string.title_cancel, new DialogInterface.OnClickListener()
                 {

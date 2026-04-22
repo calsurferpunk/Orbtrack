@@ -2857,7 +2857,7 @@ public abstract class Current
                 //update progress
                 onProgressChanged(0, Globals.ProgressType.Started, null);
 
-                //go through each orbital while not cancelled
+                //go through each orbital while not canceled
                 orbitalCount = mapView.getOrbitalCount();
                 for(index = 0; index < orbitalCount && !this.isCancelled(); index++)
                 {
@@ -2881,7 +2881,7 @@ public abstract class Current
                         pathJulianDateStart = julianDate;
                         pathJulianDateEnd = Math.min((julianDate + 1), periodJulianEnd);
 
-                        //calculate points unless cancelled
+                        //calculate points unless canceled
                         for(pathJulianDate = pathJulianDateStart; pathJulianDate < pathJulianDateEnd && !this.isCancelled(); pathJulianDate += (0.01 / 24))        //note: incrementing in fractions of a day
                         {
                             //get next position

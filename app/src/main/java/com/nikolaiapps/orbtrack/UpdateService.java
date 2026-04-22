@@ -337,7 +337,7 @@ public class UpdateService extends NotifyService
         {
             int index;
 
-            //make case insensitive
+            //make case-insensitive
             ownerCode = ownerCode.toLowerCase();
 
             //go through each owner
@@ -985,7 +985,7 @@ public class UpdateService extends NotifyService
     //Sets notification visibility
     public static void setNotificationVisible(byte updateType, boolean show)
     {
-        //if a valid update type, changing, and not cancelled
+        //if a valid update type, changing, and not canceled
         if(updateType < showNotification.length && show != showNotification[updateType] && !cancelIntent[updateType])
         {
             //update visibility
@@ -1392,7 +1392,7 @@ public class UpdateService extends NotifyService
         loginData = Globals.loginSpaceTrack(user, pwd);
         loginFailed = (loginData.isDenied() || loginData.isLoginError());
 
-        //go through each url while not cancelled
+        //go through each url while not canceled
         for(index = 0; index < urlStrings.length && !loginFailed && !cancelIntent[UpdateType.GetMasterList]; index++)
         {
             //update status
@@ -1942,7 +1942,6 @@ public class UpdateService extends NotifyService
     }
 
     //Gets master list and returns progress status
-    @SuppressWarnings("SpellCheckingInspection")
     private int getMasterList(int updateSource, int updateSubSource, int linkIndex, int overall, String user, String pwd, MasterLink[] urls)
     {
         int index;
@@ -2107,7 +2106,7 @@ public class UpdateService extends NotifyService
                     //set status
                     currentStatus = res.getString(R.string.title_satellites);
 
-                    //go through each satellite while not cancelled (75 - 85%)
+                    //go through each satellite while not canceled (75 - 85%)
                     for(index = 0; index < spaceTrackData.satellites.length && !cancelIntent[updateType]; index++)
                     {
                         //remember current satellite
@@ -2193,7 +2192,7 @@ public class UpdateService extends NotifyService
                 //if got owners
                 if(spaceTrackData.owners != null)
                 {
-                    //go through each owner while not cancelled
+                    //go through each owner while not canceled
                     for(index = 0; index < spaceTrackData.owners.length && !cancelIntent[updateType]; index++)
                     {
                         //remember current owner
@@ -2247,7 +2246,7 @@ public class UpdateService extends NotifyService
             receivedPageLower = (receivedPage != null ? receivedPage.toLowerCase() : null);
             if(receivedPageLength > 0)
             {
-                //go through page while not cancelled
+                //go through page while not canceled
                 lastOverall = 0;
                 do
                 {
@@ -2260,7 +2259,7 @@ public class UpdateService extends NotifyService
                         lastOverall = currentOverall;
                     }
 
-                    //find next txt file row start while not cancelled
+                    //find next txt file row start while not canceled
                     rowStart = (rowStartText != null ? receivedPageLower.indexOf(rowStartText, pageOffset) : pageOffset);
                     if(rowStart >= 0 && rowStart < receivedPageLength - 1 && !cancelIntent[updateType])
                     {
@@ -2578,14 +2577,14 @@ public class UpdateService extends NotifyService
                                 //remember urls
                                 urls = urlList.toArray(new MasterLink[0]);
 
-                                //get categories while not cancelled
+                                //get categories while not canceled
                                 for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                                 {
                                     //get satellites from categories (0 - 35%)
                                     status = getMasterList(updateSource, UpdateSubSource.Category, index, (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
                                 }
 
-                                //if not cancelled and got categories
+                                //if not canceled and got categories
                                 if(!cancelIntent[updateType] && status == Globals.ProgressType.Finished)
                                 {
                                     //get owners (40%)
@@ -2597,21 +2596,21 @@ public class UpdateService extends NotifyService
                                 //remember urls
                                 urls = urlList.toArray(new MasterLink[0]);
 
-                                //get categories while not cancelled
+                                //get categories while not canceled
                                 for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                                 {
                                     //get satellites from categories (20 - 40%)
                                     status = getMasterList(updateSource, UpdateSubSource.Category, index, 20 + (int)(((index + 1) / (float)urls.length) * 20), null, null, urls);
                                 }
 
-                                //if not cancelled
+                                //if not canceled
                                 if(!cancelIntent[updateType])
                                 {
                                     //get owners (40 - 60%)
                                     status = getMasterList(updateSource, UpdateSubSource.Owners, 0, 40, null, null, null);
                                 }
 
-                                //if not cancelled and got owners
+                                //if not canceled and got owners
                                 if(!cancelIntent[updateType] && status == Globals.ProgressType.Finished)
                                 {
                                     //get satellite owners (60 - 80%)
@@ -2628,7 +2627,7 @@ public class UpdateService extends NotifyService
                             //remember urls
                             urls = urlList.toArray(new MasterLink[0]);
 
-                            //get satellite owners while not cancelled (40 - 75%)
+                            //get satellite owners while not canceled (40 - 75%)
                             for(index = 0; index < urls.length && !cancelIntent[updateType] && status == Globals.ProgressType.Finished; index++)
                             {
                                 status = getMasterList(updateSource, UpdateSubSource.SatelliteOwners, index, overall + (int)(((index + 1) / (float)urls.length) * 35), null, null, urls);
@@ -2650,7 +2649,7 @@ public class UpdateService extends NotifyService
                                     OwnerItem[] ownerItems = new OwnerItem[(lastNoradID - offset) + 1];
                                     ArrayList<ArrayList<Integer>> satCatItems = new ArrayList<>(ownerItems.length);
 
-                                    //go through owner and launch items while not cancelled
+                                    //go through owner and launch items while not canceled
                                     for(index = 0; index < ownerItemList.size() && !cancelIntent[updateType]; index++)
                                     {
                                         //remember current item
@@ -2660,7 +2659,7 @@ public class UpdateService extends NotifyService
                                         ownerItems[currentItem.noradId - offset] = currentItem;
                                     }
 
-                                    //go through satellite owner and category items while not cancelled
+                                    //go through satellite owner and category items while not canceled
                                     for(index = 0; index < ownerItems.length && !cancelIntent[updateType]; index++)
                                     {
                                         //add empty list
@@ -2680,7 +2679,7 @@ public class UpdateService extends NotifyService
                                         }
                                     }
 
-                                    //go through satellites while not cancelled
+                                    //go through satellites while not canceled
                                     for(index = 0; index < masterList.satellites.size() && !cancelIntent[updateType]; index++)
                                     {
                                         //get current satellite and norad ID
@@ -2734,7 +2733,7 @@ public class UpdateService extends NotifyService
                 status = Globals.ProgressType.Cancelled;
             }
 
-            //if cancelled
+            //if canceled
             if(cancelIntent[updateType])
             {
                 //update status
@@ -3063,7 +3062,6 @@ public class UpdateService extends NotifyService
     }
 
     //Updates satellites
-    @SuppressWarnings("SpellCheckingInspection")
     private void updateSatellites(int updateSource, String section, String user, String pwd, ArrayList<Database.DatabaseSatellite> satelliteList)
     {
         int index;
@@ -3094,7 +3092,7 @@ public class UpdateService extends NotifyService
             loginFailed = loginData.isLoginError();
         }
 
-        //go through each satellite while not cancelled
+        //go through each satellite while not canceled
         count = satellites.length;
         for(index = 0; index < count && !loginFailed && !downloadError && !cancelIntent[UpdateType.UpdateSatellites]; index++)
         {
@@ -3152,7 +3150,7 @@ public class UpdateService extends NotifyService
                         url.append("TLE_LINE1%20ASC/format/tle");
                     }
 
-                    //try to get html page
+                    //try to get HTML page
                     tleData = Globals.getWebPage(url.toString());
                     downloadError = !tleData.isOkay();
                     loginFailed = tleData.isDenied();
@@ -3181,12 +3179,12 @@ public class UpdateService extends NotifyService
                         break;
 
                     case Database.UpdateSource.N2YO:
-                        //try to get html page
+                        //try to get HTML page
                         receivedPage = Globals.getWebPage("https://www.n2yo.com/satellite/?s=" + currentNumber, isLast, null);
                         break;
 
                     case Database.UpdateSource.HeavensAbove:
-                        //try to get html page
+                        //try to get HTML page
                         receivedPage = Globals.getWebPage("https://www.heavens-above.com/orbit.aspx?satid=" + currentNumber, isLast, null);
                         break;
                 }

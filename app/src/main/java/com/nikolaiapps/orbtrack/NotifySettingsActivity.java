@@ -20,6 +20,8 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class NotifySettingsActivity extends BaseInputActivity
 {
@@ -252,7 +254,7 @@ public class NotifySettingsActivity extends BaseInputActivity
     //Handles settings notifications
     private void handleSettingNotifications(int noradId, Calculations.ObserverType location, boolean useList, boolean retrying, Intent resultData)
     {
-        //done if -have permission to set exact timer- or -can't ask-
+        //done if -have permission to set exact timer- or -not allowed to ask-
         if(Globals.haveExactAlarmPermission(NotifySettingsActivity.this) || !Globals.canAskExactAlarmPermission)
         {
             //set notifications
@@ -313,7 +315,7 @@ public class NotifySettingsActivity extends BaseInputActivity
         return(new CompoundButton.OnCheckedChangeListener()
         {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
             {
                 //update visibility
                 group.setVisibility(isChecked ? View.VISIBLE : View.GONE);

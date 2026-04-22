@@ -33,6 +33,8 @@ import android.widget.TextView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.slider.Slider;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class ChooseColorDialog
 {
@@ -448,7 +450,7 @@ public class ChooseColorDialog
             transparentCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
             {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                 {
                     //if not checked but still transparent
                     if(!isChecked && currentColor == Color.TRANSPARENT)

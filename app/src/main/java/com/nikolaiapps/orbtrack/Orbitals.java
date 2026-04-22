@@ -97,7 +97,7 @@ public abstract class Orbitals
             tleAgeLayout = viewItem.findViewById(tleAgeLayoutId);
             tleAgeText = viewItem.findViewById(tleAgeTextId);
             tleUnder = viewItem.findViewById(tleAgeUnderId);
-            tleUnder.setTag("keepBg");
+            tleUnder.setTag("keepBackground");
             colorButton = viewItem.findViewById(colorButtonId);
             visibleButton = viewItem.findViewById(visibleButtonId);
             progress = viewItem.findViewById(progressId);
@@ -1119,7 +1119,7 @@ public abstract class Orbitals
                                                 @Override
                                                 public void onResult(Globals.WebPageData pageData, boolean success)
                                                 {
-                                                    //if success or attempted to login
+                                                    //if success or attempted to log in
                                                     if(success || pageData != null)
                                                     {
                                                         //try again
@@ -1521,7 +1521,7 @@ public abstract class Orbitals
         }
     }
 
-    //Shows google drive file browser
+    //Shows Google Drive file browser
     public static void showGoogleDriveFileBrowser(final Activity context, ActivityResultLauncher<Intent> launcher, boolean confirmInternet)
     {
         //if confirm internet and should ask

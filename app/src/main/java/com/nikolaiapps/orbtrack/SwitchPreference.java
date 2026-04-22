@@ -11,6 +11,8 @@ import androidx.annotation.Nullable;
 import androidx.preference.PreferenceViewHolder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class SwitchPreference extends CustomPreference
 {
@@ -69,7 +71,7 @@ public class SwitchPreference extends CustomPreference
         checkedChangeListener = new CompoundButton.OnCheckedChangeListener()
         {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean checked)
+            public void onCheckedChanged(@NotNull CompoundButton compoundButton, boolean checked)
             {
                 isChecked = checked;
                 callOnPreferenceChangeListener();

@@ -40,6 +40,9 @@ import android.widget.RadioGroup;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Map;
 
@@ -517,7 +520,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     followRadio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                     {
                         @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                        public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                         {
                             widgetSettings.location.useFollow = isChecked;
                         }
@@ -527,7 +530,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     intervalRadio.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                     {
                         @Override
-                        public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
+                        public void onCheckedChanged(@NotNull CompoundButton compoundButton, boolean isChecked)
                         {
                             widgetSettings.location.useInterval = isChecked;
                             updateDisplays();
@@ -697,7 +700,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     globalImageSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                     {
                         @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                        public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                         {
                             widgetSettings.useGlobalImage = isChecked;
                             updateDisplays();
@@ -729,7 +732,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     globalBackgroundSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                     {
                         @Override
-                        public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                        public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                         {
                             widgetSettings.useGlobalBackground = isChecked;
                             updateDisplays();
@@ -812,7 +815,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                     globalTextSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                     {
                         @Override
-                        public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
+                        public void onCheckedChanged(@NotNull CompoundButton compoundButton, boolean isChecked)
                         {
                             widgetSettings.useGlobalText = isChecked;
                             updateDisplays();
@@ -905,7 +908,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         textBoldCheckBox[index].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                         {
                             @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                            public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                             {
                                 widgetSettings.text[textIndex].bold = isChecked;
                                 onSettingChanged(context, widgetSettings.textSettingsNames[textIndex][2], widgetSettings.text[textIndex].getWeight());
@@ -914,7 +917,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         textItalicCheckBox[index].setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                         {
                             @Override
-                            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                            public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                             {
                                 widgetSettings.text[textIndex].italic = isChecked;
                                 onSettingChanged(context, widgetSettings.textSettingsNames[textIndex][2], widgetSettings.text[textIndex].getWeight());
@@ -1050,7 +1053,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                             //remember current text
                             currentText = searchText.getText().toString();
 
-                            //if search name is set and different than current text
+                            //if search name is set and different from current text
                             if(widgetSettings.location.searchName != null && !widgetSettings.location.searchName.equals(currentText))
                             {
                                 //update text
@@ -1626,7 +1629,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
             return(new CompoundButton.OnCheckedChangeListener()
             {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                 {
                     //handle specific cases
                     switch(displayIndex)

@@ -1661,6 +1661,7 @@ class Whirly
         {
             Bitmap orbitalImage;
             Bitmap infoImage;
+            Bitmap.Config orbitalImageConfig;
 
             markerScale = markerScaling;
 
@@ -1671,7 +1672,12 @@ class Whirly
             else if(orbitalBoard.boardImage != null)
             {
                 //recreate orbital
-                orbitalImage = orbitalBoard.boardImage.copy(orbitalBoard.boardImage.getConfig(), true);
+                orbitalImageConfig = orbitalBoard.boardImage.getConfig();
+                if(orbitalImageConfig == null)
+                {
+                    orbitalImageConfig = Bitmap.Config.ARGB_8888;
+                }
+                orbitalImage = orbitalBoard.boardImage.copy(orbitalImageConfig, true);
                 orbitalBoard = new Board(controller, orbitalBoard, markerScale, true);
                 orbitalBoard.setImage(orbitalImage, markerScale);
 
@@ -2769,7 +2775,7 @@ class Whirly
             }
         }
 
-        @Override @SuppressWarnings("SpellCheckingInspection")
+        @Override
         public void setStarsEnabled(boolean enabled)
         {
             Activity activity;

@@ -53,6 +53,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Objects;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -350,7 +351,7 @@ public abstract class Selectable
                                         resultIcons.add(Globals.getDrawable(context, currentId));
                                     }
                                 }
-                                resultIcons.add(Globals.getDrawableCombined(context, icons[index].getConstantState().newDrawable().mutate()));  //note: makes icon copy so that original is not altered
+                                resultIcons.add(Globals.getDrawableCombined(context, Objects.requireNonNull(icons[index].getConstantState()).newDrawable().mutate()));  //note: makes icon copy so that original is not altered
                             }
                         }
 
@@ -1054,7 +1055,7 @@ public abstract class Selectable
         {
             boolean usingContext = haveContext();
             int[] colors = (usingContext ? Globals.resolveAttributeIDs(currentContext, R.attr.colorAccentVariant, R.attr.colorAccentLightest) : new int[]{Color.BLACK, Color.WHITE});
-            colors[1] = (usingContext ? currentContext.getResources().getColor(colors[1]) : colors[1]);
+            colors[1] = (usingContext ? currentContext.getResources().getColor(colors[1], null) : colors[1]);
 
             if(showColumnTitles(page))
             {
@@ -1101,9 +1102,9 @@ public abstract class Selectable
         {
             boolean haveItem = (itemView != null);
             Object tag = (haveItem ? itemView.getTag() : null);
-            boolean setBackground = (haveItem && (tag == null || !tag.equals("keepBg")) && !(itemView instanceof AppCompatButton));
+            boolean setBackground = (haveItem && (tag == null || !tag.equals("keepBackground")) && !(itemView instanceof AppCompatButton));
 
-            //if setting background and and context exists
+            //if setting background and context exists
             if(setBackground && haveContext())
             {
                 //set background according to selected state
@@ -1123,7 +1124,7 @@ public abstract class Selectable
                     {
                         if(itemClickedListener != null && enableItemClicks)
                         {
-                            itemClickedListener.onItemClicked(view, itemHolder.getAdapterPosition());
+                            itemClickedListener.onItemClicked(view, itemHolder.getBindingAdapterPosition());
                         }
                     }
                 });
@@ -1134,7 +1135,7 @@ public abstract class Selectable
                     {
                         if(itemLongClickedListener != null && enableItemClicks)
                         {
-                            itemLongClickedListener.onItemLongClicked(view, itemHolder.getAdapterPosition());
+                            itemLongClickedListener.onItemLongClicked(view, itemHolder.getBindingAdapterPosition());
                             return(true);
                         }
 

@@ -92,6 +92,7 @@ public class FloatingActionStateButton extends FloatingActionButton
         checkedImage = drawable;
     }
 
+    @SuppressWarnings("unused")
     public void setImageCheckedResource(int resId)
     {
         setImageCheckedDrawable(ContextCompat.getDrawable(getContext(), resId));

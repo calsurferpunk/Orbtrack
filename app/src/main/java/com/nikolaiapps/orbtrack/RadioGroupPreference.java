@@ -17,6 +17,8 @@ import androidx.appcompat.widget.AppCompatRadioButton;
 import androidx.core.widget.CompoundButtonCompat;
 import androidx.preference.PreferenceViewHolder;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class RadioGroupPreference extends ValueTypePreference
 {
@@ -144,7 +146,7 @@ public class RadioGroupPreference extends ValueTypePreference
                 currentRadioButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                 {
                     @Override
-                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                    public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                     {
                         //if checked
                         if(isChecked)

@@ -17,6 +17,8 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceViewHolder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class SwitchTextPreference extends ValueTypePreference
 {
@@ -153,7 +155,7 @@ public class SwitchTextPreference extends ValueTypePreference
             checkedChangeListener = new CompoundButton.OnCheckedChangeListener()
             {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                 {
                     boolean textCheckedValue;
 

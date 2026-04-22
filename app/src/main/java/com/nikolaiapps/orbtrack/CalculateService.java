@@ -1353,7 +1353,7 @@ public class CalculateService extends NotifyService
             //if satellite was set and needed TLEs are accurate
             if(currentItem.satellite != null && neededTLEsAccurate)
             {
-                //while not done and not cancelled
+                //while not done and not canceled
                 while(!doneWithPath && !(usingTask && task.isCancelled()))
                 {
                     //get position and phase for the current time
@@ -1542,17 +1542,17 @@ public class CalculateService extends NotifyService
                 service.sendLoadRunningMessage(calculateType, section, 90, listIndex, listCount);
             }
 
-            //if done with pass, not cancelled, and pass end found
+            //if done with pass, not canceled, and pass end found
             if(doneWithPath && !(usingTask && task.isCancelled()) && pathEndGMT != null)
             {
                 //go forward up to 15 minutes/seconds to find ending second
                 updateTimeInPath(calculateType, satellite1, satellite2, observer, intersection, 1, (extendedSearch ? (15 * 60) : 15), pathEndGMT, true, applyRefraction);
             }
 
-            //if done with pass or cancelled
+            //if done with pass or canceled
             if(doneWithPath || (usingTask && task.isCancelled()))
             {
-                //if pass start is set and not cancelled
+                //if pass start is set and not canceled
                 if(pathStartGMT != null && !(usingTask && task.isCancelled()))
                 {
                     //update status
@@ -1681,7 +1681,7 @@ public class CalculateService extends NotifyService
             listener.onCalculated(Globals.ProgressType.Started, null);
         }
 
-        //go through each item while not cancelled
+        //go through each item while not canceled
         for(index = 0; index < pathItemCount && !(usingTask && task.isCancelled()); index++)
         {
             //remember current item

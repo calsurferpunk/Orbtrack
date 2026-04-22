@@ -72,10 +72,10 @@ public class ThreadTask<Params, Progress, Result>
         //update status
         running = false;
 
-        //if cancelled
+        //if canceled
         if(cancelled)
         {
-            //send cancelled result
+            //send canceled result
             onCancelled(result);
         }
         else
@@ -128,7 +128,7 @@ public class ThreadTask<Params, Progress, Result>
                         done = (runRepeatMs == 0);
                     }
 
-                    //if not done and not cancelled
+                    //if not done and not canceled
                     if(!done & !cancelled)
                     {
                         //wait for repeat delay
@@ -159,7 +159,7 @@ public class ThreadTask<Params, Progress, Result>
 
     public void cancel(boolean allow)
     {
-        //if not already cancelled
+        //if not already canceled
         if(!cancelled)
         {
             //cancel and remove

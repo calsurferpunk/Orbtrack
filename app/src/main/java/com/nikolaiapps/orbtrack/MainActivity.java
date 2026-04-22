@@ -476,7 +476,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 finishedSetup = !Settings.getFirstRun(this);
                 recreateAfterSetup = needRecreate;
 
-                //if cancelled and didn't accept privacy
+                //if canceled and didn't accept privacy
                 if(!isOkay && !acceptedPrivacy)
                 {
                     //close app
@@ -562,6 +562,11 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                         Selectable.ListFragment calculatePage = calculatePageAdapter.getPage(mainPager, page);
                         if(calculatePage instanceof Calculate.Page)
                         {
+                            if(selectedOrbitals == null)
+                            {
+                                selectedOrbitals = new ArrayList<>(0);
+                            }
+
                             //set selected
                             //note: sets saved value to use when page resumes
                             calculatePageAdapter.setSavedInput(calculatePage.getPageParam(), (listNumber == 1 ? Calculate.ParamTypes.SelectedOrbitals : Calculate.ParamTypes.SelectedOrbitals2), selectedOrbitals.toArray(new Selectable.ListItem[0]));
@@ -2246,7 +2251,10 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                     //save file
                     outStream = this.getContentResolver().openOutputStream(Globals.createFileUri(this, outUri, fileName, extension));
                     saveCalculateFile(page, outStream, separator, Globals.FileSource.Others);
-                    outStream.close();
+                    if(outStream != null)
+                    {
+                        outStream.close();
+                    }
                 }
                 catch(Exception ex)
                 {
@@ -2948,7 +2956,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                             @Override
                             public void onResult(Globals.WebPageData pageData, boolean success)
                             {
-                                //if success or attempted to login
+                                //if success or attempted to log in
                                 if(success || pageData != null)
                                 {
                                     //try again

@@ -78,7 +78,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         Calculations.SatelliteObjectType coordinateSatellite = new Calculations.SatelliteObjectType(currentSatellite);
         ArrayList<OrbitalCoordinate> coordinates = new ArrayList<>(0);
 
-        //calculate coordinates in path unless cancelled
+        //calculate coordinates in path unless canceled
         for(coordinateJulianDate = pathJulianDateStart; coordinateJulianDate <= pathJulianDateEnd && !this.isCancelled(); coordinateJulianDate += dayIncrement)
         {
             //create new geographic data
@@ -172,7 +172,7 @@ public class CalculateCoordinatesTask extends ThreadTask<Object, Integer, Intege
         //update progress
         onProgressChanged(Globals.ProgressType.Started, Integer.MAX_VALUE, null);
 
-        //go through each orbital while not cancelled
+        //go through each orbital while not canceled
         for(index = 0; index < satelliteObjects.length && !this.isCancelled(); index++)
         {
             //get current path and satellite

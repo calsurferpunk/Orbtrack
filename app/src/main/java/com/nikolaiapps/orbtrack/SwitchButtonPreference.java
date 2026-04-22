@@ -14,6 +14,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceViewHolder;
 import com.google.android.material.materialswitch.MaterialSwitch;
 
+import org.jetbrains.annotations.NotNull;
+
 
 public class SwitchButtonPreference extends CustomPreference
 {
@@ -91,7 +93,7 @@ public class SwitchButtonPreference extends CustomPreference
         switchCheckedChangeListener = new CompoundButton.OnCheckedChangeListener()
         {
             @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+            public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
             {
                 //update preference setting
                 writeSettings.putBoolean(preferenceName, isChecked).apply();

@@ -87,8 +87,8 @@ public abstract class Calculations
     private static final double EarthRotPerSD   = 1.00273790934;		  //earth rotations per sidereal day
     private static final double HalfPI          = (Math.PI / 2.0);
     private static final double TwoPI           = (2 * Math.PI);
-    private static final double JanFirst1900JD  = 2415020.0;			  //Julian date for January 1, 1900 at 12:00 noon (UTC)
-    private static final double JanFirst2000JD  = 2451545.0;			  //Julian date for January 1, 2000 at 12:00 noon (UTC)
+    private static final double JanFirst1900JD  = 2415020.0;			  //Julian date for January 1, 1900, at 12:00 noon (UTC)
+    private static final double JanFirst2000JD  = 2451545.0;			  //Julian date for January 1, 2000, at 12:00 noon (UTC)
     private static final double JulianCentury   = 36525.0;                //Julian days in a century
     private static final double J2				= 1.0826158E-3;			  //J2 harmonic (WGS '72)
     private static final double J3				= -2.53881E-6	;		  //J3 harmonic (WGS '72)
@@ -961,7 +961,6 @@ public abstract class Calculations
     }
 
     //Returns the Local Mean Sidereal Time (LMST) in radians from the given julian date and longitude
-    @SuppressWarnings("SpellCheckingInspection")
     private static double julianDateToLMST(double julianDate, double longitudeRads)
     {
         return(Math.IEEEremainder(julianDateToGMST(julianDate) + longitudeRads, TwoPI));

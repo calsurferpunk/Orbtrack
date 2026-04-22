@@ -167,7 +167,7 @@ public class Database extends SQLiteOpenHelper
             noradId.clear();
             starNames.clear();
 
-             //go through each stars file
+             //go through each language star file
             for(languageIndex = 0; languageIndex < LanguageIndex.LanguageCount; languageIndex++)
             {
                 ArrayList<String> nameList = new ArrayList<>(0);

@@ -188,7 +188,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             pathJulianDateEnd = Globals.julianDateNoSeconds(pathJulianDateEnd);
         }
 
-        //calculate points in path unless cancelled
+        //calculate points in path unless canceled
         for(viewJulianDate = pathJulianDateStart; viewJulianDate <= pathJulianDateEnd && (!limitTravel || viewJulianDate <= periodJulianEnd || Math.abs(azTravel) <= 360) && !this.isCancelled(); viewJulianDate += dayIncrement)
         {
             //if adjusting time and not on first or last
@@ -294,7 +294,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         //update progress
         onProgressChanged(Globals.ProgressType.Started, Integer.MAX_VALUE, null, null);
 
-        //go through each item while not cancelled
+        //go through each item while not canceled
         for(index = 0; index < viewItems.length && !this.isCancelled(); index++)
         {
             //get current item and path

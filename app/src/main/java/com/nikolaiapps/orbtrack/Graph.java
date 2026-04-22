@@ -20,6 +20,9 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import androidx.core.content.ContextCompat;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -512,7 +515,7 @@ public class Graph extends View
     }
 
     @Override
-    protected void onDraw(Canvas canvas)
+    protected void onDraw(@NotNull Canvas canvas)
     {
         super.onDraw(canvas);
 

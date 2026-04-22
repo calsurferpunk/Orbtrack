@@ -53,7 +53,7 @@ public class DateInputView extends AppCompatEditText implements DatePickerDialog
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        //if for the on touch down event
+        //if for the touch release event
         if(event.getAction() == MotionEvent.ACTION_UP)
         {
             performClick();

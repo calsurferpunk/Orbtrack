@@ -22,6 +22,9 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -248,7 +251,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                 @Override
                 public void onClick(View view)
                 {
-                    itemClickedListener.onItemClicked(view, itemHolder.getAdapterPosition());
+                    itemClickedListener.onItemClicked(view, itemHolder.getBindingAdapterPosition());
                 }
             });
 
@@ -278,7 +281,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
                 itemHolder.fileCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
                 {
                     @Override
-                    public void onCheckedChanged(CompoundButton compoundButton, boolean isChecked)
+                    public void onCheckedChanged(@NotNull CompoundButton compoundButton, boolean isChecked)
                     {
                         setFileSelected(currentFile, isChecked);
                     }

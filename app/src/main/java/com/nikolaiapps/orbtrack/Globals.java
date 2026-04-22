@@ -647,7 +647,7 @@ public abstract class Globals
                 //if successful
                 if(fullData.isOkay())
                 {
-                    //format in json again
+                    //format in JSON again
                     fullData.pageData = String.format(ResultBody, result);
                 }
             }
@@ -915,7 +915,10 @@ public abstract class Globals
         if(adjustHeight)
         {
             dialogWindow = confirmDialog.getWindow();
-            dialogWindow.setLayout(dialogWindow.getAttributes().width, height);
+            if(dialogWindow != null)
+            {
+                dialogWindow.setLayout(dialogWindow.getAttributes().width, height);
+            }
         }
     }
     public static void showNotificationDialog(Context context, Drawable icon, String titleString, String messageString, int positiveStringId, int negativeStringId, boolean canCancel, DialogInterface.OnClickListener positiveListener, DialogInterface.OnClickListener negativeListener, boolean adjustHeight)
@@ -1067,7 +1070,7 @@ public abstract class Globals
     //Shows a date dialog
     public static void showDateDialog(Context context, Calendar date, DatePickerDialog.OnDateSetListener listener)
     {
-        //if context an date are set
+        //if context and date are set
         if(context != null && date != null)
         {
             int themeID = Globals.getDialogThemeId(context);
@@ -1473,7 +1476,7 @@ public abstract class Globals
             @Override
             public void onCanceled()
             {
-                //send cancelled result
+                //send canceled result
                 listener.onResult(null, false);
             }
         }).addOnFailureListener(new OnFailureListener()
@@ -1788,7 +1791,8 @@ public abstract class Globals
         }
         catch(Exception ex)
         {
-            Log.d("startService Error", ex.getMessage());
+            String exMessage = ex.getMessage();
+            Log.d("startService Error", (exMessage != null ? exMessage : "?"));
         }
     }
 
@@ -2614,7 +2618,7 @@ public abstract class Globals
             //get language
             Configuration config = context.getResources().getConfiguration();
             LocaleList locales = (Build.VERSION.SDK_INT >= 24 ? config.getLocales() : null);
-            Locale currentLocale = (Build.VERSION.SDK_INT >= 24 && locales != null && !locales.isEmpty() ? locales.get(0) : Locale.getDefault());
+            Locale currentLocale = (Build.VERSION.SDK_INT >= 24 && !locales.isEmpty() ? locales.get(0) : Locale.getDefault());
             return(currentLocale.getLanguage());
         }
         else
@@ -2979,6 +2983,7 @@ public abstract class Globals
     }
 
     //Converts sp to pixels
+    @SuppressWarnings("unused")
     public static float spToPixels(Context context, float sp)
     {
         return(unitsToPixels(context, TypedValue.COMPLEX_UNIT_SP, sp)[0]);
@@ -3653,7 +3658,8 @@ public abstract class Globals
     //Copies a bitmap
     public static Bitmap copyBitmap(Bitmap image)
     {
-        return(image != null ? image.copy(image.getConfig(), image.isMutable()) : null);
+        Bitmap.Config imageConfig = (image != null ? image.getConfig() : null);
+        return(image != null && imageConfig != null ? image.copy(imageConfig, image.isMutable()) : null);
     }
 
     //Gets a bitmap
@@ -4555,7 +4561,6 @@ public abstract class Globals
     }
 
     //Normalizes owner code
-    @SuppressWarnings("SpellCheckingInspection")
     public static String normalizeOwnerCode(String code)
     {
         //if not set
@@ -4602,7 +4607,6 @@ public abstract class Globals
     }
 
     //Normalizes owner name
-    @SuppressWarnings("SpellCheckingInspection")
     public static String normalizeOwnerName(String name)
     {
         //if set
@@ -5372,7 +5376,7 @@ public abstract class Globals
         return(readZipFile(context, filePath, fileStream, extensionFilter, 1));
     }
 
-    //Tries to reads the given text files into strings
+    //Tries to read the given text files into strings
     public static ArrayList<String> readTextFiles(Context context, ArrayList<Uri> fileUris) throws Exception
     {
         int index;
@@ -5389,7 +5393,7 @@ public abstract class Globals
             String currentExtension = getFileExtension(currentPath);
 
             //if current scheme has content
-            if(currentFile.getScheme().equals("content"))
+            if(("content").equals(currentFile.getScheme()))
             {
                 //if able to get cursor
                 Cursor currentCursor = resolver.query(currentFile, null, null, null, null);
@@ -5430,7 +5434,10 @@ public abstract class Globals
                 //add file data
                 fileAscii.add(readTextFile(context, fileStream));
             }
-            fileStream.close();
+            if(fileStream != null)
+            {
+                fileStream.close();
+            }
         }
 
         return(fileAscii);
@@ -5574,7 +5581,7 @@ public abstract class Globals
         return((Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(stringValue, Html.FROM_HTML_MODE_LEGACY) : Html.fromHtml(stringValue)));
     }
 
-    //Decodes html special characters
+    //Decodes HTML special characters
     private static String decodeHtml(String htmlString)
     {
         String result;
@@ -5693,10 +5700,6 @@ public abstract class Globals
             siteHttpsConnection = client.newCall(siteRequestBuilder.build()).execute();
             responseCode = siteHttpsConnection.code();
             body = siteHttpsConnection.body();
-            if(body == null)
-            {
-                throw(new Exception("No data"));
-            }
             dataStream = body.byteStream();
             totalBytes = body.contentLength();
 
@@ -5790,7 +5793,7 @@ public abstract class Globals
         return(getWebPage(urlString, null, (OnProgressChangedListener)null));
     }
 
-    //Tries to load multiple json objects from given json input
+    //Tries to load multiple JSON objects from given JSON input
     public static JSONObject[] getJsonObjects(String jsonInput)
     {
         int row;
@@ -5837,7 +5840,7 @@ public abstract class Globals
         }
     }
 
-    //Tries to login to space-track
+    //Tries to log in to space-track
     public static WebPageData loginSpaceTrack(String user, String pwd)
     {
         //if no user and/or password
@@ -5862,7 +5865,7 @@ public abstract class Globals
             //get current user and password
             String[] loginData = Settings.getLogin(context, accountType);
 
-            //try to login
+            //try to log in
             (new LoginTask((updateType == UpdateService.UpdateType.UpdateCount), retrying, listener)).execute(context, accountType, updateType, loginData[0], loginData[1], true, updateType);
         }
     }
@@ -5926,7 +5929,7 @@ public abstract class Globals
         getWebPage("https://jnikolai.dev/query/translate.php?val=" + value + "&lan=" + language + "&src=" + source +"&key=" + key, new String[]{"data"}, new String[]{text}, null);
     }
 
-    //Tries to logout of space track
+    //Tries to log out of space track
     public static void logoutSpaceTrack(OnProgressChangedListener listener)
     {
         WebPageData pageData = getWebPage("https://www.space-track.org/ajaxauth/logout", null, null, listener);

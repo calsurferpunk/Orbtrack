@@ -44,6 +44,9 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
+
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1363,7 +1366,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         String startScreenKey;
         Bundle args = new Bundle();
         Intent startIntent = this.getIntent();
-        Fragment startFragment;
+        Fragment startFragment = null;
         List<Fragment> previousPages;
 
         //get start intent and values
@@ -1476,7 +1479,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             inputCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
             {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                 {
                     int page = setupPager.getCurrentItem();
 
@@ -1496,7 +1499,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             privacyCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
             {
                 @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
+                public void onCheckedChanged(@NotNull CompoundButton buttonView, boolean isChecked)
                 {
                     int page = setupPager.getCurrentItem();
 
@@ -1531,52 +1534,55 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
         if(!showSetup)
         {
             //setup starting fragment
-            switch(startScreenKey)
+            if(startScreenKey != null)
             {
-                case ScreenKey.Accounts:
-                case ScreenKey.Locations:
-                case ScreenKey.Notifications:
-                case ScreenKey.Widgets:
-                    switch(startScreenKey)
-                    {
-                        case ScreenKey.Accounts:
-                            titleId = R.string.title_accounts;
-                            break;
+                switch(startScreenKey)
+                {
+                    case ScreenKey.Accounts:
+                    case ScreenKey.Locations:
+                    case ScreenKey.Notifications:
+                    case ScreenKey.Widgets:
+                        switch(startScreenKey)
+                        {
+                            case ScreenKey.Accounts:
+                                titleId = R.string.title_accounts;
+                                break;
 
-                        case ScreenKey.Locations:
-                            titleId = R.string.title_locations;
-                            break;
+                            case ScreenKey.Locations:
+                                titleId = R.string.title_locations;
+                                break;
 
-                        case ScreenKey.Notifications:
-                            titleId = R.string.title_notifications;
-                            break;
+                            case ScreenKey.Notifications:
+                                titleId = R.string.title_notifications;
+                                break;
 
-                        case ScreenKey.Widgets:
-                        default:
-                            titleId = R.string.title_widgets;
-                            break;
-                    }
+                            case ScreenKey.Widgets:
+                            default:
+                                titleId = R.string.title_widgets;
+                                break;
+                        }
 
-                    startFragment = getSettingsFragment(startScreenKey, this.getString(titleId));
-                    break;
+                        startFragment = getSettingsFragment(startScreenKey, this.getString(titleId));
+                        break;
 
-                case ScreenKey.Display:
-                case ScreenKey.GlobeMapView:
-                case ScreenKey.LensView:
-                case ScreenKey.ListView:
-                case ScreenKey.QuickSettings:
-                case ScreenKey.Timeline:
-                case ScreenKey.Updates:
-                    startFragment = new SettingsSubFragment();
+                    case ScreenKey.Display:
+                    case ScreenKey.GlobeMapView:
+                    case ScreenKey.LensView:
+                    case ScreenKey.ListView:
+                    case ScreenKey.QuickSettings:
+                    case ScreenKey.Timeline:
+                    case ScreenKey.Updates:
+                        startFragment = new SettingsSubFragment();
 
-                    args.putString(RootKey, startScreenKey);
-                    startFragment.setArguments(args);
-                    break;
-
-                default:
-                    startFragment = new SettingsMainFragment();
-                    currentPageKey = null;
-                    break;
+                        args.putString(RootKey, startScreenKey);
+                        startFragment.setArguments(args);
+                        break;
+                }
+            }
+            if(startFragment == null)
+            {
+                startFragment = new SettingsMainFragment();
+                currentPageKey = null;
             }
 
             //setup fragment manager

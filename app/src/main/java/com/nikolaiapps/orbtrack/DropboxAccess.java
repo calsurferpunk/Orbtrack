@@ -180,7 +180,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
             }
             catch(InvalidAccessTokenException ex)
             {
-                //failed to login
+                //failed to log in
                 taskResult = FileBrowserBaseActivity.ResultCode.LoginFailed;
                 message = ex.getMessage();
             }
@@ -256,7 +256,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
             }
             catch(InvalidAccessTokenException ex)
             {
-                //failed to login
+                //failed to log in
                 taskResult = FileBrowserBaseActivity.ResultCode.LoginFailed;
                 message = ex.getMessage();
             }
@@ -340,7 +340,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
             }
             catch(InvalidAccessTokenException ex)
             {
-                //failed to login
+                //failed to log in
                 taskResult = FileBrowserBaseActivity.ResultCode.LoginFailed;
                 message = ex.getMessage();
             }
@@ -537,7 +537,7 @@ public class DropboxAccess extends AppCompatActivity implements ActivityResultCa
                     @Override
                     public void onResult(String email)
                     {
-                        //if email exists and different than stored
+                        //if email exists and different from stored
                         if(email != null && !email.equals(getUserEmail(DropboxAccess.this)))
                         {
                             //update user email

@@ -238,7 +238,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         otherOpenLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersOpenItem);
         otherSaveLauncher = Globals.createActivityLauncher(this, this, RequestCode.OthersSave);
 
-        /*//if have Google Play services
+        //if have Google Play services
         if(Globals.getUseGooglePlayServices(this))
         {
             //check age
@@ -255,10 +255,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         {
             //exit
             finish();
-        }*/
-
-        //bypass buggy age API beta for now
-        handleFirstRun(savedInstanceState);
+        }
     }
 
     @Override

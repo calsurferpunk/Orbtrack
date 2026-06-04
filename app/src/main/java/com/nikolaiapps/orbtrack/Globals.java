@@ -358,7 +358,12 @@ public abstract class Globals
 
         public boolean isDenied()
         {
-            return(responseCode >= 400 && responseCode <= 499);
+            return(responseCode >= 400 && responseCode <= 498);
+        }
+
+        public boolean isExceptionError()
+        {
+            return(responseCode == 499);
         }
 
         public boolean isLoginError()
@@ -1459,8 +1464,8 @@ public abstract class Globals
             {
                 Integer status = ageSignalsResult.userStatus();
 
-                //if no status or denied
-                if(status == null || status.equals(AgeSignalsVerificationStatus.SUPERVISED_APPROVAL_DENIED))
+                //if status is denied
+                if(status != null && status.equals(AgeSignalsVerificationStatus.SUPERVISED_APPROVAL_DENIED))
                 {
                     //try again
                     handleAgeCheck(context, listener);
@@ -5716,12 +5721,22 @@ public abstract class Globals
             //get message
             message = ex.getMessage();
 
-            //if an authentication problem
-            if(message != null && message.toLowerCase().contains("authentication"))
+            //if there is an error message
+            if(message != null)
             {
-                //authentication error, stop
-                responseCode = 401;
-                retryCount = maxRetryCount;
+                //if an authentication problem
+                if(message.toLowerCase().contains("authentication"))
+                {
+                    //authentication error, stop
+                    responseCode = 401;
+                    retryCount = maxRetryCount;
+                }
+                else if(message.toLowerCase().contains(("validation")))
+                {
+                    //validation error, stop
+                    responseCode = 499;
+                    retryCount = maxRetryCount;
+                }
             }
 
             //if before maximum retries
@@ -5777,7 +5792,11 @@ public abstract class Globals
         //try up to 3 times to get web page
         return(getWebPage(urlString, null, null, outString, listener, 1, 3));
     }
-    public static String getWebPage(String urlString, boolean closeConnection, OnProgressChangedListener listener)
+    public static WebPageData getWebPage(String urlString)
+    {
+        return(getWebPage(urlString, null, (OnProgressChangedListener)null));
+    }
+    public static WebPageData getWebPage(String urlString, boolean closeConnection, OnProgressChangedListener listener)
     {
         WebPageData webData = getWebPage(urlString, null, listener);
 
@@ -5786,11 +5805,18 @@ public abstract class Globals
             webData.connection.close();
         }
 
-        return(webData.pageData);
+        return(webData);
     }
-    public static WebPageData getWebPage(String urlString)
+    public static String getWebPage(String urlString, OnProgressChangedListener listener)
     {
-        return(getWebPage(urlString, null, (OnProgressChangedListener)null));
+        WebPageData webData = getWebPage(urlString, null, listener);
+
+        if(webData.connection != null)
+        {
+            webData.connection.close();
+        }
+
+        return(webData.pageData);
     }
 
     //Tries to load multiple JSON objects from given JSON input

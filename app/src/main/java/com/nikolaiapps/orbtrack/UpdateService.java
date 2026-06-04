@@ -1255,10 +1255,10 @@ public class UpdateService extends NotifyService
             if(haveTleData)
             {
                 //get page
-                receivedPage = Globals.getWebPage(urlString, true,null);
+                receivedPage = Globals.getWebPage(urlString, null);
                 if(updateSource == Database.UpdateSource.NASA &&(receivedPage == null || receivedPage.contains("Errors and Messages")) && urlAltString != null)
                 {
-                    receivedPage = Globals.getWebPage(urlAltString, true,null);
+                    receivedPage = Globals.getWebPage(urlAltString, null);
                 }
                 receivedPageLower = (receivedPage != null ? receivedPage.toLowerCase() : null);
                 if(receivedPageLower != null && !receivedPageLower.isEmpty())
@@ -2241,7 +2241,7 @@ public class UpdateService extends NotifyService
             sendMessage(MessageTypes.Download, UpdateType.GetMasterList, section, overall, Globals.ProgressType.Started);
 
             //get page
-            receivedPage = Globals.getWebPage(urlMasterBase, true, createMasterListProgressListener(MessageTypes.Download, section, overall));
+            receivedPage = Globals.getWebPage(urlMasterBase, createMasterListProgressListener(MessageTypes.Download, section, overall));
             receivedPageLength = (receivedPage != null ? receivedPage.length() : 0);
             receivedPageLower = (receivedPage != null ? receivedPage.toLowerCase() : null);
             if(receivedPageLength > 0)
@@ -3076,12 +3076,13 @@ public class UpdateService extends NotifyService
         boolean isLast;
         boolean loginFailed = false;
         boolean downloadError = false;
+        boolean downloadException = false;
         boolean usingGP = Settings.getSatelliteSourceUseGP(this, updateSource);
         String receivedPage;
         String receivedPageLower;
         Database.DatabaseSatellite[] satellites = satelliteList.toArray(new Database.DatabaseSatellite[0]);
         Globals.WebPageData loginData = null;
-        Globals.WebPageData tleData;
+        Globals.WebPageData receivedData;
         StringBuilder url = new StringBuilder();
 
         //if updating from space track
@@ -3097,6 +3098,7 @@ public class UpdateService extends NotifyService
         for(index = 0; index < count && !loginFailed && !downloadError && !cancelIntent[UpdateType.UpdateSatellites]; index++)
         {
             //reset
+            receivedData = null;
             receivedPage = "";
             index2 = index;
 
@@ -3151,10 +3153,10 @@ public class UpdateService extends NotifyService
                     }
 
                     //try to get HTML page
-                    tleData = Globals.getWebPage(url.toString());
-                    downloadError = !tleData.isOkay();
-                    loginFailed = tleData.isDenied();
-                    receivedPage = tleData.pageData;
+                    receivedData = Globals.getWebPage(url.toString());
+                    downloadError = !receivedData.isOkay();
+                    loginFailed = receivedData.isDenied();
+                    receivedPage = receivedData.pageData;
                 }
             }
             else
@@ -3169,29 +3171,34 @@ public class UpdateService extends NotifyService
                         if(usingGP)
                         {
                             //try to get GP data
-                            receivedPage = Globals.getWebPage("https://celestrak.com/NORAD/elements/gp.php?CATNR=" + currentNumber + "&FORMAT=json", isLast, null);
+                            receivedData = Globals.getWebPage("https://celestrak.com/NORAD/elements/gp.php?CATNR=" + currentNumber + "&FORMAT=json", isLast, null);
+                            receivedPage = receivedData.pageData;
                         }
                         else
                         {
                             //try to get TLE data
-                            receivedPage = Globals.getWebPage("https://celestrak.com/satcat/tle.php?CATNR=" + currentNumber, isLast, null);
+                            receivedData = Globals.getWebPage("https://celestrak.com/satcat/tle.php?CATNR=" + currentNumber, isLast, null);
+                            receivedPage = receivedData.pageData;
                         }
                         break;
 
                     case Database.UpdateSource.N2YO:
                         //try to get HTML page
-                        receivedPage = Globals.getWebPage("https://www.n2yo.com/satellite/?s=" + currentNumber, isLast, null);
+                        receivedData = Globals.getWebPage("https://www.n2yo.com/satellite/?s=" + currentNumber, isLast, null);
+                        receivedPage = receivedData.pageData;
                         break;
 
                     case Database.UpdateSource.HeavensAbove:
                         //try to get HTML page
-                        receivedPage = Globals.getWebPage("https://www.heavens-above.com/orbit.aspx?satid=" + currentNumber, isLast, null);
+                        receivedData = Globals.getWebPage("https://www.heavens-above.com/orbit.aspx?satid=" + currentNumber, isLast, null);
+                        receivedPage = receivedData.pageData;
                         break;
                 }
             }
 
             //update status
             downloadError = (downloadError || receivedPage == null || receivedPage.isEmpty() || cancelIntent[UpdateType.UpdateSatellites]);
+            downloadException = (downloadException || (receivedData != null && receivedData.isExceptionError()));
 
             //if page was received
             if(!downloadError)
@@ -3271,7 +3278,7 @@ public class UpdateService extends NotifyService
         }
 
         //update progress
-        sendMessage(MessageTypes.General, UpdateType.UpdateSatellites, section, saveCount, count, (loginFailed ? Globals.ProgressType.Denied : downloadError ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
+        sendMessage(MessageTypes.General, UpdateType.UpdateSatellites, section, saveCount, count, (loginFailed ? Globals.ProgressType.Denied : downloadException ? Globals.ProgressType.Failed : downloadError ? Globals.ProgressType.Cancelled : Globals.ProgressType.Finished));
     }
 
     //Loads a database backup file and returns saved satellite count

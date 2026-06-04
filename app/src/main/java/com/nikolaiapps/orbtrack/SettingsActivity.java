@@ -2346,6 +2346,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
     private UpdateReceiver createUpdateReceiver()
     {
         Activity activity = SettingsActivity.this;
+        Resources res = activity.getResources();
 
         //create receiver
         return(new UpdateReceiver()
@@ -2435,6 +2436,18 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     }
                                 });
                             }
+                            break;
+
+                        case Globals.ProgressType.Failed:
+                            //if updating satellites
+                            if(updatingSatellites)
+                            {
+                                //show failed
+                                Globals.showSnackBar(settingsLayout, res.getString(R.string.title_failed) + " " + res.getString(R.string.title_updating), UpdateService.getError(UpdateService.UpdateType.UpdateSatellites), true, true);
+                            }
+
+                            //allow inputs
+                            setLoading(false);
                             break;
 
                         case Globals.ProgressType.Finished:

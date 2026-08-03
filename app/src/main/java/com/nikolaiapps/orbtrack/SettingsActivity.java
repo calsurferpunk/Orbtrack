@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Spanned;
@@ -44,9 +43,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -2422,7 +2419,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     @Override
                                     public void onResult(Globals.WebPageData pageData, boolean success)
                                     {
-                                        //if success or attempted to login
+                                        //if success or attempted to log in
                                         if(success || pageData != null)
                                         {
                                             //try again
@@ -2898,10 +2895,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
             {
                 //detach then attach to refresh
                 currentTransaction = manager.beginTransaction();
-                if(Build.VERSION.SDK_INT >= 26)
-                {
-                    currentTransaction.setReorderingAllowed(false);
-                }
+                currentTransaction.setReorderingAllowed(false);
                 currentTransaction.detach(currentFragment).attach(currentFragment).commit();
 
                 //if a settings page

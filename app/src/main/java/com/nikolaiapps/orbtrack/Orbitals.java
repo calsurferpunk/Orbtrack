@@ -35,7 +35,6 @@ import java.io.File;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -1803,7 +1802,7 @@ public abstract class Orbitals
                     {
                         case AddSelectListAdapter.EditType.Color:
                             //sort items to keep in list order
-                            Collections.sort(selectedItems, new Selectable.ListDisplayItem.Comparer());
+                            selectedItems.sort(new Selectable.ListDisplayItem.Comparer());
 
                             //get colors using first and last selected item colors
                             new EditValuesDialog(context, new EditValuesDialog.OnSaveListener()

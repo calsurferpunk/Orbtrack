@@ -2667,7 +2667,7 @@ public class Database extends SQLiteOpenHelper
         return(saveID);
     }
 
-    //Runs a delete and returns success
+    //Runs a delete command and returns success
     private static boolean runDelete(Context context, String table, String where, String[] whereArgs)
     {
         boolean success = false;

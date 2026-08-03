@@ -1972,7 +1972,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         //if using LocationType.Current and don't have location permission
                         if(widgetSettings.location.getIsCurrent() && !Globals.haveLocationPermission(context))
                         {
-                            //if can ask for permission
+                            //if able to ask for permission
                             if(Globals.canAskLocationPermission)
                             {
                                 //get permission
@@ -1989,7 +1989,7 @@ public abstract class WidgetBaseSetupActivity extends BaseInputActivity implemen
                         }
                         else if(widgetSettings.location.getIsCurrent() && widgetSettings.location.useFollow && !Globals.havePostNotificationsPermission(context))
                         {
-                            //if can ask for permission
+                            //if able to ask for permission
                             if(Globals.canAskPostNotificationsPermission)
                             {
                                 //get permission

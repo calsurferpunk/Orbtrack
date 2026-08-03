@@ -68,11 +68,13 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.snackbar.Snackbar;
+import com.google.android.play.agesignals.AgeSignalsAccessRequest;
+import com.google.android.play.agesignals.AgeSignalsAccessResult;
 import com.google.android.play.agesignals.AgeSignalsManager;
 import com.google.android.play.agesignals.AgeSignalsManagerFactory;
 import com.google.android.play.agesignals.AgeSignalsRequest;
 import com.google.android.play.agesignals.AgeSignalsResult;
-import com.google.android.play.agesignals.model.AgeSignalsVerificationStatus;
+import com.google.android.play.agesignals.model.AgeSignalsStatus;
 import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.app.NotificationManagerCompat;
 import androidx.documentfile.provider.DocumentFile;
@@ -118,7 +120,6 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,7 +134,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Formatter;
 import java.util.List;
@@ -261,8 +261,8 @@ public abstract class Globals
     //Languages
     public static abstract class Languages
     {
-        static final String English = new Locale("en").getLanguage();
-        static final String Spanish = new Locale("es").getLanguage();
+        static final String English = (Build.VERSION.SDK_INT >= 36 ? Locale.of("en") : new Locale("en")).getLanguage();
+        static final String Spanish = (Build.VERSION.SDK_INT >= 36 ? Locale.of("es") : new Locale("es")).getLanguage();
     }
 
     //Foreground types
@@ -551,7 +551,7 @@ public abstract class Globals
     private static class TranslateTask extends ThreadTask<Object, Void, Void>
     {
         private final TranslateListener translateListener;
-        private static final String English = new Locale("en").getLanguage();
+        private static final String English = (Build.VERSION.SDK_INT >= 36 ? Locale.of("en") : new Locale("en")).getLanguage();
         private static final String TranslationResult = "translations";
         private static final String TextResult = "text";
         private static final String PostBody = "[{\"" + TextResult + "\":\"" + "%s" + "\"}]";
@@ -591,7 +591,7 @@ public abstract class Globals
                 //while data is okay and more to break
                 while(fullData.isOkay() && currentIndex < outStringLength)
                 {
-                    //if under size for next break
+                    //if under length for next break
                     if(currentIndex + 2500 < outStringLength)
                     {
                         //find next break
@@ -609,7 +609,7 @@ public abstract class Globals
                             if(breakIndex < 0 || (breakIndex - (currentIndex + 2500)) > 2500)
                             {
                                 //set to maximum
-                                //note: might be mid word
+                                //note: might be mid-word
                                 breakIndex = currentIndex + 2500;
                                 if(breakIndex >= outStringLength)
                                 {
@@ -1452,11 +1452,81 @@ public abstract class Globals
     }
 
     //Handles age check
-    public static void handleAgeCheck(Context context, OnAgeCheckListener listener)
+    public static void handleAgeCheck(Activity activity, OnAgeCheckListener listener)
     {
+        Context context = activity.getApplicationContext();
         AgeSignalsManager ageCheckManager = AgeSignalsManagerFactory.create(context);
 
-        //check age
+        //request age check
+        ageCheckManager.requestAgeSignalsAccess(AgeSignalsAccessRequest.builder().setActivity(activity).build()).addOnSuccessListener(new OnSuccessListener<>()
+        {
+            @Override
+            public void onSuccess(AgeSignalsAccessResult ageSignalsAccessResult)
+            {
+                Integer status = ageSignalsAccessResult.ageSignalsStatus();
+
+                //if no status or not shared
+                if(status == null || status == AgeSignalsStatus.NOT_SHARED)
+                {
+                    //unable to check, but send result
+                    listener.onResult(null, true);
+                }
+                //else if shared
+                else if(status == AgeSignalsStatus.SHARED)
+                {
+                    //check age
+                    ageCheckManager.checkAgeSignals(AgeSignalsRequest.builder().build()).addOnSuccessListener(new OnSuccessListener<>()
+                    {
+                        @Override
+                        public void onSuccess(AgeSignalsResult ageSignalsResult)
+                        {
+                            //send result
+                            //note: all ages accepted for now
+                            listener.onResult(ageSignalsResult, true);
+                        }
+                    }).addOnCanceledListener(new OnCanceledListener()
+                    {
+                        @Override
+                        public void onCanceled()
+                        {
+                            //send canceled result
+                            listener.onResult(null, false);
+                        }
+                    }).addOnFailureListener(new OnFailureListener()
+                    {
+                        @Override
+                        public void onFailure(@NonNull Exception e)
+                        {
+                            //unable to check, but send result
+                            listener.onResult(null, true);
+                        }
+                    });
+                }
+                else        //status == AgeSignalsStatus.VERIFICATION_REQUIRED
+                {
+                    //show verification needed
+                    listener.onResult(null, false);
+                }
+            }
+        }).addOnCanceledListener(new OnCanceledListener()
+        {
+            @Override
+            public void onCanceled()
+            {
+                //send canceled result
+                listener.onResult(null, false);
+            }
+        }).addOnFailureListener(new OnFailureListener()
+        {
+            @Override
+            public void onFailure(@NonNull Exception e)
+            {
+                //unable to check, but send result
+                listener.onResult(null, true);
+            }
+        });
+
+        /*//check age
         ageCheckManager.checkAgeSignals(AgeSignalsRequest.builder().build()).addOnSuccessListener(new OnSuccessListener<>()
         {
             @Override
@@ -1492,10 +1562,10 @@ public abstract class Globals
                 //unable to check, but send result
                 listener.onResult(null, true);
             }
-        });
+        });*/
     }
 
-    //Gets if google play services are available
+    //Gets if Google Play services are available
     public static boolean getUseGooglePlayServices(Context context, boolean showError)
     {
         int result;
@@ -1520,7 +1590,7 @@ public abstract class Globals
             //else if showing errors
             else if(showError)
             {
-                //if can show user a dialog
+                //if able to show user a dialog
                 if(context instanceof Activity && api.isUserResolvableError(result))
                 {
                     //try to show dialog
@@ -1781,11 +1851,11 @@ public abstract class Globals
     }
 
     //Starts a service
-    public static void startService(Context context, Intent intent, boolean runForeground)
+    public static void startService(Context context, Intent intent, boolean runForeGround)
     {
         try
         {
-            if(runForeground && Build.VERSION.SDK_INT >= 26)
+            if(runForeGround)
             {
                 context.startForegroundService(intent);
             }
@@ -1804,8 +1874,8 @@ public abstract class Globals
     //Starts the given service in foreground if needed
     public static void startForeground(Service service, int id, NotificationCompat.Builder notifyBuilder, boolean runForeground, int foregroundType)
     {
-        //if need to start in foreground and android >= 8.0
-        if(runForeground && Build.VERSION.SDK_INT >= 26)
+        //if need to start in foreground
+        if(runForeground)
         {
             //start in foreground
             if(Build.VERSION.SDK_INT >= 29)
@@ -1824,15 +1894,11 @@ public abstract class Globals
     {
         NotificationManager manager;
 
-        //if a notification channel needs to be set
-        if(Build.VERSION.SDK_INT >= 26)
+        //get manager and create channel
+        manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
+        if(manager != null)
         {
-            //get manager and create channel
-            manager = (NotificationManager)context.getSystemService(Context.NOTIFICATION_SERVICE);
-            if(manager != null)
-            {
-                manager.createNotificationChannel(new NotificationChannel(notifyChannelId, notifyChannelId, (getChannelId(ChannelIds.Pass).equals(notifyChannelId) ? NotificationManager.IMPORTANCE_DEFAULT : NotificationManager.IMPORTANCE_LOW)));
-            }
+            manager.createNotificationChannel(new NotificationChannel(notifyChannelId, notifyChannelId, (getChannelId(ChannelIds.Pass).equals(notifyChannelId) ? NotificationManager.IMPORTANCE_DEFAULT : NotificationManager.IMPORTANCE_LOW)));
         }
     }
 
@@ -2458,7 +2524,7 @@ public abstract class Globals
         }
 
         //sort list
-        Collections.sort(zones, new Comparator<>()
+        zones.sort(new Comparator<>()
         {
             @Override
             public int compare(TimeZone o1, TimeZone o2)
@@ -2622,8 +2688,8 @@ public abstract class Globals
         {
             //get language
             Configuration config = context.getResources().getConfiguration();
-            LocaleList locales = (Build.VERSION.SDK_INT >= 24 ? config.getLocales() : null);
-            Locale currentLocale = (Build.VERSION.SDK_INT >= 24 && !locales.isEmpty() ? locales.get(0) : Locale.getDefault());
+            LocaleList locales = config.getLocales();
+            Locale currentLocale = (!locales.isEmpty() ? locales.get(0) : Locale.getDefault());
             return(currentLocale.getLanguage());
         }
         else
@@ -5279,14 +5345,7 @@ public abstract class Globals
     //Creates a file input stream
     public static InputStream createFileInputStream(File file) throws IOException
     {
-        if(Build.VERSION.SDK_INT >= 26)
-        {
-            return(Files.newInputStream(file.toPath()));
-        }
-        else
-        {
-            return(new FileInputStream(file));
-        }
+        return(Files.newInputStream(file.toPath()));
     }
 
     //Gets InputStreams from files within a zip file that match any extensions
@@ -5583,7 +5642,7 @@ public abstract class Globals
     //Converts a text string into an HTML string
     public static Spanned stringToHtml(String stringValue)
     {
-        return((Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(stringValue, Html.FROM_HTML_MODE_LEGACY) : Html.fromHtml(stringValue)));
+        return((Html.fromHtml(stringValue, Html.FROM_HTML_MODE_LEGACY)));
     }
 
     //Decodes HTML special characters
@@ -5591,7 +5650,7 @@ public abstract class Globals
     {
         String result;
 
-        result = Html.fromHtml(stringToHtml(htmlString).toString()).toString();
+        result = Html.fromHtml(stringToHtml(htmlString).toString(), Html.FROM_HTML_MODE_LEGACY).toString();
         return(result.replace("< ", "<").replace(" >", ">"));
     }
 

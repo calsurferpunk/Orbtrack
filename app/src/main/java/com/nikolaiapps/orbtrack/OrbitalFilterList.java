@@ -439,8 +439,8 @@ public class OrbitalFilterList
 
                     types.add(new IconSpinner.Item(Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentId, currentType), currentTypeString, currentType));
                 }
+                types.sort(new IconSpinner.Item.Comparer());
 
-                Collections.sort(types, new IconSpinner.Item.Comparer());
                 setupListAdapter(typeList, new IconSpinner.CustomAdapter(currentContext, types.toArray(new IconSpinner.Item[0])), itemSelectedListener);
             }
         }

@@ -62,11 +62,8 @@ import androidx.lifecycle.LifecycleOwner;
 import com.google.android.material.slider.LabelFormatter;
 import com.google.android.material.slider.Slider;
 import com.google.common.util.concurrent.ListenableFuture;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 
 
@@ -2081,7 +2078,7 @@ public class CameraLens extends FrameLayout implements SensorUpdate.OnSensorChan
                 }
 
                 //sort parent orbitals
-                Collections.sort(parentOrbitals, parentOrbitalComparer);
+                parentOrbitals.sort(parentOrbitalComparer);
             }
 
             //if no change, need to set in parent filter status, and not waiting for a draw

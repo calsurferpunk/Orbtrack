@@ -37,7 +37,6 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -1771,7 +1770,7 @@ public abstract class Current
                         {
                             combinedNoradIndex.add(new Items.NoradIndex(combinedItems[index].satellite.getSatelliteNum(), index));
                         }
-                        Collections.sort(combinedNoradIndex, new Items.NoradIndex.Comparer());
+                        combinedNoradIndex.sort(new Items.NoradIndex.Comparer());
                     }
                     break;
             }

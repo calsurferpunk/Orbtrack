@@ -604,7 +604,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 {
                     //update size and display
                     currentView.setTextSize(size);
-                    currentView.setText(Html.fromHtml(setText));
+                    currentView.setText(Html.fromHtml(setText, Html.FROM_HTML_MODE_LEGACY));
                 }
             }
         }
@@ -617,7 +617,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             {
                 //update size and display
                 views.setFloat(viewId, "setTextSize", size);
-                views.setTextViewText(viewId, Html.fromHtml(setText));
+                views.setTextViewText(viewId, Html.fromHtml(setText, Html.FROM_HTML_MODE_LEGACY));
             }
         }
     }
@@ -884,13 +884,13 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
                 //if -needs to be following or using interval- and -is using current location-
                 if((needFollow || needInterval) && WidgetBaseSetupActivity.getLocationSource(context, currentId) == Database.LocationType.Current)
                 {
-                    //if needs to be following and is following
+                    //if need to be following and is following
                     if(needFollow && WidgetBaseSetupActivity.getLocationFollow(context, currentId))
                     {
                         //add it
                         ids.add(currentId);
                     }
-                    //else if needs to use interval and is using interval
+                    //else if need to use interval and is using interval
                     else if(needInterval && WidgetBaseSetupActivity.getLocationInterval(context, currentId))
                     {
                         //add it

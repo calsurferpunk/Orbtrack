@@ -243,7 +243,7 @@ public class NotifySettingsActivity extends BaseInputActivity
             setResult(RESULT_OK, resultData);
             this.finish();
         }
-        //else if can ask for permission
+        //else if able to ask for permission
         else if(Globals.canAskPostNotificationsPermission)
         {
             //ask permission

@@ -608,7 +608,7 @@ public class PlayBar extends LinearLayout
         return(increments);
     }
 
-    //Stops the play timer and returns true if was running
+    //Stops the play timer and returns if it was running
     public boolean stopPlayTimer(boolean resetSynced)
     {
         boolean stopped = false;

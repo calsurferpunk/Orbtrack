@@ -305,7 +305,7 @@ public class LocationService extends Service implements LocationListener
             gotAltitudeListener = listener;
         }
 
-        //Try to gets altitude of location from source and returns if success
+        //Try to get altitude of location from source and returns if success
         private boolean getAltitude(Context context, int source)
         {
             int statusCode;
@@ -603,7 +603,7 @@ public class LocationService extends Service implements LocationListener
                 //stop and send need restart
                 if(useForeground)
                 {
-                    stopForeground(true);
+                    stopForeground(STOP_FOREGROUND_REMOVE);
                 }
                 stopSelf();
                 useForeground = false;
@@ -783,10 +783,10 @@ public class LocationService extends Service implements LocationListener
         }
     }
 
-    //Creates a google places client
+    //Creates a Google places client
     private PlacesClient createPlacesClient()
     {
-        Places.initialize(this.getApplicationContext(), this.getResources().getString(R.string.google_places_api_key));
+        Places.initializeWithNewPlacesApiEnabled(this.getApplicationContext(), this.getResources().getString(R.string.google_places_new_api_key));
         return(Places.createClient(this));
     }
 
@@ -1026,7 +1026,7 @@ public class LocationService extends Service implements LocationListener
             //if need permission
             if(!Globals.haveLocationPermission(this))
             {
-                //if can ask
+                //if allowed to ask
                 if(Globals.canAskLocationPermission)
                 {
                     //send need permission broadcast
@@ -1174,7 +1174,7 @@ public class LocationService extends Service implements LocationListener
                 if(currentPlace != null)
                 {
                     String placeId = currentPlace.ID.toString();
-                    List<Place.Field> placeResult = Collections.singletonList(Place.Field.LAT_LNG);
+                    List<Place.Field> placeResult = Collections.singletonList(Place.Field.LOCATION);
 
                     if(googlePlacesClient != null)
                     {
@@ -1184,7 +1184,7 @@ public class LocationService extends Service implements LocationListener
                             public void onSuccess(FetchPlaceResponse fetchPlaceResponse)
                             {
                                 Place resultPlace = fetchPlaceResponse.getPlace();
-                                LatLng placeLatLon = resultPlace.getLatLng();
+                                LatLng placeLatLon = resultPlace.getLocation();
 
                                 if(placeLatLon != null)
                                 {

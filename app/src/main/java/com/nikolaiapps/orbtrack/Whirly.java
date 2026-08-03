@@ -373,7 +373,7 @@ class Whirly
 
         void moveLocation(double latitude, double longitude, double altitudeKm, boolean limitAltitude)
         {
-            //remember if non negative
+            //remember if non-negative
             boolean negativeAltitudeKm = (altitudeKm < 0);
 
             //remove display
@@ -387,7 +387,7 @@ class Whirly
             //set location
             board.setCenter(new Point3d(Math.toRadians(longitude), Math.toRadians(latitude), zValue));
 
-            //if non negative
+            //if non-negative
             if(!negativeAltitudeKm)
             {
                 //add display
@@ -2000,7 +2000,7 @@ class Whirly
             }
             common.geo = new Calculations.GeodeticDataType(latitude, longitude, altitudeKm, 0, 0);
 
-            //if can use bearing
+            //if able to use bearing
             canUseBearing = (canUseBearing && common.lastBearingGeo.isSet() && !common.geo.equals(common.lastBearingGeo));
             if(canUseBearing)
             {

@@ -282,7 +282,7 @@ public class SensorUpdate implements SensorEventListener
                     switch(currentOrientation)
                     {
                         case Surface.ROTATION_0:
-                            //use y axis
+                            //use y-axis
                             azGyroIndex = 1;
                             break;
 
@@ -292,7 +292,7 @@ public class SensorUpdate implements SensorEventListener
 
                         case Surface.ROTATION_90:
                         default:
-                            //use x axis
+                            //use x-axis
                             azGyroIndex = 0;
                             break;
                     }

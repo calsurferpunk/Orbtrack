@@ -1338,7 +1338,7 @@ public class UpdateService extends NotifyService
                 final String sourceDesc = sourceString;
 
                 //remove any extra spaces and new lines
-                infoString = infoString.replaceAll("\\s+", " ").replaceAll("\r", "").replace("\n", "").replace("<p> ", "<p>").replace(" </p>", "</p>").replace("</p> <p>", "</p><p>");
+                infoString = infoString.replaceAll("\\s+", " ").replace("\r", "").replace("\n", "").replace("<p> ", "<p>").replace(" </p>", "</p>").replace("</p> <p>", "</p><p>");
 
                 //translate if needed
                 Globals.translateText(this, infoString, new Globals.TranslateListener()
@@ -2875,7 +2875,7 @@ public class UpdateService extends NotifyService
                 line1Index = inputString.indexOf("1 ", inputOffset);
                 if(line1Index >= 0 && line1Index + TLE_LINE_LENGTH < inputLength)
                 {
-                    //if get starting line 2 index
+                    //if can get starting line 2 index
                     line2Index = inputString.indexOf("2 ", line1Index + TLE_LINE_LENGTH);
                     if(line2Index > line1Index && line2Index + TLE_LINE_LENGTH <= inputLength)
                     {
@@ -3557,7 +3557,7 @@ public class UpdateService extends NotifyService
         masterList.owners = Database.getOwners(this);
         masterList.categories = Database.getCategories(this);
         masterList.categoriesByIndex.addAll(masterList.categories);
-        Collections.sort(masterList.categoriesByIndex, new MasterCategory.Comparer(false, true));
+        masterList.categoriesByIndex.sort(new MasterCategory.Comparer(false, true));
         masterList.satelliteCategories = Database.getSatelliteCategoriesEnglish(this);
     }
 

@@ -1,16 +1,12 @@
 package com.nikolaiapps.orbtrack;
 
 
-import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.os.Build;
 import android.os.Parcelable;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.fragment.app.FragmentManager;
 import android.util.AttributeSet;
-import android.view.ContextThemeWrapper;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TimePicker;
@@ -66,7 +62,7 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
     @Override
     public boolean onTouchEvent(MotionEvent event)
     {
-        //if for the on touch down event
+        //if for the on touch-down event
         if(event.getAction() == MotionEvent.ACTION_UP)
         {
             Context context = this.getContext();
@@ -91,41 +87,11 @@ public class TimeInputView extends AppCompatEditText implements TimePickerDialog
                 return(true);
             }
 
-            //if possibly a version with time picker dialog problems
-            if(Build.VERSION.SDK_INT <= 23)
-            {
-                TimePicker timeView = new TimePicker(new ContextThemeWrapper(context, themeID));
+            TimePickerDialog timeDialog;
 
-                //set defaults
-                timeView.setHour(currentHour);
-                timeView.setMinute(currentMinute);
-                timeView.setIs24HourView(false);
-
-                //show time picker
-                new AlertDialog.Builder(context, themeID).setPositiveButton(R.string.title_ok, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                        TimeInputView.this.onTimeSet(timeView, timeView.getHour(), timeView.getMinute());
-                    }
-                }).setNegativeButton(R.string.title_cancel, new DialogInterface.OnClickListener()
-                {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i)
-                    {
-                        dialogInterface.dismiss();
-                    }
-                }).setView(timeView).show();
-            }
-            else
-            {
-                TimePickerDialog timeDialog;
-
-                //show time picker
-                timeDialog = new TimePickerDialog(context, themeID, this, currentHour, currentMinute, false);
-                timeDialog.show();
-            }
+            //show time picker
+            timeDialog = new TimePickerDialog(context, themeID, this, currentHour, currentMinute, false);
+            timeDialog.show();
         }
 
         //handled

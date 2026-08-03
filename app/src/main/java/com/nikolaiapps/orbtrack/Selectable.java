@@ -525,7 +525,7 @@ public abstract class Selectable
                 String text;
                 Resources res = currentContext.getResources();
 
-                //if can show display
+                //if able to show display
                 if(canShow)
                 {
                     MaterialCardView groupCard = new MaterialCardView(currentContext);
@@ -1075,7 +1075,7 @@ public abstract class Selectable
             }
         }
 
-        //Handles a non editable item click
+        //Handles a non-editable item click
         protected void onItemNonEditClick(ListDisplayItem item, int pageNum)
         {
             //needs to be overridden
@@ -2203,7 +2203,7 @@ public abstract class Selectable
             });
         }
 
-        //Creates an on information changed listener
+        //Creates an on-information changed listener
         protected OnInformationChangedListener createOnInformationChangedListener(final Selectable.ListBaseAdapter listAdapter)
         {
             return(new OnInformationChangedListener()

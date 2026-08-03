@@ -243,7 +243,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         {
             //check age
             ageCheckListener = createAgeCheckListener(savedInstanceState);
-            Globals.handleAgeCheck(applicationContext, ageCheckListener);
+            Globals.handleAgeCheck(this, ageCheckListener);
         }
         //else if able to check age with Amazon
         else if(getAmazonAgeCheck())
@@ -2977,6 +2977,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
     //Creates age check listener
     private Globals.OnAgeCheckListener createAgeCheckListener(Bundle savedInstanceState)
     {
+        final Activity activity = this;
         final Context applicationContext = this;
         final Resources res = applicationContext.getResources();
 
@@ -2998,7 +2999,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                         public void onClick(DialogInterface dialog, int which)
                         {
                             //retry
-                            Globals.handleAgeCheck(applicationContext, ageCheckListener);
+                            Globals.handleAgeCheck(activity, ageCheckListener);
                         }
                     }, new DialogInterface.OnClickListener()
                     {

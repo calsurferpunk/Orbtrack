@@ -13,7 +13,6 @@ import com.google.android.material.button.MaterialButton;
 import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 
 
 public class ManualOrbitalInputActivity extends BaseInputActivity
@@ -72,7 +71,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
             UpdateService.MasterOwner currentOwner = owners.get(index);
             ownerItems.add(new IconSpinner.Item(Globals.getOwnerIconIDs(currentOwner.code), currentOwner.name, currentOwner.code));
         }
-        Collections.sort(ownerItems, new IconSpinner.Item.Comparer());
+        ownerItems.sort(new IconSpinner.Item.Comparer());
         ownerItems.add(0, new IconSpinner.Item("", ""));
         ownerList.setAdapter(new IconSpinner.CustomAdapter(this, ownerItems.toArray(new IconSpinner.Item[0])));
         ownerList.setSelectedValue("");
@@ -83,7 +82,7 @@ public class ManualOrbitalInputActivity extends BaseInputActivity
             UpdateService.MasterCategory currentCategory = categories.get(index);
             categoryItems.add(new IconSpinner.Item(currentCategory.name, currentCategory.index));
         }
-        Collections.sort(categoryItems, new IconSpinner.Item.Comparer());
+        categoryItems.sort(new IconSpinner.Item.Comparer());
         categoryItems.add(0, new IconSpinner.Item("", ""));
         groupList.setAdapter(new IconSpinner.CustomAdapter(this, categoryItems.toArray(new IconSpinner.Item[0])));
         groupList.setSelectedValue("");

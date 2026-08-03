@@ -551,7 +551,7 @@ public abstract class FileBrowserBaseActivity extends BaseInputActivity
 
     private void handleBackPressed()
     {
-        //if couldn't go back
+        //if unable to go back
         if(!filesAdapter.goBack())
         {
             //call super

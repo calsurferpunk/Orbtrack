@@ -4,7 +4,6 @@ package com.nikolaiapps.orbtrack;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
-import android.os.Build;
 import android.os.Bundle;
 import androidx.lifecycle.Observer;
 import android.text.Html;
@@ -197,7 +196,7 @@ public abstract class UpdateReceiver
                         infoString = (String)extraData.getSerializable(UpdateService.ParamTypes.Information);
                         if(infoString != null)
                         {
-                            infoText = (Build.VERSION.SDK_INT >= 24 ? Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT) : Html.fromHtml(infoString));
+                            infoText = Html.fromHtml(infoString, Html.FROM_HTML_MODE_COMPACT);
                         }
                         else
                         {

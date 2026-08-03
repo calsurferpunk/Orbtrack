@@ -28,13 +28,10 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
-
 import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.List;
 
 
@@ -226,7 +223,7 @@ public class MasterAddListActivity extends BaseInputActivity
                         }
                     }
                 }
-                Collections.sort(items, new ListItem.Comparer(true));
+                items.sort(new ListItem.Comparer(true));
 
                 //if listeners are set
                 if(loadItemsListener != null)
@@ -790,7 +787,7 @@ public class MasterAddListActivity extends BaseInputActivity
                             case Globals.ProgressType.Cancelled:
                                 if(isGeneral)
                                 {
-                                    //if allowing dismiss
+                                    //if allowing dismissal
                                     if(allowDismiss)
                                     {
                                         //hide display

@@ -4134,6 +4134,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_bgr;
                     break;
 
+                case "bhr":
+                    ids[0] = R.drawable.owner_bhr;
+                    break;
+
                 case "bhut":
                 case "bt":
                     ids[0] = R.drawable.owner_bhut;
@@ -4145,6 +4149,10 @@ public abstract class Globals
 
                 case "braz":
                     ids[0] = R.drawable.owner_braz;
+                    break;
+
+                case "bwa":
+                    ids[0] = R.drawable.owner_bwa;
                     break;
 
                 case "ca":
@@ -4396,6 +4404,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_mng;
                     break;
 
+                case "mne":
+                    ids[0] = R.drawable.owner_mne;
+                    break;
+
                 case "mus":
                     ids[0] = R.drawable.owner_mus;
                     break;
@@ -4467,6 +4479,10 @@ public abstract class Globals
                     ids[1] = R.drawable.owner_esa;
                     break;
 
+                case "pri":
+                    ids[0] = R.drawable.owner_pri;
+                    break;
+
                 case "pry":
                     ids[0] = R.drawable.owner_pry;
                     break;
@@ -4534,6 +4550,10 @@ public abstract class Globals
                     ids[0] = R.drawable.owner_sk;
                     break;
 
+                case "slb":
+                    ids[0] = R.drawable.owner_slb;
+                    break;
+
                 case "kor":
                 case "skor":
                     ids[0] = R.drawable.owner_skor;
@@ -4555,6 +4575,10 @@ public abstract class Globals
 
                 case "swtz":
                     ids[0] = R.drawable.owner_swtz;
+                    break;
+
+                case "svk":
+                    ids[0] = R.drawable.owner_svk;
                     break;
 
                 case "svn":
@@ -4585,6 +4609,10 @@ public abstract class Globals
 
                 case "uae":
                     ids[0] = R.drawable.owner_uae;
+                    break;
+
+                case "uga":
+                    ids[0] = R.drawable.owner_uga;
                     break;
 
                 case "uk":

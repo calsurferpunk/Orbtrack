@@ -1200,7 +1200,7 @@ public class UpdateService extends NotifyService
         switch(updateSource)
         {
             case Database.UpdateSource.Celestrak:
-                urlString = "https://www.celestrak.com/satcat/" + launchYear + "/" + launchYearNum + ".php";
+                urlString = "https://www.celestrak.org/satcat/" + launchYear + "/" + launchYearNum + ".php";
                 sourceString = "<p>Celestrak</p><a>" + urlString + "</a>";
                 break;
 
@@ -2037,7 +2037,7 @@ public class UpdateService extends NotifyService
 
             case Database.UpdateSource.Celestrak:
             default:
-                urlBase = "https://www.celestrak.com/";
+                urlBase = "https://www.celestrak.org/";
 
                 switch(updateSubSource)
                 {
@@ -3171,13 +3171,13 @@ public class UpdateService extends NotifyService
                         if(usingGP)
                         {
                             //try to get GP data
-                            receivedData = Globals.getWebPage("https://celestrak.com/NORAD/elements/gp.php?CATNR=" + currentNumber + "&FORMAT=json", isLast, null);
+                            receivedData = Globals.getWebPage("https://celestrak.org/NORAD/elements/gp.php?CATNR=" + currentNumber + "&FORMAT=json", isLast, null);
                             receivedPage = receivedData.pageData;
                         }
                         else
                         {
                             //try to get TLE data
-                            receivedData = Globals.getWebPage("https://celestrak.com/satcat/tle.php?CATNR=" + currentNumber, isLast, null);
+                            receivedData = Globals.getWebPage("https://celestrak.org/satcat/tle.php?CATNR=" + currentNumber, isLast, null);
                             receivedPage = receivedData.pageData;
                         }
                         break;

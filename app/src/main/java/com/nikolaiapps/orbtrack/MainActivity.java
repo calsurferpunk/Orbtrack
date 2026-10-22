@@ -4000,6 +4000,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                             {
                                 //get fullscreen status
                                 setFullscreen = pageActionBar.isShowing();
+                                mainDrawerLayout.setTag(R.integer.setFullscreen, setFullscreen);
 
                                 //if fullscreen
                                 if(setFullscreen)

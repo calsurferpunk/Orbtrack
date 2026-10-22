@@ -147,10 +147,30 @@ public abstract class BaseInputActivity extends AppCompatActivity
                 @NonNull @Override
                 public WindowInsetsCompat onApplyWindowInsets(@NonNull View view, @NonNull WindowInsetsCompat insets)
                 {
+                    Object setFullscreenTag = view.getTag(R.integer.setFullscreen);
+                    boolean setFullscreen = (setFullscreenTag instanceof Boolean && (Boolean)setFullscreenTag);
+                    int currentEdgeMoveType = edgeMoveType;
+
+                    //if fullscreen tag is set
+                    if(setFullscreenTag != null)
+                    {
+                        //if setting fullscreen
+                        if(setFullscreen)
+                        {
+                            //remove action bar
+                            currentEdgeMoveType &= ~EdgeDistance.ACTION_BAR;
+                        }
+                        else
+                        {
+                            //keep action bar
+                            currentEdgeMoveType |= EdgeDistance.ACTION_BAR;
+                        }
+                    }
+
                     //remember insets and add margins to view
                     systemBarInsets = insets.getInsets(WindowInsetsCompat.Type.systemBars());
                     statusBarHeight = (systemBarInsets.bottom == 0 && context != null ? (int)Globals.dpToPixels(context, 48) : systemBarInsets.bottom);
-                    setEdgeMargins(mainView, edgeMoveType);
+                    setEdgeMargins(mainView, currentEdgeMoveType);
 
                     //continue with other insets
                     return(ViewCompat.onApplyWindowInsets(view, insets));

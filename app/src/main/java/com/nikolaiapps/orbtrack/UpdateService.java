@@ -1200,7 +1200,7 @@ public class UpdateService extends NotifyService
         switch(updateSource)
         {
             case Database.UpdateSource.Celestrak:
-                urlString = "https://www.celestrak.org/satcat/" + launchYear + "/" + launchYearNum + ".php";
+                urlString = "https://celestrak.org/satcat/" + launchYear + "/" + launchYearNum + ".php";
                 sourceString = "<p>Celestrak</p><a>" + urlString + "</a>";
                 break;
 
@@ -2037,7 +2037,7 @@ public class UpdateService extends NotifyService
 
             case Database.UpdateSource.Celestrak:
             default:
-                urlBase = "https://www.celestrak.org/";
+                urlBase = "https://celestrak.org/";
 
                 switch(updateSubSource)
                 {

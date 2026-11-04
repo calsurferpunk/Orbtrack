@@ -21,6 +21,7 @@ import android.content.ContextWrapper;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -1995,7 +1996,7 @@ public abstract class Globals
             else if(currentChild instanceof ViewGroup)
             {
                 //set children
-                setTextColor((LinearLayout)currentChild, textColor);
+                setTextColor((ViewGroup)currentChild, textColor);
             }
         }
     }
@@ -3816,12 +3817,22 @@ public abstract class Globals
         int[] colors = resolveColorIDs(context, R.attr.itemSelectColor, R.attr.itemSelectedColor, bgAttrId);
         return(getSelector(context, colors[0], colors[1], colors[2], (rounded ? 36 : 0)));
     }
+    public static ColorStateList getItemStateSelector(Context context, int bgAttrId)
+    {
+        int[] colors = resolveColorIDs(context, R.attr.itemSelectColor, R.attr.itemSelectedColor, bgAttrId);
+        return(new ColorStateList(new int[][]{new int[]{android.R.attr.state_pressed}, new int[]{android.R.attr.state_selected}, new int[]{}}, new int[]{colors[0], colors[1], colors[2]}));
+    }
 
     //Gets an item selected state
     public static Drawable getItemSelectedState(Context context, boolean rounded)
     {
         int[] colors = resolveColorIDs(context, R.attr.itemSelectedColor, android.R.attr.colorBackground);
         return(getSelectorImage(colors[0], colors[1], (rounded ? 36 : 0)));
+    }
+    public static ColorStateList getItemSelectedState(Context context)
+    {
+        int color = resolveColorID(context, R.attr.itemSelectedColor);
+        return(new ColorStateList(new int[][]{new int[]{}}, new int[]{color}));
     }
 
     //Gets menu item selector
@@ -3834,6 +3845,10 @@ public abstract class Globals
     public static StateListDrawable getListItemStateSelector(Context context, boolean forDialog)
     {
         return(getItemStateSelector(context, (forDialog ? R.attr.pageHighlightBackground : android.R.attr.colorBackground), false));
+    }
+    public static ColorStateList getListItemStateSelector(Context context)
+    {
+        return(getItemStateSelector(context, android.R.attr.colorBackground));
     }
 
     //Gets data item selector

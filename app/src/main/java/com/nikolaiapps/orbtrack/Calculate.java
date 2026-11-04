@@ -5,12 +5,14 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
+import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -27,6 +29,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputLayout;
 import java.util.ArrayList;
@@ -371,7 +374,7 @@ public abstract class Calculate
                     itemHolder = new ItemHolder(itemView, R.id.View_Az_Text, R.id.View_El_Text, R.id.View_Range_Text, R.id.View_Phase_Text, R.id.View_Illumination_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Time_Text);
                 }
 
-                setItemSelector(itemView);
+                setItemSelector(itemView, R.attr.itemNormalColor);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -581,13 +584,13 @@ public abstract class Calculate
                     orbital2Type = currentSatellite2.getOrbitalType();
                 }
             }
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean loading)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, Database.SatelliteData currentSatellite2, boolean usePathQuality, boolean loading)
             {
-                this(context, index, currentSatellite, currentSatellite2, false, false, false, loading);
+                this(context, index, currentSatellite, currentSatellite2, false, usePathQuality, false, loading);
             }
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean loading)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean usePathQuality, boolean loading)
             {
-                this(context, index, currentSatellite, null, false, false, false, loading);
+                this(context, index, currentSatellite, null, false, usePathQuality, false, loading);
             }
             public Item(CalculateService.PassData passData)
             {
@@ -641,6 +644,7 @@ public abstract class Calculate
                     if(timeStartText != null)
                     {
                         timeStartText.setText(inUnknownPassTimeStartNow() ? context.getResources().getString(R.string.title_now) : !passStartFound ? Globals.getUnknownString(context) : Globals.getDateString(context, passTimeStart, zone, true, false));
+                        TextViewCompat.setCompoundDrawableTintList(timeStartText, ColorStateList.valueOf(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : Current.getPathQualityColor(passElMax)));
                     }
 
                     if(timeStartUnder != null)
@@ -720,7 +724,7 @@ public abstract class Calculate
                     hasItems = (satellites != null);
 
                     //set as empty
-                    pathItems.set(new Item[]{new Item(context, 0, null, true)});
+                    pathItems.set(new Item[]{new Item(context, 0, null, false, true)});
                 }
 
                 //remember strings and layout ID
@@ -786,7 +790,7 @@ public abstract class Calculate
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView, R.id.Pass_Time_Start_Text, R.id.Pass_Time_Start_Under, R.id.Pass_Time_End_Text, R.id.Pass_Time_Duration_Text, R.id.Pass_El_Max_Text, R.id.Pass_El_Max_Under, R.id.Pass_Calculate_Progress_Bar, R.id.Pass_Data_Group);
 
-                setItemSelector(itemView);
+                setItemSelector(itemView, R.attr.itemNormalColor);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -1306,7 +1310,7 @@ public abstract class Calculate
                     itemHolder = new ItemHolder(itemView, R.id.Coordinate_Latitude_Text, R.id.Coordinate_Longitude_Text, R.id.Coordinate_Altitude_Text, R.id.Coordinate_Speed_Text, R.id.Coordinate_Progress_Group, R.id.Coordinate_Data_Group, R.id.Coordinate_Time_Text);
                 }
 
-                setItemSelector(itemView);
+                setItemSelector(itemView, R.attr.itemNormalColor);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -1504,7 +1508,14 @@ public abstract class Calculate
             titleText.setVisibility(View.VISIBLE);
             convertView.findViewById(progressId).setVisibility(View.GONE);
             convertView.findViewById(dataId).setVisibility(View.VISIBLE);
-            convertView.setBackground(Globals.getListItemStateSelector(context, false));
+            if(convertView instanceof MaterialCardView)
+            {
+                ((MaterialCardView)convertView).setCardBackgroundColor(Globals.getListItemStateSelector(context));
+            }
+            else
+            {
+                convertView.setBackground(Globals.getListItemStateSelector(context, false));
+            }
             dividerView = convertView.findViewById(dividerId);
             if(dividerView != null)
             {

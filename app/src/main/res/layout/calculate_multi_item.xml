@@ -1,14 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/Calculate_Multi_Item_Layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center">
+    style="@style/CardItem">
     <com.nikolaiapps.orbtrack.ExpandingListView
         android:id="@+id/Multi_Item_List"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:padding="8dp"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
         android:visibility="gone"/>
@@ -21,4 +19,4 @@
         <com.google.android.material.progressindicator.CircularProgressIndicator
             style="@style/ProgressCircleSmall"/>
     </LinearLayout>
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

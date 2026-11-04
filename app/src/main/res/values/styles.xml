@@ -81,6 +81,7 @@
         <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
         <item name="dividerLineColor">@color/light_gray</item>
         <item name="dividerTextBackground">#F9F9F9</item>
+        <item name="itemNormalColor">@color/clear_light_gray</item>
         <item name="titleTextColor">@color/white</item>
         <item name="textColorAlertDialogListItem">@color/black</item>
         <item name="android:colorBackground">@color/white</item>
@@ -97,7 +98,7 @@
         <item name="actionOverflowMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:itemTextAppearance">@style/PopupMenuTextStyle</item>
         <item name="elevationOverlayEnabled">false</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="23">true</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="DarkBase" parent="Theme.Material3.Dark">
@@ -121,6 +122,7 @@
         <item name="colorOnTertiaryContainer">?attr/colorOnPrimaryContainer</item>
         <item name="dividerLineColor">@color/dark_gray</item>
         <item name="dividerTextBackground">#2A2A2A</item>
+        <item name="itemNormalColor">@color/clear_dark_gray</item>
         <item name="titleTextColor">@color/white</item>
         <item name="textColorAlertDialogListItem">@color/white</item>
         <item name="android:colorBackground">@color/black</item>
@@ -136,7 +138,7 @@
         <item name="actionOverflowMenuStyle">@style/PopupMenuStyle</item>
         <item name="android:itemTextAppearance">@style/PopupMenuTextStyle</item>
         <item name="elevationOverlayEnabled">false</item>
-        <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+        <item name="android:windowLightStatusBar">false</item>
     </style>
 
     <!-- Themes -->
@@ -360,6 +362,16 @@
         <item name="itemSelectedColor">@color/yellow_900</item>
     </style>
 
+    <!--Card Items-->
+    <style name="CardItem">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+        <item name="android:layout_marginStart">8dp</item>
+        <item name="android:layout_marginEnd">8dp</item>
+    </style>
+
     <!--Divider-->
     <style name="Divider">
         <item name="android:layout_width">match_parent</item>
@@ -480,7 +492,7 @@
         <item name="android:maxLength">20</item>
         <item name="android:selectAllOnFocus">true</item>
         <item name="android:singleLine">true</item>
-        <item name="android:autofillHints" tools:targetApi="26">@string/empty</item>
+        <item name="android:autofillHints">@string/empty</item>
         <item name="android:hint">@string/empty</item>
     </style>
 
@@ -506,7 +518,7 @@
         <item name="android:layout_height">wrap_content</item>
         <item name="android:inputType">numberDecimal|numberSigned</item>
         <item name="android:singleLine">true</item>
-        <item name="android:autofillHints" tools:targetApi="26">@string/empty</item>
+        <item name="android:autofillHints">@string/empty</item>
         <item name="android:hint">@string/empty</item>
     </style>
 
@@ -710,7 +722,7 @@
         <item name="android:padding">8dp</item>
         <item name="android:maxLength">3</item>
         <item name="android:inputType">number</item>
-        <item name="android:autofillHints" tools:targetApi="26">@string/empty</item>
+        <item name="android:autofillHints">@string/empty</item>
         <item name="android:hint">@string/empty</item>
         <item name="android:selectAllOnFocus">true</item>
         <item name="android:text">@string/text_0</item>

@@ -1,20 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools" xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/Pass_Layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="24dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:gravity="center">
+    style="@style/CardItem">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="horizontal"
-        android:gravity="center"
-        tools:ignore="UselessParent">
+        android:gravity="center">
         <com.google.android.material.progressindicator.LinearProgressIndicator
             android:id="@+id/Pass_Calculate_Progress_Bar"
             android:layout_width="0dp"
@@ -27,6 +19,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="0.6"
+            android:padding="16dp"
             android:orientation="horizontal"
             android:visibility="gone">
             <LinearLayout
@@ -41,7 +34,10 @@
                 <TextView
                     android:id="@+id/Pass_Time_Start_Text"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
+                    android:layout_height="wrap_content"
+                    app:drawableEndCompat="@drawable/ic_circle_indicator"
+                    android:drawablePadding="4dp"
+                    app:drawableTint="@color/transparent"/>
 
                 <View
                     android:id="@+id/Pass_Time_Start_Under"
@@ -89,4 +85,4 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

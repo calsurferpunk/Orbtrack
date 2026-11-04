@@ -4,6 +4,8 @@
     <color name="very_light_gray">#F8F8F8</color>
     <color name="light_gray">#DADADA</color>
     <color name="gray">#777777</color>
+    <color name="clear_dark_gray">#A0202020</color>
+    <color name="clear_light_gray">#A0FBFBFB</color>
     <color name="very_very_dark_gray">#1D1D1D</color>
     <color name="very_dark_gray">#222222</color>
     <color name="dark_gray">#444444</color>

@@ -9,6 +9,7 @@
     <attr name="dividerLineColor" format="reference"/>
     <attr name="dividerTextBackground" format="color"/>
     <attr name="dialogStyle" format="reference"/>
+    <attr name="itemNormalColor" format="color"/>
     <attr name="itemSelectColor" format="color"/>
     <attr name="itemSelectedColor" format="color"/>
     <attr name="normalTint" format="color"/>

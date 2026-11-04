@@ -773,7 +773,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
             //refresh menu
             onPrepareOptionsMenu(optionsMenu);
         }
-        if(mainGroup == Groups.Calculate)
+        if(mainGroup == Groups.Calculate && calculatePageAdapter != null)
         {
             calculatePageAdapter.notifyUpdateOptionsMenu(getMainPage());
         }
@@ -2708,7 +2708,10 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 if(pendingLocationUpdate || usingCurrent)
                 {
                     //update observer
-                    observer = updatedObserver;
+                    if(updatedObserver != null)
+                    {
+                        observer = updatedObserver;
+                    }
                     pendingLocationUpdate = false;
 
                     //if updated
@@ -5801,9 +5804,10 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
     private CalculateService.CalculatePathsTask setCalculatePathCalculations(boolean run, CalculateService.CalculatePathsTask task, byte calculateType, final Database.SatelliteData satellite1, final Database.SatelliteData satellite2, double julianDateStart, double julianDateEnd, double intersection, double minEl)
     {
         Bundle params;
-        Calculate.Passes.Item currentItem = (satellite1 != null ? new Calculate.Passes.Item(MainActivity.this, 0, satellite1, satellite2, true) : null);
         final boolean forIntersections = (calculateType == CalculateService.CalculateType.OrbitalIntersections);
+        final boolean usePassQuality = (!forIntersections && Settings.getListPassQuality(MainActivity.this));
         final int pageType = (forIntersections ? Calculate.PageType.Intersection : Calculate.PageType.Passes);
+        Calculate.Passes.Item currentItem = (satellite1 != null ? new Calculate.Passes.Item(MainActivity.this, 0, satellite1, satellite2, usePassQuality, true) : null);
         Calculate.Passes.Item[] savedPassItems;
 
         //if task was running
@@ -5862,12 +5866,12 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                                             if(forIntersections)
                                             {
                                                 Calculate.PageAdapter.setIntersectionItems(new Calculate.Passes.Item[0]);
-                                                Calculate.PageAdapter.addIntersectionItem(new Calculate.Passes.Item(null, 0, null, true));
+                                                Calculate.PageAdapter.addIntersectionItem(new Calculate.Passes.Item(null, 0, null, false, true));
                                             }
                                             else
                                             {
                                                 Calculate.PageAdapter.setPassItems(new Calculate.Passes.Item[0]);
-                                                Calculate.PageAdapter.addPassItem(new Calculate.Passes.Item(null, 0, null, true));
+                                                Calculate.PageAdapter.addPassItem(new Calculate.Passes.Item(null, 0, null, usePassQuality, true));
                                             }
                                         }
                                         updateOptionsMenu();

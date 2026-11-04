@@ -1,214 +1,212 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content">
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/Combined_Item_Data_Left_Guide"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_begin="72dp"/>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/CardItem">
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/Combined_Item_Data_Left_Guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_begin="72dp"/>
 
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/Combined_Item_Data_Right_Guide"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.55"/>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/Combined_Item_Data_Right_Guide"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.55"/>
 
-    <View
-        android:id="@+id/Combined_Item_Pass_Quality_View"
-        android:layout_width="1dp"
-        android:layout_height="0dp"
-        android:alpha="0.65"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:background="@color/cyan"/>
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:id="@+id/Combined_Item_Name_Image"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_marginLeft="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <TextView
-        android:id="@+id/Combined_Item_Name_Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="12dp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@+id/Combined_Item_Az_Layout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toTopOf="parent"/>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Az_Layout"
-        style="@style/CombinedLayoutStart"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Az_Image"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/compass_black_white"/>
+            android:id="@+id/Combined_Item_Name_Image"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginLeft="16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <TextView
-            android:id="@+id/Combined_Item_Az_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
+            android:id="@+id/Combined_Item_Name_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:textStyle="bold"
+            app:drawableEndCompat="@drawable/ic_circle_indicator"
+            android:drawablePadding="4dp"
+            app:drawableTint="@color/transparent"
+            app:layout_constraintBottom_toTopOf="@+id/Combined_Item_Az_Layout"
+            app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toTopOf="parent"/>
 
-    <LinearLayout
-        android:id="@+id/Combined_Item_El_Layout"
-        style="@style/CombinedLayoutStart"
-        android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Elevation_Image"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/ic_arrow_back_white"/>
+        <LinearLayout
+            android:id="@+id/Combined_Item_Az_Layout"
+            style="@style/CombinedLayoutStart"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Az_Image"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/compass_black_white"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Az_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_El_Layout"
+            style="@style/CombinedLayoutStart"
+            android:paddingBottom="12dp"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Elevation_Image"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/ic_arrow_back_white"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_El_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Latitude_Layout"
+            style="@style/CombinedLayoutStart"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Latitude_Image"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/earth_vertical_lines"
+                android:rotation="90"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Latitude_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Longitude_Layout"
+            style="@style/CombinedLayoutStart"
+            android:paddingBottom="12dp"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Longitude_Image"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/earth_vertical_lines"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Longitude_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Range_Layout"
+            style="@style/CombinedLayoutStart"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Range_Image"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/distance"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Range_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Speed_Layout"
+            style="@style/CombinedLayoutStart"
+            android:paddingBottom="12dp"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Speed_Image"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/ic_arrow_back_white"
+                android:rotation="180"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Speed_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <com.google.android.material.progressindicator.CircularProgressIndicator
+            android:id="@+id/Combined_Item_Pass_Loading_Progress"
+            style="@style/ProgressCircleSmall"
+            app:layout_constraintStart_toStartOf="@id/Combined_Item_Pass_Start_Layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Pass_Start_Layout"
+            android:visibility="gone"/>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Pass_Start_Layout"
+            style="@style/CombinedLayout"
+            app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
+            <com.nikolaiapps.orbtrack.AnalogClock
+                android:id="@+id/Combined_Item_Start_Clock"
+                style="@style/CombinedImage"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Start_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Pass_End_Layout"
+            style="@style/CombinedLayout"
+            app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
+            <com.nikolaiapps.orbtrack.AnalogClock
+                android:id="@+id/Combined_Item_End_Clock"
+                style="@style/CombinedImage"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_End_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/Combined_Item_Pass_Duration_Layout"
+            style="@style/CombinedLayout"
+            android:paddingBottom="12dp"
+            app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/Combined_Item_Duration_Title"
+                style="@style/CombinedImage"
+                app:srcCompat="@drawable/ic_timer_black"/>
+
+            <TextView
+                android:id="@+id/Combined_Item_Duration_Text"
+                style="@style/CombinedText"/>
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/Combined_Item_El_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
+            android:id="@+id/Combined_Item_Outdated_Text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingBottom="12dp"
+            app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
+            app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text"
+            android:text="@string/text_outdated"
+            android:visibility="gone"/>
 
-    <LinearLayout
-        android:id="@+id/Combined_Item_Latitude_Layout"
-        style="@style/CombinedLayoutStart"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Latitude_Image"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/earth_vertical_lines"
-            android:rotation="90"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_Latitude_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Longitude_Layout"
-        style="@style/CombinedLayoutStart"
-        android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Longitude_Image"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/earth_vertical_lines"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_Longitude_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Range_Layout"
-        style="@style/CombinedLayoutStart"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Range_Image"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/distance"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_Range_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Speed_Layout"
-        style="@style/CombinedLayoutStart"
-        android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Speed_Image"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/ic_arrow_back_white"
-            android:rotation="180"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_Speed_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <com.google.android.material.progressindicator.CircularProgressIndicator
-        android:id="@+id/Combined_Item_Pass_Loading_Progress"
-        style="@style/ProgressCircleSmall"
-        app:layout_constraintStart_toStartOf="@id/Combined_Item_Pass_Start_Layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Pass_Start_Layout"
-        android:visibility="gone"/>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Pass_Start_Layout"
-        style="@style/CombinedLayout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text">
-        <com.nikolaiapps.orbtrack.AnalogClock
-            android:id="@+id/Combined_Item_Start_Clock"
-            style="@style/CombinedImage"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_Start_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Pass_End_Layout"
-        style="@style/CombinedLayout"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
-        <com.nikolaiapps.orbtrack.AnalogClock
-            android:id="@+id/Combined_Item_End_Clock"
-            style="@style/CombinedImage"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_End_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/Combined_Item_Pass_Duration_Layout"
-        style="@style/CombinedLayout"
-        android:paddingBottom="12dp"
-        app:layout_constraintStart_toEndOf="@+id/Combined_Item_Data_Right_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Az_Layout">
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/Combined_Item_Duration_Title"
-            style="@style/CombinedImage"
-            app:srcCompat="@drawable/ic_timer_black"/>
-
-        <TextView
-            android:id="@+id/Combined_Item_Duration_Text"
-            style="@style/CombinedText"/>
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/Combined_Item_Outdated_Text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:paddingBottom="12dp"
-        app:layout_constraintStart_toStartOf="@+id/Combined_Item_Data_Left_Guide"
-        app:layout_constraintTop_toBottomOf="@+id/Combined_Item_Name_Text"
-        android:text="@string/text_outdated"
-        android:visibility="gone"/>
-
-    <com.google.android.material.progressindicator.LinearProgressIndicator
-        android:id="@+id/Combined_Item_Pass_Progress"
-        style="@style/ProgressLineSmall"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:layout_marginLeft="16dp"
-        android:layout_marginRight="16dp"
-        android:visibility="gone"/>
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.progressindicator.LinearProgressIndicator
+            android:id="@+id/Combined_Item_Pass_Progress"
+            style="@style/ProgressLineSmall"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginStart="10dp"
+            android:layout_marginEnd="10dp"
+            android:layout_marginBottom="1dp"
+            android:visibility="visible"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

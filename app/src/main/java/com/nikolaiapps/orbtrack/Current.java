@@ -6,12 +6,14 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageButton;
+import androidx.core.widget.TextViewCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentManager;
@@ -52,18 +54,6 @@ public abstract class Current
         static final int Combined = 0;
         static final int Timeline = 1;
         static final int PageCount = 2;
-    }
-
-    public static abstract class QualityColors
-    {
-        static final int BrightBlue = Color.rgb(0x00, 0xA4, 0XFF);
-        static final int Cyan = Color.rgb(0x02, 0xE3, 0xFD);
-        static final int BrightGreen = Color.rgb(0x00, 0xFF, 0xC0);
-        static final int Green = Color.rgb(0x00, 0xFF, 0x00);
-        static final int YellowGreen = Color.rgb(0xD0, 0xFF, 0x00);
-        static final int Yellow = Color.rgb(0xFF, 0xF0, 0x00);
-        static final int Orange = Color.rgb(0xFF, 0xA3, 0x00);
-        static final int Red = Color.rgb(0xFF, 0x00, 0x00);
     }
 
     public static class Items
@@ -327,7 +317,6 @@ public abstract class Current
             private String name;
             private String ownerCode;
             private Drawable icon;
-            private View passQualityView;
             private TextView azText;
             private TextView elText;
             private TextView nameText;
@@ -473,9 +462,9 @@ public abstract class Current
                     durationText.setText(!passStartFound && passTimeStart == null ? Globals.getUnknownString(context) : Globals.getTimeBetween(context, passTimeStart, passTimeEnd));
                 }
 
-                if(passQualityView != null)
+                if(nameText != null)
                 {
-                    passQualityView.setBackgroundColor(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : getPathQualityColor(passElMax));
+                    TextViewCompat.setCompoundDrawableTintList(nameText, ColorStateList.valueOf(!showPassQuality || !isKnownPassElevationMax() ? Color.TRANSPARENT : getPathQualityColor(passElMax)));
                 }
 
                 if(passProgress != null)
@@ -624,7 +613,7 @@ public abstract class Current
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView);
 
-                setItemSelector(itemView);
+                setItemSelector(itemView, R.attr.itemNormalColor);
                 setViewClickListeners(itemView, itemHolder);
                 return(itemHolder);
             }
@@ -670,7 +659,6 @@ public abstract class Current
                 currentItem.passStartLayout = itemView.findViewById(R.id.Combined_Item_Pass_Start_Layout);
                 currentItem.passEndLayout = itemView.findViewById(R.id.Combined_Item_Pass_End_Layout);
                 currentItem.passDurationLayout = itemView.findViewById(R.id.Combined_Item_Pass_Duration_Layout);
-                currentItem.passQualityView = itemView.findViewById(R.id.Combined_Item_Pass_Quality_View);
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);
                 currentItem.longitudeText = itemView.findViewById(R.id.Combined_Item_Longitude_Text);
 
@@ -2946,9 +2934,55 @@ public abstract class Current
     }
 
     //Gets path quality color for given elevation pass max
-    private static  int getPathQualityColor(double passElMax)
+    public static  int getPathQualityColor(double passElMax)
     {
-        return(passElMax >= 80 ? QualityColors.BrightBlue : passElMax >= 70 ? QualityColors.Cyan : passElMax >= 60 ? QualityColors.BrightGreen : passElMax >= 50 ? QualityColors.Green : passElMax >= 40 ? QualityColors.YellowGreen : passElMax >= 30 ? QualityColors.Yellow : passElMax >= 20 ? QualityColors.Orange : QualityColors.Red);
+        int red;
+        int green;
+
+        if(passElMax > 90)
+        {
+            passElMax = 90;
+        }
+        else if(passElMax < 0)
+        {
+            passElMax = 0;
+        }
+
+        if(passElMax >= 80)
+        {
+            red = 0;
+        }
+        else if(passElMax >= 50)
+        {
+            red = 255 - (int)((255.0 / 30) * (passElMax - 50));
+        }
+        else if(passElMax >= 10)
+        {
+            red = 255;
+        }
+        else    //else passElMax < 10
+        {
+            red = 255 - (int)((105.0 / 10) * (10 - passElMax));
+        }
+
+        if(passElMax > 80)
+        {
+            green = 255 - (int)((45.0 / 10) * (passElMax - 80));
+        }
+        else if(passElMax >= 50)
+        {
+            green = 255;
+        }
+        else if(passElMax >= 10)
+        {
+            green = 255 - (int)((255.0 / 40) * (40 - (passElMax - 10)));
+        }
+        else
+        {
+            green = 0;
+        }
+
+        return(Color.rgb(red, green, 0));
     }
 
     //Gets map information text

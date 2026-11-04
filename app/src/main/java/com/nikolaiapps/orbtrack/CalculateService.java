@@ -214,13 +214,13 @@ public class CalculateService extends NotifyService
         {
             this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, null, illumination, phaseName);
         }
-        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean useListPathProgress, boolean useListPassQuality, boolean hideUnknownPasses, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, useListPathProgress, useListPassQuality, hideUnknownPasses, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
         }
-        public PassData(int index, Database.SatelliteData currentSatellite)
+        public PassData(int index, Database.SatelliteData currentSatellite, boolean usePassQuality)
         {
-            this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, true, false, false, false, null, null, "", null, null, null, 0, null);
+            this(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, true, false, usePassQuality, false, null, null, "", null, null, null, 0, null);
 
             if(currentSatellite != null && currentSatellite.satellite != null)
             {
@@ -231,9 +231,9 @@ public class CalculateService extends NotifyService
                 satellite = currentSatellite.satellite;
             }
         }
-        public PassData(int index, Database.SatelliteData satellite1, Database.SatelliteData satellite2)
+        public PassData(int index, Database.SatelliteData satellite1, Database.SatelliteData satellite2, boolean usePassQuality)
         {
-            this(index, satellite1);
+            this(index, satellite1, usePassQuality);
 
             boolean haveSatellite2 = (satellite2 != null);
             this.satellite2 = (haveSatellite2 ? new Calculations.SatelliteObjectType(satellite2.satellite) : null);
@@ -1755,7 +1755,7 @@ public class CalculateService extends NotifyService
                         if(reachedMinEl && getAll)
                         {
                             //create new item and add to list
-                            newPass = new PassData(0, currentSatellite1, currentSatellite2);
+                            newPass = new PassData(0, currentSatellite1, currentSatellite2, currentItem.showPassQuality);
                             section += (" " + res.getString(haveSatellite2 ? R.string.title_intersection : R.string.title_pass) + " " + (pathCount + 1));
                             newPass.id = currentItem.id;
                             newPass.name = section;
@@ -1833,7 +1833,7 @@ public class CalculateService extends NotifyService
     //Calculate pass for orbital
     private static void calculateOrbitalPass(Context context, byte calculateType, int id, Database.SatelliteData satellite, Calculations.ObserverType observer, double minEl, double julianStart, boolean applyRefraction, CalculateListener listener)
     {
-        calculatePaths(null, null, context, calculateType, new int[]{id}, new ArrayList<>(java.util.Collections.singletonList(new PassData(0, satellite))), null, observer, minEl, -Double.MAX_VALUE, julianStart, julianStart + 180, applyRefraction, false, true, false, listener);
+        calculatePaths(null, null, context, calculateType, new int[]{id}, new ArrayList<>(java.util.Collections.singletonList(new PassData(0, satellite, false))), null, observer, minEl, -Double.MAX_VALUE, julianStart, julianStart + 180, applyRefraction, false, true, false, listener);
     }
     public static void calculateOrbitalPass(Context context, int id, Database.SatelliteData satellite, Calculations.ObserverType observer, double minEl, double julianStart, boolean applyRefraction, CalculateListener listener)
     {

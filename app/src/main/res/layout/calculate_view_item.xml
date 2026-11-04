@@ -1,92 +1,91 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/View_Item_Layout"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:paddingLeft="16dp"
-    android:paddingRight="24dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
-    android:gravity="center">
-    <TextView
-        android:id="@+id/View_Title_Text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:visibility="gone"/>
-
+    style="@style/CardItem">
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_height="wrap_content"
+        android:padding="16dp"
+        android:orientation="vertical">
         <TextView
-            android:id="@+id/View_Time_Text"
-            android:layout_width="0dp"
+            android:id="@+id/View_Title_Text"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="0.25"
-            android:paddingRight="4dp"
+            android:textStyle="bold"
             android:visibility="gone"/>
 
         <LinearLayout
-            android:id="@+id/View_Progress_Group"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.7"
-            android:gravity="center">
-            <com.google.android.material.progressindicator.CircularProgressIndicator
-                style="@style/ProgressCircleSmall"/>
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/View_Data_Group"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="0.5"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:orientation="horizontal"
-            android:visibility="gone">
+            android:gravity="center">
             <TextView
-                android:id="@+id/View_Az_Text"
+                android:id="@+id/View_Time_Text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:gravity="center_vertical"
+                android:layout_weight="0.25"
                 android:paddingRight="4dp"
-                tools:ignore="NestedWeights" />
-
-            <TextView
-                android:id="@+id/View_El_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:gravity="center_vertical"
-                android:paddingRight="4dp"/>
-
-            <TextView
-                android:id="@+id/View_Range_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.4"
-                android:gravity="center_vertical"/>
-
-            <TextView
-                android:id="@+id/View_Phase_Text"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:gravity="center_vertical"
-                android:paddingLeft="4dp"
                 android:visibility="gone"/>
 
-            <TextView
-                android:id="@+id/View_Illumination_Text"
+            <LinearLayout
+                android:id="@+id/View_Progress_Group"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.3"
-                android:gravity="center_vertical"
-                android:paddingLeft="4dp"
-                android:visibility="gone"/>
+                android:layout_weight="0.7"
+                android:gravity="center">
+                <com.google.android.material.progressindicator.CircularProgressIndicator
+                    style="@style/ProgressCircleSmall"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/View_Data_Group"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:orientation="horizontal"
+                android:visibility="gone">
+                <TextView
+                    android:id="@+id/View_Az_Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center_vertical"
+                    android:paddingRight="4dp"
+                    tools:ignore="NestedWeights" />
+
+                <TextView
+                    android:id="@+id/View_El_Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center_vertical"
+                    android:paddingRight="4dp"/>
+
+                <TextView
+                    android:id="@+id/View_Range_Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.4"
+                    android:gravity="center_vertical"/>
+
+                <TextView
+                    android:id="@+id/View_Phase_Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="4dp"
+                    android:visibility="gone"/>
+
+                <TextView
+                    android:id="@+id/View_Illumination_Text"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="0.3"
+                    android:gravity="center_vertical"
+                    android:paddingLeft="4dp"
+                    android:visibility="gone"/>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</com.google.android.material.card.MaterialCardView>

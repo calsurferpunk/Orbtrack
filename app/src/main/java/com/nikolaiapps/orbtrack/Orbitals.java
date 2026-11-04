@@ -30,6 +30,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -429,25 +430,20 @@ public abstract class Orbitals
                 }
             }
 
+            //if using simple layout and a card view
+            if(simple && itemHolder.itemView instanceof MaterialCardView)
+            {
+                //set card background
+                ((MaterialCardView)itemHolder.itemView).setCardBackgroundColor(Globals.getItemStateSelector(currentContext, R.attr.itemNormalColor));
+            }
+
             //if not loading items
             if(!loadingItems)
             {
                 //set displays
                 itemIcon = Globals.getOrbitalIcon(currentContext, MainActivity.getObserver(), currentItem.satellite.noradId, currentItem.satellite.orbitalType, (Settings.getDarkTheme(currentContext) ? R.color.white : R.color.black));
                 itemHolder.itemImage.setImageDrawable(itemIcon);
-                if(simple)
-                {
-                    itemHolder.itemImage.setBackgroundColor(backgroundColor);
-                }
                 itemHolder.itemText.setText(currentItem.text);
-                if(simple)
-                {
-                    itemHolder.itemText.setBackgroundColor(backgroundColor);
-                }
-                if(itemHolder.itemAgeTextLayout != null && simple)
-                {
-                    itemHolder.itemAgeTextLayout.setBackgroundColor(backgroundColor);
-                }
                 if(itemHolder.tleAgeLayout != null)
                 {
                     itemHolder.tleAgeLayout.setVisibility(onSatellites ? View.VISIBLE : View.GONE);
@@ -457,10 +453,6 @@ public abstract class Orbitals
                 if(onSatellites)
                 {
                     itemHolder.tleAgeText.setText(dayText);
-                    if(simple)
-                    {
-                        itemHolder.tleAgeText.setBackgroundColor(backgroundColor);
-                    }
                     if(ageDays > 2)
                     {
                         itemHolder.tleUnder.setBackgroundColor(ageDays >= 14 ? Color.RED : ageDays >= 7 ? 0xFFFFA500 : Color.YELLOW);

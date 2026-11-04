@@ -48,7 +48,6 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.divider.MaterialDividerItemDecoration;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import java.util.ArrayList;
@@ -1090,7 +1089,14 @@ public abstract class Selectable
         //Sets item selector
         protected void setItemSelector(View itemView, int bgAttrId)
         {
-            itemView.setBackground(Globals.getDataItemStateSelector(currentContext, bgAttrId));
+            if(itemView instanceof MaterialCardView)
+            {
+                ((MaterialCardView)itemView).setCardBackgroundColor(Globals.getItemStateSelector(currentContext, bgAttrId));
+            }
+            else
+            {
+                itemView.setBackground(Globals.getDataItemStateSelector(currentContext, bgAttrId));
+            }
         }
         protected void setItemSelector(View itemView)
         {
@@ -1108,7 +1114,14 @@ public abstract class Selectable
             if(setBackground && haveContext())
             {
                 //set background according to selected state
-                itemView.setBackground(isSelected ? Globals.getItemSelectedState(currentContext, false) : Globals.getListItemStateSelector(currentContext, false));
+                if(itemView instanceof MaterialCardView)
+                {
+                    ((MaterialCardView)itemView).setCardBackgroundColor(isSelected ? Globals.getItemSelectedState(currentContext) : Globals.getItemStateSelector(currentContext, R.attr.itemNormalColor));
+                }
+                else
+                {
+                    itemView.setBackground(isSelected ? Globals.getItemSelectedState(currentContext, false) : Globals.getListItemStateSelector(currentContext, false));
+                }
             }
         }
 
@@ -1529,7 +1542,10 @@ public abstract class Selectable
 
             //setup category
             categoryText = rootView.findViewById(android.R.id.title);
-            ((View)categoryText.getParent()).setVisibility(View.GONE);
+            if(categoryText != null)
+            {
+                ((View)categoryText.getParent()).setVisibility(View.GONE);
+            }
 
             //setup list
             selectList = rootView.findViewById(R.id.List_View_List);
@@ -1607,34 +1623,15 @@ public abstract class Selectable
         protected void setListColumns(Context context, View listColumns, int page)
         {
             int columns;
-            int dividerInsetPx;
-            boolean darkTheme;
-            Object tagObject;
-            MaterialDividerItemDecoration horizontalMaterialDivider;
 
             //if context and list are set
             if(context != null && selectList != null)
             {
-                //get theme, desired columns, and sizes
-                darkTheme = Settings.getDarkTheme(context);
+                //get desired columns
                 columns = getListColumns(context, page);
 
-                //if there are existing columns
-                tagObject = selectList.getTag();
-                if(tagObject != null)
-                {
-                    //remove column decoration
-                    selectList.removeItemDecorationAt(0);
-                }
-
-                //add columns and decorations
+                //add columns
                 selectList.setLayoutManager(columns > 1 ? (new GridLayoutManager(context, columns)) : (new LinearLayoutManager(context)));
-                dividerInsetPx = (int)Globals.dpToPixels(context, 16);
-                horizontalMaterialDivider = new MaterialDividerItemDecoration(context, MaterialDividerItemDecoration.VERTICAL);
-                horizontalMaterialDivider.setDividerColorResource(context, darkTheme ? R.color.dark_gray : R.color.light_gray);
-                horizontalMaterialDivider.setDividerInsetStart(dividerInsetPx);
-                horizontalMaterialDivider.setDividerInsetEnd(dividerInsetPx);
-                selectList.addItemDecoration(horizontalMaterialDivider);
 
                 //force list refresh
                 selectList.setAdapter(null);
@@ -1646,6 +1643,20 @@ public abstract class Selectable
                 //if columns and adapter are set
                 if(listColumns != null && selectListAdapter != null)
                 {
+                    //if a card view
+                    if(listColumns instanceof MaterialCardView)
+                    {
+                        //remove margins
+                        MaterialCardView cardListColumns = ((MaterialCardView)listColumns);
+                        ViewGroup.MarginLayoutParams marginParams = (ViewGroup.MarginLayoutParams)listColumns.getLayoutParams();
+                        marginParams.leftMargin = marginParams.rightMargin = marginParams.topMargin = marginParams.bottomMargin = 0;
+                        listColumns.setLayoutParams(marginParams);
+
+                        //remove corners
+                        cardListColumns.setRadius(0);
+                        cardListColumns.setStrokeColor(context.getResources().getColor(R.color.transparent, null));
+                    }
+
                     //update column titles
                     selectListAdapter.setColumnTitles((ViewGroup)listColumns, categoryText, pageNum);
                 }

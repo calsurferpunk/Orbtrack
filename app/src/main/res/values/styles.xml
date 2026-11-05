@@ -651,7 +651,7 @@
         <item name="android:layout_gravity">center</item>
         <item name="android:padding">0dp</item>
         <item name="indicatorColor">?attr/colorAccent</item>
-        <item name="trackThickness" tools:ignore="PxUsage">3px</item>
+        <item name="trackThickness" tools:ignore="PxUsage">5px</item>
     </style>
 
     <!--Progress Box-->

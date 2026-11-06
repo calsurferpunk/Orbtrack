@@ -132,14 +132,16 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
         public final float azimuth;
         public final float elevation;
         public final float rangeKm;
+        public final boolean showVisible;
 
         public ViewData()
         {
             this.azimuth = Float.MAX_VALUE;
             this.elevation = Float.MAX_VALUE;
             this.rangeKm = Float.MAX_VALUE;
+            this.showVisible = false;
         }
-        public ViewData(int noradId, OrbitalView data)
+        public ViewData(int noradId, OrbitalView data, boolean showVisible)
         {
             this.noradId = noradId;
             this.azimuth = (float)data.azimuth;
@@ -148,6 +150,7 @@ public class CalculateViewsTask extends ThreadTask<Object, Integer, Integer[]>
             this.illumination = data.illumination;
             this.julianDate = data.julianDate;
             this.phaseName =  data.phaseName;
+            this.showVisible = showVisible;
         }
     }
 

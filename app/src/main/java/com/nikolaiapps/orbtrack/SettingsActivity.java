@@ -246,6 +246,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         break;
 
                     case ScreenKey.ListView:
+                        SwitchPreference visibleSwitch = this.findPreference(Settings.PreferenceName.ListShowVisible);
                         SwitchPreference passEndSwitch = this.findPreference(Settings.PreferenceName.ListShowPassEnd);
                         SwitchPreference pathProgressSwitch = this.findPreference(Settings.PreferenceName.ListShowPassProgress);
                         SwitchPreference passQualitySwitch = this.findPreference(Settings.PreferenceName.ListShowPassQuality);
@@ -256,6 +257,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         Settings.Options.Rates.initValues(context);
 
                         //setup displays
+                        setupSwitch(visibleSwitch);
                         setupSwitch(passEndSwitch);
                         setupSwitch(pathProgressSwitch);
                         setupSwitch(passQualitySwitch);
@@ -1700,6 +1702,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.ListShowPassEnd:
                         case Settings.PreferenceName.ListShowPassProgress:
                         case Settings.PreferenceName.ListShowPassQuality:
+                        case Settings.PreferenceName.ListShowVisible:
                         case Settings.PreferenceName.ListHideUnknownPasses:
                         case Settings.PreferenceName.TimelineShowViewQuality:
                         case Settings.PreferenceName.TimelineMinuteInterval:

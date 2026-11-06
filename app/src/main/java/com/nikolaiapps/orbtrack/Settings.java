@@ -106,6 +106,7 @@ public abstract class Settings
         static final String ListShowPassEnd = "ListShowPassEnd";
         static final String ListShowPassProgress = "ListShowPassProgress";
         static final String ListShowPassQuality = "ListShowPassQuality";
+        static final String ListShowVisible = "ListShowVisible";
         static final String ListHideUnknownPasses = "ListHideUnknownPasses";
         static final String ListOrbitalTypeFilter = "ListOrbitalTypeFilter";
         static final String LensFirstRun = "LensFirstRun";
@@ -2169,6 +2170,7 @@ public abstract class Settings
             case PreferenceName.ListShowPassEnd:
             case PreferenceName.ListShowPassProgress:
             case PreferenceName.ListShowPassQuality:
+            case PreferenceName.ListShowVisible:
             case PreferenceName.ListHideUnknownPasses:
             case PreferenceName.QuickSettingsShowTitles:
             case PreferenceName.TimelineShowViewQuality:
@@ -3045,6 +3047,12 @@ public abstract class Settings
     public static boolean getListPassQuality(Context context)
     {
         return(getPreferenceBoolean(context, PreferenceName.ListShowPassQuality));
+    }
+
+    //Gets list visible outline being shown
+    public static boolean getListVisible(Context context)
+    {
+        return(getPreferenceBoolean(context, PreferenceName.ListShowVisible));
     }
 
     //Gets list unknown passes being hidden

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="pageHighlightBackground" format="reference"/>
+    <attr name="colorAccentClear" format="reference"/>
     <attr name="colorAccentDark" format="reference"/>
     <attr name="colorAccentDarkest" format="reference"/>
     <attr name="colorAccentLightest" format="reference"/>

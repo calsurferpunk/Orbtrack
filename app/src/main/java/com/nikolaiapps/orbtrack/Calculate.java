@@ -142,6 +142,7 @@ public abstract class Calculate
         {
             public boolean isLoading;
             public Calendar time;
+            public View view;
             public View progressGroup;
             public TextView timeText;
             public TextView azText;
@@ -151,6 +152,8 @@ public abstract class Calculate
             public TextView illuminationText;
             public ExpandingListView subList;
             public LinearLayout dataGroup;
+            private ColorStateList hiddenStrokeColor;
+            private ColorStateList visibleStrokeColor;
             public final CalculateViewsTask.ViewData[] views;
 
             public Item(int index, int viewCount, Calculations.SatelliteObjectType satellite)
@@ -164,6 +167,7 @@ public abstract class Calculate
                 isLoading = (viewCount < 1);
                 time = Globals.getCalendar(null, 0);
                 timeText = null;
+                view = null;
                 azText = null;
                 elText = null;
                 rangeText = null;
@@ -183,6 +187,10 @@ public abstract class Calculate
             {
                 CalculateViewsTask.ViewData currentView = views[0];
 
+                if(view instanceof MaterialCardView)
+                {
+                    ((MaterialCardView)view).setStrokeColor(currentView.showVisible && currentView.elevation >= 0 && currentView.elevation <= 90 ? visibleStrokeColor : hiddenStrokeColor);
+                }
                 if(azText != null)
                 {
                     azText.setText(currentView.azimuth != Float.MAX_VALUE ? Globals.getDegreeString(currentView.azimuth) : "-");
@@ -254,6 +262,8 @@ public abstract class Calculate
         {
             private boolean haveSun;
             private boolean haveMoon;
+            private ColorStateList hiddenStrokeColor;
+            private ColorStateList visibleStrokeColor;
             private final Current.Items viewItems;
 
             public ItemListAdapter(Context context, Item[] savedItems, int multiCount)
@@ -360,7 +370,7 @@ public abstract class Calculate
             }
 
             @Override
-            public @NonNull ItemHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
+            public @NonNull RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType)
             {
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder;
@@ -373,6 +383,9 @@ public abstract class Calculate
                 {
                     itemHolder = new ItemHolder(itemView, R.id.View_Az_Text, R.id.View_El_Text, R.id.View_Range_Text, R.id.View_Phase_Text, R.id.View_Illumination_Text, R.id.View_Progress_Group, R.id.View_Data_Group, R.id.View_Time_Text);
                 }
+
+                hiddenStrokeColor = (itemView instanceof MaterialCardView ? ((MaterialCardView)itemView).getStrokeColorStateList() : null);
+                visibleStrokeColor = (hiddenStrokeColor != null ? Globals.getItemStateSelector(currentContext, R.attr.colorAccentClear) : null);
 
                 setItemSelector(itemView, R.attr.itemNormalColor);
                 setViewClickListeners(itemView, itemHolder);
@@ -388,6 +401,8 @@ public abstract class Calculate
                 boolean isMoon = (currentItem.id == Universe.IDs.Moon);
 
                 //get displays
+                currentItem.view = itemHolder.itemView;
+
                 currentItem.timeText = itemHolder.timeText;
                 if(currentItem.timeText != null)
                 {
@@ -422,6 +437,9 @@ public abstract class Calculate
                 currentItem.azText = itemHolder.dataGroup1Text;
                 currentItem.elText = itemHolder.dataGroup2Text;
                 currentItem.rangeText = itemHolder.dataGroup3Text;
+
+                currentItem.hiddenStrokeColor = hiddenStrokeColor;
+                currentItem.visibleStrokeColor = visibleStrokeColor;
 
                 //update displays
                 currentItem.setLoading(!hasItems, true);

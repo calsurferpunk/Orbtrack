@@ -142,6 +142,7 @@ public class CalculateService extends NotifyService
         public boolean passCalculating;
         public boolean passCalculateFinished;
         public final boolean showPassEnd;
+        public final boolean showVisible;
         public final boolean showPathProgress;
         public final boolean showPassQuality;
         public final boolean hideUnknownPasses;
@@ -168,7 +169,7 @@ public class CalculateService extends NotifyService
             @Override
             public PassData createFromParcel(Parcel source)
             {
-                return(new PassData(source.readInt(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readString(), source.readParcelableArray(CalculateViewsTask.OrbitalView.class.getClassLoader()), source.readParcelableArray(CalculateViewsTask.OrbitalView.class.getClassLoader()), source.readParcelable(Calculations.SatelliteObjectType.class.getClassLoader()), source.readDouble(), source.readString()));
+                return(new PassData(source.readInt(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), source.readDouble(), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), (source.readByte() == 1), source.readString(), source.readLong(), source.readString(), source.readLong(), source.readString(), source.readParcelableArray(CalculateViewsTask.OrbitalView.class.getClassLoader()), source.readParcelableArray(CalculateViewsTask.OrbitalView.class.getClassLoader()), source.readParcelable(Calculations.SatelliteObjectType.class.getClassLoader()), source.readDouble(), source.readString()));
             }
 
             @Override
@@ -178,7 +179,7 @@ public class CalculateService extends NotifyService
             }
         };
 
-        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
+        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean useVisible, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
         {
             super((sat != null ? sat.getSatelliteNum() : Universe.IDs.None), index);
             this.satellite = (sat != null ? new Calculations.SatelliteObjectType(sat) : null);
@@ -195,6 +196,7 @@ public class CalculateService extends NotifyService
             this.passCalculated = foundPass;
             this.passCalculateFinished = finishedCalculating;
             this.showPassEnd = showPassEnd;
+            this.showVisible = useVisible;
             this.showPathProgress = usePathProgress;
             this.hideUnknownPasses = hideUnknownPasses;
             this.showPassQuality = usePassQuality;
@@ -210,13 +212,21 @@ public class CalculateService extends NotifyService
             this.passViews = copyViewArray(views);
             this.passViews2 = copyViewArray(views2);
         }
+        protected PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, Calculations.SatelliteObjectType sat2, double illumination, String phaseName)
+        {
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, false, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, sat2, illumination, phaseName);
+        }
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean useVisible, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
+        {
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, useVisible, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, null, illumination, phaseName);
+        }
         public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, Calendar startTime, Calendar endTime, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, null, illumination, phaseName);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, false, usePathProgress, usePassQuality, hideUnknownPasses, startTime, endTime, duration, views, views2, sat, illumination, phaseName);
         }
-        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
+        public PassData(int index, double azStart, double azEnd, double azTravel, double elMax, double closestAz, double closestEl, boolean calculating, boolean foundPass, boolean finishedCalculating, boolean foundPassStart, boolean showPassEnd, boolean useVisible, boolean usePathProgress, boolean usePassQuality, boolean hideUnknownPasses, String zoneStart, long timeStart, String zoneEnd, long timeEnd, String duration, Parcelable[] views, Parcelable[] views2, Calculations.SatelliteObjectType sat, double illumination, String phaseName)
         {
-            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
+            this(index, azStart, azEnd, azTravel, elMax, closestAz, closestEl, calculating, foundPass, finishedCalculating, foundPassStart, showPassEnd, useVisible, usePathProgress, usePassQuality, hideUnknownPasses, Globals.getCalendar(zoneStart, timeStart), Globals.getCalendar(zoneEnd, timeEnd), duration, views, views2, sat, illumination, phaseName);
         }
         public PassData(int index, Database.SatelliteData currentSatellite, boolean usePassQuality)
         {
@@ -245,7 +255,7 @@ public class CalculateService extends NotifyService
         }
         public PassData(PassData copyFrom)
         {
-            this(copyFrom.listIndex, copyFrom.passAzStart, copyFrom.passAzEnd, copyFrom.passAzTravel, copyFrom.passElMax, copyFrom.passClosestAz, copyFrom.passClosestEl, copyFrom.passCalculating, copyFrom.passCalculated, copyFrom.passCalculateFinished, copyFrom.passStartFound, copyFrom.showPassEnd, copyFrom.showPathProgress, copyFrom.showPassQuality, copyFrom.hideUnknownPasses, copyFrom.passTimeStart, copyFrom.passTimeEnd, copyFrom.passDuration, copyFrom.passViews, copyFrom.passViews2, copyFrom.satellite, copyFrom.satellite2, copyFrom.illumination, copyFrom.phaseName);
+            this(copyFrom.listIndex, copyFrom.passAzStart, copyFrom.passAzEnd, copyFrom.passAzTravel, copyFrom.passElMax, copyFrom.passClosestAz, copyFrom.passClosestEl, copyFrom.passCalculating, copyFrom.passCalculated, copyFrom.passCalculateFinished, copyFrom.passStartFound, copyFrom.showPassEnd, copyFrom.showVisible, copyFrom.showPathProgress, copyFrom.showPassQuality, copyFrom.hideUnknownPasses, copyFrom.passTimeStart, copyFrom.passTimeEnd, copyFrom.passDuration, copyFrom.passViews, copyFrom.passViews2, copyFrom.satellite, copyFrom.satellite2, copyFrom.illumination, copyFrom.phaseName);
             id = copyFrom.id;
             id2 = copyFrom.id2;
             name = copyFrom.name;
@@ -270,6 +280,7 @@ public class CalculateService extends NotifyService
             dest.writeByte((byte)(passCalculateFinished ? 1 : 0));
             dest.writeByte((byte)(passStartFound ? 1 : 0));
             dest.writeByte((byte)(showPassEnd ? 1 : 0));
+            dest.writeByte((byte)(showVisible ? 1 : 0));
             dest.writeByte((byte)(showPathProgress ? 1 : 0));
             dest.writeByte((byte)(showPassQuality ? 1 : 0));
             dest.writeByte((byte)(hideUnknownPasses ? 1 : 0));

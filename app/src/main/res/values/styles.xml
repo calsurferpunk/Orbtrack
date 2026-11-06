@@ -144,6 +144,7 @@
     <!-- Themes -->
     <style name="LightBlue" parent="LightBase">
         <item name="colorAccent">@color/blue</item>
+        <item name="colorAccentClear">@color/blue_clear</item>
         <item name="colorAccentDarkest">@color/blue_900</item>
         <item name="colorAccentDark">@color/blue_800</item>
         <item name="colorAccentLightest">@color/blue_50</item>
@@ -155,6 +156,7 @@
 
     <style name="DarkBlue" parent="DarkBase">
         <item name="colorAccent">@color/blue_700</item>
+        <item name="colorAccentClear">@color/blue_clear</item>
         <item name="colorAccentDarkest">@color/blue_900</item>
         <item name="colorAccentDark">@color/blue_800</item>
         <item name="colorAccentLightest">@color/blue_50</item>
@@ -166,6 +168,7 @@
 
     <style name="LightBrown" parent="LightBase">
         <item name="colorAccent">@color/brown</item>
+        <item name="colorAccentClear">@color/brown_clear</item>
         <item name="colorAccentDarkest">@color/brown_900</item>
         <item name="colorAccentDark">@color/brown_800</item>
         <item name="colorAccentLightest">@color/brown_50</item>
@@ -177,6 +180,7 @@
 
     <style name="DarkBrown" parent="DarkBase">
         <item name="colorAccent">@color/brown_700</item>
+        <item name="colorAccentClear">@color/brown_clear</item>
         <item name="colorAccentDarkest">@color/brown_900</item>
         <item name="colorAccentDark">@color/brown_800</item>
         <item name="colorAccentLightest">@color/brown_50</item>
@@ -188,6 +192,7 @@
     
     <style name="LightCyan" parent="LightBase">
         <item name="colorAccent">@color/cyan</item>
+        <item name="colorAccentClear">@color/cyan_clear</item>
         <item name="colorAccentDarkest">@color/cyan_900</item>
         <item name="colorAccentDark">@color/cyan_800</item>
         <item name="colorAccentLightest">@color/cyan_50</item>
@@ -199,6 +204,7 @@
 
     <style name="DarkCyan" parent="DarkBase">
         <item name="colorAccent">@color/cyan_700</item>
+        <item name="colorAccentClear">@color/cyan_clear</item>
         <item name="colorAccentDarkest">@color/cyan_900</item>
         <item name="colorAccentDark">@color/cyan_800</item>
         <item name="colorAccentLightest">@color/cyan_50</item>
@@ -210,6 +216,7 @@
 
     <style name="LightGreen" parent="LightBase">
         <item name="colorAccent">@color/green</item>
+        <item name="colorAccentClear">@color/green_clear</item>
         <item name="colorAccentDarkest">@color/green_900</item>
         <item name="colorAccentDark">@color/green_800</item>
         <item name="colorAccentLightest">@color/green_50</item>
@@ -221,6 +228,7 @@
 
     <style name="DarkGreen" parent="DarkBase">
         <item name="colorAccent">@color/green_700</item>
+        <item name="colorAccentClear">@color/green_clear</item>
         <item name="colorAccentDarkest">@color/green_900</item>
         <item name="colorAccentDark">@color/green_800</item>
         <item name="colorAccentLightest">@color/green_50</item>
@@ -232,6 +240,7 @@
 
     <style name="LightGrey" parent="LightBase">
         <item name="colorAccent">@color/grey</item>
+        <item name="colorAccentClear">@color/grey_clear</item>
         <item name="colorAccentDarkest">@color/grey_900</item>
         <item name="colorAccentDark">@color/grey_800</item>
         <item name="colorAccentLightest">@color/grey_50</item>
@@ -243,6 +252,7 @@
 
     <style name="DarkGrey" parent="DarkBase">
         <item name="colorAccent">@color/grey_700</item>
+        <item name="colorAccentClear">@color/grey_clear</item>
         <item name="colorAccentDarkest">@color/grey_900</item>
         <item name="colorAccentDark">@color/grey_800</item>
         <item name="colorAccentLightest">@color/grey_50</item>
@@ -254,6 +264,7 @@
 
     <style name="LightOrange" parent="LightBase">
         <item name="colorAccent">@color/orange</item>
+        <item name="colorAccentClear">@color/orange_clear</item>
         <item name="colorAccentDarkest">@color/orange_900</item>
         <item name="colorAccentDark">@color/orange_800</item>
         <item name="colorAccentLightest">@color/orange_50</item>
@@ -265,6 +276,7 @@
 
     <style name="DarkOrange" parent="DarkBase">
         <item name="colorAccent">@color/orange_700</item>
+        <item name="colorAccentClear">@color/orange_clear</item>
         <item name="colorAccentDarkest">@color/orange_900</item>
         <item name="colorAccentDark">@color/orange_800</item>
         <item name="colorAccentLightest">@color/orange_50</item>
@@ -276,6 +288,7 @@
 
     <style name="LightPink" parent="LightBase">
         <item name="colorAccent">@color/pink</item>
+        <item name="colorAccentClear">@color/pink_clear</item>
         <item name="colorAccentDarkest">@color/pink_900</item>
         <item name="colorAccentDark">@color/pink_800</item>
         <item name="colorAccentLightest">@color/pink_50</item>
@@ -287,6 +300,7 @@
 
     <style name="DarkPink" parent="DarkBase">
         <item name="colorAccent">@color/pink_700</item>
+        <item name="colorAccentClear">@color/pink_clear</item>
         <item name="colorAccentDarkest">@color/pink_900</item>
         <item name="colorAccentDark">@color/pink_800</item>
         <item name="colorAccentLightest">@color/pink_50</item>
@@ -298,6 +312,7 @@
 
     <style name="LightRed" parent="LightBase">
         <item name="colorAccent">@color/red</item>
+        <item name="colorAccentClear">@color/red_clear</item>
         <item name="colorAccentDarkest">@color/red_900</item>
         <item name="colorAccentDark">@color/red_800</item>
         <item name="colorAccentLightest">@color/red_50</item>
@@ -309,6 +324,7 @@
 
     <style name="DarkRed" parent="DarkBase">
         <item name="colorAccent">@color/red_700</item>
+        <item name="colorAccentClear">@color/red_clear</item>
         <item name="colorAccentDarkest">@color/red_900</item>
         <item name="colorAccentDark">@color/red_800</item>
         <item name="colorAccentLightest">@color/red_50</item>
@@ -320,6 +336,7 @@
 
     <style name="LightPurple" parent="LightBase">
         <item name="colorAccent">@color/purple</item>
+        <item name="colorAccentClear">@color/purple_clear</item>
         <item name="colorAccentDarkest">@color/purple_900</item>
         <item name="colorAccentDark">@color/purple_800</item>
         <item name="colorAccentLightest">@color/purple_50</item>
@@ -331,6 +348,7 @@
 
     <style name="DarkPurple" parent="DarkBase">
         <item name="colorAccent">@color/purple_700</item>
+        <item name="colorAccentClear">@color/purple_clear</item>
         <item name="colorAccentDarkest">@color/purple_900</item>
         <item name="colorAccentDark">@color/purple_800</item>
         <item name="colorAccentLightest">@color/purple_50</item>
@@ -342,6 +360,7 @@
 
     <style name="LightYellow" parent="LightBase">
         <item name="colorAccent">@color/yellow</item>
+        <item name="colorAccentClear">@color/yellow_clear</item>
         <item name="colorAccentDarkest">@color/yellow_900</item>
         <item name="colorAccentDark">@color/yellow_800</item>
         <item name="colorAccentLightest">@color/yellow_100</item>
@@ -353,6 +372,7 @@
 
     <style name="DarkYellow" parent="DarkBase">
         <item name="colorAccent">@color/yellow_700</item>
+        <item name="colorAccentClear">@color/yellow_clear</item>
         <item name="colorAccentDarkest">@color/yellow_900</item>
         <item name="colorAccentDark">@color/yellow_800</item>
         <item name="colorAccentLightest">@color/yellow_100</item>

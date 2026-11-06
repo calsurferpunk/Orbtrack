@@ -32,6 +32,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.card.MaterialCardView;
 import com.google.android.material.progressindicator.CircularProgressIndicator;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.nikolaiapps.orbtrack.Calculations.*;
@@ -317,6 +318,7 @@ public abstract class Current
             private String name;
             private String ownerCode;
             private Drawable icon;
+            private View view;
             private TextView azText;
             private TextView elText;
             private TextView nameText;
@@ -338,6 +340,8 @@ public abstract class Current
             private AppCompatImageView elImage;
             private AppCompatImageView nameImage;
             private AppCompatImageView speedImage;
+            private ColorStateList hiddenStrokeColor;
+            private ColorStateList visibleStrokeColor;
 
             public static class Comparer implements Comparator<Item>
             {
@@ -387,9 +391,9 @@ public abstract class Current
                 }
             }
 
-            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean showPassEnd, boolean usePathProgress, boolean usePathQuality, boolean hideUnknownPasses)
+            public Item(Context context, int index, Database.SatelliteData currentSatellite, boolean showPassEnd, boolean useVisible, boolean usePathProgress, boolean usePathQuality, boolean hideUnknownPasses)
             {
-                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, showPassEnd, usePathProgress, usePathQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
+                super(index, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE, false, false, false, false, showPassEnd, useVisible, usePathProgress, usePathQuality, hideUnknownPasses, null, null, "", null, null, (currentSatellite != null ? currentSatellite.satellite : null), 0, null);
 
                 azimuth = elevation = rangeKm = speedKms = latitude = longitude = altitudeKm = Float.MAX_VALUE;
 
@@ -490,6 +494,11 @@ public abstract class Current
                 String text;
                 String kmUnit = Globals.getKmLabel(res);
 
+                if(view instanceof MaterialCardView)
+                {
+                    ((MaterialCardView)view).setStrokeColor(showVisible && elevation >= 0 && elevation <= 90 ? visibleStrokeColor : hiddenStrokeColor);
+                }
+
                 if(nameImage != null && icon != null)
                 {
                     nameImage.setBackgroundDrawable(icon);
@@ -562,6 +571,8 @@ public abstract class Current
         public static class ItemListAdapter extends Selectable.ListBaseAdapter
         {
             private final Items combinedItems;
+            private ColorStateList hiddenStrokeColor;
+            private ColorStateList visibleStrokeColor;
 
             public ItemListAdapter(Context context, Combined.Item[] savedItems, Database.SatelliteData[] orbitals)
             {
@@ -569,6 +580,7 @@ public abstract class Current
 
                 int index = 0;
                 boolean showPassEnd = Settings.getListShowPassEnd(context);
+                boolean useVisible = Settings.getListVisible(context);
                 boolean usePathProgress = Settings.getListPathProgress(context);
                 boolean usePassQuality = Settings.getListPassQuality(context);
                 boolean hideUnknownPasses = Settings.getListHideUnknownPasses(context);
@@ -591,7 +603,7 @@ public abstract class Current
                     for(Database.SatelliteData currentOrbital : orbitals)
                     {
                         //add item
-                        items.add(new Item(context, index++, currentOrbital, showPassEnd, usePathProgress, usePassQuality, hideUnknownPasses));
+                        items.add(new Item(context, index++, currentOrbital, showPassEnd, useVisible, usePathProgress, usePassQuality, hideUnknownPasses));
                     }
 
                     //setup items
@@ -612,6 +624,9 @@ public abstract class Current
             {
                 View itemView = LayoutInflater.from(parent.getContext()).inflate(this.itemsRefID, parent, false);
                 ItemHolder itemHolder = new ItemHolder(itemView);
+
+                hiddenStrokeColor = (itemView instanceof MaterialCardView ? ((MaterialCardView)itemView).getStrokeColorStateList() : null);
+                visibleStrokeColor = (hiddenStrokeColor != null ? Globals.getItemStateSelector(currentContext, R.attr.colorAccentClear) : null);
 
                 setItemSelector(itemView, R.attr.itemNormalColor);
                 setViewClickListeners(itemView, itemHolder);
@@ -640,6 +655,7 @@ public abstract class Current
                 rangeLayout = itemView.findViewById(R.id.Combined_Item_Range_Layout);
                 speedLayout = itemView.findViewById(R.id.Combined_Item_Speed_Layout);
                 outdatedText = itemView.findViewById(R.id.Combined_Item_Outdated_Text);
+                currentItem.view = itemView;
                 currentItem.azImage = itemView.findViewById(R.id.Combined_Item_Az_Image);
                 currentItem.azText = itemView.findViewById(R.id.Combined_Item_Az_Text);
                 currentItem.elText = itemView.findViewById(R.id.Combined_Item_El_Text);
@@ -661,6 +677,8 @@ public abstract class Current
                 currentItem.passDurationLayout = itemView.findViewById(R.id.Combined_Item_Pass_Duration_Layout);
                 currentItem.latitudeText = itemView.findViewById(R.id.Combined_Item_Latitude_Text);
                 currentItem.longitudeText = itemView.findViewById(R.id.Combined_Item_Longitude_Text);
+                currentItem.hiddenStrokeColor = hiddenStrokeColor;
+                currentItem.visibleStrokeColor = visibleStrokeColor;
 
                 if(outdatedText != null)
                 {

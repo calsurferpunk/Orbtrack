@@ -5592,7 +5592,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                         for(index = 0; index < views.length; index++)
                         {
                             //copy view
-                            views[index] = new CalculateViewsTask.ViewData(item.getSatelliteNum(), pathPoints.get(index));
+                            views[index] = new CalculateViewsTask.ViewData(item.getSatelliteNum(), pathPoints.get(index), false);
                         }
 
                         //set views
@@ -5637,6 +5637,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
     //Starts/stops calculate view calculations
     private void setCalculateViewCalculations(boolean run, final CalculateService.ViewListItem[] viewItems, final double julianDateStart, final double julianDateEnd, double dayIncrement)
     {
+        final boolean useVisible = Settings.getListVisible(MainActivity.this);
         boolean satelliteChanged;
         int index;
         int oldNoradId;
@@ -5758,7 +5759,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                                 if(currentOrbital != null && satelliteIndex < currentItem.views.length)
                                 {
                                     //set current data
-                                    currentItem.views[satelliteIndex] = new CalculateViewsTask.ViewData(currentOrbital.getSatelliteNum(), currentView);
+                                    currentItem.views[satelliteIndex] = new CalculateViewsTask.ViewData(currentOrbital.getSatelliteNum(), currentView, useVisible);
                                 }
                             }
                             break;

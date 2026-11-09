@@ -13,6 +13,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.text.Spanned;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
@@ -525,7 +526,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.ColorTheme:
                             currentValue = Settings.getColorTheme(context);
 
-                            preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                            preference.setOnPreferenceChangeListener(createOnPreferenceChangeListenerHandler(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -533,7 +534,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     //allow if changing
                                     return((int)newValue != Settings.getColorTheme(context));
                                 }
-                            });
+                            }));
                             break;
 
                         case Settings.PreferenceName.SatelliteIcon:
@@ -546,7 +547,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.LensIndicator:
                             currentValue = Settings.getIndicator(context);
-                            listener = new Preference.OnPreferenceChangeListener()
+                            listener = createOnPreferenceChangeListenerHandler(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -562,7 +563,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            };
+                            });
                             break;
 
                         case Settings.PreferenceName.LensDirectionSize:
@@ -607,7 +608,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.MapLayerType + Settings.SubPreferenceName.Map:
                             currentValue = Settings.getMapLayerType(context, forGlobe);
-                            listener = new Preference.OnPreferenceChangeListener()
+                            listener = createOnPreferenceChangeListenerHandler(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -624,7 +625,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            };
+                            });
                             break;
 
                         case Settings.PreferenceName.MapFootprintType:
@@ -641,7 +642,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                         case Settings.PreferenceName.MapMarkerLocationIcon:
                             currentValue = Settings.getMapMarkerLocationIcon(context);
-                            listener = new Preference.OnPreferenceChangeListener()
+                            listener = createOnPreferenceChangeListenerHandler(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -656,7 +657,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            };
+                            });
                             break;
 
                         case Settings.PreferenceName.MapMarkerInfoLocation:
@@ -667,7 +668,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         case Settings.PreferenceName.SatelliteDataSource:
                             boolean isCatalog = preferenceKey.equals(Settings.PreferenceName.SatelliteSource);
                             value = (isCatalog ? Settings.getSatelliteCatalogSource(context) : Settings.getSatelliteDataSource(context));
-                            listener = new Preference.OnPreferenceChangeListener()
+                            listener = createOnPreferenceChangeListenerHandler(new Preference.OnPreferenceChangeListener()
                             {
                                 @Override
                                 public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -695,7 +696,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                                     //allow change
                                     return(true);
                                 }
-                            };
+                            });
                             break;
 
                         case Settings.PreferenceName.AltitudeSource:
@@ -801,7 +802,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     //set state and listener
                     preference.setIconSpaceReserved(false);
                     preference.setChecked(checked);
-                    preference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
+                    preference.setOnPreferenceChangeListener(createOnPreferenceChangeListenerHandler(new Preference.OnPreferenceChangeListener()
                     {
                         @Override
                         public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
@@ -870,7 +871,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                             //allow change
                             return(true);
                         }
-                    });
+                    }));
 
                     //if might need changes
                     if(childPreference != null)
@@ -2469,6 +2470,27 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
 
                     }
                 }
+            }
+        });
+    }
+
+    //Creates an on preference change listener run inside a handler
+    private static Preference.OnPreferenceChangeListener createOnPreferenceChangeListenerHandler(Preference.OnPreferenceChangeListener listener)
+    {
+        return(new Preference.OnPreferenceChangeListener()
+        {
+            @Override
+            public boolean onPreferenceChange(@NonNull Preference preference, Object newValue)
+            {
+                new Handler(Looper.getMainLooper()).post(new Runnable()
+                {
+                    @Override
+                    public void run()
+                    {
+                        listener.onPreferenceChange(preference, newValue);
+                    }
+                });
+                return(true);
             }
         });
     }

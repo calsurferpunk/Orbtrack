@@ -5,6 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import okhttp3.Cookie;
 import okhttp3.CookieJar;
 import okhttp3.HttpUrl;
@@ -12,10 +13,10 @@ import okhttp3.HttpUrl;
 
 public class CookieManager implements CookieJar
 {
-    private static final List<Cookie> allCookies = new ArrayList<>(0);
-    private static final List<String> allowedDomainNames = new ArrayList<>(0);
+    private static final List<Cookie> allCookies = new CopyOnWriteArrayList<>();
+    private static final List<String> allowedDomainNames = new CopyOnWriteArrayList<>();
 
-    public CookieManager(String ... allowedDomainNames)
+    public CookieManager(String ...allowedDomainNames)
     {
         CookieManager.allowedDomainNames.addAll(Arrays.asList(allowedDomainNames));
     }

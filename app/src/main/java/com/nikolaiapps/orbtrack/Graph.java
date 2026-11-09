@@ -514,6 +514,7 @@ public class Graph extends View
         setMeasuredDimension(measureWidth, measureHeight);
     }
 
+    @SuppressLint("DrawAllocation")
     @Override
     protected void onDraw(@NotNull Canvas canvas)
     {
@@ -521,12 +522,26 @@ public class Graph extends View
 
         int index;
         boolean scrolling = (allowScroll && updateScrollDisplays);
-        boolean showDataImages = (showDataTitles && linePointsImages != null && linePointsImages.length == items.size());
+        boolean showDataImages;
         float y;
         float textHeight;
         double x;
         RectF itemArea;
         double[] selectedPoints;
+        Bitmap[] drawLinePointsImages;
+        List<Double> drawYPoints;
+        List<Double> drawY2Points;
+        ArrayList<Item> drawItems;
+
+        synchronized(this)
+        {
+            drawItems = (items != null ? new ArrayList<>(items) : new ArrayList<>(0));
+            drawLinePointsImages = linePointsImages;
+            drawYPoints = yPoints;
+            drawY2Points = y2Points;
+        }
+
+        showDataImages = (showDataTitles && drawLinePointsImages != null && drawLinePointsImages.length == drawItems.size());
 
         //if image is set
         if(backgroundImage != null)
@@ -535,7 +550,7 @@ public class Graph extends View
             canvas.drawBitmap(backgroundImage, 0, 0, drawBrush);
 
             //if there are items
-            if(!items.isEmpty())
+            if(!drawItems.isEmpty())
             {
                 //save canvas and clip area
                 canvas.save();
@@ -543,7 +558,7 @@ public class Graph extends View
 
                 //go through each item
                 index = 0;
-                for(Item currentItem : items)
+                for(Item currentItem : drawItems)
                 {
                     //draw item
                     itemArea = getScaledArea(currentItem);
@@ -566,7 +581,7 @@ public class Graph extends View
                                 x = getScaledX( currentItem.xMin + ((currentItem.xMax - currentItem.xMin) / 2));
                                 if(currentItem.yMax >= showDataTitlesMinYValue)
                                 {
-                                    drawXText((showDataImages ? linePointsImages[index] : null), getYValueString(currentItem.yMax), x, (int)itemArea.top, canvas, currentItem.textPaint);
+                                    drawXText((showDataImages ? drawLinePointsImages[index] : null), getYValueString(currentItem.yMax), x, (int)itemArea.top, canvas, currentItem.textPaint);
                                 }
                                 if(currentItem.yMin >= showDataTitlesMinYValue)
                                 {
@@ -611,7 +626,7 @@ public class Graph extends View
                     //go through selected images
                     for(index = 0; index < 2; index++)
                     {
-                        List<Double> currentYPoints = (index == 0 ? yPoints : y2Points);
+                        List<Double> currentYPoints = (index == 0 ? drawYPoints : drawY2Points);
                         Bitmap currentImage = (index == 0 ? selectedImage : selectedImage2);
 
                         //if points and image are set
@@ -1613,13 +1628,13 @@ public class Graph extends View
         setData(x, y, null, null, zone);
     }
 
-    public void setFillColors(List<Integer> dataColors)
+    public synchronized void setFillColors(List<Integer> dataColors)
     {
         fillColors = dataColors;
     }
 
     @SuppressWarnings("unused")
-    public void setDataImages(List<Bitmap> yImages)
+    public synchronized void setDataImages(List<Bitmap> yImages)
     {
         int index;
 
@@ -1677,7 +1692,7 @@ public class Graph extends View
         skipRepeatDays = skip;
     }
 
-    public void clearItems()
+    public synchronized void clearItems()
     {
         //clear
         items.clear();
@@ -1696,7 +1711,7 @@ public class Graph extends View
         }
     }
 
-    public void setItems(List<String> names, List<String> ids, List<Double> xMin, List<Double> xMax, List<Double> yMin, List<Double> yMax, int color, boolean showArcs)
+    public synchronized void setItems(List<String> names, List<String> ids, List<Double> xMin, List<Double> xMax, List<Double> yMin, List<Double> yMax, int color, boolean showArcs)
     {
         int index;
         int index2;
@@ -1771,7 +1786,7 @@ public class Graph extends View
             }
         }
     }
-    public void setItems(List<String> names, List<String> ids, List<Double> xMin, List<Double> xMax, List<Double> yMin, List<Double> yMax)
+    public synchronized void setItems(List<String> names, List<String> ids, List<Double> xMin, List<Double> xMax, List<Double> yMin, List<Double> yMax)
     {
         setItems(names, ids, xMin, xMax, yMin, yMax, -1, true);
     }
@@ -1901,7 +1916,7 @@ public class Graph extends View
         setItemsListener = listener;
     }
 
-    public void setDivisorsX(List<String> names, List<Double> values, List<Bitmap> images, List<Bitmap> subImages1, List<Bitmap> subImages2)
+    public synchronized void setDivisorsX(List<String> names, List<Double> values, List<Bitmap> images, List<Bitmap> subImages1, List<Bitmap> subImages2)
     {
         int index;
         int lineCount;
@@ -2002,7 +2017,7 @@ public class Graph extends View
         setDivisorsXTitles(imagesTitle, null, null);
     }
 
-    public void setDivisorsY(List<String> names, List<Double> values)
+    public synchronized void setDivisorsY(List<String> names, List<Double> values)
     {
         int index;
         int length = values.size();

@@ -1529,16 +1529,16 @@ public abstract class Current
             boolean showVirtualLens = ((usingVirtualDisplay && onSubPageList) || onSubPageCameraLens);
             boolean showSettings = (onCurrentNoSelected && (onSubPageList || onSubPageCameraLens || onSubPageVirtualLens || onSubPageMap || onSubPageGlobe));
 
-            menu.findItem(R.id.menu_list).setVisible(!onSubPageList);
-            menu.findItem(R.id.menu_map).setVisible(showMap);
-            menu.findItem(R.id.menu_globe).setVisible(showGlobe);
-            menu.findItem(R.id.menu_camera_lens).setVisible(showCameraLens & haveSensors);
-            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors && !onSubPageVirtualLens));
-            menu.findItem(R.id.menu_sort_by).setVisible(onSubPageList);
-            menu.findItem(R.id.menu_filter).setVisible(showSettings);
-            menu.findItem(R.id.menu_visible).setVisible(showSettings);
-            menu.findItem(R.id.menu_settings).setVisible(showSettings);
-            menu.findItem(R.id.menu_overflow).setVisible(showSettings);
+            Globals.setVisible(menu.findItem(R.id.menu_list), !onSubPageList);
+            Globals.setVisible(menu.findItem(R.id.menu_map), showMap);
+            Globals.setVisible(menu.findItem(R.id.menu_globe), showGlobe);
+            Globals.setVisible(menu.findItem(R.id.menu_camera_lens), showCameraLens & haveSensors);
+            Globals.setVisible(menu.findItem(R.id.menu_virtual_lens), showVirtualLens || (showCameraLens && !haveSensors && !onSubPageVirtualLens));
+            Globals.setVisible(menu.findItem(R.id.menu_sort_by), onSubPageList);
+            Globals.setVisible(menu.findItem(R.id.menu_filter), showSettings);
+            Globals.setVisible(menu.findItem(R.id.menu_visible), showSettings);
+            Globals.setVisible(menu.findItem(R.id.menu_settings), showSettings);
+            Globals.setVisible(menu.findItem(R.id.menu_overflow), showSettings);
         }
 
         @Override

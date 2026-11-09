@@ -791,8 +791,8 @@ public abstract class Orbitals
                     }
                 });
             }
-            menu.findItem(R.id.menu_save).setVisible(onOrbitalSatellitesExistNoModify);
-            menu.findItem(R.id.menu_update).setVisible(onOrbitalSatellitesExistNoModify);
+            Globals.setVisible(menu.findItem(R.id.menu_save), onOrbitalSatellitesExistNoModify);
+            Globals.setVisible(menu.findItem(R.id.menu_update), onOrbitalSatellitesExistNoModify);
 
             //update inputs for page
             setupInputs(pageNum);

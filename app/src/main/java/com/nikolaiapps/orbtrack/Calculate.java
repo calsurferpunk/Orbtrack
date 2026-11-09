@@ -1905,13 +1905,13 @@ public abstract class Calculate
             boolean showGlobe = (!calculatingCoordinates && ((onCalculateCoordinatesList && usingGlobeDisplay) || onCalculateCoordinatesMap));
             boolean showSave = (onCalculateViewList && !calculatingViews) || (onCalculatePassesList && !calculatingPasses) || (onCalculateCoordinatesList && !calculatingCoordinates) || (onCalculateIntersectionList && !calculatingIntersection);
 
-            menu.findItem(R.id.menu_list).setVisible(showList);
-            menu.findItem(R.id.menu_map).setVisible(showMap);
-            menu.findItem(R.id.menu_globe).setVisible(showGlobe);
-            menu.findItem(R.id.menu_camera_lens).setVisible(showCameraLens && haveSensors);
-            menu.findItem(R.id.menu_virtual_lens).setVisible(showVirtualLens || (showCameraLens && !haveSensors && !onSubPageVirtualLens));
-            menu.findItem(R.id.menu_edit).setVisible(showSave || onCalculateViewCameraLens || onCalculateViewVirtualLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateCoordinatesGlobe || onCalculateIntersectionLens);
-            menu.findItem(R.id.menu_save).setVisible(showSave);
+            Globals.setVisible(menu.findItem(R.id.menu_list), showList);
+            Globals.setVisible(menu.findItem(R.id.menu_map), showMap);
+            Globals.setVisible(menu.findItem(R.id.menu_globe), showGlobe);
+            Globals.setVisible(menu.findItem(R.id.menu_camera_lens) ,showCameraLens && haveSensors);
+            Globals.setVisible(menu.findItem(R.id.menu_virtual_lens), showVirtualLens || (showCameraLens && !haveSensors && !onSubPageVirtualLens));
+            Globals.setVisible(menu.findItem(R.id.menu_edit), showSave || onCalculateViewCameraLens || onCalculateViewVirtualLens || onCalculatePassesLens || onCalculateCoordinatesMap || onCalculateCoordinatesGlobe || onCalculateIntersectionLens);
+            Globals.setVisible(menu.findItem(R.id.menu_save), showSave);
         }
 
         @Override

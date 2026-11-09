@@ -103,6 +103,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
@@ -3281,7 +3282,7 @@ public abstract class Globals
         setUpdateDialog(dialog, title, null, updateType, false);
     }
 
-    //Updates visibility for the given button
+    //Updates visibility for the given view
     public static void setVisible(FloatingActionButton button, boolean visible)
     {
         //if button exists
@@ -3296,6 +3297,13 @@ public abstract class Globals
                 //show again
                 button.show();
             }
+        }
+    }
+    public static void setVisible(MenuItem item, boolean visible)
+    {
+        if(item != null)
+        {
+            item.setVisible(visible);
         }
     }
 

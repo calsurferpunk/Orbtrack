@@ -1071,13 +1071,13 @@ public class LocationService extends Service implements LocationListener
                 {
                     legacyProvider = LocationManager.NETWORK_PROVIDER;
                 }
-                else if(legacyProviders.contains(LocationManager.GPS_PROVIDER))
-                {
-                    legacyProvider = LocationManager.GPS_PROVIDER;
-                }
                 else if(legacyProviders.contains(LocationManager.PASSIVE_PROVIDER))
                 {
                     legacyProvider = LocationManager.PASSIVE_PROVIDER;
+                }
+                else if(legacyProviders.contains(LocationManager.GPS_PROVIDER))
+                {
+                    legacyProvider = LocationManager.GPS_PROVIDER;
                 }
             }
         }

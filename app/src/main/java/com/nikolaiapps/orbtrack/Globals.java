@@ -138,7 +138,6 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Formatter;
-import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -1665,17 +1664,7 @@ public abstract class Globals
 
     private static String[] getLocationManifestPermissions(Context context)
     {
-        if(Build.VERSION.SDK_INT >= 31)
-        {
-            return(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION});
-        }
-        else
-        {
-            LocationManager manager = (LocationManager)context.getSystemService(Context.LOCATION_SERVICE);
-            List<String> providers = (manager != null ? manager.getProviders(true) : null);
-
-            return(new String[]{providers != null && !providers.isEmpty() && providers.contains(LocationManager.GPS_PROVIDER) ? Manifest.permission.ACCESS_FINE_LOCATION : Manifest.permission.ACCESS_COARSE_LOCATION});
-        }
+        return(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION});
     }
 
     //Check if have location permission

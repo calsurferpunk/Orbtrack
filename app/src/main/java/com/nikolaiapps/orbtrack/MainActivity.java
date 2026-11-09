@@ -1765,7 +1765,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
                 {
                     Globals.showSnackBarTransparent(mainDrawerLayout, R.drawable.ic_location_searching_white, false, EdgeDistance. TOP_AND_ACTION_BAR);
                 }
-                LocationService.getCurrentLocation(this, false, LocationService.PowerTypes.HighPowerThenBalanced);
+                LocationService.getCurrentLocation(this, false, LocationService.PowerTypes.Balanced);
             }
             else
             {
@@ -2670,7 +2670,7 @@ public class MainActivity extends BaseInputActivity implements ActivityResultCal
         }
 
         //create receiver
-        LocationReceiver receiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION | LocationService.FLAG_START_HIGH_POWER_ONCE)
+        LocationReceiver receiver = new LocationReceiver(LocationService.FLAG_START_GET_LOCATION)
         {
             private boolean firstLocation = true;
 

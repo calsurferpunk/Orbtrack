@@ -2524,7 +2524,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                         {
                             //show status and update location
                             Globals.showSnackBarTransparent(settingsLayout, R.drawable.ic_location_searching_white, false, EdgeDistance. TOP_BAR);
-                            LocationService.getCurrentLocation(context, false, LocationService.PowerTypes.HighPowerThenBalanced);
+                            LocationService.getCurrentLocation(context, false, LocationService.PowerTypes.Balanced);
                         }
                     }
                 }
@@ -3222,7 +3222,7 @@ public class SettingsActivity extends BaseInputActivity implements PreferenceFra
                     case AddSelectListAdapter.LocationSourceType.Current:
                         //show dialog and wait for update
                         showAddCurrentLocationDialog(true);
-                        LocationService.getCurrentLocation(SettingsActivity.this, false, LocationService.PowerTypes.HighPowerThenBalanced);
+                        LocationService.getCurrentLocation(SettingsActivity.this, false, LocationService.PowerTypes.Balanced);
                         break;
 
                     case AddSelectListAdapter.LocationSourceType.Custom:

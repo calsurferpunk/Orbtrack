@@ -104,7 +104,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
 
                     case ACTION_UPDATE_LOCATION_ALARM:
                         //update location
-                        LocationService.getCurrentLocation(context, true, LocationService.PowerTypes.HighPowerThenBalanced);
+                        LocationService.getCurrentLocation(context, true, LocationService.PowerTypes.Balanced);
                         break;
 
                     case ACTION_UPDATE_PASS_ALARM:
@@ -1372,7 +1372,7 @@ public abstract class WidgetPassBaseProvider extends AppWidgetProvider
             {
                 //get location
                 createLocationReceiver(context, WidgetBaseSetupActivity.getLocationFollow(context, widgetId), true);
-                LocationService.getCurrentLocation(context, true, LocationService.PowerTypes.HighPowerThenBalanced);
+                LocationService.getCurrentLocation(context, true, LocationService.PowerTypes.Balanced);
             }
             else
             {
